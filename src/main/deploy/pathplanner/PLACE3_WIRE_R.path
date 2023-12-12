@@ -1,0 +1,74 @@
+{
+    "waypoints": [
+        {
+            "anchorPoint": {
+                "x": 14.73,
+                "y": 1.6
+            },
+            "prevControl": null,
+            "nextControl": {
+                "x": 14.397189484378968,
+                "y": 1.580127391024014
+            },
+            "holonomicAngle": 0.0,
+            "isReversal": false,
+            "velOverride": null,
+            "isLocked": true,
+            "isStopPoint": false,
+            "stopEvent": {
+                "names": [],
+                "executionBehavior": "parallel",
+                "waitBehavior": "none",
+                "waitTime": 0
+            }
+        },
+        {
+            "anchorPoint": {
+                "x": 14.156316406478966,
+                "y": 1.2236352357320113
+            },
+            "prevControl": {
+                "x": 14.252665637638966,
+                "y": 1.5704924679080132
+            },
+            "nextControl": {
+                "x": 14.057244910004897,
+                "y": 0.8669778484253583
+            },
+            "holonomicAngle": 0.0,
+            "isReversal": false,
+            "velOverride": null,
+            "isLocked": true,
+            "isStopPoint": false,
+            "stopEvent": {
+                "names": [],
+                "executionBehavior": "parallel",
+                "waitBehavior": "none",
+                "waitTime": 0
+            }
+        },
+        {
+            "anchorPoint": {
+                "x": 13.530000000000001,
+                "y": 0.8
+            },
+            "prevControl": {
+                "x": 14.310475176334968,
+                "y": 0.7804287723960073
+            },
+            "nextControl": null,
+            "holonomicAngle": 90.0,
+            "isReversal": false,
+            "velOverride": 1.0,
+            "isLocked": true,
+            "isStopPoint": false,
+            "stopEvent": {
+                "names": [],
+                "executionBehavior": "parallel",
+                "waitBehavior": "none",
+                "waitTime": 0
+            }
+        }
+    ],
+    "markers": []
+}
