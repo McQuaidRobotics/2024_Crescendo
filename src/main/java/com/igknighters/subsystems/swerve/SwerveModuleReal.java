@@ -18,7 +18,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import com.igknighters.Constants.kSwerve;
+import com.igknighters.constants.ConstValues.kSwerve;
+import com.igknighters.constants.ConstValues.kSwerve.DriveMotorConstants;
 import com.igknighters.util.SwerveModuleConstants;
 
 public class SwerveModuleReal implements SwerveModule {
@@ -73,10 +74,10 @@ public class SwerveModuleReal implements SwerveModule {
         var driveConfig = new TalonFXConfiguration();
         driveConfig.MotorOutput.Inverted = kSwerve.DRIVE_MOTOR_INVERT;
         driveConfig.MotorOutput.NeutralMode = kSwerve.DRIVE_NEUTRAL_MODE;
-        driveConfig.Slot0.kP = kSwerve.DRIVE_KP;
-        driveConfig.Slot0.kI = kSwerve.DRIVE_KI;
-        driveConfig.Slot0.kD = kSwerve.DRIVE_KD;
-        driveConfig.Slot0.kV = 12.0 / (kSwerve.MAX_SPEED / kSwerve.METERS_PER_DRIVE_MOTOR_ROTATION);
+        driveConfig.Slot0.kP = DriveMotorConstants.kP;
+        driveConfig.Slot0.kI = DriveMotorConstants.kI;
+        driveConfig.Slot0.kD = DriveMotorConstants.kD;
+        driveConfig.Slot0.kV = 12.0 / (kSwerve.MAX_DRIVE_VELOCITY / kSwerve.METERS_PER_DRIVE_MOTOR_ROTATION);
 
         driveMotor.getConfigurator().apply(driveConfig);
     }
@@ -85,12 +86,12 @@ public class SwerveModuleReal implements SwerveModule {
         var angleConfig = new TalonFXConfiguration();
         angleConfig.MotorOutput.Inverted = kSwerve.ANGLE_MOTOR_INVERT;
         angleConfig.MotorOutput.NeutralMode = kSwerve.ANGLE_NEUTRAL_MODE;
-        angleConfig.Slot0.kP = kSwerve.ANGLE_KP;
-        angleConfig.Slot0.kI = kSwerve.ANGLE_KI;
-        angleConfig.Slot0.kD = kSwerve.ANGLE_KD;
+        angleConfig.Slot0.kP = DriveMotorConstants.kP;
+        angleConfig.Slot0.kI = DriveMotorConstants.kI;
+        angleConfig.Slot0.kD = DriveMotorConstants.kD;
         angleConfig.Feedback.FeedbackRemoteSensorID = angleEncoder.getDeviceID();
         angleConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
-        angleConfig.Feedback.RotorToSensorRatio = 1.0 / kSwerve.ANGLE_MECHANISM_RATIO;
+        angleConfig.Feedback.RotorToSensorRatio = 1.0 / kSwerve.ANGLE_GEAR_RATIO;
         angleConfig.Feedback.SensorToMechanismRatio = 1.0;
         angleConfig.ClosedLoopGeneral.ContinuousWrap = true;
 
@@ -118,7 +119,7 @@ public class SwerveModuleReal implements SwerveModule {
     }
 
     private void setAngle(SwerveModuleState desiredState) {
-        Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (kSwerve.MAX_SPEED * 0.01)) ? lastAngle
+        Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (kSwerve.MAX_DRIVE_VELOCITY * 0.01)) ? lastAngle
                 : desiredState.angle;
 
         angleMotor.setControl(new PositionDutyCycle(angle.getRotations()));
@@ -127,11 +128,11 @@ public class SwerveModuleReal implements SwerveModule {
 
     private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop) {
         if (isOpenLoop) {
-            double percentOutput = desiredState.speedMetersPerSecond / kSwerve.MAX_SPEED;
+            double percentOutput = desiredState.speedMetersPerSecond / kSwerve.MAX_DRIVE_VELOCITY;
             var controlRequest = new DutyCycleOut(percentOutput);
             driveMotor.setControl(controlRequest);
         } else {
-            double rps = Math.min(desiredState.speedMetersPerSecond, kSwerve.MAX_SPEED)
+            double rps = Math.min(desiredState.speedMetersPerSecond, kSwerve.MAX_DRIVE_VELOCITY)
                     / kSwerve.METERS_PER_DRIVE_MOTOR_ROTATION;
             var veloRequest = new VelocityVoltage(rps).withEnableFOC(true);
             driveMotor.setControl(veloRequest);
