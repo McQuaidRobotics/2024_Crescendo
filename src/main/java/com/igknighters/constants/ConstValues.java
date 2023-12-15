@@ -3,10 +3,7 @@ package com.igknighters.constants;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-import com.igknighters.Constants.kSwerve.Mod1;
-import com.igknighters.Constants.kSwerve.Mod2;
-import com.igknighters.Constants.kSwerve.Mod3;
-import com.igknighters.constants.ConstantHelper.*;
+import com.igknighters.ConstantHelper.*;
 import com.igknighters.util.SwerveModuleConstants;
 import com.igknighters.util.SwerveModuleConstants.ModuleId;
 
@@ -55,10 +52,10 @@ public class ConstValues {
         public static final boolean INVERT_GYRO = false;
         public static final String CANBUS = "DriveBus";
 
-        @DoubleConst(yin = 4.5, yang = 4.5)
+        @DoubleConst(crash = 4.5)
         public static double MAX_DRIVE_VELOCITY;
 
-        @DoubleConst(yin = 10.0, yang = 10.0)
+        @DoubleConst(crash = 10.0)
         public static double MAX_ANGULAR_VELOCITY;
 
         /* Drivetrain Constants */
@@ -69,7 +66,7 @@ public class ConstValues {
 
         public static final double ANGLE_GEAR_RATIO = SwerveGearRatios.ANGLE;
 
-        @DoubleConst(yin = SwerveGearRatios.L2_DRIVE, yang = SwerveGearRatios.L2_DRIVE)
+        @DoubleConst(crash = SwerveGearRatios.L2_DRIVE)
         public static double DRIVE_GEAR_RATIO;
 
         public static final double METERS_PER_DRIVE_MOTOR_ROTATION = WHEEL_CIRCUMFERENCE * DRIVE_GEAR_RATIO;
