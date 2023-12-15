@@ -5,27 +5,40 @@ import org.littletonrobotics.junction.inputs.LoggableInputs;
 
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
 
 public interface SwerveModule {
     public static class SwerveModuleInputs implements LoggableInputs {
         public double driveVelo = 0.0;
-        public double drivePositionRads = 0.0;
-        public double angleAbsoluteRads = 0.0;
+        public double drivePosition = 0.0;
+        public double driveVolts = 0.0;
+        public double driveAmps = 0.0;
+        public double angleVelo = 0.0;
+        public double angleAbsolute = 0.0;
+        public double angleVolts = 0.0;
+        public double angleAmps = 0.0;
 
         @Override
         public void toLog(LogTable table) {
             table.put("DriveVelocity", driveVelo);
-            table.put("DrivePositionRads", drivePositionRads);
-            table.put("AngleAbsoluteRads", angleAbsoluteRads);
-            table.put("AngleAbsoluteDegrees", Units.radiansToDegrees(angleAbsoluteRads));
+            table.put("DrivePosition", drivePosition);
+            table.put("DriveVolts", driveVolts);
+            table.put("DriveAmps", driveAmps);
+            table.put("AngleVelocity", angleVelo);
+            table.put("AngleAbsolute", angleAbsolute);
+            table.put("AngleVolts", angleVolts);
+            table.put("AngleAmps", angleAmps);
         }
 
         @Override
         public void fromLog(LogTable table) {
             driveVelo = table.get("DriveVelocity", driveVelo);
-            drivePositionRads = table.get("DrivePositionRads", drivePositionRads);
-            angleAbsoluteRads = table.get("AngleAbsoluteRads", angleAbsoluteRads);
+            drivePosition = table.get("DrivePosition", drivePosition);
+            driveVolts = table.get("DriveVolts", driveVolts);
+            driveAmps = table.get("DriveAmps", driveAmps);
+            angleVelo = table.get("AngleVelocity", angleVelo);
+            angleAbsolute = table.get("AngleAbsolute", angleAbsolute);
+            angleVolts = table.get("AngleVolts", angleVolts);
+            angleAmps = table.get("AngleAmps", angleAmps);
         }
     }
 

@@ -10,6 +10,7 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 
 import org.littletonrobotics.junction.Logger;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -24,19 +25,16 @@ import com.igknighters.util.SwerveModuleConstants;
 
 public class SwerveModuleReal implements SwerveModule {
     private final TalonFX driveMotor;
-    // private final TalonFXSimState driveSimState;
-    private final StatusSignal<Double> drivePositionSignal;
-    private final StatusSignal<Double> driveVelocitySignal;
+    private final StatusSignal<Double> drivePositionSignal, driveVelocitySignal;
+    private final StatusSignal<Double> driveVoltSignal, driveAmpSignal;
 
     private final TalonFX angleMotor;
-    // private final TalonFXSimState angleSimState;
-    private final StatusSignal<Double> anglePositionSignal;
-    private final StatusSignal<Double> angleVelocitySignal;
+    private final StatusSignal<Double> anglePositionSignal, angleVelocitySignal;
+    private final StatusSignal<Double> angleVoltSignal, angleAmpSignal;
+
 
     private final CANcoder angleEncoder;
-    // private final CANcoderSimState angleEncoderSimState;
-    private final StatusSignal<Double> angleAbsoluteSignal;
-    private final StatusSignal<Double> angleAbsoluteVeloSignal;
+    private final StatusSignal<Double> angleAbsoluteSignal, angleAbsoluteVeloSignal;
 
     public final int moduleNumber;
     private final Rotation2d rotationOffset;
@@ -60,9 +58,13 @@ public class SwerveModuleReal implements SwerveModule {
 
         drivePositionSignal = driveMotor.getPosition();
         driveVelocitySignal = driveMotor.getVelocity();
+        driveVoltSignal = driveMotor.getMotorVoltage();
+        driveAmpSignal = driveMotor.getTorqueCurrent();
 
         anglePositionSignal = angleMotor.getPosition();
         angleVelocitySignal = angleMotor.getVelocity();
+        angleVoltSignal = angleMotor.getMotorVoltage();
+        angleAmpSignal = angleMotor.getTorqueCurrent();
 
         angleAbsoluteSignal = angleEncoder.getAbsolutePosition();
         angleAbsoluteVeloSignal = angleEncoder.getVelocity();
@@ -141,30 +143,43 @@ public class SwerveModuleReal implements SwerveModule {
 
     public SwerveModuleState getCurrentState() {
         return new SwerveModuleState(
-                driveRotationsToMeters(driveVelocitySignal.getValue()),
+                inputs.driveVelo,
                 getAngle());
     }
 
     public SwerveModulePosition getCurrentPosition() {
         return new SwerveModulePosition(
-                driveRotationsToMeters(drivePositionSignal.getValue()),
+                inputs.drivePosition,
                 getAngle());
+    }
+
+    private Rotation2d getAngle() {
+        return Rotation2d.fromRadians(inputs.angleAbsolute);
     }
 
     private double driveRotationsToMeters(double rotations) {
         return rotations * kSwerve.METERS_PER_DRIVE_MOTOR_ROTATION;
     }
 
-    private Rotation2d getAngle() {
-        return Rotation2d.fromRotations(angleAbsoluteSignal.getValue());
-    }
-
     public void periodic() {
-        drivePositionSignal.refresh();
-        driveVelocitySignal.refresh();
-        anglePositionSignal.refresh();
-        angleVelocitySignal.refresh();
-        angleAbsoluteSignal.refresh();
-        angleAbsoluteVeloSignal.refresh();
+        BaseStatusSignal.refreshAll(
+            drivePositionSignal, driveVelocitySignal,
+            driveVoltSignal, driveAmpSignal,
+            anglePositionSignal, angleVelocitySignal,
+            angleVoltSignal, angleAmpSignal,
+            angleAbsoluteSignal, angleAbsoluteVeloSignal
+        );
+
+        inputs.angleAbsolute = angleAbsoluteSignal.getValue() * (2.0 * Math.PI);
+        inputs.angleVelo = angleAbsoluteVeloSignal.getValue() * (2.0 * Math.PI);
+        inputs.angleVolts = angleVoltSignal.getValue();
+        inputs.angleAmps = angleAmpSignal.getValue();
+
+        inputs.drivePosition = driveRotationsToMeters(drivePositionSignal.getValue());
+        inputs.driveVelo = driveRotationsToMeters(driveVelocitySignal.getValue());
+        inputs.driveVolts = driveVoltSignal.getValue();
+        inputs.driveAmps = driveAmpSignal.getValue();
+
+        Logger.processInputs("SwerveModule[" + this.moduleNumber + "]", inputs);
     }
 }
