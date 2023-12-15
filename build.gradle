@@ -1,7 +1,21 @@
+buildscript {
+    repositories {
+        maven {
+            url = 'https://frcmaven.wpi.edu/artifactory/ex-mvn'
+        }
+    }
+    dependencies {
+        classpath 'com.hubspot.jinjava:jinjava:2.7.1'
+    }
+}
+
+
+
 plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2024.1.1-beta-3"
     id "com.peterabeles.gversion" version "1.10"
+    id "java-library"
 }
 
 java {
@@ -24,7 +38,7 @@ configurations.all {
     exclude group: "edu.wpi.first.wpilibj"
 }
 
-def ROBOT_MAIN_CLASS = "frc.robot.Main"
+def ROBOT_MAIN_CLASS = "com.igknighters.Main"
 
 // Define my targets (RoboRIO) and artifacts (deployable files)
 // This is added by GradleRIO's backing project DeployUtils.
@@ -89,6 +103,8 @@ dependencies {
 
     def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
     annotationProcessor "org.littletonrobotics.akit.junction:junction-autolog:$akitJson.version"
+
+    // classpath 'com.hubspot.jinjava:jinjava:2.7.1'
 }
 
 test {
@@ -123,10 +139,58 @@ tasks.withType(JavaCompile) {
 project.compileJava.dependsOn(createVersionFile)
 gversion {
     srcDir       = "src/main/java/"
-    classPackage = "frc.robot"
+    classPackage = "com.igknighters"
     className    = "BuildConstants"
     dateFormat   = "yyyy-MM-dd HH:mm:ss z"
     timeZone     = "America/New_York" // Use preferred time zone
     indent       = "  "
 }
 
+import groovy.json.JsonSlurper;
+import com.hubspot.jinjava.Jinjava;
+import com.hubspot.jinjava.JinjavaConfig;
+
+
+def constTypesInputFile = file("src/generators/types.json")
+def constRobotsInputFile = file("src/generators/robots.json")
+def constJinjaInputDir = file("src/generators/java")
+def constJinjaOutputDir = file("$buildDir/generated/main/java/com/igknighters")
+
+task robotConstantHelperGen() {
+    description = "Generates Constant Helper Classes"
+    group = "Robot Constants Helper"
+
+    inputs.file constTypesInputFile
+    inputs.dir constJinjaInputDir
+    outputs.dir constJinjaOutputDir
+
+    doLast {
+        def jsonSlurper = new JsonSlurper()
+        def types = jsonSlurper.parseText(constTypesInputFile.text)
+        def robots = jsonSlurper.parseText(constRobotsInputFile.text)
+
+        constJinjaOutputDir.deleteDir()
+        constJinjaOutputDir.mkdirs()
+
+        def builder = JinjavaConfig.newBuilder()
+        builder.withTrimBlocks(true)
+        builder.withLstripBlocks(true)
+        def config = builder.build()
+        def jinjava = new Jinjava(config)
+
+        constJinjaInputDir.listFiles().each { File file -> 
+            def template = file.text
+            def outfn = file.name.substring(0, file.name.length() - 6)
+            if (file.name) {
+                def replacements = new HashMap<String,?>()
+                replacements.put("types", types)
+                replacements.put("robots", robots)
+                def output = jinjava.render(template, replacements)
+                new File(constJinjaOutputDir, outfn).write(output)
+            }
+        }
+    }
+}
+
+sourceSets.main.java.srcDir "${buildDir}/generated/main/java"
+compileJava.dependsOn(robotConstantHelperGen)

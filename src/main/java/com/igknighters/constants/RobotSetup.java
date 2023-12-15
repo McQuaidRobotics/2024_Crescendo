@@ -13,7 +13,7 @@ public class RobotSetup {
     // to make these only be constructed once each instead of once per enum theyre
     // stored in
     public enum RobotConstID {
-        YIN(0), YANG(1);
+        CRASH(0), BURN(1);
 
         public final int value;
 
@@ -25,26 +25,27 @@ public class RobotSetup {
     public enum RobotID {
         RobotA("Yin",
                 Subsystems.list(Subsystems.Swerve), // can be constructed with enums
-                RobotConstID.YIN),
+                RobotConstID.CRASH),
 
         RobotB("Yang",
                 Subsystems.list("Swerve"), // can be constructed with strings(pascal case)
-                RobotConstID.YANG),
+                RobotConstID.BURN),
 
         ChargedUp("Ammonia",
                 Subsystems.list(Subsystems.Swerve),
-                RobotConstID.YIN),
+                RobotConstID.CRASH),
 
         Citrus("Citrus Circus",
                 Subsystems.list(Subsystems.Swerve),
-                RobotConstID.YIN),
+                RobotConstID.CRASH),
 
-        TestBoard("testBoard(yin)", Subsystems.all(), RobotConstID.YIN),
+        TestBoard("testBoard(yin)", Subsystems.all(), RobotConstID.CRASH),
 
-        Simulation("simulation(yin)", Subsystems.all(), RobotConstID.YIN),
+        Simulation("simulation(yin)", Subsystems.all(), RobotConstID.CRASH),
 
-        // this will never be used as if this is hit an error will already have been thrown
-        Unlabeled("", Subsystems.none(), RobotConstID.YANG);
+        // this will never be used as if this is hit an error will already have been
+        // thrown
+        Unlabeled("", Subsystems.none(), RobotConstID.BURN);
 
         public final String name;
         public final Subsystems[] subsystems;

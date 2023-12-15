@@ -1,5 +1,4 @@
 {
-  "java.configuration.updateBuildConfiguration": "automatic",
   "java.server.launchMode": "Standard",
   "files.exclude": {
     "**/.git": true,
@@ -25,5 +24,6 @@
       }
     },
   ],
-  "java.test.defaultConfig": "WPIlibUnitTests"
+  "java.test.defaultConfig": "WPIlibUnitTests",
+  "java.configuration.updateBuildConfiguration": "interactive"
 }
