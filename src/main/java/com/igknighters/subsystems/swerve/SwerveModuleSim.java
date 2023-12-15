@@ -8,17 +8,20 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
-import com.igknighters.Constants.kSwerve;
+
+import com.igknighters.constants.ConstValues;
+import com.igknighters.constants.ConstValues.kSwerve;
+import com.igknighters.constants.ConstValues.kSwerve.AngleMotorConstants;
+import com.igknighters.constants.ConstValues.kSwerve.DriveMotorConstants;
 import com.igknighters.util.SwerveModuleConstants;
-
 public class SwerveModuleSim implements SwerveModule {
-    private FlywheelSim driveSim = new FlywheelSim(DCMotor.getFalcon500(1), 1.0 / kSwerve.DRIVE_MECHANISM_RATIO, 0.025);
-    private FlywheelSim angleSim = new FlywheelSim(DCMotor.getFalcon500(1), 1.0 / kSwerve.ANGLE_MECHANISM_RATIO, 0.004);
+    private FlywheelSim driveSim = new FlywheelSim(DCMotor.getFalcon500(1), 1.0 / kSwerve.DRIVE_GEAR_RATIO, 0.025);
+    private FlywheelSim angleSim = new FlywheelSim(DCMotor.getFalcon500(1), 1.0 / kSwerve.ANGLE_GEAR_RATIO, 0.004);
 
-    private final PIDController driveFeedback = new PIDController(kSwerve.DRIVE_KP, kSwerve.DRIVE_KI, kSwerve.DRIVE_KD,
-            0.02);
-    private final PIDController angleFeedback = new PIDController(kSwerve.ANGLE_KP, kSwerve.ANGLE_KI, kSwerve.ANGLE_KD,
-            0.02);
+    private final PIDController driveFeedback = new PIDController(DriveMotorConstants.kP, DriveMotorConstants.kI, DriveMotorConstants.kD,
+            ConstValues.PERIODIC_TIME);
+    private final PIDController angleFeedback = new PIDController(AngleMotorConstants.kP, AngleMotorConstants.kI, AngleMotorConstants.kD,
+            ConstValues.PERIODIC_TIME);
 
     private double drivePositionRad = 0.0;
     private double angleRelativePositionRad = 0.0;
@@ -65,7 +68,7 @@ public class SwerveModuleSim implements SwerveModule {
     }
 
     private void setAngle(SwerveModuleState desiredState) {
-        Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (kSwerve.MAX_SPEED * 0.01)) ? lastAngle
+        Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (kSwerve.MAX_DRIVE_VELOCITY * 0.01)) ? lastAngle
                 : desiredState.angle;
 
         angleAppliedVolts = MathUtil.clamp(
