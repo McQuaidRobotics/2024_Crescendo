@@ -172,6 +172,6 @@ out/
 *-window.json
 
 # Build data
-src/main/java/frc/robot/BuildConstants.java
+src/main/java/com/igknighters/BuildConstants.java
 ctre_sim/
 *.wpilog
