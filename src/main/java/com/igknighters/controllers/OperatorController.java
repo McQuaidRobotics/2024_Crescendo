@@ -1,6 +1,7 @@
 package com.igknighters.controllers;
 
-import com.igknighters.subsystems.Resources.Subsystems;
+import com.igknighters.SubsystemResources.Subsystems;
+
 @SuppressWarnings("unused")
 
 public class OperatorController extends ControllerParent {

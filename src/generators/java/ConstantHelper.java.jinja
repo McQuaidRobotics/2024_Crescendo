@@ -7,7 +7,6 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-import com.igknighters.constants.RobotSetup.RobotConstID;
 import com.igknighters.util.BootupLogger;
 import edu.wpi.first.wpilibj.DriverStation;
 
@@ -19,9 +18,9 @@ public class ConstantHelper {
     public @interface {{type.ShortTypeName}}Const {
 {%for robo in robots%}
 {%if type.lang.isArray%}
-        public {{type.lang.ValueType}} {{robo.lower}}() default {};
+        public {{type.lang.ValueType}} {{robo}}() default {};
 {%else%}
-        public {{type.lang.ValueType}} {{robo.lower}}() default {{type.lang.EmptyValue}};
+        public {{type.lang.ValueType}} {{robo}}() default {{type.lang.EmptyValue}};
 {%endif%}
 {%endfor%}
     }
@@ -40,8 +39,8 @@ public class ConstantHelper {
             try {
                 {{type.ShortTypeName}}Const annotation = field.getAnnotation({{type.ShortTypeName}}Const.class);
 {%for robo in robots%}
-                if (constID == RobotConstID.{{robo.upper}}) {
-                    field.set(obj, annotation.{{robo.lower}}());
+                if (constID == RobotConstID.{{robo|upper}}) {
+                    field.set(obj, annotation.{{robo}}());
                 }
 {%endfor%}
             } catch (IllegalAccessException e) {
@@ -85,5 +84,12 @@ public class ConstantHelper {
             handleConstField(field, consts);
         }
         BootupLogger.BootupLog("Finished applying constants");
+    }
+
+    public enum RobotConstID {
+        {%for robo in robots%}
+        {{robo|upper}},
+        {%endfor%}
+        ;
     }
 }

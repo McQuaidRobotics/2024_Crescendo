@@ -13,31 +13,29 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
 
 //this will be where we put references to all our initialized values
-public class ConstValues {
+public final class ConstValues {
     // all measurements are in meters unless otherwise specified
     // all angles are in radians unless otherwise specified
     @SuppressWarnings("unused")
-    private static class Conv {
-        public static double FEET_TO_METERS = 0.3048;
-        public static double INCHES_TO_METERS = 0.0254;
-        public static double DEGREES_TO_RADIANS = Math.PI / 180.0;
-        public static double ROTATIONS_TO_RADIANTS = 2 * Math.PI;
+    private static final class Conv {
+        public static final double FEET_TO_METERS = 0.3048;
+        public static final double INCHES_TO_METERS = 0.0254;
+        public static final double DEGREES_TO_RADIANS = Math.PI / 180.0;
+        public static final double ROTATIONS_TO_RADIANTS = 2 * Math.PI;
     }
 
-    public static boolean DEBUG = true; // this should be false for competition
-    public static double PERIODIC_TIME = 0.02; // 20ms
+    public static final boolean DEBUG = true; // this should be false for competition
+    public static final double PERIODIC_TIME = 0.02; // 20ms
 
-    public static double DEFAULT_DEADBAND = 0.15;
-
-    public static class kDimensions {
-        public static double ROBOT_WIDTH = Units.inchesToMeters(26);
-        public static double ROBOT_LENGTH = Units.inchesToMeters(26);
-        public static double BUMPER_THICKNESS = Units.inchesToMeters(2.7);
+    public static final class kDimensions {
+        public static final double ROBOT_WIDTH = Units.inchesToMeters(26);
+        public static final double ROBOT_LENGTH = Units.inchesToMeters(26);
+        public static final double BUMPER_THICKNESS = Units.inchesToMeters(2.7);
     }
 
-    public static class kSwerve {
+    public static final class kSwerve {
         @SuppressWarnings("unused")
-        private static class SwerveGearRatios {
+        private static final class SwerveGearRatios {
             public static final double L1_DRIVE = 1.0 / 8.14;
             public static final double L2_DRIVE = 1.0 / 6.75;
             public static final double L3_DRIVE = 1.0 / 6.12;
@@ -80,25 +78,26 @@ public class ConstValues {
         public static final NeutralModeValue ANGLE_NEUTRAL_MODE = NeutralModeValue.Coast;
         public static final NeutralModeValue DRIVE_NEUTRAL_MODE = NeutralModeValue.Brake;
 
-        public static SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(
+        public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(
                 Mod0.CHASSIS_OFFSET,
                 Mod1.CHASSIS_OFFSET,
                 Mod2.CHASSIS_OFFSET,
-                Mod3.CHASSIS_OFFSET);
+                Mod3.CHASSIS_OFFSET
+            );
 
-        public static class DriveMotorConstants {
+        public static final class DriveMotorConstants {
             public static double kP = 0.25;
             public static double kI = 0.0;
             public static double kD = 0.0;
         }
 
-        public static class AngleMotorConstants {
+        public static final class AngleMotorConstants {
             public static double kP = 9.0;
             public static double kI = 0.0;
             public static double kD = 0.0;
         }
 
-        public static class Mod0 {
+        public static final class Mod0 {
             public static final ModuleId MODULE = ModuleId.m0;
             public static final int DRIVE_MOTOR_ID = 1;
             public static final int ANGLE_MOTOR_ID = 2;
@@ -109,7 +108,7 @@ public class ConstValues {
                     ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
         }
 
-        public static class Mod1 {
+        public static final class Mod1 {
             public static final ModuleId MODULE = ModuleId.m1;
             public static final int DRIVE_MOTOR_ID = 3;
             public static final int ANLGE_MOTOR_ID = 4;
@@ -120,7 +119,7 @@ public class ConstValues {
                     ANLGE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
         }
 
-        public static class Mod2 {
+        public static final class Mod2 {
             public static final ModuleId MODULE = ModuleId.m2;
             public static final int DRIVE_MOTOR_ID = 5;
             public static final int ANGLE_MOTOR_ID = 6;
@@ -131,7 +130,7 @@ public class ConstValues {
                     ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
         }
 
-        public static class Mod3 {
+        public static final class Mod3 {
             public static final ModuleId MODULE = ModuleId.m3;
             public static final int DRIVE_MOTOR_ID = 7;
             public static final int ANGLE_MOTOR_ID = 8;

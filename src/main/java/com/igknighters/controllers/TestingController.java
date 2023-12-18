@@ -1,10 +1,11 @@
 package com.igknighters.controllers;
 
 import com.igknighters.constants.ConstValues;
-import com.igknighters.subsystems.Resources.Subsystems;
+import com.igknighters.SubsystemResources.Subsystems;
+
 @SuppressWarnings("unused")
 
-/**If debug is false this controller does not initialize */
+/** If debug is false this controller does not initialize */
 public class TestingController extends ControllerParent {
     public TestingController(int port) {
         super(port, ConstValues.DEBUG, ControllerType.Testing);

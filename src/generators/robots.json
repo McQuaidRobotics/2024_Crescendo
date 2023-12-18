@@ -1,10 +1,4 @@
 [
-    {
-        "upper": "CRASH",
-        "lower": "crash"
-    },
-    {
-        "upper": "BURN",
-        "lower": "burn"
-    }
+    "crash",
+    "burn"
 ]

@@ -17,13 +17,23 @@
     {
       "name": "WPIlibUnitTests",
       "workingDirectory": "${workspaceFolder}/build/jni/release",
-      "vmargs": [ "-Djava.library.path=${workspaceFolder}/build/jni/release" ],
+      "vmargs": [
+        "-Djava.library.path=${workspaceFolder}/build/jni/release"
+      ],
       "env": {
-        "LD_LIBRARY_PATH": "${workspaceFolder}/build/jni/release" ,
+        "LD_LIBRARY_PATH": "${workspaceFolder}/build/jni/release",
         "DYLD_LIBRARY_PATH": "${workspaceFolder}/build/jni/release"
       }
     },
   ],
   "java.test.defaultConfig": "WPIlibUnitTests",
-  "java.configuration.updateBuildConfiguration": "interactive"
+  "java.configuration.updateBuildConfiguration": "automatic",
+  
+  // "java.home": "C:\\Users\\Public\\wpilib\\2024\\jdk",
+  "java.jdt.ls.java.home": "C:\\Users\\Public\\wpilib\\2024\\jdk",
+  "terminal.integrated.env.windows": {
+      "JAVA_HOME": "C:\\Users\\Public\\wpilib\\2024\\jdk",
+      "PATH": "C:\\Users\\Public\\wpilib\\2024\\jdk\\bin;${env:PATH}"
+  },
+  "java.import.gradle.java.home": "C:\\Users\\Public\\wpilib\\2024\\jdk",
 }

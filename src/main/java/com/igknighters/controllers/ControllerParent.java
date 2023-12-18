@@ -8,8 +8,8 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.DoubleSupplier;
 
-import com.igknighters.subsystems.Resources.AllSubsystems;
-import com.igknighters.subsystems.Resources.Subsystems;
+import com.igknighters.SubsystemResources.AllSubsystems;
+import com.igknighters.SubsystemResources.Subsystems;
 import com.igknighters.util.BootupLogger;
 
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -119,12 +119,11 @@ public class ControllerParent {
     }
 
     protected final TriggerBindingTuple A, B, X, Y, LB, RB, LS, RS, LT, RT, DPR, DPD, DPL, DPU;
-    //i alwayss forget which is which
-    /**Left Center */
+    // i alwayss forget which is which
+    /** Left Center */
     protected final TriggerBindingTuple Back;
-    /**Right Center */
+    /** Right Center */
     protected final TriggerBindingTuple Start;
-
 
     /**
      * for button idx (nice for sim)

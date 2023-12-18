@@ -2,49 +2,27 @@ package com.igknighters.constants;
 
 import java.util.Map;
 
-import com.igknighters.subsystems.Resources.Subsystems;
+import com.igknighters.SubsystemResources.Subsystems;
 import com.igknighters.util.BootupLogger;
+import com.igknighters.ConstantHelper.RobotConstID;
 
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 
 public class RobotSetup {
 
-    // to make these only be constructed once each instead of once per enum theyre
-    // stored in
-    public enum RobotConstID {
-        CRASH(0), BURN(1);
-
-        public final int value;
-
-        RobotConstID(int value) {
-            this.value = value;
-        }
-    }
-
     public enum RobotID {
-        RobotA("Yin",
-                Subsystems.list(Subsystems.Swerve), // can be constructed with enums
+        CRASH(Subsystems.list(Subsystems.Swerve),
                 RobotConstID.CRASH),
 
-        RobotB("Yang",
-                Subsystems.list("Swerve"), // can be constructed with strings(pascal case)
+        BURN(Subsystems.list("Swerve"),
                 RobotConstID.BURN),
 
-        ChargedUp("Ammonia",
-                Subsystems.list(Subsystems.Swerve),
-                RobotConstID.CRASH),
-
-        Citrus("Citrus Circus",
-                Subsystems.list(Subsystems.Swerve),
-                RobotConstID.CRASH),
+        SIM_CRASH(Subsystems.all(), RobotConstID.CRASH),
+        SIM_BURN(Subsystems.all(), RobotConstID.BURN),
 
         TestBoard("testBoard(yin)", Subsystems.all(), RobotConstID.CRASH),
 
-        Simulation("simulation(yin)", Subsystems.all(), RobotConstID.CRASH),
-
-        // this will never be used as if this is hit an error will already have been
-        // thrown
         Unlabeled("", Subsystems.none(), RobotConstID.BURN);
 
         public final String name;
@@ -56,16 +34,21 @@ public class RobotSetup {
             this.subsystems = subsystems;
             this.constID = constants;
         }
+
+        RobotID(Subsystems[] subsystems, RobotConstID constants) {
+            this.name = this.name();
+            this.subsystems = subsystems;
+            this.constID = constants;
+        }
     }
 
     private static final Map<String, RobotID> serialToID = Map.of(
             "0306adcf", RobotID.TestBoard,
             "0306adf3", RobotID.TestBoard,
-            "ffffffff", RobotID.Simulation,
-            "aaaaaaaa", RobotID.RobotA,
-            "bbbbbbbb", RobotID.RobotB,
-            "03260af0", RobotID.ChargedUp,
-            "03260abb", RobotID.ChargedUp);
+            "ffffffff", RobotID.SIM_CRASH,
+            "aaaaaaaa", RobotID.CRASH,
+            "bbbbbbbb", RobotID.BURN
+        );
 
     private static RobotID currentID = RobotID.Unlabeled;
 

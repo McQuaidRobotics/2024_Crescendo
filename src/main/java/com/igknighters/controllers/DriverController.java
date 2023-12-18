@@ -1,12 +1,5 @@
 package com.igknighters.controllers;
 
-import com.igknighters.subsystems.Resources.Subsystems;
-
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj2.command.Commands;
-
 public class DriverController extends ControllerParent {
 
     public DriverController(int port) {
@@ -14,32 +7,13 @@ public class DriverController extends ControllerParent {
         // disregard null safety for subsystems as it is checked on assignment
 
         /// FACE BUTTONS
-        // this.A.binding = new SingleDepBinding(
-        //     Subsystems.Swerve,
-        //     (trigger, allSS) -> trigger.onTrue(
-        //         Commands.runOnce(
-        //             () -> RobotState.postControlAllocation(ControlAllocation.Manual))
-        //     ));
+        // this.A.binding = 
 
-        // this.B.binding = new SingleDepBinding(
-        //     Subsystems.Swerve,
-        //     (trigger, allSS) -> trigger.onTrue(
-        //             new AutoDriveDynamic(allSS.swerve.get(),
-        //                 new Pose2d(new Translation2d(2.1, 4.7), Rotation2d.fromDegrees(270d)))
-        //     ));
+        // this.B.binding = 
 
-        // this.X.binding = new SingleDepBinding(
-        //         Subsystems.Swerve,
-        //         (trigger, allSS) -> trigger.onTrue(
-        //                 new AutoDriveDynamic(allSS.swerve.get(),
-        //                         new Pose2d(new Translation2d(13.3, 6.6), Rotation2d.fromDegrees(90d)))));
+        // this.X.binding = 
 
-        // this.Y.binding = new SingleDepBinding(
-        //     Subsystems.Swerve,
-        //     (trigger, allSS) -> trigger.onTrue(
-        //         Commands.runOnce(
-        //             () -> RobotState.postControlAllocation(ControlAllocation.Auto))
-        //     ));
+        // this.Y.binding = 
 
         /// BUMPER
         // this.LB.binding =

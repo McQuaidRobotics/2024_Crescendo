@@ -24,7 +24,6 @@ public class SwerveModuleSim implements SwerveModule {
             ConstValues.PERIODIC_TIME);
 
     private double drivePositionRad = 0.0;
-    private double angleRelativePositionRad = 0.0;
     private double angleAbsolutePositionRad = Math.random() * 2.0 * Math.PI;
     private double driveAppliedVolts = 0.0;
     private double angleAppliedVolts = 0.0;
@@ -99,7 +98,6 @@ public class SwerveModuleSim implements SwerveModule {
         drivePositionRad += driveSim.getAngularVelocityRadPerSec() * 0.02;
 
         double angleDiffRad = angleSim.getAngularVelocityRadPerSec() * 0.02;
-        angleRelativePositionRad += angleDiffRad;
         angleAbsolutePositionRad += angleDiffRad;
 
         while (angleAbsolutePositionRad < 0) {
