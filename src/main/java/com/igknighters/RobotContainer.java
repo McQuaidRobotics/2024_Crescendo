@@ -3,10 +3,16 @@ package com.igknighters;
 import com.igknighters.commands.swerve.TeleopSwerve;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.RobotSetup;
+import com.igknighters.constants.ConstValues.kAuto;
+import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.controllers.DriverController;
 import com.igknighters.controllers.OperatorController;
 import com.igknighters.controllers.TestingController;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.ReplanningConfig;
 import com.igknighters.SubsystemResources.AllSubsystems;
+import com.igknighters.autos.AutosCmdRegister;
 
 import edu.wpi.first.wpilibj.DriverStation;
 
@@ -31,6 +37,7 @@ public class RobotContainer {
 
         if (allSubsystems.swerve.isPresent()) {
             var swerve = allSubsystems.swerve.get();
+
             swerve.setDefaultCommand(
                     new TeleopSwerve(
                             swerve,
@@ -38,6 +45,8 @@ public class RobotContainer {
                             driverController.leftStickX(),
                             driverController.rightStickX()));
         }
+
+        setupAutos();
     }
 
     // private void configureDriverBindings() {
@@ -48,4 +57,26 @@ public class RobotContainer {
 
     // private void configureOperatorBindings() {
     // }
+
+    private void setupAutos() {
+        AutosCmdRegister.registerCommands(allSubsystems);
+
+        if (!allSubsystems.swerve.isPresent()) return;
+        var swerve = allSubsystems.swerve.get();
+        AutoBuilder.configureHolonomic(
+                swerve::getPose, 
+                swerve::resetOdometry, 
+                swerve::getChassisSpeeds, 
+                swerve::driveRobotRelative, 
+                new HolonomicPathFollowerConfig(
+                        kAuto.AUTO_TRANSLATION_PID,
+                        kAuto.AUTO_ANGULAR_PID,
+                        kSwerve.MAX_DRIVE_VELOCITY,
+                        kSwerve.DRIVEBASE_RADIUS,
+                        new ReplanningConfig(
+                                true, 
+                                true)
+                ),
+                swerve);
+    }
 }
