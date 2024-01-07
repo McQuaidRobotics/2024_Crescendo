@@ -33,6 +33,7 @@ public class Swerve extends SubsystemBase {
     private final StatusSignal<Double> gyroYawSignal;
 
     public Swerve() {
+
         gyro = new Pigeon2(ConstValues.kSwerve.PIGEON_ID, ConstValues.kSwerve.CANBUS);
         gyro.getConfigurator().apply(new Pigeon2Configuration());
         gyroSim = gyro.getSimState();
@@ -47,12 +48,12 @@ public class Swerve extends SubsystemBase {
                 new SwerveModuleReal(ConstValues.kSwerve.Mod2.CONSTANTS),
                 new SwerveModuleReal(ConstValues.kSwerve.Mod3.CONSTANTS)
         }
-                : new SwerveModule[] {
-                        new SwerveModuleSim(ConstValues.kSwerve.Mod0.CONSTANTS),
-                        new SwerveModuleSim(ConstValues.kSwerve.Mod1.CONSTANTS),
-                        new SwerveModuleSim(ConstValues.kSwerve.Mod2.CONSTANTS),
-                        new SwerveModuleSim(ConstValues.kSwerve.Mod3.CONSTANTS)
-                };
+        : new SwerveModule[] {
+                new SwerveModuleSim(ConstValues.kSwerve.Mod0.CONSTANTS),
+                new SwerveModuleSim(ConstValues.kSwerve.Mod1.CONSTANTS),
+                new SwerveModuleSim(ConstValues.kSwerve.Mod2.CONSTANTS),
+                new SwerveModuleSim(ConstValues.kSwerve.Mod3.CONSTANTS)
+        };
 
         swerveOdometry = new SwerveDriveOdometry(
                 kSwerve.SWERVE_KINEMATICS,
