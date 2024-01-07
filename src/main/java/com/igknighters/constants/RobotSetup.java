@@ -7,7 +7,6 @@ import com.igknighters.util.BootupLogger;
 import com.igknighters.ConstantHelper.RobotConstID;
 
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.RobotController;
 
 public class RobotSetup {
 
@@ -47,27 +46,30 @@ public class RobotSetup {
             "0306adf3", RobotID.TestBoard,
             "ffffffff", RobotID.SIM_CRASH,
             "aaaaaaaa", RobotID.CRASH,
+            "03260abb", RobotID.CRASH,
             "bbbbbbbb", RobotID.BURN
         );
 
     private static RobotID currentID = RobotID.Unlabeled;
 
     public static RobotID getRobotID() {
-        if (currentID == RobotID.Unlabeled) {
-            String currentSerialNum;
-            if (RobotBase.isReal()) {
-                currentSerialNum = RobotController.getSerialNumber();
-                currentSerialNum = currentSerialNum.toLowerCase();
-            } else {
-                currentSerialNum = "ffffffff";
-            }
-            if (serialToID.containsKey(currentSerialNum)) {
-                currentID = serialToID.get(currentSerialNum);
-            } else {
-                throw new RuntimeException("Robot ID not found, " + currentSerialNum + " not in serialToID map");
-            }
-            BootupLogger.BootupLog("Robot Name: " + currentID.name);
-        }
-        return currentID;
+        // if (currentID == RobotID.Unlabeled) {
+        //     String currentSerialNum;
+        //     if (RobotBase.isReal()) {
+        //         // currentSerialNum = RobotController.getSerialNumber();
+        //         // currentSerialNum = currentSerialNum.toLowerCase();
+        //         currentSerialNum = "03260abb";
+        //     } else {
+        //         currentSerialNum = "ffffffff";
+        //     }
+        //     if (serialToID.containsKey(currentSerialNum)) {
+        //         currentID = serialToID.get(currentSerialNum);
+        //     } else {
+        //         throw new RuntimeException("Robot ID not found, " + currentSerialNum + " not in serialToID map");
+        //     }
+        //     BootupLogger.BootupLog("Robot Name: " + currentID.name);
+        // }
+        // return currentID;
+        return RobotID.CRASH;
     }
 }

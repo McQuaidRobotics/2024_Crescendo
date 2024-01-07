@@ -7,7 +7,6 @@ import com.igknighters.constants.ConstValues.kAuto;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.controllers.DriverController;
 import com.igknighters.controllers.OperatorController;
-import com.igknighters.controllers.TestingController;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.ReplanningConfig;
@@ -24,7 +23,7 @@ public class RobotContainer {
 
     private static final DriverController driverController = new DriverController(0);
     private static final OperatorController operatorController = new OperatorController(1);
-    private static final TestingController testingController = new TestingController(3);
+    // private static final TestingController testingController = new TestingController(3);
 
     private final AllSubsystems allSubsystems = new AllSubsystems(RobotSetup.getRobotID().subsystems);
 
@@ -33,10 +32,12 @@ public class RobotContainer {
 
         driverController.assignButtons(allSubsystems);
         operatorController.assignButtons(allSubsystems);
-        testingController.assignButtons(allSubsystems);
+        // testingController.assignButtons(allSubsystems);
 
         if (allSubsystems.swerve.isPresent()) {
             var swerve = allSubsystems.swerve.get();
+
+            // driverController.start().onTrue(new InstantCommand(() -> swerve.setYaw(0.0)));
 
             swerve.setDefaultCommand(
                     new TeleopSwerve(
@@ -50,9 +51,8 @@ public class RobotContainer {
     }
 
     // private void configureDriverBindings() {
-
-    // // Center Buttons
-    // driveController.start().onTrue(new InstantCommand(() -> swerve.setYaw(0.0)));
+    //     // Center Buttons
+    //     // driverController.start().onTrue(new InstantCommand(() -> swerve.setYaw(0.0)));
     // }
 
     // private void configureOperatorBindings() {

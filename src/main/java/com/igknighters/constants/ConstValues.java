@@ -145,7 +145,7 @@ public final class ConstValues {
     }
 
     public static final class kAuto {
-        public static final PIDConstants AUTO_TRANSLATION_PID = new PIDConstants(0.0, 0.0, 0.0);
+        public static final PIDConstants AUTO_TRANSLATION_PID = new PIDConstants(3.0, 0.0, 0.0);
         public static final PIDConstants AUTO_ANGULAR_PID = new PIDConstants(3.0, 0.0, 1.0);
     }
 }
