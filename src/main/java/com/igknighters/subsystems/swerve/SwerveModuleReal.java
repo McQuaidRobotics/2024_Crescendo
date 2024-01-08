@@ -20,6 +20,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import com.igknighters.constants.ConstValues.kSwerve;
+import com.igknighters.constants.ConstValues.kSwerve.AngleMotorConstants;
 import com.igknighters.constants.ConstValues.kSwerve.DriveMotorConstants;
 import com.igknighters.util.SwerveModuleConstants;
 
@@ -88,9 +89,9 @@ public class SwerveModuleReal implements SwerveModule {
         var angleConfig = new TalonFXConfiguration();
         angleConfig.MotorOutput.Inverted = kSwerve.ANGLE_MOTOR_INVERT;
         angleConfig.MotorOutput.NeutralMode = kSwerve.ANGLE_NEUTRAL_MODE;
-        angleConfig.Slot0.kP = DriveMotorConstants.kP;
-        angleConfig.Slot0.kI = DriveMotorConstants.kI;
-        angleConfig.Slot0.kD = DriveMotorConstants.kD;
+        angleConfig.Slot0.kP = AngleMotorConstants.kP;
+        angleConfig.Slot0.kI = AngleMotorConstants.kI;
+        angleConfig.Slot0.kD = AngleMotorConstants.kD;
         angleConfig.Feedback.FeedbackRemoteSensorID = angleEncoder.getDeviceID();
         angleConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
         angleConfig.Feedback.RotorToSensorRatio = 1.0 / kSwerve.ANGLE_GEAR_RATIO;
