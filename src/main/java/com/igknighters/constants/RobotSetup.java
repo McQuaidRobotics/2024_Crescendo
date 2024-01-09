@@ -1,5 +1,6 @@
 package com.igknighters.constants;
 
+import java.util.List;
 import java.util.Map;
 
 import org.littletonrobotics.junction.Logger;
@@ -74,7 +75,15 @@ public class RobotSetup {
             }
             BootupLogger.BootupLog("Robot Name: " + currentID.name);
         }
-        Logger.recordMetadata("RobotName", currentID.toString());
+        Logger.recordMetadata("RobotId", currentID.name());
+        Logger.recordMetadata(
+            "EnabledSubsystems",
+            List.of(currentID.subsystems)
+                .stream()
+                .map(sub -> sub.name())
+                .reduce("", (acc, sub) -> acc + sub + ", ")
+        );
+        Logger.recordMetadata("ConstantsID", currentID.constID.name());
         return currentID;
     }
 }

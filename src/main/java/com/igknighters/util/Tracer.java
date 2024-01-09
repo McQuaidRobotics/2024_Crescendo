@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.Supplier;
 
+import com.igknighters.constants.ConstValues;
+
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -48,9 +50,12 @@ public class Tracer {
      * 
      * Best used in periodic functions in Subsystems and Robot.java.
      * 
+     * This is a no-op if {@link ConstValues#DEBUG} is false.
+     * 
      * @param name the name of the trace, should be unique to the function.
      */
     public static void startTrace(String name) {
+        if (!ConstValues.DEBUG) return;
         trace.add(name);
         traceStartTimes.put(traceStack(), Timer.getFPGATimestamp());
     }
@@ -58,8 +63,11 @@ public class Tracer {
     /**
      * Ends a trace, should only be called at the end of a function thats not being called by user code.
      * If a {@link Tracer#startTrace(String)} is not paired with a {@link Tracer#endTrace()} there could be a crash.
+     * 
+     * This is a no-op if {@link ConstValues#DEBUG} is false.
      */
     public static void endTrace() {
+        if (!ConstValues.DEBUG) return;
         try {
             var startTime = traceStartTimes.get(traceStack());
             traceTimes.put(traceStack(),  Timer.getFPGATimestamp() - startTime);
@@ -78,6 +86,8 @@ public class Tracer {
      * @param name the name of the trace, should be unique to the function.
      * @param runnable the function to trace.
      * 
+     * This just calls the runnable with minimal overhead if {@link ConstValues#DEBUG} is false.
+     * 
      * @apiNote If you want to return a value then use {@link Tracer#traceFunc(String, Supplier)}.
      */
     public static void traceFunc(String name, Runnable runnable) {
@@ -89,6 +99,8 @@ public class Tracer {
     /**
      * Traces a function, should be used in place of {@link Tracer#startTrace(String)} and {@link Tracer#endTrace()}
      * for functions called by user code like {@code CommandScheduler.run()} and other expensive functions.
+     * 
+     * This just calls the supplier with minimal overhead if {@link ConstValues#DEBUG} is false.
      * 
      * @param name the name of the trace, should be unique to the function.
      * @param supplier the function to trace.

@@ -1,7 +1,5 @@
 package com.igknighters;
 
-import com.igknighters.commands.swerve.TeleopSwerve;
-import com.igknighters.commands.swerve.TeleopSwerve2;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.RobotSetup;
 import com.igknighters.constants.ConstValues.kAuto;
@@ -41,34 +39,25 @@ public class RobotContainer {
         if (allSubsystems.swerve.isPresent()) {
             var swerve = allSubsystems.swerve.get();
 
-            // swerve.setDefaultCommand(
-            //         new TeleopSwerve(
-            //                 swerve,
-            //                 driverController.leftStickY(),
-            //                 driverController.leftStickX(),
-            //                 driverController.rightStickX()));
-
             swerve.setDefaultCommand(
-                    new TeleopSwerve2(
+                    new com.igknighters.commands.swerve.TeleopSwerve(
                             swerve,
-                            driverController.leftStickX(),
                             driverController.leftStickY(),
-                            driverController.rightStickX(),
-                            driverController.rightStickY()
-                    ));
+                            driverController.leftStickX(),
+                            driverController.rightStickX()));
+
+            // swerve.setDefaultCommand(
+            //         new com.igknighters.commands.swerve.TeleopSwerve2(
+            //                 swerve,
+            //                 driverController.leftStickX(),
+            //                 driverController.leftStickY(),
+            //                 driverController.rightStickX(),
+            //                 driverController.rightStickY()
+            //         ));
         }
 
         setupAutos();
     }
-
-    // private void configureDriverBindings() {
-    // // Center Buttons
-    // // driverController.start().onTrue(new InstantCommand(() ->
-    // swerve.setYaw(0.0)));
-    // }
-
-    // private void configureOperatorBindings() {
-    // }
 
     private void setupAutos() {
         AutosCmdRegister.registerCommands(allSubsystems);
