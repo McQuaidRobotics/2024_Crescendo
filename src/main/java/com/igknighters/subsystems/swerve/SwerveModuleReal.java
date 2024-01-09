@@ -10,6 +10,7 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 
 import org.littletonrobotics.junction.Logger;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -79,7 +80,7 @@ public class SwerveModuleReal implements SwerveModule {
         driveConfig.Slot0.kP = DriveMotorConstants.kP;
         driveConfig.Slot0.kI = DriveMotorConstants.kI;
         driveConfig.Slot0.kD = DriveMotorConstants.kD;
-        driveConfig.Slot0.kV = 12.0 / (kSwerve.MAX_DRIVE_VELOCITY / kSwerve.METERS_PER_DRIVE_MOTOR_ROTATION);
+        driveConfig.Slot0.kV = 12.0 / (kSwerve.MAX_DRIVE_VELOCITY / (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO));
 
         driveMotor.getConfigurator().apply(driveConfig);
     }
@@ -135,7 +136,7 @@ public class SwerveModuleReal implements SwerveModule {
             driveMotor.setControl(controlRequest);
         } else {
             double rps = Math.min(desiredState.speedMetersPerSecond, kSwerve.MAX_DRIVE_VELOCITY)
-                    / kSwerve.METERS_PER_DRIVE_MOTOR_ROTATION;
+                    / (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO);
             var veloRequest = new VelocityVoltage(rps).withEnableFOC(true);
             driveMotor.setControl(veloRequest);
         }
@@ -159,40 +160,29 @@ public class SwerveModuleReal implements SwerveModule {
     }
 
     private double driveRotationsToMeters(double rotations) {
-        return rotations * kSwerve.METERS_PER_DRIVE_MOTOR_ROTATION;
+        return rotations * (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO);
     }
 
     @Override
     public void periodic() {
-        // BaseStatusSignal.refreshAll(
-        //     drivePositionSignal, driveVelocitySignal,
-        //     driveVoltSignal, driveAmpSignal,
-        //     anglePositionSignal, angleVelocitySignal,
-        //     angleVoltSignal, angleAmpSignal,
-        //     angleAbsoluteSignal, angleAbsoluteVeloSignal
-        // );
-
-        drivePositionSignal.refresh();
-        driveVelocitySignal.refresh();
-        driveVoltSignal.refresh();
-        driveAmpSignal.refresh();
-        anglePositionSignal.refresh();
-        angleVelocitySignal.refresh();
-        angleVoltSignal.refresh();
-        angleAmpSignal.refresh();
-        angleAbsoluteSignal.refresh();
-        angleAbsoluteVeloSignal.refresh();
+        BaseStatusSignal.refreshAll(
+            drivePositionSignal, driveVelocitySignal,
+            driveVoltSignal, driveAmpSignal,
+            anglePositionSignal, angleVelocitySignal,
+            angleVoltSignal, angleAmpSignal,
+            angleAbsoluteSignal, angleAbsoluteVeloSignal
+        );
 
         inputs.angleAbsolute = angleAbsoluteSignal.getValue() * (2.0 * Math.PI);
         inputs.angleVelo = angleAbsoluteVeloSignal.getValue() * (2.0 * Math.PI);
         inputs.angleVolts = angleVoltSignal.getValue();
         inputs.angleAmps = angleAmpSignal.getValue();
 
-        inputs.drivePosition = drivePositionSignal.getValue();
+        inputs.drivePosition = driveRotationsToMeters(drivePositionSignal.getValue());
         inputs.driveVelo = driveRotationsToMeters(driveVelocitySignal.getValue());
         inputs.driveVolts = driveVoltSignal.getValue();
         inputs.driveAmps = driveAmpSignal.getValue();
 
-        Logger.processInputs("SwerveModule[" + this.moduleNumber + "]", inputs);
+        Logger.processInputs("Swerve/SwerveModule[" + this.moduleNumber + "]", inputs);
     }
 }

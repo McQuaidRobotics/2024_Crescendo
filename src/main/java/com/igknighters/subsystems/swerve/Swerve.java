@@ -48,12 +48,12 @@ public class Swerve extends SubsystemBase {
                 new SwerveModuleReal(ConstValues.kSwerve.Mod2.CONSTANTS),
                 new SwerveModuleReal(ConstValues.kSwerve.Mod3.CONSTANTS)
         }
-        : new SwerveModule[] {
-                new SwerveModuleSim(ConstValues.kSwerve.Mod0.CONSTANTS),
-                new SwerveModuleSim(ConstValues.kSwerve.Mod1.CONSTANTS),
-                new SwerveModuleSim(ConstValues.kSwerve.Mod2.CONSTANTS),
-                new SwerveModuleSim(ConstValues.kSwerve.Mod3.CONSTANTS)
-        };
+                : new SwerveModule[] {
+                        new SwerveModuleSim(ConstValues.kSwerve.Mod0.CONSTANTS),
+                        new SwerveModuleSim(ConstValues.kSwerve.Mod1.CONSTANTS),
+                        new SwerveModuleSim(ConstValues.kSwerve.Mod2.CONSTANTS),
+                        new SwerveModuleSim(ConstValues.kSwerve.Mod3.CONSTANTS)
+                };
 
         swerveOdometry = new SwerveDriveOdometry(
                 kSwerve.SWERVE_KINEMATICS,
@@ -82,38 +82,7 @@ public class Swerve extends SubsystemBase {
         }
     }
 
-    public void drive(Translation2d translation, Translation2d absRotation, boolean isOpenLoop) {
-        // the angle of the translation vector
-        Double wantedAngle = Math.atan2(absRotation.getY(), absRotation.getX());
-        // a 0-1 value representing the magnitude of the translation vector
-        Double magnitude = absRotation.getNorm();
-        // the current angle reading of the gyro
-        Double currentAngle = getYawRot().getRadians();
-        // the angle of the translation vector relative to the gyro
-        Double relativeAngle = wantedAngle - currentAngle;
-
-        Double rotVelo;
-        if (relativeAngle < kSwerve.MAX_ANGULAR_VELOCITY * 0.02) {
-            rotVelo = relativeAngle * 50;
-        } else {
-            rotVelo = Math.signum(relativeAngle) * kSwerve.MAX_ANGULAR_VELOCITY * magnitude;
-        }
-
-        SwerveModuleState[] mSwerveModuleStates = kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(
-                ChassisSpeeds.fromFieldRelativeSpeeds(
-                        translation.getX() * kSwerve.MAX_DRIVE_VELOCITY,
-                        translation.getY() * kSwerve.MAX_DRIVE_VELOCITY,
-                        rotVelo,
-                        getYawRot()));
-
-        SwerveDriveKinematics.desaturateWheelSpeeds(mSwerveModuleStates, ConstValues.kSwerve.MAX_DRIVE_VELOCITY);
-
-        for (SwerveModule module : swerveMods) {
-            module.setDesiredState(mSwerveModuleStates[module.getModuleNumber()], isOpenLoop);
-        }
-    }
-
-    public void driveRobotRelative(ChassisSpeeds speeds) {
+    public void driveChassisSpeeds(ChassisSpeeds speeds) {
         if (Robot.isReal())
             speeds.omegaRadiansPerSecond *= -1;
         SwerveModuleState[] targetStates = kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(speeds);

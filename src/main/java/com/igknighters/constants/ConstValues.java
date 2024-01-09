@@ -37,12 +37,12 @@ public final class ConstValues {
     public static final class kSwerve {
         @SuppressWarnings("unused")
         private static final class SwerveGearRatios {
-            public static final double L1_DRIVE = 1.0 / 8.14;
-            public static final double L2_DRIVE = 1.0 / 6.75;
-            public static final double L3_DRIVE = 1.0 / 6.12;
-            public static final double L4_DRIVE = 1.0 / 5.14;
+            static final double L1_DRIVE = 1.0 / 8.14;
+            static final double L2_DRIVE = 1.0 / 6.75;
+            static final double L3_DRIVE = 1.0 / 6.12;
+            static final double L4_DRIVE = 1.0 / 5.14;
 
-            public static final double ANGLE = 7.0 / 150.0;
+            static final double ANGLE = 7.0 / 150.0;
         }
 
         public static final AprilTagFields APRIL_TAG_FIELD = AprilTagFields.k2023ChargedUp;
@@ -69,8 +69,6 @@ public final class ConstValues {
         @DoubleConst(crash = SwerveGearRatios.L2_DRIVE)
         public static double DRIVE_GEAR_RATIO;
 
-        public static final double METERS_PER_DRIVE_MOTOR_ROTATION = WHEEL_CIRCUMFERENCE * DRIVE_GEAR_RATIO;
-
         /* Inverts */
         public static final InvertedValue ANGLE_MOTOR_INVERT = InvertedValue.Clockwise_Positive;
         public static final InvertedValue DRIVE_MOTOR_INVERT = InvertedValue.CounterClockwise_Positive;
@@ -88,15 +86,15 @@ public final class ConstValues {
             );
 
         public static final class DriveMotorConstants {
-            public static double kP = 0.25;
-            public static double kI = 0.0;
-            public static double kD = 0.0;
+            public static final double kP = 0.25;
+            public static final double kI = 0.0;
+            public static final double kD = 0.0;
         }
 
         public static final class AngleMotorConstants {
-            public static double kP = 9.0;
-            public static double kI = 0.0;
-            public static double kD = 0.0;
+            public static final double kP = 9.0;
+            public static final double kI = 0.0;
+            public static final double kD = 0.0;
         }
 
         public static final class Mod0 {

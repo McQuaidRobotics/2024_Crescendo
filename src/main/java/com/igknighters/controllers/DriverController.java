@@ -3,7 +3,6 @@ package com.igknighters.controllers;
 import com.igknighters.SubsystemResources.Subsystems;
 
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 public class DriverController extends ControllerParent {
 
@@ -29,7 +28,7 @@ public class DriverController extends ControllerParent {
         // this.Back.binding =
 
         this.Start.binding = new SingleDepBinding(Subsystems.Swerve, (trig, allss) -> {
-            trig.onTrue(new InstantCommand(() -> allss.swerve.get().setYaw(0.0)));
+            trig.onTrue(Commands.runOnce(() -> allss.swerve.get().setYaw(0.0)));
         });
 
         /// STICKS

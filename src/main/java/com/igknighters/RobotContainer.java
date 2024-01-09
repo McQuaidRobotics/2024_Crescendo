@@ -1,6 +1,7 @@
 package com.igknighters;
 
 import com.igknighters.commands.swerve.TeleopSwerve;
+import com.igknighters.commands.swerve.TeleopSwerve2;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.RobotSetup;
 import com.igknighters.constants.ConstValues.kAuto;
@@ -40,20 +41,30 @@ public class RobotContainer {
         if (allSubsystems.swerve.isPresent()) {
             var swerve = allSubsystems.swerve.get();
 
+            // swerve.setDefaultCommand(
+            //         new TeleopSwerve(
+            //                 swerve,
+            //                 driverController.leftStickY(),
+            //                 driverController.leftStickX(),
+            //                 driverController.rightStickX()));
+
             swerve.setDefaultCommand(
-                    new TeleopSwerve(
+                    new TeleopSwerve2(
                             swerve,
-                            driverController.leftStickY(),
                             driverController.leftStickX(),
-                            driverController.rightStickX()));
+                            driverController.leftStickY(),
+                            driverController.rightStickX(),
+                            driverController.rightStickY()
+                    ));
         }
 
         setupAutos();
     }
 
     // private void configureDriverBindings() {
-    //     // Center Buttons
-    //     // driverController.start().onTrue(new InstantCommand(() -> swerve.setYaw(0.0)));
+    // // Center Buttons
+    // // driverController.start().onTrue(new InstantCommand(() ->
+    // swerve.setYaw(0.0)));
     // }
 
     // private void configureOperatorBindings() {
@@ -62,22 +73,22 @@ public class RobotContainer {
     private void setupAutos() {
         AutosCmdRegister.registerCommands(allSubsystems);
 
-        if (!allSubsystems.swerve.isPresent()) return;
+        if (!allSubsystems.swerve.isPresent())
+            return;
         var swerve = allSubsystems.swerve.get();
         AutoBuilder.configureHolonomic(
-                swerve::getPose, 
-                swerve::resetOdometry, 
-                swerve::getChassisSpeeds, 
-                swerve::driveRobotRelative, 
+                swerve::getPose,
+                swerve::resetOdometry,
+                swerve::getChassisSpeeds,
+                swerve::driveChassisSpeeds,
                 new HolonomicPathFollowerConfig(
                         kAuto.AUTO_TRANSLATION_PID,
                         kAuto.AUTO_ANGULAR_PID,
                         kSwerve.MAX_DRIVE_VELOCITY,
                         kSwerve.DRIVEBASE_RADIUS,
                         new ReplanningConfig(
-                                true, 
-                                true)
-                ),
+                                true,
+                                true)),
                 swerve);
     }
 }
