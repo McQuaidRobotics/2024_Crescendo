@@ -6,11 +6,18 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.igknighters.ConstantHelper.*;
 import com.igknighters.util.SwerveModuleConstants;
 import com.igknighters.util.SwerveModuleConstants.ModuleId;
+import com.igknighters.vision.Camera;
 import com.pathplanner.lib.util.PIDConstants;
 
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 
 //this will be where we put references to all our initialized values
@@ -32,6 +39,38 @@ public final class ConstValues {
         public static final double ROBOT_WIDTH = Units.inchesToMeters(26);
         public static final double ROBOT_LENGTH = Units.inchesToMeters(26);
         public static final double BUMPER_THICKNESS = Units.inchesToMeters(2.7);
+    }
+
+    public static final class kVision {
+        /** The least trustworthy std dev */
+        public static final Vector<N3> visionStdDevs = VecBuilder.fill(0.9, 0.9, 0.9);
+        /** The middle trustworthy std dev */
+        public static final Vector<N3> visionStdDevsTrust = VecBuilder.fill(0.4, 0.4, 0.4);
+        /** The most trustworthy std dev */
+        public static final Vector<N3> visionStdDevsReal = VecBuilder.fill(0.15, 0.15, 0.15);
+
+        public static final double ToleratedHistoryDifference = 0.1;
+        public static final double ToleratedMultiCamDifference = 0.1;
+
+
+        public static final Camera[] CAMERAS = new Camera[] {
+            new Camera(
+                "RearLeftCamera",
+                0,
+                new Pose3d(
+                    new Translation3d(0.0, 0.0, 0.25),
+                    new Rotation3d()
+                )
+            ),
+            new Camera(
+                "RearRightCamera",
+                1,
+                new Pose3d(
+                    new Translation3d(0.0, 0.0, 0.25),
+                    new Rotation3d()
+                )
+            )
+        };
     }
 
     public static final class kSwerve {

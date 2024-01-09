@@ -5,24 +5,25 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.sim.Pigeon2SimState;
 
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import com.igknighters.GlobalState;
 import com.igknighters.Robot;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues;
 
 public class Swerve extends SubsystemBase {
-    private final SwerveDriveOdometry swerveOdometry;
     private final SwerveModule[] swerveMods;
     private final Field2d field = new Field2d();
 
@@ -55,10 +56,13 @@ public class Swerve extends SubsystemBase {
                         new SwerveModuleSim(ConstValues.kSwerve.Mod3.CONSTANTS)
                 };
 
-        swerveOdometry = new SwerveDriveOdometry(
+        GlobalState.onceInitOdometry(
+            new SwerveDrivePoseEstimator(
                 kSwerve.SWERVE_KINEMATICS,
                 getYawRot(),
-                getModulePositions());
+                getModulePositions(),
+                getPose())
+        );
 
         SmartDashboard.putData("Field", field);
     }
@@ -149,11 +153,11 @@ public class Swerve extends SubsystemBase {
     }
 
     public Pose2d getPose() {
-        return swerveOdometry.getPoseMeters();
+        return GlobalState.getLocalizedPose();
     }
 
     public void resetOdometry(Pose2d pose) {
-        swerveOdometry.resetPosition(getYawRot(), getModulePositions(), pose);
+        GlobalState.resetLocalization(getYawRot(), pose, getModulePositions());
     }
 
     @Override
@@ -177,7 +181,7 @@ public class Swerve extends SubsystemBase {
         var gyroRot = getYawRot();
         SmartDashboard.putNumber("Gyro Angle", gyroRot.getDegrees());
 
-        var pose = swerveOdometry.update(gyroRot, modulePoses);
+        var pose = GlobalState.submitSwerveData(gyroRot, modulePoses);
         field.getRobotObject().setPose(pose);
     }
 
