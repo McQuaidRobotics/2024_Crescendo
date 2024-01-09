@@ -7,6 +7,7 @@ import com.igknighters.constants.ConstValues.kAuto;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.controllers.DriverController;
 import com.igknighters.controllers.OperatorController;
+import com.igknighters.controllers.TestingController;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.ReplanningConfig;
@@ -17,27 +18,27 @@ import edu.wpi.first.wpilibj.DriverStation;
 
 public class RobotContainer {
 
-    static {
-        com.igknighters.ConstantHelper.applyRoboConst(ConstValues.class);
-    }
+    private final DriverController driverController;
+    private final OperatorController operatorController;
+    private final TestingController testingController;
 
-    private static final DriverController driverController = new DriverController(0);
-    private static final OperatorController operatorController = new OperatorController(1);
-    // private static final TestingController testingController = new TestingController(3);
-
-    private final AllSubsystems allSubsystems = new AllSubsystems(RobotSetup.getRobotID().subsystems);
+    private static AllSubsystems allSubsystems;
 
     public RobotContainer() {
         DriverStation.silenceJoystickConnectionWarning(ConstValues.DEBUG);
 
+        driverController = new DriverController(0);
+        operatorController = new OperatorController(1);
+        testingController = new TestingController(3);
+
+        allSubsystems = new AllSubsystems(RobotSetup.getRobotID().subsystems);
+
         driverController.assignButtons(allSubsystems);
         operatorController.assignButtons(allSubsystems);
-        // testingController.assignButtons(allSubsystems);
+        testingController.assignButtons(allSubsystems);
 
         if (allSubsystems.swerve.isPresent()) {
             var swerve = allSubsystems.swerve.get();
-
-            // driverController.start().onTrue(new InstantCommand(() -> swerve.setYaw(0.0)));
 
             swerve.setDefaultCommand(
                     new TeleopSwerve(

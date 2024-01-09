@@ -1,7 +1,6 @@
 package com.igknighters;
 
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.function.BiConsumer;
 
 import org.littletonrobotics.junction.LoggedRobot;
@@ -9,25 +8,24 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 import com.igknighters.autos.Autos;
+import com.igknighters.constants.ConstValues;
 import com.igknighters.util.ShuffleboardApi;
 
 public class Robot extends LoggedRobot {
 
     private Command autoCmd;
-    @SuppressWarnings("unused")
-    private final RobotContainer robotContainer = new RobotContainer();
 
     @Override
     public void robotInit() {
         setupAkit();
+
+        com.igknighters.ConstantHelper.applyRoboConst(ConstValues.class);
+        new RobotContainer();
 
         Autos.createSendableChooser();
         SmartDashboard.putString("AutoCommand", Autos.getSelectedAutoName());
@@ -88,7 +86,6 @@ public class Robot extends LoggedRobot {
     }
 
     private void setupAkit() {
-        Logger.recordMetadata("Robot", "CitrusCircus");
         Logger.recordMetadata("RuntimeType", getRuntimeType().toString());
         Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
         Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
@@ -119,7 +116,7 @@ public class Robot extends LoggedRobot {
             int count = commandCounts.getOrDefault(name, 0) + (active ? 1 : -1);
             commandCounts.put(name, count);
             Logger.recordOutput(
-                    "CommandsUnique/" + name + "_" + Integer.toHexString(command.hashCode()), active);
+                    "CommandsUnique/" + name + "_" + Integer.toHexString(command.hashCode()), active.booleanValue());
             Logger.recordOutput("CommandsAll/" + name, count > 0);
         };
         CommandScheduler.getInstance()

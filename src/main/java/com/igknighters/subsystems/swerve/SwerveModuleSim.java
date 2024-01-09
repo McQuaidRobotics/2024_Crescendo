@@ -8,6 +8,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kSwerve;
@@ -106,5 +107,7 @@ public class SwerveModuleSim implements SwerveModule {
         while (angleAbsolutePositionRad > 2 * Math.PI) {
             angleAbsolutePositionRad -= 2 * Math.PI;
         }
+
+        SmartDashboard.putNumber("HELP", kSwerve.DRIVE_GEAR_RATIO);
     }
 }

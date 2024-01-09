@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.igknighters.Robot;
-import com.igknighters.Constants.kSwerve;
+import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues;
 
 public class Swerve extends SubsystemBase {
@@ -101,8 +101,8 @@ public class Swerve extends SubsystemBase {
 
         SwerveModuleState[] mSwerveModuleStates = kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(
                 ChassisSpeeds.fromFieldRelativeSpeeds(
-                        translation.getX() * kSwerve.MAX_SPEED,
-                        translation.getY() * kSwerve.MAX_SPEED,
+                        translation.getX() * kSwerve.MAX_DRIVE_VELOCITY,
+                        translation.getY() * kSwerve.MAX_DRIVE_VELOCITY,
                         rotVelo,
                         getYawRot()));
 
@@ -118,7 +118,7 @@ public class Swerve extends SubsystemBase {
             speeds.omegaRadiansPerSecond *= -1;
         SwerveModuleState[] targetStates = kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(speeds);
 
-        SwerveDriveKinematics.desaturateWheelSpeeds(targetStates, kSwerve.MAX_SPEED);
+        SwerveDriveKinematics.desaturateWheelSpeeds(targetStates, kSwerve.MAX_DRIVE_VELOCITY);
 
         SmartDashboard.putNumber("Speed X", speeds.vxMetersPerSecond);
         SmartDashboard.putNumber("Speed Y", speeds.vyMetersPerSecond);

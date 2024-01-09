@@ -10,7 +10,6 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 
 import org.littletonrobotics.junction.Logger;
 
-import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -20,6 +19,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import com.igknighters.constants.ConstValues.kSwerve;
+import com.igknighters.constants.ConstValues.kSwerve.AngleMotorConstants;
 import com.igknighters.constants.ConstValues.kSwerve.DriveMotorConstants;
 import com.igknighters.util.SwerveModuleConstants;
 
@@ -88,9 +88,9 @@ public class SwerveModuleReal implements SwerveModule {
         var angleConfig = new TalonFXConfiguration();
         angleConfig.MotorOutput.Inverted = kSwerve.ANGLE_MOTOR_INVERT;
         angleConfig.MotorOutput.NeutralMode = kSwerve.ANGLE_NEUTRAL_MODE;
-        angleConfig.Slot0.kP = DriveMotorConstants.kP;
-        angleConfig.Slot0.kI = DriveMotorConstants.kI;
-        angleConfig.Slot0.kD = DriveMotorConstants.kD;
+        angleConfig.Slot0.kP = AngleMotorConstants.kP;
+        angleConfig.Slot0.kI = AngleMotorConstants.kI;
+        angleConfig.Slot0.kD = AngleMotorConstants.kD;
         angleConfig.Feedback.FeedbackRemoteSensorID = angleEncoder.getDeviceID();
         angleConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
         angleConfig.Feedback.RotorToSensorRatio = 1.0 / kSwerve.ANGLE_GEAR_RATIO;
@@ -147,9 +147,10 @@ public class SwerveModuleReal implements SwerveModule {
                 getAngle());
     }
 
+    @Override
     public SwerveModulePosition getCurrentPosition() {
         return new SwerveModulePosition(
-                inputs.drivePosition,
+                driveRotationsToMeters(1000000),
                 getAngle());
     }
 
@@ -161,21 +162,33 @@ public class SwerveModuleReal implements SwerveModule {
         return rotations * kSwerve.METERS_PER_DRIVE_MOTOR_ROTATION;
     }
 
+    @Override
     public void periodic() {
-        BaseStatusSignal.refreshAll(
-            drivePositionSignal, driveVelocitySignal,
-            driveVoltSignal, driveAmpSignal,
-            anglePositionSignal, angleVelocitySignal,
-            angleVoltSignal, angleAmpSignal,
-            angleAbsoluteSignal, angleAbsoluteVeloSignal
-        );
+        // BaseStatusSignal.refreshAll(
+        //     drivePositionSignal, driveVelocitySignal,
+        //     driveVoltSignal, driveAmpSignal,
+        //     anglePositionSignal, angleVelocitySignal,
+        //     angleVoltSignal, angleAmpSignal,
+        //     angleAbsoluteSignal, angleAbsoluteVeloSignal
+        // );
+
+        drivePositionSignal.refresh();
+        driveVelocitySignal.refresh();
+        driveVoltSignal.refresh();
+        driveAmpSignal.refresh();
+        anglePositionSignal.refresh();
+        angleVelocitySignal.refresh();
+        angleVoltSignal.refresh();
+        angleAmpSignal.refresh();
+        angleAbsoluteSignal.refresh();
+        angleAbsoluteVeloSignal.refresh();
 
         inputs.angleAbsolute = angleAbsoluteSignal.getValue() * (2.0 * Math.PI);
         inputs.angleVelo = angleAbsoluteVeloSignal.getValue() * (2.0 * Math.PI);
         inputs.angleVolts = angleVoltSignal.getValue();
         inputs.angleAmps = angleAmpSignal.getValue();
 
-        inputs.drivePosition = driveRotationsToMeters(drivePositionSignal.getValue());
+        inputs.drivePosition = drivePositionSignal.getValue();
         inputs.driveVelo = driveRotationsToMeters(driveVelocitySignal.getValue());
         inputs.driveVolts = driveVoltSignal.getValue();
         inputs.driveAmps = driveAmpSignal.getValue();
