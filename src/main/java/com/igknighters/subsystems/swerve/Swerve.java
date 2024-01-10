@@ -21,6 +21,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.igknighters.GlobalState;
 import com.igknighters.Robot;
 import com.igknighters.constants.ConstValues.kSwerve;
+import com.igknighters.subsystems.swerve.module.SwerveModule;
+import com.igknighters.subsystems.swerve.module.SwerveModuleReal;
+import com.igknighters.subsystems.swerve.module.SwerveModuleSim;
 import com.igknighters.constants.ConstValues;
 
 public class Swerve extends SubsystemBase {

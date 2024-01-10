@@ -1,4 +1,4 @@
-package com.igknighters.subsystems.swerve;
+package com.igknighters.subsystems.swerve.module;
 
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.PositionDutyCycle;

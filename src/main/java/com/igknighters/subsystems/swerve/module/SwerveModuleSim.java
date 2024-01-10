@@ -1,4 +1,4 @@
-package com.igknighters.subsystems.swerve;
+package com.igknighters.subsystems.swerve.module;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
