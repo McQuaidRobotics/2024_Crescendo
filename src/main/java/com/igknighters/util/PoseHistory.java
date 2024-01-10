@@ -8,15 +8,26 @@ public class PoseHistory {
     private final ArrayList<TimestampedPose2d> prevPoses;
     private final double maxAge;
 
+    /**
+     * Creates a PoseHistory with a default max age of 0.5 seconds.
+     */
     public PoseHistory() {
         this(0.5);
     }
 
+    /**
+     * Creates a PoseHistory with the given max age.
+     * @param maxAgeSeconds The lifetime of a pose in the history
+     */
     public PoseHistory(double maxAgeSeconds) {
         prevPoses = new ArrayList<>();
         maxAge = maxAgeSeconds;
     }
 
+    /**
+     * Adds a Pose2d to the history with a timestamp of now.
+     * @param pose The pose to add
+     */
     public void addPose(Pose2d pose) {
         double timestamp = Timer.getFPGATimestamp();
 
@@ -26,6 +37,11 @@ public class PoseHistory {
         }
     }
 
+    /**
+     * Returns the Pose2d with the closest timestamp to the given timestamp.
+     * @param timestamp The timestamp to lookup
+     * @return The closest pose
+     */
     public Pose2d lookup(double timestamp) {
         TimestampedPose2d closest = prevPoses.get(prevPoses.size() - 1);
 

@@ -12,11 +12,16 @@ import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Notifier;
 
-public class VisionVerifier {
+public class VisionExecutor {
 
     private VisionPoseEstimator visionPoseEstimator;
     private Notifier visionNotifier;
 
+    /**
+     * Starts the vision system.
+     * 
+     * The vision system will run in a separate thread and feed the global localization system.
+     */
     public void startVision() {
         visionPoseEstimator = new VisionPoseEstimator(
             new AprilTagFieldLayout(List.of(), 100.0, 100.0),

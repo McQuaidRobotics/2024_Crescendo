@@ -11,12 +11,22 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.RobotBase;
 
+/**
+ * An abstraction for a photon camera.
+ */
 public class Camera {
     private final PhotonCamera camera;
     private final Integer id;
     private final Transform3d cameraPose;
     private Function<List<PhotonTrackedTarget>, List<PhotonTrackedTarget>> filter;
 
+    /**
+     * Creates an abstraction for a photon camera.
+     * @param cameraName The name of the camera
+     * @param id The ID of the camera
+     * @param cameraPose The pose of the camera relative to the robot
+     * @param filter The filter to apply to the targets
+     */
     public Camera(String cameraName, Integer id, Pose3d cameraPose, Function<List<PhotonTrackedTarget>, List<PhotonTrackedTarget>> filter) {
         if (RobotBase.isReal()) {
             this.camera = new PhotonCamera(cameraName);
@@ -28,6 +38,12 @@ public class Camera {
         this.filter = filter;
     }
 
+    /**
+     * Creates an abstraction for a photon camera.
+     * @param camerName The name of the camera
+     * @param id The ID of the camera
+     * @param cameraPose The pose of the camera relative to the robot
+     */
     public Camera(String camerName, Integer id, Pose3d cameraPose) {
         this(camerName, id, cameraPose, Camera::filterTargets);
     }
@@ -36,14 +52,26 @@ public class Camera {
         return targets.stream().filter(target -> target.getPoseAmbiguity() < 0.2).toList();
     }
 
+    /**
+     * Gets the latest result from the camera.
+     * @return The latest result
+     */
     public CameraResult getLatestResult() {
         return new CameraResult(camera.getLatestResult());
     }
 
+    /**
+     * If the camera has calibration data.
+     * @return If the camera has calibration data
+     */
     public Boolean hasCalibrationData() {
         return camera.getCameraMatrix().isPresent() && camera.getDistCoeffs().isPresent();
     }
 
+    /**
+     * Gets the underlying photon camera for advanced usage.
+     * @return The underlying photon camera
+     */
     public PhotonCamera getPhotonCamera() {
         return camera;
     }

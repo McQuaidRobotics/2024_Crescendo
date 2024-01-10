@@ -22,6 +22,10 @@ public class GlobalState {
 
     private static PoseHistory poseHistory = new PoseHistory();
 
+    /**
+     * Meant to be used by swerve to initialize the odometry system.
+     * @param odometry The odometry system to initialize
+     */
     public static void onceInitOdometry(SwerveDrivePoseEstimator odometry) {
         globalLock.lock();
         try {
@@ -35,6 +39,10 @@ public class GlobalState {
         }
     }
 
+    /**
+     * Get the robot's pose from the odometry system.
+     * @return The robot's pose
+     */
     public static Pose2d getLocalizedPose() {
         globalLock.lock();
         try {
@@ -48,6 +56,12 @@ public class GlobalState {
         }
     }
 
+    /**
+     * Reset the odometry system to the given pose.
+     * @param gyroRot The gyro's rotation
+     * @param pose The pose to reset to
+     * @param positions The positions of the swerve modules
+     */
     public static void resetLocalization(Rotation2d gyroRot, Pose2d pose, SwerveModulePosition... positions) {
         globalLock.lock();
         try {
@@ -61,6 +75,12 @@ public class GlobalState {
         }
     }
 
+    /**
+     * Pipe swerve data into the odometry system to update the robot's pose.
+     * @param gyroRot The gyro's rotation
+     * @param modulePositions The positions of the swerve modules
+     * @return The robot's updated pose
+     */
     public static Pose2d submitSwerveData(Rotation2d gyroRot, SwerveModulePosition[] modulePositions) {
         globalLock.lock();
         try {
@@ -74,6 +94,11 @@ public class GlobalState {
         }
     }
 
+    /**
+     * Pipe vision data into the odometry system to update the robot's pose.
+     * @param value The vision data
+     * @param trustworthyness The trustworthyness of the vision data
+     */
     public static void submitVisionData(EstimatedRobotPose value, Vector<N3> trustworthyness) {
         globalLock.lock();
         try {
@@ -91,6 +116,10 @@ public class GlobalState {
         }
     }
 
+    /**
+     * Add a pose to the pose history to be queried later to validate vision data.
+     * @param pose The pose to add
+     */
     public static void addPoseToHistory(Pose2d pose) {
         globalLock.lock();
         try {
@@ -100,6 +129,11 @@ public class GlobalState {
         }
     }
 
+    /**
+     * Get a pose from the pose history.
+     * @param timestamp The timestamp of the pose to get
+     * @return The pose at the given timestamp
+     */
     public static Pose2d getPoseFromHistory(double timestamp) {
         globalLock.lock();
         try {

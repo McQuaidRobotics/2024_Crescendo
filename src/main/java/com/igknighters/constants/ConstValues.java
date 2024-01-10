@@ -20,10 +20,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 
-//this will be where we put references to all our initialized values
 public final class ConstValues {
-    // all measurements are in meters unless otherwise specified
-    // all angles are in radians unless otherwise specified
     @SuppressWarnings("unused")
     private static final class Conv {
         public static final double FEET_TO_METERS = 0.3048;
@@ -52,7 +49,9 @@ public final class ConstValues {
         public static final double ToleratedHistoryDifference = 0.1;
         public static final double ToleratedMultiCamDifference = 0.1;
 
-
+        /**
+         * The cameras used for vision.
+         */
         public static final Camera[] CAMERAS = new Camera[] {
             new Camera(
                 "RearLeftCamera",
@@ -74,6 +73,9 @@ public final class ConstValues {
     }
 
     public static final class kSwerve {
+        /**
+         * The gear ratios for the swerve modules for easier constant definition.
+         */
         @SuppressWarnings("unused")
         private static final class SwerveGearRatios {
             static final double L1_DRIVE = 1.0 / 8.14;
@@ -90,18 +92,19 @@ public final class ConstValues {
         public static final boolean INVERT_GYRO = false;
         public static final String CANBUS = "DriveBus";
 
+        /** The Peak velocity of the swerve drive in meters */
         @DoubleConst(crash = 4.5)
         public static double MAX_DRIVE_VELOCITY;
 
+        /** The Peak angular velocity of the swerve drive in radians */
         @DoubleConst(crash = 10.0)
         public static double MAX_ANGULAR_VELOCITY;
 
         /* Drivetrain Constants */
         public static final double TRACK_WIDTH = 0.551942;
-        public static final double WHEEL_BASE = 0.551942;
         public static final double WHEEL_DIAMETER = 0.1016;
         public static final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
-        public static final double DRIVEBASE_RADIUS = Math.sqrt(Math.pow(TRACK_WIDTH, 2) + Math.pow(WHEEL_BASE, 2));
+        public static final double DRIVEBASE_RADIUS = Math.sqrt(Math.pow(TRACK_WIDTH, 2) + Math.pow(TRACK_WIDTH, 2));
 
         public static final double ANGLE_GEAR_RATIO = SwerveGearRatios.ANGLE;
 
@@ -142,7 +145,7 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 2;
             public static final int CANCODER_ID = 21;
             public static final double ROTATION_OFFSET = 0.21875;
-            public static final Translation2d CHASSIS_OFFSET = new Translation2d(-WHEEL_BASE / 2.0, TRACK_WIDTH / 2.0);
+            public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0, TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
                     ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
         }
@@ -153,7 +156,7 @@ public final class ConstValues {
             public static final int ANLGE_MOTOR_ID = 4;
             public static final int CANCODER_ID = 22;
             public static final double ROTATION_OFFSET = 0.3278805;
-            public static final Translation2d CHASSIS_OFFSET = new Translation2d(WHEEL_BASE / 2.0, TRACK_WIDTH / 2.0);
+            public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0, TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
                     ANLGE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
         }
@@ -164,7 +167,7 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 6;
             public static final int CANCODER_ID = 23;
             public static final double ROTATION_OFFSET = 0.6540972;
-            public static final Translation2d CHASSIS_OFFSET = new Translation2d(WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0);
+            public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0, -TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
                     ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
         }
@@ -175,7 +178,7 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 8;
             public static final int CANCODER_ID = 24;
             public static final double ROTATION_OFFSET = 0.5776361;
-            public static final Translation2d CHASSIS_OFFSET = new Translation2d(-WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0);
+            public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0, -TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
                     ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
         }
