@@ -78,6 +78,7 @@ public class RobotContainer {
                         new ReplanningConfig(
                                 true,
                                 true)),
+                () -> true,
                 swerve);
     }
 }
