@@ -3,29 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.7634809592015757,
-        "y": 4.894376008438179
+        "x": 2.1454890270693507,
+        "y": 6.066213330714821
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.106544698110794,
-        "y": 4.825763260656336
+        "x": 3.1454890270693507,
+        "y": 5.566213330714821
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.35300961614762,
-        "y": 4.768585970838132
+        "x": 4.639897211320813,
+        "y": 6.171610859626855
       },
       "prevControl": {
-        "x": 2.461043894983652,
-        "y": 4.654231391201726
+        "x": 4.7640448852881665,
+        "y": 5.481901559808231
+      },
+      "nextControl": {
+        "x": 4.534499682408779,
+        "y": 6.75715268691593
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.1454890270693507,
+        "y": 6.066213330714821
+      },
+      "prevControl": {
+        "x": 4.721873067141283,
+        "y": 6.722020177278586
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Test Path 1 End Point"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -38,7 +54,7 @@
     "maxAngularAcceleration": 720.0
   },
   "goalEndState": {
-    "velocity": 4.5,
+    "velocity": 0.0,
     "rotation": 180.0,
     "rotateFast": false
   },

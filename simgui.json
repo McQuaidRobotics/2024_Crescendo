@@ -54,9 +54,30 @@
   "NetworkTables": {
     "transitory": {
       "AdvantageKit": {
+        "Swerve": {
+          "SwerveModule[0]": {
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      },
+      "PathPlanner": {
+        "double[]##v_/PathPlanner/activePath": {
+          "open": true
+        },
+        "double[]##v_/PathPlanner/targetPose": {
+          "open": true
+        },
+        "double[]##v_/PathPlanner/vel": {
+          "open": true
+        },
         "open": true
       },
       "SmartDashboard": {
+        "Auto Chooser": {
+          "open": true
+        },
         "open": true
       }
     }
