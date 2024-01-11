@@ -3,46 +3,56 @@ package com.igknighters.subsystems.stem.pivot;
 import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 
+import com.igknighters.constants.ConstValues;
 import com.igknighters.subsystems.Component;
 
 public interface Pivot extends Component {
 
     public static class PivotInputs implements LoggableInputs {
-        public double degrees, targetDegrees, degreesPerSecond = 0.0;
+        public double radians, targetRadians, radiansPerSecond = 0.0;
         public double volts = 0.0;
         public double leftAmps = 0.0, rightAmps = 0.0;
         public double leftTemp = 0.0, rightTemp = 0.0;
         public boolean isLimitSwitchHit = false;
 
-        public PivotInputs(double startingDegrees) {
-            this.degrees = startingDegrees;
-            this.targetDegrees = startingDegrees;
+        public PivotInputs(double startingRadians) {
+            this.radians = startingRadians;
+            this.targetRadians = startingRadians;
         }
 
         @Override
         public void toLog(LogTable table) {
-            table.put("Stem/Pivot/degrees", degrees);
-            table.put("Stem/Pivot/targetDegrees", targetDegrees);
-            table.put("Stem/Pivot/degreesPerSecond", degreesPerSecond);
-            table.put("Stem/Pivot/volts", volts);
-            table.put("Stem/Pivot/leftAmps", leftAmps);
-            table.put("Stem/Pivot/rightAmps", rightAmps);
-            table.put("Stem/Pivot/leftTemp", leftTemp);
-            table.put("Stem/Pivot/rightTemp", rightTemp);
-            table.put("Stem/Pivot/isLimitSwitchHit", isLimitSwitchHit);
+            table.put("radians", radians);
+            table.put("targetRadians", targetRadians);
+            table.put("radiansPerSecond", radiansPerSecond);
+            table.put("volts", volts);
+            table.put("leftAmps", leftAmps);
+            table.put("rightAmps", rightAmps);
+            table.put("leftTemp", leftTemp);
+            table.put("rightTemp", rightTemp);
+            table.put("isLimitSwitchHit", isLimitSwitchHit);
+
+            // A subtable, thats only written to when in debug mode and never read from,
+            // that provides some more human readable values
+            if (ConstValues.DEBUG) {
+                table.put("#Human/degrees", Math.toDegrees(radians));
+                table.put("#Human/targetDegrees", Math.toDegrees(targetRadians));
+                table.put("#Human/degreesPerSecond", Math.toDegrees(radiansPerSecond));
+                table.put("#Human/watts", volts * (leftAmps + rightAmps));
+            }
         }
 
         @Override
         public void fromLog(LogTable table) {
-            degrees = table.get("Stem/Pivot/degrees", degrees);
-            targetDegrees = table.get("Stem/Pivot/targetDegrees", targetDegrees);
-            degreesPerSecond = table.get("Stem/Pivot/degreesPerSecond", degreesPerSecond);
-            volts = table.get("Stem/Pivot/volts", volts);
-            leftAmps = table.get("Stem/Pivot/leftAmps", leftAmps);
-            rightAmps = table.get("Stem/Pivot/rightAmps", rightAmps);
-            leftTemp = table.get("Stem/Pivot/leftTemp", leftTemp);
-            rightTemp = table.get("Stem/Pivot/rightTemp", rightTemp);
-            isLimitSwitchHit = table.get("Stem/Pivot/isLimitSwitchHit", isLimitSwitchHit);
+            radians = table.get("radians", radians);
+            targetRadians = table.get("targetRadians", targetRadians);
+            radiansPerSecond = table.get("radiansPerSecond", radiansPerSecond);
+            volts = table.get("volts", volts);
+            leftAmps = table.get("leftAmps", leftAmps);
+            rightAmps = table.get("rightAmps", rightAmps);
+            leftTemp = table.get("leftTemp", leftTemp);
+            rightTemp = table.get("rightTemp", rightTemp);
+            isLimitSwitchHit = table.get("isLimitSwitchHit", isLimitSwitchHit);
         }
     }
 

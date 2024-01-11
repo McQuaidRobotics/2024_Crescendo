@@ -1,0 +1,5 @@
+package com.igknighters.subsystems.stem.telescope;
+
+public class TelescopeReal implements Telescope {
+
+}

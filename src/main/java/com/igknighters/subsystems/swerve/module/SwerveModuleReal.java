@@ -33,7 +33,6 @@ public class SwerveModuleReal implements SwerveModule {
     private final StatusSignal<Double> anglePositionSignal, angleVelocitySignal;
     private final StatusSignal<Double> angleVoltSignal, angleAmpSignal;
 
-
     private final CANcoder angleEncoder;
     private final StatusSignal<Double> angleAbsoluteSignal, angleAbsoluteVeloSignal;
 
@@ -80,7 +79,8 @@ public class SwerveModuleReal implements SwerveModule {
         driveConfig.Slot0.kP = DriveMotorConstants.kP;
         driveConfig.Slot0.kI = DriveMotorConstants.kI;
         driveConfig.Slot0.kD = DriveMotorConstants.kD;
-        driveConfig.Slot0.kV = 12.0 / (kSwerve.MAX_DRIVE_VELOCITY / (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO));
+        driveConfig.Slot0.kV = 12.0
+                / (kSwerve.MAX_DRIVE_VELOCITY / (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO));
 
         driveMotor.getConfigurator().apply(driveConfig);
     }
@@ -122,7 +122,8 @@ public class SwerveModuleReal implements SwerveModule {
     }
 
     private void setAngle(SwerveModuleState desiredState) {
-        Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (kSwerve.MAX_DRIVE_VELOCITY * 0.01)) ? lastAngle
+        Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (kSwerve.MAX_DRIVE_VELOCITY * 0.01))
+                ? lastAngle
                 : desiredState.angle;
 
         angleMotor.setControl(new PositionDutyCycle(angle.getRotations()));
@@ -144,7 +145,7 @@ public class SwerveModuleReal implements SwerveModule {
 
     public SwerveModuleState getCurrentState() {
         return new SwerveModuleState(
-                inputs.driveVelo,
+                inputs.driveVeloMPS,
                 getAngle());
     }
 
@@ -156,7 +157,7 @@ public class SwerveModuleReal implements SwerveModule {
     }
 
     private Rotation2d getAngle() {
-        return Rotation2d.fromRadians(inputs.angleAbsolute);
+        return Rotation2d.fromRadians(inputs.angleAbsoluteRads);
     }
 
     private double driveRotationsToMeters(double rotations) {
@@ -166,20 +167,19 @@ public class SwerveModuleReal implements SwerveModule {
     @Override
     public void periodic() {
         BaseStatusSignal.refreshAll(
-            drivePositionSignal, driveVelocitySignal,
-            driveVoltSignal, driveAmpSignal,
-            anglePositionSignal, angleVelocitySignal,
-            angleVoltSignal, angleAmpSignal,
-            angleAbsoluteSignal, angleAbsoluteVeloSignal
-        );
+                drivePositionSignal, driveVelocitySignal,
+                driveVoltSignal, driveAmpSignal,
+                anglePositionSignal, angleVelocitySignal,
+                angleVoltSignal, angleAmpSignal,
+                angleAbsoluteSignal, angleAbsoluteVeloSignal);
 
-        inputs.angleAbsolute = angleAbsoluteSignal.getValue() * (2.0 * Math.PI);
-        inputs.angleVelo = angleAbsoluteVeloSignal.getValue() * (2.0 * Math.PI);
+        inputs.angleAbsoluteRads = angleAbsoluteSignal.getValue() * (2.0 * Math.PI);
+        inputs.angleVeloRadPS = angleAbsoluteVeloSignal.getValue() * (2.0 * Math.PI);
         inputs.angleVolts = angleVoltSignal.getValue();
         inputs.angleAmps = angleAmpSignal.getValue();
 
-        inputs.drivePosition = driveRotationsToMeters(drivePositionSignal.getValue());
-        inputs.driveVelo = driveRotationsToMeters(driveVelocitySignal.getValue());
+        inputs.drivePositionMeters = driveRotationsToMeters(drivePositionSignal.getValue());
+        inputs.driveVeloMPS = driveRotationsToMeters(driveVelocitySignal.getValue());
         inputs.driveVolts = driveVoltSignal.getValue();
         inputs.driveAmps = driveAmpSignal.getValue();
 

@@ -3,46 +3,43 @@ package com.igknighters.subsystems.swerve.module;
 import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 
+import com.igknighters.subsystems.Component;
 import com.igknighters.subsystems.swerve.Swerve;
 
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
-public interface SwerveModule {
+public interface SwerveModule extends Component {
     public static class SwerveModuleInputs implements LoggableInputs {
-        /**Measured in Meters/s */
-        public double driveVelo = 0.0;
-        /**Measured in Meters */
-        public double drivePosition = 0.0;
+        public double driveVeloMPS = 0.0;
+        public double drivePositionMeters = 0.0;
         public double driveVolts = 0.0;
         public double driveAmps = 0.0;
-        /**Measured in Radian/s */
-        public double angleVelo = 0.0;
-        /**Measured in Radians */
-        public double angleAbsolute = 0.0;
+        public double angleVeloRadPS = 0.0;
+        public double angleAbsoluteRads = 0.0;
         public double angleVolts = 0.0;
         public double angleAmps = 0.0;
 
         @Override
         public void toLog(LogTable table) {
-            table.put("DriveVelocityMPS", driveVelo);
-            table.put("DrivePositionMeters", drivePosition);
+            table.put("DriveVelocityMPS", driveVeloMPS);
+            table.put("DrivePositionMeters", drivePositionMeters);
             table.put("DriveVolts", driveVolts);
             table.put("DriveAmps", driveAmps);
-            table.put("AngleVelocityRPS", angleVelo);
-            table.put("AngleAbsoluteRadians", angleAbsolute);
+            table.put("AngleVelocityRPS", angleVeloRadPS);
+            table.put("AngleAbsoluteRadians", angleAbsoluteRads);
             table.put("AngleVolts", angleVolts);
             table.put("AngleAmps", angleAmps);
         }
 
         @Override
         public void fromLog(LogTable table) {
-            driveVelo = table.get("DriveVelocityMPS", driveVelo);
-            drivePosition = table.get("DrivePositionMeters", drivePosition);
+            driveVeloMPS = table.get("DriveVelocityMPS", driveVeloMPS);
+            drivePositionMeters = table.get("DrivePositionMeters", drivePositionMeters);
             driveVolts = table.get("DriveVolts", driveVolts);
             driveAmps = table.get("DriveAmps", driveAmps);
-            angleVelo = table.get("AngleVelocityRPS", angleVelo);
-            angleAbsolute = table.get("AngleAbsoluteRadians", angleAbsolute);
+            angleVeloRadPS = table.get("AngleVelocityRPS", angleVeloRadPS);
+            angleAbsoluteRads = table.get("AngleAbsoluteRadians", angleAbsoluteRads);
             angleVolts = table.get("AngleVolts", angleVolts);
             angleAmps = table.get("AngleAmps", angleAmps);
         }
@@ -68,6 +65,4 @@ public interface SwerveModule {
      *         array.
      */
     public int getModuleNumber();
-
-    public void periodic();
 }
