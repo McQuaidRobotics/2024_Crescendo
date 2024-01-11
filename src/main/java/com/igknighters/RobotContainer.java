@@ -11,8 +11,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.ReplanningConfig;
 
-import javax.swing.GroupLayout.Alignment;
-
 import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.autos.AutosCmdRegister;
 
