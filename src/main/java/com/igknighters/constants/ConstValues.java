@@ -6,7 +6,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.igknighters.ConstantHelper.*;
 import com.igknighters.util.SwerveModuleConstants;
 import com.igknighters.util.SwerveModuleConstants.ModuleId;
-import com.igknighters.vision.Camera;
+import com.igknighters.vision.camera.Camera;
 import com.pathplanner.lib.util.PIDConstants;
 
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -53,7 +53,7 @@ public final class ConstValues {
          * The cameras used for vision.
          */
         public static final Camera[] CAMERAS = new Camera[] {
-            new Camera(
+            Camera.create(
                 "RearLeftCamera",
                 0,
                 new Pose3d(
@@ -61,7 +61,7 @@ public final class ConstValues {
                     new Rotation3d()
                 )
             ),
-            new Camera(
+            Camera.create(
                 "RearRightCamera",
                 1,
                 new Pose3d(

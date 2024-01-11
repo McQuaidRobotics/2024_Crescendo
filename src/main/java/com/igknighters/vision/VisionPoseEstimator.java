@@ -11,6 +11,8 @@ import org.photonvision.estimation.VisionEstimation;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.targeting.TargetCorner;
 
+import com.igknighters.vision.camera.Camera;
+
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -87,8 +89,8 @@ public class VisionPoseEstimator {
         }
 
         //so ugly but only is called once
-        var cameraMatrix = result.getCamera().getPhotonCamera().getCameraMatrix().get();
-        var distCoeffs = result.getCamera().getPhotonCamera().getDistCoeffs().get();
+        var cameraMatrix = result.getCamera().getCameraMatrix().get();
+        var distCoeffs = result.getCamera().getDistCoeffs().get();
 
         var pnpResult = VisionEstimation.estimateCamPosePNP(cameraMatrix, distCoeffs, result.getTargets(), aprilTagFieldLayout, tagModel);
 
