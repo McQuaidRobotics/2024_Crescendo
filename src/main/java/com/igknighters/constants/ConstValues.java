@@ -79,13 +79,13 @@ public final class ConstValues {
         public static final NeutralModeValue DRIVE_NEUTRAL_MODE = NeutralModeValue.Brake;
 
         public static final class DriveMotorConstants {
-            public static final double kP = 0.25;
+            public static final double kP = 1.0;
             public static final double kI = 0.0;
             public static final double kD = 0.0;
         }
 
         public static final class AngleMotorConstants {
-            public static final double kP = 9.0;
+            public static final double kP = 11.0;
             public static final double kI = 0.0;
             public static final double kD = 0.0;
         }
@@ -147,7 +147,7 @@ public final class ConstValues {
     }
 
     public static final class kAuto {
-        public static final PIDConstants AUTO_TRANSLATION_PID = new PIDConstants(3.0, 0.0, 0.0);
-        public static final PIDConstants AUTO_ANGULAR_PID = new PIDConstants(3.0, 0.0, 1.0);
+        public static final PIDConstants AUTO_TRANSLATION_PID = new PIDConstants(3.4, 0.0, 0.3);
+        public static final PIDConstants AUTO_ANGULAR_PID = new PIDConstants(3.0, 0.0, 0.0);
     }
 }
