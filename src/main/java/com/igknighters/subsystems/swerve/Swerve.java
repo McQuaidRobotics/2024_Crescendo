@@ -176,7 +176,7 @@ public class Swerve extends SubsystemBase {
         var gyroRot = getYawRot();
         SmartDashboard.putNumber("Gyro Angle", gyroRot.getDegrees());
 
-        visualizer.update();
+        visualizer.update(swerveOdometry.update(gyroRot, modulePoses));
     }
 
     @Override
