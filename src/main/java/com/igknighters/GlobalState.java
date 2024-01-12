@@ -142,4 +142,26 @@ public class GlobalState {
             globalLock.unlock();
         }
     }
+
+    public static final class Simulation {
+        private static boolean hasGamePiece = false;
+
+        public static boolean hasGamePiece() {
+            globalLock.lock();
+            try {
+                return hasGamePiece;
+            } finally {
+                globalLock.unlock();
+            }
+        }
+
+        public static void setHasGamePiece(boolean hasGamePiece) {
+            globalLock.lock();
+            try {
+                Simulation.hasGamePiece = hasGamePiece;
+            } finally {
+                globalLock.unlock();
+            }
+        }
+    }
 }

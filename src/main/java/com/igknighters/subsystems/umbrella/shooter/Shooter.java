@@ -45,6 +45,11 @@ public interface Shooter extends Component {
     public double getSpeed();
 
     /**
+     * @return The target rotational speed of the {@code Shooter} flywheel in Rad/S
+     */
+    public double getTargetSpeed();
+
+    /**
      * Runs the {@code Shooter} in closed loop at the specified speed
      * @param speedRadPerSec The speed in Rad/S to spin the flywheel at
      */

@@ -34,6 +34,11 @@ public class ShooterSim implements Shooter {
     }
 
     @Override
+    public double getTargetSpeed() {
+        return inputs.targetRadiansPerSecond;
+    }
+
+    @Override
     public void setSpeed(double speedRadPerSec) {
         inputs.targetRadiansPerSecond = speedRadPerSec;
 

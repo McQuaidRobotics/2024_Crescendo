@@ -196,6 +196,14 @@ public final class ConstValues {
             public static final double kP = 1.0;
             public static final double kI = 0.0;
             public static final double kD = 0.0;
+
+            public static final int MOTOR_ID = 17;
+
+            public static final double DEFAULT_TOLERANCE = 0.05;
+        }
+
+        public static final class kIntake {
+            public static final int MOTOR_ID = 18;
         }
 
 
