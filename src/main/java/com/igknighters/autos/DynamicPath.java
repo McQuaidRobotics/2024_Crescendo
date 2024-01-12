@@ -16,14 +16,9 @@ public class DynamicPath implements DPBlock {
     public DynamicPath(PathPlannerPath path, PathConstraints contraints, double rotDelay) {
         cmd = AutoBuilder.pathfindThenFollowPath(path, contraints, rotDelay);
     }
-    
-    // public DynamicPath withName(String name) {
-    //     cmd = cmd.withName(name);
-    //     return this;
-    // }
 
     public Command getCmd() {
-        return cmd; //TODO crashes if I use .withName for some reason
+        return cmd;
     }
 
 }

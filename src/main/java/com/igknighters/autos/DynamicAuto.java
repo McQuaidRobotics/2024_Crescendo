@@ -11,22 +11,18 @@ public class DynamicAuto implements DPBlock {
     private Command cmd;
 
     public DynamicAuto(DynPath... dynPaths) {
-        ArrayList<Command> cmds = new ArrayList<Command>();
-        for (DynPath dynPath : dynPaths) {
-            cmds.add(dynPath.getCmd());
+        Command[] pathCmds = new Command[dynPaths.length];
+        for (int i = 0; i < dynPaths.length; i++) {
+            pathCmds[i] = dynPaths[i].getCmd();
         }
-        this.cmd = buildAuto(cmds);
+        this.cmd = new SequentialCommandGroup(pathCmds);
     }
     public DynamicAuto(DPBlock... dynBlocks) {
-        ArrayList<Command> cmds = new ArrayList<Command>();
-        for (DPBlock dynBlock : dynBlocks) {
-            cmds.add(dynBlock.getCmd());
+        Command[] pathCmds = new Command[dynBlocks.length];
+        for (int i = 0; i < dynBlocks.length; i++) {
+            pathCmds[i] = dynBlocks[i].getCmd();
         }
-        this.cmd = buildAuto(cmds);
-    }
-    
-    public Command buildAuto(ArrayList<Command> dynPathCmds) {
-        return new SequentialCommandGroup(dynPathCmds.toArray(new Command[dynPathCmds.size()]));
+        this.cmd = new SequentialCommandGroup(pathCmds);
     }
 
     public Command getCmd() {

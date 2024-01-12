@@ -18,7 +18,7 @@ public class Autos {
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
-    public static Command getAutonomousCommand() {
+public static Command getAutonomousCommand() {
         if (autoChooser == null) return new InstantCommand().withName("Nothing -> Auto Chooser Not Created!");
         return autoChooser.getSelected();
     }
