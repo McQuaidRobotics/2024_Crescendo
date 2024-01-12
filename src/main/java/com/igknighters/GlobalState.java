@@ -2,10 +2,11 @@ package com.igknighters;
 
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 
 import org.photonvision.EstimatedRobotPose;
 
-import com.igknighters.util.PoseHistory;
+// import com.igknighters.util.PoseHistory;
 
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -13,14 +14,19 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
 
 public class GlobalState {
     private static final ReentrantLock globalLock = new ReentrantLock();
 
     private static Optional<SwerveDrivePoseEstimator> localizer = Optional.empty();
 
-    private static PoseHistory poseHistory = new PoseHistory();
+    // private static final PoseHistory poseHistory = new PoseHistory();
+
+    private static Optional<Field2d> field;
 
     /**
      * Meant to be used by swerve to initialize the odometry system.
@@ -116,28 +122,71 @@ public class GlobalState {
         }
     }
 
+    // /**
+    //  * Add a pose to the pose history to be queried later to validate vision data.
+    //  * @param pose The pose to add
+    //  */
+    // public static void addPoseToHistory(Pose2d pose) {
+    //     globalLock.lock();
+    //     try {
+    //         poseHistory.addPose(pose);
+    //     } finally {
+    //         globalLock.unlock();
+    //     }
+    // }
+
+    // /**
+    //  * Get a pose from the pose history.
+    //  * @param timestamp The timestamp of the pose to get
+    //  * @return The pose at the given timestamp
+    //  */
+    // public static Pose2d getPoseFromHistory(double timestamp) {
+    //     globalLock.lock();
+    //     try {
+    //         return poseHistory.lookup(timestamp);
+    //     } finally {
+    //         globalLock.unlock();
+    //     }
+    // }
+
+
     /**
-     * Add a pose to the pose history to be queried later to validate vision data.
-     * @param pose The pose to add
+     * Create and publish the field to network tables,
+     * this is also called by {@link GlobalState#modifyField(Consumer)} if the field is not already published.
      */
-    public static void addPoseToHistory(Pose2d pose) {
+    public static void publishField() {
         globalLock.lock();
         try {
-            poseHistory.addPose(pose);
+            if (field.isPresent()) {
+                DriverStation.reportError("Field already published", false);
+                return;
+            }
+            field = Optional.of(new Field2d());
+            var builder = new SendableBuilderImpl();
+            builder.setTable(
+                NetworkTableInstance
+                    .getDefault()
+                    .getTable("Visualizers")
+                    .getSubTable("Field")
+            );
+            field.get().initSendable(builder);
         } finally {
             globalLock.unlock();
         }
     }
 
+
     /**
-     * Get a pose from the pose history.
-     * @param timestamp The timestamp of the pose to get
-     * @return The pose at the given timestamp
+     * Run a function that modifies the field in a thread-safe manner.
+     * @param modifier The function to receive the field
      */
-    public static Pose2d getPoseFromHistory(double timestamp) {
+    public static void modifyField(Consumer<Field2d> modifier) {
         globalLock.lock();
         try {
-            return poseHistory.lookup(timestamp);
+            if (!field.isPresent()) {
+                publishField();
+            }
+            modifier.accept(field.get());
         } finally {
             globalLock.unlock();
         }

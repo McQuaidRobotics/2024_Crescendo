@@ -25,10 +25,12 @@ public class Robot extends LoggedRobot {
         setupAkit();
 
         com.igknighters.ConstantHelper.applyRoboConst(ConstValues.class);
+
+        GlobalState.publishField();
+
         new RobotContainer();
 
         Autos.createSendableChooser();
-        SmartDashboard.putString("AutoCommand", Autos.getSelectedAutoName());
     }
 
     @Override
