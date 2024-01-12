@@ -1,5 +1,10 @@
 package com.igknighters.subsystems.swerve;
 
+import org.littletonrobotics.junction.LogTable;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.inputs.LoggableInputs;
+
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -31,6 +36,26 @@ public class Swerve extends SubsystemBase {
     private final StatusSignal<Double> gyroRollSignal;
     private final StatusSignal<Double> gyroPitchSignal;
     private final StatusSignal<Double> gyroYawSignal;
+
+    private static class SwerveInputs implements LoggableInputs {
+        public double gyroPitchRads = 0.0, gyroRollRads = 0.0, gyroYawRads = 0.0;
+
+        @Override
+        public void toLog(LogTable table) {
+            table.put("GyroPitchRads", gyroPitchRads);
+            table.put("GyroRollRads", gyroRollRads);
+            table.put("GyroYawRads", gyroYawRads);
+        }
+
+        @Override
+        public void fromLog(LogTable table) {
+            gyroPitchRads = table.get("GyroPitchRads", gyroPitchRads);
+            gyroRollRads = table.get("GyroRollRads", gyroRollRads);
+            gyroYawRads = table.get("GyroYawRads", gyroYawRads);
+        }
+    }
+
+    private SwerveInputs inputs = new SwerveInputs();
 
     public Swerve() {
 
@@ -99,6 +124,10 @@ public class Swerve extends SubsystemBase {
         setModuleStates(targetStates);
     }
 
+    /**
+     * Sets the
+     * @param val
+     */
     public void setYaw(double val) {
         gyro.setYaw(val);
     }
@@ -107,16 +136,25 @@ public class Swerve extends SubsystemBase {
         return Rotation2d.fromDegrees(scope0To360(this.getYaw()));
     }
 
+    /**
+     * @return The raw gyro yaw value in degrees
+     */
     public Double getYaw() {
-        return gyro.getYaw().getValue();
+        return Units.radiansToDegrees(inputs.gyroYawRads);
     }
 
+    /**
+     * @return The raw gyro pitch value in degrees
+     */
     public Double getPitch() {
-        return gyro.getPitch().getValue();
+        return Units.radiansToDegrees(inputs.gyroPitchRads);
     }
 
+    /**
+     * @return The raw gyro roll value in degrees
+     */
     public Double getRoll() {
-        return gyro.getRoll().getValue();
+        return Units.radiansToDegrees(inputs.gyroRollRads);
     }
 
     public SwerveModulePosition[] getModulePositions() {
@@ -161,26 +199,23 @@ public class Swerve extends SubsystemBase {
 
     @Override
     public void periodic() {
-        gyroPitchSignal.refresh();
-        gyroRollSignal.refresh();
-        gyroYawSignal.refresh();
+        BaseStatusSignal.refreshAll(
+                gyroPitchSignal,
+                gyroRollSignal,
+                gyroYawSignal
+        );
+
+        inputs.gyroPitchRads = Units.degreesToRadians(getPitch());
+        inputs.gyroRollRads = Units.degreesToRadians(getRoll());
+        inputs.gyroYawRads = Units.degreesToRadians(getYaw());
+
         for (SwerveModule module : swerveMods) {
             module.periodic();
         }
 
-        var currCmd = this.getCurrentCommand();
-        SmartDashboard.putString("swerve cmd", currCmd == null ? "None" : currCmd.getName());
+        visualizer.update(GlobalState.submitSwerveData(getYawRot(), getModulePositions()));
 
-        var modulePoses = getModulePositions();
-        for (var i = 0; i < modulePoses.length; i++) {
-            SmartDashboard.putNumber("Module " + i + " Distance", modulePoses[i].distanceMeters);
-            SmartDashboard.putNumber("Module " + i + " Angle", modulePoses[i].angle.getDegrees());
-        }
-
-        var gyroRot = getYawRot();
-        SmartDashboard.putNumber("Gyro Angle", gyroRot.getDegrees());
-
-        visualizer.update(GlobalState.submitSwerveData(gyroRot, modulePoses));
+        Logger.processInputs("Swerve", inputs);
     }
 
     @Override
