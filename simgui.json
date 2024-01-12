@@ -17,6 +17,11 @@
       "/Visualizers/SwerveModules/Module[3]": "Mechanism2d"
     },
     "windows": {
+      "/SmartDashboard/Auto Chooser": {
+        "window": {
+          "visible": true
+        }
+      },
       "/Visualizers/Field": {
         "window": {
           "visible": true
@@ -50,15 +55,17 @@
         "Swerve": {
           "SwerveModule[0]": {
             "open": true
-          }
-        },
+          },
+          "open": true
+        }
+      },
+      "SmartDashboard": {
         "open": true
       },
       "Visualizers": {
         "SwerveModules": {
           "open": true
-        },
-        "open": true
+        }
       }
     }
   }

@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
@@ -101,27 +102,29 @@ public class SwerveModuleSim implements SwerveModule {
 
     @Override
     public void periodic() {
-        driveSim.update(ConstValues.PERIODIC_TIME);
-        angleSim.update(ConstValues.PERIODIC_TIME);
+        if (!DriverStation.isDisabled()) {
+            driveSim.update(ConstValues.PERIODIC_TIME);
+            angleSim.update(ConstValues.PERIODIC_TIME);
 
-        inputs.drivePosition += driveRadiansToMeters(driveSim.getAngularVelocityRadPerSec() * ConstValues.PERIODIC_TIME);
+            inputs.drivePosition += driveRadiansToMeters(driveSim.getAngularVelocityRadPerSec() * ConstValues.PERIODIC_TIME);
 
-        double angleDiffRad = angleSim.getAngularVelocityRadPerSec() * ConstValues.PERIODIC_TIME;
-        inputs.angleAbsolute += angleDiffRad;
+            double angleDiffRad = angleSim.getAngularVelocityRadPerSec() * ConstValues.PERIODIC_TIME;
+            inputs.angleAbsolute += angleDiffRad;
 
-        while (inputs.angleAbsolute < 0) {
-            inputs.angleAbsolute += 2 * Math.PI;
+            while (inputs.angleAbsolute < 0) {
+                inputs.angleAbsolute += 2 * Math.PI;
+            }
+            while (inputs.angleAbsolute > 2 * Math.PI) {
+                inputs.angleAbsolute -= 2 * Math.PI;
+            }
+
+            inputs.angleVelo = angleSim.getAngularVelocityRadPerSec();
+            inputs.angleAmps = angleSim.getCurrentDrawAmps();
+
+            inputs.driveVelo = driveRotationsToMeters(driveSim.getAngularVelocityRPM() / 60.0);
+            inputs.driveAmps = driveSim.getCurrentDrawAmps();
+
+            Logger.processInputs("Swerve/SwerveModule[" + this.moduleNumber + "]", inputs);
         }
-        while (inputs.angleAbsolute > 2 * Math.PI) {
-            inputs.angleAbsolute -= 2 * Math.PI;
-        }
-
-        inputs.angleVelo = angleSim.getAngularVelocityRadPerSec();
-        inputs.angleAmps = angleSim.getCurrentDrawAmps();
-
-        inputs.driveVelo = driveRotationsToMeters(driveSim.getAngularVelocityRPM() / 60.0);
-        inputs.driveAmps = driveSim.getCurrentDrawAmps();
-
-        Logger.processInputs("Swerve/SwerveModule[" + this.moduleNumber + "]", inputs);
     }
 }

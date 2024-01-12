@@ -13,8 +13,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 import com.igknighters.autos.Autos;
+import com.igknighters.autos.LocalADStarAK;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.util.ShuffleboardApi;
+import com.pathplanner.lib.pathfinding.Pathfinding;
 
 public class Robot extends LoggedRobot {
 
@@ -22,6 +24,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotInit() {
+        Pathfinding.setPathfinder(new LocalADStarAK());
         setupAkit();
 
         com.igknighters.ConstantHelper.applyRoboConst(ConstValues.class);
