@@ -2,6 +2,8 @@ package com.igknighters.constants;
 
 import java.util.Map;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.igknighters.SubsystemResources.Subsystems;
 import com.igknighters.util.BootupLogger;
 import com.igknighters.ConstantHelper.RobotConstID;
@@ -47,7 +49,8 @@ public class RobotSetup {
             "0306adf3", RobotID.TestBoard,
             "ffffffff", RobotID.SIM_CRASH,
             "aaaaaaaa", RobotID.CRASH,
-            "bbbbbbbb", RobotID.BURN
+            "bbbbbbbb", RobotID.BURN,
+            "03260abb", RobotID.CRASH
         );
 
     private static RobotID currentID = RobotID.Unlabeled;
@@ -68,6 +71,7 @@ public class RobotSetup {
             }
             BootupLogger.BootupLog("Robot Name: " + currentID.name);
         }
+        Logger.recordMetadata("RobotName", currentID.toString());
         return currentID;
     }
 }
