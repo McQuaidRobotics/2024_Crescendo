@@ -14,7 +14,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -25,7 +24,7 @@ import com.igknighters.constants.ConstValues;
 
 public class Swerve extends SubsystemBase {
     private final SwerveModule[] swerveMods;
-    private final Field2d field = new Field2d();
+    private final SwerveVisualizer visualizer;
 
     private final Pigeon2 gyro;
     private final Pigeon2SimState gyroSim;
@@ -64,7 +63,7 @@ public class Swerve extends SubsystemBase {
                 getPose())
         );
 
-        SmartDashboard.putData("Field", field);
+        visualizer = new SwerveVisualizer(this, swerveMods);
     }
 
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
@@ -181,8 +180,7 @@ public class Swerve extends SubsystemBase {
         var gyroRot = getYawRot();
         SmartDashboard.putNumber("Gyro Angle", gyroRot.getDegrees());
 
-        var pose = GlobalState.submitSwerveData(gyroRot, modulePoses);
-        field.getRobotObject().setPose(pose);
+        visualizer.update(GlobalState.submitSwerveData(gyroRot, modulePoses));
     }
 
     @Override

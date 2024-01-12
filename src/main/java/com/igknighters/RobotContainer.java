@@ -10,10 +10,12 @@ import com.igknighters.controllers.TestingController;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.ReplanningConfig;
+
 import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.autos.AutosCmdRegister;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class RobotContainer {
 
@@ -54,12 +56,12 @@ public class RobotContainer {
             //                 driverController.rightStickX(),
             //                 driverController.rightStickY()
             //         ));
-        }
 
-        setupAutos();
+            setupAutos();
+        }
     }
 
-    private void setupAutos() {
+    public void setupAutos() {
         AutosCmdRegister.registerCommands(allSubsystems);
 
         if (!allSubsystems.swerve.isPresent())
@@ -77,7 +79,18 @@ public class RobotContainer {
                         kSwerve.DRIVEBASE_RADIUS,
                         new ReplanningConfig(
                                 true,
-                                true)),
+                                false)),
+                () -> {
+                    if (DriverStation.getAlliance().isPresent() 
+                    && DriverStation.getAlliance().get() == Alliance.Blue) {
+                        return false;
+                    }
+                    else if (DriverStation.getAlliance().isPresent() 
+                    && DriverStation.getAlliance().get() == Alliance.Red) {
+                        return true;
+                    }
+                    else return false; //Default path for blue alliance side
+                },
                 swerve);
     }
 }

@@ -151,7 +151,7 @@ public class SwerveModuleReal implements SwerveModule {
     @Override
     public SwerveModulePosition getCurrentPosition() {
         return new SwerveModulePosition(
-                driveRotationsToMeters(1000000),
+                inputs.drivePosition,
                 getAngle());
     }
 

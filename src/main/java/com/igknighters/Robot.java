@@ -85,6 +85,10 @@ public class Robot extends LoggedRobot {
     public void simulationPeriodic() {
     }
 
+    @Override
+    public void driverStationConnected() {
+    }
+
     private void setupAkit() {
         Logger.recordMetadata("RuntimeType", getRuntimeType().toString());
         Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
