@@ -188,4 +188,16 @@ public final class ConstValues {
         public static final PIDConstants AUTO_TRANSLATION_PID = new PIDConstants(3.0, 0.0, 0.0);
         public static final PIDConstants AUTO_ANGULAR_PID = new PIDConstants(3.0, 0.0, 1.0);
     }
+
+    public static final class kUmbrella {
+
+
+        public static final class kShooter {
+            public static final double kP = 1.0;
+            public static final double kI = 0.0;
+            public static final double kD = 0.0;
+        }
+
+
+    }
 }

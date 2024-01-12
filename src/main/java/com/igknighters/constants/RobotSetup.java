@@ -22,7 +22,7 @@ public class RobotSetup {
                 RobotConstID.BURN),
 
         SIM_CRASH(Subsystems.all(), RobotConstID.CRASH),
-        SIM_BURN(Subsystems.all(), RobotConstID.BURN),
+        SIM_BURN(Subsystems.none(), RobotConstID.BURN),
 
         TestBoard("testBoard(yin)", Subsystems.all(), RobotConstID.CRASH),
 
@@ -51,7 +51,8 @@ public class RobotSetup {
             "ffffffff", RobotID.SIM_CRASH,
             "aaaaaaaa", RobotID.CRASH,
             "bbbbbbbb", RobotID.BURN,
-            "03260abb", RobotID.CRASH
+            "03260abb", RobotID.CRASH,
+            "riobombb", RobotID.SIM_BURN
         );
 
     private static RobotID currentID = RobotID.Unlabeled;

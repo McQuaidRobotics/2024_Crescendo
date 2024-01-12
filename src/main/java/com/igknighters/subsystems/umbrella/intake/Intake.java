@@ -13,18 +13,18 @@ public interface Intake extends Component {
 
         @Override
         public void toLog(LogTable table) {
-            table.put("Umbrella/Intake/hasGamePiece", hasGamePiece);
-            table.put("Umbrella/Intake/volts", volts);
-            table.put("Umbrella/Intake/amps", amps);
-            table.put("Umbrella/Intake/temp", temp);
+            table.put("hasGamePiece", hasGamePiece);
+            table.put("volts", volts);
+            table.put("amps", amps);
+            table.put("temp", temp);
         }
 
         @Override
         public void fromLog(LogTable table) {
-            hasGamePiece = table.get("Umbrella/Intake/hasGamePiece", hasGamePiece);
-            volts = table.get("Umbrella/Intake/volts", volts);
-            amps = table.get("Umbrella/Intake/amps", amps);
-            temp = table.get("Umbrella/Intake/temp", temp);
+            hasGamePiece = table.get("hasGamePiece", hasGamePiece);
+            volts = table.get("volts", volts);
+            amps = table.get("amps", amps);
+            temp = table.get("temp", temp);
         }
     }
 }
