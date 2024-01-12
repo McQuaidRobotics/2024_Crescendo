@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -57,9 +58,9 @@ public class SwerveVisualizer {
             moduleLig.setLength(length);
 
             var color = new Color8Bit(
-                (int) (percent * (MAX_COLOR.red - MIN_COLOR.red) + MIN_COLOR.red),
-                (int) (percent * (MAX_COLOR.green - MIN_COLOR.green) + MIN_COLOR.green),
-                (int) (percent * (MAX_COLOR.blue - MIN_COLOR.blue) + MIN_COLOR.blue)
+                (int) (Math.abs(percent) * (MAX_COLOR.red - MIN_COLOR.red) + MIN_COLOR.red),
+                (int) (Math.abs(percent) * (MAX_COLOR.green - MIN_COLOR.green) + MIN_COLOR.green),
+                (int) (Math.abs(percent) * (MAX_COLOR.blue - MIN_COLOR.blue) + MIN_COLOR.blue)
             );
 
             moduleLig.setColor(color);
@@ -71,6 +72,7 @@ public class SwerveVisualizer {
     private final ModuleVisualizer[] moduleVisual;
     private final Field2d field = new Field2d();
     private final NetworkTable table;
+    private final BooleanEntry modulesOnField;
 
     public SwerveVisualizer(Swerve swerve, SwerveModule... modules) {
         this.swerve = swerve;
@@ -90,6 +92,13 @@ public class SwerveVisualizer {
         }
 
         field.initSendable(getBuilder("Field"));
+
+        modulesOnField = table
+            .getSubTable("SwerveModules")
+            .getBooleanTopic("OnField")
+            .getEntry(false);
+        modulesOnField.set(false);
+
     }
 
     private SendableBuilderImpl getBuilder(String subtable) {
@@ -98,18 +107,19 @@ public class SwerveVisualizer {
         return builder;
     }
 
-    public void update() {
+    public void update(Pose2d pose) {
         for (int i = 0; i < modules.length; i++) {
             moduleVisual[i].update(
                 modules[i].getCurrentState()
             );
         }
-        var pose = swerve.getPose();
         updateField(pose);
     }
 
     private void updateField(Pose2d roboPose) {
         field.setRobotPose(roboPose);
+
+        if (!modulesOnField.get(false)) return;
 
         var trans = roboPose.getTranslation();
         ArrayList<Pose2d> modulePoses = new ArrayList<Pose2d>();
