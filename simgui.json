@@ -29,7 +29,13 @@
       "/Shuffleboard/SuperStructure/SuperStructure Visualizer": "Mechanism2d",
       "/Shuffleboard/SuperStructure/Superstructure Visualizer": "Mechanism2d",
       "/SmartDashboard/Auto Chooser": "String Chooser",
-      "/SmartDashboard/Field": "Field2d"
+      "/SmartDashboard/Field": "Field2d",
+      "/Visualizers": "Field2d",
+      "/Visualizers/Field": "Field2d",
+      "/Visualizers/SwerveModules/Module[0]": "Mechanism2d",
+      "/Visualizers/SwerveModules/Module[1]": "Mechanism2d",
+      "/Visualizers/SwerveModules/Module[2]": "Mechanism2d",
+      "/Visualizers/SwerveModules/Module[3]": "Mechanism2d"
     },
     "windows": {
       "/SmartDashboard/Auto Chooser": {
@@ -44,7 +50,14 @@
         "left": 46,
         "right": 1088,
         "top": 36,
-        "width": 16.541748046875,
+        "width": 16.541748046875
+      },
+      "/Visualizers/Field": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/Visualizers/SwerveModules/Module[0]": {
         "window": {
           "visible": true
         }

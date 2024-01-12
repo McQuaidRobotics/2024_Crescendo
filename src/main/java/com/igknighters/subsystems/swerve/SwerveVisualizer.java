@@ -3,20 +3,26 @@ package com.igknighters.subsystems.swerve;
 import com.igknighters.constants.ConstValues.kSwerve;
 
 import java.util.List;
+import java.util.ArrayList;
+
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 
 public class SwerveVisualizer {
 
     private static class ModuleVisualizer {
         private static final double MAX_LENGTH = 5.0;
+
+        private static final Color8Bit MIN_COLOR = new Color8Bit(0, 255, 0);
+        private static final Color8Bit MAX_COLOR = new Color8Bit(255, 0, 0);
 
         Mechanism2d mechanism;
         MechanismLigament2d moduleLig;
@@ -38,11 +44,25 @@ public class SwerveVisualizer {
 
         }
 
+        public Mechanism2d getMechanism() {
+            return mechanism;
+        }
+
         public void update(SwerveModuleState state) {
             moduleLig.setAngle(state.angle);
 
-            var length = (state.speedMetersPerSecond / kSwerve.MAX_DRIVE_VELOCITY) * MAX_LENGTH;
+            var percent = (state.speedMetersPerSecond / kSwerve.MAX_DRIVE_VELOCITY);
+
+            var length = percent * (MAX_LENGTH * 0.9) + (MAX_LENGTH * 0.1);
             moduleLig.setLength(length);
+
+            var color = new Color8Bit(
+                (int) (percent * (MAX_COLOR.red - MIN_COLOR.red) + MIN_COLOR.red),
+                (int) (percent * (MAX_COLOR.green - MIN_COLOR.green) + MIN_COLOR.green),
+                (int) (percent * (MAX_COLOR.blue - MIN_COLOR.blue) + MIN_COLOR.blue)
+            );
+
+            moduleLig.setColor(color);
         }
     }
 
@@ -50,15 +70,32 @@ public class SwerveVisualizer {
     private final SwerveModule[] modules;
     private final ModuleVisualizer[] moduleVisual;
     private final Field2d field = new Field2d();
+    private final NetworkTable table;
 
     public SwerveVisualizer(Swerve swerve, SwerveModule... modules) {
         this.swerve = swerve;
         this.modules = modules;
 
+        table = NetworkTableInstance.getDefault().getTable("Visualizers");
+
         moduleVisual = new ModuleVisualizer[this.modules.length];
         for (int i = 0; i < modules.length; i++) {
             moduleVisual[i] = new ModuleVisualizer(modules[i].getModuleNumber());
+            moduleVisual[i]
+                .getMechanism()
+                .initSendable(
+                getBuilder(
+                    "SwerveModules/Module[" + modules[i].getModuleNumber() + "]"
+            ));
         }
+
+        field.initSendable(getBuilder("Field"));
+    }
+
+    private SendableBuilderImpl getBuilder(String subtable) {
+        var builder = new SendableBuilderImpl();
+        builder.setTable(table.getSubTable(subtable));
+        return builder;
     }
 
     public void update() {
@@ -75,9 +112,24 @@ public class SwerveVisualizer {
         field.setRobotPose(roboPose);
 
         var trans = roboPose.getTranslation();
+        ArrayList<Pose2d> modulePoses = new ArrayList<Pose2d>();
+        var moduleTranslations = List.of(kSwerve.MODULE_CHASSIS_OFFSETS);
+        var moduleRotations = List.of(swerve.getModuleStates())
+            .stream()
+            .map(state -> state.angle)
+            .toList();
 
-        field.getObject("SwerveModules").setPoses(List.of(
-            
-        ));
+        for (int i = 0; i < modules.length; i++) {
+            modulePoses.add(
+                new Pose2d(
+                    moduleTranslations.get(i).plus(trans),
+                    moduleRotations.get(i)
+                )
+            );
+        }
+
+        field.getObject("SwerveModules").setPoses(
+            modulePoses.toArray(new Pose2d[0])
+        );
     }
 }

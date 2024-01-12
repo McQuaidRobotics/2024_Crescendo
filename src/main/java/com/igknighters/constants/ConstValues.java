@@ -78,13 +78,6 @@ public final class ConstValues {
         public static final NeutralModeValue ANGLE_NEUTRAL_MODE = NeutralModeValue.Coast;
         public static final NeutralModeValue DRIVE_NEUTRAL_MODE = NeutralModeValue.Brake;
 
-        public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(
-                Mod0.CHASSIS_OFFSET,
-                Mod1.CHASSIS_OFFSET,
-                Mod2.CHASSIS_OFFSET,
-                Mod3.CHASSIS_OFFSET
-            );
-
         public static final class DriveMotorConstants {
             public static final double kP = 0.25;
             public static final double kI = 0.0;
@@ -140,6 +133,17 @@ public final class ConstValues {
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
                     ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
         }
+
+        public static final Translation2d[] MODULE_CHASSIS_OFFSETS = new Translation2d[] {
+            Mod0.CHASSIS_OFFSET,
+            Mod1.CHASSIS_OFFSET,
+            Mod2.CHASSIS_OFFSET,
+            Mod3.CHASSIS_OFFSET
+        };
+
+        public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(
+            MODULE_CHASSIS_OFFSETS
+        );
     }
 
     public static final class kAuto {
