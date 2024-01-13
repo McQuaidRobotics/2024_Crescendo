@@ -17,7 +17,7 @@ public class WristSim implements Wrist  {
     );
     private Double setRadians = Units.degreesToRadians(55.0), AppliedVolts = 0.0;
 
-    public WristSim(double startingRadians) {
+    public WristSim() {
         sim = new SingleJointedArmSim(
             DCMotor.getFalcon500(1),
             1.0 / kWrist.MOTOR_TO_MECHANISM_RATIO, 
@@ -28,19 +28,18 @@ public class WristSim implements Wrist  {
             false,
             kWrist.WRIST_MIN_ANGLE
         );
-        sim.setState(startingRadians, 0);
-        inputs = new WristInputs(startingRadians);
+        sim.setState(setRadians, 0);
+        inputs = new WristInputs(setRadians);
     }
 
 
     @Override
-    public boolean setWristRadians(Double radians) {
+    public void setWristRadians(Double radians) {
         setRadians = radians;
         Double wristVoltageFeedback = pidController.calculate(
             sim.getAngleRads(), radians);
         sim.setInputVoltage(wristVoltageFeedback);
         AppliedVolts = wristVoltageFeedback;
-        return Math.abs(radians - getWristRadians()) < kWrist.TOLERANCE;
     }
 
     @Override

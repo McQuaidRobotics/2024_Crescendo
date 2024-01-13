@@ -1,15 +1,15 @@
 package com.igknighters.subsystems.stem;
 
-public enum StemPositions {
+public class StemPositions {
 
-    Stowed(50.0),
-    PickupFloor(0.0),
-    ScoringAmp(90.0),
-    ScoringSpeakerSub(0.0);
+    public static class StemPosition {
+        public double pivotPos, wristPos, telescopePos;
 
-    public final Double pivotDegrees;
-
-    private StemPositions(Double pivotDegrees) {
-        this.pivotDegrees = pivotDegrees;
+        public StemPosition(double pivotPos, double wristPos, double telescopePos){
+            this.pivotPos = pivotPos;
+            this.wristPos = wristPos;
+            this.telescopePos = telescopePos;
+        }
     }
+
 }

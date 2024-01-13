@@ -55,11 +55,11 @@ public interface Pivot extends Component {
             isLimitSwitchHit = table.get("isLimitSwitchHit", isLimitSwitchHit);
         }
     }
-    public boolean setPivotRadians(Double radians);
+    public void setPivotRadians(double radians);
 
     /**
      * @return the current angle of the mechanism
      */
-    public Double getPivotRadians();
+    public double getPivotRadians();
 
 }
