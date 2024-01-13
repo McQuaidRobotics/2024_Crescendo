@@ -8,7 +8,6 @@ import com.igknighters.util.SwerveModuleConstants;
 import com.igknighters.util.SwerveModuleConstants.ModuleId;
 import com.pathplanner.lib.util.PIDConstants;
 
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
@@ -44,8 +43,6 @@ public final class ConstValues {
 
             static final double ANGLE = 7.0 / 150.0;
         }
-
-        public static final AprilTagFields APRIL_TAG_FIELD = AprilTagFields.k2023ChargedUp;
 
         public static final int PIGEON_ID = 33;
         public static final boolean INVERT_GYRO = false;
