@@ -53,12 +53,8 @@
     "transitory": {
       "AdvantageKit": {
         "Swerve": {
-          "SwerveModule[0]": {
-            "open": true
-          },
           "open": true
-        },
-        "open": true
+        }
       },
       "PathPlanner": {
         "double[]##v_/PathPlanner/currentPose": {

@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 public class DynamicPath implements DPBlock {
     private Supplier<Command> cmdSupplier;
+    private String name = "Dynamic Path Command";
 
     public DynamicPath(Pose2d target, PathConstraints contraints, double endVelo, double rotDelay) {
         cmdSupplier = () -> AutoBuilder.pathfindToPose(target, contraints, endVelo, rotDelay);
@@ -19,7 +20,12 @@ public class DynamicPath implements DPBlock {
         cmdSupplier = () -> AutoBuilder.pathfindThenFollowPath(path, contraints, rotDelay);
     }
 
-    public Supplier<Command> getCmdSupplier() {
-        return cmdSupplier;
+    public DynamicPath withName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public Command getCmd() {
+        return DynamicRoutines.loggedCommad(cmdSupplier.get().withName(name));
     }
 }
