@@ -2,6 +2,10 @@ package com.igknighters.vision;
 
 import java.util.List;
 
+import edu.wpi.first.apriltag.AprilTag;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import org.photonvision.estimation.TargetModel;
 
 import com.igknighters.GlobalState;
@@ -24,7 +28,12 @@ public class VisionExecutor {
      */
     public void startVision() {
         visionPoseEstimator = new VisionPoseEstimator(
-            new AprilTagFieldLayout(List.of(), 100.0, 100.0),
+            new AprilTagFieldLayout(List.of(
+                    new AprilTag(8, new Pose3d(
+                            new Translation3d(0, 1.4511, 5.772),
+                            new Rotation3d(0, 0, 0))
+                    )
+            ), 100.0, 100.0),  // 99.767
             TargetModel.kAprilTag36h11,
             kVision.CAMERAS
         );

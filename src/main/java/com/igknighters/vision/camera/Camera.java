@@ -1,5 +1,6 @@
 package com.igknighters.vision.camera;
 
+import edu.wpi.first.wpilibj.RobotBase;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -17,19 +18,19 @@ import edu.wpi.first.math.numbers.N5;
 public interface Camera {
 
     public static Camera create(String cameraName, Integer id, Pose3d cameraPose, Function<List<PhotonTrackedTarget>, List<PhotonTrackedTarget>> filter) {
-        // if (CameraSimulator.isSimulation()) {
-        //     return new CameraSimulator(cameraName, id, cameraPose, filter);
-        // } else {
+         if (RobotBase.isSimulation()) {
+             return new CameraDisabled(cameraName, id, cameraPose);
+         } else {
             return new CameraReal(cameraName, id, cameraPose, filter);
-        // }
+         }
     }
 
     public static Camera create(String cameraName, Integer id, Pose3d cameraPose) {
-        // if (CameraSimulator.isSimulation()) {
-        //     return new CameraSimulator(cameraName, id, cameraPose, filter);
-        // } else {
+         if (RobotBase.isSimulation()) {
+             return new CameraDisabled(cameraName, id, cameraPose);
+         } else {
             return new CameraReal(cameraName, id, cameraPose);
-        // }
+         }
     }
 
     /**
