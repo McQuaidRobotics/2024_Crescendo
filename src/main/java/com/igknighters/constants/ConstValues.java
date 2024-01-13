@@ -117,7 +117,7 @@ public final class ConstValues {
             public static final int DRIVE_MOTOR_ID = 5;
             public static final int ANGLE_MOTOR_ID = 6;
             public static final int CANCODER_ID = 23;
-            public static final double ROTATION_OFFSET = 0.6540972;
+            public static final double ROTATION_OFFSET = 0.65;
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
                     ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
@@ -147,7 +147,7 @@ public final class ConstValues {
     }
 
     public static final class kAuto {
-        public static final PIDConstants AUTO_TRANSLATION_PID = new PIDConstants(3.4, 0.0, 0.3);
+        public static final PIDConstants AUTO_TRANSLATION_PID = new PIDConstants(3.4, 0, 0.0);
         public static final PIDConstants AUTO_ANGULAR_PID = new PIDConstants(3.0, 0.0, 0.0);
     }
 }
