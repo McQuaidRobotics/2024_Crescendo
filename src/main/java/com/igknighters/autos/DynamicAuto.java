@@ -26,4 +26,8 @@ public class DynamicAuto implements DPBlock {
     public Command getCmd() {
         return cmd;
     }
+
+    // private void checkPathTooClose() {
+        
+    // }
 }

@@ -32,54 +32,50 @@ public class DynamicRoutines {
 
     static enum DynPath {
         SPEAKER(new DynamicPath(
-                new Pose2d(new Translation2d(3.0, 4.0), Rotation2d.fromDegrees(270)), 
+                new Pose2d(new Translation2d(1.28, 5.55), Rotation2d.fromDegrees(180)), 
                 kAuto.DYNAMIC_PATH_CONSTRAINTS, 
                 kAuto.DYN_END_VELO, 
                 0.0)),
         AMP(new DynamicPath(
-                new Pose2d(new Translation2d(0.0, 5.0), Rotation2d.fromDegrees(270)), 
-                kAuto.DYNAMIC_PATH_CONSTRAINTS, 
-                kAuto.DYN_END_VELO, 
-                0.0)),
-        SOURCE(new DynamicPath(
-                new Pose2d(new Translation2d(6.0, 2.0), Rotation2d.fromDegrees(270)), 
+                new Pose2d(new Translation2d(1.82, 7.72), Rotation2d.fromDegrees(90)), 
                 kAuto.DYNAMIC_PATH_CONSTRAINTS, 
                 kAuto.DYN_END_VELO, 
                 0.0)),
         STAGE_CENTER(new DynamicPath(
-                new Pose2d(new Translation2d(3.0, 4.0), Rotation2d.fromDegrees(270)), 
+                new Pose2d(new Translation2d(5.78, 4.12), Rotation2d.fromDegrees(180)), 
                 kAuto.DYNAMIC_PATH_CONSTRAINTS, 
                 kAuto.DYN_END_VELO, 
                 0.0)),
         STAGE_LEFT(new DynamicPath(
-                new Pose2d(new Translation2d(3.0, 4.0), Rotation2d.fromDegrees(270)), 
+                new Pose2d(new Translation2d(4.39, 4.86), Rotation2d.fromDegrees(-60)), 
                 kAuto.DYNAMIC_PATH_CONSTRAINTS, 
                 kAuto.DYN_END_VELO, 
                 0.0)),
         STAGE_RIGHT(new DynamicPath(
-                new Pose2d(new Translation2d(3.0, 4.0), Rotation2d.fromDegrees(270)), 
+                new Pose2d(new Translation2d(4.38, 3.33), Rotation2d.fromDegrees(60)), 
                 kAuto.DYNAMIC_PATH_CONSTRAINTS, 
                 kAuto.DYN_END_VELO, 
                 0.0)),
         NOTE_LEFT(new DynamicPath(
-                new Pose2d(new Translation2d(3.0, 4.0), Rotation2d.fromDegrees(270)), 
+                new Pose2d(new Translation2d(2.9, 7.0), Rotation2d.fromDegrees(0.0)), 
                 kAuto.DYNAMIC_PATH_CONSTRAINTS, 
                 kAuto.DYN_END_VELO, 
                 0.0)),
         NOTE_CENTER(new DynamicPath(
-                new Pose2d(new Translation2d(8.0, 7.1), Rotation2d.fromDegrees(270)), 
+                new Pose2d(new Translation2d(2.9, 5.55), Rotation2d.fromDegrees(0.0)), 
                 kAuto.DYNAMIC_PATH_CONSTRAINTS, 
                 kAuto.DYN_END_VELO, 
                 0.0)),
         NOTE_RIGHT(new DynamicPath(
-                new Pose2d(new Translation2d(3.0, 4.0), Rotation2d.fromDegrees(270)), 
+                new Pose2d(new Translation2d(2.9, 4.10), Rotation2d.fromDegrees(0.0)), 
                 kAuto.DYNAMIC_PATH_CONSTRAINTS, 
                 kAuto.DYN_END_VELO, 
                 0.0)),
         SPEAKER_AMP_SOURCE(new DynamicAuto(
+            DynPath.NOTE_RIGHT,
             DynPath.SPEAKER,
             DynPath.NOTE_CENTER,
-            DynPath.SOURCE
+            DynPath.NOTE_RIGHT
         ));
 
         private DPBlock dynBlock;
