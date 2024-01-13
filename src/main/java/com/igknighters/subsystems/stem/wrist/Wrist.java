@@ -7,11 +7,12 @@ import com.igknighters.subsystems.Component;
 
 public interface Wrist extends Component {
 
-    public static class Wristinputs implements LoggableInputs {
+    public static class WristInputs implements LoggableInputs {
         public double radians, targetRadians, radiansPerSecond = 0.0;
         public double volts = 0.0, amps = 0.0, temp = 0.0;
+        public boolean isHomed = false;
 
-        public Wristinputs(double startingRadians) {
+        public WristInputs(double startingRadians) {
             this.radians = startingRadians;
             this.targetRadians = startingRadians;
         }
@@ -36,4 +37,9 @@ public interface Wrist extends Component {
             temp = table.get("temp", temp);
         }
     }
+
+    public boolean setWristRadians (Double radians);
+
+    public Double getWristRadians();
+
 }
