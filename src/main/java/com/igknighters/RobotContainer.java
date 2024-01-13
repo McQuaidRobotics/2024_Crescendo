@@ -79,7 +79,7 @@ public class RobotContainer {
                         kSwerve.DRIVEBASE_RADIUS,
                         new ReplanningConfig(
                                 true,
-                                false)),
+                                true)),
                 () -> {
                     if (DriverStation.getAlliance().isPresent() 
                     && DriverStation.getAlliance().get() == Alliance.Blue) {

@@ -57,6 +57,15 @@
             "open": true
           },
           "open": true
+        },
+        "open": true
+      },
+      "PathPlanner": {
+        "double[]##v_/PathPlanner/currentPose": {
+          "open": true
+        },
+        "double[]##v_/PathPlanner/targetPose": {
+          "open": true
         }
       },
       "SmartDashboard": {

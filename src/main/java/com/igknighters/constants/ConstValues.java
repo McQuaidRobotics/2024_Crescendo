@@ -6,6 +6,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.igknighters.ConstantHelper.*;
 import com.igknighters.util.SwerveModuleConstants;
 import com.igknighters.util.SwerveModuleConstants.ModuleId;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.PIDConstants;
 
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -149,5 +150,10 @@ public final class ConstValues {
     public static final class kAuto {
         public static final PIDConstants AUTO_TRANSLATION_PID = new PIDConstants(3.4, 0.0, 0.3);
         public static final PIDConstants AUTO_ANGULAR_PID = new PIDConstants(3.0, 0.0, 0.0);
+        public static final PathConstraints DYNAMIC_PATH_CONSTRAINTS = new PathConstraints(
+            0.50, 
+            3.0, 
+            540.0, 
+            720.0);
     }
 }

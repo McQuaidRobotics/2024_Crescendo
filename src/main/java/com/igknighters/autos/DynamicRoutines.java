@@ -7,88 +7,53 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import com.igknighters.constants.ConstValues.kAuto;
 
 public class DynamicRoutines {
     static enum DynPath {
         SPEAKER(new DynamicPath(
                 new Pose2d(new Translation2d(3.0, 4.0), Rotation2d.fromDegrees(270)), 
-                new PathConstraints(
-                    4.5, 
-                    3.0, 
-                    540.0, 
-                    720.0), 
-                4.5, 
+                kAuto.DYNAMIC_PATH_CONSTRAINTS, 
+                0.25, 
                 0.0)),
         AMP(new DynamicPath(
                 new Pose2d(new Translation2d(0.0, 5.0), Rotation2d.fromDegrees(270)), 
-                new PathConstraints(
-                    4.5, 
-                    3.0, 
-                    540.0, 
-                    720.0), 
+                kAuto.DYNAMIC_PATH_CONSTRAINTS, 
                 4.5, 
                 0.0)),
         SOURCE(new DynamicPath(
                 new Pose2d(new Translation2d(6.0, 2.0), Rotation2d.fromDegrees(270)), 
-                new PathConstraints(
-                    4.5, 
-                    3.0, 
-                    540.0, 
-                    720.0), 
-                4.5, 
+                kAuto.DYNAMIC_PATH_CONSTRAINTS, 
+                0.25, 
                 0.0)),
         STAGE_CENTER(new DynamicPath(
                 new Pose2d(new Translation2d(3.0, 4.0), Rotation2d.fromDegrees(270)), 
-                new PathConstraints(
-                    4.5, 
-                    3.0, 
-                    540.0, 
-                    720.0), 
+                kAuto.DYNAMIC_PATH_CONSTRAINTS, 
                 4.5, 
                 0.0)),
         STAGE_LEFT(new DynamicPath(
                 new Pose2d(new Translation2d(3.0, 4.0), Rotation2d.fromDegrees(270)), 
-                new PathConstraints(
-                    4.5, 
-                    3.0, 
-                    540.0, 
-                    720.0), 
+                kAuto.DYNAMIC_PATH_CONSTRAINTS, 
                 4.5, 
                 0.0)),
         STAGE_RIGHT(new DynamicPath(
                 new Pose2d(new Translation2d(3.0, 4.0), Rotation2d.fromDegrees(270)), 
-                new PathConstraints(
-                    4.5, 
-                    3.0, 
-                    540.0, 
-                    720.0), 
+                kAuto.DYNAMIC_PATH_CONSTRAINTS, 
                 4.5, 
                 0.0)),
         NOTE_LEFT(new DynamicPath(
                 new Pose2d(new Translation2d(3.0, 4.0), Rotation2d.fromDegrees(270)), 
-                new PathConstraints(
-                    4.5, 
-                    3.0, 
-                    540.0, 
-                    720.0), 
+                kAuto.DYNAMIC_PATH_CONSTRAINTS, 
                 4.5, 
                 0.0)),
         NOTE_CENTER(new DynamicPath(
-                new Pose2d(new Translation2d(3.0, 4.0), Rotation2d.fromDegrees(270)), 
-                new PathConstraints(
-                    4.5, 
-                    3.0, 
-                    540.0, 
-                    720.0), 
-                4.5, 
+                new Pose2d(new Translation2d(3.1, 4.1), Rotation2d.fromDegrees(270)), 
+                kAuto.DYNAMIC_PATH_CONSTRAINTS, 
+                0.25, 
                 0.0)),
         NOTE_RIGHT(new DynamicPath(
                 new Pose2d(new Translation2d(3.0, 4.0), Rotation2d.fromDegrees(270)), 
-                new PathConstraints(
-                    4.5, 
-                    3.0, 
-                    540.0, 
-                    720.0), 
+                kAuto.DYNAMIC_PATH_CONSTRAINTS, 
                 4.5, 
                 0.0)),
         SPEAKER_AMP_SOURCE(new DynamicAuto(
@@ -112,7 +77,7 @@ public class DynamicRoutines {
         }
 
         public Command getCmd() {
-            return dynBlock.getCmd();
+            return dynBlock.getCmdSupplier().get().withName(this.name());
         }
     }
 }
