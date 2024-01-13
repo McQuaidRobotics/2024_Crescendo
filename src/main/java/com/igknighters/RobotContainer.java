@@ -24,7 +24,7 @@ public class RobotContainer {
     private final OperatorController operatorController;
     private final TestingController testingController;
 
-    private static AllSubsystems allSubsystems;
+    public static AllSubsystems allSubsystems;
 
     public RobotContainer() {
         DriverStation.silenceJoystickConnectionWarning(ConstValues.DEBUG);
