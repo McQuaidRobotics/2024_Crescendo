@@ -12,9 +12,6 @@ public class Autos {
 
     public static void createSendableChooser() {
         autoChooser = AutoBuilder.buildAutoChooser();
-        for (DynamicRoutines.DynPath dynPath : DynamicRoutines.DynPath.values()) {
-            autoChooser.addOption("(Dynamic) " + dynPath.name(), dynPath.getCmd());
-        }
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
