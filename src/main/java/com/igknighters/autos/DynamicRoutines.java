@@ -20,7 +20,7 @@ public class DynamicRoutines {
                 SmartDashboard.putString("DynamicCmd", cmd.getName());
                 cmd.initialize();
             },
-            cmd::initialize,
+            cmd::execute,
             (interupted) -> {
                 SmartDashboard.putString("DynamicCmd", "");
                 cmd.end(interupted);
@@ -67,7 +67,7 @@ public class DynamicRoutines {
                 kAuto.DYN_END_VELO, 
                 0.0)),
         NOTE_CENTER(new DynamicPath(
-                new Pose2d(new Translation2d(3.1, 4.1), Rotation2d.fromDegrees(270)), 
+                new Pose2d(new Translation2d(8.0, 7.1), Rotation2d.fromDegrees(270)), 
                 kAuto.DYNAMIC_PATH_CONSTRAINTS, 
                 kAuto.DYN_END_VELO, 
                 0.0)),

@@ -74,6 +74,8 @@ public class SwerveModuleSim implements SwerveModule {
     }
 
     private void setAngle(SwerveModuleState desiredState) {
+        inputs.targetAngleAbsolute = desiredState.angle.getRadians();
+
         Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (kSwerve.MAX_DRIVE_VELOCITY * 0.01)) ? new Rotation2d(inputs.angleAbsolute)
                 : desiredState.angle;
 
@@ -88,6 +90,8 @@ public class SwerveModuleSim implements SwerveModule {
     }
 
     private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop) {
+        inputs.targetDriveVelo = desiredState.speedMetersPerSecond;
+
         desiredState.speedMetersPerSecond *= Math.cos(angleFeedback.getPositionError());
 
         double velocityRadPerSec = desiredState.speedMetersPerSecond / (kSwerve.WHEEL_DIAMETER / 2);
@@ -102,29 +106,31 @@ public class SwerveModuleSim implements SwerveModule {
 
     @Override
     public void periodic() {
-        if (!DriverStation.isDisabled()) {
-            driveSim.update(ConstValues.PERIODIC_TIME);
-            angleSim.update(ConstValues.PERIODIC_TIME);
-
-            inputs.drivePosition += driveRadiansToMeters(driveSim.getAngularVelocityRadPerSec() * ConstValues.PERIODIC_TIME);
-
-            double angleDiffRad = angleSim.getAngularVelocityRadPerSec() * ConstValues.PERIODIC_TIME;
-            inputs.angleAbsolute += angleDiffRad;
-
-            while (inputs.angleAbsolute < 0) {
-                inputs.angleAbsolute += 2 * Math.PI;
-            }
-            while (inputs.angleAbsolute > 2 * Math.PI) {
-                inputs.angleAbsolute -= 2 * Math.PI;
-            }
-
-            inputs.angleVelo = angleSim.getAngularVelocityRadPerSec();
-            inputs.angleAmps = angleSim.getCurrentDrawAmps();
-
-            inputs.driveVelo = driveRotationsToMeters(driveSim.getAngularVelocityRPM() / 60.0);
-            inputs.driveAmps = driveSim.getCurrentDrawAmps();
-
-            Logger.processInputs("Swerve/SwerveModule[" + this.moduleNumber + "]", inputs);
+        if (DriverStation.isDisabled()) {
+            this.driveSim.setInputVoltage(0.0);
+            this.angleSim.setInputVoltage(0.0);
         }
+        driveSim.update(ConstValues.PERIODIC_TIME);
+        angleSim.update(ConstValues.PERIODIC_TIME);
+
+        inputs.drivePosition += driveRadiansToMeters(driveSim.getAngularVelocityRadPerSec() * ConstValues.PERIODIC_TIME);
+
+        double angleDiffRad = angleSim.getAngularVelocityRadPerSec() * ConstValues.PERIODIC_TIME;
+        inputs.angleAbsolute += angleDiffRad;
+
+        while (inputs.angleAbsolute < 0) {
+            inputs.angleAbsolute += 2 * Math.PI;
+        }
+        while (inputs.angleAbsolute > 2 * Math.PI) {
+            inputs.angleAbsolute -= 2 * Math.PI;
+        }
+
+        inputs.angleVelo = angleSim.getAngularVelocityRadPerSec();
+        inputs.angleAmps = angleSim.getCurrentDrawAmps();
+
+        inputs.driveVelo = driveRotationsToMeters(driveSim.getAngularVelocityRPM() / 60.0);
+        inputs.driveAmps = driveSim.getCurrentDrawAmps();
+
+        Logger.processInputs("Swerve/SwerveModule[" + this.moduleNumber + "]", inputs);
     }
 }
