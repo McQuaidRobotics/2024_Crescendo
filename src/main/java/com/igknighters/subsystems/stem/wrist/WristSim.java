@@ -7,7 +7,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
-import com.igknighters.constants.ConstValues.kWrist;
+import com.igknighters.constants.ConstValues.kStem.kWrist;
 
 public class WristSim implements Wrist  {
     private final WristInputs inputs;
@@ -16,44 +16,25 @@ public class WristSim implements Wrist  {
         kWrist.MOTOR_kP, kWrist.MOTOR_kI, kWrist.MOTOR_kD, 0.2
     );
     private Double setRadians = Units.degreesToRadians(55.0), AppliedVolts = 0.0;
-    private boolean isHomed = false;
 
-    public WristSim() {
+    public WristSim(double startingRadians) {
         sim = new SingleJointedArmSim(
             DCMotor.getFalcon500(1),
             1.0 / kWrist.MOTOR_TO_MECHANISM_RATIO, 
-            0.07, //TODO: get real value
+            0.07, //TODO: get real values
             0.3,
-            Units.degreesToRadians(kWrist.WRIST_MIN_ANGLE),
-            Units.degreesToRadians(kWrist.WRIST_MAX_ANGLE),
+            kWrist.WRIST_MIN_ANGLE,
+            kWrist.WRIST_MAX_ANGLE,
             false,
-            Units.degreesToRadians(kWrist.HOME_RADIANS)
+            kWrist.WRIST_MIN_ANGLE
         );
-        sim.setState(Units.degreesToRadians(startingRadians), 0);
+        sim.setState(startingRadians, 0);
         inputs = new WristInputs(startingRadians);
     }
 
-    @Override
-    public void manualDriveMechanism(Double percentOut) {
-        isHomed = false;
-        sim.setInputVoltage(12.0*percentOut);
-    }
-
-    @Override
-    public void stopMechanism() {
-        sim.setInputVoltage(0.0);
-    }
-
-    @Override
-    public boolean homeMechanism(boolean force) {
-        isHomed = true;
-        sim.setState(Units.degreesToRadians(kWrist.WRIST_MAX_ANGLE), 0);
-        return true;
-    }
 
     @Override
     public boolean setWristRadians(Double radians) {
-        isHomed = false;
         setRadians = radians;
         Double wristVoltageFeedback = pidController.calculate(
             sim.getAngleRads(), radians);
@@ -68,6 +49,11 @@ public class WristSim implements Wrist  {
     }
     
     @Override
+    public void setVoltageOut(double volts) {
+       sim.setInputVoltage(volts);
+    }
+
+    @Override
     public void periodic() {
         if (DriverStation.isDisabled()) {
             sim.setInputVoltage(0);
@@ -80,10 +66,12 @@ public class WristSim implements Wrist  {
         inputs.radiansPerSecond = Units.radiansToDegrees(sim.getVelocityRadPerSec());
         inputs.volts = AppliedVolts;
         inputs.amps = sim.getCurrentDrawAmps();
-        inputs.isHomed = isHomed;
         inputs.temp = 0.0;
         inputs.targetRadians = setRadians;
 
         Logger.processInputs("SuperStructure/Wrist", inputs);
     }
+
+
+    
 }

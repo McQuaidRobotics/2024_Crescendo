@@ -13,7 +13,7 @@ import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import com.igknighters.constants.ConstValues.kWrist;
+import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.util.SafeTalonFXConfiguration;
 
 import edu.wpi.first.math.util.Units;

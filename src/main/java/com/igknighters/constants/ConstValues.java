@@ -209,21 +209,66 @@ public final class ConstValues {
 
     }
 
-    public static final class kWrist{
-        public static final int MOTOR_ID = 11;
-        public static final int CANCODER_ID = 31;
-        public static final double MOTOR_kP = 1.0;
-        public static final double MOTOR_kI = 0.0;
-        public static final double MOTOR_kD = 0.0;
+    public static final class kStem{
+        public static final class kWrist{
+            public static final int MOTOR_ID = 11;
+            public static final int CANCODER_ID = 31;
+            public static final double MOTOR_kP = 1.0;
+            public static final double MOTOR_kI = 0.0;
+            public static final double MOTOR_kD = 0.0;
 
-        public static final boolean INVERTED = false;
+            public static final boolean INVERTED = false;
 
-        @DoubleConst(crash = 0.0, burn = 0.0)
-        public static double CANCODER_OFFSET = 0.0;
+            @DoubleConst(crash = 0.0, burn = 0.0)
+            public static double CANCODER_OFFSET = 0.0;
 
-        //TODO temporary values (converts degrees to radians)
-        public static final double WRIST_MIN_ANGLE = (15.0*Math.PI)/180;
-        public static final double WRIST_MAX_ANGLE = (90.0*Math.PI)/180;
+            //TODO temporary values (converts degrees to radians)
+            public static final double WRIST_MIN_ANGLE = (15.0*Math.PI)/180;
+            public static final double WRIST_MAX_ANGLE = (90.0*Math.PI)/180;
 
+            public static final double MOTOR_TO_MECHANISM_RATIO = (1.0 / 25.0) * (30.0 / 64.0) * (12.0 / 54.0); //TODO important to find when we have
+
+            public static final double TOLERANCE = 0.5;
+
+        }
+    
+        public static final class kPivot{
+            public static final int LEFT_MOTOR_ID = 13;
+            public static final int RIGHT_MOTOR_ID = 14;
+            public static final int PIGEON_ID = 31;
+
+            public static final double MOTOR_kP = 1.0;
+            public static final double MOTOR_kI = 0;
+            public static final double MOTOR_kD = 0;
+
+            //TODO all untested values that need to be found when we have a robor
+            public static final double MAX_VELOCITY = 105;
+            public static final double MAX_ACCELERATION = 700;
+            public static final double MAX_JERK = 10000;// effectively infinite
+
+
+            public static final double PIVOT_MIN_RADIANS = 0.0;
+          
+            public static final double PIVOT_MAX_RADIANS = 0.0;
+
+            public static final double PIGEON_OFFSET = 1.85;
+
+            public final static double SCORE_RADIANS = 40.0;
+
+            public static final boolean ENABLE_SOFTLIMITS = false;
+
+            /** For every {@value} rotations of the motor the mechanism moves 1 rotation */
+            // motor -> gbx(25:1) -> (30t -> 64t) -> (12t -> 54t)
+            public static final double MOTOR_TO_MECHANISM_RATIO = (1.0 / 25.0) * (30.0 / 64.0) * (12.0 / 54.0); //TODO important to find when we have
+
+            public static final boolean INVERTED = false;
+
+            /**
+             * The max voltage of the motors to behave more predictably
+             * throughout the match.
+             */
+            public static final double VOLTAGE_COMP = 11.8;
+            public static final double TOLERANCE = 0.5;
+        }
     }
 }

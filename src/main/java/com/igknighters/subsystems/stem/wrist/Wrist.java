@@ -42,7 +42,7 @@ public interface Wrist extends Component {
         }
     }
 
-    public void setWristRadians (Double radians);
+    public boolean setWristRadians (Double radians);
 
     public Double getWristRadians();
 }
