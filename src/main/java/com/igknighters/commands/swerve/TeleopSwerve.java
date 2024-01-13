@@ -1,6 +1,5 @@
 package com.igknighters.commands.swerve;
 
-import com.igknighters.Constants;
 import com.igknighters.subsystems.swerve.Swerve;
 
 import java.util.function.DoubleSupplier;
@@ -8,7 +7,7 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import com.igknighters.Constants.*;
+import com.igknighters.constants.ConstValues.kSwerve;
 
 /** An example command that uses an example subsystem. */
 public class TeleopSwerve extends Command {
@@ -34,14 +33,14 @@ public class TeleopSwerve extends Command {
         double strafeVal;
         double rotationVal;
 
-        translationVal = MathUtil.applyDeadband(-translationXSup.getAsDouble(), ControllerConsts.LEFT_DEADBAND);
-        strafeVal = MathUtil.applyDeadband(-translationYSup.getAsDouble(), ControllerConsts.LEFT_DEADBAND);
-        rotationVal = MathUtil.applyDeadband(rotationAxisSup.getAsDouble(), ControllerConsts.RIGHT_DEADBAND);
+        translationVal = MathUtil.applyDeadband(-translationXSup.getAsDouble(), 0.1);
+        strafeVal = MathUtil.applyDeadband(-translationYSup.getAsDouble(), 0.1);
+        rotationVal = MathUtil.applyDeadband(rotationAxisSup.getAsDouble(), 0.1);
 
         swerve.drive(
                 new Translation2d(translationVal, strafeVal)
-                        .times(Constants.kSwerve.MAX_SPEED),
-                rotationVal * Constants.kSwerve.MAX_ANGULAR_VELOCITY,
+                        .times(kSwerve.MAX_DRIVE_VELOCITY),
+                rotationVal * kSwerve.MAX_ANGULAR_VELOCITY,
                 true,
                 true);
     }

@@ -6,6 +6,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.igknighters.ConstantHelper.*;
 import com.igknighters.util.SwerveModuleConstants;
 import com.igknighters.util.SwerveModuleConstants.ModuleId;
+import com.pathplanner.lib.util.PIDConstants;
 
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -36,12 +37,12 @@ public final class ConstValues {
     public static final class kSwerve {
         @SuppressWarnings("unused")
         private static final class SwerveGearRatios {
-            public static final double L1_DRIVE = 1.0 / 8.14;
-            public static final double L2_DRIVE = 1.0 / 6.75;
-            public static final double L3_DRIVE = 1.0 / 6.12;
-            public static final double L4_DRIVE = 1.0 / 5.14;
+            static final double L1_DRIVE = 1.0 / 8.14;
+            static final double L2_DRIVE = 1.0 / 6.75;
+            static final double L3_DRIVE = 1.0 / 6.12;
+            static final double L4_DRIVE = 1.0 / 5.14;
 
-            public static final double ANGLE = 7.0 / 150.0;
+            static final double ANGLE = 7.0 / 150.0;
         }
 
         public static final AprilTagFields APRIL_TAG_FIELD = AprilTagFields.k2023ChargedUp;
@@ -61,13 +62,12 @@ public final class ConstValues {
         public static final double WHEEL_BASE = 0.551942;
         public static final double WHEEL_DIAMETER = 0.1016;
         public static final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
+        public static final double DRIVEBASE_RADIUS = Math.sqrt(Math.pow(TRACK_WIDTH, 2) + Math.pow(WHEEL_BASE, 2));
 
         public static final double ANGLE_GEAR_RATIO = SwerveGearRatios.ANGLE;
 
         @DoubleConst(crash = SwerveGearRatios.L2_DRIVE)
         public static double DRIVE_GEAR_RATIO;
-
-        public static final double METERS_PER_DRIVE_MOTOR_ROTATION = WHEEL_CIRCUMFERENCE * DRIVE_GEAR_RATIO;
 
         /* Inverts */
         public static final InvertedValue ANGLE_MOTOR_INVERT = InvertedValue.Clockwise_Positive;
@@ -78,23 +78,16 @@ public final class ConstValues {
         public static final NeutralModeValue ANGLE_NEUTRAL_MODE = NeutralModeValue.Coast;
         public static final NeutralModeValue DRIVE_NEUTRAL_MODE = NeutralModeValue.Brake;
 
-        public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(
-                Mod0.CHASSIS_OFFSET,
-                Mod1.CHASSIS_OFFSET,
-                Mod2.CHASSIS_OFFSET,
-                Mod3.CHASSIS_OFFSET
-            );
-
         public static final class DriveMotorConstants {
-            public static double kP = 0.25;
-            public static double kI = 0.0;
-            public static double kD = 0.0;
+            public static final double kP = 1.0;
+            public static final double kI = 0.0;
+            public static final double kD = 0.0;
         }
 
         public static final class AngleMotorConstants {
-            public static double kP = 9.0;
-            public static double kI = 0.0;
-            public static double kD = 0.0;
+            public static final double kP = 11.0;
+            public static final double kI = 0.0;
+            public static final double kD = 0.0;
         }
 
         public static final class Mod0 {
@@ -124,7 +117,7 @@ public final class ConstValues {
             public static final int DRIVE_MOTOR_ID = 5;
             public static final int ANGLE_MOTOR_ID = 6;
             public static final int CANCODER_ID = 23;
-            public static final double ROTATION_OFFSET = 0.6540972;
+            public static final double ROTATION_OFFSET = 0.65;
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
                     ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
@@ -140,5 +133,21 @@ public final class ConstValues {
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
                     ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
         }
+
+        public static final Translation2d[] MODULE_CHASSIS_OFFSETS = new Translation2d[] {
+            Mod0.CHASSIS_OFFSET,
+            Mod1.CHASSIS_OFFSET,
+            Mod2.CHASSIS_OFFSET,
+            Mod3.CHASSIS_OFFSET
+        };
+
+        public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(
+            MODULE_CHASSIS_OFFSETS
+        );
+    }
+
+    public static final class kAuto {
+        public static final PIDConstants AUTO_TRANSLATION_PID = new PIDConstants(3.4, 0, 0.0);
+        public static final PIDConstants AUTO_ANGULAR_PID = new PIDConstants(3.0, 0.0, 0.0);
     }
 }

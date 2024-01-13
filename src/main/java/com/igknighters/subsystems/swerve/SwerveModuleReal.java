@@ -80,7 +80,9 @@ public class SwerveModuleReal implements SwerveModule {
         driveConfig.Slot0.kP = DriveMotorConstants.kP;
         driveConfig.Slot0.kI = DriveMotorConstants.kI;
         driveConfig.Slot0.kD = DriveMotorConstants.kD;
-        driveConfig.Slot0.kV = 12.0 / (kSwerve.MAX_DRIVE_VELOCITY / kSwerve.METERS_PER_DRIVE_MOTOR_ROTATION);
+        driveConfig.Slot0.kV = 12.0 / (kSwerve.MAX_DRIVE_VELOCITY / (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO));
+        driveConfig.CurrentLimits.StatorCurrentLimit = 50.0;
+        driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
         driveMotor.getConfigurator().apply(driveConfig);
     }
@@ -124,19 +126,21 @@ public class SwerveModuleReal implements SwerveModule {
     private void setAngle(SwerveModuleState desiredState) {
         Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (kSwerve.MAX_DRIVE_VELOCITY * 0.01)) ? lastAngle
                 : desiredState.angle;
+        inputs.targetAngleAbsolute = angle.getRadians();
 
         angleMotor.setControl(new PositionDutyCycle(angle.getRotations()));
         lastAngle = angle;
     }
 
     private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop) {
+        inputs.targetDriveVelo = desiredState.speedMetersPerSecond;
         if (isOpenLoop) {
             double percentOutput = desiredState.speedMetersPerSecond / kSwerve.MAX_DRIVE_VELOCITY;
             var controlRequest = new DutyCycleOut(percentOutput);
             driveMotor.setControl(controlRequest);
         } else {
             double rps = Math.min(desiredState.speedMetersPerSecond, kSwerve.MAX_DRIVE_VELOCITY)
-                    / kSwerve.METERS_PER_DRIVE_MOTOR_ROTATION;
+                    / (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO);
             var veloRequest = new VelocityVoltage(rps).withEnableFOC(true);
             driveMotor.setControl(veloRequest);
         }
@@ -148,6 +152,7 @@ public class SwerveModuleReal implements SwerveModule {
                 getAngle());
     }
 
+    @Override
     public SwerveModulePosition getCurrentPosition() {
         return new SwerveModulePosition(
                 inputs.drivePosition,
@@ -159,9 +164,10 @@ public class SwerveModuleReal implements SwerveModule {
     }
 
     private double driveRotationsToMeters(double rotations) {
-        return rotations * kSwerve.METERS_PER_DRIVE_MOTOR_ROTATION;
+        return rotations * (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO);
     }
 
+    @Override
     public void periodic() {
         BaseStatusSignal.refreshAll(
             drivePositionSignal, driveVelocitySignal,
@@ -181,6 +187,7 @@ public class SwerveModuleReal implements SwerveModule {
         inputs.driveVolts = driveVoltSignal.getValue();
         inputs.driveAmps = driveAmpSignal.getValue();
 
-        Logger.processInputs("SwerveModule[" + this.moduleNumber + "]", inputs);
+
+        Logger.processInputs("Swerve/SwerveModule[" + this.moduleNumber + "]", inputs);
     }
 }

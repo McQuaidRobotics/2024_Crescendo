@@ -9,6 +9,8 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kSwerve.AngleMotorConstants;
@@ -23,21 +25,25 @@ public class SwerveModuleSim implements SwerveModule {
     private final PIDController angleFeedback = new PIDController(AngleMotorConstants.kP, AngleMotorConstants.kI, AngleMotorConstants.kD,
             ConstValues.PERIODIC_TIME);
 
-    private double drivePositionRad = 0.0;
-    private double angleAbsolutePositionRad = Math.random() * 2.0 * Math.PI;
-    private double driveAppliedVolts = 0.0;
-    private double angleAppliedVolts = 0.0;
-    private Rotation2d lastAngle = new Rotation2d();
-
     public int moduleNumber;
+
+    private final SwerveModuleInputs inputs;
 
     public SwerveModuleSim(final SwerveModuleConstants moduleConstants) {
         this.moduleNumber = moduleConstants.moduleId.num;
         angleFeedback.enableContinuousInput(-Math.PI, Math.PI);
+
+        inputs = new SwerveModuleInputs();
+
+        inputs.angleAbsolute = Math.random() * 2.0 * Math.PI;
     }
 
     private double driveRotationsToMeters(double rotations) {
         return rotations * kSwerve.WHEEL_CIRCUMFERENCE;
+    }
+
+    private double driveRadiansToMeters(double radians) {
+        return driveRotationsToMeters(radians / (2 * Math.PI));
     }
 
     public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop) {
@@ -48,13 +54,13 @@ public class SwerveModuleSim implements SwerveModule {
 
     public SwerveModulePosition getCurrentPosition() {
         return new SwerveModulePosition(
-                driveRotationsToMeters(drivePositionRad / (2 * Math.PI)),
+                inputs.drivePosition,
                 getAngle());
     }
 
     public SwerveModuleState getCurrentState() {
         return new SwerveModuleState(
-                driveRotationsToMeters(driveSim.getAngularVelocityRPM() / 60.0),
+                inputs.driveVelo,
                 getAngle());
     }
 
@@ -63,48 +69,59 @@ public class SwerveModuleSim implements SwerveModule {
     }
 
     private Rotation2d getAngle() {
-        return lastAngle;
+        return new Rotation2d(inputs.angleAbsolute);
     }
 
     private void setAngle(SwerveModuleState desiredState) {
-        Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (kSwerve.MAX_DRIVE_VELOCITY * 0.01)) ? lastAngle
+        Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (kSwerve.MAX_DRIVE_VELOCITY * 0.01)) ? new Rotation2d(inputs.angleAbsolute)
                 : desiredState.angle;
 
-        angleAppliedVolts = MathUtil.clamp(
+        var angleAppliedVolts = MathUtil.clamp(
                 angleFeedback.calculate(getAngle().getRadians(), angle.getRadians()),
                 -1.0 * RobotController.getBatteryVoltage(),
                 RobotController.getBatteryVoltage());
         angleSim.setInputVoltage(angleAppliedVolts);
 
-        lastAngle = angle;
+        inputs.angleVolts = angleAppliedVolts;
+        inputs.angleAbsolute = angle.getRadians();
     }
 
     private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop) {
         desiredState.speedMetersPerSecond *= Math.cos(angleFeedback.getPositionError());
 
         double velocityRadPerSec = desiredState.speedMetersPerSecond / (kSwerve.WHEEL_DIAMETER / 2);
-        driveAppliedVolts = MathUtil.clamp(
+        var driveAppliedVolts = MathUtil.clamp(
                 driveFeedback.calculate(driveSim.getAngularVelocityRadPerSec(), velocityRadPerSec),
                 -1.0 * RobotController.getBatteryVoltage(),
                 RobotController.getBatteryVoltage());
         driveSim.setInputVoltage(driveAppliedVolts);
+
+        inputs.driveVolts = driveAppliedVolts;
     }
 
     @Override
     public void periodic() {
-        driveSim.update(0.02);
-        angleSim.update(0.02);
+        driveSim.update(ConstValues.PERIODIC_TIME);
+        angleSim.update(ConstValues.PERIODIC_TIME);
 
-        drivePositionRad += driveSim.getAngularVelocityRadPerSec() * 0.02;
+        inputs.drivePosition += driveRadiansToMeters(driveSim.getAngularVelocityRadPerSec() * ConstValues.PERIODIC_TIME);
 
-        double angleDiffRad = angleSim.getAngularVelocityRadPerSec() * 0.02;
-        angleAbsolutePositionRad += angleDiffRad;
+        double angleDiffRad = angleSim.getAngularVelocityRadPerSec() * ConstValues.PERIODIC_TIME;
+        inputs.angleAbsolute += angleDiffRad;
 
-        while (angleAbsolutePositionRad < 0) {
-            angleAbsolutePositionRad += 2 * Math.PI;
+        while (inputs.angleAbsolute < 0) {
+            inputs.angleAbsolute += 2 * Math.PI;
         }
-        while (angleAbsolutePositionRad > 2 * Math.PI) {
-            angleAbsolutePositionRad -= 2 * Math.PI;
+        while (inputs.angleAbsolute > 2 * Math.PI) {
+            inputs.angleAbsolute -= 2 * Math.PI;
         }
+
+        inputs.angleVelo = angleSim.getAngularVelocityRadPerSec();
+        inputs.angleAmps = angleSim.getCurrentDrawAmps();
+
+        inputs.driveVelo = driveRotationsToMeters(driveSim.getAngularVelocityRPM() / 60.0);
+        inputs.driveAmps = driveSim.getCurrentDrawAmps();
+
+        Logger.processInputs("Swerve/SwerveModule[" + this.moduleNumber + "]", inputs);
     }
 }

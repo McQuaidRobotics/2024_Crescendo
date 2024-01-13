@@ -13,7 +13,7 @@ buildscript {
 
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2024.1.1-beta-3"
+    id "edu.wpi.first.GradleRIO" version "2024.1.1-beta-4"
     id "com.peterabeles.gversion" version "1.10"
     id "java-library"
 }
@@ -146,13 +146,15 @@ gversion {
     indent       = "  "
 }
 
+
 import groovy.json.JsonSlurper;
 import com.hubspot.jinjava.Jinjava;
 import com.hubspot.jinjava.JinjavaConfig;
 
+sourceSets.main.java.srcDir "${buildDir}/generated/main/java"
+
 def constJinjaInputDir = file("src/generators/java")
 def constJinjaOutputDir = file("$buildDir/generated/main/java/com/igknighters")
-sourceSets.main.java.srcDir "${buildDir}/generated/main/java"
 
 def constTypesInputFile = file("src/generators/types.json")
 def constRobotsInputFile = file("src/generators/robots.json")

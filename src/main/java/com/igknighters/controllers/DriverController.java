@@ -1,5 +1,9 @@
 package com.igknighters.controllers;
 
+import com.igknighters.SubsystemResources.Subsystems;
+
+import edu.wpi.first.wpilibj2.command.Commands;
+
 public class DriverController extends ControllerParent {
 
     public DriverController(int port) {
@@ -23,7 +27,9 @@ public class DriverController extends ControllerParent {
         /// CENTER BUTTONS
         // this.Back.binding =
 
-        // this.Start.binding =
+        this.Start.binding = new SingleDepBinding(Subsystems.Swerve, (trig, allss) -> {
+            trig.onTrue(Commands.runOnce(() -> allss.swerve.get().setYaw(0.0)));
+        });
 
         /// STICKS
         // this.LS.binding =

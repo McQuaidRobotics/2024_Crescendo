@@ -8,13 +8,17 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
+import com.igknighters.autos.Autos;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.util.ShuffleboardApi;
 
 public class Robot extends LoggedRobot {
+
+    private Command autoCmd;
 
     @Override
     public void robotInit() {
@@ -22,6 +26,9 @@ public class Robot extends LoggedRobot {
 
         com.igknighters.ConstantHelper.applyRoboConst(ConstValues.class);
         new RobotContainer();
+
+        Autos.createSendableChooser();
+        SmartDashboard.putString("AutoCommand", Autos.getSelectedAutoName());
     }
 
     @Override
@@ -37,10 +44,15 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void disabledPeriodic() {
+        autoCmd = Autos.getAutonomousCommand();
+        SmartDashboard.putString("AutoCommand", Autos.getSelectedAutoName());
     }
 
     @Override
     public void autonomousInit() {
+        if (autoCmd != null) {
+            autoCmd.schedule();
+        }
     }
 
     @Override
@@ -71,6 +83,10 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void simulationPeriodic() {
+    }
+
+    @Override
+    public void driverStationConnected() {
     }
 
     private void setupAkit() {
@@ -104,7 +120,7 @@ public class Robot extends LoggedRobot {
             int count = commandCounts.getOrDefault(name, 0) + (active ? 1 : -1);
             commandCounts.put(name, count);
             Logger.recordOutput(
-                    "CommandsUnique/" + name + "_" + Integer.toHexString(command.hashCode()), active);
+                    "CommandsUnique/" + name + "_" + Integer.toHexString(command.hashCode()), active.booleanValue());
             Logger.recordOutput("CommandsAll/" + name, count > 0);
         };
         CommandScheduler.getInstance()
