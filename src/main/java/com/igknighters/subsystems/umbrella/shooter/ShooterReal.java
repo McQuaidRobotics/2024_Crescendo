@@ -29,7 +29,7 @@ public class ShooterReal implements Shooter {
         veloSignal.setUpdateFrequency(100);
         voltSignal.setUpdateFrequency(100);
         currentSignal.setUpdateFrequency(100);
-        tempSignal.setUpdateFrequency(100);
+        tempSignal.setUpdateFrequency(4);
 
         motor.optimizeBusUtilization();
     }

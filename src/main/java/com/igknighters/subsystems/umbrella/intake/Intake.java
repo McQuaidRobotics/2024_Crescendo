@@ -36,13 +36,6 @@ public interface Intake extends Component {
     public boolean hasGamePiece();
 
     /**
-     * Runs the {@code Intake} in open loop at the specified voltage
-     * 
-     * @param volts The specified volts: [-12.0 .. 12.0]
-     */
-    public void setVoltageOut(double volts);
-
-    /**
      * Turns the rotor on the {@code Intake} a specified number of radians
      * 
      * @param radians The number of radians to turn the rotor

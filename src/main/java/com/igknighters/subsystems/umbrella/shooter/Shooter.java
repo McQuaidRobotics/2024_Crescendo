@@ -54,10 +54,4 @@ public interface Shooter extends Component {
      * @param speedRadPerSec The speed in Rad/S to spin the flywheel at
      */
     public void setSpeed(double speedRadPerSec);
-
-    /**
-     * Runs the {@code Shooter} flywheel in open loop at the specified voltage
-     * @param volts The specified volts: [-12.0 .. 12.0]
-     */
-    public void setVoltageOut(double volts);
 }

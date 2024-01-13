@@ -10,22 +10,15 @@ public interface Component {
     };
 
     /**
-     * To be used for debugging, not guranteed to have all
-     * safety features
-     * 
-     * @param percentOut of the mechanisms motors
+     * Runs the mechanism in open loop at the specified voltage
+     * @param volts The specified volts: [-12.0 .. 12.0]
      */
-    public void manualDriveMechanism(Double percentOut);
+    public void setVoltageOut(double volts);
 
     /**
      * Stops the mechanism
      */
-    public void stopMechanism();
-
-    /**
-     * Moves the mechanism towards the home position,
-     * @param force if true, will ignore if the mechanism is already at the home position
-     * @return true if the mechanism has reached home
-     */
-    public boolean homeMechanism(boolean force);
+    public default void stopMechanism() {
+        setVoltageOut(0.0);
+    }
 }

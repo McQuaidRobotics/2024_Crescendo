@@ -10,16 +10,15 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import com.igknighters.constants.ConstValues.kWrist;
 
 public class WristSim implements Wrist  {
-    
     private final WristInputs inputs;
     private final SingleJointedArmSim sim;
     private final PIDController pidController = new PIDController(
         kWrist.MOTOR_kP, kWrist.MOTOR_kI, kWrist.MOTOR_kD, 0.2
     );
-    private Double setRadians = kWrist.HOME_RADIANS, AppliedVolts = 0.0;
+    private Double setRadians = Units.degreesToRadians(55.0), AppliedVolts = 0.0;
     private boolean isHomed = false;
 
-    public WristSim(Double startingRadians) {
+    public WristSim() {
         sim = new SingleJointedArmSim(
             DCMotor.getFalcon500(1),
             1.0 / kWrist.MOTOR_TO_MECHANISM_RATIO, 

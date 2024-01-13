@@ -210,17 +210,20 @@ public final class ConstValues {
     }
 
     public static final class kWrist{
-        public static final int MOTOR_ID = 0; //NEEDS TO BE FOUND
+        public static final int MOTOR_ID = 11;
+        public static final int CANCODER_ID = 31;
         public static final double MOTOR_kP = 1.0;
         public static final double MOTOR_kI = 0.0;
         public static final double MOTOR_kD = 0.0;
 
         public static final boolean INVERTED = false;
 
-        public static final double HOME_RADIANS = 0.0; //TODO find real value of this
+        @DoubleConst(crash = 0.0, burn = 0.0)
+        public static double CANCODER_OFFSET = 0.0;
 
-        public static final double WRIST_MIN_ANGLE = (15*Math.PI)/180; //TODO temporary values (converts degrees to radians)
-        public static final double WRIST_MAX_ANGLE = (90*Math.PI)/180;
+        //TODO temporary values (converts degrees to radians)
+        public static final double WRIST_MIN_ANGLE = (15.0*Math.PI)/180;
+        public static final double WRIST_MAX_ANGLE = (90.0*Math.PI)/180;
 
     }
 }

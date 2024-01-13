@@ -4,81 +4,94 @@ import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
+import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import com.igknighters.constants.ConstValues.kWrist;
+import com.igknighters.util.SafeTalonFXConfiguration;
+
+import edu.wpi.first.math.util.Units;
 
 
 public class WristReal implements Wrist {
     private final TalonFX motor;
+    private final CANcoder cancoder;
 
     private final StatusSignal<Double> motorRots, motorVelo, motorAmps, motorVolts, motorTemp;
+    private final StatusSignal<Double> cancoderRots, cancoderVelo;
 
     private final WristInputs inputs;
-    private boolean isHomed = false;
-    private Double setPointRadians = 0.0; //Must find 
-    
-    public WristReal(Double startingRadians) {
+
+    public WristReal() {
         motor = new TalonFX(kWrist.MOTOR_ID); 
-        motor.getConfigurator().apply(getWristMotorConfig());
+        motor.getConfigurator().apply(motorConfig());
 
         motorRots = motor.getRotorPosition();
         motorVelo = motor.getRotorVelocity();
-        motorAmps = motor.getStatorCurrent();
-        motorVolts = motor.getSupplyVoltage();
+        motorAmps = motor.getTorqueCurrent();
+        motorVolts = motor.getMotorVoltage();
         motorTemp = motor.getDeviceTemp();
 
+        motorRots.setUpdateFrequency(100);
+        motorVelo.setUpdateFrequency(100);
+        motorAmps.setUpdateFrequency(100);
+        motorVolts.setUpdateFrequency(100);
         motorTemp.setUpdateFrequency(4);
 
-        motor.setPosition(mechDegreesToMotorRots(startingRadians));
-        inputs = new WristInputs(startingRadians);
+        motor.optimizeBusUtilization();
+
+        cancoder = new CANcoder(kWrist.CANCODER_ID);
+        cancoder.getConfigurator().apply(cancoderConfig());
+
+        cancoderRots = cancoder.getPosition();
+        cancoderVelo = cancoder.getVelocity();
+
+        cancoderRots.setUpdateFrequency(100);
+        cancoderVelo.setUpdateFrequency(100);
+
+        cancoder.optimizeBusUtilization();
+
+        inputs = new WristInputs(Units.rotationsToRadians(cancoderRots.getValue()));
     }
 
-    private Double mechDegreesToMotorRots(Double mechanismDegrees) {
-        return (mechanismDegrees / 360.0) / kWrist.MOTOR_TO_MECHANISM_RATIO; //TODO this can only be finished when we have an actual robot.
-    }
-
-    private TalonFXConfiguration getWristMotorConfig() {
-        TalonFXConfiguration wristMotorCfg = new TalonFXConfiguration();
+    private TalonFXConfiguration motorConfig() {
+        TalonFXConfiguration wristMotorCfg = new SafeTalonFXConfiguration();
         wristMotorCfg.Slot0.kP = kWrist.MOTOR_kP;
         wristMotorCfg.Slot0.kI = kWrist.MOTOR_kI;
         wristMotorCfg.Slot0.kD = kWrist.MOTOR_kD;
-        // wristMotorCfg.Slot0.kS = kWrist.MOTOR_kS;
-        // wristMotorCfg.Slot0.kV = kWrist.MOTOR_kV;
 
         wristMotorCfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         wristMotorCfg.MotorOutput.Inverted = kWrist.INVERTED ? InvertedValue.Clockwise_Positive
                 : InvertedValue.CounterClockwise_Positive;
 
-        wristMotorCfg.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = 0.2;
-
         return wristMotorCfg;
     }
 
+    private CANcoderConfiguration cancoderConfig() {
+        CANcoderConfiguration wristCancoderCfg = new CANcoderConfiguration();
+        wristCancoderCfg.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
+        wristCancoderCfg.MagnetSensor.MagnetOffset = kWrist.CANCODER_OFFSET;
+        return wristCancoderCfg;
+    }
+
+    private Double mechanismRadsToMotorRots(Double radians) {
+        return 0.0; //TODO: get real value
+    }
+
     @Override
-    public boolean setWristRadians(Double radians) {
-        isHomed = false;
-        setPointRadians = radians;
-        var posControlRequest = new MotionMagicDutyCycle(mechDegreesToMotorRots(radians));
+    public void setWristRadians(Double radians) {
+        inputs.targetRadians = radians;
+        var posControlRequest = new PositionDutyCycle(
+            Units.radiansToRotations(inputs.motorRadians)
+            + mechanismRadsToMotorRots(radians)
+        );
         this.motor.setControl(posControlRequest);
-        return Math.abs(radians - getWristRadians()) < kWrist.TOLERANCE;
-    }
-
-    @Override
-    public void manualDriveMechanism(Double percentOut) {
-        isHomed = false;
-        var percentControlRequest = new DutyCycleOut(percentOut);
-        this.motor.setControl(percentControlRequest);
-    }
-
-    @Override
-    public void stopMechanism() {
-        this.motor.setVoltage(0.0);
     }
 
     @Override
@@ -87,26 +100,9 @@ public class WristReal implements Wrist {
     }
 
     @Override
-    public boolean homeMechanism(boolean force) {
-        if (force) {
-            isHomed = false;
-        }
-        if (isHomed) {
-            return true;
-        }
-
-        if (getWristRadians() < kWrist.HOME_DEGREES - 10.0) {
-            setWristRadians(kWrist.HOME_DEGREES);
-        } else {
-            manualDriveMechanism(0.2);
-        }
-        if (inputs.amps > kWrist.CURRENT_PEAK_FOR_ZERO) {
-            this.stopMechanism();
-            this.motor.setPosition(mechDegreesToMotorRots(kWrist.HOME_DEGREES + kWrist.HARD_OFFSET));
-            isHomed = true;
-        }
-
-        return isHomed;
+    public void setVoltageOut(double volts) {
+        inputs.targetRadians = 0.0;
+        motor.setVoltage(volts);
     }
 
     @Override
@@ -117,17 +113,15 @@ public class WristReal implements Wrist {
             motorTemp
         );
 
-        inputs.radians = motorRotsToMechDegrees(motorRots.getValue());
-        inputs.radiansPerSecond = motorRotsToMechDegrees(motorVelo.getValue());
+        inputs.radians = Units.radiansToRotations(cancoderRots.getValue());
+        inputs.radiansPerSecond = Units.radiansToRotations(cancoderVelo.getValue());
+        inputs.motorRadians = Units.radiansToRotations(motorRots.getValue());
+        inputs.motorRadiansPerSecond = Units.radiansToRotations(motorVelo.getValue());
         inputs.amps = motorAmps.getValue();
         inputs.volts = motorVolts.getValue();
         inputs.temp = motorTemp.getValue();
-        inputs.isHomed = isHomed;
-        inputs.targetRadians = setPointRadians;
 
-        Logger.processInputs("SuperStructure/Wrist", inputs);
-
-        isHomed = inputs.isHomed;
+        Logger.processInputs("Stem/Wrist", inputs);
     }
 
 }

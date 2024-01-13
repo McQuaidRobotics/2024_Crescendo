@@ -185,4 +185,7 @@ public class SwerveModuleReal implements SwerveModule {
 
         Logger.processInputs("Swerve/SwerveModule[" + this.moduleNumber + "]", inputs);
     }
+
+    @Override
+    public void setVoltageOut(double volts) {}
 }
