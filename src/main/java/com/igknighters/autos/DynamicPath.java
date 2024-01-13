@@ -85,11 +85,11 @@ public class DynamicPath {
         );
     }
 
-    private Supplier<Command> cmdSupplier;
+    private Command cmd;
     private String name = "Dynamic Path Command";
 
     public DynamicPath(double x, double y, double rotationDegrees) {
-        cmdSupplier = () -> AutoBuilder.pathfindToPose(
+        cmd = AutoBuilder.pathfindToPose(
             new Pose2d(
                 new Translation2d(x, y), 
                 Rotation2d.fromDegrees(rotationDegrees)), 
@@ -98,10 +98,10 @@ public class DynamicPath {
             0.0);
     }
     public DynamicPath(Pose2d target, PathConstraints contraints, double endVelo, double rotDelay) {
-        cmdSupplier = () -> AutoBuilder.pathfindToPose(target, contraints, endVelo, rotDelay);
+        cmd = AutoBuilder.pathfindToPose(target, contraints, endVelo, rotDelay);
     }
     public DynamicPath(PathPlannerPath path, PathConstraints contraints, double rotDelay) {
-        cmdSupplier = () -> AutoBuilder.pathfindThenFollowPath(path, contraints, rotDelay);
+        cmd = AutoBuilder.pathfindThenFollowPath(path, contraints, rotDelay);
     }
 
     public DynamicPath withName(String name) {
@@ -110,6 +110,6 @@ public class DynamicPath {
     }
 
     public Command getCmd() {
-        return loggedCommad(cmdSupplier.get().withName(name));
+        return loggedCommad(cmd.withName(name));
     }
 }

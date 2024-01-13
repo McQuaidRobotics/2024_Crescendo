@@ -12,6 +12,9 @@ public class Autos {
 
     public static void createSendableChooser() {
         autoChooser = AutoBuilder.buildAutoChooser();
+        for (Command dynamicAutoCmd : DynamicRoutines.choosableDynamicRoutines()) {
+            autoChooser.addOption("(Dynamic) " + dynamicAutoCmd.getName(), dynamicAutoCmd);
+        }
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
