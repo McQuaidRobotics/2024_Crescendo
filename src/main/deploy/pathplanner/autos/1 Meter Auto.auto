@@ -14,13 +14,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "1 Meter Path"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 3.0
+            "pathName": "1 Meter"
           }
         }
       ]
