@@ -87,6 +87,8 @@ public class DynamicPath {
     private String name = "Dynamic Path Command";
 
     public DynamicPath(double x, double y, double rotationDegrees) {
+        if (x < 0 || y < 0 || x > 16.5 || y > 8.15) throw new RuntimeException("Dynamic path pose is outside the field!");
+
         cmd = AutoBuilder.pathfindToPose(
             new Pose2d(
                 new Translation2d(x, y), 
