@@ -1,6 +1,4 @@
-package com.igknighters.autos;
-
-import java.util.function.Supplier;
+package com.igknighters.commands.autos;
 
 import com.igknighters.constants.ConstValues.kAuto;
 import com.pathplanner.lib.auto.AutoBuilder;

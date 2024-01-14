@@ -1,4 +1,4 @@
-package com.igknighters.autos;
+package com.igknighters.commands.autos;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 

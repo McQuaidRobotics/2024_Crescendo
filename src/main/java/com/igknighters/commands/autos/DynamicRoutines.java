@@ -1,17 +1,12 @@
-package com.igknighters.autos;
+package com.igknighters.commands.autos;
 
-import com.igknighters.RobotContainer;
-import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.constants.ConstValues.kAuto;
-import com.igknighters.subsystems.swerve.Swerve;
 import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 public class DynamicRoutines {
@@ -29,7 +24,6 @@ public class DynamicRoutines {
             kAuto.DYN_END_VELO,
             0.0
         ),
-        new InstantCommand(() -> RobotContainer.allSubsystems.swerve.get().setModuleStates(new ChassisSpeeds())),
         AutoBuilder.pathfindToPose(
             new Pose2d(
                 new Translation2d(-1.0, -2.0),

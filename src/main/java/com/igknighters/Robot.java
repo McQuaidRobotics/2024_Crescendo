@@ -12,8 +12,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-import com.igknighters.autos.Autos;
-import com.igknighters.autos.LocalADStarAK;
+import com.igknighters.util.pathfinders.LocalADStarAK;
+import com.igknighters.commands.autos.Autos;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.util.ShuffleboardApi;
 import com.pathplanner.lib.pathfinding.Pathfinding;

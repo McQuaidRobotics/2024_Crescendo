@@ -12,7 +12,7 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.ReplanningConfig;
 
 import com.igknighters.SubsystemResources.AllSubsystems;
-import com.igknighters.autos.AutosCmdRegister;
+import com.igknighters.commands.autos.AutosCmdRegister;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -24,7 +24,7 @@ public class RobotContainer {
     private final OperatorController operatorController;
     private final TestingController testingController;
 
-    public static AllSubsystems allSubsystems;
+    private static AllSubsystems allSubsystems;
 
     public RobotContainer() {
         DriverStation.silenceJoystickConnectionWarning(ConstValues.DEBUG);
