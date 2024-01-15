@@ -1,29 +1,34 @@
 package com.igknighters.subsystems.swerve;
 
+import org.littletonrobotics.junction.LogTable;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.inputs.LoggableInputs;
+
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.sim.Pigeon2SimState;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import com.igknighters.GlobalState;
 import com.igknighters.Robot;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues;
 
 public class Swerve extends SubsystemBase {
-    private final SwerveDriveOdometry swerveOdometry;
     private final SwerveModule[] swerveMods;
     private final SwerveVisualizer visualizer;
 
@@ -35,6 +40,26 @@ public class Swerve extends SubsystemBase {
     private double simYawOffset = 0.0;
 
     private final PIDController rotController = new PIDController(8.0, 0.0, 0.0);
+
+    private static class SwerveInputs implements LoggableInputs {
+        public double gyroPitchRads = 0.0, gyroRollRads = 0.0, gyroYawRads = 0.0;
+
+        @Override
+        public void toLog(LogTable table) {
+            table.put("GyroPitchRads", gyroPitchRads);
+            table.put("GyroRollRads", gyroRollRads);
+            table.put("GyroYawRads", gyroYawRads);
+        }
+
+        @Override
+        public void fromLog(LogTable table) {
+            gyroPitchRads = table.get("GyroPitchRads", gyroPitchRads);
+            gyroRollRads = table.get("GyroRollRads", gyroRollRads);
+            gyroYawRads = table.get("GyroYawRads", gyroYawRads);
+        }
+    }
+
+    private SwerveInputs inputs = new SwerveInputs();
 
     public Swerve() {
 
@@ -59,10 +84,13 @@ public class Swerve extends SubsystemBase {
                 new SwerveModuleSim(ConstValues.kSwerve.Mod3.CONSTANTS)
         };
 
-        swerveOdometry = new SwerveDriveOdometry(
+        GlobalState.onceInitOdometry(
+            new SwerveDrivePoseEstimator(
                 kSwerve.SWERVE_KINEMATICS,
                 getYawRot(),
-                getModulePositions());
+                getModulePositions(),
+                getPose())
+        );
 
         visualizer = new SwerveVisualizer(this, swerveMods);
     }
@@ -99,6 +127,10 @@ public class Swerve extends SubsystemBase {
         setModuleStates(targetStates);
     }
 
+    /**
+     * Sets the
+     * @param val
+     */
     public void setYaw(double val) {
         if (Robot.isReal()) {
             gyro.setYaw(val);
@@ -111,16 +143,25 @@ public class Swerve extends SubsystemBase {
         return Rotation2d.fromDegrees(scope0To360(this.getYaw()));
     }
 
+    /**
+     * @return The raw gyro yaw value in degrees
+     */
     public Double getYaw() {
-        return gyro.getYaw().getValue();
+        return Units.radiansToDegrees(inputs.gyroYawRads);
     }
 
+    /**
+     * @return The raw gyro pitch value in degrees
+     */
     public Double getPitch() {
-        return gyro.getPitch().getValue();
+        return Units.radiansToDegrees(inputs.gyroPitchRads);
     }
 
+    /**
+     * @return The raw gyro roll value in degrees
+     */
     public Double getRoll() {
-        return gyro.getRoll().getValue();
+        return Units.radiansToDegrees(inputs.gyroRollRads);
     }
 
     public SwerveModulePosition[] getModulePositions() {
@@ -156,11 +197,11 @@ public class Swerve extends SubsystemBase {
     }
 
     public Pose2d getPose() {
-        return swerveOdometry.getPoseMeters();
+        return GlobalState.getLocalizedPose();
     }
 
     public void resetOdometry(Pose2d pose) {
-        swerveOdometry.resetPosition(getYawRot(), getModulePositions(), pose);
+        GlobalState.resetLocalization(getYawRot(), pose, getModulePositions());
     }
 
     // public double rotVeloForRotation(Rotation2d wantedAngle) {
@@ -179,26 +220,23 @@ public class Swerve extends SubsystemBase {
 
     @Override
     public void periodic() {
-        gyroPitchSignal.refresh();
-        gyroRollSignal.refresh();
-        gyroYawSignal.refresh();
+        BaseStatusSignal.refreshAll(
+                gyroPitchSignal,
+                gyroRollSignal,
+                gyroYawSignal
+        );
+
+        inputs.gyroPitchRads = Units.degreesToRadians(getPitch());
+        inputs.gyroRollRads = Units.degreesToRadians(getRoll());
+        inputs.gyroYawRads = Units.degreesToRadians(getYaw());
+
         for (SwerveModule module : swerveMods) {
             module.periodic();
         }
 
-        var currCmd = this.getCurrentCommand();
-        SmartDashboard.putString("swerve cmd", currCmd == null ? "None" : currCmd.getName());
+        visualizer.update(GlobalState.submitSwerveData(getYawRot(), getModulePositions()));
 
-        var modulePoses = getModulePositions();
-        for (var i = 0; i < modulePoses.length; i++) {
-            SmartDashboard.putNumber("Module " + i + " Distance", modulePoses[i].distanceMeters);
-            SmartDashboard.putNumber("Module " + i + " Angle", modulePoses[i].angle.getDegrees());
-        }
-
-        var gyroRot = getYawRot();
-        SmartDashboard.putNumber("Gyro Angle", gyroRot.getDegrees());
-
-        visualizer.update(swerveOdometry.update(gyroRot, modulePoses));
+        Logger.processInputs("Swerve", inputs);
     }
 
     @Override

@@ -3,19 +3,23 @@ package com.igknighters.constants;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-import com.igknighters.ConstantHelper.*;
 import com.igknighters.util.SwerveModuleConstants;
 import com.igknighters.util.SwerveModuleConstants.ModuleId;
 import com.pathplanner.lib.path.PathConstraints;
+import com.igknighters.vision.camera.Camera;
 import com.pathplanner.lib.util.PIDConstants;
 
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 
-//this will be where we put references to all our initialized values
 public final class ConstValues {
     private final static double TAU = 2 * Math.PI;
 
@@ -55,7 +59,44 @@ public final class ConstValues {
         public static final double BUMPER_THICKNESS = Units.inchesToMeters(2.7);
     }
 
+    public static final class kVision {
+        /** The least trustworthy std dev */
+        public static final Vector<N3> visionStdDevs = VecBuilder.fill(0.9, 0.9, 0.9);
+        /** The middle trustworthy std dev */
+        public static final Vector<N3> visionStdDevsTrust = VecBuilder.fill(0.4, 0.4, 0.4);
+        /** The most trustworthy std dev */
+        public static final Vector<N3> visionStdDevsReal = VecBuilder.fill(0.15, 0.15, 0.15);
+
+        public static final double ToleratedHistoryDifference = 0.1;
+        public static final double ToleratedMultiCamDifference = 0.1;
+
+        /**
+         * The cameras used for vision.
+         */
+        public static final Camera[] CAMERAS = new Camera[] {
+            Camera.create(
+                "RearLeftCamera",
+                0,
+                new Pose3d(
+                    new Translation3d(0.0, 0.0, 0.25),
+                    new Rotation3d()
+                )
+            ),
+            Camera.create(
+                "RearRightCamera",
+                1,
+                new Pose3d(
+                    new Translation3d(0.0, 0.0, 0.25),
+                    new Rotation3d()
+                )
+            )
+        };
+    }
+
     public static final class kSwerve {
+        /**
+         * The gear ratios for the swerve modules for easier constant definition.
+         */
         @SuppressWarnings("unused")
         private static final class SwerveGearRatios {
             static final double L1_DRIVE = 1.0 / 8.14;
@@ -74,7 +115,6 @@ public final class ConstValues {
 
         /* Drivetrain Constants */
         public static final double TRACK_WIDTH = 0.551942;
-        public static final double WHEEL_BASE = 0.551942;
         public static final double WHEEL_DIAMETER = 0.1016;
         public static final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
         // public static final double DRIVEBASE_RADIUS = Math.sqrt(Math.pow(TRACK_WIDTH / 2.0, 2) + Math.pow(WHEEL_BASE / 2.0, 2));
@@ -125,7 +165,7 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 2;
             public static final int CANCODER_ID = 21;
             public static final double ROTATION_OFFSET = 0.21875;
-            public static final Translation2d CHASSIS_OFFSET = new Translation2d(-WHEEL_BASE / 2.0, TRACK_WIDTH / 2.0);
+            public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0, TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
                     ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
         }
@@ -136,7 +176,7 @@ public final class ConstValues {
             public static final int ANLGE_MOTOR_ID = 4;
             public static final int CANCODER_ID = 22;
             public static final double ROTATION_OFFSET = 0.3278805;
-            public static final Translation2d CHASSIS_OFFSET = new Translation2d(WHEEL_BASE / 2.0, TRACK_WIDTH / 2.0);
+            public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0, TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
                     ANLGE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
         }
@@ -147,7 +187,7 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 6;
             public static final int CANCODER_ID = 23;
             public static final double ROTATION_OFFSET = 0.65;
-            public static final Translation2d CHASSIS_OFFSET = new Translation2d(WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0);
+            public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0, -TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
                     ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
         }
@@ -158,7 +198,7 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 8;
             public static final int CANCODER_ID = 24;
             public static final double ROTATION_OFFSET = 0.5776361;
-            public static final Translation2d CHASSIS_OFFSET = new Translation2d(-WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0);
+            public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0, -TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
                     ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
         }
