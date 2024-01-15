@@ -19,42 +19,42 @@ public class DynamicPath {
         SPEAKER(new DynamicPath(
                 FieldPositions.SPEAKER, 
                 kAuto.DYNAMIC_PATH_CONSTRAINTS, 
-                kAuto.DYN_END_VELO, 
+                kAuto.DYNAMIC_END_VELO, 
                 0.0)),
         AMP(new DynamicPath(
                 FieldPositions.AMP, 
                 kAuto.DYNAMIC_PATH_CONSTRAINTS, 
-                kAuto.DYN_END_VELO, 
+                kAuto.DYNAMIC_END_VELO, 
                 0.0)),
         STAGE_CENTER(new DynamicPath(
                 FieldPositions.STAGE_CENTER, 
                 kAuto.DYNAMIC_PATH_CONSTRAINTS, 
-                kAuto.DYN_END_VELO, 
+                kAuto.DYNAMIC_END_VELO, 
                 0.0)),
         STAGE_LEFT(new DynamicPath(
                 FieldPositions.STAGE_LEFT, 
                 kAuto.DYNAMIC_PATH_CONSTRAINTS, 
-                kAuto.DYN_END_VELO, 
+                kAuto.DYNAMIC_END_VELO, 
                 0.0)),
         STAGE_RIGHT(new DynamicPath(
                 FieldPositions.STAGE_RIGHT, 
                 kAuto.DYNAMIC_PATH_CONSTRAINTS, 
-                kAuto.DYN_END_VELO, 
+                kAuto.DYNAMIC_END_VELO, 
                 0.0)),
         NOTE_LEFT(new DynamicPath(
                 FieldPositions.NOTE_LEFT, 
                 kAuto.DYNAMIC_PATH_CONSTRAINTS, 
-                kAuto.DYN_END_VELO, 
+                kAuto.DYNAMIC_END_VELO, 
                 0.0)),
         NOTE_CENTER(new DynamicPath(
                 FieldPositions.NOTE_CENTER, 
                 kAuto.DYNAMIC_PATH_CONSTRAINTS, 
-                kAuto.DYN_END_VELO, 
+                kAuto.DYNAMIC_END_VELO, 
                 0.0)),
         NOTE_RIGHT(new DynamicPath(
                 FieldPositions.NOTE_RIGHT, 
                 kAuto.DYNAMIC_PATH_CONSTRAINTS, 
-                kAuto.DYN_END_VELO, 
+                kAuto.DYNAMIC_END_VELO, 
                 0.0));
 
         private DynamicPath dynBlock;
@@ -88,13 +88,20 @@ public class DynamicPath {
 
     public DynamicPath(double x, double y, double rotationDegrees) {
         if (x < 0 || y < 0 || x > 16.5 || y > 8.15) throw new RuntimeException("Dynamic path pose is outside the field!");
+        if (kAuto.DYNAMIC_PATH_CONSTRAINTS.getMaxAngularVelocityRps() <= 0.0 || kAuto.DYNAMIC_PATH_CONSTRAINTS.getMaxAngularAccelerationRpsSq() <= 0.0) {
+            throw new RuntimeException("Dynamic path constraints angular velocities CANNOT be equal to 0.0 or less!");
+        }
+        var endVelo = kAuto.DYNAMIC_END_VELO;
+        if (endVelo != 0.0) {
+            throw new RuntimeException("Dynamic path end velocity is NOT 0.0, end velocity NEEDS to be 0.0!");
+        }
 
         cmd = AutoBuilder.pathfindToPose(
             new Pose2d(
                 new Translation2d(x, y), 
                 Rotation2d.fromDegrees(rotationDegrees)), 
             kAuto.DYNAMIC_PATH_CONSTRAINTS, 
-            kAuto.DYN_END_VELO, 
+            kAuto.DYNAMIC_END_VELO, 
             0.0);
     }
     public DynamicPath(Pose2d target, PathConstraints contraints, double endVelo, double rotDelay) {
