@@ -74,22 +74,22 @@ public final class ConstValues {
          * The cameras used for vision.
          */
         public static final Camera[] CAMERAS = new Camera[] {
-            // Camera.create(
-            //     "RearLeftCamera",
-            //     0,
-            //     new Pose3d(
-            //         new Translation3d(0.0, 0.0, 0.25),
-            //         new Rotation3d()
-            //     )
-            // ),
-            // Camera.create(
-            //     "RearRightCamera",
-            //     1,
-            //     new Pose3d(
-            //         new Translation3d(0.0, 0.0, 0.25),
-            //         new Rotation3d()
-            //     )
-            // )
+            Camera.create(
+                "RearLeftCamera",
+                0,
+                new Pose3d(
+                    new Translation3d(0.0, 0.0, 0.25),
+                    new Rotation3d()
+                )
+            ),
+            Camera.create(
+                "RearRightCamera",
+                1,
+                new Pose3d(
+                    new Translation3d(0.0, 0.0, 0.25),
+                    new Rotation3d()
+                )
+            )
         };
     }
 
