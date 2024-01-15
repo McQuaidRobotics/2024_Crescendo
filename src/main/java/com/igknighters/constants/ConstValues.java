@@ -12,10 +12,13 @@ import com.pathplanner.lib.util.PIDConstants;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
 //this will be where we put references to all our initialized values
 public final class ConstValues {
+    private final static double TAU = 2 * Math.PI;
+
     // all measurements are in meters unless otherwise specified
     // all angles are in radians unless otherwise specified
     @SuppressWarnings("unused")
@@ -23,7 +26,24 @@ public final class ConstValues {
         public static final double FEET_TO_METERS = 0.3048;
         public static final double INCHES_TO_METERS = 0.0254;
         public static final double DEGREES_TO_RADIANS = Math.PI / 180.0;
-        public static final double ROTATIONS_TO_RADIANTS = 2 * Math.PI;
+        public static final double ROTATIONS_TO_RADIANTS = TAU;
+    }
+
+    @SuppressWarnings("unused")
+    private static final class Motors {
+        private static final class Falcon500 {
+            public static final double FREE_SPEED = 668.1;
+            public static final double FREE_CURRENT = 1.5;
+            public static final double STALL_TORQUE = 4.69;
+            public static final double STALL_CURRENT = 257.0;
+        }
+
+        private static final class Falcon500Foc {
+            public static final double FREE_SPEED = 636.69;
+            public static final double FREE_CURRENT = 1.5;
+            public static final double STALL_TORQUE = 5.84;
+            public static final double STALL_CURRENT = 304.0;
+        }
     }
 
     public static final boolean DEBUG = true; // this should be false for competition
@@ -52,23 +72,31 @@ public final class ConstValues {
         public static final boolean INVERT_GYRO = false;
         public static final String CANBUS = "DriveBus";
 
-        @DoubleConst(crash = 4.8)
-        public static double MAX_DRIVE_VELOCITY;
-
-        @DoubleConst(crash = 10.0)
-        public static double MAX_ANGULAR_VELOCITY;
-
         /* Drivetrain Constants */
         public static final double TRACK_WIDTH = 0.551942;
         public static final double WHEEL_BASE = 0.551942;
         public static final double WHEEL_DIAMETER = 0.1016;
         public static final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
-        public static final double DRIVEBASE_RADIUS = Math.sqrt(Math.pow(TRACK_WIDTH, 2) + Math.pow(WHEEL_BASE, 2));
+        // public static final double DRIVEBASE_RADIUS = Math.sqrt(Math.pow(TRACK_WIDTH / 2.0, 2) + Math.pow(WHEEL_BASE / 2.0, 2));
+        public static final double DRIVEBASE_RADIUS = 0.39;
+        public static final double DRIVEBASE_CIRCUMFERENCE = DRIVEBASE_RADIUS * TAU;
 
         public static final double ANGLE_GEAR_RATIO = SwerveGearRatios.ANGLE;
 
-        @DoubleConst(crash = SwerveGearRatios.L2_DRIVE)
-        public static double DRIVE_GEAR_RATIO;
+        public static final double DRIVE_GEAR_RATIO = SwerveGearRatios.L3_DRIVE;
+
+        /**Not every motor can output the max speed at all times, add a buffer to make closed loop more accurate */
+        public static final double MOTOR_OUTPUT_SCALAR = 0.95;
+
+        /**User defined acceleration time in seconds */
+        public static final double ACCELERATION_TIME = 1.0;
+
+        public static final double MAX_DRIVE_VELOCITY = 
+            (Motors.Falcon500Foc.FREE_SPEED / TAU) * DRIVE_GEAR_RATIO * WHEEL_CIRCUMFERENCE * MOTOR_OUTPUT_SCALAR;
+        public static final double MAX_DRIVE_ACCELERATION = MAX_DRIVE_VELOCITY / ACCELERATION_TIME;
+
+        public static final double MAX_ANGULAR_VELOCITY = MAX_DRIVE_VELOCITY / DRIVEBASE_CIRCUMFERENCE * TAU;
+        public static final double MAX_ANGULAR_ACCELERATION = MAX_ANGULAR_VELOCITY / ACCELERATION_TIME;
 
         /* Inverts */
         public static final InvertedValue ANGLE_MOTOR_INVERT = InvertedValue.Clockwise_Positive;

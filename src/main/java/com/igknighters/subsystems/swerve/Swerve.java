@@ -5,6 +5,7 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.sim.Pigeon2SimState;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -13,6 +14,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -32,6 +34,8 @@ public class Swerve extends SubsystemBase {
     private final StatusSignal<Double> gyroYawSignal;
     private double simYawOffset = 0.0;
 
+    private final PIDController rotController = new PIDController(8.0, 0.0, 0.0);
+
     public Swerve() {
 
         gyro = new Pigeon2(ConstValues.kSwerve.PIGEON_ID, ConstValues.kSwerve.CANBUS);
@@ -48,12 +52,12 @@ public class Swerve extends SubsystemBase {
                 new SwerveModuleReal(ConstValues.kSwerve.Mod2.CONSTANTS),
                 new SwerveModuleReal(ConstValues.kSwerve.Mod3.CONSTANTS)
         }
-                : new SwerveModule[] {
-                        new SwerveModuleSim(ConstValues.kSwerve.Mod0.CONSTANTS),
-                        new SwerveModuleSim(ConstValues.kSwerve.Mod1.CONSTANTS),
-                        new SwerveModuleSim(ConstValues.kSwerve.Mod2.CONSTANTS),
-                        new SwerveModuleSim(ConstValues.kSwerve.Mod3.CONSTANTS)
-                };
+        : new SwerveModule[] {
+                new SwerveModuleSim(ConstValues.kSwerve.Mod0.CONSTANTS),
+                new SwerveModuleSim(ConstValues.kSwerve.Mod1.CONSTANTS),
+                new SwerveModuleSim(ConstValues.kSwerve.Mod2.CONSTANTS),
+                new SwerveModuleSim(ConstValues.kSwerve.Mod3.CONSTANTS)
+        };
 
         swerveOdometry = new SwerveDriveOdometry(
                 kSwerve.SWERVE_KINEMATICS,
@@ -83,7 +87,7 @@ public class Swerve extends SubsystemBase {
     }
 
     public void driveChassisSpeeds(ChassisSpeeds speeds, boolean openLoop, boolean invertRotation) {
-        if (invertRotation) speeds.omegaRadiansPerSecond *= -1;
+        if (invertRotation) speeds.omegaRadiansPerSecond *= -1.0;
         SwerveModuleState[] targetStates = kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(speeds);
 
         SwerveDriveKinematics.desaturateWheelSpeeds(targetStates, kSwerve.MAX_DRIVE_VELOCITY);
@@ -157,6 +161,20 @@ public class Swerve extends SubsystemBase {
 
     public void resetOdometry(Pose2d pose) {
         swerveOdometry.resetPosition(getYawRot(), getModulePositions(), pose);
+    }
+
+    // public double rotVeloForRotation(Rotation2d wantedAngle) {
+    //     var wantedAngleRads = wantedAngle.getRadians();
+    // }
+
+    public Rotation2d rotationRelativeToPose(Rotation2d wantedAngle, Translation2d pose) {
+        var currentTrans = getPose().getTranslation();
+        var angleBetween = Math.atan2(
+            currentTrans.getY() - pose.getY(),
+            currentTrans.getX() - pose.getX()
+        );
+        return Rotation2d.fromRadians(angleBetween)
+            .minus(wantedAngle);
     }
 
     @Override

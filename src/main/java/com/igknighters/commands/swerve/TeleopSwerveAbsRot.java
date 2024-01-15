@@ -24,11 +24,7 @@ public class TeleopSwerveAbsRot extends Command {
     private final DoubleSupplier translationYSup;
     private final DoubleSupplier rotationXSup;
     private final DoubleSupplier rotationYSup;
-    private final PIDController rotController = new PIDController(20.0, 0.0, 0.0);
-    // private final TrapezoidProfile rotProfile = new TrapezoidProfile(
-    // new Constraints(kSwerve.MAX_ANGULAR_VELOCITY, kSwerve.MAX_ANGULAR_VELOCITY *
-    // 10.0)
-    // );
+    private final PIDController rotController = new PIDController(8.0, 0.0, 0.0);
 
     /**if within x of a multiple of 90 degrees it will snap to the closest multiple of 90 degrees */
     private final static double ANGLE_SNAP_WINDOW = Units.degreesToRadians(5.0);
