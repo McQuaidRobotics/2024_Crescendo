@@ -1,0 +1,26 @@
+name: Build And Test
+
+on: [ push, pull_request ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    container: wpilib/roborio-cross-ubuntu:2024-22.04
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Add safe directory for git
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
+
+      # Grant execute permission for gradlew
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # Build
+      - name: Build code
+        run: ./gradlew compileJava
+
+      - name: Test code
+        run: ./gradlew check
