@@ -52,7 +52,7 @@ public final class ConstValues {
         public static final boolean INVERT_GYRO = false;
         public static final String CANBUS = "DriveBus";
 
-        @DoubleConst(crash = 4.5)
+        @DoubleConst(crash = 4.8)
         public static double MAX_DRIVE_VELOCITY;
 
         @DoubleConst(crash = 10.0)
@@ -151,9 +151,9 @@ public final class ConstValues {
         public static final PIDConstants AUTO_TRANSLATION_PID = new PIDConstants(3.4, 0, 0.0);
         public static final PIDConstants AUTO_ANGULAR_PID = new PIDConstants(3.0, 0.0, 0.0);
         public static final PathConstraints DYNAMIC_PATH_CONSTRAINTS = new PathConstraints(
-            3.5, 
-            3.0, 
-            540.0, 
+            4.8,
+            4.8,
+            540.0,
             720.0);
         public static final double DYN_END_VELO = 3.0;
     }

@@ -1,10 +1,7 @@
 package com.pathplanner.lib.commands;
 
-import com.igknighters.util.pathfinders.LocalADStarAK;
 import com.pathplanner.lib.controllers.PathFollowingController;
 import com.pathplanner.lib.path.*;
-import com.pathplanner.lib.pathfinding.LocalADStar;
-import com.pathplanner.lib.pathfinding.Pathfinder;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.GeometryUtil;
 import com.pathplanner.lib.util.PPLibTelemetry;
@@ -160,8 +157,6 @@ public class PathfindingCommand extends Command {
 
   @Override
   public void initialize() {
-    // Pathfinding.setPathfinder(new LocalADStar());
-  
     currentTrajectory = null;
     timeOffset = 0;
 
@@ -197,7 +192,7 @@ public class PathfindingCommand extends Command {
                     .getTranslation()
                     .getDistance(currentTrajectory.getEndState().positionMeters)
                 < 2.0;
-                
+
     if (!skipUpdates && Pathfinding.isNewPathAvailable()) {
       currentPath = Pathfinding.getCurrentPath(constraints, goalEndState);
 

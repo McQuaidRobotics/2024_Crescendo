@@ -1,9 +1,6 @@
 package com.igknighters.controllers;
 
 import com.igknighters.SubsystemResources.Subsystems;
-import com.igknighters.commands.autos.DynamicRoutines;
-import com.igknighters.constants.ConstValues.kAuto;
-import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
