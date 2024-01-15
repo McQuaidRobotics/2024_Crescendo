@@ -26,7 +26,7 @@ public class GlobalState {
 
     // private static final PoseHistory poseHistory = new PoseHistory();
 
-    private static Optional<Field2d> field;
+    private static Optional<Field2d> field = Optional.empty();
 
     /**
      * Meant to be used by swerve to initialize the odometry system.

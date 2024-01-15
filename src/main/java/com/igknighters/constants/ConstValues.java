@@ -74,22 +74,22 @@ public final class ConstValues {
          * The cameras used for vision.
          */
         public static final Camera[] CAMERAS = new Camera[] {
-            Camera.create(
-                "RearLeftCamera",
-                0,
-                new Pose3d(
-                    new Translation3d(0.0, 0.0, 0.25),
-                    new Rotation3d()
-                )
-            ),
-            Camera.create(
-                "RearRightCamera",
-                1,
-                new Pose3d(
-                    new Translation3d(0.0, 0.0, 0.25),
-                    new Rotation3d()
-                )
-            )
+            // Camera.create(
+            //     "RearLeftCamera",
+            //     0,
+            //     new Pose3d(
+            //         new Translation3d(0.0, 0.0, 0.25),
+            //         new Rotation3d()
+            //     )
+            // ),
+            // Camera.create(
+            //     "RearRightCamera",
+            //     1,
+            //     new Pose3d(
+            //         new Translation3d(0.0, 0.0, 0.25),
+            //         new Rotation3d()
+            //     )
+            // )
         };
     }
 
@@ -159,6 +159,8 @@ public final class ConstValues {
             public static final double kD = 0.0;
         }
 
+        public static final double ANGLE_CONTROLLER_KP = 8.0;
+
         public static final class Mod0 {
             public static final ModuleId MODULE = ModuleId.m0;
             public static final int DRIVE_MOTOR_ID = 1;
@@ -219,10 +221,10 @@ public final class ConstValues {
         public static final PIDConstants AUTO_TRANSLATION_PID = new PIDConstants(3.4, 0, 0.0);
         public static final PIDConstants AUTO_ANGULAR_PID = new PIDConstants(3.0, 0.0, 0.0);
         public static final PathConstraints DYNAMIC_PATH_CONSTRAINTS = new PathConstraints(
-            4.8,
-            4.8,
-            540.0,
-            720.0);
+            kSwerve.MAX_DRIVE_VELOCITY,
+            kSwerve.MAX_DRIVE_ACCELERATION,
+            kSwerve.MAX_ANGULAR_VELOCITY,
+            kSwerve.MAX_ANGULAR_ACCELERATION);
         public static final double DYN_END_VELO = 3.0;
     }
 }

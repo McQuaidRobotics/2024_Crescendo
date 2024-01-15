@@ -56,8 +56,7 @@
           "SwerveModule[0]": {
             "open": true
           }
-        },
-        "open": true
+        }
       },
       "PathPlanner": {
         "double[]##v_/PathPlanner/currentPose": {
@@ -65,11 +64,7 @@
         },
         "double[]##v_/PathPlanner/targetPose": {
           "open": true
-        },
-        "open": true
-      },
-      "SmartDashboard": {
-        "open": true
+        }
       },
       "Visualizers": {
         "SwerveModules": {

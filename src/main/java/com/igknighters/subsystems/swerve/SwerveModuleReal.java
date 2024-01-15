@@ -136,7 +136,7 @@ public class SwerveModuleReal implements SwerveModule {
         inputs.targetDriveVelo = desiredState.speedMetersPerSecond;
         if (isOpenLoop) {
             double percentOutput = desiredState.speedMetersPerSecond / kSwerve.MAX_DRIVE_VELOCITY;
-            var controlRequest = new DutyCycleOut(percentOutput);
+            var controlRequest = new DutyCycleOut(percentOutput).withEnableFOC(true);
             driveMotor.setControl(controlRequest);
         } else {
             double rps = Math.min(desiredState.speedMetersPerSecond, kSwerve.MAX_DRIVE_VELOCITY)
