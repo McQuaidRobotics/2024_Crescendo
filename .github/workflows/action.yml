@@ -1,6 +1,16 @@
 name: Build And Test
 
-on: [ push, pull_request ]
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited, closed]
+    branches:
+      - main
+
+  push:
+    branches:
+      - main
+
+
 
 jobs:
   build:
