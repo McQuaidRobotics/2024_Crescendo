@@ -17,8 +17,8 @@ public class DriverController extends ControllerParent {
         this.A.binding = new SingleDepBinding(Subsystems.Swerve, (trig, allss) -> {
             trig.onTrue(Commands.runOnce(() -> allss.swerve.get().resetOdometry(
                 new Pose2d(
-                    new Translation2d(0.0, 0.0),
-                    Rotation2d.fromDegrees(0.0)
+                    new Translation2d(6.28, 4.1),
+                    Rotation2d.fromDegrees(180.0)
                 )
             )));
         });

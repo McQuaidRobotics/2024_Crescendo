@@ -151,10 +151,10 @@ public final class ConstValues {
         public static final PIDConstants AUTO_TRANSLATION_PID = new PIDConstants(3.4, 0, 0.0);
         public static final PIDConstants AUTO_ANGULAR_PID = new PIDConstants(3.0, 0.0, 0.0);
         public static final PathConstraints DYNAMIC_PATH_CONSTRAINTS = new PathConstraints(
-            4.8,
-            4.8,
+            3.0,
+            1.50,
             540.0,
-            720.0);
-        public static final double DYN_END_VELO = 3.0;
+        720.0);
+        public static final double DYN_END_VELO = 0.0;
     }
 }

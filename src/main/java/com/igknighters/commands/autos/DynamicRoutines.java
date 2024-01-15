@@ -12,9 +12,19 @@ public class DynamicRoutines {
         DynPath.SPEAKER.getCmd()
     );
 
+    public static SequentialCommandGroup TEST = new SequentialCommandGroup(
+        new DynamicPath(5.5, 3.0, -60.0).getCmd(),
+        new DynamicPath(3.55, 4.10, 180.0).getCmd(),
+        new DynamicPath(5.5, 5.2, 60.0).getCmd(),
+        new DynamicPath(5.5, 3.0, -60.0).getCmd(),
+        new DynamicPath(3.55, 4.10, 180).getCmd(),
+        new DynamicPath(5.5, 5.2, 60.0).getCmd(),
+        new DynamicPath(6.5, 4.1, 180.0).getCmd()
+    );
+
     public static Command[] choosableDynamicRoutines() {
         Command[] choosableRoutines = new Command[]{
-            TRANSLATE.withName("TRANSLATE")
+            TEST.withName("TEST")
         };
         return choosableRoutines;
     }

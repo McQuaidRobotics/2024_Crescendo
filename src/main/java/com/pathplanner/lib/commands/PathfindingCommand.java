@@ -203,23 +203,36 @@ public class PathfindingCommand extends Command {
         // Find the two closest states in front of and behind robot
         int closestState1Idx = 0;
         int closestState2Idx = 1;
+        var states = currentTrajectory.getStates();
+        double closest2Dist = 0.0;
+        double nextDist = 0.0;
         while (true) {
-          double closest2Dist =
-              currentTrajectory
-                  .getState(closestState2Idx)
-                  .positionMeters
-                  .getDistance(currentPose.getTranslation());
-          double nextDist =
-              currentTrajectory
-                  .getState(closestState2Idx + 1)
-                  .positionMeters
-                  .getDistance(currentPose.getTranslation());
+          if (closestState2Idx < states.size()) {
+            closest2Dist = states.get(closestState2Idx).positionMeters.getDistance(currentPose.getTranslation());
+          } else {
+            closest2Dist = states.get(closestState1Idx).positionMeters.getDistance(currentPose.getTranslation());
+          }
+          if (closestState2Idx + 1 < states.size()) {
+            nextDist = states.get(closestState2Idx + 1).positionMeters.getDistance(currentPose.getTranslation());
+          } else {
+            nextDist = states.get(closestState1Idx).positionMeters.getDistance(currentPose.getTranslation());
+          }
           if (nextDist < closest2Dist) {
             closestState1Idx++;
             closestState2Idx++;
           } else {
             break;
           }
+          // double closest2Dist =
+          //     currentTrajectory
+          //         .getState(closestState2Idx)
+          //         .positionMeters
+          //         .getDistance(currentPose.getTranslation());
+          // double nextDist =
+          //     currentTrajectory
+          //         .getState(closestState2Idx + 1)
+          //         .positionMeters
+          //         .getDistance(currentPose.getTranslation());
         }
 
         // Use the closest 2 states to interpolate what the time offset should be
