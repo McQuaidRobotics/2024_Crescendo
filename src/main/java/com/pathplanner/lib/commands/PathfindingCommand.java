@@ -207,16 +207,23 @@ public class PathfindingCommand extends Command {
         double closest2Dist = 0.0;
         double nextDist = 0.0;
         while (true) {
-          if (closestState2Idx < states.size()) {
+          if (states.size() == 0) {
+            closest2Dist = 0.0;
+          }
+          else if (closestState2Idx < states.size()) {
             closest2Dist = states.get(closestState2Idx).positionMeters.getDistance(currentPose.getTranslation());
           } else {
-            closest2Dist = states.get(closestState1Idx).positionMeters.getDistance(currentPose.getTranslation());
+            closest2Dist = states.get(states.size() - 1).positionMeters.getDistance(currentPose.getTranslation());
           }
-          if (closestState2Idx + 1 < states.size()) {
+          if (states.size() == 0.0) {
+            nextDist = 0.0;
+          }
+          else if (closestState2Idx + 1 < states.size()) {
             nextDist = states.get(closestState2Idx + 1).positionMeters.getDistance(currentPose.getTranslation());
           } else {
-            nextDist = states.get(closestState1Idx).positionMeters.getDistance(currentPose.getTranslation());
+            nextDist = states.get(states.size() - 1).positionMeters.getDistance(currentPose.getTranslation());
           }
+
           if (nextDist < closest2Dist) {
             closestState1Idx++;
             closestState2Idx++;

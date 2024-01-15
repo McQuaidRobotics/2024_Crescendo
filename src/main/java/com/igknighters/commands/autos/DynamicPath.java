@@ -86,6 +86,24 @@ public class DynamicPath {
     private Command cmd;
     private String name = "Dynamic Path Command";
 
+    public DynamicPath(double x, double y, double rotationDegrees, double rotationDelay) {
+        if (x < 0 || y < 0 || x > 16.5 || y > 8.15) throw new RuntimeException("Dynamic path pose is outside the field!");
+        if (kAuto.DYNAMIC_PATH_CONSTRAINTS.getMaxAngularVelocityRps() <= 0.0 || kAuto.DYNAMIC_PATH_CONSTRAINTS.getMaxAngularAccelerationRpsSq() <= 0.0) {
+            throw new RuntimeException("Dynamic path constraints angular velocities CANNOT be equal to 0.0 or less!");
+        }
+        var endVelo = kAuto.DYNAMIC_END_VELO;
+        if (endVelo != 0.0) {
+            throw new RuntimeException("Dynamic path end velocity is NOT 0.0, end velocity NEEDS to be 0.0!");
+        }
+
+        cmd = AutoBuilder.pathfindToPose(
+            new Pose2d(
+                new Translation2d(x, y), 
+                Rotation2d.fromDegrees(rotationDegrees)), 
+            kAuto.DYNAMIC_PATH_CONSTRAINTS, 
+            kAuto.DYNAMIC_END_VELO, 
+            rotationDelay);
+    }
     public DynamicPath(double x, double y, double rotationDegrees) {
         if (x < 0 || y < 0 || x > 16.5 || y > 8.15) throw new RuntimeException("Dynamic path pose is outside the field!");
         if (kAuto.DYNAMIC_PATH_CONSTRAINTS.getMaxAngularVelocityRps() <= 0.0 || kAuto.DYNAMIC_PATH_CONSTRAINTS.getMaxAngularAccelerationRpsSq() <= 0.0) {
