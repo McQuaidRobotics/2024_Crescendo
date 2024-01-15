@@ -46,6 +46,10 @@ public class PivotReal implements Pivot {
         gyro = new Pigeon2(kPivot.PIGEON_ID); //add canbus
         gyroPitch = (gyro.getPitch());
 
+        gyroPitch.setUpdateFrequency(100);
+        
+        gyro.optimizeBusUtilization();
+
         leaderMotor = new TalonFX(kPivot.LEFT_MOTOR_ID);
         followerMotor = new TalonFX(kPivot.RIGHT_MOTOR_ID);
         leaderMotor.getConfigurator().apply(getMotorConfig());
@@ -62,11 +66,20 @@ public class PivotReal implements Pivot {
         rightMotorAmps = leaderMotor.getStatorCurrent();
         leftMotorAmps = followerMotor.getStatorCurrent();
         motorVolts = leaderMotor.getSupplyVoltage();
-
         rightMotorTemp = leaderMotor.getDeviceTemp();
         leftMotorTemp = followerMotor.getDeviceTemp();
+
+        motorRots.setUpdateFrequency(100);
+        motorVelo.setUpdateFrequency(100);
+        rightMotorAmps.setUpdateFrequency(100);
+        leftMotorAmps.setUpdateFrequency(100);
+        motorVolts.setUpdateFrequency(100);
         rightMotorTemp.setUpdateFrequency(4);
         leftMotorTemp.setUpdateFrequency(4);
+
+        leaderMotor.optimizeBusUtilization();
+        followerMotor.optimizeBusUtilization();
+
     }
 
     private TalonFXConfiguration getMotorConfig() {
