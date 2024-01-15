@@ -17,6 +17,11 @@
       "/Visualizers/SwerveModules/Module[3]": "Mechanism2d"
     },
     "windows": {
+      "/SmartDashboard/Auto Chooser": {
+        "window": {
+          "visible": true
+        }
+      },
       "/Visualizers/Field": {
         "window": {
           "visible": true
@@ -51,15 +56,32 @@
           "SwerveModule[0]": {
             "open": true
           }
+        }
+      },
+      "PathPlanner": {
+        "double[]##v_/PathPlanner/currentPose": {
+          "open": true
         },
-        "open": true
+        "double[]##v_/PathPlanner/targetPose": {
+          "open": true
+        }
       },
       "Visualizers": {
         "SwerveModules": {
           "open": true
-        },
-        "open": true
+        }
       }
+    }
+  },
+  "NetworkTables Info": {
+    "Clients": {
+      "open": true
+    },
+    "Connections": {
+      "open": true
+    },
+    "Server": {
+      "open": true
     }
   }
 }
