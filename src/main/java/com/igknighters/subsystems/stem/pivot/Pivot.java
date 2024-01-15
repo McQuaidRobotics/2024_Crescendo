@@ -13,6 +13,7 @@ public interface Pivot extends Component {
         public double volts = 0.0;
         public double leftAmps = 0.0, rightAmps = 0.0;
         public double leftTemp = 0.0, rightTemp = 0.0;
+        public double gyroPitchRadians = 0.0;
         public boolean isLimitSwitchHit = false;
 
         public PivotInputs(double startingRadians) {
@@ -30,6 +31,7 @@ public interface Pivot extends Component {
             table.put("rightAmps", rightAmps);
             table.put("leftTemp", leftTemp);
             table.put("rightTemp", rightTemp);
+            table.put("gyroPitchRadians", gyroPitchRadians);
             table.put("isLimitSwitchHit", isLimitSwitchHit);
 
             // A subtable, thats only written to when in debug mode and never read from,
@@ -52,6 +54,7 @@ public interface Pivot extends Component {
             rightAmps = table.get("rightAmps", rightAmps);
             leftTemp = table.get("leftTemp", leftTemp);
             rightTemp = table.get("rightTemp", rightTemp);
+            gyroPitchRadians = table.get("gyroPitchRadians", gyroPitchRadians);
             isLimitSwitchHit = table.get("isLimitSwitchHit", isLimitSwitchHit);
         }
     }
