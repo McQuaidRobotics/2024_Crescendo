@@ -1,107 +1,80 @@
 package com.igknighters.commands.autos;
 
+import java.util.function.Function;
+
 import com.igknighters.constants.ConstValues.kAuto;
-import com.pathplanner.lib.auto.AutoBuilder;
+import com.igknighters.subsystems.swerve.Swerve;
 import com.pathplanner.lib.path.PathConstraints;
-import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 
 public class DynamicPath {
-    
+
     static enum DynPath {
-        SPEAKER(new DynamicPath(
-                FieldPositions.SPEAKER, 
-                kAuto.DYNAMIC_PATH_CONSTRAINTS, 
-                kAuto.DYN_END_VELO, 
-                0.0)),
-        AMP(new DynamicPath(
-                FieldPositions.AMP, 
-                kAuto.DYNAMIC_PATH_CONSTRAINTS, 
-                kAuto.DYN_END_VELO, 
-                0.0)),
-        STAGE_CENTER(new DynamicPath(
-                FieldPositions.STAGE_CENTER, 
-                kAuto.DYNAMIC_PATH_CONSTRAINTS, 
-                kAuto.DYN_END_VELO, 
-                0.0)),
-        STAGE_LEFT(new DynamicPath(
-                FieldPositions.STAGE_LEFT, 
-                kAuto.DYNAMIC_PATH_CONSTRAINTS, 
-                kAuto.DYN_END_VELO, 
-                0.0)),
-        STAGE_RIGHT(new DynamicPath(
-                FieldPositions.STAGE_RIGHT, 
-                kAuto.DYNAMIC_PATH_CONSTRAINTS, 
-                kAuto.DYN_END_VELO, 
-                0.0)),
-        NOTE_LEFT(new DynamicPath(
-                FieldPositions.NOTE_LEFT, 
-                kAuto.DYNAMIC_PATH_CONSTRAINTS, 
-                kAuto.DYN_END_VELO, 
-                0.0)),
-        NOTE_CENTER(new DynamicPath(
-                FieldPositions.NOTE_CENTER, 
-                kAuto.DYNAMIC_PATH_CONSTRAINTS, 
-                kAuto.DYN_END_VELO, 
-                0.0)),
-        NOTE_RIGHT(new DynamicPath(
-                FieldPositions.NOTE_RIGHT, 
-                kAuto.DYNAMIC_PATH_CONSTRAINTS, 
-                kAuto.DYN_END_VELO, 
-                0.0));
+        SPEAKER(new DynamicPath(FieldPositions.SPEAKER)),
+        AMP(new DynamicPath(FieldPositions.AMP)),
+        STAGE_CENTER(new DynamicPath(FieldPositions.STAGE_CENTER)),
+        STAGE_LEFT(new DynamicPath(FieldPositions.STAGE_LEFT)),
+        STAGE_RIGHT(new DynamicPath(FieldPositions.STAGE_RIGHT)),
+        NOTE_LEFT(new DynamicPath(FieldPositions.NOTE_LEFT)),
+        NOTE_CENTER(new DynamicPath(FieldPositions.NOTE_CENTER)),
+        NOTE_RIGHT(new DynamicPath(FieldPositions.NOTE_RIGHT));
 
         private DynamicPath dynBlock;
         private DynPath(DynamicPath dynPath) {
             this.dynBlock = dynPath.withName(this.name());
         }
 
-        public Command getCmd() {
-            return dynBlock.getCmd().withName(this.name());
+        public Command getCmd(Swerve swerve) {
+            return dynBlock.getCmd(swerve);
         }
     }
 
-    private Command loggedCommad(Command cmd) {
-        return new FunctionalCommand(
-            () -> {
-                SmartDashboard.putString("DynamicCmd", cmd.getName());
-                cmd.initialize();
-            },
-            cmd::execute,
-            (interupted) -> {
-                SmartDashboard.putString("DynamicCmd", "");
-                cmd.end(interupted);
-            },
-            cmd::isFinished,
-            cmd.getRequirements().toArray(new Subsystem[0])
-        );
-    }
-
-    private Command cmd;
+    private Function<Swerve, Command> cmdResolver;
     private String name = "Dynamic Path Command";
 
-    public DynamicPath(double x, double y, double rotationDegrees) {
-        if (x < 0 || y < 0 || x > 16.5 || y > 8.15) throw new RuntimeException("Dynamic path pose is outside the field!");
+    public DynamicPath(double x, double y, double rotationDegrees, double rotationDelay) {
+        var targetPose = new Pose2d(
+            new Translation2d(x, y), 
+            Rotation2d.fromDegrees(rotationDegrees)
+        );
 
-        cmd = AutoBuilder.pathfindToPose(
-            new Pose2d(
-                new Translation2d(x, y), 
-                Rotation2d.fromDegrees(rotationDegrees)), 
-            kAuto.DYNAMIC_PATH_CONSTRAINTS, 
-            kAuto.DYN_END_VELO, 
-            0.0);
+        cmdResolver = (swerve) -> new SimplePathfindingCommand(
+            targetPose,
+            0.0,
+            rotationDelay,
+            kAuto.DYNAMIC_PATH_CONSTRAINTS,
+            swerve
+        );
+    }
+    public DynamicPath(double x, double y, double rotationDegrees) {
+        var targetPose = new Pose2d(
+            new Translation2d(x, y), 
+            Rotation2d.fromDegrees(rotationDegrees)
+        );
+
+        cmdResolver = (swerve) -> new SimplePathfindingCommand(
+            targetPose,
+            swerve
+        );
+    }
+    public DynamicPath(Pose2d targetPose) {
+        cmdResolver = (swerve) -> new SimplePathfindingCommand(
+            targetPose,
+            swerve
+        );
     }
     public DynamicPath(Pose2d target, PathConstraints contraints, double endVelo, double rotDelay) {
-        cmd = AutoBuilder.pathfindToPose(target, contraints, endVelo, rotDelay);
-    }
-    public DynamicPath(PathPlannerPath path, PathConstraints contraints, double rotDelay) {
-        cmd = AutoBuilder.pathfindThenFollowPath(path, contraints, rotDelay);
+        cmdResolver = (swerve) -> new SimplePathfindingCommand(
+            target,
+            endVelo,
+            rotDelay,
+            contraints,
+            swerve
+        );
     }
 
     public DynamicPath withName(String name) {
@@ -109,7 +82,7 @@ public class DynamicPath {
         return this;
     }
 
-    public Command getCmd() {
-        return loggedCommad(cmd.withName(name));
+    public Command getCmd(Swerve swerve) {
+        return cmdResolver.apply(swerve).withName(name);
     }
 }

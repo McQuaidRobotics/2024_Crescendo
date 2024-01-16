@@ -9,6 +9,7 @@ import com.igknighters.util.SwerveModuleConstants;
 import com.igknighters.util.SwerveModuleConstants.ModuleId;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
@@ -222,7 +223,11 @@ public final class ConstValues {
             kSwerve.MAX_DRIVE_VELOCITY,
             kSwerve.MAX_DRIVE_ACCELERATION,
             kSwerve.MAX_ANGULAR_VELOCITY,
-            kSwerve.MAX_ANGULAR_ACCELERATION);
-        public static final double DYN_END_VELO = 3.0;
+            kSwerve.MAX_ANGULAR_ACCELERATION
+        );
+        public static final ReplanningConfig DYNAMIC_REPLANNING_CONFIG = new ReplanningConfig(
+            true,
+            false
+        );
     }
 }

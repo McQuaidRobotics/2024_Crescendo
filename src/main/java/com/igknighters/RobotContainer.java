@@ -9,9 +9,9 @@ import com.igknighters.controllers.OperatorController;
 import com.igknighters.controllers.TestingController;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.ReplanningConfig;
 
 import com.igknighters.SubsystemResources.AllSubsystems;
+import com.igknighters.commands.autos.Autos;
 import com.igknighters.commands.autos.AutosCmdRegister;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -77,6 +77,7 @@ public class RobotContainer {
             //     ));
 
             setupAutos();
+            Autos.createSendableChooser(swerve);
         }
     }
 
@@ -98,9 +99,8 @@ public class RobotContainer {
                         kAuto.AUTO_ANGULAR_PID,
                         kSwerve.MAX_DRIVE_VELOCITY,
                         kSwerve.DRIVEBASE_RADIUS,
-                        new ReplanningConfig(
-                                true,
-                                false)),
+                        kAuto.DYNAMIC_REPLANNING_CONFIG
+                ),
                 () -> {
                     if (DriverStation.getAlliance().isPresent() 
                     && DriverStation.getAlliance().get() == Alliance.Blue) {
@@ -114,6 +114,6 @@ public class RobotContainer {
                 },
                 swerve);
 
-        GlobalState.onceInitAutoChooser();
+        GlobalState.onceInitAutoChooser(allSubsystems.swerve.get());
     }
 }

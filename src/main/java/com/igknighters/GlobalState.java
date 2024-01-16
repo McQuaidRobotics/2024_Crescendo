@@ -5,6 +5,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 import com.igknighters.commands.autos.Autos;
+import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.vision.VisionOnlyPoseEstimator;
 import com.igknighters.subsystems.vision.VisionOnlyPoseEstimator.FakeWheelPositions;
 import com.igknighters.subsystems.vision.camera.Camera.VisionPoseEst;
@@ -231,7 +232,7 @@ public class GlobalState {
      * This is called by {@link RobotContainer#setupAutos()}.
      * This can only be called once, further calls will log error and do nothing.
      */
-    public static void onceInitAutoChooser() {
+    public static void onceInitAutoChooser(Swerve swerve) {
         globalLock.lock();
         try {
             if (autoChooserCreated) {
@@ -239,7 +240,7 @@ public class GlobalState {
                 return;
             }
             autoChooserCreated = true;
-            Autos.createSendableChooser();
+            Autos.createSendableChooser(swerve);
         } finally {
             globalLock.unlock();
         }
