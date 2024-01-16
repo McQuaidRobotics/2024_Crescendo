@@ -122,13 +122,11 @@ public class AprilTags {
                     new Translation3d(182.73, 146.19, 52.00),
                     new Rotation3d(0.0, 0.0, 240)
                 )
-            ),
-            
-            
+            )
         };
     public static final AprilTagFieldLayout APRIL_TAG_FIELD = new AprilTagFieldLayout(
         List.of(APRILTAGS),
-        Units.feetToMeters(54.4),
-        Units.feetToMeters(26.9)
+        FieldConstants.FIELD_LENGTH,
+        FieldConstants.FIELD_WIDTH
     );
 }
