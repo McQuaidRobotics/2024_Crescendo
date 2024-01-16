@@ -44,6 +44,8 @@ public class SimplePathfindingCommand extends Command {
     private final PathFollowingController controller;
     private final double rotationDelayDistance;
     private final ReplanningConfig replanningConfig;
+    private final Optional<Supplier<Rotation2d>> rotationOverrideSupplier = Optional.empty();
+    private final Swerve swerve;
 
     private Optional<PathPlannerPath> currentPathOpt;
     private Optional<PathPlannerTrajectory> currentTrajectoryOpt;
@@ -53,29 +55,16 @@ public class SimplePathfindingCommand extends Command {
 
     private boolean invalid = false;
 
-    /**
-     * Constructs a new base pathfinding command that will generate a path towards
-     * the given pose.
-     *
-     * @param targetPose            the pose to pathfind to, the rotation component
-     *                              is only relevant for
-     *                              holonomic drive trains
-     * @param goalEndVel            The goal end velocity when reaching the target
-     *                              pose
-     * @param rotationDelayDistance How far the robot should travel before
-     *                              attempting to rotate to the
-     *                              final rotation
-     * @param constraints           The path constraints to use when generating the
-     *                              path
-     * @param swerve                The swerve subsystem to use for pathfinding
-     */
-    public SimplePathfindingCommand(
+    private SimplePathfindingCommand(
             Pose2d targetPose,
             double goalEndVel,
             double rotationDelayDistance,
             PathConstraints constraints,
-            Swerve swerve) {
+            Optional<Supplier<Rotation2d>> rotationOverrideSupplier,
+            Swerve swerve
+    ) {
         addRequirements(swerve);
+        this.swerve = swerve;
 
         Pathfinding.ensureInitialized();
 
@@ -113,13 +102,73 @@ public class SimplePathfindingCommand extends Command {
      * @param swerve                The swerve subsystem to use for pathfinding
      */
     public SimplePathfindingCommand(Pose2d targetPose, Swerve swerve) {
-        this(targetPose, 0.0, 0.05, kAuto.DYNAMIC_PATH_CONSTRAINTS, swerve);
+        this(targetPose, 0.0, 0.05, kAuto.DYNAMIC_PATH_CONSTRAINTS, Optional.empty(), swerve);
+    }
+
+
+    public SimplePathfindingCommand withEndVelo(double velo) {
+        return new SimplePathfindingCommand(
+            targetPose,
+            velo,
+            rotationDelayDistance,
+            constraints,
+            rotationOverrideSupplier,
+            swerve
+        );
+    }
+
+    public SimplePathfindingCommand withRotDelayDist(double rotationDelayDistance) {
+        return new SimplePathfindingCommand(
+            targetPose,
+            goalEndState.getVelocity(),
+            rotationDelayDistance,
+            constraints,
+            rotationOverrideSupplier,
+            swerve
+        );
+    }
+
+    public SimplePathfindingCommand withConstraints(PathConstraints constraints) {
+        return new SimplePathfindingCommand(
+            targetPose,
+            goalEndState.getVelocity(),
+            rotationDelayDistance,
+            constraints,
+            rotationOverrideSupplier,
+            swerve
+        );
+    }
+
+    public SimplePathfindingCommand withRotationOverride(Supplier<Rotation2d> rotationOverrideSupplier) {
+        return new SimplePathfindingCommand(
+            targetPose,
+            goalEndState.getVelocity(),
+            rotationDelayDistance,
+            constraints,
+            Optional.of(rotationOverrideSupplier),
+            swerve
+        );
+    }
+
+    public SimplePathfindingCommand withReplanningConfig(ReplanningConfig replanningConfig) {
+        return new SimplePathfindingCommand(
+            targetPose,
+            goalEndState.getVelocity(),
+            rotationDelayDistance,
+            constraints,
+            rotationOverrideSupplier,
+            swerve
+        );
     }
 
     @Override
     public void initialize() {
         if (invalid) {
             return;
+        }
+
+        if (rotationOverrideSupplier.isPresent()) {
+            PPHolonomicDriveController.setRotationTargetOverride(() -> Optional.of(rotationOverrideSupplier.get().get()));
         }
 
         currentTrajectoryOpt = Optional.empty();
@@ -308,6 +357,10 @@ public class SimplePathfindingCommand extends Command {
             return;
         }
 
+        if (rotationOverrideSupplier.isPresent()) {
+            PPHolonomicDriveController.setRotationTargetOverride(Optional::empty);
+        }
+
         timer.stop();
 
         if (!interrupted && goalEndState.getVelocity() < 0.1) {
@@ -330,9 +383,9 @@ public class SimplePathfindingCommand extends Command {
     private void validateTargetPose(Pose2d targetPose) {
         var x = targetPose.getTranslation().getX();
         var y = targetPose.getTranslation().getY();
-        boolean xTooLarge = x > FieldConstants.fieldLength;
+        boolean xTooLarge = x > FieldConstants.FIELD_LENGTH;
         boolean xTooSmall = x < 0;
-        boolean yTooLarge = y > FieldConstants.fieldWidth;
+        boolean yTooLarge = y > FieldConstants.FIELD_WIDTH;
         boolean yTooSmall = y < 0;
         if (xTooLarge || xTooSmall || yTooLarge || yTooSmall) {
             String message = "Target pose is out of bounds for  "
