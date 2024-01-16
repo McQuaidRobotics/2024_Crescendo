@@ -10,10 +10,11 @@ import edu.wpi.first.math.kinematics.Odometry;
 import edu.wpi.first.math.kinematics.WheelPositions;
 import edu.wpi.first.math.VecBuilder;
 
-
+/**
+ * A fake pose estimator that only uses vision.
+ */
 public class VisionOnlyPoseEstimator extends PoseEstimator<VisionOnlyPoseEstimator.FakeWheelPositions> {
     public static class FakeWheelPositions implements WheelPositions<FakeWheelPositions> {
-
         @Override
         public FakeWheelPositions copy() {
             return new FakeWheelPositions();
@@ -53,7 +54,7 @@ public class VisionOnlyPoseEstimator extends PoseEstimator<VisionOnlyPoseEstimat
             new FakeKinematics(),
             new FakeOdometry(),
             VecBuilder.fill(0.01, 0.01, 0.01),
-            VecBuilder.fill(0.01, 0.01, 0.01)
+            VecBuilder.fill(1.0, 1.0, 1.0)
         );
     }
 }

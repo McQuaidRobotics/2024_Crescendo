@@ -55,8 +55,8 @@ public class CameraReal implements Camera {
                         estRoboPose.timestampSeconds,
                         estRoboPose.targetsUsed
                             .stream()
-                            .mapToInt(PhotonTrackedTarget::getFiducialId)
-                            .toArray()
+                            .map(PhotonTrackedTarget::getFiducialId)
+                            .toList()
                     )
                 );
     }

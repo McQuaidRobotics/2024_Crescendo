@@ -2,12 +2,16 @@ package com.igknighters.subsystems.vision;
 
 import com.igknighters.GlobalState;
 import com.igknighters.GlobalState.LocalizerType;
+import com.igknighters.constants.AprilTags;
 import com.igknighters.constants.ConstValues.kVision;
 import com.igknighters.subsystems.vision.camera.Camera;
 
 import java.util.List;
 
 import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -59,11 +63,21 @@ public class Vision extends SubsystemBase {
             if (optEval.isPresent()) {
                 var eval = optEval.get();
 
-                var trust = VisionTrustworthiness.formInt(Math.min(eval.apriltags.length, 3));
+                var trust = VisionTrustworthiness.formInt(Math.min(eval.apriltags.size(), 3));
 
                 GlobalState.submitVisionData(eval, trust.stdDevs);
 
-                //TODO: Add showing april tags on field
+                GlobalState.modifyField(field -> {
+                    field.getObject("seen_apriltags").setPoses(
+                        eval.apriltags.stream()
+                            .map(tagId -> AprilTags.APRIL_TAG_FIELD
+                                .getTagPose(tagId)
+                                .orElseGet(() -> new Pose3d(new Translation3d(-10.0, -10.0, -10.0), new Rotation3d()))
+                                .toPose2d()
+                            )
+                            .toList()
+                    );
+                });
             }
         }
     }
