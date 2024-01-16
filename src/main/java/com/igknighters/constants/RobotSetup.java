@@ -75,16 +75,16 @@ public class RobotSetup {
                 throw new RuntimeException("Robot ID not found, " + currentSerialNum + " not in serialToID map");
             }
             BootupLogger.BootupLog("Robot Name: " + currentID.name);
+            Logger.recordMetadata("RobotId", currentID.name());
+            Logger.recordMetadata(
+                "EnabledSubsystems",
+                List.of(currentID.subsystems)
+                    .stream()
+                    .map(sub -> sub.name())
+                    .reduce("", (acc, sub) -> acc + sub + ", ")
+            );
+            Logger.recordMetadata("ConstantsID", currentID.constID.name());
         }
-        Logger.recordMetadata("RobotId", currentID.name());
-        Logger.recordMetadata(
-            "EnabledSubsystems",
-            List.of(currentID.subsystems)
-                .stream()
-                .map(sub -> sub.name())
-                .reduce("", (acc, sub) -> acc + sub + ", ")
-        );
-        Logger.recordMetadata("ConstantsID", currentID.constID.name());
         return currentID;
     }
 }
