@@ -134,7 +134,7 @@ public final class ConstValues {
             (Motors.Falcon500Foc.FREE_SPEED / TAU) * DRIVE_GEAR_RATIO * WHEEL_CIRCUMFERENCE * MOTOR_OUTPUT_SCALAR;
         public static final double MAX_DRIVE_ACCELERATION = MAX_DRIVE_VELOCITY / ACCELERATION_TIME;
 
-        public static final double MAX_ANGULAR_VELOCITY = MAX_DRIVE_VELOCITY / DRIVEBASE_CIRCUMFERENCE * TAU;
+        public static final double MAX_ANGULAR_VELOCITY = MAX_DRIVE_VELOCITY / DRIVEBASE_RADIUS;
         public static final double MAX_ANGULAR_ACCELERATION = MAX_ANGULAR_VELOCITY / ACCELERATION_TIME;
 
         /* Inverts */
