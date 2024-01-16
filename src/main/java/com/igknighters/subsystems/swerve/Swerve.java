@@ -10,6 +10,7 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.sim.Pigeon2SimState;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -104,33 +105,14 @@ public class Swerve extends SubsystemBase {
         visualizer = new SwerveVisualizer(this, swerveMods);
     }
 
-    public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
-        SwerveModuleState[] mSwerveModuleStates = kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(fieldRelative
-                ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                        translation.getX(),
-                        translation.getY(),
-                        rotation,
-                        getYawRot())
-                : new ChassisSpeeds(
-                        translation.getX(),
-                        translation.getY(),
-                        rotation));
-
-        SwerveDriveKinematics.desaturateWheelSpeeds(mSwerveModuleStates, ConstValues.kSwerve.MAX_DRIVE_VELOCITY);
-
-        for (SwerveModule module : swerveMods) {
-            module.setDesiredState(mSwerveModuleStates[module.getModuleNumber()], isOpenLoop);
-        }
-    }
-
-    public void driveChassisSpeeds(ChassisSpeeds speeds, boolean openLoop, boolean invertRotation) {
+    public void driveChassisSpeeds(ChassisSpeeds speeds, boolean isOpenLoop, boolean invertRotation) {
         if (invertRotation)
             speeds.omegaRadiansPerSecond *= -1.0;
         SwerveModuleState[] targetStates = kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(speeds);
 
         SwerveDriveKinematics.desaturateWheelSpeeds(targetStates, kSwerve.MAX_DRIVE_VELOCITY);
 
-        setModuleStates(targetStates);
+        setModuleStates(targetStates, isOpenLoop);
     }
 
     public void setYaw(double val) {
@@ -176,16 +158,16 @@ public class Swerve extends SubsystemBase {
         return modulePositions;
     }
 
-    public void setModuleStates(SwerveModuleState[] desiredStates) {
+    public void setModuleStates(SwerveModuleState[] desiredStates, boolean isOpenLoop) {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, ConstValues.kSwerve.MAX_DRIVE_VELOCITY);
 
         for (SwerveModule module : swerveMods) {
-            module.setDesiredState(desiredStates[module.getModuleNumber()], false);
+            module.setDesiredState(desiredStates[module.getModuleNumber()], isOpenLoop);
         }
     }
 
-    public void setModuleStates(ChassisSpeeds chassisSpeeds) {
-        setModuleStates(kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(chassisSpeeds));
+    public void setModuleStates(ChassisSpeeds chassisSpeeds, boolean isOpenLoop) {
+        setModuleStates(kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(chassisSpeeds), isOpenLoop);
     }
 
     public SwerveModuleState[] getModuleStates() {
@@ -212,15 +194,16 @@ public class Swerve extends SubsystemBase {
         var wantedAngleRads = wantedAngle.getRadians();
         var currentAngleRads = getYawRads();
 
-        if (Math.abs(wantedAngleRads - currentAngleRads) > Math.PI) {
-            if (wantedAngleRads > currentAngleRads) {
-                wantedAngleRads -= 2 * Math.PI;
-            } else {
-                wantedAngleRads += 2 * Math.PI;
-            }
-        }
+        // if (Math.abs(wantedAngleRads - currentAngleRads) > Math.PI) {
+        // if (wantedAngleRads > currentAngleRads) {
+        // wantedAngleRads -= 2 * Math.PI;
+        // } else {
+        // wantedAngleRads += 2 * Math.PI;
+        // }
+        // }
 
-        var rotVelo = kSwerve.ANGLE_CONTROLLER_KP * (wantedAngleRads - currentAngleRads);
+        var rotVelo = kSwerve.ANGLE_CONTROLLER_KP
+                * MathUtil.inputModulus(wantedAngleRads - currentAngleRads, -Math.PI, Math.PI);
         return Math.max(Math.min(rotVelo, kSwerve.MAX_ANGULAR_VELOCITY), -kSwerve.MAX_ANGULAR_VELOCITY);
     }
 
@@ -238,9 +221,10 @@ public class Swerve extends SubsystemBase {
         Tracer.startTrace("SwervePeriodic");
 
         BaseStatusSignal.refreshAll(
-                gyroPitchSignal,
-                gyroRollSignal,
-                gyroYawSignal);
+            gyroPitchSignal,
+            gyroRollSignal,
+            gyroYawSignal
+        );
 
         inputs.gyroPitchRads = Units.degreesToRadians(gyroPitchSignal.getValue());
         inputs.gyroRollRads = Units.degreesToRadians(gyroRollSignal.getValue());

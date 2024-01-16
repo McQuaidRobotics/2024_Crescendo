@@ -13,6 +13,7 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.commands.autos.Autos;
 import com.igknighters.commands.autos.AutosCmdRegister;
+import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -42,39 +43,7 @@ public class RobotContainer {
         if (allSubsystems.swerve.isPresent()) {
             var swerve = allSubsystems.swerve.get();
 
-            if (RobotBase.isReal()) {
-                swerve.setDefaultCommand(
-                        new com.igknighters.commands.swerve.TeleopSwerve(
-                                swerve,
-                                driverController.leftStickY(),
-                                driverController.leftStickX(),
-                                driverController.rightStickX()));
-            } else {
-                swerve.setDefaultCommand(
-                        new com.igknighters.commands.swerve.TeleopSwerveSim(
-                                swerve,
-                                driverController.leftStickY(),
-                                driverController.leftStickX(),
-                                driverController.rightStickX()));
-            }
-
-            // swerve.setDefaultCommand(
-            //         new com.igknighters.commands.swerve.TeleopSwerveAbsRot(
-            //                 swerve,
-            //                 driverController.leftStickX(),
-            //                 driverController.leftStickY(),
-            //                 driverController.rightStickX(),
-            //                 driverController.rightStickY()
-            //         ));
-
-            // swerve.setDefaultCommand(
-            //     new com.igknighters.commands.swerve.TeleopSwerveTarget(
-            //             swerve,
-            //             driverController.leftStickX(),
-            //             driverController.leftStickY(),
-            //             driverController.rightStickX(),
-            //             driverController.rightStickY()
-            //     ));
+            swerve.setDefaultCommand(new TeleopSwerveBase.TeleopSwerveOmni(swerve, driverController));
 
             setupAutos();
             Autos.createSendableChooser(swerve);

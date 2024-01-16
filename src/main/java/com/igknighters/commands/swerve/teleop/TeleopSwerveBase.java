@@ -1,0 +1,111 @@
+package com.igknighters.commands.swerve.teleop;
+
+import com.igknighters.subsystems.swerve.Swerve;
+
+import java.util.function.DoubleSupplier;
+
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import com.igknighters.constants.ConstValues.kSwerve;
+import com.igknighters.controllers.ControllerParent;
+
+public class TeleopSwerveBase extends Command {
+    @SuppressWarnings("unused")
+    public static Translation2d adjustForSimOrientedControl(Translation2d chassisSpeeds) {
+        if (RobotBase.isSimulation() && kSwerve.ORIENT_TELEOP_FOR_SIM) {
+            return new Translation2d(
+                chassisSpeeds.getY(),
+                -chassisSpeeds.getX()
+            );
+        } else {
+            return chassisSpeeds;
+        }
+    }
+
+    protected final Swerve swerve;
+
+    private final DoubleSupplier rawTranslationXSup;
+    private final DoubleSupplier rawTranslationYSup;
+    private final DoubleSupplier rawRotationXSup;
+    private final DoubleSupplier rawRotationYSup;
+
+    public TeleopSwerveBase(Swerve swerve, ControllerParent controller) {
+        this.swerve = swerve;
+        addRequirements(swerve);
+
+        this.rawTranslationXSup = controller.leftStickX();
+        this.rawTranslationYSup = controller.leftStickY();
+        this.rawRotationXSup = controller.rightStickX();
+        this.rawRotationYSup = controller.rightStickY();
+    }
+
+    protected double getTranslationX() {
+        return -kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(rawTranslationXSup.getAsDouble());
+    }
+
+    protected double getTranslationY() {
+        return -kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(rawTranslationYSup.getAsDouble());
+    }
+
+    protected double getRotationX() {
+        return -kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(rawRotationXSup.getAsDouble());
+    }
+
+    protected double getRotationY() {
+        return -kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(rawRotationYSup.getAsDouble());
+    }
+
+    public static class TeleopSwerveOmni extends Command {
+        public static enum TeleopMode {
+            TRADITIONAL,
+            ABS_ROT,
+            TARGET
+        }
+
+
+        private final SendableChooser<TeleopMode> chooser = new SendableChooser<>();
+
+        private final Swerve swerve;
+        private final ControllerParent controller;
+
+        private TeleopMode mode = TeleopMode.TRADITIONAL;
+        private TeleopSwerveBase currentCmd;
+
+        public TeleopSwerveOmni(Swerve swerve, ControllerParent controller) {
+            addRequirements(swerve);
+
+            this.swerve = swerve;
+            this.controller = controller;
+            currentCmd = new TeleopSwerveTraditional(swerve, controller);
+
+            chooser.setDefaultOption("Traditional", TeleopMode.TRADITIONAL);
+            chooser.addOption("Absolute Rotation", TeleopMode.ABS_ROT);
+            chooser.addOption("Target", TeleopMode.TARGET);
+
+            SmartDashboard.putData("Teleop Mode", chooser);
+        }
+
+        @Override
+        public void execute() {
+            var newMode = chooser.getSelected();
+            if (newMode != mode) {
+                mode = newMode;
+                switch (mode) {
+                    case TRADITIONAL:
+                        currentCmd = new TeleopSwerveTraditional(swerve, controller);
+                        break;
+                    case ABS_ROT:
+                        currentCmd = new TeleopSwerveAbsRot(swerve, controller);
+                        break;
+                    case TARGET:
+                        currentCmd = new TeleopSwerveTarget(swerve, controller);
+                        break;
+                }
+            }
+            currentCmd.execute();
+        }
+    }
+}

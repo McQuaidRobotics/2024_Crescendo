@@ -16,11 +16,11 @@ public class SwerveCommands {
                     new SwerveModuleState(0.0, Rotation2d.fromDegrees(90)),
                     new SwerveModuleState(0.0, Rotation2d.fromDegrees(0))
             };
-            swerve.setModuleStates(newModuleStates);
+            swerve.setModuleStates(newModuleStates, false);
         }).andThen(new WaitCommand(0.5)).withName("commandXDrives");
     }
 
     public static Command commandStopDrives(final Swerve swerve) {
-        return swerve.runOnce(() -> swerve.setModuleStates(new ChassisSpeeds())).withName("commandStopDrives");
+        return swerve.runOnce(() -> swerve.setModuleStates(new ChassisSpeeds(), false)).withName("commandStopDrives");
     }
 }

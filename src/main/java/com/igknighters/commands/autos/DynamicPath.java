@@ -2,7 +2,6 @@ package com.igknighters.commands.autos;
 
 import java.util.function.Function;
 
-import com.igknighters.constants.ConstValues.kAuto;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.pathplanner.lib.path.PathConstraints;
 
@@ -44,11 +43,8 @@ public class DynamicPath {
 
         cmdResolver = (swerve) -> new SimplePathfindingCommand(
             targetPose,
-            0.0,
-            rotationDelay,
-            kAuto.DYNAMIC_PATH_CONSTRAINTS,
             swerve
-        );
+        ).withRotDelayDist(rotationDelay);
     }
     public DynamicPath(double x, double y, double rotationDegrees) {
         var targetPose = new Pose2d(
@@ -70,11 +66,8 @@ public class DynamicPath {
     public DynamicPath(Pose2d target, PathConstraints contraints, double endVelo, double rotDelay) {
         cmdResolver = (swerve) -> new SimplePathfindingCommand(
             target,
-            endVelo,
-            rotDelay,
-            contraints,
             swerve
-        );
+        ).withConstraints(contraints).withEndVelo(endVelo).withRotDelayDist(rotDelay);
     }
 
     public DynamicPath withName(String name) {

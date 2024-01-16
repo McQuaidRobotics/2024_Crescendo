@@ -5,7 +5,9 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.igknighters.subsystems.vision.camera.Camera;
 import com.igknighters.subsystems.vision.camera.Camera.CameraConfig;
+import com.igknighters.util.LerpTable;
 import com.igknighters.util.SwerveModuleConstants;
+import com.igknighters.util.LerpTable.LerpTableEntry;
 import com.igknighters.util.SwerveModuleConstants.ModuleId;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.PIDConstants;
@@ -159,6 +161,22 @@ public final class ConstValues {
         }
 
         public static final double ANGLE_CONTROLLER_KP = 8.0;
+
+        public static final boolean ORIENT_TELEOP_FOR_SIM = false;
+
+        public static final LerpTable TELEOP_TRANSLATION_AXIS_CURVE = new LerpTable(
+            new LerpTableEntry(0.0, 0.0),
+            new LerpTableEntry(0.1, 0.0), //deadzone
+            new LerpTableEntry(0.7, 0.4),
+            new LerpTableEntry(1.0, 1.0)
+        );
+
+        public static final LerpTable TELEOP_ROTATION_AXIS_CURVE = new LerpTable(
+            new LerpTableEntry(0.0, 0.0),
+            new LerpTableEntry(0.1, 0.0), //deadzone
+            new LerpTableEntry(0.7, 0.4),
+            new LerpTableEntry(1.0, 1.0)
+        );
 
         public static final class Mod0 {
             public static final ModuleId MODULE = ModuleId.m0;
