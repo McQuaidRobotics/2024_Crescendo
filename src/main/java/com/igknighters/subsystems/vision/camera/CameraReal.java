@@ -1,6 +1,5 @@
 package com.igknighters.subsystems.vision.camera;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.photonvision.PhotonCamera;
@@ -9,14 +8,11 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.estimation.TargetModel;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import com.igknighters.constants.AprilTags;
 import com.igknighters.util.BootupLogger;
 
-import edu.wpi.first.apriltag.AprilTag;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
 
 /**
  * An abstraction for a photon camera.
@@ -26,13 +22,6 @@ public class CameraReal implements Camera {
     private final Integer id;
     private final Transform3d cameraPose;
     private final PhotonPoseEstimator poseEstimator;
-
-    private static final AprilTagFieldLayout TEMP_APRIL_TAGS = new AprilTagFieldLayout(List.of(
-            new AprilTag(8, new Pose3d(
-                    new Translation3d(0, 1.4511, 5.772),
-                    new Rotation3d(0, 0, 0)))),
-            100.0,
-            100.0);
 
     /**
      * Creates an abstraction for a photon camera.
@@ -47,7 +36,7 @@ public class CameraReal implements Camera {
         this.cameraPose = new Transform3d(cameraPose.getTranslation(), cameraPose.getRotation());
 
         poseEstimator = new PhotonPoseEstimator(
-                TEMP_APRIL_TAGS,
+                AprilTags.APRIL_TAG_FIELD,
                 PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                 this.camera,
                 this.cameraPose);
