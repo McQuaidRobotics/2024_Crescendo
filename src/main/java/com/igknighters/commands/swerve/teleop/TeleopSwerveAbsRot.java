@@ -19,14 +19,13 @@ public class TeleopSwerveAbsRot extends TeleopSwerveBase {
         Translation2d absRotation = new Translation2d(getRotationX(), getRotationY());
         double rotVelo = swerve.rotVeloForRotation(absRotation.getAngle()) * absRotation.getNorm();
 
-        var translation = adjustForSimOrientedControl(new Translation2d(-getTranslationX(), -getTranslationY()));
+        var translation = orientForUser(new Translation2d(-getTranslationX(), -getTranslationY()));
 
         var chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-            translation.getX() * kSwerve.MAX_DRIVE_VELOCITY,
-            translation.getY() * kSwerve.MAX_DRIVE_VELOCITY,
-            rotVelo,
-            swerve.getYawRot()
-        );
+                translation.getX() * kSwerve.MAX_DRIVE_VELOCITY,
+                translation.getY() * kSwerve.MAX_DRIVE_VELOCITY,
+                rotVelo,
+                swerve.getYawRot());
 
         swerve.driveChassisSpeeds(chassisSpeeds, true, false);
     }

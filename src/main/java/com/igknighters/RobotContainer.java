@@ -7,6 +7,7 @@ import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.controllers.DriverController;
 import com.igknighters.controllers.OperatorController;
 import com.igknighters.controllers.TestingController;
+import com.igknighters.subsystems.swerve.Swerve;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 
@@ -45,17 +46,17 @@ public class RobotContainer {
 
             swerve.setDefaultCommand(new TeleopSwerveBase.TeleopSwerveOmni(swerve, driverController));
 
-            setupAutos();
+            setupAutos(swerve);
+
             Autos.createSendableChooser(swerve);
         }
     }
 
-    public void setupAutos() {
+    public void setupAutos(Swerve swerve) {
         AutosCmdRegister.registerCommands(allSubsystems);
 
         if (!allSubsystems.swerve.isPresent())
             return;
-        var swerve = allSubsystems.swerve.get();
         AutoBuilder.configureHolonomic(
                 swerve::getPose,
                 swerve::resetOdometry,
@@ -83,6 +84,6 @@ public class RobotContainer {
                 },
                 swerve);
 
-        GlobalState.onceInitAutoChooser(allSubsystems.swerve.get());
+        GlobalState.onceInitAutoChooser(swerve);
     }
 }

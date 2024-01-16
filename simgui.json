@@ -47,11 +47,6 @@
         "window": {
           "visible": true
         }
-      },
-      "/Visualizers/SwerveModules/Module[3]": {
-        "window": {
-          "visible": true
-        }
       }
     }
   },

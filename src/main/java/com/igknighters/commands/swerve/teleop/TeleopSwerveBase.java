@@ -4,6 +4,7 @@ import com.igknighters.subsystems.swerve.Swerve;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -14,14 +15,14 @@ import com.igknighters.controllers.ControllerParent;
 
 public class TeleopSwerveBase extends Command {
     @SuppressWarnings("unused")
-    public static Translation2d adjustForSimOrientedControl(Translation2d chassisSpeeds) {
+    public static Translation2d orientForUser(Translation2d chassisSpeeds) {
         if (RobotBase.isSimulation() && kSwerve.ORIENT_TELEOP_FOR_SIM) {
             return new Translation2d(
-                chassisSpeeds.getY(),
-                -chassisSpeeds.getX()
-            );
+                    chassisSpeeds.getX(),
+                    -chassisSpeeds.getY());
         } else {
-            return chassisSpeeds;
+            Translation2d chassisSpeedsAdj = chassisSpeeds.rotateBy(Rotation2d.fromDegrees(-90));
+            return new Translation2d(-chassisSpeedsAdj.getX(), chassisSpeedsAdj.getY());
         }
     }
 
@@ -43,19 +44,31 @@ public class TeleopSwerveBase extends Command {
     }
 
     protected double getTranslationX() {
-        return -kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(rawTranslationXSup.getAsDouble());
+        // inverted because left is positive for field due to Y being increased but left
+        // is negative for controller
+        var v = -kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(rawTranslationXSup.getAsDouble());
+        SmartDashboard.putNumber("getTranslationX", v);
+        return v;
     }
 
     protected double getTranslationY() {
-        return -kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(rawTranslationYSup.getAsDouble());
+        var v = kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(rawTranslationYSup.getAsDouble());
+        SmartDashboard.putNumber("getTranslationY", v);
+        return v;
     }
 
     protected double getRotationX() {
-        return -kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(rawRotationXSup.getAsDouble());
+        // inverted because left is positive for field due to Y being increased but left
+        // is negative for controller
+        var v = -kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(rawRotationXSup.getAsDouble());
+        SmartDashboard.putNumber("getRotationX", v);
+        return v;
     }
 
     protected double getRotationY() {
-        return -kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(rawRotationYSup.getAsDouble());
+        var v = kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(rawRotationYSup.getAsDouble());
+        SmartDashboard.putNumber("getRotationY", v);
+        return v;
     }
 
     public static class TeleopSwerveOmni extends Command {
@@ -64,7 +77,6 @@ public class TeleopSwerveBase extends Command {
             ABS_ROT,
             TARGET
         }
-
 
         private final SendableChooser<TeleopMode> chooser = new SendableChooser<>();
 
