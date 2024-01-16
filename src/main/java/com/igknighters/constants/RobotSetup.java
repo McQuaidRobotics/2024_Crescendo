@@ -24,7 +24,7 @@ public class RobotSetup {
         SIM_CRASH(Subsystems.all(), RobotConstID.CRASH),
         SIM_BURN(Subsystems.all(), RobotConstID.BURN),
 
-        TestBoard("testBoard(crash)", Subsystems.none(), RobotConstID.CRASH),
+        TestBoard("testBoard(crash)", Subsystems.list(Subsystems.Vision), RobotConstID.CRASH),
 
         Unlabeled("", Subsystems.none(), RobotConstID.BURN);
 
