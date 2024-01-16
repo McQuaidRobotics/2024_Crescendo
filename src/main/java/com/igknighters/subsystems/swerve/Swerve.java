@@ -85,20 +85,20 @@ public class Swerve extends SubsystemBase {
                 new SwerveModuleReal(ConstValues.kSwerve.Mod2.CONSTANTS),
                 new SwerveModuleReal(ConstValues.kSwerve.Mod3.CONSTANTS)
         }
-        : new SwerveModule[] {
-                new SwerveModuleSim(ConstValues.kSwerve.Mod0.CONSTANTS),
-                new SwerveModuleSim(ConstValues.kSwerve.Mod1.CONSTANTS),
-                new SwerveModuleSim(ConstValues.kSwerve.Mod2.CONSTANTS),
-                new SwerveModuleSim(ConstValues.kSwerve.Mod3.CONSTANTS)
-        };
+                : new SwerveModule[] {
+                        new SwerveModuleSim(ConstValues.kSwerve.Mod0.CONSTANTS),
+                        new SwerveModuleSim(ConstValues.kSwerve.Mod1.CONSTANTS),
+                        new SwerveModuleSim(ConstValues.kSwerve.Mod2.CONSTANTS),
+                        new SwerveModuleSim(ConstValues.kSwerve.Mod3.CONSTANTS)
+                };
 
-        GlobalState.onceInitOdometry(
-            new SwerveDrivePoseEstimator(
-                kSwerve.SWERVE_KINEMATICS,
-                getYawRot(),
-                getModulePositions(),
-                getPose())
-        );
+        GlobalState.setLocalizer(
+                new SwerveDrivePoseEstimator(
+                        kSwerve.SWERVE_KINEMATICS,
+                        getYawRot(),
+                        getModulePositions(),
+                        getPose()),
+                GlobalState.LocalizerType.HYBRID);
 
         visualizer = new SwerveVisualizer(this, swerveMods);
     }
@@ -123,7 +123,8 @@ public class Swerve extends SubsystemBase {
     }
 
     public void driveChassisSpeeds(ChassisSpeeds speeds, boolean openLoop, boolean invertRotation) {
-        if (invertRotation) speeds.omegaRadiansPerSecond *= -1.0;
+        if (invertRotation)
+            speeds.omegaRadiansPerSecond *= -1.0;
         SwerveModuleState[] targetStates = kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(speeds);
 
         SwerveDriveKinematics.desaturateWheelSpeeds(targetStates, kSwerve.MAX_DRIVE_VELOCITY);
@@ -141,9 +142,8 @@ public class Swerve extends SubsystemBase {
 
     public Rotation2d getYawRot() {
         return Rotation2d.fromDegrees(
-            scope0To360(
-                Units.radiansToDegrees(this.getYawRads())
-            ));
+                scope0To360(
+                        Units.radiansToDegrees(this.getYawRads())));
     }
 
     /**
@@ -204,7 +204,7 @@ public class Swerve extends SubsystemBase {
     }
 
     public void resetOdometry(Pose2d pose) {
-        GlobalState.resetLocalization(getYawRot(), pose, getModulePositions());
+        GlobalState.resetSwerveLocalization(getYawRot(), pose, getModulePositions());
     }
 
     public double rotVeloForRotation(Rotation2d wantedAngle) {
@@ -226,11 +226,10 @@ public class Swerve extends SubsystemBase {
     public Rotation2d rotationRelativeToPose(Rotation2d wantedAngleOffet, Translation2d pose) {
         var currentTrans = getPose().getTranslation();
         var angleBetween = Math.atan2(
-            pose.getY() - currentTrans.getY(),
-            pose.getX() - currentTrans.getX()
-        );
+                pose.getY() - currentTrans.getY(),
+                pose.getX() - currentTrans.getX());
         return Rotation2d.fromRadians(angleBetween)
-            .plus(wantedAngleOffet);
+                .plus(wantedAngleOffet);
     }
 
     @Override
@@ -238,8 +237,7 @@ public class Swerve extends SubsystemBase {
         BaseStatusSignal.refreshAll(
                 gyroPitchSignal,
                 gyroRollSignal,
-                gyroYawSignal
-        );
+                gyroYawSignal);
 
         inputs.gyroPitchRads = Units.degreesToRadians(gyroPitchSignal.getValue());
         inputs.gyroRollRads = Units.degreesToRadians(gyroRollSignal.getValue());
@@ -261,8 +259,8 @@ public class Swerve extends SubsystemBase {
 
         gyroSim.setRawYaw(
                 getYawRot().getDegrees()
-                + (Units.radiansToDegrees(currentSpeeds.omegaRadiansPerSecond) * ConstValues.PERIODIC_TIME)
-                + simYawOffset);
+                        + (Units.radiansToDegrees(currentSpeeds.omegaRadiansPerSecond) * ConstValues.PERIODIC_TIME)
+                        + simYawOffset);
         simYawOffset = 0.0;
     }
 

@@ -1,4 +1,4 @@
-package com.igknighters.vision.camera;
+package com.igknighters.subsystems.vision.camera;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -15,41 +15,33 @@ import java.util.function.Function;
 
 @SuppressWarnings("unused")
 public class CameraDisabled implements Camera {
-    private final Integer ID;
-    private final Transform3d CAMERA_POSE;
+    private final Integer id;
+    private final Transform3d cameraPose;
+    private final String cameraName;
 
     public CameraDisabled(String cameraName, Integer id, Pose3d cameraPose) {
-        ID = id;
-        CAMERA_POSE = new Transform3d(cameraPose.getTranslation(), cameraPose.getRotation());
+        this.id = id;
+        this.cameraPose = new Transform3d(cameraPose.getTranslation(), cameraPose.getRotation());
+        this.cameraName = cameraName;
     }
 
     @Override
-    public CameraResult getLatestResult() {
-        return null;
-    }
-
-    @Override
-    public Optional<Matrix<N3, N3>> getCameraMatrix() {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Matrix<N5, N1>> getDistCoeffs() {
+    public Optional<VisionPoseEst> evalPose() {
         return Optional.empty();
     }
 
     @Override
     public Transform3d getRobotToCameraTransform3d() {
-        return CAMERA_POSE;
-    }
-
-    @Override
-    public Function<List<PhotonTrackedTarget>, List<PhotonTrackedTarget>> getFilter() {
-        return Function.identity();
+        return cameraPose;
     }
 
     @Override
     public Integer getId() {
-        return ID;
+        return id;
+    }
+
+    @Override
+    public String getName() {
+        return cameraName;
     }
 }

@@ -3,10 +3,11 @@ package com.igknighters.constants;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.igknighters.subsystems.vision.camera.Camera;
+import com.igknighters.subsystems.vision.camera.Camera.CameraConfig;
 import com.igknighters.util.SwerveModuleConstants;
 import com.igknighters.util.SwerveModuleConstants.ModuleId;
 import com.pathplanner.lib.path.PathConstraints;
-import com.igknighters.vision.camera.Camera;
 import com.pathplanner.lib.util.PIDConstants;
 
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -73,17 +74,17 @@ public final class ConstValues {
         /**
          * The cameras used for vision.
          */
-        public static final Camera[] CAMERAS = new Camera[] {
-            Camera.create(
-                "RearLeftCamera",
+        public static final CameraConfig[] CAMERA_CONFIGS = new CameraConfig[] {
+            Camera.createConfig(
+                "photonvision-15",
                 0,
                 new Pose3d(
                     new Translation3d(0.0, 0.0, 0.25),
                     new Rotation3d()
                 )
             ),
-            Camera.create(
-                "RearRightCamera",
+            Camera.createConfig(
+                "photonvision-16",
                 1,
                 new Pose3d(
                     new Translation3d(0.0, 0.0, 0.25),

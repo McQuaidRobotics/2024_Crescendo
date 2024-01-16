@@ -24,7 +24,7 @@ public class RobotContainer {
     private final OperatorController operatorController;
     private final TestingController testingController;
 
-    private static AllSubsystems allSubsystems;
+    private final AllSubsystems allSubsystems;
 
     public RobotContainer() {
         DriverStation.silenceJoystickConnectionWarning(ConstValues.DEBUG);
@@ -113,5 +113,7 @@ public class RobotContainer {
                     else return false; //Default path for blue alliance side
                 },
                 swerve);
+
+        GlobalState.onceInitAutoChooser();
     }
 }

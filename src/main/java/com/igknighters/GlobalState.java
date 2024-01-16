@@ -4,11 +4,17 @@ import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
-import org.photonvision.EstimatedRobotPose;
+import com.igknighters.commands.autos.Autos;
+import com.igknighters.subsystems.vision.VisionOnlyPoseEstimator;
+import com.igknighters.subsystems.vision.VisionOnlyPoseEstimator.FakeWheelPositions;
+import com.igknighters.subsystems.vision.camera.Camera.VisionPoseEst;
+
+import edu.wpi.first.math.VecBuilder;
 
 // import com.igknighters.util.PoseHistory;
 
 import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -18,28 +24,49 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 
 public class GlobalState {
+    public static enum LocalizerType {
+        HYBRID(1000),
+        VISION(500),
+        NONE(0);
+
+        public final int priority;
+
+        private LocalizerType(int priority) {
+            this.priority = priority;
+        }
+    }
+
     private static final ReentrantLock globalLock = new ReentrantLock();
 
-    private static Optional<SwerveDrivePoseEstimator> localizer = Optional.empty();
+    private static LocalizerType localizerType = LocalizerType.NONE;
+    private static Optional<PoseEstimator<?>> localizer = Optional.empty();
 
     // private static final PoseHistory poseHistory = new PoseHistory();
 
     private static Optional<Field2d> field = Optional.empty();
 
+    private static boolean autoChooserCreated = false;
+
+    private GlobalState() {
+        throw new UnsupportedOperationException("This is a utility class!");
+    }
+
     /**
      * Meant to be used by swerve to initialize the odometry system.
+     * 
      * @param odometry The odometry system to initialize
      */
-    public static void onceInitOdometry(SwerveDrivePoseEstimator odometry) {
+    public static void setLocalizer(PoseEstimator<?> localizer, LocalizerType type) {
         globalLock.lock();
         try {
-            if (GlobalState.localizer.isPresent()) {
-                DriverStation.reportError("Odometry already present", false);
-                return;
+            if (localizerType.priority < type.priority) {
+                GlobalState.localizer = Optional.of(localizer);
+                localizerType = type;
             }
-            GlobalState.localizer = Optional.of(odometry);
         } finally {
             globalLock.unlock();
         }
@@ -47,12 +74,13 @@ public class GlobalState {
 
     /**
      * Get the robot's pose from the odometry system.
+     * 
      * @return The robot's pose
      */
     public static Pose2d getLocalizedPose() {
         globalLock.lock();
         try {
-            if (!localizer.isPresent()) {
+            if (!localizer.isPresent() || localizerType == LocalizerType.NONE) {
                 DriverStation.reportError("Odometry not present", false);
                 return new Pose2d();
             }
@@ -64,18 +92,25 @@ public class GlobalState {
 
     /**
      * Reset the odometry system to the given pose.
-     * @param gyroRot The gyro's rotation
-     * @param pose The pose to reset to
+     * 
+     * @param gyroRot   The gyro's rotation
+     * @param pose      The pose to reset to
      * @param positions The positions of the swerve modules
      */
-    public static void resetLocalization(Rotation2d gyroRot, Pose2d pose, SwerveModulePosition... positions) {
+    public static void resetSwerveLocalization(Rotation2d gyroRot, Pose2d pose, SwerveModulePosition... positions) {
         globalLock.lock();
         try {
-            if (!localizer.isPresent()) {
-                DriverStation.reportError("Odometry not present", false);
+            if (!localizer.isPresent() || localizerType == LocalizerType.NONE) {
+                DriverStation.reportError("Localizer not present", false);
                 return;
             }
-            localizer.get().resetPosition(gyroRot, positions, pose);
+            if (localizerType == LocalizerType.HYBRID) {
+                ((SwerveDrivePoseEstimator) localizer.get()).resetPosition(gyroRot, positions, pose);
+                return;
+            } else {
+                DriverStation.reportError("Localizer does not support Swerve", false);
+                return;
+            }
         } finally {
             globalLock.unlock();
         }
@@ -83,18 +118,30 @@ public class GlobalState {
 
     /**
      * Pipe swerve data into the odometry system to update the robot's pose.
-     * @param gyroRot The gyro's rotation
+     * 
+     * @param gyroRot         The gyro's rotation
      * @param modulePositions The positions of the swerve modules
      * @return The robot's updated pose
      */
     public static Pose2d submitSwerveData(Rotation2d gyroRot, SwerveModulePosition[] modulePositions) {
         globalLock.lock();
         try {
-            if (!localizer.isPresent()) {
-                DriverStation.reportError("Odometry not present", false);
+            // if (!localizer.isPresent()) {
+            //     DriverStation.reportError("Odometry not present", false);
+            //     return new Pose2d();
+            // }
+            // return localizer.get().update(gyroRot, modulePositions);
+
+            if (!localizer.isPresent() || localizerType == LocalizerType.NONE) {
+                DriverStation.reportError("Localizer not present", false);
                 return new Pose2d();
             }
-            return localizer.get().update(gyroRot, modulePositions);
+            if (localizerType == LocalizerType.HYBRID) {
+                return ((SwerveDrivePoseEstimator) localizer.get()).update(gyroRot, modulePositions);
+            } else {
+                DriverStation.reportError("Localizer does not support Swerve", false);
+                return new Pose2d();
+            }
         } finally {
             globalLock.unlock();
         }
@@ -102,57 +149,45 @@ public class GlobalState {
 
     /**
      * Pipe vision data into the odometry system to update the robot's pose.
-     * @param value The vision data
+     * 
+     * @param value           The vision data
      * @param trustworthyness The trustworthyness of the vision data
      */
-    public static void submitVisionData(EstimatedRobotPose value, Vector<N3> trustworthyness) {
+    public static void submitVisionData(VisionPoseEst value, Vector<N3> trustworthyness) {
         globalLock.lock();
         try {
-            if (!localizer.isPresent()) {
-                DriverStation.reportError("Odometry not present", false);
+            if (!localizer.isPresent() || localizerType == LocalizerType.NONE) {
+                DriverStation.reportError("Localizer not present", false);
                 return;
             }
-            localizer.get().addVisionMeasurement(
-                value.estimatedPose.toPose2d(),
-                value.timestampSeconds,
-                trustworthyness
-            );
+            if (localizerType == LocalizerType.VISION) {
+                ((VisionOnlyPoseEstimator) localizer.get()).addVisionMeasurement(
+                        value.pose.toPose2d(),
+                        value.timestamp,
+                        VecBuilder.fill(1.0, 1.0, 1.0));
+                ((VisionOnlyPoseEstimator) localizer.get())
+                    .update(
+                        value.pose.toPose2d().getRotation(),
+                        new FakeWheelPositions()
+                    );
+            } else if (localizerType == LocalizerType.HYBRID) {
+                ((SwerveDrivePoseEstimator) localizer.get()).addVisionMeasurement(
+                        value.pose.toPose2d(),
+                        value.timestamp,
+                        trustworthyness);
+            } else {
+                DriverStation.reportError("Localizer does not support Vision", false);
+                return;
+            }
         } finally {
             globalLock.unlock();
         }
     }
 
-    // /**
-    //  * Add a pose to the pose history to be queried later to validate vision data.
-    //  * @param pose The pose to add
-    //  */
-    // public static void addPoseToHistory(Pose2d pose) {
-    //     globalLock.lock();
-    //     try {
-    //         poseHistory.addPose(pose);
-    //     } finally {
-    //         globalLock.unlock();
-    //     }
-    // }
-
-    // /**
-    //  * Get a pose from the pose history.
-    //  * @param timestamp The timestamp of the pose to get
-    //  * @return The pose at the given timestamp
-    //  */
-    // public static Pose2d getPoseFromHistory(double timestamp) {
-    //     globalLock.lock();
-    //     try {
-    //         return poseHistory.lookup(timestamp);
-    //     } finally {
-    //         globalLock.unlock();
-    //     }
-    // }
-
-
     /**
      * Create and publish the field to network tables,
-     * this is also called by {@link GlobalState#modifyField(Consumer)} if the field is not already published.
+     * this is also called by {@link GlobalState#modifyField(Consumer)} if the field
+     * is not already published.
      */
     public static void publishField() {
         globalLock.lock();
@@ -164,20 +199,19 @@ public class GlobalState {
             field = Optional.of(new Field2d());
             var builder = new SendableBuilderImpl();
             builder.setTable(
-                NetworkTableInstance
-                    .getDefault()
-                    .getTable("Visualizers")
-                    .getSubTable("Field")
-            );
+                    NetworkTableInstance
+                            .getDefault()
+                            .getTable("Visualizers")
+                            .getSubTable("Field"));
             field.get().initSendable(builder);
         } finally {
             globalLock.unlock();
         }
     }
 
-
     /**
      * Run a function that modifies the field in a thread-safe manner.
+     * 
      * @param modifier The function to receive the field
      */
     public static void modifyField(Consumer<Field2d> modifier) {
@@ -187,6 +221,40 @@ public class GlobalState {
                 publishField();
             }
             modifier.accept(field.get());
+        } finally {
+            globalLock.unlock();
+        }
+    }
+
+    /**
+     * Initialize the auto chooser.
+     * This is called by {@link RobotContainer#setupAutos()}.
+     * This can only be called once, further calls will log error and do nothing.
+     */
+    public static void onceInitAutoChooser() {
+        globalLock.lock();
+        try {
+            if (autoChooserCreated) {
+                DriverStation.reportError("Auto chooser already created", false);
+                return;
+            }
+            autoChooserCreated = true;
+            Autos.createSendableChooser();
+        } finally {
+            globalLock.unlock();
+        }
+    }
+
+    /**
+     * Get the auto command from the auto chooser.
+     */
+    public static Command getAutoCommand() {
+        globalLock.lock();
+        try {
+            if (!autoChooserCreated) {
+                return Commands.none().withName("Empty Auto Command");
+            }
+            return Autos.getAutonomousCommand();
         } finally {
             globalLock.unlock();
         }
