@@ -8,6 +8,7 @@ import com.igknighters.util.SwerveModuleConstants;
 import com.igknighters.util.SwerveModuleConstants.ModuleId;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -153,8 +154,12 @@ public final class ConstValues {
         public static final PathConstraints DYNAMIC_PATH_CONSTRAINTS = new PathConstraints(
             3.0,
             3.0,
-            540.0,
-        720.0);
-        public static final double DYNAMIC_END_VELO = 0.0;
+            Units.degreesToRadians(540.0),
+            Units.degreesToRadians(720.0)
+        );
+        public static final ReplanningConfig DYNAMIC_REPLANNING_CONFIG = new ReplanningConfig(
+            true,
+            false
+        );
     }
 }

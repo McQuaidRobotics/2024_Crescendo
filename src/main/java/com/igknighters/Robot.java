@@ -30,7 +30,6 @@ public class Robot extends LoggedRobot {
         com.igknighters.ConstantHelper.applyRoboConst(ConstValues.class);
         new RobotContainer();
 
-        Autos.createSendableChooser();
         SmartDashboard.putString("AutoCommand", Autos.getSelectedAutoName());
     }
 
