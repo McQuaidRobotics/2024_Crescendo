@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.Supplier;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.igknighters.constants.ConstValues;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 
 /**
  * A Utility class for tracing code execution time.
@@ -57,7 +58,7 @@ public class Tracer {
     public static void startTrace(String name) {
         if (!ConstValues.DEBUG) return;
         trace.add(name);
-        traceStartTimes.put(traceStack(), Timer.getFPGATimestamp());
+        traceStartTimes.put(traceStack(), Logger.getRealTimestamp() / 1_000_000.0);
     }
 
     /**
@@ -70,7 +71,7 @@ public class Tracer {
         if (!ConstValues.DEBUG) return;
         try {
             var startTime = traceStartTimes.get(traceStack());
-            traceTimes.put(traceStack(),  Timer.getFPGATimestamp() - startTime);
+            traceTimes.put(traceStack(),  Logger.getRealTimestamp() / 1_000_000.0 - startTime);
             trace.remove(trace.size() - 1);
             if (trace.size() == 0) {
                 endCycle();

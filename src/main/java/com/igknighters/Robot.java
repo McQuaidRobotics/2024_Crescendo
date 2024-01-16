@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 import com.igknighters.constants.ConstValues;
 import com.igknighters.util.ShuffleboardApi;
+import com.igknighters.util.Tracer;
 import com.igknighters.util.pathfinders.LocalADStarAK;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 
@@ -35,9 +36,11 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotPeriodic() {
-        ShuffleboardApi.run();
-        CommandScheduler.getInstance().run();
-        LED.getInstance().run();
+        Tracer.startTrace("RobotPeriodic");
+        Tracer.traceFunc("Shuffleboard", ShuffleboardApi::run);
+        Tracer.traceFunc("CommandScheduler", () -> CommandScheduler.getInstance().run());
+        Tracer.traceFunc("LEDUpdate", () -> LED.getInstance().run());
+        Tracer.endTrace();
     }
 
     @Override

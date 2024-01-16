@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.igknighters.GlobalState;
 import com.igknighters.Robot;
 import com.igknighters.constants.ConstValues.kSwerve;
+import com.igknighters.util.Tracer;
 import com.igknighters.constants.ConstValues;
 
 public class Swerve extends SubsystemBase {
@@ -234,6 +235,8 @@ public class Swerve extends SubsystemBase {
 
     @Override
     public void periodic() {
+        Tracer.startTrace("SwervePeriodic");
+
         BaseStatusSignal.refreshAll(
                 gyroPitchSignal,
                 gyroRollSignal,
@@ -244,12 +247,14 @@ public class Swerve extends SubsystemBase {
         inputs.gyroYawRads = Units.degreesToRadians(gyroYawSignal.getValue());
 
         for (SwerveModule module : swerveMods) {
-            module.periodic();
+            Tracer.traceFunc("SwerveModule[" + module.getModuleNumber() + "]", module::periodic);
         }
 
         visualizer.update(GlobalState.submitSwerveData(getYawRot(), getModulePositions()));
 
         Logger.processInputs("Swerve", inputs);
+
+        Tracer.endTrace();
     }
 
     @Override

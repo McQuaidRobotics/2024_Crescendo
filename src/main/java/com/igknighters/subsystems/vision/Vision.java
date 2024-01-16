@@ -5,6 +5,7 @@ import com.igknighters.GlobalState.LocalizerType;
 import com.igknighters.constants.AprilTags;
 import com.igknighters.constants.ConstValues.kVision;
 import com.igknighters.subsystems.vision.camera.Camera;
+import com.igknighters.util.Tracer;
 
 import java.util.List;
 
@@ -58,6 +59,7 @@ public class Vision extends SubsystemBase {
 
     @Override
     public void periodic() {
+        Tracer.startTrace("VisionPeriodic");
         for (var camera : cameras) {
             var optEval = camera.evalPose();
             if (optEval.isPresent()) {
@@ -80,5 +82,6 @@ public class Vision extends SubsystemBase {
                 });
             }
         }
+        Tracer.endTrace();
     }
 }
