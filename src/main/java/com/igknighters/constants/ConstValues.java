@@ -162,7 +162,7 @@ public final class ConstValues {
 
         public static final double ANGLE_CONTROLLER_KP = 8.0;
 
-        public static final boolean ORIENT_TELEOP_FOR_SIM = false;
+        public static final boolean ORIENT_TELEOP_FOR_SIM = true;
 
         public static final LerpTable TELEOP_TRANSLATION_AXIS_CURVE = new LerpTable(
             new LerpTableEntry(0.0, 0.0),

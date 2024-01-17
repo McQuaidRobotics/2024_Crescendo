@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -13,26 +14,55 @@ import org.littletonrobotics.junction.inputs.LoggableInputs;
 public interface Camera {
 
     public static class CameraInput implements LoggableInputs {
-        public VisionPoseEst latestPoseEst;
+        private VisionPoseEst latestPoseEst;
+        private boolean isPresent = false;
 
         public CameraInput(VisionPoseEst pose) {
             this.latestPoseEst = pose;
         }
 
+        public void update(Optional<VisionPoseEst> pose) {
+            if (pose.isPresent()) {
+                latestPoseEst = pose.get();
+                isPresent = true;
+            } else {
+                isPresent = false;
+            }
+        }
+
+        public Optional<VisionPoseEst> getLatestPoseEst() {
+            if (isPresent) {
+                return Optional.of(latestPoseEst);
+            } else {
+                return Optional.empty();
+            }
+        }
+
         @Override
         public void toLog(LogTable table) {
+            table.put("isPresent", isPresent);
+            if (!isPresent) {
+                return;
+            }
             table.put("latestPoseEst/timestamp", latestPoseEst.timestamp);
             table.put("latestPoseEst/pose", latestPoseEst.pose);
-            table.put("latestPoseEst/tags", latestPoseEst.apriltags);
+            table.put("latestPoseEst/tags", latestPoseEst.apriltags.stream().mapToInt(i -> i).toArray());
         }
 
         @Override
         public void fromLog(LogTable table) {
-            var pose = table.get("latestPoseEst/pose", latestPoseEst.pose);
-            var timestamp = table.get("latestPoseEst/timestamp", latestPoseEst.timestamp);
-            var tags = table.get("latestPoseEst/tags", latestPoseEst.apriltags);
+            isPresent = table.get("isPresent", isPresent);
 
-            var poseEst = new VisionPoseEst(
+            Pose3d pose = table.get("latestPoseEst/pose", latestPoseEst.pose);
+            double timestamp = table.get("latestPoseEst/timestamp", latestPoseEst.timestamp);
+            int[] tagsPrim = table.get("latestPoseEst/tags", latestPoseEst.apriltags.stream().mapToInt(i -> i).toArray());
+
+            ArrayList<Integer> tags = new ArrayList<>();
+            for (int tag : tagsPrim) {
+                tags.add(tag);
+            }
+
+            latestPoseEst = new VisionPoseEst(
                     latestPoseEst.cameraId,
                     pose,
                     timestamp,

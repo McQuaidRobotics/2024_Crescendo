@@ -4,6 +4,8 @@ import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.igknighters.commands.autos.Autos;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.vision.VisionOnlyPoseEstimator;
@@ -257,6 +259,16 @@ public class GlobalState {
                 return Commands.none().withName("Empty Auto Command");
             }
             return Autos.getAutonomousCommand();
+        } finally {
+            globalLock.unlock();
+        }
+    }
+
+    public static void log() {
+        globalLock.lock();
+        try {
+            Logger.recordOutput("Global/Pose", GlobalState.getLocalizedPose());
+            Logger.recordOutput("Global/AutoCommand", GlobalState.getAutoCommand().getName());
         } finally {
             globalLock.unlock();
         }

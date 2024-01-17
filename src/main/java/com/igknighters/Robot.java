@@ -40,6 +40,7 @@ public class Robot extends LoggedRobot {
         Tracer.traceFunc("Shuffleboard", ShuffleboardApi::run);
         Tracer.traceFunc("CommandScheduler", () -> CommandScheduler.getInstance().run());
         Tracer.traceFunc("LEDUpdate", () -> LED.getInstance().run());
+        GlobalState.log();
         Tracer.endTrace();
     }
 
@@ -114,7 +115,7 @@ public class Robot extends LoggedRobot {
         }
 
         if (Robot.isReal()) {
-//            Logger.addDataReceiver(new WPILOGWriter("/media/sda1/robotlogs/"));
+            Logger.addDataReceiver(new WPILOGWriter("/media/sda1/robotlogs/"));
         }
         Logger.addDataReceiver(new NT4Publisher());
         Logger.start();

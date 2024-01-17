@@ -7,7 +7,10 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.numbers.N5;
 
+import org.littletonrobotics.junction.Logger;
 import org.photonvision.targeting.PhotonTrackedTarget;
+
+import com.igknighters.util.BootupLogger;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,15 +22,26 @@ public class CameraDisabled implements Camera {
     private final Transform3d cameraPose;
     private final String cameraName;
 
+    private final CameraInput cameraInput;
+
     public CameraDisabled(String cameraName, Integer id, Pose3d cameraPose) {
         this.id = id;
         this.cameraPose = new Transform3d(cameraPose.getTranslation(), cameraPose.getRotation());
         this.cameraName = cameraName;
+
+        cameraInput = new CameraInput(new VisionPoseEst(
+                id,
+                new Pose3d(),
+                0,
+                List.of()
+        ));
+
+        BootupLogger.BootupLog(cameraName + " camera initialized");
     }
 
     @Override
     public Optional<VisionPoseEst> evalPose() {
-        return Optional.empty();
+        return cameraInput.getLatestPoseEst();
     }
 
     @Override
@@ -46,5 +60,7 @@ public class CameraDisabled implements Camera {
     }
 
     @Override
-    public void periodic() {}
+    public void periodic() {
+        Logger.processInputs("Vision/Camera[" + getName() + "]", cameraInput);
+    }
 }

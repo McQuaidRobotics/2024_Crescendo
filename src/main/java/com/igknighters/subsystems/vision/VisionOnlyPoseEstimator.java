@@ -12,7 +12,6 @@ import edu.wpi.first.math.kinematics.WheelPositions;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.util.CircularBuffer;
 
 /**
  * A fake pose estimator that only uses vision.

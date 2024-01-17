@@ -60,6 +60,7 @@ public class Vision extends SubsystemBase {
     public void periodic() {
         Tracer.startTrace("VisionPeriodic");
         for (var camera : cameras) {
+            camera.periodic();
             var optEval = camera.evalPose();
             if (optEval.isPresent()) {
                 var eval = optEval.get();

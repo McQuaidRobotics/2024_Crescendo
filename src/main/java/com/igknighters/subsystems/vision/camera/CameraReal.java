@@ -3,6 +3,7 @@ package com.igknighters.subsystems.vision.camera;
 import java.util.List;
 import java.util.Optional;
 
+import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -46,7 +47,7 @@ public class CameraReal implements Camera {
         poseEstimator.setTagModel(TargetModel.kAprilTag36h11);
         poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
-         cameraInput = new CameraInput(new VisionPoseEst(
+        cameraInput = new CameraInput(new VisionPoseEst(
                 id,
                 new Pose3d(),
                 0,
@@ -56,8 +57,7 @@ public class CameraReal implements Camera {
         BootupLogger.BootupLog(cameraName + " camera initialized");
     }
 
-    @Override
-    public Optional<VisionPoseEst> evalPose() {
+    private Optional<VisionPoseEst> realEvaluatePose() {
         return poseEstimator.update()
                 .map(estRoboPose -> new VisionPoseEst(
                         this.id,
@@ -69,6 +69,11 @@ public class CameraReal implements Camera {
                             .toList()
                     )
                 );
+    }
+
+    @Override
+    public Optional<VisionPoseEst> evalPose() {
+        return cameraInput.getLatestPoseEst();
     }
 
     @Override
@@ -88,6 +93,8 @@ public class CameraReal implements Camera {
 
     @Override
     public void periodic() {
+        cameraInput.update(realEvaluatePose());
 
+        Logger.processInputs("Vision/Camera[" + getName() + "]", cameraInput);
     }
 }
