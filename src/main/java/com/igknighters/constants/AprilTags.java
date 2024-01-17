@@ -1,9 +1,6 @@
 package com.igknighters.constants;
 
-import java.util.List;
-
 import edu.wpi.first.apriltag.AprilTag;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -124,9 +121,4 @@ public class AprilTags {
                 )
             )
         };
-    public static final AprilTagFieldLayout APRIL_TAG_FIELD = new AprilTagFieldLayout(
-        List.of(APRILTAGS),
-        FieldConstants.FIELD_LENGTH,
-        FieldConstants.FIELD_WIDTH
-    );
 }
