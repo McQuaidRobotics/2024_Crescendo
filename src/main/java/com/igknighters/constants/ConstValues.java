@@ -60,6 +60,7 @@ public final class ConstValues {
         public static final double ROBOT_WIDTH = Units.inchesToMeters(26);
         public static final double ROBOT_LENGTH = Units.inchesToMeters(26);
         public static final double BUMPER_THICKNESS = Units.inchesToMeters(2.7);
+        public static final double BELLYPAN_HEIGHT = Units.inchesToMeters(2);
     }
 
     public static final class kVision {
@@ -70,8 +71,9 @@ public final class ConstValues {
         /** The most trustworthy std dev */
         public static final Vector<N3> visionStdDevsReal = VecBuilder.fill(0.15, 0.15, 0.15);
 
-        public static final double ToleratedHistoryDifference = 0.1;
-        public static final double ToleratedMultiCamDifference = 0.1;
+        public static final double AMBIGUITY_CUTOFF = 0.5;
+
+        public static final double MAX_Z_DELTA = 0.3;
 
         /**
          * The cameras used for vision.

@@ -13,16 +13,11 @@ import com.igknighters.subsystems.vision.VisionOnlyPoseEstimator.FakeWheelPositi
 import com.igknighters.subsystems.vision.camera.Camera.VisionPoseEst;
 
 import edu.wpi.first.math.VecBuilder;
-
-// import com.igknighters.util.PoseHistory;
-
-import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -156,7 +151,7 @@ public class GlobalState {
      * @param value           The vision data
      * @param trustworthyness The trustworthyness of the vision data
      */
-    public static void submitVisionData(VisionPoseEst value, Vector<N3> trustworthyness) {
+    public static void submitVisionData(VisionPoseEst value, double ambiguity) {
         globalLock.lock();
         try {
             if (!localizer.isPresent() || localizerType == LocalizerType.NONE) {
@@ -178,7 +173,7 @@ public class GlobalState {
                 ((SwerveDrivePoseEstimator) localizer.get()).addVisionMeasurement(
                         value.pose.toPose2d(),
                         value.timestamp,
-                        trustworthyness);
+                        VecBuilder.fill(ambiguity, ambiguity, ambiguity));
             } else {
                 DriverStation.reportError("Localizer does not support Vision", false);
                 return;

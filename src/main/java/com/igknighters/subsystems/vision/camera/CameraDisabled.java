@@ -33,7 +33,8 @@ public class CameraDisabled implements Camera {
                 id,
                 new Pose3d(),
                 0,
-                List.of()
+                List.of(),
+                0.0
         ));
 
         BootupLogger.BootupLog(cameraName + " camera initialized");
