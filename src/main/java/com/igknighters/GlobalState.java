@@ -56,6 +56,20 @@ public class GlobalState {
         throw new UnsupportedOperationException("This is a utility class!");
     }
 
+    public static void restoreDefaultState() {
+        globalLock.lock();
+        try {
+            localizerType = LocalizerType.NONE;
+            localizer = Optional.empty();
+            field = Optional.empty();
+            isUnitTest.set(false);
+            //intentionally ignore as this is dependent on AutoBuilder state and that cannot be restored
+            // autoChooserCreated = false;
+        } finally {
+            globalLock.unlock();
+        }
+    }
+
     /**
      * Meant to be used by swerve to initialize the odometry system.
      * 

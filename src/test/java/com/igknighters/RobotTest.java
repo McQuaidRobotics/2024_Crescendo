@@ -1,13 +1,14 @@
 package com.igknighters;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.igknighters.commands.autos.Autos;
+import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.RobotSetup;
 import com.igknighters.constants.RobotSetup.RobotID;
+import com.igknighters.util.UnitTestableRobot.Mode;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.hal.AllianceStationID;
@@ -18,6 +19,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 public class RobotTest {
 
@@ -27,31 +29,37 @@ public class RobotTest {
         GlobalState.setUnitTest(true);
     }
 
-    // @Test
-    // public void testRobotSetup() {
-    // for (RobotID id : RobotID.values()) {
-    // if (id == RobotID.Unlabeled) {
-    // continue;
-    // }
+    @AfterEach
+    void teardown() {
+        HAL.exitMain();
+        HAL.shutdown();
+        GlobalState.restoreDefaultState();
+    }
 
-    // RobotSetup.testOverrideRobotID(id);
+    @Test
+    public void testRobotSetup() {
+    for (RobotID id : RobotID.values()) {
+            if (id == RobotID.Unlabeled) {
+                continue;
+            }
 
-    // com.igknighters.ConstantHelper.applyRoboConst(ConstValues.class);
+            RobotSetup.testOverrideRobotID(id);
 
-    // new RobotContainer();
+            com.igknighters.ConstantHelper.applyRoboConst(ConstValues.class);
 
-    // CommandScheduler.getInstance().getActiveButtonLoop().clear();
-    // CommandScheduler.getInstance().getDefaultButtonLoop().clear();
+            new RobotContainer();
 
-    // System.gc();
-    // }
-    // }
+            CommandScheduler.getInstance().getActiveButtonLoop().clear();
+            CommandScheduler.getInstance().getDefaultButtonLoop().clear();
+
+            System.gc();
+        }
+    }
 
     static Command autoCmd;
     @Test
     public void testAuto() {
         RobotSetup.testOverrideRobotID(RobotID.SIM_CRASH);
-        final AtomicBoolean start = new AtomicBoolean(true);
         Pose2d desiredEndPose = new Pose2d(
                 new Translation2d(3.0, 7.0),
                 new Rotation2d());
@@ -65,12 +73,11 @@ public class RobotTest {
         timer.start();
 
         Robot.testRobot(Robot::new, (robot) -> {
-            if (start.get()) {
+            if (robot.lastMode != Mode.kAutonomous) {
                 autoCmd = new PathPlannerAuto("1 Meter Auto");
                 Autos.setAutoOverrideTest(autoCmd);
                 DriverStationSim.setAutonomous(true);
                 DriverStationSim.setEnabled(true);
-                start.set(false);
             }
 
             boolean isFinished = GlobalState.getLocalizedPose()

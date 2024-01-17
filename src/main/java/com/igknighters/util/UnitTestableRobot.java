@@ -58,9 +58,10 @@ public class UnitTestableRobot extends LoggedRobot {
     protected void loopFunc() {
         Tracer.traceFunc("RobotLoop", this::innerLoop);
         testFn.ifPresent(fn -> fn.accept(this));
+        loopCount++;
     }
 
-    private enum Mode {
+    public static enum Mode {
         kNone,
         kDisabled,
         kAutonomous,
@@ -68,8 +69,9 @@ public class UnitTestableRobot extends LoggedRobot {
         kTest
     }
 
-    private Mode lastMode = Mode.kNone;
+    public Mode lastMode = Mode.kNone;
     private boolean calledDsConnected = false;
+    public int loopCount = 0;
 
     private void innerLoop() {
         if (killswitch.get()) {
