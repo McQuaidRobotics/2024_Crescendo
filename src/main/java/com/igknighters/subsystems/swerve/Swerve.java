@@ -26,6 +26,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.igknighters.GlobalState;
 import com.igknighters.Robot;
 import com.igknighters.constants.ConstValues.kSwerve;
+import com.igknighters.subsystems.swerve.module.SwerveModule;
+import com.igknighters.subsystems.swerve.module.SwerveModuleReal;
+import com.igknighters.subsystems.swerve.module.SwerveModuleSim;
 import com.igknighters.util.Tracer;
 import com.igknighters.constants.ConstValues;
 
@@ -98,7 +101,7 @@ public class Swerve extends SubsystemBase {
         GlobalState.setLocalizer(
                 new SwerveDrivePoseEstimator(
                         kSwerve.SWERVE_KINEMATICS,
-                        getYawRot(),
+                        getYawWrappedRot(),
                         getModulePositions(),
                         getPose()),
                 GlobalState.LocalizerType.HYBRID);
@@ -117,15 +120,23 @@ public class Swerve extends SubsystemBase {
         setModuleStates(targetStates, isOpenLoop);
     }
 
-    public void setYaw(double val) {
+    /**
+     * Offsets the gyro to define the current yaw as the supplied value
+     * 
+     * @param degrees The value to set the gyro yaw to in degrees
+     */
+    public void setYaw(double degrees) {
         if (Robot.isReal()) {
-            gyro.setYaw(val);
+            gyro.setYaw(degrees);
         } else {
-            simYawOffset = val - getYawRot().getDegrees();
+            simYawOffset = degrees - getYawWrappedRot().getDegrees();
         }
     }
 
-    public Rotation2d getYawRot() {
+    /**
+     * @return The gyro yaw value in degrees, wrapped to 0-360, as a Rotation2d
+     */
+    public Rotation2d getYawWrappedRot() {
         return Rotation2d.fromDegrees(
                 scope0To360(
                         Units.radiansToDegrees(this.getYawRads())));
@@ -180,7 +191,7 @@ public class Swerve extends SubsystemBase {
         return states;
     }
 
-    public ChassisSpeeds getChassisSpeeds() {
+    public ChassisSpeeds getChassisSpeed() {
         return kSwerve.SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
     }
 
@@ -189,7 +200,7 @@ public class Swerve extends SubsystemBase {
     }
 
     public void resetOdometry(Pose2d pose) {
-        GlobalState.resetSwerveLocalization(getYawRot(), pose, getModulePositions());
+        GlobalState.resetSwerveLocalization(getYawWrappedRot(), pose, getModulePositions());
     }
 
     public double rotVeloForRotation(Rotation2d wantedAngle) {
@@ -215,10 +226,9 @@ public class Swerve extends SubsystemBase {
         Tracer.startTrace("SwervePeriodic");
 
         BaseStatusSignal.refreshAll(
-            gyroPitchSignal,
-            gyroRollSignal,
-            gyroYawSignal
-        );
+                gyroPitchSignal,
+                gyroRollSignal,
+                gyroYawSignal);
 
         inputs.gyroPitchRads = Units.degreesToRadians(gyroPitchSignal.getValue());
         inputs.gyroRollRads = Units.degreesToRadians(gyroRollSignal.getValue());
@@ -228,7 +238,7 @@ public class Swerve extends SubsystemBase {
             Tracer.traceFunc("SwerveModule[" + module.getModuleNumber() + "]", module::periodic);
         }
 
-        visualizer.update(GlobalState.submitSwerveData(getYawRot(), getModulePositions()));
+        visualizer.update(GlobalState.submitSwerveData(getYawWrappedRot(), getModulePositions()));
 
         Logger.processInputs("Swerve", inputs);
 
@@ -236,17 +246,17 @@ public class Swerve extends SubsystemBase {
             Logger.recordOutput("Swerve/targetChassisSpeed", new ChassisSpeeds());
         }
 
+        Logger.recordOutput("Swerve/chassisSpeed", getChassisSpeed());
+
         Tracer.endTrace();
     }
 
     @Override
     public void simulationPeriodic() {
 
-        ChassisSpeeds currentSpeeds = kSwerve.SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
-
         gyroSim.setRawYaw(
-                getYawRot().getDegrees()
-                        + (Units.radiansToDegrees(currentSpeeds.omegaRadiansPerSecond) * ConstValues.PERIODIC_TIME)
+                getYawWrappedRot().getDegrees()
+                        + (Units.radiansToDegrees(getChassisSpeed().omegaRadiansPerSecond) * ConstValues.PERIODIC_TIME)
                         + simYawOffset);
         simYawOffset = 0.0;
     }

@@ -26,9 +26,8 @@ public class TeleopSwerveAbsRot extends TeleopSwerveBase {
                 vt.getX(),
                 vt.getY(),
                 rotVelo,
-                swerve.getYawRot());
+                swerve.getYawWrappedRot());
 
         swerve.driveChassisSpeeds(chassisSpeeds, true);
     }
 }
-

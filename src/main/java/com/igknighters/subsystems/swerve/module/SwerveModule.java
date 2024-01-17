@@ -1,7 +1,9 @@
-package com.igknighters.subsystems.swerve;
+package com.igknighters.subsystems.swerve.module;
 
 import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
+
+import com.igknighters.subsystems.swerve.Swerve;
 
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;

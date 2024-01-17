@@ -23,7 +23,7 @@ public class TeleopSwerveTraditional extends TeleopSwerveBase {
                 vt.getX(),
                 vt.getY(),
                 -getRotationX() * kSwerve.MAX_ANGULAR_VELOCITY,
-                swerve.getYawRot());
+                swerve.getYawWrappedRot());
 
         swerve.driveChassisSpeeds(chassisSpeeds, true);
     }

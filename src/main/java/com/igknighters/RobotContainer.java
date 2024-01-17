@@ -59,27 +59,24 @@ public class RobotContainer {
         AutoBuilder.configureHolonomic(
                 swerve::getPose,
                 swerve::resetOdometry,
-                swerve::getChassisSpeeds,
+                swerve::getChassisSpeed,
                 chassisSpeeds -> swerve.driveChassisSpeeds(
-                    chassisSpeeds, false
-                ),
+                        chassisSpeeds, false),
                 new HolonomicPathFollowerConfig(
                         kAuto.AUTO_TRANSLATION_PID,
                         kAuto.AUTO_ANGULAR_PID,
                         kSwerve.MAX_DRIVE_VELOCITY,
                         kSwerve.DRIVEBASE_RADIUS,
-                        kAuto.DYNAMIC_REPLANNING_CONFIG
-                ),
+                        kAuto.DYNAMIC_REPLANNING_CONFIG),
                 () -> {
-                    if (DriverStation.getAlliance().isPresent() 
-                    && DriverStation.getAlliance().get() == Alliance.Blue) {
+                    if (DriverStation.getAlliance().isPresent()
+                            && DriverStation.getAlliance().get() == Alliance.Blue) {
                         return false;
-                    }
-                    else if (DriverStation.getAlliance().isPresent() 
-                    && DriverStation.getAlliance().get() == Alliance.Red) {
+                    } else if (DriverStation.getAlliance().isPresent()
+                            && DriverStation.getAlliance().get() == Alliance.Red) {
                         return true;
-                    }
-                    else return false; //Default path for blue alliance side
+                    } else
+                        return false; // Default path for blue alliance side
                 },
                 swerve);
 

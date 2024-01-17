@@ -2,6 +2,7 @@ package com.igknighters.subsystems.swerve;
 
 import com.igknighters.GlobalState;
 import com.igknighters.constants.ConstValues.kSwerve;
+import com.igknighters.subsystems.swerve.module.SwerveModule;
 
 import java.util.List;
 import java.util.ArrayList;
