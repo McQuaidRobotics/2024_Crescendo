@@ -14,7 +14,6 @@ import com.ctre.phoenix.led.TwinkleOffAnimation;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.ColorFlowAnimation.Direction;
 
-import edu.wpi.first.wpilibj.CAN;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -59,7 +58,6 @@ public class LED {
         }
     }
     
-    
 
 
     private Timer timer;
@@ -79,8 +77,7 @@ public class LED {
         config.v5Enabled = true;
         config.stripType = LEDStripType.RGB;
         config.brightnessScalar = 1.0;
-        candle.setLEDs(255, 0, 0);
-        sendAnimation(LedAnimations.DISABLED);
+        sendAnimation(LedAnimations.BOOTING);
 
         new Trigger(DriverStation::isFMSAttached)
                 .and(() -> Math.abs(DriverStation.getMatchTime() - 30.0) < 0.2)
