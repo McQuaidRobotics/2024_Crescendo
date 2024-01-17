@@ -50,6 +50,6 @@ public class TeleopSwerveTarget extends TeleopSwerveBase {
                 rotVelo,
                 swerve.getYawRot());
 
-        swerve.driveChassisSpeeds(chassisSpeeds, true, false);
+        swerve.driveChassisSpeeds(chassisSpeeds, false);
     }
 }

@@ -20,6 +20,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.igknighters.GlobalState;
@@ -105,9 +106,10 @@ public class Swerve extends SubsystemBase {
         visualizer = new SwerveVisualizer(this, swerveMods);
     }
 
-    public void driveChassisSpeeds(ChassisSpeeds speeds, boolean isOpenLoop, boolean invertRotation) {
-        if (invertRotation)
-            speeds.omegaRadiansPerSecond *= -1.0;
+    public void driveChassisSpeeds(ChassisSpeeds speeds, boolean isOpenLoop) {
+
+        Logger.recordOutput("Swerve/targetChassisSpeed", speeds);
+
         SwerveModuleState[] targetStates = kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(speeds);
 
         SwerveDriveKinematics.desaturateWheelSpeeds(targetStates, kSwerve.MAX_DRIVE_VELOCITY);
@@ -194,14 +196,6 @@ public class Swerve extends SubsystemBase {
         var wantedAngleRads = wantedAngle.getRadians();
         var currentAngleRads = getYawRads();
 
-        // if (Math.abs(wantedAngleRads - currentAngleRads) > Math.PI) {
-        // if (wantedAngleRads > currentAngleRads) {
-        // wantedAngleRads -= 2 * Math.PI;
-        // } else {
-        // wantedAngleRads += 2 * Math.PI;
-        // }
-        // }
-
         var rotVelo = kSwerve.ANGLE_CONTROLLER_KP
                 * MathUtil.inputModulus(wantedAngleRads - currentAngleRads, -Math.PI, Math.PI);
         return Math.max(Math.min(rotVelo, kSwerve.MAX_ANGULAR_VELOCITY), -kSwerve.MAX_ANGULAR_VELOCITY);
@@ -237,6 +231,10 @@ public class Swerve extends SubsystemBase {
         visualizer.update(GlobalState.submitSwerveData(getYawRot(), getModulePositions()));
 
         Logger.processInputs("Swerve", inputs);
+
+        if (DriverStation.isDisabled()) {
+            Logger.recordOutput("Swerve/targetChassisSpeed", new ChassisSpeeds());
+        }
 
         Tracer.endTrace();
     }

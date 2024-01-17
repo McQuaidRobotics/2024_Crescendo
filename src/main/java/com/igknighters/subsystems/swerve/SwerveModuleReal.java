@@ -139,8 +139,11 @@ public class SwerveModuleReal implements SwerveModule {
             var controlRequest = new DutyCycleOut(percentOutput).withEnableFOC(true);
             driveMotor.setControl(controlRequest);
         } else {
-            double rps = Math.min(desiredState.speedMetersPerSecond, kSwerve.MAX_DRIVE_VELOCITY)
-                    / (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO);
+            double rps = (Math.min(
+                Math.abs(desiredState.speedMetersPerSecond),
+                kSwerve.MAX_DRIVE_VELOCITY)
+                * Math.signum(desiredState.speedMetersPerSecond))
+                / (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO);
             var veloRequest = new VelocityVoltage(rps).withEnableFOC(true);
             driveMotor.setControl(veloRequest);
         }

@@ -74,10 +74,9 @@ public class SwerveModuleSim implements SwerveModule {
     }
 
     private void setAngle(SwerveModuleState desiredState) {
-        inputs.targetAngleAbsolute = desiredState.angle.getRadians();
-
         Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (kSwerve.MAX_DRIVE_VELOCITY * 0.01)) ? new Rotation2d(inputs.angleAbsolute)
                 : desiredState.angle;
+        inputs.targetAngleAbsolute = angle.getRadians();
 
         var angleAppliedVolts = MathUtil.clamp(
                 angleFeedback.calculate(getAngle().getRadians(), angle.getRadians()),

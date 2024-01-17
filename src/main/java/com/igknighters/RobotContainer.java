@@ -17,7 +17,6 @@ import com.igknighters.commands.autos.AutosCmdRegister;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class RobotContainer {
@@ -62,7 +61,7 @@ public class RobotContainer {
                 swerve::resetOdometry,
                 swerve::getChassisSpeeds,
                 chassisSpeeds -> swerve.driveChassisSpeeds(
-                    chassisSpeeds, false, RobotBase.isReal()
+                    chassisSpeeds, false
                 ),
                 new HolonomicPathFollowerConfig(
                         kAuto.AUTO_TRANSLATION_PID,

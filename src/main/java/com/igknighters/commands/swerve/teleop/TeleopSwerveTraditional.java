@@ -25,6 +25,6 @@ public class TeleopSwerveTraditional extends TeleopSwerveBase {
                 -getRotationX() * kSwerve.MAX_ANGULAR_VELOCITY,
                 swerve.getYawRot());
 
-        swerve.driveChassisSpeeds(chassisSpeeds, false, false);
+        swerve.driveChassisSpeeds(chassisSpeeds, true);
     }
 }
