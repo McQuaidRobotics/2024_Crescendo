@@ -11,6 +11,7 @@ import org.photonvision.estimation.TargetModel;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.igknighters.constants.AprilTags;
+import com.igknighters.constants.FieldConstants;
 import com.igknighters.util.BootupLogger;
 
 import edu.wpi.first.math.geometry.Pose3d;
@@ -40,7 +41,7 @@ public class CameraReal implements Camera {
         this.cameraPose = new Transform3d(cameraPose.getTranslation(), cameraPose.getRotation());
 
         poseEstimator = new PhotonPoseEstimator(
-                AprilTags.APRIL_TAG_FIELD,
+                FieldConstants.APRIL_TAG_FIELD,
                 PoseStrategy.MULTI_TAG_PNP_ON_RIO,
                 this.camera,
                 this.cameraPose);
