@@ -78,6 +78,7 @@ public class DynamicPath {
         return this;
     }
 
+    //TODO get rid of this before merge with main! Used for debugging!
     private Command loggedCommad(Command cmd) {
         return new FunctionalCommand(
             () -> {
