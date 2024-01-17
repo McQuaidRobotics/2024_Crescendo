@@ -41,11 +41,11 @@ public class CameraReal implements Camera {
 
         poseEstimator = new PhotonPoseEstimator(
                 AprilTags.APRIL_TAG_FIELD,
-                PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+                PoseStrategy.MULTI_TAG_PNP_ON_RIO,
                 this.camera,
                 this.cameraPose);
         poseEstimator.setTagModel(TargetModel.kAprilTag36h11);
-        poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+        poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_CAMERA_HEIGHT);
 
         cameraInput = new CameraInput(new VisionPoseEst(
                 id,
