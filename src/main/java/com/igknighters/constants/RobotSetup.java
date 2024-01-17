@@ -22,7 +22,7 @@ public class RobotSetup {
                 RobotConstID.BURN),
 
         SIM_CRASH(Subsystems.all(), RobotConstID.CRASH),
-        SIM_BURN(Subsystems.all(), RobotConstID.BURN),
+        SIM_BURN(Subsystems.none(), RobotConstID.BURN),
 
         TestBoard("testBoard(crash)", Subsystems.list(Subsystems.Vision), RobotConstID.CRASH),
 
@@ -86,5 +86,9 @@ public class RobotSetup {
             Logger.recordMetadata("ConstantsID", currentID.constID.name());
         }
         return currentID;
+    }
+
+    public static void testOverrideRobotID(RobotID id) {
+        currentID = id;
     }
 }

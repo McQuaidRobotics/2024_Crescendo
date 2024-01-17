@@ -52,6 +52,13 @@ public class RobotContainer {
     }
 
     public void setupAutos(Swerve swerve) {
+
+        if (AutoBuilder.isConfigured() && GlobalState.isUnitTest()) {
+            // this code can be run multiple times during unit tests,
+            // because of AutoBuilder once paradigm this causes a crash
+            return;
+        }
+
         AutosCmdRegister.registerCommands(allSubsystems);
 
         if (!allSubsystems.swerve.isPresent())
