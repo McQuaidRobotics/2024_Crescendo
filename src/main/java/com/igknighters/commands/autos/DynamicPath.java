@@ -1,6 +1,7 @@
 package com.igknighters.commands.autos;
 
 import java.util.function.Function;
+import org.littletonrobotics.junction.Logger;
 
 import com.igknighters.subsystems.swerve.Swerve;
 import com.pathplanner.lib.path.PathConstraints;
@@ -83,11 +84,13 @@ public class DynamicPath {
         return new FunctionalCommand(
             () -> {
                 SmartDashboard.putString("DynamicCmd", cmd.getName());
+                Logger.recordOutput("DynamicCmd", cmd.getName());
                 cmd.initialize();
             },
             cmd::execute,
             (interupted) -> {
                 SmartDashboard.putString("DynamicCmd", "");
+                Logger.recordOutput("DynamicCmd", "");
                 cmd.end(interupted);
             },
             cmd::isFinished,
