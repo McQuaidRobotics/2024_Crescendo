@@ -17,13 +17,16 @@ import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kSwerve.AngleMotorConstants;
 import com.igknighters.constants.ConstValues.kSwerve.DriveMotorConstants;
 import com.igknighters.util.SwerveModuleConstants;
+
 public class SwerveModuleSim implements SwerveModule {
     private FlywheelSim driveSim = new FlywheelSim(DCMotor.getFalcon500(1), 1.0 / kSwerve.DRIVE_GEAR_RATIO, 0.025);
     private FlywheelSim angleSim = new FlywheelSim(DCMotor.getFalcon500(1), 1.0 / kSwerve.ANGLE_GEAR_RATIO, 0.004);
 
-    private final PIDController driveFeedback = new PIDController(DriveMotorConstants.kP, DriveMotorConstants.kI, DriveMotorConstants.kD,
+    private final PIDController driveFeedback = new PIDController(DriveMotorConstants.kP, DriveMotorConstants.kI,
+            DriveMotorConstants.kD,
             ConstValues.PERIODIC_TIME);
-    private final PIDController angleFeedback = new PIDController(AngleMotorConstants.kP, AngleMotorConstants.kI, AngleMotorConstants.kD,
+    private final PIDController angleFeedback = new PIDController(AngleMotorConstants.kP, AngleMotorConstants.kI,
+            AngleMotorConstants.kD,
             ConstValues.PERIODIC_TIME);
 
     public int moduleNumber;
@@ -74,7 +77,8 @@ public class SwerveModuleSim implements SwerveModule {
     }
 
     private void setAngle(SwerveModuleState desiredState) {
-        Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (kSwerve.MAX_DRIVE_VELOCITY * 0.01)) ? new Rotation2d(inputs.angleAbsolute)
+        Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (kSwerve.MAX_DRIVE_VELOCITY * 0.01))
+                ? new Rotation2d(inputs.angleAbsolute)
                 : desiredState.angle;
         inputs.targetAngleAbsolute = angle.getRadians();
 
@@ -112,7 +116,8 @@ public class SwerveModuleSim implements SwerveModule {
         driveSim.update(ConstValues.PERIODIC_TIME);
         angleSim.update(ConstValues.PERIODIC_TIME);
 
-        inputs.drivePosition += driveRadiansToMeters(driveSim.getAngularVelocityRadPerSec() * ConstValues.PERIODIC_TIME);
+        inputs.drivePosition += driveRadiansToMeters(
+                driveSim.getAngularVelocityRadPerSec() * ConstValues.PERIODIC_TIME);
 
         double angleDiffRad = angleSim.getAngularVelocityRadPerSec() * ConstValues.PERIODIC_TIME;
         inputs.angleAbsolute += angleDiffRad;

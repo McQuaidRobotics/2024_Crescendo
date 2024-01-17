@@ -53,21 +53,14 @@
   "NetworkTables": {
     "transitory": {
       "AdvantageKit": {
+        "RealOutputs": {
+          "open": true
+        },
         "Swerve": {
           "SwerveModule[0]": {
             "open": true
           }
-        }
-      },
-      "PathPlanner": {
-        "double[]##v_/PathPlanner/currentPose": {
-          "open": true
         },
-        "double[]##v_/PathPlanner/targetPose": {
-          "open": true
-        }
-      },
-      "SmartDashboard": {
         "open": true
       },
       "Visualizers": {

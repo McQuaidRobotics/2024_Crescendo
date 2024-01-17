@@ -3,24 +3,24 @@ package com.igknighters;
 import java.util.HashMap;
 import java.util.function.BiConsumer;
 
-import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 import com.igknighters.constants.ConstValues;
 import com.igknighters.util.ShuffleboardApi;
 import com.igknighters.util.Tracer;
+import com.igknighters.util.UnitTestableRobot;
 import com.igknighters.util.pathfinders.LocalADStarAK;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 
-public class Robot extends LoggedRobot {
+public class Robot extends UnitTestableRobot {
 
     private Command autoCmd;
+    private final CommandScheduler scheduler = CommandScheduler.getInstance();
 
     @Override
     public void robotInit() {
@@ -36,12 +36,10 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotPeriodic() {
-        Tracer.startTrace("RobotPeriodic");
         Tracer.traceFunc("Shuffleboard", ShuffleboardApi::run);
-        Tracer.traceFunc("CommandScheduler", () -> CommandScheduler.getInstance().run());
+        Tracer.traceFunc("CommandScheduler", () -> scheduler.run());
         Tracer.traceFunc("LEDUpdate", () -> LED.getInstance().run());
         GlobalState.log();
-        Tracer.endTrace();
     }
 
     @Override
@@ -51,18 +49,30 @@ public class Robot extends LoggedRobot {
     @Override
     public void disabledPeriodic() {
         autoCmd = GlobalState.getAutoCommand();
-        SmartDashboard.putString("AutoCommand", autoCmd.getName());
+        Logger.recordOutput("SelectedAutoCommand", autoCmd.getName());
     }
 
     @Override
     public void autonomousInit() {
+        if (GlobalState.isUnitTest()) {
+            autoCmd = GlobalState.getAutoCommand();
+        }
         if (autoCmd != null) {
-            autoCmd.schedule();
+            Logger.recordOutput("CurrentAutoCommand", autoCmd.getName());
+            scheduler.schedule(autoCmd);
         }
     }
 
     @Override
     public void autonomousPeriodic() {
+    }
+
+    @Override
+    public void autonomousExit() {
+        if (autoCmd != null) {
+            Logger.recordOutput("CurrentAutoCommand", "");
+            autoCmd.cancel();
+        }
     }
 
     @Override
