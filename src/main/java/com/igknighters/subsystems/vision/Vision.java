@@ -3,6 +3,7 @@ package com.igknighters.subsystems.vision;
 import com.igknighters.GlobalState;
 import com.igknighters.GlobalState.LocalizerType;
 import com.igknighters.constants.AprilTags;
+import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kDimensions;
 import com.igknighters.constants.ConstValues.kVision;
 import com.igknighters.subsystems.vision.camera.Camera;
@@ -49,9 +50,9 @@ public class Vision extends SubsystemBase {
                 GlobalState.modifyField(field -> {
                     field.getObject("seen_apriltags").setPoses(
                         eval.apriltags.stream()
-                            .map(tagId -> AprilTags.APRIL_TAG_FIELD
+                            .map(tagId -> FieldConstants.APRIL_TAG_FIELD
                                 .getTagPose(tagId)
-                                .orElseGet(() -> new Pose3d(new Translation3d(-10.0, -10.0, -10.0), new Rotation3d()))
+                                .orElseGet(() -> new Pose3d(new Translation3d(0.0, 0.0, 0.0), new Rotation3d()))
                                 .toPose2d()
                             )
                             .toList()
