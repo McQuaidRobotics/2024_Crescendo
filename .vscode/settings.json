@@ -19,5 +19,5 @@
       "JAVA_HOME": "C:\\Users\\Public\\wpilib\\2024\\jdk",
       "PATH": "C:\\Users\\Public\\wpilib\\2024\\jdk\\bin;${env:PATH}"
   },
-  "java.import.gradle.java.home": "C:\\Users\\Public\\wpilib\\2024\\jdk",
+  "java.import.gradle.java.home": "C:\\Users\\Public\\wpilib\\2024\\jdk"
 }

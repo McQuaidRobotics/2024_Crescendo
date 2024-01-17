@@ -1,4 +1,4 @@
-package com.igknighters.subsystems.swerve;
+package com.igknighters.subsystems.swerve.module;
 
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
@@ -136,11 +136,10 @@ public class SwerveModuleReal implements SwerveModule {
         inputs.targetDriveVelo = desiredState.speedMetersPerSecond;
         if (isOpenLoop) {
             double percentOutput = desiredState.speedMetersPerSecond / kSwerve.MAX_DRIVE_VELOCITY;
-            var controlRequest = new DutyCycleOut(percentOutput);
+            var controlRequest = new DutyCycleOut(percentOutput).withEnableFOC(true);
             driveMotor.setControl(controlRequest);
         } else {
-            double rps = Math.min(desiredState.speedMetersPerSecond, kSwerve.MAX_DRIVE_VELOCITY)
-                    / (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO);
+            double rps = desiredState.speedMetersPerSecond / (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO);
             var veloRequest = new VelocityVoltage(rps).withEnableFOC(true);
             driveMotor.setControl(veloRequest);
         }
