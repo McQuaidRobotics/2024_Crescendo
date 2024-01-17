@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Vision extends SubsystemBase {
@@ -37,8 +38,6 @@ public class Vision extends SubsystemBase {
                     return TRUSTED;
                 case 2:
                     return SemiTrusted;
-                case 1:
-                    return UnTrusted;
                 default:
                     return UnTrusted;
             }
@@ -66,6 +65,8 @@ public class Vision extends SubsystemBase {
                 var eval = optEval.get();
 
                 var trust = VisionTrustworthiness.formInt(Math.min(eval.apriltags.size(), 3));
+
+                SmartDashboard.putString(camera.getName(), eval.pose.toString());
 
                 GlobalState.submitVisionData(eval, trust.stdDevs);
 

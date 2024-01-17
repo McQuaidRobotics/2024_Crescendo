@@ -7,8 +7,39 @@ import java.util.Optional;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import org.littletonrobotics.junction.LogTable;
+import org.littletonrobotics.junction.inputs.LoggableInputs;
 
 public interface Camera {
+
+    public static class CameraInput implements LoggableInputs {
+        public VisionPoseEst latestPoseEst;
+
+        public CameraInput(VisionPoseEst pose) {
+            this.latestPoseEst = pose;
+        }
+
+        @Override
+        public void toLog(LogTable table) {
+            table.put("latestPoseEst/timestamp", latestPoseEst.timestamp);
+            table.put("latestPoseEst/pose", latestPoseEst.pose);
+            table.put("latestPoseEst/tags", latestPoseEst.apriltags);
+        }
+
+        @Override
+        public void fromLog(LogTable table) {
+            var pose = table.get("latestPoseEst/pose", latestPoseEst.pose);
+            var timestamp = table.get("latestPoseEst/timestamp", latestPoseEst.timestamp);
+            var tags = table.get("latestPoseEst/tags", latestPoseEst.apriltags);
+
+            var poseEst = new VisionPoseEst(
+                    latestPoseEst.cameraId,
+                    pose,
+                    timestamp,
+                    tags
+            );
+        }
+    }
 
     /**
      * A configuration for a camera.
@@ -75,6 +106,8 @@ public interface Camera {
      * @return The name of the camera
      */
     public String getName();
+
+    public void periodic();
 
     /**
      * A pose estimation from a camera.

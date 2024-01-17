@@ -81,7 +81,7 @@ public final class ConstValues {
                 "photonvision-15",
                 0,
                 new Pose3d(
-                    new Translation3d(0.0, 0.0, 0.25),
+                    new Translation3d(-0.04, 0.04, 0.04),
                     new Rotation3d()
                 )
             ),
@@ -89,7 +89,7 @@ public final class ConstValues {
                 "photonvision-16",
                 1,
                 new Pose3d(
-                    new Translation3d(0.0, 0.0, 0.25),
+                    new Translation3d(0.04, 0.04, 0.04),
                     new Rotation3d()
                 )
             )

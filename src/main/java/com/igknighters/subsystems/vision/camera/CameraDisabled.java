@@ -44,4 +44,7 @@ public class CameraDisabled implements Camera {
     public String getName() {
         return cameraName;
     }
+
+    @Override
+    public void periodic() {}
 }

@@ -166,11 +166,12 @@ public class GlobalState {
                         value.pose.toPose2d(),
                         value.timestamp,
                         VecBuilder.fill(1.0, 1.0, 1.0));
-                ((VisionOnlyPoseEstimator) localizer.get())
+                var pose = ((VisionOnlyPoseEstimator) localizer.get())
                     .update(
                         value.pose.toPose2d().getRotation(),
                         new FakeWheelPositions()
                     );
+                field.ifPresent(field2d -> field2d.setRobotPose(pose));
             } else if (localizerType == LocalizerType.HYBRID) {
                 ((SwerveDrivePoseEstimator) localizer.get()).addVisionMeasurement(
                         value.pose.toPose2d(),

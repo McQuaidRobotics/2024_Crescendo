@@ -114,7 +114,7 @@ public class Robot extends LoggedRobot {
         }
 
         if (Robot.isReal()) {
-            Logger.addDataReceiver(new WPILOGWriter("/media/sda1/robotlogs/"));
+//            Logger.addDataReceiver(new WPILOGWriter("/media/sda1/robotlogs/"));
         }
         Logger.addDataReceiver(new NT4Publisher());
         Logger.start();

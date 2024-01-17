@@ -1,5 +1,6 @@
 package com.igknighters.subsystems.vision.camera;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.photonvision.PhotonCamera;
@@ -23,6 +24,8 @@ public class CameraReal implements Camera {
     private final Transform3d cameraPose;
     private final PhotonPoseEstimator poseEstimator;
 
+    private final CameraInput cameraInput;
+
     /**
      * Creates an abstraction for a photon camera.
      * 
@@ -42,6 +45,13 @@ public class CameraReal implements Camera {
                 this.cameraPose);
         poseEstimator.setTagModel(TargetModel.kAprilTag36h11);
         poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+
+         cameraInput = new CameraInput(new VisionPoseEst(
+                id,
+                new Pose3d(),
+                0,
+                List.of()
+        ));
 
         BootupLogger.BootupLog(cameraName + " camera initialized");
     }
@@ -74,5 +84,10 @@ public class CameraReal implements Camera {
     @Override
     public String getName() {
         return camera.getName();
+    }
+
+    @Override
+    public void periodic() {
+
     }
 }
