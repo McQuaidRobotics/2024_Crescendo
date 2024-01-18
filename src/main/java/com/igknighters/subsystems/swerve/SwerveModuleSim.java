@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
@@ -73,6 +74,8 @@ public class SwerveModuleSim implements SwerveModule {
     }
 
     private void setAngle(SwerveModuleState desiredState) {
+        inputs.targetAngleAbsolute = desiredState.angle.getRadians();
+
         Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (kSwerve.MAX_DRIVE_VELOCITY * 0.01)) ? new Rotation2d(inputs.angleAbsolute)
                 : desiredState.angle;
 
@@ -87,6 +90,8 @@ public class SwerveModuleSim implements SwerveModule {
     }
 
     private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop) {
+        inputs.targetDriveVelo = desiredState.speedMetersPerSecond;
+
         desiredState.speedMetersPerSecond *= Math.cos(angleFeedback.getPositionError());
 
         double velocityRadPerSec = desiredState.speedMetersPerSecond / (kSwerve.WHEEL_DIAMETER / 2);
@@ -101,6 +106,10 @@ public class SwerveModuleSim implements SwerveModule {
 
     @Override
     public void periodic() {
+        if (DriverStation.isDisabled()) {
+            this.driveSim.setInputVoltage(0.0);
+            this.angleSim.setInputVoltage(0.0);
+        }
         driveSim.update(ConstValues.PERIODIC_TIME);
         angleSim.update(ConstValues.PERIODIC_TIME);
 
