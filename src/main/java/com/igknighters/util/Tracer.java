@@ -128,6 +128,7 @@ public class Tracer {
                 entry = entryHeap.get(trace.getKey());
             }
             entry.setDouble(trace.getValue());
+            Logger.recordOutput("Tracer/" + trace.getKey(), trace.getValue());
         }
         traceTimes.clear();
     }

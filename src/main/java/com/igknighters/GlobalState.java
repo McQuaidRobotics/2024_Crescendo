@@ -262,7 +262,7 @@ public class GlobalState {
     public static void log() {
         globalLock.lock();
         try {
-            Logger.recordOutput("Global/Pose", GlobalState.getLocalizedPose());
+            localizer.ifPresent(l -> Logger.recordOutput("Global/LocalizedPose", l.getEstimatedPosition()));
             Logger.recordOutput("Global/AutoCommand", GlobalState.getAutoCommand().getName());
         } finally {
             globalLock.unlock();

@@ -54,8 +54,6 @@ public class RobotContainer {
     public void setupAutos(Swerve swerve) {
         AutosCmdRegister.registerCommands(allSubsystems);
 
-        if (!allSubsystems.swerve.isPresent())
-            return;
         AutoBuilder.configureHolonomic(
                 swerve::getPose,
                 swerve::resetOdometry,

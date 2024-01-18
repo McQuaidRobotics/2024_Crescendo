@@ -18,32 +18,7 @@
       "/Visualizers/SwerveModules/Module[3]": "Mechanism2d"
     },
     "windows": {
-      "/SmartDashboard/Auto Chooser": {
-        "window": {
-          "visible": true
-        }
-      },
       "/SmartDashboard/Teleop Mode": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/Visualizers/Field": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/Visualizers/SwerveModules/Module[0]": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/Visualizers/SwerveModules/Module[1]": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/Visualizers/SwerveModules/Module[2]": {
         "window": {
           "visible": true
         }
@@ -53,11 +28,17 @@
   "NetworkTables": {
     "transitory": {
       "AdvantageKit": {
+        "RealOutputs": {
+          "Swerve": {
+            "open": true
+          }
+        },
         "Swerve": {
           "SwerveModule[0]": {
             "open": true
           }
-        }
+        },
+        "open": true
       },
       "PathPlanner": {
         "double[]##v_/PathPlanner/currentPose": {
@@ -67,10 +48,16 @@
           "open": true
         }
       },
-      "SmartDashboard": {
+      "Tracer": {
         "open": true
       },
       "Visualizers": {
+        "Field": {
+          "double[]##v_/Visualizers/Field/Robot": {
+            "open": true
+          },
+          "open": true
+        },
         "SwerveModules": {
           "open": true
         }
