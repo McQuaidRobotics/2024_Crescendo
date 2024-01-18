@@ -4,6 +4,7 @@ import java.util.function.Function;
 import org.littletonrobotics.junction.Logger;
 
 import com.igknighters.subsystems.swerve.Swerve;
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.math.geometry.Pose2d;
