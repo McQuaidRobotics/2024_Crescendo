@@ -1,19 +1,14 @@
 package com.igknighters.commands.autos;
 
 import java.util.function.Function;
-import org.littletonrobotics.junction.Logger;
 
 import com.igknighters.subsystems.swerve.Swerve;
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 
 public class DynamicPath {
 
@@ -80,26 +75,7 @@ public class DynamicPath {
         return this;
     }
 
-    //TODO get rid of this before merge with main! Used for debugging!
-    private Command loggedCommad(Command cmd) {
-        return new FunctionalCommand(
-            () -> {
-                SmartDashboard.putString("DynamicCmd", cmd.getName());
-                Logger.recordOutput("DynamicCmd", cmd.getName());
-                cmd.initialize();
-            },
-            cmd::execute,
-            (interupted) -> {
-                SmartDashboard.putString("DynamicCmd", "");
-                Logger.recordOutput("DynamicCmd", "");
-                cmd.end(interupted);
-            },
-            cmd::isFinished,
-            cmd.getRequirements().toArray(new Subsystem[0])
-        );
-    }
-
     public Command getCmd(Swerve swerve) {
-        return loggedCommad(cmdResolver.apply(swerve).withName(name));
+        return cmdResolver.apply(swerve).withName(name);
     }
 }

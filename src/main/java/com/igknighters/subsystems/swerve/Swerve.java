@@ -20,9 +20,6 @@ import com.igknighters.Robot;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues;
 
-
-import org.littletonrobotics.junction.Logger;
-
 public class Swerve extends SubsystemBase {
     private final SwerveDriveOdometry swerveOdometry;
     private final SwerveModule[] swerveMods;
@@ -184,10 +181,6 @@ public class Swerve extends SubsystemBase {
         SmartDashboard.putNumber("Gyro Angle", gyroRot.getDegrees());
 
         visualizer.update(swerveOdometry.update(gyroRot, modulePoses));
-
-        //TODO get rid of this before merge with main! Used for debugging!
-        Logger.recordOutput("gyro", gyroRot.getDegrees());
-        Logger.recordOutput("swerve pose", getPose());
     }
 
     @Override
