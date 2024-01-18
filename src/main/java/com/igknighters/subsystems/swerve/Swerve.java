@@ -145,21 +145,21 @@ public class Swerve extends SubsystemBase {
     /**
      * @return The raw gyro yaw value in radians
      */
-    public Double getYawRads() {
+    public double getYawRads() {
         return inputs.gyroYawRads;
     }
 
     /**
      * @return The raw gyro pitch value in radians
      */
-    public Double getPitchRads() {
+    public double getPitchRads() {
         return inputs.gyroPitchRads;
     }
 
     /**
      * @return The raw gyro roll value in radians
      */
-    public Double getRollRads() {
+    public double getRollRads() {
         return inputs.gyroRollRads;
     }
 

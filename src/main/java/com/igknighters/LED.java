@@ -30,7 +30,7 @@ public class LED {
     }
 
     private Timer timer;
-    private Double duration;
+    private double duration;
     private LedPatterns pattern;
     private LedPatterns lastPattern;
 
