@@ -73,7 +73,7 @@ public final class ConstValues {
 
         public static final double AMBIGUITY_CUTOFF = 0.5;
 
-        public static final double MAX_Z_DELTA = 0.3;
+        public static final double MAX_Z_DELTA = 100.0;
 
         /**
          * The cameras used for vision.

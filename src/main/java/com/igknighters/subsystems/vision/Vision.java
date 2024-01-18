@@ -2,7 +2,6 @@ package com.igknighters.subsystems.vision;
 
 import com.igknighters.GlobalState;
 import com.igknighters.GlobalState.LocalizerType;
-import com.igknighters.constants.AprilTags;
 import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kDimensions;
 import com.igknighters.constants.ConstValues.kVision;
