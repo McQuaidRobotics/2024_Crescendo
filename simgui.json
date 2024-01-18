@@ -1,50 +1,43 @@
 {
+  "HALProvider": {
+    "Other Devices": {
+      "window": {
+        "visible": false
+      }
+    }
+  },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
-      "/LiveWindow/Ungrouped/DigitalOutput[17]": "Digital Output",
-      "/LiveWindow/Ungrouped/DigitalOutput[18]": "Digital Output",
-      "/LiveWindow/Ungrouped/DigitalOutput[19]": "Digital Output",
-      "/LiveWindow/Ungrouped/DigitalOutput[20]": "Digital Output",
-      "/LiveWindow/Ungrouped/PIDController[10]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[11]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[12]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[13]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[14]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[15]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[16]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[17]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[1]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[2]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[3]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[4]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[5]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[6]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[7]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[8]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[9]": "PIDController",
-      "/LiveWindow/Ungrouped/Pigeon 2 (v6) [33]": "Gyro",
-      "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
-      "/Shuffleboard/Autos/Autonomous Routine": "String Chooser",
-      "/Shuffleboard/SuperStructure/SuperStructure Visualizer": "Mechanism2d",
-      "/Shuffleboard/SuperStructure/Superstructure Visualizer": "Mechanism2d",
       "/SmartDashboard/Auto Chooser": "String Chooser",
-      "/SmartDashboard/Field": "Field2d"
+      "/Visualizers/Field": "Field2d",
+      "/Visualizers/SwerveModules/Module[0]": "Mechanism2d",
+      "/Visualizers/SwerveModules/Module[1]": "Mechanism2d",
+      "/Visualizers/SwerveModules/Module[2]": "Mechanism2d",
+      "/Visualizers/SwerveModules/Module[3]": "Mechanism2d"
     },
     "windows": {
-      "/SmartDashboard/Auto Chooser": {
+      "/Visualizers/Field": {
         "window": {
           "visible": true
         }
       },
-      "/SmartDashboard/Field": {
-        "bottom": 544,
-        "builtin": "2023 Charged Up",
-        "height": 8.013679504394531,
-        "left": 46,
-        "right": 1088,
-        "top": 36,
-        "width": 16.541748046875,
+      "/Visualizers/SwerveModules/Module[0]": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/Visualizers/SwerveModules/Module[1]": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/Visualizers/SwerveModules/Module[2]": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/Visualizers/SwerveModules/Module[3]": {
         "window": {
           "visible": true
         }
@@ -54,42 +47,19 @@
   "NetworkTables": {
     "transitory": {
       "AdvantageKit": {
+        "Swerve": {
+          "SwerveModule[0]": {
+            "open": true
+          }
+        },
         "open": true
       },
-      "SmartDashboard": {
+      "Visualizers": {
+        "SwerveModules": {
+          "open": true
+        },
         "open": true
       }
-    }
-  },
-  "Plot": {
-    "Plot <0>": {
-      "plots": [
-        {
-          "axis": [
-            {
-              "autoFit": true
-            }
-          ],
-          "backgroundColor": [
-            0.0,
-            0.0,
-            0.0,
-            0.8500000238418579
-          ],
-          "height": 332,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/Module 0 Angle"
-            }
-          ]
-        }
-      ]
     }
   }
 }

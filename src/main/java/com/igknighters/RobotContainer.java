@@ -10,10 +10,13 @@ import com.igknighters.controllers.TestingController;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.ReplanningConfig;
+
 import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.autos.AutosCmdRegister;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class RobotContainer {
 
@@ -39,27 +42,36 @@ public class RobotContainer {
         if (allSubsystems.swerve.isPresent()) {
             var swerve = allSubsystems.swerve.get();
 
-            swerve.setDefaultCommand(
-                    new com.igknighters.commands.swerve.TeleopSwerve(
-                            swerve,
-                            driverController.leftStickY(),
-                            driverController.leftStickX(),
-                            driverController.rightStickX()));
+            if (RobotBase.isReal()) {
+                swerve.setDefaultCommand(
+                        new com.igknighters.commands.swerve.TeleopSwerve(
+                                swerve,
+                                driverController.leftStickY(),
+                                driverController.leftStickX(),
+                                driverController.rightStickX()));
+            } else {
+                swerve.setDefaultCommand(
+                        new com.igknighters.commands.swerve.TeleopSwerveSim(
+                                swerve,
+                                driverController.leftStickY(),
+                                driverController.leftStickX(),
+                                driverController.rightStickX()));
+            }
 
             // swerve.setDefaultCommand(
-            //         new com.igknighters.commands.swerve.TeleopSwerve2(
+            //         new com.igknighters.commands.swerve.TeleopSwerveAbsRot(
             //                 swerve,
             //                 driverController.leftStickX(),
             //                 driverController.leftStickY(),
             //                 driverController.rightStickX(),
             //                 driverController.rightStickY()
             //         ));
-        }
 
-        setupAutos();
+            setupAutos();
+        }
     }
 
-    private void setupAutos() {
+    public void setupAutos() {
         AutosCmdRegister.registerCommands(allSubsystems);
 
         if (!allSubsystems.swerve.isPresent())
@@ -69,7 +81,9 @@ public class RobotContainer {
                 swerve::getPose,
                 swerve::resetOdometry,
                 swerve::getChassisSpeeds,
-                swerve::driveChassisSpeeds,
+                chassisSpeeds -> swerve.driveChassisSpeeds(
+                    chassisSpeeds, false, RobotBase.isReal()
+                ),
                 new HolonomicPathFollowerConfig(
                         kAuto.AUTO_TRANSLATION_PID,
                         kAuto.AUTO_ANGULAR_PID,
@@ -77,7 +91,18 @@ public class RobotContainer {
                         kSwerve.DRIVEBASE_RADIUS,
                         new ReplanningConfig(
                                 true,
-                                true)),
+                                false)),
+                () -> {
+                    if (DriverStation.getAlliance().isPresent() 
+                    && DriverStation.getAlliance().get() == Alliance.Blue) {
+                        return false;
+                    }
+                    else if (DriverStation.getAlliance().isPresent() 
+                    && DriverStation.getAlliance().get() == Alliance.Red) {
+                        return true;
+                    }
+                    else return false; //Default path for blue alliance side
+                },
                 swerve);
     }
 }
