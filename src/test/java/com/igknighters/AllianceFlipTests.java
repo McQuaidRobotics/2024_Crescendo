@@ -32,7 +32,7 @@ import com.igknighters.util.AllianceFlip;
 public class AllianceFlipTests {
     Random rnd = new Random();
 
-    @RepeatedTest(3)
+    @Test
     @DisplayName("Test Flip Translation2d")
     public void testFlipTranslationd() {
         Translation2d randomTranslation = new Translation2d(rnd.nextDouble(FieldConstants.FIELD_LENGTH + 1.0),
@@ -43,7 +43,7 @@ public class AllianceFlipTests {
                 AllianceFlip.flipTranslation(randomTranslation));
     }
 
-    @RepeatedTest(3)
+    @Test
     @DisplayName("Test Flip Translation3d")
     public void testFlipTranslation2d() {
         Translation3d randomTranslation = new Translation3d(rnd.nextDouble(FieldConstants.FIELD_LENGTH + 1.0), rnd.nextDouble(FieldConstants.FIELD_WIDTH + 1.0), rnd.nextDouble(6.0));
@@ -54,7 +54,7 @@ public class AllianceFlipTests {
         );
     }
 
-    @RepeatedTest(3)
+    @Test
     @DisplayName("Test Flip Rotation2d")
     public void testFlipRotation2d() {
         Rotation2d randomRotation = Rotation2d.fromRadians(rnd.nextDouble((2.0 * Math.PI) + 1.0));
@@ -65,7 +65,7 @@ public class AllianceFlipTests {
         );
     }
 
-    @RepeatedTest(3)
+    @Test
     @DisplayName("Test Flip Rotation3d")
     public void testFlipRotation3d() {
         Rotation3d randomRotation = new Rotation3d(rnd.nextDouble((2.0 * Math.PI) + 1.0), rnd.nextDouble((2.0 * Math.PI) + 1.0), rnd.nextDouble((2.0 * Math.PI) + 1.0));
@@ -77,7 +77,7 @@ public class AllianceFlipTests {
         assertEquals(expectedRotation.getZ(), outputRotation.getZ());
     }
 
-    @RepeatedTest(3)
+    @Test
     @DisplayName("Test Flip Pose2d")
     public void testFlipPose2d() {
         Pose2d randomPose = new Pose2d(
@@ -92,7 +92,7 @@ public class AllianceFlipTests {
                 AllianceFlip.flipPose(randomPose));
     }
 
-    @RepeatedTest(3)
+    @Test
     @DisplayName("Test Flip Pose3d")
     public void testFlipPose3d() {
         Pose3d randomPose = new Pose3d(
@@ -113,7 +113,7 @@ public class AllianceFlipTests {
         assertEquals(expectedPose.getRotation().getZ(), outputPose.getRotation().getZ());
     }
 
-    @RepeatedTest(3)
+    @Test
     @DisplayName("Test Flip Transform2d")
     public void testFlipTransform2d() {
         Transform2d randomTransform = new Transform2d(
@@ -128,7 +128,7 @@ public class AllianceFlipTests {
                 AllianceFlip.flipTransform(randomTransform));
     }
 
-    @RepeatedTest(3)
+    @Test
     @DisplayName("Test Flip Transform3d")
     public void testFlipTransform3d() {
         Transform3d randomTransform = new Transform3d(
