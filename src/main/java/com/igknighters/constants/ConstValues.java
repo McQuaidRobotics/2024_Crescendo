@@ -6,7 +6,9 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.igknighters.ConstantHelper.*;
 import com.igknighters.util.SwerveModuleConstants;
 import com.igknighters.util.SwerveModuleConstants.ModuleId;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -48,7 +50,7 @@ public final class ConstValues {
         public static final boolean INVERT_GYRO = false;
         public static final String CANBUS = "DriveBus";
 
-        @DoubleConst(crash = 4.5)
+        @DoubleConst(crash = 4.8)
         public static double MAX_DRIVE_VELOCITY;
 
         @DoubleConst(crash = 10.0)
@@ -146,5 +148,15 @@ public final class ConstValues {
     public static final class kAuto {
         public static final PIDConstants AUTO_TRANSLATION_PID = new PIDConstants(3.4, 0, 0.0);
         public static final PIDConstants AUTO_ANGULAR_PID = new PIDConstants(3.0, 0.0, 0.0);
+        public static final PathConstraints DYNAMIC_PATH_CONSTRAINTS = new PathConstraints(
+            3.0,
+            3.0,
+            Units.degreesToRadians(540.0),
+            Units.degreesToRadians(720.0)
+        );
+        public static final ReplanningConfig DYNAMIC_REPLANNING_CONFIG = new ReplanningConfig(
+            true,
+            false
+        );
     }
 }
