@@ -30,6 +30,7 @@ public class Swerve extends SubsystemBase {
     private final StatusSignal<Double> gyroRollSignal;
     private final StatusSignal<Double> gyroPitchSignal;
     private final StatusSignal<Double> gyroYawSignal;
+    private double simYawOffset = 0.0;
 
     public Swerve() {
 
@@ -81,9 +82,8 @@ public class Swerve extends SubsystemBase {
         }
     }
 
-    public void driveChassisSpeeds(ChassisSpeeds speeds) {
-        if (Robot.isReal())
-            speeds.omegaRadiansPerSecond *= -1;
+    public void driveChassisSpeeds(ChassisSpeeds speeds, boolean openLoop, boolean invertRotation) {
+        if (invertRotation) speeds.omegaRadiansPerSecond *= -1;
         SwerveModuleState[] targetStates = kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(speeds);
 
         SwerveDriveKinematics.desaturateWheelSpeeds(targetStates, kSwerve.MAX_DRIVE_VELOCITY);
@@ -96,7 +96,11 @@ public class Swerve extends SubsystemBase {
     }
 
     public void setYaw(double val) {
-        gyro.setYaw(val);
+        if (Robot.isReal()) {
+            gyro.setYaw(val);
+        } else {
+            simYawOffset = val - getYawRot().getDegrees();
+        }
     }
 
     public Rotation2d getYawRot() {
@@ -185,7 +189,10 @@ public class Swerve extends SubsystemBase {
         ChassisSpeeds currentSpeeds = kSwerve.SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
 
         gyroSim.setRawYaw(
-                getYawRot().getDegrees() + (Units.radiansToDegrees(currentSpeeds.omegaRadiansPerSecond) * 0.02));
+                getYawRot().getDegrees()
+                + (Units.radiansToDegrees(currentSpeeds.omegaRadiansPerSecond) * 0.02)
+                + simYawOffset);
+        simYawOffset = 0.0;
     }
 
     public static double scope0To360(double angle) {

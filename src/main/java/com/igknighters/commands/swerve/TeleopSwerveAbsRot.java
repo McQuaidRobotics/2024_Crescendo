@@ -16,7 +16,7 @@ import com.igknighters.commands.Helpers;
 import com.igknighters.constants.ConstValues.kSwerve;
 
 /** An example command that uses an example subsystem. */
-public class TeleopSwerve2 extends Command {
+public class TeleopSwerveAbsRot extends Command {
     @SuppressWarnings({ "PMD.UnusedPrivateField", "PMD.SingularField" })
 
     private final Swerve swerve;
@@ -33,7 +33,7 @@ public class TeleopSwerve2 extends Command {
     /**if within x of a multiple of 90 degrees it will snap to the closest multiple of 90 degrees */
     private final static double ANGLE_SNAP_WINDOW = Units.degreesToRadians(5.0);
 
-    public TeleopSwerve2(
+    public TeleopSwerveAbsRot(
             Swerve swerve,
             DoubleSupplier translationX,
             DoubleSupplier translationY,
@@ -94,10 +94,10 @@ public class TeleopSwerve2 extends Command {
     public void execute() {
         var chassisSpeeds = genChassisSpeeds(
                 new Translation2d(
-                        translationXSup.getAsDouble(), translationYSup.getAsDouble()),
+                        -translationYSup.getAsDouble(), -translationXSup.getAsDouble()),
                 new Translation2d(
                         rotationXSup.getAsDouble(), rotationYSup.getAsDouble()),
                 true);
-        swerve.driveChassisSpeeds(chassisSpeeds);
+        swerve.driveChassisSpeeds(chassisSpeeds, true, false);
     }
 }
