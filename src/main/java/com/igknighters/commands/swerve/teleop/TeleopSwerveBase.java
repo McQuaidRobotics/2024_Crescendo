@@ -14,14 +14,23 @@ import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.controllers.ControllerParent;
 
 public class TeleopSwerveBase extends Command {
+    /**
+     * Orient the chassis speeds for the user,
+     * If real robot this means up on translation stick moves away from driver.
+     * If simulation and {@link kSwerve#ORIENT_TELEOP_FOR_SIM} is true,
+     * it will make up on the translation stick move up on the field visualization.
+     * If simulation and {@link kSwerve#ORIENT_TELEOP_FOR_SIM} is false it will replicate the real robot.
+     * @param input The controller input
+     * @return The adjusted controller input
+     */
     @SuppressWarnings("unused")
-    public static Translation2d orientForUser(Translation2d chassisSpeeds) {
+    public static Translation2d orientForUser(Translation2d input) {
         if (RobotBase.isSimulation() && kSwerve.ORIENT_TELEOP_FOR_SIM) {
             return new Translation2d(
-                    chassisSpeeds.getX(),
-                    -chassisSpeeds.getY());
+                    input.getX(),
+                    -input.getY());
         } else {
-            Translation2d chassisSpeedsAdj = chassisSpeeds.rotateBy(Rotation2d.fromDegrees(-90));
+            Translation2d chassisSpeedsAdj = input.rotateBy(Rotation2d.fromDegrees(-90));
             return new Translation2d(-chassisSpeedsAdj.getX(), chassisSpeedsAdj.getY());
         }
     }
