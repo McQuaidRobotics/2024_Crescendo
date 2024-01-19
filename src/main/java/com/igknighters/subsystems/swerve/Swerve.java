@@ -21,6 +21,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.igknighters.GlobalState;
@@ -110,6 +111,8 @@ public class Swerve extends SubsystemBase {
     }
 
     public void driveChassisSpeeds(ChassisSpeeds speeds, boolean isOpenLoop) {
+        if (RobotBase.isReal())
+            speeds.omegaRadiansPerSecond *= -1.0;
 
         Logger.recordOutput("Swerve/targetChassisSpeed", speeds);
 
