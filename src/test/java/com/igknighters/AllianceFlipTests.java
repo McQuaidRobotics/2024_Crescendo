@@ -1,20 +1,9 @@
-import static java.time.Duration.ofMillis;
-import static java.time.Duration.ofMinutes;
-import static org.junit.jupiter.api.Assertions.assertAll;
+package com.igknighters;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTimeout;
-import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.util.Random;
-import java.util.concurrent.CountDownLatch;
-
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -39,19 +28,21 @@ public class AllianceFlipTests {
                 rnd.nextDouble(FieldConstants.FIELD_WIDTH + 1.0));
 
         assertEquals(
-                new Translation2d(FieldConstants.FIELD_LENGTH - randomTranslation.getX(), randomTranslation.getY()),
+                new Translation2d(FieldConstants.FIELD_LENGTH - randomTranslation.getX(),
+                        randomTranslation.getY()),
                 AllianceFlip.flipTranslation(randomTranslation));
     }
 
     @Test
     @DisplayName("Test Flip Translation3d")
     public void testFlipTranslation2d() {
-        Translation3d randomTranslation = new Translation3d(rnd.nextDouble(FieldConstants.FIELD_LENGTH + 1.0), rnd.nextDouble(FieldConstants.FIELD_WIDTH + 1.0), rnd.nextDouble(6.0));
+        Translation3d randomTranslation = new Translation3d(rnd.nextDouble(FieldConstants.FIELD_LENGTH + 1.0),
+                rnd.nextDouble(FieldConstants.FIELD_WIDTH + 1.0), rnd.nextDouble(6.0));
 
         assertEquals(
-            new Translation3d(FieldConstants.FIELD_LENGTH - randomTranslation.getX(), randomTranslation.getY(), randomTranslation.getZ()),
-            AllianceFlip.flipTranslation(randomTranslation)
-        );
+                new Translation3d(FieldConstants.FIELD_LENGTH - randomTranslation.getX(),
+                        randomTranslation.getY(), randomTranslation.getZ()),
+                AllianceFlip.flipTranslation(randomTranslation));
     }
 
     @Test
@@ -60,16 +51,19 @@ public class AllianceFlipTests {
         Rotation2d randomRotation = Rotation2d.fromRadians(rnd.nextDouble((2.0 * Math.PI) + 1.0));
 
         assertEquals(
-            Rotation2d.fromRadians(randomRotation.getRadians() + Math.PI),
-            AllianceFlip.flipRotation(randomRotation)
-        );
+                Rotation2d.fromRadians(new Rotation2d(-randomRotation.getCos(), randomRotation.getSin())
+                        .getRadians()),
+                AllianceFlip.flipRotation(randomRotation));
     }
 
     @Test
     @DisplayName("Test Flip Rotation3d")
     public void testFlipRotation3d() {
-        Rotation3d randomRotation = new Rotation3d(rnd.nextDouble((2.0 * Math.PI) + 1.0), rnd.nextDouble((2.0 * Math.PI) + 1.0), rnd.nextDouble((2.0 * Math.PI) + 1.0));
-        Rotation3d expectedRotation = new Rotation3d(randomRotation.getX(), randomRotation.getY(), randomRotation.getZ() + Math.PI);
+        Rotation3d randomRotation = new Rotation3d(rnd.nextDouble((2.0 * Math.PI) + 1.0),
+                rnd.nextDouble((2.0 * Math.PI) + 1.0), rnd.nextDouble((2.0 * Math.PI) + 1.0));
+        Rotation3d expectedRotation = new Rotation3d(randomRotation.getX(), randomRotation.getY(),
+                new Rotation2d(-Rotation2d.fromRadians(randomRotation.getZ()).getCos(),
+                        Rotation2d.fromRadians(randomRotation.getZ()).getSin()).getRadians());
         Rotation3d outputRotation = AllianceFlip.flipRotation(randomRotation);
 
         assertEquals(expectedRotation.getX(), outputRotation.getX());
@@ -87,8 +81,12 @@ public class AllianceFlipTests {
 
         assertEquals(
                 new Pose2d(
-                        new Translation2d(FieldConstants.FIELD_LENGTH - randomPose.getX(), randomPose.getY()),
-                        Rotation2d.fromDegrees(randomPose.getRotation().getDegrees() + 180)),
+                        new Translation2d(FieldConstants.FIELD_LENGTH - randomPose.getX(),
+                                randomPose.getY()),
+                        Rotation2d.fromRadians(
+                                new Rotation2d(-randomPose.getRotation().getCos(),
+                                        randomPose.getRotation().getSin())
+                                        .getRadians())),
                 AllianceFlip.flipPose(randomPose));
     }
 
@@ -98,13 +96,18 @@ public class AllianceFlipTests {
         Pose3d randomPose = new Pose3d(
                 new Translation3d(rnd.nextDouble(FieldConstants.FIELD_LENGTH + 1.0),
                         rnd.nextDouble(FieldConstants.FIELD_WIDTH + 1.0), 6.0),
-                new Rotation3d(rnd.nextDouble((2.0 * Math.PI) + 1.0), rnd.nextDouble((2.0 * Math.PI) + 1.0),
+                new Rotation3d(rnd.nextDouble((2.0 * Math.PI) + 1.0),
+                        rnd.nextDouble((2.0 * Math.PI) + 1.0),
                         rnd.nextDouble((2.0 * Math.PI) + 1.0)));
         Pose3d expectedPose = new Pose3d(
                 new Translation3d(FieldConstants.FIELD_LENGTH - randomPose.getX(), randomPose.getY(),
                         randomPose.getZ()),
                 new Rotation3d(randomPose.getRotation().getX(), randomPose.getRotation().getY(),
-                        randomPose.getRotation().getZ() + Math.PI));
+                        new Rotation2d(-Rotation2d.fromRadians(randomPose.getRotation().getZ())
+                                .getCos(),
+                                Rotation2d.fromRadians(randomPose.getRotation().getZ())
+                                        .getSin())
+                                .getRadians()));
         Pose3d outputPose = AllianceFlip.flipPose(randomPose);
 
         assertEquals(expectedPose.getTranslation(), outputPose.getTranslation());
@@ -123,8 +126,12 @@ public class AllianceFlipTests {
 
         assertEquals(
                 new Transform2d(
-                        new Translation2d(FieldConstants.FIELD_LENGTH - randomTransform.getX(), randomTransform.getY()),
-                        Rotation2d.fromDegrees(randomTransform.getRotation().getDegrees() + 180)),
+                        new Translation2d(FieldConstants.FIELD_LENGTH - randomTransform.getX(),
+                                randomTransform.getY()),
+                        Rotation2d.fromRadians(
+                                new Rotation2d(-randomTransform.getRotation().getCos(),
+                                        randomTransform.getRotation().getSin())
+                                        .getRadians())),
                 AllianceFlip.flipTransform(randomTransform));
     }
 
@@ -134,13 +141,22 @@ public class AllianceFlipTests {
         Transform3d randomTransform = new Transform3d(
                 new Translation3d(rnd.nextDouble(FieldConstants.FIELD_LENGTH + 1.0),
                         rnd.nextDouble(FieldConstants.FIELD_WIDTH + 1.0), 6.0),
-                new Rotation3d(rnd.nextDouble((2.0 * Math.PI) + 1.0), rnd.nextDouble((2.0 * Math.PI) + 1.0),
+                new Rotation3d(rnd.nextDouble((2.0 * Math.PI) + 1.0),
+                        rnd.nextDouble((2.0 * Math.PI) + 1.0),
                         rnd.nextDouble((2.0 * Math.PI) + 1.0)));
         Transform3d expectedPose = new Transform3d(
-                new Translation3d(FieldConstants.FIELD_LENGTH - randomTransform.getX(), randomTransform.getY(),
+                new Translation3d(FieldConstants.FIELD_LENGTH - randomTransform.getX(),
+                        randomTransform.getY(),
                         randomTransform.getZ()),
-                new Rotation3d(randomTransform.getRotation().getX(), randomTransform.getRotation().getY(),
-                        randomTransform.getRotation().getZ() + Math.PI));
+                new Rotation3d(randomTransform.getRotation().getX(),
+                        randomTransform.getRotation().getY(),
+                        new Rotation2d(-Rotation2d
+                                .fromRadians(randomTransform.getRotation().getZ())
+                                .getCos(),
+                                Rotation2d.fromRadians(
+                                        randomTransform.getRotation().getZ())
+                                        .getSin())
+                                .getRadians()));
         Transform3d outputPose = AllianceFlip.flipTransform(randomTransform);
 
         assertEquals(expectedPose.getTranslation(), outputPose.getTranslation());

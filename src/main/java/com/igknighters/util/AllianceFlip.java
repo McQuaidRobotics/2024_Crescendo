@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.wpilibj.DriverStation;
 
 public class AllianceFlip {
     /**
@@ -32,7 +33,7 @@ public class AllianceFlip {
      * @return Rotation object rotated by PI or 180 degrees
      */
     public static final Rotation2d flipRotation(Rotation2d rotation) {
-        return Rotation2d.fromRadians(rotation.getRadians() + Math.PI);
+        return new Rotation2d(-rotation.getCos(), rotation.getSin());
     }
     /**
      * @param rotation
@@ -42,7 +43,7 @@ public class AllianceFlip {
         return new Rotation3d(
             rotation.getX(),
             rotation.getY(),
-            rotation.getZ() + Math.PI
+            flipRotation(Rotation2d.fromRadians(rotation.getZ())).getRadians()
         );
     }
 
