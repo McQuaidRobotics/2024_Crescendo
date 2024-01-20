@@ -106,6 +106,10 @@ public class Robot extends UnitTestableRobot {
     }
 
     private void setupAkit() {
+        if (GlobalState.isUnitTest()) {
+            return;
+        }
+
         Logger.recordMetadata("RuntimeType", getRuntimeType().toString());
         Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
         Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
