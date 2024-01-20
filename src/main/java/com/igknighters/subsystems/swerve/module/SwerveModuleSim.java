@@ -23,15 +23,15 @@ public class SwerveModuleSim implements SwerveModule {
     private FlywheelSim angleSim = new FlywheelSim(DCMotor.getFalcon500(1), 1.0 / kSwerve.ANGLE_GEAR_RATIO, 0.004);
 
     private final PIDController driveFeedback = new PIDController(
-        DriveMotorConstants.kP * (Math.PI * 2.0),
-        DriveMotorConstants.kI * (Math.PI * 2.0),
-        DriveMotorConstants.kD * (Math.PI * 2.0),
+        DriveMotorConstants.kP,
+        DriveMotorConstants.kI,
+        DriveMotorConstants.kD,
         ConstValues.PERIODIC_TIME
     );
     private final PIDController angleFeedback = new PIDController(
-        AngleMotorConstants.kP * (Math.PI * 2.0),
-        AngleMotorConstants.kI * (Math.PI * 2.0),
-        AngleMotorConstants.kD * (Math.PI * 2.0),
+        AngleMotorConstants.kP,
+        AngleMotorConstants.kI,
+        AngleMotorConstants.kD,
         ConstValues.PERIODIC_TIME
     );
 
