@@ -77,7 +77,7 @@ public class AllianceFlipTests {
         Pose2d randomPose = new Pose2d(
                 new Translation2d(rnd.nextDouble(FieldConstants.FIELD_LENGTH + 1.0),
                         rnd.nextDouble(FieldConstants.FIELD_WIDTH + 1.0)),
-                Rotation2d.fromDegrees(rnd.nextDouble(361)));
+                Rotation2d.fromDegrees(rnd.nextDouble((2.0 * Math.PI) + 1.0)));
 
         assertEquals(
                 new Pose2d(
@@ -122,7 +122,7 @@ public class AllianceFlipTests {
         Transform2d randomTransform = new Transform2d(
                 new Translation2d(rnd.nextDouble(FieldConstants.FIELD_LENGTH + 1.0),
                         rnd.nextDouble(FieldConstants.FIELD_WIDTH + 1.0)),
-                Rotation2d.fromDegrees(rnd.nextDouble(361)));
+                Rotation2d.fromDegrees(rnd.nextDouble((2.0 * Math.PI) + 1.0)));
 
         assertEquals(
                 new Transform2d(
