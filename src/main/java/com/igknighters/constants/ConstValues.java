@@ -83,16 +83,22 @@ public final class ConstValues {
                 "photonvision-15",
                 0,
                 new Pose3d(
-                    new Translation3d(-0.04, 0.04, 0.04),
-                    new Rotation3d()
+                    new Translation3d(Units.inchesToMeters(10.0), Units.inchesToMeters(10.0), Units.inchesToMeters(3.0)),
+                    new Rotation3d(
+                        0.0,
+                        Units.degreesToRadians(15.0),
+                        Units.degreesToRadians(45.0))
                 )
             ),
             Camera.createConfig(
                 "photonvision-16",
                 1,
                 new Pose3d(
-                    new Translation3d(0.04, 0.04, 0.04),
-                    new Rotation3d()
+                    new Translation3d(Units.inchesToMeters(10.0), Units.inchesToMeters(-10.0), Units.inchesToMeters(3.0)),
+                    new Rotation3d(
+                        0.0,
+                        Units.degreesToRadians(15.0),
+                        Units.degreesToRadians(-45.0))
                 )
             )
         };
@@ -162,7 +168,7 @@ public final class ConstValues {
             public static final double kD = 0.0;
         }
 
-        public static final double ANGLE_CONTROLLER_KP = 8.0;
+        public static final double ANGLE_CONTROLLER_KP = 4.0;
 
         public static final boolean ORIENT_TELEOP_FOR_SIM = true;
 

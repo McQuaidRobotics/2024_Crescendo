@@ -116,11 +116,7 @@ public class Swerve extends SubsystemBase {
 
         Logger.recordOutput("Swerve/targetChassisSpeed", speeds);
 
-        SwerveModuleState[] targetStates = kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(speeds);
-
-        SwerveDriveKinematics.desaturateWheelSpeeds(targetStates, kSwerve.MAX_DRIVE_VELOCITY);
-
-        setModuleStates(targetStates, isOpenLoop);
+        setModuleStates(speeds, isOpenLoop);
     }
 
     /**

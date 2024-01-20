@@ -81,8 +81,8 @@ public class SwerveModuleReal implements SwerveModule {
         driveConfig.Slot0.kI = DriveMotorConstants.kI;
         driveConfig.Slot0.kD = DriveMotorConstants.kD;
         driveConfig.Slot0.kV = 12.0 / (kSwerve.MAX_DRIVE_VELOCITY / (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO));
-        driveConfig.CurrentLimits.StatorCurrentLimit = 50.0;
-        driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        // driveConfig.CurrentLimits.StatorCurrentLimit = 50.0;
+        // driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
         driveMotor.getConfigurator().apply(driveConfig);
     }
@@ -128,7 +128,10 @@ public class SwerveModuleReal implements SwerveModule {
                 : desiredState.angle;
         inputs.targetAngleAbsolute = angle.getRadians();
 
-        angleMotor.setControl(new PositionDutyCycle(angle.getRotations()));
+        angleMotor.setControl(
+            new PositionDutyCycle(angle.getRotations())
+                .withUpdateFreqHz(250)
+            );
         lastAngle = angle;
     }
 

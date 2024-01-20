@@ -7,14 +7,21 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.igknighters.GlobalState;
 import com.igknighters.constants.ConstValues;
+import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.controllers.ControllerParent;
 
 public class TeleopSwerveTarget extends TeleopSwerveBase {
 
-    private Translation2d targetTranslation = new Translation2d(5.0, 5.0);
+    private Translation2d targetTranslation = FieldConstants.APRIL_TAG_FIELD
+        .getTagPose(7)
+        .get()
+        .getTranslation()
+        .toTranslation2d();
 
     public TeleopSwerveTarget(Swerve swerve, ControllerParent controller) {
         super(swerve, controller);
@@ -37,11 +44,17 @@ public class TeleopSwerveTarget extends TeleopSwerveBase {
         });
 
         var targetAngle = swerve.rotationRelativeToPose(
-                new Rotation2d(),
+                Rotation2d.fromDegrees(180),
                 targetTranslation.plus(new Translation2d(
                         vt.getX() * ConstValues.PERIODIC_TIME,
                         vt.getY() * ConstValues.PERIODIC_TIME)));
         var rotVelo = swerve.rotVeloForRotation(targetAngle);
+
+        Logger.recordOutput("/Swerve/rotvelo", rotVelo);
+
+        if (Math.abs(vt.getX()) < 0.25 && Math.abs(vt.getX()) < 0.25 && Math.abs(rotVelo) < 0.75) {
+            rotVelo = 0.0;
+        }
 
         var chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 vt.getX(),
