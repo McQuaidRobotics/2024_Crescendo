@@ -12,7 +12,6 @@ import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 
 public interface Camera {
-
     public static class CameraInput implements LoggableInputs {
         private VisionPoseEst latestPoseEst;
         private boolean isPresent = false;

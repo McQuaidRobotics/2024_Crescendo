@@ -15,7 +15,7 @@ public class DynamicRoutines {
             new DynamicPath(5.5, 3.0, -60.0, 0.1).withName("path 4").getCmd(swerve),
             new DynamicPath(3.55, 4.10, 180, 0.1).withName("path 5").getCmd(swerve),
             new DynamicPath(5.5, 5.2, 60.0, 0.1).withName("path 6").getCmd(swerve),
-            new DynamicPath(6.5, 4.1, 180.0, 0.1).withName("path 7").getCmd(swerve)
+            new DynamicPath(6.28, 4.1, 180.0, 0.1).withName("path 7").getCmd(swerve)
         );
     }
 

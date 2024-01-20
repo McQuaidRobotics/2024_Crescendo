@@ -189,7 +189,7 @@ public class GlobalState {
                 ((SwerveDrivePoseEstimator) localizer.get()).addVisionMeasurement(
                         value.pose.toPose2d(),
                         value.timestamp,
-                        VecBuilder.fill(ambiguity, ambiguity, ambiguity));
+                        VecBuilder.fill(ambiguity, ambiguity, 0.0));
             } else {
                 DriverStation.reportError("Localizer does not support Vision", false);
                 return;
@@ -278,7 +278,7 @@ public class GlobalState {
     public static void log() {
         globalLock.lock();
         try {
-            Logger.recordOutput("Global/Pose", GlobalState.getLocalizedPose());
+            localizer.ifPresent(l -> Logger.recordOutput("Global/LocalizedPose", l.getEstimatedPosition()));
             Logger.recordOutput("Global/AutoCommand", GlobalState.getAutoCommand().getName());
         } finally {
             globalLock.unlock();

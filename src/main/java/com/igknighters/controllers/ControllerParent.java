@@ -190,7 +190,7 @@ public class ControllerParent {
         }
     }
 
-    private DoubleSupplier deadbandSupplier(DoubleSupplier supplier, Double deadband) {
+    private DoubleSupplier deadbandSupplier(DoubleSupplier supplier, double deadband) {
         return () -> {
             double val = supplier.getAsDouble();
             if (Math.abs(val) > deadband) {
@@ -208,6 +208,7 @@ public class ControllerParent {
 
     /**
      * Right on the stick is positive (axis 4)
+     * 
      * @return A supplier for the value of the right stick x axis
      */
     public DoubleSupplier rightStickX() {
@@ -216,15 +217,17 @@ public class ControllerParent {
 
     /**
      * Right on the stick is positive (axis 4)
+     * 
      * @param deadband the deadband to apply to the stick
      * @return A supplier for the value of the right stick x axis
      */
-    public DoubleSupplier rightStickX(Double deadband) {
+    public DoubleSupplier rightStickX(double deadband) {
         return deadbandSupplier(rightStickX(), deadband);
     }
 
     /**
      * Up on the stick is positive (axis 5)
+     * 
      * @return A supplier for the value of the right stick y axis
      */
     public DoubleSupplier rightStickY() {
@@ -233,15 +236,17 @@ public class ControllerParent {
 
     /**
      * Up on the stick is positive (axis 5)
+     * 
      * @param deadband the deadband to apply to the stick
      * @return A supplier for the value of the right stick y axis
      */
-    public DoubleSupplier rightStickY(Double deadband) {
+    public DoubleSupplier rightStickY(double deadband) {
         return deadbandSupplier(rightStickY(), deadband);
     }
 
     /**
      * Right on the stick is positive (axis 0)
+     * 
      * @return A supplier for the value of the left stick x axis
      */
     public DoubleSupplier leftStickX() {
@@ -250,15 +255,17 @@ public class ControllerParent {
 
     /**
      * Right on the stick is positive (axis 0)
+     * 
      * @param deadband the deadband to apply to the stick
      * @return A supplier for the value of the left stick x axis
      */
-    public DoubleSupplier leftStickX(Double deadband) {
+    public DoubleSupplier leftStickX(double deadband) {
         return deadbandSupplier(leftStickX(), deadband);
     }
 
     /**
      * Up on the stick is positive (axis 1)
+     * 
      * @return A supplier for the value of the left stick y axis
      */
     public DoubleSupplier leftStickY() {
@@ -267,10 +274,11 @@ public class ControllerParent {
 
     /**
      * Up on the stick is positive (axis 1)
+     * 
      * @param deadband the deadband to apply to the stick
      * @return A supplier for the value of the left stick y axis
      */
-    public DoubleSupplier leftStickY(Double deadband) {
+    public DoubleSupplier leftStickY(double deadband) {
         return deadbandSupplier(leftStickY(), deadband);
     }
 

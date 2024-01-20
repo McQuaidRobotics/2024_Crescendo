@@ -1,6 +1,7 @@
 package com.igknighters.controllers;
 
 import com.igknighters.SubsystemResources.Subsystems;
+import com.igknighters.util.AllianceFlip;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -14,20 +15,13 @@ public class DriverController extends ControllerParent {
         // disregard null safety for subsystems as it is checked on assignment
 
         /// FACE BUTTONS
-        this.A.binding = new SingleDepBinding(Subsystems.Swerve, (trig, allss) -> {
-            trig.onTrue(Commands.runOnce(() -> allss.swerve.get().resetOdometry(
-                new Pose2d(
-                    new Translation2d(6.28, 4.1),
-                    Rotation2d.fromDegrees(180.0)
-                )
-            )));
-        });
+        // this.A.binding = 
 
         // this.B.binding =
 
-        // this.X.binding = 
+        // this.X.binding =
 
-        // this.Y.binding = 
+        // this.Y.binding =
 
         /// BUMPER
         // this.LB.binding =
