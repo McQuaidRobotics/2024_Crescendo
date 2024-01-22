@@ -29,7 +29,7 @@ public class PivotSim implements Pivot {
                 0.55,
                 kPivot.PIVOT_MIN_RADIANS,
                 kPivot.PIVOT_MAX_RADIANS,
-                false,
+                true,
                 kPivot.PIVOT_MIN_RADIANS);
         sim.setState(0.0, 0);
         inputs = new PivotInputs(0.0);
@@ -81,7 +81,7 @@ public class PivotSim implements Pivot {
         inputs.rightTemp = 0.0;
         inputs.isLimitSwitchHit = limitSwitch.get();
 
-        Logger.processInputs("SuperStructure/Pivot", inputs);
+        Logger.processInputs("Stem/Pivot", inputs);
     }
 
 }

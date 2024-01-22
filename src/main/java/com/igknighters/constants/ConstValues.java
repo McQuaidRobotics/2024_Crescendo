@@ -291,9 +291,8 @@ public final class ConstValues {
             @DoubleConst(crash = 0.0, burn = 0.0)
             public static double CANCODER_OFFSET = 0.0;
 
-            //TODO temporary values (converts degrees to radians)
-            public static final double WRIST_MIN_ANGLE = (15.0*Math.PI)/180;
-            public static final double WRIST_MAX_ANGLE = (90.0*Math.PI)/180;
+            public static final double WRIST_MIN_ANGLE = 24.0 * Conv.DEGREES_TO_RADIANS;
+            public static final double WRIST_MAX_ANGLE = 125.0 * Conv.DEGREES_TO_RADIANS;
 
             public static final double MOTOR_TO_MECHANISM_RATIO = (1.0 / 25.0) * (30.0 / 64.0) * (12.0 / 54.0); //TODO important to find when we have
 
@@ -310,25 +309,22 @@ public final class ConstValues {
             public static final double MOTOR_kI = 0;
             public static final double MOTOR_kD = 0;
 
-            //TODO all untested values that need to be found when we have a robor
             public static final double MAX_VELOCITY = 105;
             public static final double MAX_ACCELERATION = 700;
             public static final double MAX_JERK = 10000;// effectively infinite
 
 
             public static final double PIVOT_MIN_RADIANS = 0.0;
-          
-            public static final double PIVOT_MAX_RADIANS = 0.0;
 
-            public static final double PIGEON_OFFSET = 1.85;
+            public static final double PIVOT_MAX_RADIANS = 100.0 * Conv.DEGREES_TO_RADIANS;
 
-            public final static double SCORE_RADIANS = 40.0;
+            public static final double PIGEON_OFFSET = 0.0;
 
-            public static final boolean ENABLE_SOFTLIMITS = false;
+            public static final boolean ENABLE_SOFTLIMITS = true;
 
             /** For every {@value} rotations of the motor the mechanism moves 1 rotation */
-            // motor -> gbx(25:1) -> (30t -> 64t) -> (12t -> 54t)
-            public static final double MOTOR_TO_MECHANISM_RATIO = (1.0 / 25.0) * (30.0 / 64.0) * (12.0 / 54.0); //TODO important to find when we have
+            // motor -> gbx(100:1) -> (15 -> 42) -> mechanism
+            public static final double MOTOR_TO_MECHANISM_RATIO = (1.0 / 100.0) * (15.0 / 42.0);
 
             public static final boolean INVERTED = false;
 
@@ -337,7 +333,7 @@ public final class ConstValues {
              * throughout the match.
              */
             public static final double VOLTAGE_COMP = 11.8;
-            public static final double TOLERANCE = 0.5;
+            public static final double RESEED_TOLERANCE = TAU * (2.0 / 360.0); // effectively 2 degrees
         }
     }
 }

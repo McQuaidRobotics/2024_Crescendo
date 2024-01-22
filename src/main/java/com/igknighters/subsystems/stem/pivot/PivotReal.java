@@ -15,6 +15,7 @@ import edu.wpi.first.math.util.Units;
 import org.littletonrobotics.junction.Logger;
 
 import com.igknighters.constants.ConstValues.kStem.kPivot;
+import com.igknighters.util.SafeTalonFXConfiguration;
 
 public class PivotReal implements Pivot {
     /** Left */
@@ -30,7 +31,6 @@ public class PivotReal implements Pivot {
 
     private final PivotInputs inputs;
 
-
     private Double mechRadiansToMotorRots(Double mechRads) {
         return (mechRads / (2 * Math.PI)) / kPivot.MOTOR_TO_MECHANISM_RATIO;
     }
@@ -40,11 +40,11 @@ public class PivotReal implements Pivot {
     }
 
     public PivotReal() {
-        gyro = new Pigeon2(kPivot.PIGEON_ID); //add canbus
-        gyroPitch = (gyro.getPitch());
+        gyro = new Pigeon2(kPivot.PIGEON_ID);
+        gyroPitch = gyro.getPitch();
 
         gyroPitch.setUpdateFrequency(100);
-        
+
         gyro.optimizeBusUtilization();
 
         leaderMotor = new TalonFX(kPivot.LEFT_MOTOR_ID);
@@ -55,7 +55,6 @@ public class PivotReal implements Pivot {
         followerMotor.setControl(
                 new Follower(kPivot.LEFT_MOTOR_ID, true));
 
-        inputs = new PivotInputs(gyroPitch.getValue() - kPivot.PIGEON_OFFSET);
         leaderMotor.setPosition(mechRadiansToMotorRots(getPivotRadiansPigeon()));
 
         motorRots = leaderMotor.getRotorPosition();
@@ -77,10 +76,11 @@ public class PivotReal implements Pivot {
         leaderMotor.optimizeBusUtilization();
         followerMotor.optimizeBusUtilization();
 
+        inputs = new PivotInputs(gyroPitch.getValue() - kPivot.PIGEON_OFFSET);
     }
 
     private TalonFXConfiguration getMotorConfig() {
-        TalonFXConfiguration motorCfg = new TalonFXConfiguration();
+        TalonFXConfiguration motorCfg = new SafeTalonFXConfiguration();
         motorCfg.Slot0.kP = kPivot.MOTOR_kP;
         motorCfg.Slot0.kI = kPivot.MOTOR_kI;
         motorCfg.Slot0.kD = kPivot.MOTOR_kD;
@@ -94,10 +94,9 @@ public class PivotReal implements Pivot {
                 : InvertedValue.CounterClockwise_Positive;
 
         motorCfg.HardwareLimitSwitch.ReverseLimitEnable = true;
-        motorCfg.HardwareLimitSwitch.ForwardLimitAutosetPositionEnable = true;
-        motorCfg.HardwareLimitSwitch.ForwardLimitAutosetPositionValue = 0.0;
+        motorCfg.HardwareLimitSwitch.ForwardLimitEnable = true;
 
-        motorCfg.Voltage.PeakForwardVoltage = kPivot.VOLTAGE_COMP; //11.8
+        motorCfg.Voltage.PeakForwardVoltage = kPivot.VOLTAGE_COMP;
         motorCfg.Voltage.PeakReverseVoltage = -kPivot.VOLTAGE_COMP;
 
         return motorCfg;
@@ -105,8 +104,8 @@ public class PivotReal implements Pivot {
 
     @Override
     public void setPivotRadians(double radians) {
-        var posControlRequest = new MotionMagicDutyCycle(Units.radiansToRotations(radians));
-        this.leaderMotor.setControl(posControlRequest);
+        inputs.targetRadians = radians;
+        this.leaderMotor.setControl(new MotionMagicDutyCycle(mechRadiansToMotorRots(radians)));
     }
 
     @Override
@@ -114,7 +113,6 @@ public class PivotReal implements Pivot {
         inputs.targetRadians = 0.0;
         this.leaderMotor.setVoltage(volts);
     }
-
 
     @Override
     public double getPivotRadians() {
@@ -126,18 +124,17 @@ public class PivotReal implements Pivot {
     }
 
     private void seedPivot() {
-        var pigeonRadians = mechRadiansToMotorRots(getPivotRadiansPigeon());
-        leaderMotor.setPosition(pigeonRadians);
+        leaderMotor.setPosition(mechRadiansToMotorRots(getPivotRadiansPigeon()));
+        inputs.radians = getPivotRadiansPigeon();
     }
 
     @Override
     public void periodic() {
         BaseStatusSignal.refreshAll(
-            motorRots, motorVelo,
-            motorVolts, gyroPitch,
-            leftMotorAmps, rightMotorAmps,
-            leftMotorTemp, rightMotorTemp
-        );
+                motorRots, motorVelo,
+                motorVolts, gyroPitch,
+                leftMotorAmps, rightMotorAmps,
+                leftMotorTemp, rightMotorTemp);
 
         inputs.radians = motorRotsToMechRadians(motorRots.getValue());
         inputs.radiansPerSecond = motorRotsToMechRadians(motorVelo.getValue());
@@ -148,8 +145,16 @@ public class PivotReal implements Pivot {
         inputs.leftTemp = leftMotorTemp.getValue();
         inputs.rightTemp = rightMotorTemp.getValue();
 
-        Logger.processInputs("SuperStructure/Pivot", inputs);
-    }
+        if (Math.abs(inputs.radiansPerSecond - inputs.targetRadians) < kPivot.RESEED_TOLERANCE
+                && inputs.radians < Math.PI / 2.2 // ensuers backlash is going the right way (kinda)
+        ) {
+            seedPivot();
+            Logger.recordOutput("Stem/Pivot/SeededPivot", true);
+        } else {
+            Logger.recordOutput("Stem/Pivot/SeededPivot", false);
+        }
 
+        Logger.processInputs("Stem/Pivot", inputs);
+    }
 
 }

@@ -58,6 +58,10 @@ public interface Pivot extends Component {
             isLimitSwitchHit = table.get("isLimitSwitchHit", isLimitSwitchHit);
         }
     }
+
+    /**
+     * @param radians the angle to set the mechanism to
+     */
     public void setPivotRadians(double radians);
 
     /**

@@ -10,6 +10,7 @@ import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -49,7 +50,7 @@ public class WristReal implements Wrist {
         cancoder = new CANcoder(kWrist.CANCODER_ID);
         cancoder.getConfigurator().apply(cancoderConfig());
 
-        cancoderRots = cancoder.getPosition();
+        cancoderRots = cancoder.getAbsolutePosition();
         cancoderVelo = cancoder.getVelocity();
 
         cancoderRots.setUpdateFrequency(100);
@@ -77,6 +78,7 @@ public class WristReal implements Wrist {
         CANcoderConfiguration wristCancoderCfg = new CANcoderConfiguration();
         wristCancoderCfg.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
         wristCancoderCfg.MagnetSensor.MagnetOffset = kWrist.CANCODER_OFFSET;
+
         return wristCancoderCfg;
     }
 
@@ -88,8 +90,7 @@ public class WristReal implements Wrist {
     public void setWristRadians(Double radians) {
         inputs.targetRadians = radians;
         var posControlRequest = new PositionDutyCycle(
-            Units.radiansToRotations(inputs.motorRadians)
-            + mechanismRadsToMotorRots(radians)
+            mechanismRadsToMotorRots(radians)
         );
         this.motor.setControl(posControlRequest);
     }
