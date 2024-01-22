@@ -4,10 +4,11 @@ import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 
 import com.igknighters.constants.ConstValues;
+import com.igknighters.subsystems.Component;
 
 import edu.wpi.first.math.util.Units;
 
-public interface Gyro {
+public interface Gyro extends Component {
     public static class GyroInputs implements LoggableInputs {
         public double pitchRads = 0.0, rollRads = 0.0, yawRads = 0.0;
         public double pitchVelRadsPerSec = 0.0, rollVelRadsPerSec = 0.0, yawVelRadsPerSec = 0.0;
@@ -44,12 +45,6 @@ public interface Gyro {
     public double getRollRads();
 
     public double getYawRads();
-
-    public double getPitchVelRadsPerSec();
-
-    public double getRollVelRadsPerSec();
-
-    public double getYawVelRadsPerSec();
 
     public void setYawRads(double yawRads);
 }

@@ -1,13 +1,8 @@
 package com.igknighters.subsystems;
 
-import com.igknighters.util.ShuffleboardApi.ShuffleEntryContainer;
-
 public interface Component {
 
     default public void periodic() {};
-
-     default public void setupShuffleboard(ShuffleEntryContainer tab) {
-    };
 
     /**
      * Runs the mechanism in open loop at the specified voltage
