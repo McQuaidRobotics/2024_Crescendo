@@ -1,4 +1,4 @@
-package com.igknighters.subsystems.swerve;
+package com.igknighters.subsystems.swerve.module;
 
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
@@ -81,8 +81,8 @@ public class SwerveModuleReal implements SwerveModule {
         driveConfig.Slot0.kI = DriveMotorConstants.kI;
         driveConfig.Slot0.kD = DriveMotorConstants.kD;
         driveConfig.Slot0.kV = 12.0 / (kSwerve.MAX_DRIVE_VELOCITY / (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO));
-        driveConfig.CurrentLimits.StatorCurrentLimit = 50.0;
-        driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        // driveConfig.CurrentLimits.StatorCurrentLimit = 50.0;
+        // driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
         driveMotor.getConfigurator().apply(driveConfig);
     }
@@ -128,7 +128,10 @@ public class SwerveModuleReal implements SwerveModule {
                 : desiredState.angle;
         inputs.targetAngleAbsolute = angle.getRadians();
 
-        angleMotor.setControl(new PositionDutyCycle(angle.getRotations()));
+        angleMotor.setControl(
+            new PositionDutyCycle(angle.getRotations())
+                .withUpdateFreqHz(250)
+            );
         lastAngle = angle;
     }
 
@@ -136,11 +139,10 @@ public class SwerveModuleReal implements SwerveModule {
         inputs.targetDriveVelo = desiredState.speedMetersPerSecond;
         if (isOpenLoop) {
             double percentOutput = desiredState.speedMetersPerSecond / kSwerve.MAX_DRIVE_VELOCITY;
-            var controlRequest = new DutyCycleOut(percentOutput);
+            var controlRequest = new DutyCycleOut(percentOutput).withEnableFOC(true);
             driveMotor.setControl(controlRequest);
         } else {
-            double rps = Math.min(desiredState.speedMetersPerSecond, kSwerve.MAX_DRIVE_VELOCITY)
-                    / (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO);
+            double rps = desiredState.speedMetersPerSecond / (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO);
             var veloRequest = new VelocityVoltage(rps).withEnableFOC(true);
             driveMotor.setControl(veloRequest);
         }

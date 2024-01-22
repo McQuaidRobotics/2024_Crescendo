@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.RobotController;
 public class RobotSetup {
 
     public enum RobotID {
-        CRASH(Subsystems.list(Subsystems.Swerve),
+        CRASH(Subsystems.list(Subsystems.Swerve, Subsystems.Vision),
                 RobotConstID.CRASH),
 
         BURN(Subsystems.list("Swerve"),
@@ -24,7 +24,7 @@ public class RobotSetup {
         SIM_CRASH(Subsystems.all(), RobotConstID.CRASH),
         SIM_BURN(Subsystems.all(), RobotConstID.BURN),
 
-        TestBoard("testBoard(yin)", Subsystems.all(), RobotConstID.CRASH),
+        TestBoard("testBoard(crash)", Subsystems.list(Subsystems.Vision), RobotConstID.CRASH),
 
         Unlabeled("", Subsystems.none(), RobotConstID.BURN);
 
@@ -51,7 +51,8 @@ public class RobotSetup {
             "ffffffff", RobotID.SIM_CRASH,
             "aaaaaaaa", RobotID.CRASH,
             "bbbbbbbb", RobotID.BURN,
-            "03260abb", RobotID.CRASH
+            "03260abb", RobotID.CRASH,
+            "0306adb6", RobotID.TestBoard
         );
 
     private static RobotID currentID = RobotID.Unlabeled;
@@ -74,16 +75,16 @@ public class RobotSetup {
                 throw new RuntimeException("Robot ID not found, " + currentSerialNum + " not in serialToID map");
             }
             BootupLogger.BootupLog("Robot Name: " + currentID.name);
+            Logger.recordOutput("RobotSetup/RobotId", currentID.name());
+            Logger.recordOutput(
+                "RobotSetup/EnabledSubsystems",
+                List.of(currentID.subsystems)
+                    .stream()
+                    .map(sub -> sub.name())
+                    .reduce("", (acc, sub) -> acc + sub + ", ")
+            );
+            Logger.recordOutput("RobotSetup/ConstantsID", currentID.constID.name());
         }
-        Logger.recordMetadata("RobotId", currentID.name());
-        Logger.recordMetadata(
-            "EnabledSubsystems",
-            List.of(currentID.subsystems)
-                .stream()
-                .map(sub -> sub.name())
-                .reduce("", (acc, sub) -> acc + sub + ", ")
-        );
-        Logger.recordMetadata("ConstantsID", currentID.constID.name());
         return currentID;
     }
 }

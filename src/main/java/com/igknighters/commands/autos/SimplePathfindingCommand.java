@@ -21,7 +21,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -74,17 +73,15 @@ public class SimplePathfindingCommand extends Command {
         this.goalEndState = new GoalEndState(goalEndVel, targetPose.getRotation(), true);
         this.constraints = constraints;
         this.controller = new PPHolonomicDriveController(
-            kAuto.AUTO_TRANSLATION_PID,
-            kAuto.AUTO_ANGULAR_PID,
-            ConstValues.PERIODIC_TIME,
-            kSwerve.MAX_DRIVE_VELOCITY,
-            kSwerve.DRIVEBASE_RADIUS
-        );
+                kAuto.AUTO_TRANSLATION_PID,
+                kAuto.AUTO_ANGULAR_PID,
+                ConstValues.PERIODIC_TIME,
+                kSwerve.MAX_DRIVE_VELOCITY,
+                kSwerve.DRIVEBASE_RADIUS);
         this.poseSupplier = swerve::getPose;
-        this.speedsSupplier = swerve::getChassisSpeeds;
+        this.speedsSupplier = swerve::getChassisSpeed;
         this.output = chassisSpeeds -> swerve.driveChassisSpeeds(
-            chassisSpeeds, false, RobotBase.isReal()
-        );
+                chassisSpeeds, false);
         this.rotationDelayDistance = rotationDelayDistance;
         this.replanningConfig = kAuto.DYNAMIC_REPLANNING_CONFIG;
 
@@ -92,14 +89,12 @@ public class SimplePathfindingCommand extends Command {
         HAL.report(tResourceType.kResourceType_PathFindingCommand, instances);
     }
 
-
-
     /**
      * Constructs a new base pathfinding command that will generate a path towards
      * the given pose.
      *
-     * @param targetPose            the pose to pathfind to
-     * @param swerve                The swerve subsystem to use for pathfinding
+     * @param targetPose the pose to pathfind to
+     * @param swerve     The swerve subsystem to use for pathfinding
      */
     public SimplePathfindingCommand(Pose2d targetPose, Swerve swerve) {
         this(targetPose, 0.0, 0.05, kAuto.DYNAMIC_PATH_CONSTRAINTS, Optional.empty(), swerve);
@@ -208,7 +203,8 @@ public class SimplePathfindingCommand extends Command {
             if (currentPathOpt.isPresent()) {
                 var currentPath = currentPathOpt.get();
 
-                currentTrajectoryOpt = Optional.ofNullable(new PathPlannerTrajectory(currentPath, currentSpeeds, currentPose.getRotation()));
+                currentTrajectoryOpt = Optional
+                        .ofNullable(new PathPlannerTrajectory(currentPath, currentSpeeds, currentPose.getRotation()));
 
                 var currentTrajectory = currentTrajectoryOpt.get();
 
@@ -218,13 +214,11 @@ public class SimplePathfindingCommand extends Command {
                 double farDistance = 0.0;
                 double nextDistance = 0.0;
                 while (nextDistance < farDistance) {
-                    farDistance = states.get(Math.min(farStateIdx, states.size() - 1))
-                        .positionMeters
-                        .getDistance(currentPose.getTranslation());
+                    farDistance = states.get(Math.min(farStateIdx, states.size() - 1)).positionMeters
+                            .getDistance(currentPose.getTranslation());
 
-                    nextDistance = states.get(Math.min(farStateIdx + 1, states.size() - 1))
-                        .positionMeters
-                        .getDistance(currentPose.getTranslation());
+                    nextDistance = states.get(Math.min(farStateIdx + 1, states.size() - 1)).positionMeters
+                            .getDistance(currentPose.getTranslation());
 
                     if (nextDistance < farDistance) {
                         farStateIdx++;
@@ -265,11 +259,10 @@ public class SimplePathfindingCommand extends Command {
                 } else {
                     currentPathOpt = Optional.ofNullable(currentPath.replan(currentPose, currentSpeeds));
                     currentTrajectoryOpt = Optional.ofNullable(
-                        new PathPlannerTrajectory(
-                            currentPathOpt.get(),
-                            currentSpeeds,
-                            currentPose.getRotation()
-                        ));
+                            new PathPlannerTrajectory(
+                                    currentPathOpt.get(),
+                                    currentSpeeds,
+                                    currentPose.getRotation()));
 
                     timeOffset = 0;
                 }
@@ -375,7 +368,8 @@ public class SimplePathfindingCommand extends Command {
 
     private void replanPath(Pose2d currentPose, ChassisSpeeds currentSpeeds) {
         PathPlannerPath replanned = currentPathOpt.get().replan(currentPose, currentSpeeds);
-        currentTrajectoryOpt = Optional.ofNullable(new PathPlannerTrajectory(replanned, currentSpeeds, currentPose.getRotation()));
+        currentTrajectoryOpt = Optional
+                .ofNullable(new PathPlannerTrajectory(replanned, currentSpeeds, currentPose.getRotation()));
         PathPlannerLogging.logActivePath(replanned);
         PPLibTelemetry.setCurrentPath(replanned);
     }
@@ -389,9 +383,9 @@ public class SimplePathfindingCommand extends Command {
         boolean yTooSmall = y < 0;
         if (xTooLarge || xTooSmall || yTooLarge || yTooSmall) {
             String message = "Target pose is out of bounds for  "
-                + this.getName()
-                + " Pathfinding Command. "
-                + "Because ";
+                    + this.getName()
+                    + " Pathfinding Command. "
+                    + "Because ";
             if (xTooLarge) {
                 message += "x is too large, ";
             }
