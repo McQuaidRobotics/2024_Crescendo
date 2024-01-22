@@ -3,39 +3,43 @@ package com.igknighters;
 import java.util.HashMap;
 import java.util.function.BiConsumer;
 
-import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-import com.igknighters.autos.Autos;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.util.ShuffleboardApi;
+import com.igknighters.util.Tracer;
+import com.igknighters.util.UnitTestableRobot;
+import com.igknighters.util.pathfinders.LocalADStarAK;
+import com.pathplanner.lib.pathfinding.Pathfinding;
 
-public class Robot extends LoggedRobot {
+public class Robot extends UnitTestableRobot {
 
     private Command autoCmd;
+    private final CommandScheduler scheduler = CommandScheduler.getInstance();
 
     @Override
     public void robotInit() {
+        Pathfinding.setPathfinder(new LocalADStarAK());
         setupAkit();
 
         com.igknighters.ConstantHelper.applyRoboConst(ConstValues.class);
-        new RobotContainer();
 
-        Autos.createSendableChooser();
-        SmartDashboard.putString("AutoCommand", Autos.getSelectedAutoName());
+        GlobalState.publishField();
+
+        new RobotContainer();
     }
 
     @Override
     public void robotPeriodic() {
-        ShuffleboardApi.run();
-        CommandScheduler.getInstance().run();
-        LED.getInstance().run();
+        Tracer.traceFunc("Shuffleboard", ShuffleboardApi::run);
+        Tracer.traceFunc("CommandScheduler", () -> scheduler.run());
+        Tracer.traceFunc("LEDUpdate", () -> LED.getInstance().run());
+        GlobalState.log();
     }
 
     @Override
@@ -44,19 +48,31 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void disabledPeriodic() {
-        autoCmd = Autos.getAutonomousCommand();
-        SmartDashboard.putString("AutoCommand", Autos.getSelectedAutoName());
+        autoCmd = GlobalState.getAutoCommand();
+        Logger.recordOutput("SelectedAutoCommand", autoCmd.getName());
     }
 
     @Override
     public void autonomousInit() {
+        if (GlobalState.isUnitTest()) {
+            autoCmd = GlobalState.getAutoCommand();
+        }
         if (autoCmd != null) {
-            autoCmd.schedule();
+            Logger.recordOutput("CurrentAutoCommand", autoCmd.getName());
+            scheduler.schedule(autoCmd);
         }
     }
 
     @Override
     public void autonomousPeriodic() {
+    }
+
+    @Override
+    public void autonomousExit() {
+        if (autoCmd != null) {
+            Logger.recordOutput("CurrentAutoCommand", "");
+            autoCmd.cancel();
+        }
     }
 
     @Override
@@ -90,6 +106,10 @@ public class Robot extends LoggedRobot {
     }
 
     private void setupAkit() {
+        if (GlobalState.isUnitTest()) {
+            return;
+        }
+
         Logger.recordMetadata("RuntimeType", getRuntimeType().toString());
         Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
         Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);

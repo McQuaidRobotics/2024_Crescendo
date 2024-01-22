@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
@@ -21,10 +22,14 @@ public class SwerveModuleSim implements SwerveModule {
     private FlywheelSim driveSim = new FlywheelSim(DCMotor.getFalcon500(1), 1.0 / kSwerve.DRIVE_GEAR_RATIO, 0.025);
     private FlywheelSim angleSim = new FlywheelSim(DCMotor.getFalcon500(1), 1.0 / kSwerve.ANGLE_GEAR_RATIO, 0.004);
 
-    private final PIDController driveFeedback = new PIDController(DriveMotorConstants.kP, DriveMotorConstants.kI,
+    private final PIDController driveFeedback = new PIDController(
+            DriveMotorConstants.kP,
+            DriveMotorConstants.kI,
             DriveMotorConstants.kD,
             ConstValues.PERIODIC_TIME);
-    private final PIDController angleFeedback = new PIDController(AngleMotorConstants.kP, AngleMotorConstants.kI,
+    private final PIDController angleFeedback = new PIDController(
+            AngleMotorConstants.kP,
+            AngleMotorConstants.kI,
             AngleMotorConstants.kD,
             ConstValues.PERIODIC_TIME);
 
@@ -46,7 +51,7 @@ public class SwerveModuleSim implements SwerveModule {
     }
 
     private double driveRadiansToMeters(double radians) {
-        return driveRotationsToMeters(radians / (2 * Math.PI));
+        return driveRotationsToMeters(radians / (2.0 * Math.PI));
     }
 
     public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop) {
@@ -79,6 +84,7 @@ public class SwerveModuleSim implements SwerveModule {
         Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (kSwerve.MAX_DRIVE_VELOCITY * 0.01))
                 ? new Rotation2d(inputs.angleAbsoluteRads)
                 : desiredState.angle;
+        inputs.targetAngleAbsoluteRads = angle.getRadians();
 
         var angleAppliedVolts = MathUtil.clamp(
                 angleFeedback.calculate(getAngle().getRadians(), angle.getRadians()),
@@ -91,6 +97,8 @@ public class SwerveModuleSim implements SwerveModule {
     }
 
     private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop) {
+        inputs.targetDriveVeloMPS = desiredState.speedMetersPerSecond;
+
         desiredState.speedMetersPerSecond *= Math.cos(angleFeedback.getPositionError());
 
         double velocityRadPerSec = desiredState.speedMetersPerSecond / (kSwerve.WHEEL_DIAMETER / 2);
@@ -105,6 +113,10 @@ public class SwerveModuleSim implements SwerveModule {
 
     @Override
     public void periodic() {
+        if (DriverStation.isDisabled()) {
+            this.driveSim.setInputVoltage(0.0);
+            this.angleSim.setInputVoltage(0.0);
+        }
         driveSim.update(ConstValues.PERIODIC_TIME);
         angleSim.update(ConstValues.PERIODIC_TIME);
 
@@ -131,5 +143,6 @@ public class SwerveModuleSim implements SwerveModule {
     }
 
     @Override
-    public void setVoltageOut(double volts) {}
+    public void setVoltageOut(double volts) {
+    }
 }

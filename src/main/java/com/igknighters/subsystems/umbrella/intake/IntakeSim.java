@@ -31,7 +31,7 @@ public class IntakeSim implements Intake {
 
     @Override
     public void periodic() {
-        inputs.hasGamePiece = GlobalState.Simulation.hasGamePiece();
+        inputs.hasGamePiece = GlobalState.hasGamePiece();
 
         Logger.processInputs("/Umbrella/Intake", inputs);
     }

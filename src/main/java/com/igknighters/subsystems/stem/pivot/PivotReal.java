@@ -3,21 +3,18 @@ package com.igknighters.subsystems.stem.pivot;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.igknighters.util.ShuffleboardApi.ShuffleEntryContainer;
 
 import edu.wpi.first.math.util.Units;
 
 import org.littletonrobotics.junction.Logger;
 
 import com.igknighters.constants.ConstValues.kStem.kPivot;
-import com.igknighters.subsystems.stem.pivot.Pivot.PivotInputs;
 
 public class PivotReal implements Pivot {
     /** Left */
@@ -133,17 +130,6 @@ public class PivotReal implements Pivot {
         leaderMotor.setPosition(pigeonRadians);
     }
 
-
-    @Override
-    public void setupShuffleboard(ShuffleEntryContainer tab) {
-        // tab.addDouble("Pivot Motor Rots", motorRots::getValue);
-        // tab.addDouble("Pivot Motor Velo", motorVelo::getValue);
-        // tab.addDouble("Pivot Motor Amps", motorAmps::getValue);
-        // tab.addDouble("Pivot Motor Volts", motorVolts::getValue);
-        // tab.addDouble("Pivot Degrees Gyro", this::getPivotRadiansPigeon);
-        // tab.addBoolean("Pivot Homed", () -> isHomed);
-    }
-
     @Override
     public void periodic() {
         BaseStatusSignal.refreshAll(
@@ -163,7 +149,6 @@ public class PivotReal implements Pivot {
         inputs.rightTemp = rightMotorTemp.getValue();
 
         Logger.processInputs("SuperStructure/Pivot", inputs);
-
     }
 
 

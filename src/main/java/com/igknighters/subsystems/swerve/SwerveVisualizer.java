@@ -1,6 +1,8 @@
 package com.igknighters.subsystems.swerve;
 
+import com.igknighters.GlobalState;
 import com.igknighters.constants.ConstValues.kSwerve;
+import com.igknighters.subsystems.swerve.module.SwerveModule;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -11,7 +13,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
@@ -70,7 +71,6 @@ public class SwerveVisualizer {
     private final Swerve swerve;
     private final SwerveModule[] modules;
     private final ModuleVisualizer[] moduleVisual;
-    private final Field2d field = new Field2d();
     private final NetworkTable table;
     private final BooleanEntry modulesOnField;
 
@@ -90,8 +90,6 @@ public class SwerveVisualizer {
                     "SwerveModules/Module[" + modules[i].getModuleNumber() + "]"
             ));
         }
-
-        field.initSendable(getBuilder("Field"));
 
         modulesOnField = table
             .getSubTable("SwerveModules")
@@ -117,7 +115,7 @@ public class SwerveVisualizer {
     }
 
     private void updateField(Pose2d roboPose) {
-        field.setRobotPose(roboPose);
+        GlobalState.modifyField(field -> field.setRobotPose(roboPose));
 
         if (!modulesOnField.get(false)) return;
 
@@ -138,8 +136,10 @@ public class SwerveVisualizer {
             );
         }
 
-        field.getObject("SwerveModules").setPoses(
-            modulePoses.toArray(new Pose2d[0])
-        );
+        GlobalState.modifyField(field -> {
+            field.getObject("SwerveModules").setPoses(
+                modulePoses.toArray(new Pose2d[0])
+            );
+        });
     }
 }

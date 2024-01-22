@@ -12,44 +12,44 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 public interface SwerveModule extends Component {
     public static class SwerveModuleInputs implements LoggableInputs {
         /**Measured in Meters/s */
-        public double driveVelo = 0.0;
-        public double targetDriveVelo = 0.0;
+        public double driveVeloMPS = 0.0;
+        public double targetDriveVeloMPS = 0.0;
         /**Measured in Meters */
-        public double drivePosition = 0.0;
+        public double drivePositionMeters = 0.0;
         public double driveVolts = 0.0;
         public double driveAmps = 0.0;
         /**Measured in Radian/s */
-        public double angleVelo = 0.0;
+        public double angleVeloRadPS = 0.0;
         /**Measured in Radians */
-        public double angleAbsolute = 0.0;
-        public double targetAngleAbsolute = 0.0;
+        public double angleAbsoluteRads = 0.0;
+        public double targetAngleAbsoluteRads = 0.0;
         public double angleVolts = 0.0;
         public double angleAmps = 0.0;
 
         @Override
         public void toLog(LogTable table) {
-            table.put("DriveVelocityMPS", driveVelo);
-            table.put("TargetDriveVelocityMPS", targetDriveVelo);
-            table.put("DrivePositionMeters", drivePosition);
+            table.put("DriveVelocityMPS", driveVeloMPS);
+            table.put("TargetDriveVelocityMPS", targetDriveVeloMPS);
+            table.put("DrivePositionMeters", drivePositionMeters);
             table.put("DriveVolts", driveVolts);
             table.put("DriveAmps", driveAmps);
-            table.put("AngleVelocityRPS", angleVelo);
-            table.put("AngleAbsoluteRadians", angleAbsolute);
-            table.put("TargetAngleAbsoluteRadians", targetAngleAbsolute);
+            table.put("AngleVelocityRadPS", angleVeloRadPS);
+            table.put("AngleAbsoluteRadians", angleAbsoluteRads);
+            table.put("TargetAngleAbsoluteRadians", targetAngleAbsoluteRads);
             table.put("AngleVolts", angleVolts);
             table.put("AngleAmps", angleAmps);
         }
 
         @Override
         public void fromLog(LogTable table) {
-            driveVelo = table.get("DriveVelocityMPS", driveVelo);
-            targetAngleAbsolute = table.get("TargetDriveVelocityMPS", targetDriveVelo);
-            drivePosition = table.get("DrivePositionMeters", drivePosition);
+            driveVeloMPS = table.get("DriveVelocityMPS", driveVeloMPS);
+            targetDriveVeloMPS = table.get("TargetDriveVelocityMPS", targetDriveVeloMPS);
+            drivePositionMeters = table.get("DrivePositionMeters", drivePositionMeters);
             driveVolts = table.get("DriveVolts", driveVolts);
             driveAmps = table.get("DriveAmps", driveAmps);
-            angleVelo = table.get("AngleVelocityRPS", angleVelo);
-            angleAbsolute = table.get("AngleAbsoluteRadians", angleAbsolute);
-            targetAngleAbsolute = table.get("TargetAngleAbsoluteRadians", targetAngleAbsolute);
+            angleVeloRadPS = table.get("AngleVelocityRadPS", angleVeloRadPS);
+            angleAbsoluteRads = table.get("AngleAbsoluteRadians", angleAbsoluteRads);
+            targetAngleAbsoluteRads = table.get("TargetAngleAbsoluteRadians", targetAngleAbsoluteRads);
             angleVolts = table.get("AngleVolts", angleVolts);
             angleAmps = table.get("AngleAmps", angleAmps);
         }
