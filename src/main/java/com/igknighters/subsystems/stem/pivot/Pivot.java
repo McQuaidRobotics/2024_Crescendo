@@ -69,4 +69,27 @@ public interface Pivot extends Component {
      */
     public double getPivotRadians();
 
+    /**
+     * Move the pivot to the target and returns if it has reached the target.
+     * Meant to be used in a kind of polling loop to wait the mechanism to reach
+     * the target.
+     * @param radians The target angle to move to
+     * @param tolerancMult The multiplier to apply to the tolerance, higher mult means more tolerance
+     * @return If the mechanism has reached the target
+     */
+    default public boolean target(double radians, double tolerancMult) {
+        this.setPivotRadians(radians);
+        return Math.abs(this.getPivotRadians() - radians) < ConstValues.kStem.kPivot.TARGET_TOLERANCE * tolerancMult;
+    }
+
+    /**
+     * Move the pivot to the target and returns if it has reached the target.
+     * Meant to be used in a kind of polling loop to wait the mechanism to reach
+     * the target.
+     * @param radians The target angle to move to
+     * @return If the mechanism has reached the target
+     */
+    default public boolean target(double radians) {
+        return target(radians, 1.0);
+    }
 }

@@ -36,7 +36,8 @@ public class PivotSim implements Pivot {
 
         if (GlobalState.isUnitTest()) {
             // HAL requires unique allocations for each SimDevice,
-            // in unit tests we don't care what this is actually called so just make it random
+            // in unit tests we don't care what this is actually called so just make it
+            // random
             limitSwitch = SimDevice.create("" + Math.random() + Math.random()).createBoolean("", Direction.kInput,
                     false);
         } else {
@@ -47,7 +48,7 @@ public class PivotSim implements Pivot {
     @Override
     public void setPivotRadians(double radians) {
         inputs.targetRadians = radians;
-        Double pivotVoltageFeedback = pidController.calculate(
+        double pivotVoltageFeedback = pidController.calculate(
                 inputs.radians, radians);
         sim.setInputVoltage(pivotVoltageFeedback);
         inputs.volts = pivotVoltageFeedback;

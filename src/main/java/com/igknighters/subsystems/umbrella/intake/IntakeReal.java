@@ -4,10 +4,10 @@ import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.igknighters.constants.ConstValues.kUmbrella.kIntake;
-import com.igknighters.util.SafeTalonFXConfiguration;
 
 import edu.wpi.first.math.util.Units;
 
@@ -21,7 +21,7 @@ public class IntakeReal implements Intake {
 
 
     public IntakeReal() {
-        motor.getConfigurator().apply(new SafeTalonFXConfiguration());
+        motor.getConfigurator().apply(new TalonFXConfiguration());
 
         veloSignal = motor.getVelocity();
         voltSignal = motor.getMotorVoltage();

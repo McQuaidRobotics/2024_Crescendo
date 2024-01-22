@@ -8,7 +8,6 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
-import com.igknighters.util.SafeTalonFXConfiguration;
 
 import edu.wpi.first.math.util.Units;
 
@@ -35,10 +34,10 @@ public class ShooterReal implements Shooter {
     }
 
     private TalonFXConfiguration motorConfig() {
-        var cfg = new SafeTalonFXConfiguration();
-        cfg.Slot0.kP = kShooter.kP;
-        cfg.Slot0.kI = kShooter.kI;
-        cfg.Slot0.kD = kShooter.kD;
+        var cfg = new TalonFXConfiguration();
+        cfg.Slot0.kP = kShooter.MOTOR_kP;
+        cfg.Slot0.kI = kShooter.MOTOR_kI;
+        cfg.Slot0.kD = kShooter.MOTOR_kD;
         return cfg;
     }
 
@@ -75,7 +74,7 @@ public class ShooterReal implements Shooter {
         );
 
         inputs.amps = currentSignal.getValue();
-        inputs.radiansPerSecond = veloSignal.getValue() * (Math.PI*2);
+        inputs.radiansPerSecond = Units.rotationsToRadians(veloSignal.getValue());
         inputs.volts = voltSignal.getValue();
         inputs.temp = tempSignal.getValue();
 

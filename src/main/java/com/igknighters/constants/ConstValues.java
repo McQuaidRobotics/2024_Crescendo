@@ -80,28 +80,26 @@ public final class ConstValues {
          * The cameras used for vision.
          */
         public static final CameraConfig[] CAMERA_CONFIGS = new CameraConfig[] {
-            Camera.createConfig(
-                "photonvision-15",
-                0,
-                new Pose3d(
-                    new Translation3d(Units.inchesToMeters(10.0), Units.inchesToMeters(10.0), Units.inchesToMeters(3.0)),
-                    new Rotation3d(
-                        0.0,
-                        Units.degreesToRadians(15.0),
-                        Units.degreesToRadians(45.0))
-                )
-            ),
-            Camera.createConfig(
-                "photonvision-16",
-                1,
-                new Pose3d(
-                    new Translation3d(Units.inchesToMeters(10.0), Units.inchesToMeters(-10.0), Units.inchesToMeters(3.0)),
-                    new Rotation3d(
-                        0.0,
-                        Units.degreesToRadians(15.0),
-                        Units.degreesToRadians(-45.0))
-                )
-            )
+                Camera.createConfig(
+                        "photonvision-15",
+                        0,
+                        new Pose3d(
+                                new Translation3d(Units.inchesToMeters(10.0), Units.inchesToMeters(10.0),
+                                        Units.inchesToMeters(3.0)),
+                                new Rotation3d(
+                                        0.0,
+                                        Units.degreesToRadians(15.0),
+                                        Units.degreesToRadians(45.0)))),
+                Camera.createConfig(
+                        "photonvision-16",
+                        1,
+                        new Pose3d(
+                                new Translation3d(Units.inchesToMeters(10.0), Units.inchesToMeters(-10.0),
+                                        Units.inchesToMeters(3.0)),
+                                new Rotation3d(
+                                        0.0,
+                                        Units.degreesToRadians(15.0),
+                                        Units.degreesToRadians(-45.0))))
         };
     }
 
@@ -121,13 +119,14 @@ public final class ConstValues {
 
         public static final int PIGEON_ID = 33;
         public static final boolean INVERT_GYRO = false;
-        public static final String CANBUS = "DriveBus"; 
+        public static final String CANBUS = "DriveBus";
 
         /* Drivetrain Constants */
         public static final double TRACK_WIDTH = 0.551942;
         public static final double WHEEL_DIAMETER = 0.1016;
         public static final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
-        // public static final double DRIVEBASE_RADIUS = Math.sqrt(Math.pow(TRACK_WIDTH / 2.0, 2) + Math.pow(WHEEL_BASE / 2.0, 2));
+        // public static final double DRIVEBASE_RADIUS = Math.sqrt(Math.pow(TRACK_WIDTH
+        // / 2.0, 2) + Math.pow(WHEEL_BASE / 2.0, 2));
         public static final double DRIVEBASE_RADIUS = 0.39;
         public static final double DRIVEBASE_CIRCUMFERENCE = DRIVEBASE_RADIUS * TAU;
 
@@ -135,14 +134,17 @@ public final class ConstValues {
 
         public static final double DRIVE_GEAR_RATIO = SwerveGearRatios.L3_DRIVE;
 
-        /**Not every motor can output the max speed at all times, add a buffer to make closed loop more accurate */
+        /**
+         * Not every motor can output the max speed at all times, add a buffer to make
+         * closed loop more accurate
+         */
         public static final double MOTOR_OUTPUT_SCALAR = 0.95;
 
-        /**User defined acceleration time in seconds */
+        /** User defined acceleration time in seconds */
         public static final double ACCELERATION_TIME = 1.0;
 
-        public static final double MAX_DRIVE_VELOCITY = 
-            (Motors.Falcon500Foc.FREE_SPEED / TAU) * DRIVE_GEAR_RATIO * WHEEL_CIRCUMFERENCE * MOTOR_OUTPUT_SCALAR;
+        public static final double MAX_DRIVE_VELOCITY = (Motors.Falcon500Foc.FREE_SPEED / TAU) * DRIVE_GEAR_RATIO
+                * WHEEL_CIRCUMFERENCE * MOTOR_OUTPUT_SCALAR;
         public static final double MAX_DRIVE_ACCELERATION = MAX_DRIVE_VELOCITY / ACCELERATION_TIME;
 
         public static final double MAX_ANGULAR_VELOCITY = MAX_DRIVE_VELOCITY / DRIVEBASE_RADIUS;
@@ -174,18 +176,16 @@ public final class ConstValues {
         public static final boolean ORIENT_TELEOP_FOR_SIM = true;
 
         public static final LerpTable TELEOP_TRANSLATION_AXIS_CURVE = new LerpTable(
-            new LerpTableEntry(0.0, 0.0),
-            new LerpTableEntry(0.1, 0.0), //deadzone
-            new LerpTableEntry(0.7, 0.4),
-            new LerpTableEntry(1.0, 1.0)
-        );
+                new LerpTableEntry(0.0, 0.0),
+                new LerpTableEntry(0.1, 0.0), // deadzone
+                new LerpTableEntry(0.7, 0.4),
+                new LerpTableEntry(1.0, 1.0));
 
         public static final LerpTable TELEOP_ROTATION_AXIS_CURVE = new LerpTable(
-            new LerpTableEntry(0.0, 0.0),
-            new LerpTableEntry(0.1, 0.0), //deadzone
-            new LerpTableEntry(0.7, 0.4),
-            new LerpTableEntry(1.0, 1.0)
-        );
+                new LerpTableEntry(0.0, 0.0),
+                new LerpTableEntry(0.1, 0.0), // deadzone
+                new LerpTableEntry(0.7, 0.4),
+                new LerpTableEntry(1.0, 1.0));
 
         public static final class Mod0 {
             public static final ModuleId MODULE = ModuleId.m0;
@@ -226,45 +226,42 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 8;
             public static final int CANCODER_ID = 24;
             public static final double ROTATION_OFFSET = 0.5776361;
-            public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0, -TRACK_WIDTH / 2.0);
+            public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0,
+                    -TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
                     ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
         }
 
         public static final Translation2d[] MODULE_CHASSIS_OFFSETS = new Translation2d[] {
-            Mod0.CHASSIS_OFFSET,
-            Mod1.CHASSIS_OFFSET,
-            Mod2.CHASSIS_OFFSET,
-            Mod3.CHASSIS_OFFSET
+                Mod0.CHASSIS_OFFSET,
+                Mod1.CHASSIS_OFFSET,
+                Mod2.CHASSIS_OFFSET,
+                Mod3.CHASSIS_OFFSET
         };
 
         public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(
-            MODULE_CHASSIS_OFFSETS
-        );
+                MODULE_CHASSIS_OFFSETS);
     }
 
     public static final class kAuto {
         public static final PIDConstants AUTO_TRANSLATION_PID = new PIDConstants(3.4, 0, 0.0);
         public static final PIDConstants AUTO_ANGULAR_PID = new PIDConstants(3.0, 0.0, 0.0);
         public static final PathConstraints DYNAMIC_PATH_CONSTRAINTS = new PathConstraints(
-            kSwerve.MAX_DRIVE_VELOCITY,
-            kSwerve.MAX_DRIVE_ACCELERATION,
-            kSwerve.MAX_ANGULAR_VELOCITY,
-            kSwerve.MAX_ANGULAR_ACCELERATION
-        );
+                kSwerve.MAX_DRIVE_VELOCITY,
+                kSwerve.MAX_DRIVE_ACCELERATION,
+                kSwerve.MAX_ANGULAR_VELOCITY,
+                kSwerve.MAX_ANGULAR_ACCELERATION);
         public static final ReplanningConfig DYNAMIC_REPLANNING_CONFIG = new ReplanningConfig(
-            true,
-            false
-        );
+                true,
+                false);
     }
 
     public static final class kUmbrella {
 
-
         public static final class kShooter {
-            public static final double kP = 1.0;
-            public static final double kI = 0.0;
-            public static final double kD = 0.0;
+            public static final double MOTOR_kP = 1.0;
+            public static final double MOTOR_kI = 0.0;
+            public static final double MOTOR_kD = 0.0;
 
             public static final int MOTOR_ID = 17;
 
@@ -275,34 +272,13 @@ public final class ConstValues {
             public static final int MOTOR_ID = 18;
         }
 
-
     }
 
-    public static final class kStem{
-        public static final class kWrist{
-            public static final int MOTOR_ID = 11;
-            public static final int CANCODER_ID = 31;
-            public static final double MOTOR_kP = 1.0;
-            public static final double MOTOR_kI = 0.0;
-            public static final double MOTOR_kD = 0.0;
+    public static final class kStem {
 
-            public static final boolean INVERTED = false;
-
-            @DoubleConst(crash = 0.0, burn = 0.0)
-            public static double CANCODER_OFFSET = 0.0;
-
-            public static final double WRIST_MIN_ANGLE = 24.0 * Conv.DEGREES_TO_RADIANS;
-            public static final double WRIST_MAX_ANGLE = 125.0 * Conv.DEGREES_TO_RADIANS;
-
-            public static final double MOTOR_TO_MECHANISM_RATIO = (1.0 / 25.0) * (30.0 / 64.0) * (12.0 / 54.0); //TODO important to find when we have
-
-            public static final double TOLERANCE = 0.5;
-
-        }
-
-        public static final class kPivot{
-            public static final int LEFT_MOTOR_ID = 13;
-            public static final int RIGHT_MOTOR_ID = 14;
+        public static final class kPivot {
+            public static final int LEFT_MOTOR_ID = 11;
+            public static final int RIGHT_MOTOR_ID = 12;
             public static final int PIGEON_ID = 31;
 
             public static final double MOTOR_kP = 1.0;
@@ -312,7 +288,6 @@ public final class ConstValues {
             public static final double MAX_VELOCITY = 105;
             public static final double MAX_ACCELERATION = 700;
             public static final double MAX_JERK = 10000;// effectively infinite
-
 
             public static final double PIVOT_MIN_RADIANS = 0.0;
 
@@ -334,6 +309,49 @@ public final class ConstValues {
              */
             public static final double VOLTAGE_COMP = 11.8;
             public static final double RESEED_TOLERANCE = TAU * (2.0 / 360.0); // effectively 2 degrees
+            public static final double TARGET_TOLERANCE = TAU * (1.0 / 360.0); // effectively 1 degree
+        }
+
+        public static final class kTelescope {
+            public static final int MOTOR_ID = 15;
+
+            public static final double MOTOR_kP = 1.0;
+            public static final double MOTOR_kI = 0.0;
+            public static final double MOTOR_kD = 0.0;
+
+            public static final double MAX_VELOCITY = 105;
+            public static final double MAX_ACCELERATION = 700;
+            public static final double MAX_JERK = 10000;// effectively infinite
+
+            public static final double MIN_METERS = 0.2;
+            public static final double TELESCOPE_MAX_METERS = 1.0;
+
+            public static final double MOTOR_TO_MECHANISM_RATIO = 1.0;
+
+            public static final boolean INVERTED = false;
+
+            public static final double TARGET_TOLERANCE = 0.03;
+        }
+
+        public static final class kWrist {
+            public static final int MOTOR_ID = 16;
+            public static final int CANCODER_ID = 26;
+            public static final double MOTOR_kP = 1.0;
+            public static final double MOTOR_kI = 0.0;
+            public static final double MOTOR_kD = 0.0;
+
+            public static final boolean INVERTED = false;
+
+            @DoubleConst(crash = 0.0, burn = 0.0)
+            public static double CANCODER_OFFSET = 0.0;
+
+            public static final double WRIST_MIN_ANGLE = 24.0 * Conv.DEGREES_TO_RADIANS;
+            public static final double WRIST_MAX_ANGLE = 125.0 * Conv.DEGREES_TO_RADIANS;
+
+            public static final double MOTOR_TO_MECHANISM_RATIO = 1.0;
+
+            public static final double TARGET_TOLERANCE = TAU * (1.0 / 360.0); // effectively 1 degree
+
         }
     }
 }

@@ -31,11 +31,11 @@ public class PivotReal implements Pivot {
 
     private final PivotInputs inputs;
 
-    private Double mechRadiansToMotorRots(Double mechRads) {
+    private double mechRadiansToMotorRots(Double mechRads) {
         return (mechRads / (2 * Math.PI)) / kPivot.MOTOR_TO_MECHANISM_RATIO;
     }
 
-    private Double motorRotsToMechRadians(Double motorRots) {
+    private double motorRotsToMechRadians(Double motorRots) {
         return motorRots * (2 * Math.PI) * kPivot.MOTOR_TO_MECHANISM_RATIO;
     }
 
@@ -119,7 +119,7 @@ public class PivotReal implements Pivot {
         return inputs.radians;
     }
 
-    private Double getPivotRadiansPigeon() {
+    private double getPivotRadiansPigeon() {
         return inputs.gyroPitchRadians - kPivot.PIGEON_OFFSET;
     }
 

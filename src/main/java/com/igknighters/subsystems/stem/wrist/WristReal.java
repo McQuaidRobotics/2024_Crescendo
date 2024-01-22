@@ -18,7 +18,6 @@ import com.igknighters.util.SafeTalonFXConfiguration;
 
 import edu.wpi.first.math.util.Units;
 
-
 public class WristReal implements Wrist {
     private final TalonFX motor;
     private final CANcoder cancoder;
@@ -29,7 +28,7 @@ public class WristReal implements Wrist {
     private final WristInputs inputs;
 
     public WristReal() {
-        motor = new TalonFX(kWrist.MOTOR_ID); 
+        motor = new TalonFX(kWrist.MOTOR_ID);
         motor.getConfigurator().apply(motorConfig());
 
         motorRots = motor.getRotorPosition();
@@ -81,21 +80,20 @@ public class WristReal implements Wrist {
         return wristCancoderCfg;
     }
 
-    private Double mechanismRadsToMotorRots(Double radians) {
-        return 0.0; //TODO: get real value
+    private double mechanismRadsToMotorRots(Double radians) {
+        return 0.0; // TODO: get real value
     }
 
     @Override
     public void setWristRadians(Double radians) {
         inputs.targetRadians = radians;
         var posControlRequest = new PositionDutyCycle(
-            mechanismRadsToMotorRots(radians)
-        );
+                mechanismRadsToMotorRots(radians));
         this.motor.setControl(posControlRequest);
     }
 
     @Override
-    public Double getWristRadians() {
+    public double getWristRadians() {
         return inputs.radians;
     }
 
@@ -108,10 +106,9 @@ public class WristReal implements Wrist {
     @Override
     public void periodic() {
         BaseStatusSignal.refreshAll(
-            motorAmps, motorVolts,
-            motorRots, motorVelo,
-            motorTemp
-        );
+                motorAmps, motorVolts,
+                motorRots, motorVelo,
+                motorTemp);
 
         inputs.radians = Units.radiansToRotations(cancoderRots.getValue());
         inputs.radiansPerSecond = Units.radiansToRotations(cancoderVelo.getValue());

@@ -2,6 +2,9 @@ package com.igknighters.subsystems;
 
 public interface Component {
 
+    /**
+     * Should be called every cycle in the parent subsystems periodic method
+     */
     default public void periodic() {};
 
     /**

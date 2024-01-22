@@ -20,9 +20,9 @@ public class ShooterSim implements Shooter {
         0.05
     );
     private final PIDController pid = new PIDController(
-        kShooter.kP * (Math.PI*2),
-        kShooter.kI * (Math.PI*2),
-        kShooter.kD * (Math.PI*2),
+        kShooter.MOTOR_kP * (Math.PI*2),
+        kShooter.MOTOR_kI * (Math.PI*2),
+        kShooter.MOTOR_kD * (Math.PI*2),
         ConstValues.PERIODIC_TIME
     );
 
