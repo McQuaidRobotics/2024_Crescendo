@@ -7,6 +7,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 
 import edu.wpi.first.math.util.Units;
@@ -38,6 +39,9 @@ public class ShooterReal implements Shooter {
         cfg.Slot0.kP = kShooter.MOTOR_kP;
         cfg.Slot0.kI = kShooter.MOTOR_kI;
         cfg.Slot0.kD = kShooter.MOTOR_kD;
+
+        cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
         return cfg;
     }
 
@@ -54,9 +58,7 @@ public class ShooterReal implements Shooter {
     @Override
     public void setSpeed(double speedRadPerSec) {
         inputs.targetRadiansPerSecond = speedRadPerSec;
-
-        var ret = new VelocityDutyCycle(Units.radiansToRotations(speedRadPerSec));
-        motor.setControl(ret);
+        motor.setControl(new VelocityDutyCycle(Units.radiansToRotations(speedRadPerSec)));
     }
 
     @Override
@@ -69,9 +71,8 @@ public class ShooterReal implements Shooter {
     @Override
     public void periodic() {
         BaseStatusSignal.refreshAll(
-            veloSignal, voltSignal,
-            currentSignal, tempSignal
-        );
+                veloSignal, voltSignal,
+                currentSignal, tempSignal);
 
         inputs.amps = currentSignal.getValue();
         inputs.radiansPerSecond = Units.rotationsToRadians(veloSignal.getValue());

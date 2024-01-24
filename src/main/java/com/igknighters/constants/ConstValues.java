@@ -259,13 +259,13 @@ public final class ConstValues {
     public static final class kUmbrella {
 
         public static final class kShooter {
-            public static final double MOTOR_kP = 1.0;
+            public static final double MOTOR_kP = 0.3;
             public static final double MOTOR_kI = 0.0;
-            public static final double MOTOR_kD = 0.0;
+            public static final double MOTOR_kD = 0.08;
 
             public static final int MOTOR_ID = 17;
 
-            public static final double DEFAULT_TOLERANCE = 0.05;
+            public static final double DEFAULT_TOLERANCE = 0.5;
         }
 
         public static final class kIntake {

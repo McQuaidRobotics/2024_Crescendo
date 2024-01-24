@@ -6,6 +6,8 @@ import org.littletonrobotics.junction.inputs.LoggableInputs;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.subsystems.Component;
 
+import edu.wpi.first.math.util.Units;
+
 public interface Shooter extends Component {
 
     public static class ShooterInputs implements LoggableInputs {
@@ -23,8 +25,9 @@ public interface Shooter extends Component {
             // A subtable, thats only written to when in debug mode and never read from,
             // that provides some more human readable values
             if (ConstValues.DEBUG) {
-                table.put("#Human/degreesPerSecond", Math.toDegrees(radiansPerSecond));
-                table.put("#Human/targetDegreesPerSecond", Math.toDegrees(targetRadiansPerSecond));
+                table.put("#Human/deltaTargeRadians", radiansPerSecond - targetRadiansPerSecond);
+                table.put("#Human/rpm", Units.radiansPerSecondToRotationsPerMinute(radiansPerSecond));
+                table.put("#Human/targetRPM", Units.radiansPerSecondToRotationsPerMinute(radiansPerSecond));
                 table.put("#Human/watts", volts * amps);
             }
         }

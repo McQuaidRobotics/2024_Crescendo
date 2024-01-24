@@ -47,4 +47,35 @@ public class Umbrella extends SubsystemBase {
     public boolean isShooterAtSpeed(double tolerance) {
         return Math.abs(shooter.getSpeed() - shooter.getTargetSpeed()) < tolerance;
     }
+
+    /**
+     * @return If the entrance beam is broken
+     */
+    public boolean isEntranceBeamBroken() {
+        return intake.isEntranceBeamBroken();
+    }
+
+    /**
+     * @return If the exit beam is broken
+     */
+    public boolean isExitBeamBroken() {
+        return intake.isExitBeamBroken();
+    }
+
+    /**
+     * Sets the intakes percent out
+     */
+    public void runIntakeAt(double percent) {
+        intake.setVoltageOut(12.0 * percent);
+    }
+
+    public void turnIntakeBy(double meters) {
+        intake.turnIntakeMeters(meters);
+    }
+
+    public void spinupShooterToSurfaceSpeed(double surfaceMPS) {
+        // shooter.setSpeed(radPerSec);
+    }
+
+    public void spinupShooterToRotSpeed() {}
 }
