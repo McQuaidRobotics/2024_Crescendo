@@ -2,8 +2,6 @@ package com.igknighters.util;
 
 import org.littletonrobotics.junction.Logger;
 
-// import com.igknighters.constants.ConstValues;
-
 public class BootupLogger {
     private static final String println_prefix = "[bootup] ";
 

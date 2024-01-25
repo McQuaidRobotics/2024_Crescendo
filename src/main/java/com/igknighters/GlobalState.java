@@ -3,6 +3,7 @@ package com.igknighters;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -49,8 +50,24 @@ public class GlobalState {
 
     private static boolean autoChooserCreated = false;
 
+    private static AtomicBoolean isUnitTest = new AtomicBoolean(false);
+
     private GlobalState() {
         throw new UnsupportedOperationException("This is a utility class!");
+    }
+
+    public static void restoreDefaultState() {
+        globalLock.lock();
+        try {
+            localizerType = LocalizerType.NONE;
+            localizer = Optional.empty();
+            field = Optional.empty();
+            isUnitTest.set(false);
+            //intentionally ignore as this is dependent on AutoBuilder state and that cannot be restored
+            // autoChooserCreated = false;
+        } finally {
+            globalLock.unlock();
+        }
     }
 
     /**
@@ -125,8 +142,8 @@ public class GlobalState {
         globalLock.lock();
         try {
             // if (!localizer.isPresent()) {
-            //     DriverStation.reportError("Odometry not present", false);
-            //     return new Pose2d();
+            // DriverStation.reportError("Odometry not present", false);
+            // return new Pose2d();
             // }
             // return localizer.get().update(gyroRot, modulePositions);
 
@@ -164,10 +181,9 @@ public class GlobalState {
                         value.timestamp,
                         VecBuilder.fill(1.0, 1.0, 1.0));
                 var pose = ((VisionOnlyPoseEstimator) localizer.get())
-                    .update(
-                        value.pose.toPose2d().getRotation(),
-                        new FakeWheelPositions()
-                    );
+                        .update(
+                                value.pose.toPose2d().getRotation(),
+                                new FakeWheelPositions());
                 field.ifPresent(field2d -> field2d.setRobotPose(pose));
             } else if (localizerType == LocalizerType.HYBRID) {
                 ((SwerveDrivePoseEstimator) localizer.get()).addVisionMeasurement(
@@ -267,5 +283,13 @@ public class GlobalState {
         } finally {
             globalLock.unlock();
         }
+    }
+
+    public static boolean isUnitTest() {
+        return isUnitTest.get();
+    }
+
+    public static void setUnitTest(boolean isTest) {
+        GlobalState.isUnitTest.set(isTest);
     }
 }
