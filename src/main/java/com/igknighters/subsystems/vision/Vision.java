@@ -37,6 +37,7 @@ public class Vision extends SubsystemBase {
         Tracer.startTrace("VisionPeriodic");
         HashSet<Integer> seenTags = new HashSet<>();
         for (var camera : cameras) {
+            Tracer.startTrace(camera.getName() + "Periodic");
             camera.periodic();
             var optEval = camera.evalPose();
             if (optEval.isPresent()) {
@@ -52,6 +53,7 @@ public class Vision extends SubsystemBase {
 
                 seenTags.addAll(eval.apriltags);
             }
+            Tracer.endTrace();
         }
         GlobalState.modifyField(field -> {
             field.getObject("seen_apriltags").setPoses(

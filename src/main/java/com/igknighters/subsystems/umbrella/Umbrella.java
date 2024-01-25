@@ -3,6 +3,7 @@ package com.igknighters.subsystems.umbrella;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.umbrella.intake.*;
 import com.igknighters.subsystems.umbrella.shooter.*;
+import com.igknighters.util.Tracer;
 
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -24,8 +25,12 @@ public class Umbrella extends SubsystemBase {
 
     @Override
     public void periodic() {
-        intake.periodic();
-        shooter.periodic();
+        Tracer.startTrace("UmbrellaPeriodic");
+
+        Tracer.traceFunc("IntakePeriodic", intake::periodic);
+        Tracer.traceFunc("ShooterPeriodic", shooter::periodic);
+
+        Tracer.endTrace();
     }
 
     /**

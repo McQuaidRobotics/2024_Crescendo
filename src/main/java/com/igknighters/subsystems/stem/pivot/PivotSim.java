@@ -29,7 +29,7 @@ public class PivotSim implements Pivot {
                 0.55,
                 kPivot.PIVOT_MIN_RADIANS,
                 kPivot.PIVOT_MAX_RADIANS,
-                true,
+                false,
                 kPivot.PIVOT_MIN_RADIANS);
         sim.setState(0.0, 0);
         inputs = new PivotInputs(0.0);

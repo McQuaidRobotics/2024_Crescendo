@@ -324,7 +324,7 @@ public final class ConstValues {
             public static final double MAX_JERK = 10000;// effectively infinite
 
             public static final double MIN_METERS = 0.2;
-            public static final double TELESCOPE_MAX_METERS = 1.0;
+            public static final double MAX_METERS = 1.0;
 
             public static final double MOTOR_TO_MECHANISM_RATIO = 1.0;
 

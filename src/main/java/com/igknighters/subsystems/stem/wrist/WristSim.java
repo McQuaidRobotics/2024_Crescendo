@@ -65,7 +65,7 @@ public class WristSim implements Wrist {
         inputs.temp = 0.0;
         inputs.targetRadians = setRadians;
 
-        Logger.processInputs("SuperStructure/Wrist", inputs);
+        Logger.processInputs("Stem/Wrist", inputs);
     }
 
 }
