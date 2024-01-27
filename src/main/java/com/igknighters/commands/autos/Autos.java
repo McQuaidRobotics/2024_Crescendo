@@ -1,5 +1,8 @@
 package com.igknighters.commands.autos;
 
+import java.util.Optional;
+
+import com.igknighters.GlobalState;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.pathplanner.lib.auto.AutoBuilder;
 
@@ -10,7 +13,12 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 public class Autos {
     private static SendableChooser<Command> autoChooser;
+    private static Optional<Command> autoCmdOverride = Optional.empty();
 
+    /**
+     * Creates the sendable chooser to be used for path planner autos
+     * @param swerve The swerve subsystem to be used in dynamic autos
+     */
     public static void createSendableChooser(Swerve swerve) {
         autoChooser = AutoBuilder.buildAutoChooser();
         for (Command dynamicAutoCmd : DynamicRoutines.choosableDynamicRoutines(swerve)) {
@@ -19,13 +27,24 @@ public class Autos {
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
-public static Command getAutonomousCommand() {
-        if (autoChooser == null) return new InstantCommand().withName("Nothing -> Auto Chooser Not Created!");
+    public static Command getAutonomousCommand() {
+        if (autoCmdOverride.isPresent() && GlobalState.isUnitTest()) return autoCmdOverride.get();
+        if (autoChooser == null) return new InstantCommand().withName("Nothing");
         return autoChooser.getSelected();
     }
 
     public static String getSelectedAutoName() {
-        if (autoChooser == null) return "Nothing -> Auto Chooser Not Created!";
-        return autoChooser.getSelected().getName();
+        return getAutonomousCommand().getName();
+    }
+
+    /**
+     * Only to be used in unit tests, will force {@link Autos#getAutonomousCommand()}
+     * to return a specific command.
+     * Supplying null as a command to this function will return 
+     * {@link Autos#getAutonomousCommand()} to default behavior;
+     * @param cmd The command to force {@link Autos#getAutonomousCommand()} to return
+     */
+    public static void setAutoOverrideTest(Command cmd) {
+        autoCmdOverride = Optional.ofNullable(cmd);
     }
 }

@@ -15,7 +15,7 @@ import edu.wpi.first.math.util.Units;
  * of corners start in the lower left moving clockwise.
  */
 public final class FieldConstants {
-
+    
     public static final double FIELD_LENGTH = Units.feetToMeters(54.4);
     public static final double FIELD_WIDTH = Units.feetToMeters(26.9);
     public static final double TAPE_WIDTH = Units.inchesToMeters(2.0);
@@ -35,28 +35,27 @@ public final class FieldConstants {
 
         // corners (blue alliance origin)
         public static final Translation3d TOP_RIGHT_SPEAKER = new Translation3d(
-            Units.inchesToMeters(18.055),
-            Units.inchesToMeters(238.815),
-            Units.inchesToMeters(13.091));
+                Units.inchesToMeters(18.055),
+                Units.inchesToMeters(238.815),
+                Units.inchesToMeters(13.091));
 
         public static final Translation3d TOP_LEFT_SPEAKER = new Translation3d(
-            Units.inchesToMeters(18.055),
-            Units.inchesToMeters(197.765),
-            Units.inchesToMeters(83.091));
+                Units.inchesToMeters(18.055),
+                Units.inchesToMeters(197.765),
+                Units.inchesToMeters(83.091));
 
         public static final Translation3d BOTTOM_RIGHT_SPEAKER = new Translation3d(
-            0.0,
-            Units.inchesToMeters(238.815),
-            Units.inchesToMeters(78.324));
+                0.0,
+                Units.inchesToMeters(238.815),
+                Units.inchesToMeters(78.324));
         public static final Translation3d BOTTOM_LEFT_SPEAKER = new Translation3d(
-            0.0,
-            Units.inchesToMeters(197.765),
-            Units.inchesToMeters(78.324));
+                0.0,
+                Units.inchesToMeters(197.765),
+                Units.inchesToMeters(78.324));
     }
 
     public static final AprilTagFieldLayout APRIL_TAG_FIELD = new AprilTagFieldLayout(
-        List.of(AprilTags.APRILTAGS),
-        FieldConstants.FIELD_LENGTH,
-        FieldConstants.FIELD_WIDTH
-    );
+            List.of(AprilTags.APRILTAGS),
+            FieldConstants.FIELD_LENGTH,
+            FieldConstants.FIELD_WIDTH);
 }

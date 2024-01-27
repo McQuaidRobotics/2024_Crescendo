@@ -21,6 +21,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.igknighters.GlobalState;
@@ -110,14 +111,12 @@ public class Swerve extends SubsystemBase {
     }
 
     public void driveChassisSpeeds(ChassisSpeeds speeds, boolean isOpenLoop) {
+        if (RobotBase.isReal())
+            speeds.omegaRadiansPerSecond *= -1.0;
 
         Logger.recordOutput("Swerve/targetChassisSpeed", speeds);
 
-        SwerveModuleState[] targetStates = kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(speeds);
-
-        SwerveDriveKinematics.desaturateWheelSpeeds(targetStates, kSwerve.MAX_DRIVE_VELOCITY);
-
-        setModuleStates(targetStates, isOpenLoop);
+        setModuleStates(speeds, isOpenLoop);
     }
 
     /**
@@ -145,21 +144,21 @@ public class Swerve extends SubsystemBase {
     /**
      * @return The raw gyro yaw value in radians
      */
-    public Double getYawRads() {
+    public double getYawRads() {
         return inputs.gyroYawRads;
     }
 
     /**
      * @return The raw gyro pitch value in radians
      */
-    public Double getPitchRads() {
+    public double getPitchRads() {
         return inputs.gyroPitchRads;
     }
 
     /**
      * @return The raw gyro roll value in radians
      */
-    public Double getRollRads() {
+    public double getRollRads() {
         return inputs.gyroRollRads;
     }
 

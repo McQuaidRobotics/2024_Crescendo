@@ -53,6 +53,7 @@ public class VisionOnlyPoseEstimator extends PoseEstimator<VisionOnlyPoseEstimat
     }
 
     Pose2d lastPose = new Pose2d();
+    Pose2d lastPose2 = new Pose2d();
 
     public VisionOnlyPoseEstimator() {
         super(
@@ -65,11 +66,18 @@ public class VisionOnlyPoseEstimator extends PoseEstimator<VisionOnlyPoseEstimat
 
     @Override
     public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
+        lastPose2 = lastPose;
         lastPose = visionRobotPoseMeters;
     }
 
     @Override
     public Pose2d getEstimatedPosition() {
-        return lastPose;
+        var trans = lastPose
+                .getTranslation()
+                .plus(lastPose2.getTranslation())
+                .div(2.0);
+        var rot = lastPose.getRotation();
+
+        return new Pose2d(trans, rot);
     }
 }

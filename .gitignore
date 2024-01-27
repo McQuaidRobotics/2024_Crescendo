@@ -175,3 +175,4 @@ out/
 src/main/java/com/igknighters/BuildConstants.java
 ctre_sim/
 *.wpilog
+simgui*
