@@ -7,6 +7,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.igknighters.constants.ConstValues;
+import com.igknighters.util.BootupLogger;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -39,6 +40,8 @@ public class GyroReal implements Gyro {
         yawVeloSignal.setUpdateFrequency(100);
 
         gyro.optimizeBusUtilization();
+
+        BootupLogger.bootupLog("    Gyro initialized (real)");
     }
 
     @Override
@@ -69,10 +72,9 @@ public class GyroReal implements Gyro {
     @Override
     public void periodic() {
         BaseStatusSignal.refreshAll(
-            pitchSignal, pitchVeloSignal,
-            rollSignal, rollVeloSignal,
-            yawSignal, yawVeloSignal
-        );
+                pitchSignal, pitchVeloSignal,
+                rollSignal, rollVeloSignal,
+                yawSignal, yawVeloSignal);
 
         inputs.pitchRads = Units.degreesToRadians(pitchSignal.getValue());
         inputs.pitchVelRadsPerSec = Units.degreesToRadians(pitchVeloSignal.getValue());

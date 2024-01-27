@@ -26,6 +26,7 @@ import com.igknighters.subsystems.swerve.module.SwerveModuleReal;
 import com.igknighters.subsystems.swerve.module.SwerveModuleSim;
 import com.igknighters.util.Tracer;
 import com.igknighters.constants.ConstValues;
+import com.igknighters.constants.FieldConstants;
 
 public class Swerve extends SubsystemBase {
     private final SwerveModule[] swerveMods;
@@ -57,7 +58,13 @@ public class Swerve extends SubsystemBase {
                         kSwerve.SWERVE_KINEMATICS,
                         getYawWrappedRot(),
                         getModulePositions(),
-                        getPose()),
+                        new Pose2d(
+                            new Translation2d(
+                                FieldConstants.FIELD_LENGTH / 2.0,
+                                FieldConstants.FIELD_WIDTH / 2.0
+                            ),
+                            new Rotation2d()
+                        )),
                 GlobalState.LocalizerType.Hybrid);
 
         visualizer = new SwerveVisualizer(this, swerveMods);

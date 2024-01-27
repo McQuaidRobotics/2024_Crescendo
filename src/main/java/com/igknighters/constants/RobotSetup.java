@@ -52,8 +52,7 @@ public class RobotSetup {
             "aaaaaaaa", RobotID.CRASH,
             "bbbbbbbb", RobotID.BURN,
             "03260abb", RobotID.CRASH,
-            "0306adb6", RobotID.TestBoard
-        );
+            "0306adb6", RobotID.TestBoard);
 
     private static RobotID currentID = RobotID.Unlabeled;
 
@@ -74,15 +73,14 @@ public class RobotSetup {
             } else {
                 throw new RuntimeException("Robot ID not found, " + currentSerialNum + " not in serialToID map");
             }
-            BootupLogger.BootupLog("Robot Name: " + currentID.name);
+            BootupLogger.bootupLog("Robot Name: " + currentID.name);
             Logger.recordOutput("RobotSetup/RobotId", currentID.name());
             Logger.recordOutput(
-                "RobotSetup/EnabledSubsystems",
-                List.of(currentID.subsystems)
-                    .stream()
-                    .map(sub -> sub.name())
-                    .reduce("", (acc, sub) -> acc + sub + ", ")
-            );
+                    "RobotSetup/EnabledSubsystems",
+                    List.of(currentID.subsystems)
+                            .stream()
+                            .map(sub -> sub.name())
+                            .reduce("", (acc, sub) -> acc + sub + ", "));
             Logger.recordOutput("RobotSetup/ConstantsID", currentID.constID.name());
         }
         return currentID;

@@ -1,6 +1,7 @@
 package com.igknighters.subsystems.swerve.gyro;
 
 import com.igknighters.constants.ConstValues;
+import com.igknighters.util.BootupLogger;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -17,6 +18,8 @@ public class GyroSim implements Gyro {
 
     public GyroSim(Supplier<ChassisSpeeds> chassisSpeedSupplier) {
         this.chassisSpeedSupplier = chassisSpeedSupplier;
+
+        BootupLogger.bootupLog("    Gyro initialized (sim)");
     }
 
     @Override

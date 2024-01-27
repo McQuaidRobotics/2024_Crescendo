@@ -8,6 +8,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
+import com.igknighters.util.BootupLogger;
 
 public class WristSim implements Wrist {
     private final WristInputs inputs;
@@ -28,6 +29,8 @@ public class WristSim implements Wrist {
                 kWrist.WRIST_MIN_ANGLE);
         sim.setState(setRadians, 0);
         inputs = new WristInputs(setRadians);
+
+        BootupLogger.bootupLog("    Wrist initialized (sim)");
     }
 
     @Override

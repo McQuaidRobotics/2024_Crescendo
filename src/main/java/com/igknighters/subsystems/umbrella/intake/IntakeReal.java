@@ -10,6 +10,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ForwardLimitValue;
 import com.ctre.phoenix6.signals.ReverseLimitValue;
 import com.igknighters.constants.ConstValues.kUmbrella.kIntake;
+import com.igknighters.util.BootupLogger;
 
 import edu.wpi.first.math.util.Units;
 
@@ -44,7 +45,7 @@ public class IntakeReal implements Intake {
 
         followerMotor.optimizeBusUtilization();
 
-        // followerMotor.setControl(new Follower(kIntake.UPPER_MOTOR_ID, false));
+        BootupLogger.bootupLog("    Intake initialized (real)");
     }
 
     @Override

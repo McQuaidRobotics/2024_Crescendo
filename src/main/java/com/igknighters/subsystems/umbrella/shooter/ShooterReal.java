@@ -9,6 +9,7 @@ import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
+import com.igknighters.util.BootupLogger;
 
 import edu.wpi.first.math.util.Units;
 
@@ -48,6 +49,8 @@ public class ShooterReal implements Shooter {
         tempSignalLower.setUpdateFrequency(4);
 
         lowerMotor.optimizeBusUtilization();
+
+        BootupLogger.bootupLog("    Shooter initialized (real)");
     }
 
     private TalonFXConfiguration motorUpperConfig() {

@@ -6,13 +6,16 @@ import edu.wpi.first.hal.SimDevice.Direction;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 import org.littletonrobotics.junction.Logger;
 
 import com.igknighters.GlobalState;
 import com.igknighters.constants.ConstValues.kStem.kPivot;
+import com.igknighters.util.BootupLogger;
 
 public class PivotSim implements Pivot {
     private final PivotInputs inputs;
@@ -34,7 +37,16 @@ public class PivotSim implements Pivot {
         sim.setState(0.0, 0);
         inputs = new PivotInputs(0.0);
 
-        if (GlobalState.isUnitTest()) {
+        if (RobotBase.isReal()) {
+            // In the event we use this to "disable" the pivot on the real robot,
+            // we don't want to crash the robot by trying to create a SimDevice
+            limitSwitch = null;
+            NetworkTableInstance.getDefault()
+                    .getTable("SimDevices")
+                    .getSubTable("PivotLimitSwitch")
+                    .getEntry("tripped")
+                    .setBoolean(false);
+        } else if (GlobalState.isUnitTest()) {
             // HAL requires unique allocations for each SimDevice,
             // in unit tests we don't care what this is actually called so just make it
             // random
@@ -43,6 +55,8 @@ public class PivotSim implements Pivot {
         } else {
             limitSwitch = SimDevice.create("PivotLimitSwitch").createBoolean("tripped", Direction.kInput, false);
         }
+
+        BootupLogger.bootupLog("    Pivot initialized (sim)");
     }
 
     @Override
@@ -80,7 +94,15 @@ public class PivotSim implements Pivot {
         inputs.rightAmps = sim.getCurrentDrawAmps() / 2.0;
         inputs.leftTemp = 0.0;
         inputs.rightTemp = 0.0;
-        inputs.isLimitSwitchHit = limitSwitch.get();
+        if (RobotBase.isReal()) {
+            inputs.isLimitSwitchHit = NetworkTableInstance.getDefault()
+                    .getTable("SimDevices")
+                    .getSubTable("PivotLimitSwitch")
+                    .getEntry("tripped")
+                    .getBoolean(false);
+        } else {
+            inputs.isLimitSwitchHit = limitSwitch.get();
+        }
 
         Logger.processInputs("Stem/Pivot", inputs);
     }

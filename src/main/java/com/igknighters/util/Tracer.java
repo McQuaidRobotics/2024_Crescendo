@@ -77,7 +77,7 @@ public class Tracer {
                 endCycle();
             }
         } catch (Exception e) {
-            DriverStation.reportError("[Tracer] An end trace was called with no opening trace" + e, true);
+            DriverStation.reportError("[Tracer] An end trace was called with no opening trace " + e, true);
         }
     }
 
@@ -114,11 +114,17 @@ public class Tracer {
     }
 
     private static void endCycle() {
-        for (var mapEntry : entryHeap.entrySet()) {
-            if (!traceTimes.containsKey(mapEntry.getKey())) {
-                entryHeap.remove(mapEntry.getKey()).unpublish();
-            }
-        }
+        var keys = new ArrayList<String>();
+        entryHeap
+            .entrySet()
+            .stream()
+            .filter(mapEntry -> !traceTimes.containsKey(mapEntry.getKey()))
+            .forEach(mapEntry -> {
+                keys.add(mapEntry.getKey());
+                mapEntry.getValue().unpublish();
+            });
+        keys.forEach(key -> entryHeap.remove(key));
+
         for (var trace : traceTimes.entrySet()) {
             NetworkTableEntry entry;
             if (!entryHeap.containsKey(trace.getKey())) {

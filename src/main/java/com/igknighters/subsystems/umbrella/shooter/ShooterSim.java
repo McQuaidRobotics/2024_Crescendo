@@ -4,6 +4,7 @@ import org.littletonrobotics.junction.Logger;
 
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
+import com.igknighters.util.BootupLogger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -25,6 +26,7 @@ public class ShooterSim implements Shooter {
             ConstValues.PERIODIC_TIME);
 
     public ShooterSim() {
+        BootupLogger.bootupLog("    Shooter initialized (sim)");
     }
 
     @Override

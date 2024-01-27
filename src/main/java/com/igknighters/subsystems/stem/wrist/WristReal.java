@@ -14,6 +14,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import com.igknighters.constants.ConstValues.kStem.kWrist;
+import com.igknighters.util.BootupLogger;
 import com.igknighters.util.SafeTalonFXConfiguration;
 
 import edu.wpi.first.math.util.Units;
@@ -57,6 +58,8 @@ public class WristReal implements Wrist {
         cancoder.optimizeBusUtilization();
 
         inputs = new WristInputs(Units.rotationsToRadians(cancoderRots.getValue()));
+
+        BootupLogger.bootupLog("    Wrist initialized (real)");
     }
 
     private TalonFXConfiguration motorConfig() {

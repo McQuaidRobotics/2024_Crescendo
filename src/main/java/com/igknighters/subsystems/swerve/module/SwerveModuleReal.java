@@ -22,6 +22,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kSwerve.AngleMotorConstants;
 import com.igknighters.constants.ConstValues.kSwerve.DriveMotorConstants;
+import com.igknighters.util.BootupLogger;
 import com.igknighters.util.SwerveModuleConstants;
 
 public class SwerveModuleReal implements SwerveModule {
@@ -70,6 +71,8 @@ public class SwerveModuleReal implements SwerveModule {
         angleAbsoluteVeloSignal = angleEncoder.getVelocity();
 
         inputs = new SwerveModuleInputs();
+
+        BootupLogger.bootupLog("    SwerveModule[" + this.moduleNumber + "] initialized (real)");
     }
 
     private void configureDriveMotor() {

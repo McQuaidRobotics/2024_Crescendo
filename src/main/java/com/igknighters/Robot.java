@@ -37,8 +37,8 @@ public class Robot extends UnitTestableRobot {
     @Override
     public void robotPeriodic() {
         Tracer.traceFunc("Shuffleboard", ShuffleboardApi::run);
-        Tracer.traceFunc("CommandScheduler", () -> scheduler.run());
-        Tracer.traceFunc("LEDUpdate", () -> LED.getInstance().run());
+        Tracer.traceFunc("CommandScheduler", scheduler::run);
+        Tracer.traceFunc("LEDUpdate", LED.getInstance()::run);
         GlobalState.log();
     }
 

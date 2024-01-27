@@ -15,6 +15,7 @@ import edu.wpi.first.math.util.Units;
 import org.littletonrobotics.junction.Logger;
 
 import com.igknighters.constants.ConstValues.kStem.kPivot;
+import com.igknighters.util.BootupLogger;
 import com.igknighters.util.SafeTalonFXConfiguration;
 
 public class PivotReal implements Pivot {
@@ -77,6 +78,8 @@ public class PivotReal implements Pivot {
         followerMotor.optimizeBusUtilization();
 
         inputs = new PivotInputs(gyroPitch.getValue() - kPivot.PIGEON_OFFSET);
+
+        BootupLogger.bootupLog("    Pivot initialized (real)");
     }
 
     private TalonFXConfiguration getMotorConfig() {

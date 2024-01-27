@@ -104,7 +104,7 @@ public class GlobalState {
         globalLock.lock();
         try {
             if (!localizer.isPresent() || localizerType == LocalizerType.None) {
-                DriverStation.reportError("Odometry not present", false);
+                DriverStation.reportError("[GlobalState] Odometry not present", true);
                 return new Pose2d();
             }
             return localizer.get().getEstimatedPosition();
@@ -124,14 +124,14 @@ public class GlobalState {
         globalLock.lock();
         try {
             if (!localizer.isPresent() || localizerType == LocalizerType.None) {
-                DriverStation.reportError("Localizer not present", false);
+                DriverStation.reportError("[GlobalState] Localizer not present", true);
                 return;
             }
             if (localizerType == LocalizerType.Hybrid) {
                 ((SwerveDrivePoseEstimator) localizer.get()).resetPosition(gyroRot, positions, pose);
                 return;
             } else {
-                DriverStation.reportError("Localizer does not support Swerve", false);
+                DriverStation.reportError("[GlobalState] Localizer does not support Swerve", true);
                 return;
             }
         } finally {
@@ -150,19 +150,19 @@ public class GlobalState {
         globalLock.lock();
         try {
             // if (!localizer.isPresent()) {
-            // DriverStation.reportError("Odometry not present", false);
+            // DriverStation.reportError("[GlobalState] Odometry not present", false);
             // return new Pose2d();
             // }
             // return localizer.get().update(gyroRot, modulePositions);
 
             if (!localizer.isPresent() || localizerType == LocalizerType.None) {
-                DriverStation.reportError("Localizer not present", false);
+                DriverStation.reportError("[GlobalState] Localizer not present", true);
                 return new Pose2d();
             }
             if (localizerType == LocalizerType.Hybrid) {
                 return ((SwerveDrivePoseEstimator) localizer.get()).update(gyroRot, modulePositions);
             } else {
-                DriverStation.reportError("Localizer does not support Swerve", false);
+                DriverStation.reportError("[GlobalState] Localizer does not support Swerve", true);
                 return new Pose2d();
             }
         } finally {
@@ -180,7 +180,7 @@ public class GlobalState {
         globalLock.lock();
         try {
             if (!localizer.isPresent() || localizerType == LocalizerType.None) {
-                DriverStation.reportError("Localizer not present", false);
+                DriverStation.reportError("[GlobalState] Localizer not present", true);
                 return;
             }
             if (localizerType == LocalizerType.Vision) {
@@ -199,7 +199,7 @@ public class GlobalState {
                         value.timestamp,
                         VecBuilder.fill(ambiguity, ambiguity, 0.0));
             } else {
-                DriverStation.reportError("Localizer does not support Vision", false);
+                DriverStation.reportError("[GlobalState] Localizer does not support Vision", true);
                 return;
             }
         } finally {
@@ -216,7 +216,7 @@ public class GlobalState {
         globalLock.lock();
         try {
             if (field.isPresent()) {
-                DriverStation.reportError("Field already published", false);
+                DriverStation.reportError("[GlobalState] Field already published", true);
                 return;
             }
             field = Optional.of(new Field2d());
@@ -266,7 +266,7 @@ public class GlobalState {
         globalLock.lock();
         try {
             if (autoChooserCreated) {
-                DriverStation.reportError("Auto chooser already created", false);
+                DriverStation.reportError("[GlobalState] Auto chooser already created", true);
                 return;
             }
             autoChooserCreated = true;

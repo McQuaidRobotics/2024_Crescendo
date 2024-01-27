@@ -16,6 +16,7 @@ import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kSwerve.AngleMotorConstants;
 import com.igknighters.constants.ConstValues.kSwerve.DriveMotorConstants;
+import com.igknighters.util.BootupLogger;
 import com.igknighters.util.SwerveModuleConstants;
 
 public class SwerveModuleSim implements SwerveModule {
@@ -44,6 +45,8 @@ public class SwerveModuleSim implements SwerveModule {
         inputs = new SwerveModuleInputs();
 
         inputs.angleAbsoluteRads = Math.random() * 2.0 * Math.PI;
+
+        BootupLogger.bootupLog("    SwerveModule[" + this.moduleNumber + "] initialized (sim)");
     }
 
     private double driveRotationsToMeters(double rotations) {

@@ -83,7 +83,7 @@ public class ConstantHelper {
         for (Field field : consts.getDeclaredFields()) {
             handleConstField(field, consts);
         }
-        BootupLogger.BootupLog("Finished applying constants");
+        BootupLogger.bootupLog("Finished applying constants");
     }
 
     public enum RobotConstID {
