@@ -17,6 +17,7 @@ import com.ctre.phoenix.led.ColorFlowAnimation.Direction;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -33,12 +34,13 @@ public class LED {
     }
 
     private static Animation animDisabled = new ColorFlowAnimation(0, 0, 255, 0, 0.1, 8, Direction.Forward);
-    private static Animation animTeleOp = new FireAnimation(1.0, 0.1, 8, 0.1, 0.1);
+    private static Animation animTeleOp = new FireAnimation(1.0, 0.1, 4, 0.1, 0.1);
     private static Animation animAuto = new RainbowAnimation(1.0, 0.2, 8);
     private static Animation animTest = new RgbFadeAnimation(1.0, 0.2, 8);
     private static Animation anim20sLeft = new SingleFadeAnimation(255, 255, 255);
-    private static Animation animShooting = new TwinkleOffAnimation(255, 107, 0); // McQ gold for now
+    private static Animation animShooting = new ColorFlowAnimation(255, 107, 0, 0, 0.1, 4, Direction.Forward, 4); // McQ gold for now
     private static Animation animBooting = new StrobeAnimation(255, 0, 255, 0, 0.1, 8);
+    private static Animation animNone = null;
     
     public enum LedAnimations {
         DISABLED(animDisabled),
@@ -47,7 +49,8 @@ public class LED {
         TEST(animTest),
         _20S_LEFT(anim20sLeft),
         SHOOTING(animShooting),
-        BOOTING(animBooting);
+        BOOTING(animBooting),
+        DEFAULT(animNone);
 
         private final Animation anim;
 
@@ -65,13 +68,16 @@ public class LED {
     private Timer timer;
     private Double duration;
     private LedAnimations animation;
+    private LedAnimations animation2;
     private LedAnimations lastPattern;
     private CANdle candle;
     private CANdleConfiguration config;
+    private XboxController controller = new XboxController(0);
 
     public LED() {
         this.timer = new Timer();
         this.animation = LedAnimations.DISABLED;
+        this.animation2 = LedAnimations.DEFAULT;
         this.lastPattern = LedAnimations.DISABLED;
         this.duration = 0.0;
         candle = new CANdle(51);
@@ -79,6 +85,8 @@ public class LED {
         config.v5Enabled = true;
         config.stripType = LEDStripType.RGB;
         config.brightnessScalar = 0.1;
+        config.disableWhenLOS = true;
+        candle.configAllSettings(config);
         sendAnimation(animation);
 
         
@@ -88,12 +96,16 @@ public class LED {
                 .and(() -> Math.abs(DriverStation.getMatchTime() - 30.0) < 0.2)
                 .onTrue(new InstantCommand(() -> this.setLed(LedAnimations._20S_LEFT, 2)));
 
-        SmartDashboard.putNumber("Speed", 0.1);
     }
 
     
     private void sendAnimation(LedAnimations anim) {
         candle.animate(anim.getAnim());
+    }
+    
+    private void sendMultiAnimation(LedAnimations anim1, LedAnimations anim2){
+        candle.animate(anim1.getAnim(), 0);
+        candle.animate(anim2.getAnim(), 1);
     }
 
     public void setLed(LedAnimations anim, double seconds) {
@@ -116,25 +128,35 @@ public class LED {
         } else {
             this.animation = LedAnimations.TELEOP;
         }
-        sendAnimation(this.animation);
+
+    }
+
+    public void shooting(LedAnimations anim) {
+        if (timer.hasElapsed(duration)){
+            this.animation2=LedAnimations.DEFAULT;
+        }
+        else{
+            this.animation2 = LedAnimations.SHOOTING;
+            sendMultiAnimation(anim, animation2);
+        }
     }
 
     public void run() {
         if (timer.hasElapsed(duration)) {
             setDefault();
+            animation2 = LedAnimations.DEFAULT;
         }
         if (animation != lastPattern || duration == 0) {
-            sendAnimation(animation);
+            sendMultiAnimation(animation, animation2);
             lastPattern = animation;
         }
-        
-    }
+        if (controller.getAButton()){
+            this.timer.restart();
+            duration = 2.5;
+            shooting(animation);
+        }
 
-    public double getSpeed(){
-        return NetworkTableInstance
-            .getDefault()
-            .getTable("/SmartDashboard")
-            .getEntry("Speed")
-            .getDouble(0.1);
     }
+    
+
 }
