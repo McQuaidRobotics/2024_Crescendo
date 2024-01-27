@@ -15,21 +15,23 @@ import edu.wpi.first.math.util.Units;
 
 public class IntakeReal implements Intake {
 
-    private final TalonFX motor = new TalonFX(kIntake.MOTOR_ID);
+    private final TalonFX leaderMotor = new TalonFX(kIntake.UPPER_MOTOR_ID);
+    private final TalonFX followerMotor = new TalonFX(kIntake.LOWER_MOTOR_ID);
     private final StatusSignal<Double> veloSignal, voltSignal, currentSignal, tempSignal;
     private final StatusSignal<ReverseLimitValue> revLimitSignal;
     private final StatusSignal<ForwardLimitValue> fwdLimitSignal;
     private final IntakeInputs inputs = new IntakeInputs();
 
     public IntakeReal() {
-        motor.getConfigurator().apply(new TalonFXConfiguration());
+        leaderMotor.getConfigurator().apply(new TalonFXConfiguration());
+        followerMotor.getConfigurator().apply(new TalonFXConfiguration());
 
-        veloSignal = motor.getVelocity();
-        voltSignal = motor.getMotorVoltage();
-        currentSignal = motor.getTorqueCurrent();
-        tempSignal = motor.getDeviceTemp();
-        revLimitSignal = motor.getReverseLimit();
-        fwdLimitSignal = motor.getForwardLimit();
+        veloSignal = leaderMotor.getVelocity();
+        voltSignal = leaderMotor.getMotorVoltage();
+        currentSignal = leaderMotor.getTorqueCurrent();
+        tempSignal = leaderMotor.getDeviceTemp();
+        revLimitSignal = leaderMotor.getReverseLimit();
+        fwdLimitSignal = leaderMotor.getForwardLimit();
 
         veloSignal.setUpdateFrequency(100);
         voltSignal.setUpdateFrequency(100);
@@ -38,21 +40,26 @@ public class IntakeReal implements Intake {
         revLimitSignal.setUpdateFrequency(100);
         fwdLimitSignal.setUpdateFrequency(100);
 
-        motor.optimizeBusUtilization();
+        leaderMotor.optimizeBusUtilization();
+
+        followerMotor.optimizeBusUtilization();
+
+        // followerMotor.setControl(new Follower(kIntake.UPPER_MOTOR_ID, false));
     }
 
     @Override
     public void setVoltageOut(double volts) {
         inputs.volts = volts;
-        motor.setVoltage(volts);
+        leaderMotor.setVoltage(volts);
+        followerMotor.setVoltage(volts * 0.66);
     }
 
     @Override
     public void turnIntakeRads(double radians) {
         setVoltageOut(0.0);
         var ret = new PositionDutyCycle(
-                motor.getRotorPosition().getValue() + Units.radiansToRotations(radians));
-        motor.setControl(ret);
+                leaderMotor.getRotorPosition().getValue() + Units.radiansToRotations(radians));
+        leaderMotor.setControl(ret);
     }
 
     @Override

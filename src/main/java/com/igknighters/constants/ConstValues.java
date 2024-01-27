@@ -259,17 +259,30 @@ public final class ConstValues {
     public static final class kUmbrella {
 
         public static final class kShooter {
-            public static final double MOTOR_kP = 0.3;
-            public static final double MOTOR_kI = 0.0;
-            public static final double MOTOR_kD = 0.08;
+            public static final double MOTOR_UPPER_kP = 0.02;
+            public static final double MOTOR_UPPER_kI = 0.0;
+            public static final double MOTOR_UPPER_kD = 0.0;
+            public static final double MOTOR_UPPER_kS = 0.032;
+            public static final double MOTOR_UPPER_kV = 0.01;
 
-            public static final int MOTOR_ID = 17;
+            public static final double MOTOR_LOWER_kP = 0.02;
+            public static final double MOTOR_LOWER_kI = 0.0;
+            public static final double MOTOR_LOWER_kD = 0.0;
+            public static final double MOTOR_LOWER_kS = 0.032;
+            public static final double MOTOR_LOWER_kV = 0.01;
+
+            public static final int LOWER_MOTOR_ID = 17;
+            public static final int UPPER_MOTOR_ID = 18;
+
+            public static final double MECHANISM_RATIO = 0.5;
+            public static final double WHEEL_DIAMETER = 4.0;
 
             public static final double DEFAULT_TOLERANCE = 0.5;
         }
 
         public static final class kIntake {
-            public static final int MOTOR_ID = 18;
+            public static final int UPPER_MOTOR_ID = 19;
+            public static final int LOWER_MOTOR_ID = 20;
         }
 
     }

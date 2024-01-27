@@ -36,18 +36,18 @@ public class Swerve extends SubsystemBase {
 
         if (RobotBase.isReal()) {
             swerveMods = new SwerveModule[] {
-                new SwerveModuleReal(ConstValues.kSwerve.Mod0.CONSTANTS),
-                new SwerveModuleReal(ConstValues.kSwerve.Mod1.CONSTANTS),
-                new SwerveModuleReal(ConstValues.kSwerve.Mod2.CONSTANTS),
-                new SwerveModuleReal(ConstValues.kSwerve.Mod3.CONSTANTS)
+                    new SwerveModuleReal(ConstValues.kSwerve.Mod0.CONSTANTS),
+                    new SwerveModuleReal(ConstValues.kSwerve.Mod1.CONSTANTS),
+                    new SwerveModuleReal(ConstValues.kSwerve.Mod2.CONSTANTS),
+                    new SwerveModuleReal(ConstValues.kSwerve.Mod3.CONSTANTS)
             };
             gyro = new GyroReal();
         } else {
             swerveMods = new SwerveModule[] {
-                new SwerveModuleSim(ConstValues.kSwerve.Mod0.CONSTANTS),
-                new SwerveModuleSim(ConstValues.kSwerve.Mod1.CONSTANTS),
-                new SwerveModuleSim(ConstValues.kSwerve.Mod2.CONSTANTS),
-                new SwerveModuleSim(ConstValues.kSwerve.Mod3.CONSTANTS)
+                    new SwerveModuleSim(ConstValues.kSwerve.Mod0.CONSTANTS),
+                    new SwerveModuleSim(ConstValues.kSwerve.Mod1.CONSTANTS),
+                    new SwerveModuleSim(ConstValues.kSwerve.Mod2.CONSTANTS),
+                    new SwerveModuleSim(ConstValues.kSwerve.Mod3.CONSTANTS)
             };
             gyro = new GyroSim(this::getChassisSpeed);
         }
@@ -58,7 +58,7 @@ public class Swerve extends SubsystemBase {
                         getYawWrappedRot(),
                         getModulePositions(),
                         getPose()),
-                GlobalState.LocalizerType.HYBRID);
+                GlobalState.LocalizerType.Hybrid);
 
         visualizer = new SwerveVisualizer(this, swerveMods);
     }

@@ -15,6 +15,7 @@ import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.commands.autos.Autos;
 import com.igknighters.commands.autos.AutosCmdRegister;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
+import com.igknighters.commands.umbrella.UmbrellaCommands;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -48,6 +49,16 @@ public class RobotContainer {
             setupAutos(swerve);
 
             Autos.createSendableChooser(swerve);
+        }
+
+        if (allSubsystems.umbrella.isPresent() && !allSubsystems.swerve.isPresent()) {
+            var umbrella = allSubsystems.umbrella.get();
+
+            umbrella.setDefaultCommand(UmbrellaCommands.testUmbrella(
+                umbrella,
+                driverController.leftStickY(0.1),
+                driverController.rightStickY(0.1)
+            ));
         }
     }
 

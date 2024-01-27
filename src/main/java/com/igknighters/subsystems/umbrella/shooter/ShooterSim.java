@@ -15,58 +15,62 @@ public class ShooterSim implements Shooter {
 
     private final ShooterInputs inputs = new ShooterInputs();
     private final FlywheelSim flywheelSim = new FlywheelSim(
-        DCMotor.getFalcon500(1),
-        1.0,
-        0.05
-    );
+            DCMotor.getFalcon500(1),
+            1.0,
+            0.05);
     private final PIDController pid = new PIDController(
-        kShooter.MOTOR_kP * (Math.PI*2),
-        kShooter.MOTOR_kI * (Math.PI*2),
-        kShooter.MOTOR_kD * (Math.PI*2),
-        ConstValues.PERIODIC_TIME
-    );
+            kShooter.MOTOR_UPPER_kP * (Math.PI * 2),
+            kShooter.MOTOR_UPPER_kI * (Math.PI * 2),
+            kShooter.MOTOR_UPPER_kD * (Math.PI * 2),
+            ConstValues.PERIODIC_TIME);
 
-    public ShooterSim() {}
+    public ShooterSim() {
+    }
 
     @Override
     public double getSpeed() {
-        return inputs.radiansPerSecond;
+        return inputs.radiansPerSecondUpper;
     }
 
     @Override
     public double getTargetSpeed() {
-        return inputs.targetRadiansPerSecond;
+        return inputs.targetRadiansPerSecondUpper;
     }
 
     @Override
     public void setSpeed(double speedRadPerSec) {
-        inputs.targetRadiansPerSecond = speedRadPerSec;
+        inputs.targetRadiansPerSecondUpper = speedRadPerSec;
+        inputs.targetRadiansPerSecondLower = speedRadPerSec;
 
         var flywheelAppliedVolts = MathUtil.clamp(
-            pid.calculate(flywheelSim.getAngularVelocityRadPerSec(), speedRadPerSec),
-            -RobotController.getBatteryVoltage(),
-            RobotController.getBatteryVoltage()
-        );
+                pid.calculate(flywheelSim.getAngularVelocityRadPerSec(), speedRadPerSec),
+                -RobotController.getBatteryVoltage(),
+                RobotController.getBatteryVoltage());
 
         flywheelSim.setInputVoltage(flywheelAppliedVolts);
 
-        inputs.volts = flywheelAppliedVolts;
+        inputs.voltsUpper = flywheelAppliedVolts;
+        inputs.voltsLower = flywheelAppliedVolts;
     }
 
     @Override
     public void setVoltageOut(double volts) {
         flywheelSim.setInputVoltage(volts);
-        inputs.targetRadiansPerSecond = 0.0;
-        inputs.volts = volts;
+        inputs.targetRadiansPerSecondUpper = 0.0;
+        inputs.targetRadiansPerSecondLower = 0.0;
+        inputs.voltsUpper = volts;
+        inputs.voltsLower = volts;
     }
 
     @Override
     public void periodic() {
         flywheelSim.update(ConstValues.PERIODIC_TIME);
 
-        inputs.amps = flywheelSim.getCurrentDrawAmps();
+        inputs.ampsUpper = flywheelSim.getCurrentDrawAmps();
+        inputs.ampsLower = flywheelSim.getCurrentDrawAmps();
 
-        inputs.radiansPerSecond = flywheelSim.getAngularVelocityRadPerSec();
+        inputs.radiansPerSecondUpper = flywheelSim.getAngularVelocityRadPerSec();
+        inputs.radiansPerSecondLower = flywheelSim.getAngularVelocityRadPerSec();
 
         Logger.processInputs("/Umbrella/Shooter", inputs);
     }

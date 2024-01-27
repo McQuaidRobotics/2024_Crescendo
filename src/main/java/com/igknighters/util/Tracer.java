@@ -77,7 +77,7 @@ public class Tracer {
                 endCycle();
             }
         } catch (Exception e) {
-            DriverStation.reportError("[Tracer] An end trace was called with no opening trace", false);
+            DriverStation.reportError("[Tracer] An end trace was called with no opening trace" + e, true);
         }
     }
 

@@ -5,6 +5,7 @@ import com.igknighters.subsystems.umbrella.intake.*;
 import com.igknighters.subsystems.umbrella.shooter.*;
 import com.igknighters.util.Tracer;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -74,13 +75,17 @@ public class Umbrella extends SubsystemBase {
         intake.setVoltageOut(12.0 * percent);
     }
 
-    public void turnIntakeBy(double meters) {
-        intake.turnIntakeMeters(meters);
-    }
+    // public void turnIntakeBy(double meters) {
+    //     var wheelCircum = kShooter.WHEEL_DIAMETER * Math.PI;
+    //     intake.turnIntakeMeters(Units.rotationsToRadians(surfaceMPS / wheelCircum));
+    // }
 
     public void spinupShooterToSurfaceSpeed(double surfaceMPS) {
-        // shooter.setSpeed(radPerSec);
+        var wheelCircum = kShooter.WHEEL_DIAMETER * Math.PI;
+        shooter.setSpeed(Units.rotationsToRadians(surfaceMPS / wheelCircum));
     }
 
-    public void spinupShooterToRotSpeed() {}
+    public void spinupShooterToRotSpeed(double RPM) {
+        shooter.setSpeed(Units.rotationsPerMinuteToRadiansPerSecond(RPM));
+    }
 }

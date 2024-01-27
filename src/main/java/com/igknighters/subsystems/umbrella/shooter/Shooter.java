@@ -11,34 +11,46 @@ import edu.wpi.first.math.util.Units;
 public interface Shooter extends Component {
 
     public static class ShooterInputs implements LoggableInputs {
-        public double radiansPerSecond = 0.0, targetRadiansPerSecond = 0.0;
-        public double volts = 0.0, amps = 0.0, temp = 0.0;
+        public double radiansPerSecondUpper = 0.0, targetRadiansPerSecondUpper = 0.0;
+        public double radiansPerSecondLower = 0.0, targetRadiansPerSecondLower = 0.0;
+        public double voltsUpper = 0.0, voltsLower = 0.0;
+        public double ampsUpper = 0.0, ampsLower = 0.0;
+        public double tempUpper = 0.0, tempLower = 0.0;
 
         @Override
         public void toLog(LogTable table) {
-            table.put("radiansPerSecond", radiansPerSecond);
-            table.put("targetRadiansPerSecond", targetRadiansPerSecond);
-            table.put("volts", volts);
-            table.put("amps", amps);
-            table.put("temp", temp);
+            table.put("radiansPerSecondUpper", radiansPerSecondUpper);
+            table.put("targetRadiansPerSecondUpper", targetRadiansPerSecondUpper);
+            table.put("radiansPerSecondLower", radiansPerSecondLower);
+            table.put("targetRadiansPerSecondLower", targetRadiansPerSecondLower);
+            table.put("ampsUpper", ampsUpper);
+            table.put("ampsLower", ampsLower);
+            table.put("voltsUpper", voltsUpper);
+            table.put("voltsLower", voltsLower);
+            table.put("tempUpper", tempUpper);
+            table.put("tempLower", tempLower);
 
             // A subtable, thats only written to when in debug mode and never read from,
             // that provides some more human readable values
             if (ConstValues.DEBUG) {
-                table.put("#Human/deltaTargeRadians", radiansPerSecond - targetRadiansPerSecond);
-                table.put("#Human/rpm", Units.radiansPerSecondToRotationsPerMinute(radiansPerSecond));
-                table.put("#Human/targetRPM", Units.radiansPerSecondToRotationsPerMinute(radiansPerSecond));
-                table.put("#Human/watts", volts * amps);
+                table.put("#Human/rpmUpper", Units.radiansPerSecondToRotationsPerMinute(radiansPerSecondUpper));
+                table.put("#Human/targetRPMUpper",
+                        Units.radiansPerSecondToRotationsPerMinute(targetRadiansPerSecondUpper));
             }
         }
 
         @Override
         public void fromLog(LogTable table) {
-            radiansPerSecond = table.get("radiansPerSecond", radiansPerSecond);
-            targetRadiansPerSecond = table.get("targetRadiansPerSecond", targetRadiansPerSecond);
-            volts = table.get("volts", volts);
-            amps = table.get("amps", amps);
-            temp = table.get("temp", temp);
+            radiansPerSecondUpper = table.get("radiansPerSecond", radiansPerSecondUpper);
+            targetRadiansPerSecondUpper = table.get("targetRadiansPerSecond", targetRadiansPerSecondUpper);
+            radiansPerSecondLower = table.get("radiansPerSecond", radiansPerSecondLower);
+            targetRadiansPerSecondLower = table.get("targetRadiansPerSecond", targetRadiansPerSecondLower);
+            ampsUpper = table.get("ampsUpper", ampsUpper);
+            ampsLower = table.get("ampsLower", ampsLower);
+            voltsUpper = table.get("voltsUpper", voltsUpper);
+            voltsLower = table.get("voltsLower", voltsLower);
+            tempUpper = table.get("tempUpper", tempUpper);
+            tempLower = table.get("tempLower", tempLower);
         }
     }
 
@@ -54,6 +66,7 @@ public interface Shooter extends Component {
 
     /**
      * Runs the {@code Shooter} in closed loop at the specified speed
+     * 
      * @param speedRadPerSec The speed in Rad/S to spin the flywheel at
      */
     public void setSpeed(double speedRadPerSec);

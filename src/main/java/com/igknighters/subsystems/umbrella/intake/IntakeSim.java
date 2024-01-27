@@ -24,8 +24,8 @@ public class IntakeSim implements Intake {
             exit = SimDevice.create("" + Math.random() + Math.random()).createBoolean("", Direction.kInput,
                     false);
         } else {
-            entrance = SimDevice.create("EntranceBeamBreak").createBoolean("broken", Direction.kInput, false);
-            exit = SimDevice.create("ExitBeamBreak").createBoolean("broken", Direction.kInput, false);
+            entrance = SimDevice.create("EntranceBeamBreak").createBoolean("broken1", Direction.kInput, false);
+            exit = SimDevice.create("ExitBeamBreak").createBoolean("broken2", Direction.kInput, false);
         }
     }
 

@@ -50,8 +50,6 @@ public interface Intake extends Component {
      */
     public void turnIntakeRads(double radians);
 
-    public default void turnIntakeMeters(double meters) {/* TODO */};
-
     /**
      * @return If the entrance beam is broken
      */

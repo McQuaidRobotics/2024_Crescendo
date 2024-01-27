@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -28,9 +29,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 public class GlobalState {
     public static enum LocalizerType {
-        HYBRID(1000),
-        VISION(500),
-        NONE(0);
+        Hybrid(1000),
+        Vision(500),
+        None(0);
 
         public final int priority;
 
@@ -39,9 +40,13 @@ public class GlobalState {
         }
     }
 
+    public static enum GamepieceState {
+        None, Held, Confirmed;
+    }
+
     private static final ReentrantLock globalLock = new ReentrantLock();
 
-    private static LocalizerType localizerType = LocalizerType.NONE;
+    private static LocalizerType localizerType = LocalizerType.None;
     private static Optional<PoseEstimator<?>> localizer = Optional.empty();
 
     // private static final PoseHistory poseHistory = new PoseHistory();
@@ -52,7 +57,7 @@ public class GlobalState {
 
     private static AtomicBoolean isUnitTest = new AtomicBoolean(false);
 
-    private static AtomicBoolean hasGamePiece = new AtomicBoolean(false);
+    private static AtomicReference<GamepieceState> gamePieceState = new AtomicReference<GlobalState.GamepieceState>(GamepieceState.None);
 
     private GlobalState() {
         throw new UnsupportedOperationException("This is a utility class!");
@@ -61,11 +66,12 @@ public class GlobalState {
     public static void restoreDefaultState() {
         globalLock.lock();
         try {
-            localizerType = LocalizerType.NONE;
+            localizerType = LocalizerType.None;
             localizer = Optional.empty();
             field = Optional.empty();
             isUnitTest.set(false);
-            //intentionally ignore as this is dependent on AutoBuilder state and that cannot be restored
+            // intentionally ignore as this is dependent on AutoBuilder state and that
+            // cannot be restored
             // autoChooserCreated = false;
         } finally {
             globalLock.unlock();
@@ -97,7 +103,7 @@ public class GlobalState {
     public static Pose2d getLocalizedPose() {
         globalLock.lock();
         try {
-            if (!localizer.isPresent() || localizerType == LocalizerType.NONE) {
+            if (!localizer.isPresent() || localizerType == LocalizerType.None) {
                 DriverStation.reportError("Odometry not present", false);
                 return new Pose2d();
             }
@@ -117,11 +123,11 @@ public class GlobalState {
     public static void resetSwerveLocalization(Rotation2d gyroRot, Pose2d pose, SwerveModulePosition... positions) {
         globalLock.lock();
         try {
-            if (!localizer.isPresent() || localizerType == LocalizerType.NONE) {
+            if (!localizer.isPresent() || localizerType == LocalizerType.None) {
                 DriverStation.reportError("Localizer not present", false);
                 return;
             }
-            if (localizerType == LocalizerType.HYBRID) {
+            if (localizerType == LocalizerType.Hybrid) {
                 ((SwerveDrivePoseEstimator) localizer.get()).resetPosition(gyroRot, positions, pose);
                 return;
             } else {
@@ -149,11 +155,11 @@ public class GlobalState {
             // }
             // return localizer.get().update(gyroRot, modulePositions);
 
-            if (!localizer.isPresent() || localizerType == LocalizerType.NONE) {
+            if (!localizer.isPresent() || localizerType == LocalizerType.None) {
                 DriverStation.reportError("Localizer not present", false);
                 return new Pose2d();
             }
-            if (localizerType == LocalizerType.HYBRID) {
+            if (localizerType == LocalizerType.Hybrid) {
                 return ((SwerveDrivePoseEstimator) localizer.get()).update(gyroRot, modulePositions);
             } else {
                 DriverStation.reportError("Localizer does not support Swerve", false);
@@ -173,11 +179,11 @@ public class GlobalState {
     public static void submitVisionData(VisionPoseEst value, double ambiguity) {
         globalLock.lock();
         try {
-            if (!localizer.isPresent() || localizerType == LocalizerType.NONE) {
+            if (!localizer.isPresent() || localizerType == LocalizerType.None) {
                 DriverStation.reportError("Localizer not present", false);
                 return;
             }
-            if (localizerType == LocalizerType.VISION) {
+            if (localizerType == LocalizerType.Vision) {
                 ((VisionOnlyPoseEstimator) localizer.get()).addVisionMeasurement(
                         value.pose.toPose2d(),
                         value.timestamp,
@@ -187,7 +193,7 @@ public class GlobalState {
                                 value.pose.toPose2d().getRotation(),
                                 new FakeWheelPositions());
                 field.ifPresent(field2d -> field2d.setRobotPose(pose));
-            } else if (localizerType == LocalizerType.HYBRID) {
+            } else if (localizerType == LocalizerType.Hybrid) {
                 ((SwerveDrivePoseEstimator) localizer.get()).addVisionMeasurement(
                         value.pose.toPose2d(),
                         value.timestamp,
@@ -243,12 +249,12 @@ public class GlobalState {
         }
     }
 
-    public static boolean hasGamePiece() {
-        return hasGamePiece.get();
+    public static GamepieceState getGamePieceState() {
+        return gamePieceState.get();
     }
 
-    public static void setHasGamePiece(boolean hasGamePiece) {
-        GlobalState.hasGamePiece.set(hasGamePiece);
+    public static void setHasGamePiece(GamepieceState state) {
+        gamePieceState.set(state);
     }
 
     /**
