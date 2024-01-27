@@ -10,6 +10,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
+import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.util.ShuffleboardApi;
 import com.igknighters.util.Tracer;
@@ -21,6 +22,7 @@ public class Robot extends UnitTestableRobot {
 
     private Command autoCmd;
     private final CommandScheduler scheduler = CommandScheduler.getInstance();
+    private RobotContainer roboContainer;
 
     @Override
     public void robotInit() {
@@ -31,7 +33,7 @@ public class Robot extends UnitTestableRobot {
 
         GlobalState.publishField();
 
-        new RobotContainer();
+        roboContainer = new RobotContainer();
     }
 
     @Override
@@ -158,5 +160,13 @@ public class Robot extends UnitTestableRobot {
                         (Command command) -> {
                             logCommandFunction.accept(command, false);
                         });
+    }
+
+    @Override
+    public AllSubsystems getAllSubsystemsForTest() {
+        if (!GlobalState.isUnitTest()) {
+            throw new RuntimeException("This method should only be called in unit tests");
+        }
+        return roboContainer.getAllSubsystemsForTest();
     }
 }

@@ -15,7 +15,6 @@ import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.commands.autos.Autos;
 import com.igknighters.commands.autos.AutosCmdRegister;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
-import com.igknighters.commands.umbrella.UmbrellaCommands;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -50,19 +49,9 @@ public class RobotContainer {
 
             Autos.createSendableChooser(swerve);
         }
-
-        if (allSubsystems.umbrella.isPresent() && !allSubsystems.swerve.isPresent()) {
-            var umbrella = allSubsystems.umbrella.get();
-
-            umbrella.setDefaultCommand(UmbrellaCommands.testUmbrella(
-                umbrella,
-                driverController.leftStickY(0.1),
-                driverController.rightStickY(0.1)
-            ));
-        }
     }
 
-    public void setupAutos(Swerve swerve) {
+    private void setupAutos(Swerve swerve) {
 
         if (AutoBuilder.isConfigured() && GlobalState.isUnitTest()) {
             // this code can be run multiple times during unit tests,
@@ -97,5 +86,12 @@ public class RobotContainer {
                 swerve);
 
         GlobalState.onceInitAutoChooser(swerve);
+    }
+
+    AllSubsystems getAllSubsystemsForTest() {
+        if (!GlobalState.isUnitTest()) {
+            throw new RuntimeException("This method should only be called in unit tests");
+        }
+        return allSubsystems;
     }
 }

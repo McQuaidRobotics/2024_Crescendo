@@ -8,6 +8,7 @@ import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 
 import com.igknighters.GlobalState;
+import com.igknighters.SubsystemResources.AllSubsystems;
 
 import edu.wpi.first.hal.DriverStationJNI;
 import edu.wpi.first.hal.HAL;
@@ -249,5 +250,9 @@ public class UnitTestableRobot extends LoggedRobot {
 
     public double getElapsedTime() {
         return timer.get();
+    }
+
+    public AllSubsystems getAllSubsystemsForTest() {
+        return new AllSubsystems();
     }
 }
