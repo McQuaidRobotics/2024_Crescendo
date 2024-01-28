@@ -13,7 +13,7 @@ buildscript {
 
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2024.1.1-beta-4"
+    id "edu.wpi.first.GradleRIO" version "2024.1.1"
     id "com.peterabeles.gversion" version "1.10"
     id "java-library"
 }
@@ -97,14 +97,13 @@ dependencies {
     nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
     simulationRelease wpi.sim.enableRelease()
 
+    implementation platform("org.junit:junit-bom:5.8.2")
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
     def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
     annotationProcessor "org.littletonrobotics.akit.junction:junction-autolog:$akitJson.version"
-
-    // classpath 'com.hubspot.jinjava:jinjava:2.7.1'
 }
 
 test {
@@ -134,6 +133,7 @@ wpi.java.configureTestTasks(test)
 // Configure string concat to always inline compile
 tasks.withType(JavaCompile) {
     options.compilerArgs.add '-XDstringConcat=inline'
+    options.encoding = 'UTF-8'
 }
 
 project.compileJava.dependsOn(createVersionFile)

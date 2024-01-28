@@ -85,8 +85,9 @@ public class SubsystemResources {
         private Subsystems[] subsystems;
         private List<Subsystem> subsystemsList = new ArrayList<>();
 
-        //add new subsystems here, make sure they are public
-        public Optional<Swerve> swerve = Optional.empty();
+{%for ss in subsystems%}
+        public Optional<{{ss}}> {{ss|lower}} = Optional.empty();
+{%endfor%}
 
         public AllSubsystems(Subsystems... subsystems) {
             this.subsystems = subsystems;
