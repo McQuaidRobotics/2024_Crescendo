@@ -5,8 +5,8 @@ import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest.SwerveDriveBrake;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -25,7 +25,7 @@ import com.igknighters.constants.ConstValues.kSwerve.DriveMotorConstants;
 import com.igknighters.util.BootupLogger;
 import com.igknighters.util.SwerveModuleConstants;
 
-public class SwerveModuleRealPoor implements SwerveModule {
+public class SwerveModuleReal implements SwerveModule {
     private final TalonFX driveMotor;
     private final StatusSignal<Double> drivePositionSignal, driveVelocitySignal;
     private final StatusSignal<Double> driveVoltSignal, driveAmpSignal;
@@ -43,8 +43,10 @@ public class SwerveModuleRealPoor implements SwerveModule {
     private final Translation2d moduleChassisPose;
     private Rotation2d lastAngle = new Rotation2d();
     private final SwerveModuleInputs inputs;
+    private final boolean isPro;
 
-    public SwerveModuleRealPoor(final SwerveModuleConstants moduleConstants) {
+    public SwerveModuleReal(final SwerveModuleConstants moduleConstants, boolean isPro) {
+        this.isPro = isPro;
         this.moduleNumber = moduleConstants.moduleId.num;
         this.rotationOffset = moduleConstants.getRotationOffset(moduleConstants.moduleId);
         this.moduleChassisPose = moduleConstants.moduleChassisPose;
@@ -72,31 +74,49 @@ public class SwerveModuleRealPoor implements SwerveModule {
 
         inputs = new SwerveModuleInputs();
 
-        BootupLogger.bootupLog("    SwerveModule[" + this.moduleNumber + "] initialized (real)");
+        BootupLogger.bootupLog(
+                "    SwerveModule[" + this.moduleNumber + "] initialized ("
+                        + (isPro ? " realPro" : "real")
+                        + ")");
     }
 
     private void configureDriveMotor() {
         var driveConfig = new TalonFXConfiguration();
+
         driveConfig.MotorOutput.Inverted = kSwerve.DRIVE_MOTOR_INVERT;
         driveConfig.MotorOutput.NeutralMode = kSwerve.DRIVE_NEUTRAL_MODE;
+
         driveConfig.Slot0.kP = DriveMotorConstants.kP;
         driveConfig.Slot0.kI = DriveMotorConstants.kI;
         driveConfig.Slot0.kD = DriveMotorConstants.kD;
-        driveConfig.Slot0.kV = 12.0 / (kSwerve.MAX_DRIVE_VELOCITY / (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO));
-        // driveConfig.CurrentLimits.StatorCurrentLimit = 50.0;
-        // driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        driveConfig.Slot0.kV = 12.0
+                / (kSwerve.MAX_DRIVE_VELOCITY / (kSwerve.WHEEL_CIRCUMFERENCE / kSwerve.DRIVE_GEAR_RATIO));
+
+        driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        driveConfig.CurrentLimits.StatorCurrentLimit = kSwerve.SLIP_CURRENT;
+        driveConfig.TorqueCurrent.PeakForwardTorqueCurrent = kSwerve.SLIP_CURRENT;
+        driveConfig.TorqueCurrent.PeakReverseTorqueCurrent = -kSwerve.SLIP_CURRENT;
 
         driveMotor.getConfigurator().apply(driveConfig);
     }
 
     private void configureAngleMotor() {
         var angleConfig = new TalonFXConfiguration();
+
         angleConfig.MotorOutput.Inverted = kSwerve.ANGLE_MOTOR_INVERT;
         angleConfig.MotorOutput.NeutralMode = kSwerve.ANGLE_NEUTRAL_MODE;
+
         angleConfig.Slot0.kP = AngleMotorConstants.kP;
         angleConfig.Slot0.kI = AngleMotorConstants.kI;
         angleConfig.Slot0.kD = AngleMotorConstants.kD;
-        angleConfig.Feedback.SensorToMechanismRatio = kSwerve.ANGLE_GEAR_RATIO;
+
+        angleConfig.Feedback.FeedbackRemoteSensorID = angleEncoder.getDeviceID();
+        angleConfig.Feedback.RotorToSensorRatio = kSwerve.ANGLE_GEAR_RATIO;
+        if (isPro) {
+            angleConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+        } else {
+            angleConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+        }
         angleConfig.ClosedLoopGeneral.ContinuousWrap = true;
 
         angleMotor.getConfigurator().apply(angleConfig);
@@ -129,9 +149,8 @@ public class SwerveModuleRealPoor implements SwerveModule {
         inputs.targetAngleAbsoluteRads = angle.getRadians();
 
         angleMotor.setControl(
-            new PositionDutyCycle(angle.getRotations())
-                .withUpdateFreqHz(250)
-            );
+                new PositionDutyCycle(angle.getRotations())
+                        .withUpdateFreqHz(250));
         lastAngle = angle;
     }
 
@@ -139,11 +158,11 @@ public class SwerveModuleRealPoor implements SwerveModule {
         inputs.targetDriveVeloMPS = desiredState.speedMetersPerSecond;
         if (isOpenLoop) {
             double percentOutput = desiredState.speedMetersPerSecond / kSwerve.MAX_DRIVE_VELOCITY;
-            var controlRequest = new DutyCycleOut(percentOutput).withEnableFOC(false);
+            var controlRequest = new DutyCycleOut(percentOutput).withEnableFOC(isPro);
             driveMotor.setControl(controlRequest);
         } else {
             double rps = desiredState.speedMetersPerSecond / (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO);
-            var veloRequest = new VelocityVoltage(rps).withEnableFOC(false);
+            var veloRequest = new VelocityVoltage(rps).withEnableFOC(isPro);
             driveMotor.setControl(veloRequest);
         }
     }
@@ -188,10 +207,10 @@ public class SwerveModuleRealPoor implements SwerveModule {
         inputs.driveVolts = driveVoltSignal.getValue();
         inputs.driveAmps = driveAmpSignal.getValue();
 
-
         Logger.processInputs("Swerve/SwerveModule[" + this.moduleNumber + "]", inputs);
     }
 
     @Override
-    public void setVoltageOut(double volts) {}
+    public void setVoltageOut(double volts) {
+    }
 }

@@ -109,12 +109,12 @@ public final class ConstValues {
          */
         @SuppressWarnings("unused")
         private static final class SwerveGearRatios {
-            static final double L1_DRIVE = 1.0 / 8.14;
-            static final double L2_DRIVE = 1.0 / 6.75;
-            static final double L3_DRIVE = 1.0 / 6.12;
-            static final double L4_DRIVE = 1.0 / 5.14;
+            static final double L1_DRIVE = 8.14;
+            static final double L2_DRIVE = 6.75;
+            static final double L3_DRIVE = 6.12;
+            static final double L4_DRIVE = 5.14;
 
-            static final double ANGLE = 7.0 / 150.0;
+            static final double ANGLE = 150.0 / 7.0;
         }
 
         public static final int PIGEON_ID = 33;
@@ -138,13 +138,15 @@ public final class ConstValues {
          * Not every motor can output the max speed at all times, add a buffer to make
          * closed loop more accurate
          */
-        public static final double MOTOR_OUTPUT_SCALAR = 0.95;
+        public static final double MOTOR_CLOSED_LOOP_OUTPUT_SCALAR = 0.95;
 
         /** User defined acceleration time in seconds */
         public static final double ACCELERATION_TIME = 1.0;
 
+        public static final double SLIP_CURRENT = 50.0;
+
         public static final double MAX_DRIVE_VELOCITY = (Motors.Falcon500Foc.FREE_SPEED / TAU) * DRIVE_GEAR_RATIO
-                * WHEEL_CIRCUMFERENCE * MOTOR_OUTPUT_SCALAR;
+                * WHEEL_CIRCUMFERENCE * MOTOR_CLOSED_LOOP_OUTPUT_SCALAR;
         public static final double MAX_DRIVE_ACCELERATION = MAX_DRIVE_VELOCITY / ACCELERATION_TIME;
 
         public static final double MAX_ANGULAR_VELOCITY = MAX_DRIVE_VELOCITY / DRIVEBASE_RADIUS;
@@ -274,7 +276,7 @@ public final class ConstValues {
             public static final int LOWER_MOTOR_ID = 17;
             public static final int UPPER_MOTOR_ID = 18;
 
-            public static final double MECHANISM_RATIO = 0.5;
+            public static final double MECHANISM_RATIO = 2.0;
             public static final double WHEEL_DIAMETER = 4.0;
 
             public static final double DEFAULT_TOLERANCE = 0.5;
@@ -312,7 +314,7 @@ public final class ConstValues {
 
             /** For every {@value} rotations of the motor the mechanism moves 1 rotation */
             // motor -> gbx(100:1) -> (15 -> 42) -> mechanism
-            public static final double MOTOR_TO_MECHANISM_RATIO = (1.0 / 100.0) * (15.0 / 42.0);
+            public static final double MOTOR_TO_MECHANISM_RATIO = 100.0 *  (42.0 / 15.0);
 
             public static final boolean INVERTED = false;
 
@@ -349,6 +351,7 @@ public final class ConstValues {
         public static final class kWrist {
             public static final int MOTOR_ID = 16;
             public static final int CANCODER_ID = 26;
+
             public static final double MOTOR_kP = 1.0;
             public static final double MOTOR_kI = 0.0;
             public static final double MOTOR_kD = 0.0;
@@ -360,8 +363,6 @@ public final class ConstValues {
 
             public static final double WRIST_MIN_ANGLE = 24.0 * Conv.DEGREES_TO_RADIANS;
             public static final double WRIST_MAX_ANGLE = 125.0 * Conv.DEGREES_TO_RADIANS;
-
-            public static final double MOTOR_TO_MECHANISM_RATIO = 1.0;
 
             public static final double TARGET_TOLERANCE = TAU * (1.0 / 360.0); // effectively 1 degree
 

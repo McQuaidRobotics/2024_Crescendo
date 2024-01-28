@@ -33,11 +33,11 @@ public class PivotReal implements Pivot {
     private final PivotInputs inputs;
 
     private double mechRadiansToMotorRots(Double mechRads) {
-        return (mechRads / (2 * Math.PI)) / kPivot.MOTOR_TO_MECHANISM_RATIO;
+        return (mechRads / (2 * Math.PI)) * kPivot.MOTOR_TO_MECHANISM_RATIO;
     }
 
     private double motorRotsToMechRadians(Double motorRots) {
-        return motorRots * (2 * Math.PI) * kPivot.MOTOR_TO_MECHANISM_RATIO;
+        return (motorRots * (2 * Math.PI)) / kPivot.MOTOR_TO_MECHANISM_RATIO;
     }
 
     public PivotReal() {

@@ -20,7 +20,7 @@ public class WristSim implements Wrist {
     public WristSim() {
         sim = new SingleJointedArmSim(
                 DCMotor.getFalcon500(1),
-                1.0 / kWrist.MOTOR_TO_MECHANISM_RATIO,
+                1.0,
                 0.1, // TODO: get real values
                 0.1,
                 kWrist.WRIST_MIN_ANGLE,
