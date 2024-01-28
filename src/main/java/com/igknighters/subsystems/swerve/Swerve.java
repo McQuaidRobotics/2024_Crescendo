@@ -22,7 +22,7 @@ import com.igknighters.subsystems.swerve.gyro.Gyro;
 import com.igknighters.subsystems.swerve.gyro.GyroReal;
 import com.igknighters.subsystems.swerve.gyro.GyroSim;
 import com.igknighters.subsystems.swerve.module.SwerveModule;
-import com.igknighters.subsystems.swerve.module.SwerveModuleReal;
+import com.igknighters.subsystems.swerve.module.SwerveModuleRealPro;
 import com.igknighters.subsystems.swerve.module.SwerveModuleSim;
 import com.igknighters.util.Tracer;
 import com.igknighters.constants.ConstValues;
@@ -37,10 +37,10 @@ public class Swerve extends SubsystemBase {
 
         if (RobotBase.isReal()) {
             swerveMods = new SwerveModule[] {
-                    new SwerveModuleReal(ConstValues.kSwerve.Mod0.CONSTANTS),
-                    new SwerveModuleReal(ConstValues.kSwerve.Mod1.CONSTANTS),
-                    new SwerveModuleReal(ConstValues.kSwerve.Mod2.CONSTANTS),
-                    new SwerveModuleReal(ConstValues.kSwerve.Mod3.CONSTANTS)
+                    new SwerveModuleRealPro(ConstValues.kSwerve.Mod0.CONSTANTS),
+                    new SwerveModuleRealPro(ConstValues.kSwerve.Mod1.CONSTANTS),
+                    new SwerveModuleRealPro(ConstValues.kSwerve.Mod2.CONSTANTS),
+                    new SwerveModuleRealPro(ConstValues.kSwerve.Mod3.CONSTANTS)
             };
             gyro = new GyroReal();
         } else {

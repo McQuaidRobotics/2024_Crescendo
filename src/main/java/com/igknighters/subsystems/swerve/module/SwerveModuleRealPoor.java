@@ -5,8 +5,8 @@ import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest.SwerveDriveBrake;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -25,7 +25,7 @@ import com.igknighters.constants.ConstValues.kSwerve.DriveMotorConstants;
 import com.igknighters.util.BootupLogger;
 import com.igknighters.util.SwerveModuleConstants;
 
-public class SwerveModuleReal implements SwerveModule {
+public class SwerveModuleRealPoor implements SwerveModule {
     private final TalonFX driveMotor;
     private final StatusSignal<Double> drivePositionSignal, driveVelocitySignal;
     private final StatusSignal<Double> driveVoltSignal, driveAmpSignal;
@@ -44,7 +44,7 @@ public class SwerveModuleReal implements SwerveModule {
     private Rotation2d lastAngle = new Rotation2d();
     private final SwerveModuleInputs inputs;
 
-    public SwerveModuleReal(final SwerveModuleConstants moduleConstants) {
+    public SwerveModuleRealPoor(final SwerveModuleConstants moduleConstants) {
         this.moduleNumber = moduleConstants.moduleId.num;
         this.rotationOffset = moduleConstants.getRotationOffset(moduleConstants.moduleId);
         this.moduleChassisPose = moduleConstants.moduleChassisPose;
@@ -96,10 +96,7 @@ public class SwerveModuleReal implements SwerveModule {
         angleConfig.Slot0.kP = AngleMotorConstants.kP;
         angleConfig.Slot0.kI = AngleMotorConstants.kI;
         angleConfig.Slot0.kD = AngleMotorConstants.kD;
-        angleConfig.Feedback.FeedbackRemoteSensorID = angleEncoder.getDeviceID();
-        angleConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
-        angleConfig.Feedback.RotorToSensorRatio = 1.0 / kSwerve.ANGLE_GEAR_RATIO;
-        angleConfig.Feedback.SensorToMechanismRatio = 1.0;
+        angleConfig.Feedback.SensorToMechanismRatio = kSwerve.ANGLE_GEAR_RATIO;
         angleConfig.ClosedLoopGeneral.ContinuousWrap = true;
 
         angleMotor.getConfigurator().apply(angleConfig);
@@ -142,11 +139,11 @@ public class SwerveModuleReal implements SwerveModule {
         inputs.targetDriveVeloMPS = desiredState.speedMetersPerSecond;
         if (isOpenLoop) {
             double percentOutput = desiredState.speedMetersPerSecond / kSwerve.MAX_DRIVE_VELOCITY;
-            var controlRequest = new DutyCycleOut(percentOutput).withEnableFOC(true);
+            var controlRequest = new DutyCycleOut(percentOutput).withEnableFOC(false);
             driveMotor.setControl(controlRequest);
         } else {
             double rps = desiredState.speedMetersPerSecond / (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO);
-            var veloRequest = new VelocityVoltage(rps).withEnableFOC(true);
+            var veloRequest = new VelocityVoltage(rps).withEnableFOC(false);
             driveMotor.setControl(veloRequest);
         }
     }
