@@ -34,7 +34,7 @@ public class SwerveModuleSim implements SwerveModule {
             AngleMotorConstants.kD,
             ConstValues.PERIODIC_TIME);
 
-    public int moduleNumber;
+    public final int moduleNumber;
 
     private final SwerveModuleInputs inputs;
 
@@ -91,7 +91,7 @@ public class SwerveModuleSim implements SwerveModule {
 
         var angleAppliedVolts = MathUtil.clamp(
                 angleFeedback.calculate(getAngle().getRadians(), angle.getRadians()),
-                -1.0 * RobotController.getBatteryVoltage(),
+                -RobotController.getBatteryVoltage(),
                 RobotController.getBatteryVoltage());
         angleSim.setInputVoltage(angleAppliedVolts);
 

@@ -17,7 +17,9 @@ import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.util.BootupLogger;
 import com.igknighters.util.SafeTalonFXConfiguration;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 
 public class WristReal implements Wrist {
     private final TalonFX motor;
@@ -69,8 +71,9 @@ public class WristReal implements Wrist {
         wristMotorCfg.Slot0.kD = kWrist.MOTOR_kD;
 
         wristMotorCfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        wristMotorCfg.MotorOutput.Inverted = kWrist.INVERTED ? InvertedValue.Clockwise_Positive
-                : InvertedValue.CounterClockwise_Positive;
+        wristMotorCfg.MotorOutput.Inverted = kWrist.INVERTED
+            ? InvertedValue.Clockwise_Positive
+            : InvertedValue.CounterClockwise_Positive;
 
         return wristMotorCfg;
     }
@@ -84,7 +87,28 @@ public class WristReal implements Wrist {
     }
 
     private double mechanismRadsToMotorRots(Double radians) {
-        return 0.0; // TODO: get real value
+        double clampedRadians = MathUtil.clamp(
+            radians,
+            kWrist.WRIST_MIN_ANGLE,
+            kWrist.WRIST_MAX_ANGLE
+        );
+
+        if (clampedRadians != radians) {
+            DriverStation.reportWarning(
+                "[Wrist] requested mechanism rads out of bounds: " + radians
+                + " (clamped to " + clampedRadians + ")",
+                true);
+        }
+
+        double beta = clampedRadians - kWrist.kDimensions.ANGLE_OFFSET;
+
+        double leadscrewLength = Math.sqrt(
+            Math.pow(kWrist.kDimensions.MOTOR_PIVOT_TO_WRIST_PIVOT, 2)
+            + Math.pow(kWrist.kDimensions.WRIST_PIVOT_TO_NUT, 2)
+            - (2 * kWrist.kDimensions.MOTOR_PIVOT_TO_WRIST_PIVOT * kWrist.kDimensions.WRIST_PIVOT_TO_NUT * Math.cos(beta))
+        );
+
+        return Units.metersToInches(leadscrewLength) * 20.0;
     }
 
     @Override
@@ -111,7 +135,13 @@ public class WristReal implements Wrist {
         BaseStatusSignal.refreshAll(
                 motorAmps, motorVolts,
                 motorRots, motorVelo,
-                motorTemp);
+                motorTemp, cancoderRots,
+                cancoderVelo);
+
+        motor.setPosition(
+            mechanismRadsToMotorRots(
+                Units.radiansToRotations(cancoderRots.getValue())
+        ));
 
         inputs.radians = Units.radiansToRotations(cancoderRots.getValue());
         inputs.radiansPerSecond = Units.radiansToRotations(cancoderVelo.getValue());

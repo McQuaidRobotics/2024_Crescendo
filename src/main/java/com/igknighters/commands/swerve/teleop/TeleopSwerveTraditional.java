@@ -22,7 +22,7 @@ public class TeleopSwerveTraditional extends TeleopSwerveBase {
         ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 vt.getX(),
                 vt.getY(),
-                -getRotationX() * kSwerve.MAX_ANGULAR_VELOCITY,
+                -getRotationX() * kSwerve.MAX_ANGULAR_VELOCITY, //invert because CCW is positive
                 swerve.getYawWrappedRot());
 
         swerve.driveChassisSpeeds(chassisSpeeds, true);

@@ -55,16 +55,16 @@ public class Swerve extends SubsystemBase {
 
         GlobalState.setLocalizer(
                 new SwerveDrivePoseEstimator(
-                        kSwerve.SWERVE_KINEMATICS,
-                        getYawWrappedRot(),
-                        getModulePositions(),
-                        new Pose2d(
-                            new Translation2d(
-                                FieldConstants.FIELD_LENGTH / 2.0,
-                                FieldConstants.FIELD_WIDTH / 2.0
-                            ),
-                            new Rotation2d()
-                        )),
+                    kSwerve.SWERVE_KINEMATICS,
+                    getYawWrappedRot(),
+                    getModulePositions(),
+                    new Pose2d(
+                        new Translation2d(
+                            FieldConstants.FIELD_LENGTH / 2.0,
+                            FieldConstants.FIELD_WIDTH / 2.0
+                        ),
+                        new Rotation2d()
+                    )),
                 GlobalState.LocalizerType.Hybrid);
 
         visualizer = new SwerveVisualizer(this, swerveMods);

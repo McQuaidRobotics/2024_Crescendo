@@ -349,6 +349,13 @@ public final class ConstValues {
         }
 
         public static final class kWrist {
+
+            public static final class kDimensions {
+                public static final double ANGLE_OFFSET = 38.65 * Conv.DEGREES_TO_RADIANS;
+                public static final double MOTOR_PIVOT_TO_WRIST_PIVOT = 0.03393;
+                public static final double WRIST_PIVOT_TO_NUT = 0.01566;
+            }
+
             public static final int MOTOR_ID = 16;
             public static final int CANCODER_ID = 26;
 
