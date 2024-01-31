@@ -300,9 +300,9 @@ public final class ConstValues {
             public static final double MOTOR_kI = 0;
             public static final double MOTOR_kD = 0;
 
-            public static final double MAX_VELOCITY = 105;
-            public static final double MAX_ACCELERATION = 700;
-            public static final double MAX_JERK = 10000;// effectively infinite
+            public static final double MAX_VELOCITY = 100;
+            public static final double MAX_ACCELERATION = 100;
+            public static final double MAX_JERK = 100;
 
             public static final double PIVOT_MIN_RADIANS = 0.0;
 
@@ -352,8 +352,8 @@ public final class ConstValues {
 
             public static final class kDimensions {
                 public static final double ANGLE_OFFSET = 38.65 * Conv.DEGREES_TO_RADIANS;
-                public static final double MOTOR_PIVOT_TO_WRIST_PIVOT = 0.03393;
-                public static final double WRIST_PIVOT_TO_NUT = 0.01566;
+                public static final double MOTOR_PIVOT_TO_WRIST_PIVOT = 3.393 * Conv.INCHES_TO_METERS;
+                public static final double WRIST_PIVOT_TO_NUT = 1.566 * Conv.INCHES_TO_METERS;
             }
 
             public static final int MOTOR_ID = 16;
@@ -365,8 +365,8 @@ public final class ConstValues {
 
             public static final boolean INVERTED = false;
 
-            @DoubleConst(crash = 0.0, burn = 0.0)
-            public static double CANCODER_OFFSET = 0.0;
+            @DoubleConst(crash = -0.41137, burn = 0.0)
+            public static double CANCODER_OFFSET;;
 
             public static final double WRIST_MIN_ANGLE = 24.0 * Conv.DEGREES_TO_RADIANS;
             public static final double WRIST_MAX_ANGLE = 125.0 * Conv.DEGREES_TO_RADIANS;

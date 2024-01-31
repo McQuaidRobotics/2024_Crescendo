@@ -1,6 +1,5 @@
 package com.igknighters.subsystems.stem;
 
-import com.igknighters.subsystems.stem.StemPositions.StemPosition;
 import com.igknighters.subsystems.stem.pivot.*;
 import com.igknighters.subsystems.stem.telescope.*;
 import com.igknighters.subsystems.stem.wrist.*;
@@ -23,7 +22,7 @@ public class Stem extends SubsystemBase {
             telescope = new TelescopeDisabled();
             wrist = new WristSim();
         } else {
-            pivot = new PivotReal();
+            pivot = new PivotSim();
             telescope = new TelescopeDisabled();
             wrist = new WristReal();
         }
@@ -33,7 +32,7 @@ public class Stem extends SubsystemBase {
 
     /**
      * Meant as the main api for controlling the stem,
-     * this method takes in a {@link StemPositions.StemPosition} and sets the
+     * this method takes in a {@link StemPosition.StemPosition} and sets the
      * stem to that position. This method will return false if any of the
      * mechanisms have not yet reached their target position.
      * 
@@ -52,7 +51,7 @@ public class Stem extends SubsystemBase {
      * @return The current position of the stem
      */
     public StemPosition getStemPosition() {
-        return StemPositions.StemPosition.fromRadians(
+        return StemPosition.fromRadians(
                 pivot.getPivotRadians(),
                 wrist.getWristRadians(),
                 telescope.getTelescopeMeters());

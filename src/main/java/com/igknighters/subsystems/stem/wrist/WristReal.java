@@ -20,6 +20,7 @@ import com.igknighters.util.SafeTalonFXConfiguration;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class WristReal implements Wrist {
     private final TalonFX motor;
@@ -97,16 +98,24 @@ public class WristReal implements Wrist {
             DriverStation.reportWarning(
                 "[Wrist] requested mechanism rads out of bounds: " + radians
                 + " (clamped to " + clampedRadians + ")",
-                true);
+                false);
         }
 
-        double beta = clampedRadians - kWrist.kDimensions.ANGLE_OFFSET;
+        SmartDashboard.putNumber("clampedrads", clampedRadians);
+
+        double scopedRadians = (Math.PI / 2.0) - (clampedRadians - (Math.PI / 2.0));
+
+        double beta = scopedRadians - kWrist.kDimensions.ANGLE_OFFSET;
+
+        SmartDashboard.putNumber("beta", beta);
 
         double leadscrewLength = Math.sqrt(
             Math.pow(kWrist.kDimensions.MOTOR_PIVOT_TO_WRIST_PIVOT, 2)
             + Math.pow(kWrist.kDimensions.WRIST_PIVOT_TO_NUT, 2)
             - (2 * kWrist.kDimensions.MOTOR_PIVOT_TO_WRIST_PIVOT * kWrist.kDimensions.WRIST_PIVOT_TO_NUT * Math.cos(beta))
         );
+
+        SmartDashboard.putNumber("leadscrewInches", Units.metersToInches(leadscrewLength));
 
         return Units.metersToInches(leadscrewLength) * 20.0;
     }
@@ -140,13 +149,13 @@ public class WristReal implements Wrist {
 
         motor.setPosition(
             mechanismRadsToMotorRots(
-                Units.radiansToRotations(cancoderRots.getValue())
+                Units.rotationsToRadians(cancoderRots.getValue())
         ));
 
-        inputs.radians = Units.radiansToRotations(cancoderRots.getValue());
-        inputs.radiansPerSecond = Units.radiansToRotations(cancoderVelo.getValue());
-        inputs.motorRadians = Units.radiansToRotations(motorRots.getValue());
-        inputs.motorRadiansPerSecond = Units.radiansToRotations(motorVelo.getValue());
+        inputs.radians = Units.rotationsToRadians(cancoderRots.getValue());
+        inputs.radiansPerSecond = Units.rotationsToRadians(cancoderVelo.getValue());
+        Logger.recordOutput("Stem/Wrist/MotorRads", Units.rotationsToRadians(motorRots.getValue()));
+        Logger.recordOutput("Stem/Wrist/MotorRadsPs", Units.rotationsToRadians(motorVelo.getValue()));
         inputs.amps = motorAmps.getValue();
         inputs.volts = motorVolts.getValue();
         inputs.temp = motorTemp.getValue();
