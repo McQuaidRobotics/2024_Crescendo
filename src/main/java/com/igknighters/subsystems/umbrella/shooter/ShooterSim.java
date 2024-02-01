@@ -31,18 +31,18 @@ public class ShooterSim implements Shooter {
 
     @Override
     public double getSpeed() {
-        return inputs.radiansPerSecondUpper;
+        return inputs.radiansPerSecondRight;
     }
 
     @Override
     public double getTargetSpeed() {
-        return inputs.targetRadiansPerSecondUpper;
+        return inputs.targetRadiansPerSecondRight;
     }
 
     @Override
     public void setSpeed(double speedRadPerSec) {
-        inputs.targetRadiansPerSecondUpper = speedRadPerSec;
-        inputs.targetRadiansPerSecondLower = speedRadPerSec;
+        inputs.targetRadiansPerSecondRight = speedRadPerSec;
+        inputs.targetRadiansPerSecondLeft = speedRadPerSec;
 
         var flywheelAppliedVolts = MathUtil.clamp(
                 pid.calculate(flywheelSim.getAngularVelocityRadPerSec(), speedRadPerSec),
@@ -51,28 +51,28 @@ public class ShooterSim implements Shooter {
 
         flywheelSim.setInputVoltage(flywheelAppliedVolts);
 
-        inputs.voltsUpper = flywheelAppliedVolts;
-        inputs.voltsLower = flywheelAppliedVolts;
+        inputs.voltsRight = flywheelAppliedVolts;
+        inputs.voltsLeft = flywheelAppliedVolts;
     }
 
     @Override
     public void setVoltageOut(double volts) {
         flywheelSim.setInputVoltage(volts);
-        inputs.targetRadiansPerSecondUpper = 0.0;
-        inputs.targetRadiansPerSecondLower = 0.0;
-        inputs.voltsUpper = volts;
-        inputs.voltsLower = volts;
+        inputs.targetRadiansPerSecondRight = 0.0;
+        inputs.targetRadiansPerSecondLeft = 0.0;
+        inputs.voltsRight = volts;
+        inputs.voltsLeft = volts;
     }
 
     @Override
     public void periodic() {
         flywheelSim.update(ConstValues.PERIODIC_TIME);
 
-        inputs.ampsUpper = flywheelSim.getCurrentDrawAmps();
-        inputs.ampsLower = flywheelSim.getCurrentDrawAmps();
+        inputs.ampsRight = flywheelSim.getCurrentDrawAmps();
+        inputs.ampsLeft = flywheelSim.getCurrentDrawAmps();
 
-        inputs.radiansPerSecondUpper = flywheelSim.getAngularVelocityRadPerSec();
-        inputs.radiansPerSecondLower = flywheelSim.getAngularVelocityRadPerSec();
+        inputs.radiansPerSecondRight = flywheelSim.getAngularVelocityRadPerSec();
+        inputs.radiansPerSecondLeft = flywheelSim.getAngularVelocityRadPerSec();
 
         Logger.processInputs("/Umbrella/Shooter", inputs);
     }

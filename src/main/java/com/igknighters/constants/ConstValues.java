@@ -273,8 +273,8 @@ public final class ConstValues {
             public static final double MOTOR_LOWER_kS = 0.032;
             public static final double MOTOR_LOWER_kV = 0.01;
 
-            public static final int LOWER_MOTOR_ID = 17;
-            public static final int UPPER_MOTOR_ID = 18;
+            public static final int LEFT_MOTOR_ID = 17;
+            public static final int RIGHT_MOTOR_ID = 18;
 
             public static final double MECHANISM_RATIO = 2.0;
             public static final double WHEEL_DIAMETER = 4.0;
@@ -314,7 +314,7 @@ public final class ConstValues {
 
             /** For every {@value} rotations of the motor the mechanism moves 1 rotation */
             // motor -> gbx(100:1) -> (15 -> 42) -> mechanism
-            public static final double MOTOR_TO_MECHANISM_RATIO = 100.0 *  (42.0 / 15.0);
+            public static final double MOTOR_TO_MECHANISM_RATIO = 100.0 * (42.0 / 15.0);
 
             public static final boolean INVERTED = false;
 

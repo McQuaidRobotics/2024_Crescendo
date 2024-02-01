@@ -6,7 +6,7 @@ public class HardwareIndex {
     }
 
     public static enum UmbrellaHW {
-        UpperShooterMotor, LowerShooterMotor, IntakeMotor;
+        RightShooterMotor, LeftShooterMotor, IntakeMotor;
     }
 
     public static enum StemHW {

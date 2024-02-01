@@ -17,45 +17,45 @@ import edu.wpi.first.math.util.Units;
 
 public class ShooterReal implements Shooter {
 
-    private final TalonFX upperMotor = new TalonFX(kShooter.UPPER_MOTOR_ID);
-    private final TalonFX lowerMotor = new TalonFX(kShooter.LOWER_MOTOR_ID);
+    private final TalonFX rightMotor = new TalonFX(kShooter.RIGHT_MOTOR_ID);
+    private final TalonFX leftMotor = new TalonFX(kShooter.LEFT_MOTOR_ID);
     private final ShooterInputs inputs = new ShooterInputs();
-    private final StatusSignal<Double> veloSignalUpper, voltSignalUpper, currentSignalUpper, tempSignalUpper;
-    private final StatusSignal<Double> veloSignalLower, voltSignalLower, currentSignalLower, tempSignalLower;
+    private final StatusSignal<Double> veloSignalRight, voltSignalRight, currentSignalRight, tempSignalRight;
+    private final StatusSignal<Double> veloSignalLeft, voltSignalLeft, currentSignalLeft, tempSignalLeft;
 
     public ShooterReal() {
-        upperMotor.getConfigurator().apply(motorUpperConfig());
+        rightMotor.getConfigurator().apply(motorRightConfig());
 
-        veloSignalUpper = upperMotor.getVelocity();
-        voltSignalUpper = upperMotor.getMotorVoltage();
-        currentSignalUpper = upperMotor.getTorqueCurrent();
-        tempSignalUpper = upperMotor.getDeviceTemp();
+        veloSignalRight = rightMotor.getVelocity();
+        voltSignalRight = rightMotor.getMotorVoltage();
+        currentSignalRight = rightMotor.getTorqueCurrent();
+        tempSignalRight = rightMotor.getDeviceTemp();
 
-        veloSignalUpper.setUpdateFrequency(100);
-        voltSignalUpper.setUpdateFrequency(100);
-        currentSignalUpper.setUpdateFrequency(100);
-        tempSignalUpper.setUpdateFrequency(4);
+        veloSignalRight.setUpdateFrequency(100);
+        voltSignalRight.setUpdateFrequency(100);
+        currentSignalRight.setUpdateFrequency(100);
+        tempSignalRight.setUpdateFrequency(4);
 
-        upperMotor.optimizeBusUtilization();
+        rightMotor.optimizeBusUtilization();
 
-        lowerMotor.getConfigurator().apply(motorLowerConfig());
+        leftMotor.getConfigurator().apply(motorLeftConfig());
 
-        veloSignalLower = lowerMotor.getVelocity();
-        voltSignalLower = lowerMotor.getMotorVoltage();
-        currentSignalLower = lowerMotor.getTorqueCurrent();
-        tempSignalLower = lowerMotor.getDeviceTemp();
+        veloSignalLeft = leftMotor.getVelocity();
+        voltSignalLeft = leftMotor.getMotorVoltage();
+        currentSignalLeft = leftMotor.getTorqueCurrent();
+        tempSignalLeft = leftMotor.getDeviceTemp();
 
-        veloSignalLower.setUpdateFrequency(100);
-        voltSignalLower.setUpdateFrequency(100);
-        currentSignalLower.setUpdateFrequency(100);
-        tempSignalLower.setUpdateFrequency(4);
+        veloSignalLeft.setUpdateFrequency(100);
+        voltSignalLeft.setUpdateFrequency(100);
+        currentSignalLeft.setUpdateFrequency(100);
+        tempSignalLeft.setUpdateFrequency(4);
 
-        lowerMotor.optimizeBusUtilization();
+        leftMotor.optimizeBusUtilization();
 
         BootupLogger.bootupLog("    Shooter initialized (real)");
     }
 
-    private TalonFXConfiguration motorUpperConfig() {
+    private TalonFXConfiguration motorRightConfig() {
         var cfg = new TalonFXConfiguration();
         cfg.Slot0.kP = kShooter.MOTOR_UPPER_kP;
         cfg.Slot0.kI = kShooter.MOTOR_UPPER_kI;
@@ -73,7 +73,7 @@ public class ShooterReal implements Shooter {
         return cfg;
     }
 
-    private TalonFXConfiguration motorLowerConfig() {
+    private TalonFXConfiguration motorLeftConfig() {
         var cfg = new TalonFXConfiguration();
         cfg.Slot0.kP = kShooter.MOTOR_LOWER_kP;
         cfg.Slot0.kI = kShooter.MOTOR_LOWER_kI;
@@ -93,60 +93,60 @@ public class ShooterReal implements Shooter {
 
     @Override
     public double getSpeed() {
-        return (inputs.radiansPerSecondUpper + inputs.radiansPerSecondLower) / 2.0;
+        return (inputs.radiansPerSecondRight + inputs.radiansPerSecondLeft) / 2.0;
     }
 
     @Override
     public double getTargetSpeed() {
-        return (inputs.targetRadiansPerSecondUpper + inputs.targetRadiansPerSecondLower) / 2.0;
+        return (inputs.targetRadiansPerSecondRight + inputs.targetRadiansPerSecondLeft) / 2.0;
     }
 
     @Override
     public void setSpeed(double speedRadPerSec) {
-        inputs.targetRadiansPerSecondUpper = speedRadPerSec;
-        inputs.targetRadiansPerSecondLower = speedRadPerSec;
+        inputs.targetRadiansPerSecondRight = speedRadPerSec;
+        inputs.targetRadiansPerSecondLeft = speedRadPerSec;
         var req = new VelocityDutyCycle(Units.radiansToRotations(speedRadPerSec));
-        upperMotor.setControl(req);
-        lowerMotor.setControl(req);
+        rightMotor.setControl(req);
+        leftMotor.setControl(req);
     }
 
     @Override
     public void setVoltageOut(double volts) {
-        inputs.targetRadiansPerSecondUpper = 0.0;
-        inputs.targetRadiansPerSecondLower = 0.0;
-        inputs.voltsUpper = volts;
-        inputs.voltsLower = volts;
-        upperMotor.setVoltage(volts);
-        lowerMotor.setVoltage(volts);
+        inputs.targetRadiansPerSecondRight = 0.0;
+        inputs.targetRadiansPerSecondLeft = 0.0;
+        inputs.voltsRight = volts;
+        inputs.voltsLeft = volts;
+        rightMotor.setVoltage(volts);
+        leftMotor.setVoltage(volts);
     }
 
     @Override
     public void periodic() {
         FaultManager.captureFault(
-                UmbrellaHW.UpperShooterMotor,
+                UmbrellaHW.RightShooterMotor,
                 BaseStatusSignal.refreshAll(
-                        veloSignalUpper,
-                        voltSignalUpper,
-                        currentSignalUpper,
-                        tempSignalUpper));
+                        veloSignalRight,
+                        voltSignalRight,
+                        currentSignalRight,
+                        tempSignalRight));
 
         FaultManager.captureFault(
-                UmbrellaHW.LowerShooterMotor,
+                UmbrellaHW.LeftShooterMotor,
                 BaseStatusSignal.refreshAll(
-                        veloSignalLower,
-                        voltSignalLower,
-                        currentSignalLower,
-                        tempSignalLower));
+                        veloSignalLeft,
+                        voltSignalLeft,
+                        currentSignalLeft,
+                        tempSignalLeft));
 
-        inputs.radiansPerSecondUpper = Units.rotationsToRadians(veloSignalUpper.getValue());
-        inputs.voltsUpper = voltSignalUpper.getValue();
-        inputs.ampsUpper = currentSignalUpper.getValue();
-        inputs.tempUpper = tempSignalUpper.getValue();
+        inputs.radiansPerSecondRight = Units.rotationsToRadians(veloSignalRight.getValue());
+        inputs.voltsRight = voltSignalRight.getValue();
+        inputs.ampsRight = currentSignalRight.getValue();
+        inputs.tempRight = tempSignalRight.getValue();
 
-        inputs.radiansPerSecondLower = Units.rotationsToRadians(veloSignalLower.getValue());
-        inputs.voltsLower = voltSignalLower.getValue();
-        inputs.ampsLower = currentSignalLower.getValue();
-        inputs.tempLower = tempSignalLower.getValue();
+        inputs.radiansPerSecondLeft = Units.rotationsToRadians(veloSignalLeft.getValue());
+        inputs.voltsLeft = voltSignalLeft.getValue();
+        inputs.ampsLeft = currentSignalLeft.getValue();
+        inputs.tempLeft = tempSignalLeft.getValue();
 
         Logger.processInputs("/Umbrella/Shooter", inputs);
     }
