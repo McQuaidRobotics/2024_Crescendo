@@ -103,21 +103,19 @@ public class RobotTest {
         DriverStationSim.setEnabled(true);
 
         robot.withTeleopInitTest(robo -> {
-            var umbrella = robo.getAllSubsystemsForTest()
-                .umbrella
-                .get();
+            var umbrella = robo.getAllSubsystemsForTest().umbrella
+                    .get();
 
-            umbrella.run(() -> umbrella.spinupShooterToRotSpeed(3000));
+            umbrella.run(() -> umbrella.spinupShooterToRPM(3000));
         })
-        .withTeleopPeriodicTest(robo -> {
-            var umbrella = robo.getAllSubsystemsForTest()
-                .umbrella
-                .get();
+                .withTeleopPeriodicTest(robo -> {
+                    var umbrella = robo.getAllSubsystemsForTest().umbrella
+                            .get();
 
-            if (umbrella.isShooterAtSpeed()) {
-                robo.finishUnitTestRobot();
-            }
-        });
+                    if (umbrella.isShooterAtSpeed()) {
+                        robo.finishUnitTestRobot();
+                    }
+                });
 
         robot.runTest(3);
     }

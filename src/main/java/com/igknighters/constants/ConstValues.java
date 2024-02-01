@@ -35,6 +35,7 @@ public final class ConstValues {
         public static final double INCHES_TO_METERS = 0.0254;
         public static final double DEGREES_TO_RADIANS = Math.PI / 180.0;
         public static final double ROTATIONS_TO_RADIANTS = TAU;
+        public static final double RPM_TO_RADIANS_PER_SECOND = TAU / 60.0;
     }
 
     @SuppressWarnings("unused")
@@ -280,6 +281,8 @@ public final class ConstValues {
             public static final double WHEEL_DIAMETER = 4.0;
 
             public static final double DEFAULT_TOLERANCE = 0.5;
+
+            public static final double MIN_SHOOT_SPEED = 1000.0 * Conv.RPM_TO_RADIANS_PER_SECOND;
         }
 
         public static final class kIntake {

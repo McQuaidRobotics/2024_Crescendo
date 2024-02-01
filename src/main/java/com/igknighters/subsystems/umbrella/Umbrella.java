@@ -37,21 +37,37 @@ public class Umbrella extends SubsystemBase {
     /**
      * @return If the {@code Shooter} is at the target speed
      * 
-     * @apiNote This uses the default tolerance of {@link kShooter#DEFAULT_TOLERANCE}
+     * @apiNote This uses the default tolerance of
+     *          {@link kShooter#DEFAULT_TOLERANCE}
      */
     public boolean isShooterAtSpeed() {
         return isShooterAtSpeed(kShooter.DEFAULT_TOLERANCE);
     }
 
     /**
-     * @param tolerance The tolerance to use when checking if the {@code Shooter} is at speed
+     * @param tolerance The tolerance to use when checking if the {@code Shooter} is
+     *                  at speed
      * @return If the {@code Shooter} is at the target speed
      * 
      * @apiNote Tolerance is a percentage of the target speed to allow for error,
-     *         so a tolerance of 0.1 would allow for a 10% error
+     *          so a tolerance of 0.1 would allow for a 10% error
      */
     public boolean isShooterAtSpeed(double tolerance) {
         return Math.abs(shooter.getSpeed() - shooter.getTargetSpeed()) < tolerance;
+    }
+
+    /**
+     * @return The speed of the {@code Shooter} in radians per second
+     */
+    public double getShooterSpeed() {
+        return shooter.getSpeed();
+    }
+
+    /**
+     * @return The target speed of the {@code Shooter} in radians per second
+     */
+    public double getShooterTargetSpeed() {
+        return shooter.getTargetSpeed();
     }
 
     /**
@@ -75,17 +91,37 @@ public class Umbrella extends SubsystemBase {
         intake.setVoltageOut(12.0 * percent);
     }
 
-    // public void turnIntakeBy(double meters) {
-    //     var wheelCircum = kShooter.WHEEL_DIAMETER * Math.PI;
-    //     intake.turnIntakeMeters(Units.rotationsToRadians(surfaceMPS / wheelCircum));
-    // }
+    public void turnIntakeBy(double meters) {
+        // TODO
+        // var wheelCircum = kIntake.WHEEL_DIAMETER * Math.PI;
+        // intake.turnIntakeMeters(Units.rotationsToRadians(surfaceMPS / wheelCircum));
+    }
 
+    /**
+     * Spins up the {@code Shooter} to a certain speed
+     * 
+     * @param radiansPerSecond The speed to spin up to in radians per second
+     */
+    public void spinupShooter(double radiansPerSecond) {
+        shooter.setSpeed(radiansPerSecond);
+    }
+
+    /**
+     * Spins up the {@code Shooter} to a certain speed
+     * 
+     * @param surfaceMPS The speed to spin up to in meters per second
+     */
     public void spinupShooterToSurfaceSpeed(double surfaceMPS) {
         var wheelCircum = kShooter.WHEEL_DIAMETER * Math.PI;
         shooter.setSpeed(Units.rotationsToRadians(surfaceMPS / wheelCircum));
     }
 
-    public void spinupShooterToRotSpeed(double RPM) {
+    /**
+     * Spins up the {@code Shooter} to a certain speed
+     * 
+     * @param RPM The speed to spin up to in rotations per minute
+     */
+    public void spinupShooterToRPM(double RPM) {
         shooter.setSpeed(Units.rotationsPerMinuteToRadiansPerSecond(RPM));
     }
 }
