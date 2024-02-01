@@ -61,12 +61,12 @@ public class ShooterReal implements Shooter {
         cfg.Slot0.kS = kShooter.MOTOR_UPPER_kS;
         cfg.Slot0.kV = kShooter.MOTOR_UPPER_kV;
 
-        cfg.CurrentLimits.StatorCurrentLimit = 100.0;
+        cfg.CurrentLimits.StatorCurrentLimit = kShooter.PEAK_CURRENT;
         cfg.CurrentLimits.StatorCurrentLimitEnable = true;
 
         cfg.MotorOutput.PeakReverseDutyCycle = 0.0;
 
-        cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
         return cfg;
     }
@@ -79,12 +79,12 @@ public class ShooterReal implements Shooter {
         cfg.Slot0.kS = kShooter.MOTOR_LOWER_kS;
         cfg.Slot0.kV = kShooter.MOTOR_LOWER_kV;
 
-        cfg.CurrentLimits.StatorCurrentLimit = 100.0;
+        cfg.CurrentLimits.StatorCurrentLimit = kShooter.PEAK_CURRENT;
         cfg.CurrentLimits.StatorCurrentLimitEnable = true;
 
         cfg.MotorOutput.PeakReverseDutyCycle = 0.0;
 
-        cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
         return cfg;
     }

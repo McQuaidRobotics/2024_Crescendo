@@ -259,15 +259,15 @@ public final class ConstValues {
     public static final class kUmbrella {
 
         public static final class kShooter {
-            public static final double MOTOR_UPPER_kP = 0.02;
+            public static final double MOTOR_UPPER_kP = 0.05;
             public static final double MOTOR_UPPER_kI = 0.0;
-            public static final double MOTOR_UPPER_kD = 0.0;
+            public static final double MOTOR_UPPER_kD = 0.00;
             public static final double MOTOR_UPPER_kS = 0.032;
             public static final double MOTOR_UPPER_kV = 0.01;
 
-            public static final double MOTOR_LOWER_kP = 0.02;
+            public static final double MOTOR_LOWER_kP = 0.05;
             public static final double MOTOR_LOWER_kI = 0.0;
-            public static final double MOTOR_LOWER_kD = 0.0;
+            public static final double MOTOR_LOWER_kD = 0.00;
             public static final double MOTOR_LOWER_kS = 0.032;
             public static final double MOTOR_LOWER_kV = 0.01;
 
@@ -278,6 +278,8 @@ public final class ConstValues {
             public static final double WHEEL_DIAMETER = 4.0;
 
             public static final double DEFAULT_TOLERANCE = 0.5;
+
+            public static final double PEAK_CURRENT = 80.0;
         }
 
         public static final class kIntake {

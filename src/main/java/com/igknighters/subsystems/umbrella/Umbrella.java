@@ -7,6 +7,7 @@ import com.igknighters.util.Tracer;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Umbrella extends SubsystemBase {
@@ -19,7 +20,7 @@ public class Umbrella extends SubsystemBase {
             intake = new IntakeSim();
             shooter = new ShooterSim();
         } else {
-            intake = new IntakeReal();
+            intake = new IntakeSim();
             shooter = new ShooterReal();
         }
     }
@@ -51,7 +52,7 @@ public class Umbrella extends SubsystemBase {
      *         so a tolerance of 0.1 would allow for a 10% error
      */
     public boolean isShooterAtSpeed(double tolerance) {
-        return Math.abs(shooter.getSpeed() - shooter.getTargetSpeed()) < tolerance;
+        return (Math.abs(shooter.getSpeed() - shooter.getTargetSpeed()) / shooter.getTargetSpeed()) < tolerance;
     }
 
     /**
@@ -87,5 +88,10 @@ public class Umbrella extends SubsystemBase {
 
     public void spinupShooterToRotSpeed(double RPM) {
         shooter.setSpeed(Units.rotationsPerMinuteToRadiansPerSecond(RPM));
+    }
+
+    public Command run(Runnable action) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'run'");
     }
 }
