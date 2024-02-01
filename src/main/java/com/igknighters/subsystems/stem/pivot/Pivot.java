@@ -13,7 +13,7 @@ public interface Pivot extends Component {
         public double volts = 0.0;
         public double leftAmps = 0.0, rightAmps = 0.0;
         public double leftTemp = 0.0, rightTemp = 0.0;
-        public double gyroPitchRadians = 0.0;
+        public double gyroRadians = 0.0;
         public boolean isLimitSwitchHit = false;
 
         public PivotInputs(double startingRadians) {
@@ -31,7 +31,7 @@ public interface Pivot extends Component {
             table.put("rightAmps", rightAmps);
             table.put("leftTemp", leftTemp);
             table.put("rightTemp", rightTemp);
-            table.put("gyroPitchRadians", gyroPitchRadians);
+            table.put("gyroPitchRadians", gyroRadians);
             table.put("isLimitSwitchHit", isLimitSwitchHit);
 
             // A subtable, thats only written to when in debug mode and never read from,
@@ -54,7 +54,7 @@ public interface Pivot extends Component {
             rightAmps = table.get("rightAmps", rightAmps);
             leftTemp = table.get("leftTemp", leftTemp);
             rightTemp = table.get("rightTemp", rightTemp);
-            gyroPitchRadians = table.get("gyroPitchRadians", gyroPitchRadians);
+            gyroRadians = table.get("gyroPitchRadians", gyroRadians);
             isLimitSwitchHit = table.get("isLimitSwitchHit", isLimitSwitchHit);
         }
     }
@@ -74,8 +74,9 @@ public interface Pivot extends Component {
      * Meant to be used in a kind of polling loop to wait the mechanism to reach
      * the target.
      * 
-     * @param radians The target angle to move to
-     * @param tolerancMult The multiplier to apply to the tolerance, higher mult means more tolerance
+     * @param radians      The target angle to move to
+     * @param tolerancMult The multiplier to apply to the tolerance, higher mult
+     *                     means more tolerance
      * @return If the mechanism has reached the target
      */
     default public boolean target(double radians, double tolerancMult) {

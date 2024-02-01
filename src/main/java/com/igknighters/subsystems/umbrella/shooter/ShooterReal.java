@@ -10,6 +10,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.util.BootupLogger;
+import com.igknighters.util.FaultManager;
+import com.igknighters.constants.HardwareIndex.UmbrellaHW;
 
 import edu.wpi.first.math.util.Units;
 
@@ -120,15 +122,21 @@ public class ShooterReal implements Shooter {
 
     @Override
     public void periodic() {
-        BaseStatusSignal.refreshAll(
-                veloSignalUpper,
-                voltSignalUpper,
-                currentSignalUpper,
-                tempSignalUpper,
-                veloSignalLower,
-                voltSignalLower,
-                currentSignalLower,
-                tempSignalLower);
+        FaultManager.captureFault(
+                UmbrellaHW.UpperShooterMotor,
+                BaseStatusSignal.refreshAll(
+                        veloSignalUpper,
+                        voltSignalUpper,
+                        currentSignalUpper,
+                        tempSignalUpper));
+
+        FaultManager.captureFault(
+                UmbrellaHW.LowerShooterMotor,
+                BaseStatusSignal.refreshAll(
+                        veloSignalLower,
+                        voltSignalLower,
+                        currentSignalLower,
+                        tempSignalLower));
 
         inputs.radiansPerSecondUpper = Units.rotationsToRadians(veloSignalUpper.getValue());
         inputs.voltsUpper = voltSignalUpper.getValue();
@@ -139,7 +147,6 @@ public class ShooterReal implements Shooter {
         inputs.voltsLower = voltSignalLower.getValue();
         inputs.ampsLower = currentSignalLower.getValue();
         inputs.tempLower = tempSignalLower.getValue();
-
 
         Logger.processInputs("/Umbrella/Shooter", inputs);
     }

@@ -3,6 +3,7 @@ package com.igknighters.subsystems.umbrella.intake;
 import org.littletonrobotics.junction.Logger;
 
 import com.igknighters.GlobalState;
+import com.igknighters.util.BootupLogger;
 
 import edu.wpi.first.hal.SimBoolean;
 import edu.wpi.first.hal.SimDevice;
@@ -42,6 +43,8 @@ public class IntakeSim implements Intake {
             entrance = SimDevice.create("EntranceBeamBreak").createBoolean("broken1", Direction.kInput, false);
             exit = SimDevice.create("ExitBeamBreak").createBoolean("broken2", Direction.kInput, false);
         }
+
+        BootupLogger.bootupLog("    Intake initialized (sim)");
     }
 
     @Override

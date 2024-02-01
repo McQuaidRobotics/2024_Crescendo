@@ -14,7 +14,9 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import com.igknighters.constants.ConstValues.kStem.kWrist;
+import com.igknighters.constants.HardwareIndex.StemHW;
 import com.igknighters.util.BootupLogger;
+import com.igknighters.util.FaultManager;
 import com.igknighters.util.SafeTalonFXConfiguration;
 
 import edu.wpi.first.math.MathUtil;
@@ -141,11 +143,17 @@ public class WristReal implements Wrist {
 
     @Override
     public void periodic() {
-        BaseStatusSignal.refreshAll(
-                motorAmps, motorVolts,
-                motorRots, motorVelo,
-                motorTemp, cancoderRots,
-                cancoderVelo);
+        FaultManager.captureFault(
+                StemHW.WristMotor,
+                BaseStatusSignal.refreshAll(
+                        motorRots, motorVelo,
+                        motorVolts, motorAmps,
+                        motorTemp));
+
+        FaultManager.captureFault(
+                StemHW.WristEncoder,
+                BaseStatusSignal.refreshAll(
+                        cancoderRots, cancoderVelo));
 
         motor.setPosition(
             mechanismRadsToMotorRots(
