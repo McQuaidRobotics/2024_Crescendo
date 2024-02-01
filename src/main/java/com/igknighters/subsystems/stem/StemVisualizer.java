@@ -1,7 +1,6 @@
 package com.igknighters.subsystems.stem;
 
 import com.igknighters.constants.ConstValues.kStem;
-import com.igknighters.subsystems.stem.StemPositions.StemPosition;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;

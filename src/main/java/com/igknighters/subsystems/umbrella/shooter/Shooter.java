@@ -11,46 +11,46 @@ import edu.wpi.first.math.util.Units;
 public interface Shooter extends Component {
 
     public static class ShooterInputs implements LoggableInputs {
-        public double radiansPerSecondUpper = 0.0, targetRadiansPerSecondUpper = 0.0;
-        public double radiansPerSecondLower = 0.0, targetRadiansPerSecondLower = 0.0;
-        public double voltsUpper = 0.0, voltsLower = 0.0;
-        public double ampsUpper = 0.0, ampsLower = 0.0;
-        public double tempUpper = 0.0, tempLower = 0.0;
+        public double radiansPerSecondRight = 0.0, targetRadiansPerSecondRight = 0.0;
+        public double radiansPerSecondLeft = 0.0, targetRadiansPerSecondLeft = 0.0;
+        public double voltsRight = 0.0, voltsLeft = 0.0;
+        public double ampsRight = 0.0, ampsLeft = 0.0;
+        public double tempRight = 0.0, tempLeft = 0.0;
 
         @Override
         public void toLog(LogTable table) {
-            table.put("radiansPerSecondUpper", radiansPerSecondUpper);
-            table.put("targetRadiansPerSecondUpper", targetRadiansPerSecondUpper);
-            table.put("radiansPerSecondLower", radiansPerSecondLower);
-            table.put("targetRadiansPerSecondLower", targetRadiansPerSecondLower);
-            table.put("ampsUpper", ampsUpper);
-            table.put("ampsLower", ampsLower);
-            table.put("voltsUpper", voltsUpper);
-            table.put("voltsLower", voltsLower);
-            table.put("tempUpper", tempUpper);
-            table.put("tempLower", tempLower);
+            table.put("radiansPerSecondRight", radiansPerSecondRight);
+            table.put("targetRadiansPerSecondRight", targetRadiansPerSecondRight);
+            table.put("radiansPerSecondLeft", radiansPerSecondLeft);
+            table.put("targetRadiansPerSecondLeft", targetRadiansPerSecondLeft);
+            table.put("ampsRight", ampsRight);
+            table.put("ampsLeft", ampsLeft);
+            table.put("voltsRight", voltsRight);
+            table.put("voltsLeft", voltsLeft);
+            table.put("tempRight", tempRight);
+            table.put("tempLeft", tempLeft);
 
             // A subtable, thats only written to when in debug mode and never read from,
             // that provides some more human readable values
             if (ConstValues.DEBUG) {
-                table.put("#Human/rpmUpper", Units.radiansPerSecondToRotationsPerMinute(radiansPerSecondUpper));
-                table.put("#Human/targetRPMUpper",
-                        Units.radiansPerSecondToRotationsPerMinute(targetRadiansPerSecondUpper));
+                table.put("#Human/rpmRight", Units.radiansPerSecondToRotationsPerMinute(radiansPerSecondRight));
+                table.put("#Human/targetRPMRight",
+                        Units.radiansPerSecondToRotationsPerMinute(targetRadiansPerSecondRight));
             }
         }
 
         @Override
         public void fromLog(LogTable table) {
-            radiansPerSecondUpper = table.get("radiansPerSecond", radiansPerSecondUpper);
-            targetRadiansPerSecondUpper = table.get("targetRadiansPerSecond", targetRadiansPerSecondUpper);
-            radiansPerSecondLower = table.get("radiansPerSecond", radiansPerSecondLower);
-            targetRadiansPerSecondLower = table.get("targetRadiansPerSecond", targetRadiansPerSecondLower);
-            ampsUpper = table.get("ampsUpper", ampsUpper);
-            ampsLower = table.get("ampsLower", ampsLower);
-            voltsUpper = table.get("voltsUpper", voltsUpper);
-            voltsLower = table.get("voltsLower", voltsLower);
-            tempUpper = table.get("tempUpper", tempUpper);
-            tempLower = table.get("tempLower", tempLower);
+            radiansPerSecondRight = table.get("radiansPerSecond", radiansPerSecondRight);
+            targetRadiansPerSecondRight = table.get("targetRadiansPerSecond", targetRadiansPerSecondRight);
+            radiansPerSecondLeft = table.get("radiansPerSecond", radiansPerSecondLeft);
+            targetRadiansPerSecondLeft = table.get("targetRadiansPerSecond", targetRadiansPerSecondLeft);
+            ampsRight = table.get("ampsRight", ampsRight);
+            ampsLeft = table.get("ampsLeft", ampsLeft);
+            voltsRight = table.get("voltsRight", voltsRight);
+            voltsLeft = table.get("voltsLeft", voltsLeft);
+            tempRight = table.get("tempRight", tempRight);
+            tempLeft = table.get("tempLeft", tempLeft);
         }
     }
 

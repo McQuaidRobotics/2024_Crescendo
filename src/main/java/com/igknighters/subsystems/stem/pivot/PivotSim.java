@@ -27,7 +27,7 @@ public class PivotSim implements Pivot {
     public PivotSim() {
         sim = new SingleJointedArmSim(
                 DCMotor.getFalcon500(2),
-                1.0 / kPivot.MOTOR_TO_MECHANISM_RATIO,
+                kPivot.MOTOR_TO_MECHANISM_RATIO,
                 0.07, // TODO: get real values
                 0.55,
                 kPivot.PIVOT_MIN_RADIANS,

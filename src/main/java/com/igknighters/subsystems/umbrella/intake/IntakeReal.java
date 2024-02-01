@@ -11,6 +11,9 @@ import com.ctre.phoenix6.signals.ForwardLimitValue;
 import com.ctre.phoenix6.signals.ReverseLimitValue;
 import com.igknighters.constants.ConstValues.kUmbrella.kIntake;
 import com.igknighters.util.BootupLogger;
+import com.igknighters.util.FaultManager;
+import com.igknighters.constants.HardwareIndex.UmbrellaHW;
+
 
 import edu.wpi.first.math.util.Units;
 
@@ -24,8 +27,16 @@ public class IntakeReal implements Intake {
     private final IntakeInputs inputs = new IntakeInputs();
 
     public IntakeReal() {
-        leaderMotor.getConfigurator().apply(new TalonFXConfiguration());
-        followerMotor.getConfigurator().apply(new TalonFXConfiguration());
+        FaultManager.captureFault(
+            UmbrellaHW.IntakeMotor,
+            leaderMotor.getConfigurator()
+                .apply(new TalonFXConfiguration())
+        );
+        FaultManager.captureFault(
+            UmbrellaHW.IntakeMotor,
+            followerMotor.getConfigurator()
+                .apply(new TalonFXConfiguration())
+        );
 
         veloSignal = leaderMotor.getVelocity();
         voltSignal = leaderMotor.getMotorVoltage();
@@ -75,9 +86,11 @@ public class IntakeReal implements Intake {
 
     @Override
     public void periodic() {
-        BaseStatusSignal.refreshAll(
-                veloSignal, voltSignal,
-                currentSignal, tempSignal);
+        FaultManager.captureFault(
+            UmbrellaHW.IntakeMotor,
+            BaseStatusSignal.refreshAll(
+                    veloSignal, voltSignal,
+                    currentSignal, tempSignal));
 
         inputs.entranceBeamBroken = revLimitSignal.getValue().equals(ReverseLimitValue.ClosedToGround);
         inputs.exitBeamBroken = fwdLimitSignal.getValue().equals(ForwardLimitValue.ClosedToGround);

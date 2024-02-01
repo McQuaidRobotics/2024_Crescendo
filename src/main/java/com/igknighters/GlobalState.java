@@ -301,10 +301,17 @@ public class GlobalState {
         }
     }
 
+    /**
+     * @return If the code is being run as part of a unit test
+     */
     public static boolean isUnitTest() {
         return isUnitTest.get();
     }
 
+    /**
+     * Declare if the code is being run as part of a unit test
+     * @param isTest If the code should be run as a unit test
+     */
     public static void setUnitTest(boolean isTest) {
         GlobalState.isUnitTest.set(isTest);
     }

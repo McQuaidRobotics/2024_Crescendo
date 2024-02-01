@@ -1,4 +1,4 @@
-package com.igknighters.util.pathfinders;
+package com.igknighters.util.pathplanner;
 
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Translation2d;

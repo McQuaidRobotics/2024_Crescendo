@@ -20,8 +20,8 @@ import com.igknighters.util.BootupLogger;
 import com.igknighters.util.SwerveModuleConstants;
 
 public class SwerveModuleSim implements SwerveModule {
-    private FlywheelSim driveSim = new FlywheelSim(DCMotor.getFalcon500(1), 1.0 / kSwerve.DRIVE_GEAR_RATIO, 0.025);
-    private FlywheelSim angleSim = new FlywheelSim(DCMotor.getFalcon500(1), 1.0 / kSwerve.ANGLE_GEAR_RATIO, 0.004);
+    private FlywheelSim driveSim = new FlywheelSim(DCMotor.getFalcon500(1), kSwerve.DRIVE_GEAR_RATIO, 0.025);
+    private FlywheelSim angleSim = new FlywheelSim(DCMotor.getFalcon500(1), kSwerve.ANGLE_GEAR_RATIO, 0.004);
 
     private final PIDController driveFeedback = new PIDController(
             DriveMotorConstants.kP,
@@ -34,7 +34,7 @@ public class SwerveModuleSim implements SwerveModule {
             AngleMotorConstants.kD,
             ConstValues.PERIODIC_TIME);
 
-    public int moduleNumber;
+    public final int moduleNumber;
 
     private final SwerveModuleInputs inputs;
 
@@ -91,7 +91,7 @@ public class SwerveModuleSim implements SwerveModule {
 
         var angleAppliedVolts = MathUtil.clamp(
                 angleFeedback.calculate(getAngle().getRadians(), angle.getRadians()),
-                -1.0 * RobotController.getBatteryVoltage(),
+                -RobotController.getBatteryVoltage(),
                 RobotController.getBatteryVoltage());
         angleSim.setInputVoltage(angleAppliedVolts);
 
