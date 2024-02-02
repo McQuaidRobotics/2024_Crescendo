@@ -61,24 +61,6 @@ public class LED {
 
     private final static int NUMLEDS = 8;
     private static int numPatterns = 1;
-    private static Animation animDisabled = new ColorFlowAnimation(0, 0, 255, 0, 0.1, NUMLEDS/numPatterns, Direction.Forward);
-    private static Animation animTeleOp = new ColorFlowAnimation(0, 255, 0, 0, 0.1, NUMLEDS/numPatterns, Direction.Forward);
-    private static Animation animAuto = new RainbowAnimation(1.0, 0.2, NUMLEDS/numPatterns);
-    private static Animation animTest = new ColorFlowAnimation(255, 0, 255, 0, 0.1, NUMLEDS/numPatterns, Direction.Forward);
-    private static Animation anim20sLeft = new SingleFadeAnimation(255, 255, 255);
-    private static Animation animShooting = new ColorFlowAnimation(255, 107, 0, 0, 0.1, NUMLEDS/numPatterns, Direction.Forward, 4); // McQ gold for now
-    private static Animation animBooting = new StrobeAnimation(255, 0, 255, 0, 0.1, NUMLEDS/numPatterns);
-    private static Animation animNone = null;
-    // private static Animation[] animations = 
-    // new Animation[]{animDisabled,
-    // animTeleOp, 
-    // animAuto, 
-    // animTest, 
-    // anim20sLeft, 
-    // animShooting, 
-    // animBooting,
-    // animNone}; 
-    private static HashMap<String, Animation> hashAnims = new HashMap<String, Animation>();
     
     public enum LedAnimations {
         DISABLED(
@@ -144,22 +126,13 @@ public class LED {
     private Timer timer;
     private Double duration;
     private LedAnimations animation;
-    private Animation animation1;
-    private Animation animation2;
-    private Animation lastAnimation;
+    private LedAnimations animation2;
+    private LedAnimations lastAnimation;
     private CANdle candle;
     private CANdleConfiguration config;
     private XboxController controller = new XboxController(0);
 
     public LED() {
-        hashAnims.put("disabled", animDisabled);
-        hashAnims.put("teleop", animTeleOp);
-        hashAnims.put("auto", animAuto);
-        hashAnims.put("test", animTest);
-        hashAnims.put("20s", anim20sLeft);
-        hashAnims.put("shooting", animShooting);
-        hashAnims.put("booting", animBooting);
-        hashAnims.put("none", animNone);
         this.timer = new Timer();
         // this.animation = LedAnimations.DISABLED;
         // this.animation2 = LedAnimations.DEFAULT;
@@ -214,71 +187,36 @@ public class LED {
 
     public void setDefault() {
         numPatterns = 1;
-        animDisabled = new ColorFlowAnimation(0, 0, 255, 0, 0.1, NUMLEDS/numPatterns, Direction.Forward);
-        animTeleOp = new ColorFlowAnimation(0, 255, 0, 0, 0.1, NUMLEDS/numPatterns, Direction.Forward);
-        animAuto = new RainbowAnimation(1.0, 0.2, NUMLEDS/numPatterns);
-        animTest = new ColorFlowAnimation(255, 0, 255, 0, 0.1, NUMLEDS/numPatterns, Direction.Forward);
-        anim20sLeft = new SingleFadeAnimation(255, 255, 255);
-        animShooting = new ColorFlowAnimation(255, 107, 0, 0, 0.1, NUMLEDS/numPatterns, Direction.Forward, 4); // McQ gold for now
-        animBooting = new StrobeAnimation(255, 0, 255, 0, 0.1, NUMLEDS/numPatterns);
         this.duration = 0.0;
-        // animations = 
-        // new Animation[]{animDisabled,
-        // animTeleOp, 
-        // animAuto, 
-        // animTest, 
-        // anim20sLeft, 
-        // animShooting, 
-        // animBooting,
-        // animNone};
-        hashAnims.put("disabled", animDisabled);
-        hashAnims.put("teleop", animTeleOp);
-        hashAnims.put("auto", animAuto);
-        hashAnims.put("test", animTest);
-        hashAnims.put("20s", anim20sLeft);
-        hashAnims.put("shooting", animShooting);
-        hashAnims.put("booting", animBooting);
-        hashAnims.put("none", animNone); 
         if (DriverStation.isDisabled()) {
-            //this.animation = LedAnimations.DISABLED;
-            this.animation1 = hashAnims.get("disabled");
+            this.animation = LedAnimations.DISABLED;
         } else if (DriverStation.isAutonomous()) {
-            //this.animation = LedAnimations.AUTO;
-            this.animation1 = hashAnims.get("auto");
+            this.animation = LedAnimations.AUTO;
         } else {
-            //this.animation = LedAnimations.TELEOP;
-            this.animation1 = hashAnims.get("teleop");
+            this.animation = LedAnimations.TELEOP;
         }
         
     }
 
     public void shooting(Animation anim) {
         if (timer.hasElapsed(duration)){
-            this.animation2=hashAnims.get("none");
+            // this.animation = LedAnimations.NONE;
         }
         else{
-            this.animation2 = hashAnims.get("shooting");
-            sendMultiAnimation(anim, animation2);
+            this.animation2 = LedAnimations.SHOOTING;
+            sendMultiAnimation(animation, animation2);
         }
     }
 
     public void run() {
         if (timer.hasElapsed(duration)) {
             setDefault();
-            animation2 = hashAnims.get("none");
+            animation2 = LedAnimations.NONE;
         }
-        if (animation1 != lastAnimation || duration == 0) {
+        if (animation != lastAnimation || duration == 0) {
             //sendMultiAnimation(animation, animation2);
-            sendMultiAnimation(animation1, animation2);
-            lastAnimation = animation1;
-        }
-        if (controller.getAButton()){
-            numPatterns=2;
-            this.timer.restart();
-            duration = 2.5;
-            hashAnims.put("teleop", new ColorFlowAnimation(255, 0, 255, 0, 0.1, NUMLEDS/numPatterns, Direction.Forward));
-            animation1 = hashAnims.get("teleop");
-            shooting(animation1);
+            sendMultiAnimation(animation, animation2);
+            lastAnimation = animation;
         }
 
     }
