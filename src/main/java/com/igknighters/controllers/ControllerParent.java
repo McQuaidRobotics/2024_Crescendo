@@ -133,10 +133,10 @@ public class ControllerParent {
         this.madeController = makeController;
         if (madeController) {
             controller = new CommandXboxController(port);
-            BootupLogger.BootupLog("Controller " + port + " initialized");
+            BootupLogger.bootupLog("Controller " + port + " initialized");
         } else {
             controller = null;
-            BootupLogger.BootupLog("Controller " + port + " not initialized");
+            BootupLogger.bootupLog("Controller " + port + " not initialized");
             A = new TriggerBindingTuple(null, SingleDepBinding.empty());
             B = new TriggerBindingTuple(null, SingleDepBinding.empty());
             X = new TriggerBindingTuple(null, SingleDepBinding.empty());

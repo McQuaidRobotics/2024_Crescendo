@@ -1,4 +1,4 @@
-package com.igknighters.util.pathfinders;
+package com.igknighters.util.pathplanner;
 
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;

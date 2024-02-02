@@ -57,15 +57,15 @@ public class VisionOnlyPoseEstimator extends PoseEstimator<VisionOnlyPoseEstimat
 
     public VisionOnlyPoseEstimator() {
         super(
-            new FakeKinematics(),
-            new FakeOdometry(),
-            VecBuilder.fill(0.01, 0.01, 0.01),
-            VecBuilder.fill(1.0, 1.0, 1.0)
-        );
+                new FakeKinematics(),
+                new FakeOdometry(),
+                VecBuilder.fill(0.01, 0.01, 0.01),
+                VecBuilder.fill(1.0, 1.0, 1.0));
     }
 
     @Override
-    public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
+    public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds,
+            Matrix<N3, N1> visionMeasurementStdDevs) {
         lastPose2 = lastPose;
         lastPose = visionRobotPoseMeters;
     }

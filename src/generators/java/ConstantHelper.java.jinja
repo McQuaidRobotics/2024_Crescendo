@@ -18,9 +18,9 @@ public class ConstantHelper {
     public @interface {{type.ShortTypeName}}Const {
 {%for robo in robots%}
 {%if type.lang.isArray%}
-        public {{type.lang.ValueType}} {{robo}}() default {};
+        public {{type.lang.ValueType}} {{robo}}(); // default {};
 {%else%}
-        public {{type.lang.ValueType}} {{robo}}() default {{type.lang.EmptyValue}};
+        public {{type.lang.ValueType}} {{robo}}(); // default {{type.lang.EmptyValue}};
 {%endif%}
 {%endfor%}
     }
@@ -83,7 +83,7 @@ public class ConstantHelper {
         for (Field field : consts.getDeclaredFields()) {
             handleConstField(field, consts);
         }
-        BootupLogger.BootupLog("Finished applying constants");
+        BootupLogger.bootupLog("Finished applying constants");
     }
 
     public enum RobotConstID {

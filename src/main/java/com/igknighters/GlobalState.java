@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -28,9 +29,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 public class GlobalState {
     public static enum LocalizerType {
-        HYBRID(1000),
-        VISION(500),
-        NONE(0);
+        Hybrid(1000),
+        Vision(500),
+        None(0);
 
         public final int priority;
 
@@ -39,9 +40,13 @@ public class GlobalState {
         }
     }
 
+    public static enum GamepieceState {
+        None, Held, Confirmed;
+    }
+
     private static final ReentrantLock globalLock = new ReentrantLock();
 
-    private static LocalizerType localizerType = LocalizerType.NONE;
+    private static LocalizerType localizerType = LocalizerType.None;
     private static Optional<PoseEstimator<?>> localizer = Optional.empty();
 
     // private static final PoseHistory poseHistory = new PoseHistory();
@@ -52,6 +57,8 @@ public class GlobalState {
 
     private static AtomicBoolean isUnitTest = new AtomicBoolean(false);
 
+    private static AtomicReference<GamepieceState> gamePieceState = new AtomicReference<GlobalState.GamepieceState>(GamepieceState.None);
+
     private GlobalState() {
         throw new UnsupportedOperationException("This is a utility class!");
     }
@@ -59,11 +66,12 @@ public class GlobalState {
     public static void restoreDefaultState() {
         globalLock.lock();
         try {
-            localizerType = LocalizerType.NONE;
+            localizerType = LocalizerType.None;
             localizer = Optional.empty();
             field = Optional.empty();
             isUnitTest.set(false);
-            //intentionally ignore as this is dependent on AutoBuilder state and that cannot be restored
+            // intentionally ignore as this is dependent on AutoBuilder state and that
+            // cannot be restored
             // autoChooserCreated = false;
         } finally {
             globalLock.unlock();
@@ -95,8 +103,8 @@ public class GlobalState {
     public static Pose2d getLocalizedPose() {
         globalLock.lock();
         try {
-            if (!localizer.isPresent() || localizerType == LocalizerType.NONE) {
-                DriverStation.reportError("Odometry not present", false);
+            if (!localizer.isPresent() || localizerType == LocalizerType.None) {
+                DriverStation.reportError("[GlobalState] Odometry not present", true);
                 return new Pose2d();
             }
             return localizer.get().getEstimatedPosition();
@@ -115,15 +123,15 @@ public class GlobalState {
     public static void resetSwerveLocalization(Rotation2d gyroRot, Pose2d pose, SwerveModulePosition... positions) {
         globalLock.lock();
         try {
-            if (!localizer.isPresent() || localizerType == LocalizerType.NONE) {
-                DriverStation.reportError("Localizer not present", false);
+            if (!localizer.isPresent() || localizerType == LocalizerType.None) {
+                DriverStation.reportError("[GlobalState] Localizer not present", true);
                 return;
             }
-            if (localizerType == LocalizerType.HYBRID) {
+            if (localizerType == LocalizerType.Hybrid) {
                 ((SwerveDrivePoseEstimator) localizer.get()).resetPosition(gyroRot, positions, pose);
                 return;
             } else {
-                DriverStation.reportError("Localizer does not support Swerve", false);
+                DriverStation.reportError("[GlobalState] Localizer does not support Swerve", true);
                 return;
             }
         } finally {
@@ -142,19 +150,19 @@ public class GlobalState {
         globalLock.lock();
         try {
             // if (!localizer.isPresent()) {
-            // DriverStation.reportError("Odometry not present", false);
+            // DriverStation.reportError("[GlobalState] Odometry not present", false);
             // return new Pose2d();
             // }
             // return localizer.get().update(gyroRot, modulePositions);
 
-            if (!localizer.isPresent() || localizerType == LocalizerType.NONE) {
-                DriverStation.reportError("Localizer not present", false);
+            if (!localizer.isPresent() || localizerType == LocalizerType.None) {
+                DriverStation.reportError("[GlobalState] Localizer not present", true);
                 return new Pose2d();
             }
-            if (localizerType == LocalizerType.HYBRID) {
+            if (localizerType == LocalizerType.Hybrid) {
                 return ((SwerveDrivePoseEstimator) localizer.get()).update(gyroRot, modulePositions);
             } else {
-                DriverStation.reportError("Localizer does not support Swerve", false);
+                DriverStation.reportError("[GlobalState] Localizer does not support Swerve", true);
                 return new Pose2d();
             }
         } finally {
@@ -171,11 +179,11 @@ public class GlobalState {
     public static void submitVisionData(VisionPoseEst value, double ambiguity) {
         globalLock.lock();
         try {
-            if (!localizer.isPresent() || localizerType == LocalizerType.NONE) {
-                DriverStation.reportError("Localizer not present", false);
+            if (!localizer.isPresent() || localizerType == LocalizerType.None) {
+                DriverStation.reportError("[GlobalState] Localizer not present", true);
                 return;
             }
-            if (localizerType == LocalizerType.VISION) {
+            if (localizerType == LocalizerType.Vision) {
                 ((VisionOnlyPoseEstimator) localizer.get()).addVisionMeasurement(
                         value.pose.toPose2d(),
                         value.timestamp,
@@ -185,13 +193,13 @@ public class GlobalState {
                                 value.pose.toPose2d().getRotation(),
                                 new FakeWheelPositions());
                 field.ifPresent(field2d -> field2d.setRobotPose(pose));
-            } else if (localizerType == LocalizerType.HYBRID) {
+            } else if (localizerType == LocalizerType.Hybrid) {
                 ((SwerveDrivePoseEstimator) localizer.get()).addVisionMeasurement(
                         value.pose.toPose2d(),
                         value.timestamp,
                         VecBuilder.fill(ambiguity, ambiguity, 0.0));
             } else {
-                DriverStation.reportError("Localizer does not support Vision", false);
+                DriverStation.reportError("[GlobalState] Localizer does not support Vision", true);
                 return;
             }
         } finally {
@@ -208,7 +216,7 @@ public class GlobalState {
         globalLock.lock();
         try {
             if (field.isPresent()) {
-                DriverStation.reportError("Field already published", false);
+                DriverStation.reportError("[GlobalState] Field already published", true);
                 return;
             }
             field = Optional.of(new Field2d());
@@ -241,6 +249,14 @@ public class GlobalState {
         }
     }
 
+    public static GamepieceState getGamePieceState() {
+        return gamePieceState.get();
+    }
+
+    public static void setHasGamePiece(GamepieceState state) {
+        gamePieceState.set(state);
+    }
+
     /**
      * Initialize the auto chooser.
      * This is called by {@link RobotContainer#setupAutos()}.
@@ -250,7 +266,7 @@ public class GlobalState {
         globalLock.lock();
         try {
             if (autoChooserCreated) {
-                DriverStation.reportError("Auto chooser already created", false);
+                DriverStation.reportError("[GlobalState] Auto chooser already created", true);
                 return;
             }
             autoChooserCreated = true;
@@ -285,10 +301,17 @@ public class GlobalState {
         }
     }
 
+    /**
+     * @return If the code is being run as part of a unit test
+     */
     public static boolean isUnitTest() {
         return isUnitTest.get();
     }
 
+    /**
+     * Declare if the code is being run as part of a unit test
+     * @param isTest If the code should be run as a unit test
+     */
     public static void setUnitTest(boolean isTest) {
         GlobalState.isUnitTest.set(isTest);
     }
