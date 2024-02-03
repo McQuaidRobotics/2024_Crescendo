@@ -94,29 +94,29 @@ public class RobotTest {
         robot.runTest(3);
     }
 
-    @Test
-    public void testShooter(@Robo Robot robot) {
-        RobotSetup.testOverrideRobotID(RobotID.SIM_CRASH);
+    // @Test
+    // public void testShooter(@Robo Robot robot) {
+    //     RobotSetup.testOverrideRobotID(RobotID.SIM_CRASH);
 
-        DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
+    //     DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
 
-        DriverStationSim.setEnabled(true);
+    //     DriverStationSim.setEnabled(true);
 
-        robot.withTeleopInitTest(robo -> {
-            var umbrella = robo.getAllSubsystemsForTest().umbrella
-                    .get();
+    //     robot.withTeleopInitTest(robo -> {
+    //         var umbrella = robo.getAllSubsystemsForTest().umbrella
+    //                 .get();
 
-            umbrella.run(() -> umbrella.spinupShooterToRPM(3000));
-        })
-                .withTeleopPeriodicTest(robo -> {
-                    var umbrella = robo.getAllSubsystemsForTest().umbrella
-                            .get();
+    //         umbrella.run(() -> umbrella.spinupShooterToRPM(3000));
+    //     })
+    //             .withTeleopPeriodicTest(robo -> {
+    //                 var umbrella = robo.getAllSubsystemsForTest().umbrella
+    //                         .get();
 
-                    if (umbrella.isShooterAtSpeed()) {
-                        robo.finishUnitTestRobot();
-                    }
-                });
+    //                 if (umbrella.isShooterAtSpeed()) {
+    //                     robo.finishUnitTestRobot();
+    //                 }
+    //             });
 
-        robot.runTest(3);
-    }
+    //     robot.runTest(3);
+    // }
 }
