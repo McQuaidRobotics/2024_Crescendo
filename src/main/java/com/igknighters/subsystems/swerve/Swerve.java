@@ -37,10 +37,10 @@ public class Swerve extends SubsystemBase {
 
         if (RobotBase.isReal()) {
             swerveMods = new SwerveModule[] {
-                    new SwerveModuleReal(ConstValues.kSwerve.Mod0.CONSTANTS, true),
-                    new SwerveModuleReal(ConstValues.kSwerve.Mod1.CONSTANTS, true),
-                    new SwerveModuleReal(ConstValues.kSwerve.Mod2.CONSTANTS, true),
-                    new SwerveModuleReal(ConstValues.kSwerve.Mod3.CONSTANTS, true)
+                    new SwerveModuleReal(ConstValues.kSwerve.Mod0.CONSTANTS, false),
+                    new SwerveModuleReal(ConstValues.kSwerve.Mod1.CONSTANTS, false),
+                    new SwerveModuleReal(ConstValues.kSwerve.Mod2.CONSTANTS, false),
+                    new SwerveModuleReal(ConstValues.kSwerve.Mod3.CONSTANTS, false)
             };
             gyro = new GyroReal();
         } else {

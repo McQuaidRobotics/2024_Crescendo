@@ -92,6 +92,8 @@ public class SwerveModuleReal implements SwerveModule {
         driveConfig.Slot0.kV = 12.0
                 / (kSwerve.MAX_DRIVE_VELOCITY / (kSwerve.WHEEL_CIRCUMFERENCE / kSwerve.DRIVE_GEAR_RATIO));
 
+        driveConfig.Slot0.kS = DriveMotorConstants.kS;
+
         driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         driveConfig.CurrentLimits.StatorCurrentLimit = kSwerve.SLIP_CURRENT;
         driveConfig.TorqueCurrent.PeakForwardTorqueCurrent = kSwerve.SLIP_CURRENT;
@@ -109,6 +111,9 @@ public class SwerveModuleReal implements SwerveModule {
         angleConfig.Slot0.kP = AngleMotorConstants.kP;
         angleConfig.Slot0.kI = AngleMotorConstants.kI;
         angleConfig.Slot0.kD = AngleMotorConstants.kD;
+
+        angleConfig.Slot0.kV = AngleMotorConstants.kV;
+        angleConfig.Slot0.kS = AngleMotorConstants.kS;
 
         angleConfig.Feedback.FeedbackRemoteSensorID = angleEncoder.getDeviceID();
         angleConfig.Feedback.RotorToSensorRatio = kSwerve.ANGLE_GEAR_RATIO;
@@ -161,8 +166,9 @@ public class SwerveModuleReal implements SwerveModule {
             var controlRequest = new DutyCycleOut(percentOutput).withEnableFOC(isPro);
             driveMotor.setControl(controlRequest);
         } else {
-            double rps = desiredState.speedMetersPerSecond / (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO);
+            double rps = (desiredState.speedMetersPerSecond / kSwerve.WHEEL_CIRCUMFERENCE) * kSwerve.DRIVE_GEAR_RATIO;
             var veloRequest = new VelocityVoltage(rps).withEnableFOC(isPro);
+            Logger.recordOutput("Swerve/SwerveModule[" + this.moduleNumber + "]/DriveRPS", rps);
             driveMotor.setControl(veloRequest);
         }
     }
@@ -185,7 +191,7 @@ public class SwerveModuleReal implements SwerveModule {
     }
 
     private double driveRotationsToMeters(double rotations) {
-        return rotations * (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO);
+        return (rotations / kSwerve.DRIVE_GEAR_RATIO) * kSwerve.WHEEL_CIRCUMFERENCE;
     }
 
     @Override

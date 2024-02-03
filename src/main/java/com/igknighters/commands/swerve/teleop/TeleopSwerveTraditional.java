@@ -25,6 +25,6 @@ public class TeleopSwerveTraditional extends TeleopSwerveBase {
                 -getRotationX() * kSwerve.MAX_ANGULAR_VELOCITY, //invert because CCW is positive
                 swerve.getYawWrappedRot());
 
-        swerve.driveChassisSpeeds(chassisSpeeds, true);
+        swerve.driveChassisSpeeds(chassisSpeeds, false);
     }
 }

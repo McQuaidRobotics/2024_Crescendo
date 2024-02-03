@@ -52,7 +52,8 @@ public class RobotSetup {
             "aaaaaaaa", RobotID.CRASH,
             "bbbbbbbb", RobotID.BURN,
             "03260abb", RobotID.CRASH,
-            "0306adb6", RobotID.TestBoard);
+            "0306adb6", RobotID.TestBoard,
+            "03260af0", RobotID.BURN);
 
     private static RobotID currentID = RobotID.Unlabeled;
 
