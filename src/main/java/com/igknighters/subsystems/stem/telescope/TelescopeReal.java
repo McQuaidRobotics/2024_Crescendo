@@ -80,10 +80,10 @@ public class TelescopeReal implements Telescope {
         telescopeMotorCfg.HardwareLimitSwitch.ForwardLimitEnable = false;
 
         telescopeMotorCfg.HardwareLimitSwitch.ForwardLimitAutosetPositionEnable = true;
-        telescopeMotorCfg.HardwareLimitSwitch.ForwardLimitAutosetPositionValue = mechMetersToMotorRots(0.2);
+        telescopeMotorCfg.HardwareLimitSwitch.ForwardLimitAutosetPositionValue = mechMetersToMotorRots(kTelescope.MIN_METERS);
 
         telescopeMotorCfg.HardwareLimitSwitch.ReverseLimitAutosetPositionEnable = true;
-        telescopeMotorCfg.HardwareLimitSwitch.ReverseLimitAutosetPositionValue = mechMetersToMotorRots(0.2);
+        telescopeMotorCfg.HardwareLimitSwitch.ReverseLimitAutosetPositionValue = mechMetersToMotorRots(kTelescope.MAX_METERS);
 
 
         return telescopeMotorCfg;
