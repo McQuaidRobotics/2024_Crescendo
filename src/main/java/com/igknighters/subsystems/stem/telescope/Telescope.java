@@ -13,12 +13,13 @@ public interface Telescope extends Component {
         public double volts = 0.0;
         public double temp = 0.0, amps = 0.0;
         public boolean isLimitFwdSwitchHit = false, isLimitRevSwitchHit = false;
+        public boolean isHomed = false;
 
         public TelescopeInputs(double startingMeters) {
             this.meters = startingMeters;
             this.targetMeters = startingMeters;
         }
-
+ 
         @Override
         public void toLog(LogTable table) {
             table.put("meters", meters);
@@ -29,6 +30,8 @@ public interface Telescope extends Component {
             table.put("amps", amps);
             table.put("isLimitFwdSwitchHit", isLimitFwdSwitchHit);
             table.put("isLimitRevSwitchHit", isLimitRevSwitchHit);
+            table.put("TelescopeHomed", isHomed);
+
 
             // A subtable, thats only written to when in debug mode and never read from,
             // that provides some more human readable values
@@ -47,6 +50,8 @@ public interface Telescope extends Component {
             amps = table.get("amps", amps);
             isLimitFwdSwitchHit = table.get("isLimitFwdSwitchHit", isLimitFwdSwitchHit);
             isLimitRevSwitchHit = table.get("isLimitRevSwitchHit", isLimitRevSwitchHit);
+            isHomed = table.get("TelescopeHomed", isHomed);
+
         }
     }
 
@@ -65,6 +70,11 @@ public interface Telescope extends Component {
      * @return The current distance from the pivot axel to the wrist axel
      */
     public double getTelescopeMeters();
+
+
+    public boolean isFwdLimitSwitchHit();
+
+    public boolean isRevLimitSwitchHit();
 
     /**
      * Move the telescope to the target and returns if it has reached the target.

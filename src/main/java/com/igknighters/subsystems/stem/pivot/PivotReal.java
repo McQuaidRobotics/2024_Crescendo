@@ -141,6 +141,8 @@ public class PivotReal implements Pivot {
         inputs.radians = getPivotRadiansPigeon();
     }
 
+//TODO add limit switch logging 
+
     @Override
     public void periodic() {
         FaultManager.captureFault(

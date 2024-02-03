@@ -17,4 +17,16 @@ public class TelescopeDisabled implements Telescope {
 
     @Override
     public void setVoltageOut(double volts) {}
+
+    @Override
+    public boolean isFwdLimitSwitchHit() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'isFwdLimitSwitchHit'");
+    }
+
+    @Override
+    public boolean isRevLimitSwitchHit() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'isRevLimitSwitchHit'");
+    }
 }
