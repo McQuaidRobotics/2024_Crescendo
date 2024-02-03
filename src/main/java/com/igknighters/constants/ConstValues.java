@@ -289,6 +289,13 @@ public final class ConstValues {
         public static final class kIntake {
             public static final int UPPER_MOTOR_ID = 19;
             public static final int LOWER_MOTOR_ID = 20;
+
+            public static final double UPPER_DIAMETER = 2.125 * Conv.INCHES_TO_METERS;
+            public static final double LOWER_DIAMETER = 1.25 * Conv.INCHES_TO_METERS;
+
+            public static final double UPPER_DIFF = LOWER_DIAMETER / UPPER_DIAMETER;
+
+            public static final boolean BEAM_IS_UPPER = true;
         }
 
     }

@@ -19,9 +19,10 @@ import edu.wpi.first.math.util.Units;
 
 public class IntakeReal implements Intake {
 
-    private final TalonFX leaderMotor = new TalonFX(kIntake.UPPER_MOTOR_ID);
-    private final TalonFX followerMotor = new TalonFX(kIntake.LOWER_MOTOR_ID);
-    private final StatusSignal<Double> veloSignal, voltSignal, currentSignal, tempSignal;
+    private final TalonFX upperMotor = new TalonFX(kIntake.UPPER_MOTOR_ID);
+    private final TalonFX lowerMotor = new TalonFX(kIntake.LOWER_MOTOR_ID);
+    private final StatusSignal<Double> veloSignalUpper, voltSignalUpper, currentSignalUpper, tempSignalUpper;
+    private final StatusSignal<Double> veloSignalLower, voltSignalLower, currentSignalLower, tempSignalLower;
     private final StatusSignal<ReverseLimitValue> revLimitSignal;
     private final StatusSignal<ForwardLimitValue> fwdLimitSignal;
     private final IntakeInputs inputs = new IntakeInputs();
@@ -29,49 +30,71 @@ public class IntakeReal implements Intake {
     public IntakeReal() {
         FaultManager.captureFault(
             UmbrellaHW.IntakeMotor,
-            leaderMotor.getConfigurator()
+            upperMotor.getConfigurator()
                 .apply(new TalonFXConfiguration())
         );
         FaultManager.captureFault(
             UmbrellaHW.IntakeMotor,
-            followerMotor.getConfigurator()
+            lowerMotor.getConfigurator()
                 .apply(new TalonFXConfiguration())
         );
 
-        veloSignal = leaderMotor.getVelocity();
-        voltSignal = leaderMotor.getMotorVoltage();
-        currentSignal = leaderMotor.getTorqueCurrent();
-        tempSignal = leaderMotor.getDeviceTemp();
-        revLimitSignal = leaderMotor.getReverseLimit();
-        fwdLimitSignal = leaderMotor.getForwardLimit();
+        veloSignalUpper = upperMotor.getVelocity();
+        voltSignalUpper = upperMotor.getMotorVoltage();
+        currentSignalUpper = upperMotor.getTorqueCurrent();
+        tempSignalUpper = upperMotor.getDeviceTemp();
 
-        veloSignal.setUpdateFrequency(100);
-        voltSignal.setUpdateFrequency(100);
-        currentSignal.setUpdateFrequency(100);
-        tempSignal.setUpdateFrequency(100);
-        revLimitSignal.setUpdateFrequency(100);
-        fwdLimitSignal.setUpdateFrequency(100);
+        veloSignalUpper.setUpdateFrequency(100);
+        voltSignalUpper.setUpdateFrequency(100);
+        currentSignalUpper.setUpdateFrequency(100);
+        tempSignalUpper.setUpdateFrequency(100);
 
-        leaderMotor.optimizeBusUtilization();
+        veloSignalLower = lowerMotor.getVelocity();
+        voltSignalLower = lowerMotor.getMotorVoltage();
+        currentSignalLower = lowerMotor.getTorqueCurrent();
+        tempSignalLower = lowerMotor.getDeviceTemp();
 
-        followerMotor.optimizeBusUtilization();
+        veloSignalLower.setUpdateFrequency(100);
+        voltSignalLower.setUpdateFrequency(100);
+        currentSignalLower.setUpdateFrequency(100);
+        tempSignalLower.setUpdateFrequency(100);
+
+        if (kIntake.BEAM_IS_UPPER) {
+            revLimitSignal = upperMotor.getReverseLimit();
+            fwdLimitSignal = upperMotor.getForwardLimit();
+        } else {
+            revLimitSignal = lowerMotor.getReverseLimit();
+            fwdLimitSignal = lowerMotor.getForwardLimit();
+        }
+
+        revLimitSignal.setUpdateFrequency(250);
+        fwdLimitSignal.setUpdateFrequency(250);
+
+        upperMotor.optimizeBusUtilization();
+        lowerMotor.optimizeBusUtilization();
 
         BootupLogger.bootupLog("    Intake initialized (real)");
     }
 
     @Override
     public void setVoltageOut(double volts) {
-        inputs.volts = volts;
-        leaderMotor.setVoltage(volts);
-        followerMotor.setVoltage(volts * 0.66);
+        inputs.voltsLower = volts;
+        inputs.voltsUpper = volts * kIntake.UPPER_DIFF;
+        lowerMotor.setVoltage(volts);
+        upperMotor.setVoltage(volts * kIntake.UPPER_DIFF);
     }
 
     @Override
     public void turnIntakeRads(double radians) {
         setVoltageOut(0.0);
-        var ret = new PositionDutyCycle(
-                leaderMotor.getRotorPosition().getValue() + Units.radiansToRotations(radians));
-        leaderMotor.setControl(ret);
+        upperMotor.setControl(new PositionDutyCycle(
+            upperMotor.getRotorPosition().getValue()
+            + Units.radiansToRotations(radians * kIntake.UPPER_DIFF))
+        );
+        lowerMotor.setControl(new PositionDutyCycle(
+            lowerMotor.getRotorPosition().getValue()
+            + Units.radiansToRotations(radians))
+        );
     }
 
     @Override
@@ -89,15 +112,19 @@ public class IntakeReal implements Intake {
         FaultManager.captureFault(
             UmbrellaHW.IntakeMotor,
             BaseStatusSignal.refreshAll(
-                    veloSignal, voltSignal,
-                    currentSignal, tempSignal));
+                    veloSignalUpper, voltSignalUpper,
+                    currentSignalUpper, tempSignalUpper));
 
         inputs.entranceBeamBroken = revLimitSignal.getValue().equals(ReverseLimitValue.ClosedToGround);
         inputs.exitBeamBroken = fwdLimitSignal.getValue().equals(ForwardLimitValue.ClosedToGround);
-        inputs.radiansPerSecond = Units.rotationsToRadians(veloSignal.getValue());
-        inputs.volts = voltSignal.getValue();
-        inputs.amps = currentSignal.getValue();
-        inputs.temp = tempSignal.getValue();
+        inputs.radiansPerSecondUpper = Units.rotationsToRadians(veloSignalUpper.getValue());
+        inputs.voltsUpper = voltSignalUpper.getValue();
+        inputs.ampsUpper = currentSignalUpper.getValue();
+        inputs.tempUpper = tempSignalUpper.getValue();
+        inputs.radiansPerSecondLower = Units.rotationsToRadians(veloSignalLower.getValue());
+        inputs.voltsLower = voltSignalLower.getValue();
+        inputs.ampsLower = currentSignalLower.getValue();
+        inputs.tempLower = tempSignalLower.getValue();
 
         Logger.processInputs("/Umbrella/Intake", inputs);
     }

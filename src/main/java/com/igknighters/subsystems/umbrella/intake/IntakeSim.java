@@ -3,6 +3,7 @@ package com.igknighters.subsystems.umbrella.intake;
 import org.littletonrobotics.junction.Logger;
 
 import com.igknighters.GlobalState;
+import com.igknighters.constants.ConstValues.kUmbrella.kIntake;
 import com.igknighters.util.BootupLogger;
 
 import edu.wpi.first.hal.SimBoolean;
@@ -49,14 +50,18 @@ public class IntakeSim implements Intake {
 
     @Override
     public void setVoltageOut(double volts) {
-        inputs.volts = volts;
-        inputs.radiansPerSecond = (volts / 12.0) * DCMotor.getFalcon500(0).freeSpeedRadPerSec;
+        inputs.voltsLower = volts;
+        inputs.voltsUpper = inputs.voltsLower * kIntake.UPPER_DIFF;
+        inputs.radiansPerSecondLower = (volts / 12.0) * DCMotor.getFalcon500(0).freeSpeedRadPerSec;
+        inputs.radiansPerSecondUpper = inputs.radiansPerSecondLower * kIntake.UPPER_DIFF;
     }
 
     @Override
     public void turnIntakeRads(double radians) {
-        inputs.volts = 0.0;
-        inputs.radiansPerSecond = 0.0;
+        inputs.voltsLower = 0.0;
+        inputs.voltsUpper = 0.0;
+        inputs.radiansPerSecondLower = 0.0;
+        inputs.radiansPerSecondUpper = 0.0;
     }
 
     @Override

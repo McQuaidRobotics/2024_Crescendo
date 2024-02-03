@@ -170,12 +170,11 @@ public class UmbrellaCommands {
      * @return A command to be scheduled
      */
     public static Command intake(Umbrella umbrella) {
-        return umbrella.run(
-            () -> umbrella.runIntakeAt(-1.0)
-        ).until(
-            () -> umbrella.isEntranceBeamBroken()
-        ).andThen(
+        return umbrella.runEnd(
+            () -> umbrella.runIntakeAt(-1.0),
             () -> umbrella.runIntakeAt(0.0)
+        ).until(
+            () -> umbrella.isEntranceBeamBroken() || umbrella.isExitBeamBroken()
         );
     }
 }
