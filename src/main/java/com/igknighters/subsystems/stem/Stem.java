@@ -37,14 +37,28 @@ public class Stem extends SubsystemBase {
      * mechanisms have not yet reached their target position.
      * 
      * @param position The position to set the stem to
+     * @param toleranceMult A value to multiply the accepted positional tolerance by
+     * @return True if all mechanisms have reached their target position
+     */
+    public boolean setStemPosition(StemPosition position, double toleranceMult) {
+        visualizer.updateSetpoint(position);
+        boolean pivotSuccess = pivot.target(position.pivotRads, toleranceMult);
+        boolean wristSuccess = wrist.target(position.wristRads, toleranceMult);
+        boolean telescopeSuccess = telescope.target(position.telescopeMeters, toleranceMult);
+        return pivotSuccess && wristSuccess && telescopeSuccess;
+    }
+
+    /**
+     * Meant as the main api for controlling the stem,
+     * this method takes in a {@link StemPosition.StemPosition} and sets the
+     * stem to that position. This method will return false if any of the
+     * mechanisms have not yet reached their target position.
+     * 
+     * @param position The position to set the stem to
      * @return True if all mechanisms have reached their target position
      */
     public boolean setStemPosition(StemPosition position) {
-        visualizer.updateSetpoint(position);
-        boolean pivotSuccess = pivot.target(position.pivotRads);
-        boolean wristSuccess = wrist.target(position.wristRads);
-        boolean telescopeSuccess = telescope.target(position.telescopeMeters);
-        return pivotSuccess && wristSuccess && telescopeSuccess;
+        return setStemPosition(position, 1.0);
     }
 
     /**
