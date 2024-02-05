@@ -61,8 +61,8 @@ public interface Telescope extends Component {
      * 
      * @apiNote This is distance from pivot axel to the wrist axel,
      * this means 0.0 is not fully retraccted but rather an unreachable
-     * position. Check {@link ConstValues.kStem.kTelescope.MIN_EXTENSION} and
-     * {@link ConstValues.kStem.kTelescope.MAX_EXTENSION} for the min and max.
+     * position. Check {@link ConstValues.kStem.kTelescope.MIN_METERS} and
+     * {@link ConstValues.kStem.kTelescope.MAX_METERS} for the min and max.
      */
     public void setTelescopeMeters(double meters);
 

@@ -334,8 +334,6 @@ public final class ConstValues {
         public static final class kTelescope {
             public static final int MOTOR_ID = 15;
 
-            public static final int PIGEON_ID = 35;
-
             public static final double MOTOR_kP = 1.0;
             public static final double MOTOR_kI = 0.0;
             public static final double MOTOR_kD = 0.0;
@@ -348,6 +346,8 @@ public final class ConstValues {
             public static final double MAX_METERS = 1.0;
 
             public static final double MOTOR_TO_MECHANISM_RATIO = 1.0;
+
+            public static final double SPROCKET_CIRCUMFERENCE = 1.0;
 
             public static final boolean INVERTED = false;
 
