@@ -28,6 +28,31 @@ import com.igknighters.util.Tracer;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.FieldConstants;
 
+
+/**
+ * This is the subsystem for our swerve drivetrain.
+ * The Swerve subsystem is composed of 5 components, 4 SwerveModules and 1 Gyro.
+ * The SwerveModules are the physical wheels and the Gyro is the sensor that measures the robot's rotation.
+ * The Swerve subsystem is responsible for controlling the SwerveModules and reading the Gyro.
+ * 
+ * The Swerve subsystem is also responsible for updating the robot's pose and submitting data to the GlobalState.
+ * 
+ * {@link https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html}
+ * 
+ * The coordinate system used in this code is the field coordinate system.
+ */
+// Field Coordinate System from the blue alliance driver station
+//-------------------------
+//|           ^           |
+//|          Xpos         |
+//|           |           |
+//|           |           |
+//| <-Ypos----+----negY-> |
+//|           |           |
+//|           |           |
+//|          Xneg         |
+//|           v           |
+//-------------------------
 public class Swerve extends SubsystemBase {
     private final SwerveModule[] swerveMods;
     private final SwerveVisualizer visualizer;
