@@ -107,10 +107,10 @@ public class Swerve extends SubsystemBase {
     /**
      * Offsets the gyro to define the current yaw as the supplied value
      * 
-     * @param degrees The value to set the gyro yaw to in degrees
+     * @param rot A {@link Rotation2d} representing the desired yaw
      */
-    public void setYaw(double degrees) {
-        gyro.setYawRads(Units.degreesToRadians(degrees));
+    public void setYaw(Rotation2d rot) {
+        gyro.setYawRads(rot.getRadians());
     }
 
     /**
