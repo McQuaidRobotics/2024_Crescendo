@@ -112,9 +112,6 @@ public class SwerveModuleReal implements SwerveModule {
         angleConfig.Slot0.kI = AngleMotorConstants.kI;
         angleConfig.Slot0.kD = AngleMotorConstants.kD;
 
-        angleConfig.Slot0.kV = AngleMotorConstants.kV;
-        angleConfig.Slot0.kS = AngleMotorConstants.kS;
-
         angleConfig.Feedback.FeedbackRemoteSensorID = angleEncoder.getDeviceID();
         angleConfig.Feedback.RotorToSensorRatio = kSwerve.ANGLE_GEAR_RATIO;
         if (isPro) {
