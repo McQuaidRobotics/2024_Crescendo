@@ -77,31 +77,46 @@ public final class ConstValues {
 
         public static final double MAX_Z_DELTA = 100.0;
 
+        private static enum CameraConfigs {
+            CRASH(
+                new CameraConfig[] {
+                    Camera.createConfig(
+                            "photonvision-15",
+                            0,
+                            new Pose3d(
+                                    new Translation3d(Units.inchesToMeters(10.0), Units.inchesToMeters(10.0),
+                                            Units.inchesToMeters(3.0)),
+                                    new Rotation3d(
+                                            0.0,
+                                            Units.degreesToRadians(15.0),
+                                            Units.degreesToRadians(45.0)))),
+                    Camera.createConfig(
+                            "photonvision-16",
+                            1,
+                            new Pose3d(
+                                    new Translation3d(Units.inchesToMeters(10.0), Units.inchesToMeters(-10.0),
+                                            Units.inchesToMeters(3.0)),
+                                    new Rotation3d(
+                                            0.0,
+                                            Units.degreesToRadians(15.0),
+                                            Units.degreesToRadians(-45.0))))
+                }
+            ),
+            BURN(new CameraConfig[] {});
+
+            public final CameraConfig[] cameras;
+
+            private CameraConfigs(CameraConfig[] cameras) {
+                this.cameras = cameras;
+            }
+        }
+
         /**
          * The cameras used for vision.
          */
-        public static final CameraConfig[] CAMERA_CONFIGS = new CameraConfig[] {
-                Camera.createConfig(
-                        "photonvision-15",
-                        0,
-                        new Pose3d(
-                                new Translation3d(Units.inchesToMeters(10.0), Units.inchesToMeters(10.0),
-                                        Units.inchesToMeters(3.0)),
-                                new Rotation3d(
-                                        0.0,
-                                        Units.degreesToRadians(15.0),
-                                        Units.degreesToRadians(45.0)))),
-                Camera.createConfig(
-                        "photonvision-16",
-                        1,
-                        new Pose3d(
-                                new Translation3d(Units.inchesToMeters(10.0), Units.inchesToMeters(-10.0),
-                                        Units.inchesToMeters(3.0)),
-                                new Rotation3d(
-                                        0.0,
-                                        Units.degreesToRadians(15.0),
-                                        Units.degreesToRadians(-45.0))))
-        };
+        public final static CameraConfig[] CAMERA_CONFIGS = CameraConfigs.valueOf(
+            RobotSetup.getRobotID().constID.name() // most based java code of the century
+        ).cameras;
     }
 
     public static final class kSwerve {
@@ -163,7 +178,7 @@ public final class ConstValues {
         public static final NeutralModeValue DRIVE_NEUTRAL_MODE = NeutralModeValue.Brake;
 
         public static final class DriveMotorConstants {
-            public static final double kP = 0.30;
+            public static final double kP = 0.27;
             public static final double kI = 0.0;
             public static final double kD = 0.0;
 
