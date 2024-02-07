@@ -28,7 +28,7 @@ public class PivotReal implements Pivot {
 
     private final Pigeon2 gyro;
 
-    private final StatusSignal<Double> motorRots, motorVelo, motorVolts;
+    private final StatusSignal<Double> motorRots, motorVelo, leaderMotorVolts, followerMotorVolts;
     private final StatusSignal<Double> leaderMotorAmps, followerMotorAmps, leaderMotorTemp, followerMotorTemp;
     /**Could be pitch or roll */
     private final StatusSignal<Double> gyroMeasurement;
@@ -66,13 +66,16 @@ public class PivotReal implements Pivot {
                 followerMotor.setControl(
                         new Follower(kPivot.LEFT_MOTOR_ID, true)));
 
+        inputs = new PivotInputs(Units.degreesToRadians(gyroMeasurement.getValue()) - kPivot.PIGEON_OFFSET);
+
         leaderMotor.setPosition(mechRadiansToMotorRots(getPivotRadiansPigeon()));
 
         motorRots = leaderMotor.getRotorPosition();
         motorVelo = leaderMotor.getRotorVelocity();
-        followerMotorAmps = leaderMotor.getStatorCurrent();
-        leaderMotorAmps = followerMotor.getStatorCurrent();
-        motorVolts = leaderMotor.getSupplyVoltage();
+        followerMotorAmps = leaderMotor.getTorqueCurrent();
+        leaderMotorAmps = followerMotor.getTorqueCurrent();
+        leaderMotorVolts = leaderMotor.getMotorVoltage();
+        followerMotorVolts = followerMotor.getMotorVoltage();
         followerMotorTemp = leaderMotor.getDeviceTemp();
         leaderMotorTemp = followerMotor.getDeviceTemp();
 
@@ -80,14 +83,17 @@ public class PivotReal implements Pivot {
         motorVelo.setUpdateFrequency(100);
         followerMotorAmps.setUpdateFrequency(100);
         leaderMotorAmps.setUpdateFrequency(100);
-        motorVolts.setUpdateFrequency(100);
+        leaderMotorVolts.setUpdateFrequency(100);
+        followerMotorVolts.setUpdateFrequency(100);
         followerMotorTemp.setUpdateFrequency(4);
         leaderMotorTemp.setUpdateFrequency(4);
 
         leaderMotor.optimizeBusUtilization();
         followerMotor.optimizeBusUtilization();
 
-        inputs = new PivotInputs(gyroMeasurement.getValue() - kPivot.PIGEON_OFFSET);
+        followerMotor.setControl(
+            new Follower(kPivot.LEFT_MOTOR_ID, true)
+        );
 
         BootupLogger.bootupLog("    Pivot initialized (real)");
     }
@@ -147,13 +153,14 @@ public class PivotReal implements Pivot {
                 StemHW.LeaderMotor,
                 BaseStatusSignal.refreshAll(
                         motorRots, motorVelo,
-                        motorVolts, leaderMotorAmps,
-                        leaderMotorTemp));
+                        leaderMotorVolts, leaderMotorAmps,
+                        leaderMotorTemp
+                    ));
 
         FaultManager.captureFault(
                 StemHW.FollowerMotor,
                 BaseStatusSignal.refreshAll(
-                        followerMotorAmps, followerMotorTemp));
+                        followerMotorAmps, followerMotorTemp, followerMotorVolts));
 
         FaultManager.captureFault(
                 StemHW.Pigeon2,
@@ -162,7 +169,8 @@ public class PivotReal implements Pivot {
         inputs.radians = motorRotsToMechRadians(motorRots.getValue());
         inputs.radiansPerSecond = motorRotsToMechRadians(motorVelo.getValue());
         inputs.gyroRadians = Units.degreesToRadians(gyroMeasurement.getValue());
-        inputs.volts = motorVolts.getValue();
+        inputs.leftVolts = leaderMotorVolts.getValue();
+        inputs.rightVolts = followerMotorVolts.getValue();
         inputs.leftAmps = leaderMotorAmps.getValue();
         inputs.rightAmps = followerMotorAmps.getValue();
         inputs.leftTemp = leaderMotorTemp.getValue();
