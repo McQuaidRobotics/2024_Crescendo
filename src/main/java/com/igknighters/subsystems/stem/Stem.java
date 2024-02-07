@@ -22,9 +22,9 @@ public class Stem extends SubsystemBase {
             telescope = new TelescopeDisabled();
             wrist = new WristSim();
         } else {
-            pivot = new PivotSim();
+            pivot = new PivotReal();
             telescope = new TelescopeDisabled();
-            wrist = new WristReal();
+            wrist = new WristSim();
         }
 
         visualizer = new StemVisualizer();
