@@ -18,10 +18,10 @@ import com.igknighters.controllers.ControllerParent;
 public class TeleopSwerveTarget extends TeleopSwerveBase {
 
     private Translation2d targetTranslation = FieldConstants.APRIL_TAG_FIELD
-        .getTagPose(7)
-        .get()
-        .getTranslation()
-        .toTranslation2d();
+            .getTagPose(7)
+            .get()
+            .getTranslation()
+            .toTranslation2d();
 
     public TeleopSwerveTarget(Swerve swerve, ControllerParent controller) {
         super(swerve, controller);
@@ -30,10 +30,9 @@ public class TeleopSwerveTarget extends TeleopSwerveBase {
     @Override
     public void execute() {
         targetTranslation = targetTranslation
-            .plus(orientForUser(new Translation2d(
+                .plus(orientForUser(new Translation2d(
                         getRotationX() * 0.1,
-                        getRotationY() * 0.1
-                    )));
+                        getRotationY() * 0.1)));
 
         var vt = orientForUser(new Translation2d(
                 getTranslationX() * kSwerve.MAX_DRIVE_VELOCITY * 0.85,
@@ -62,6 +61,6 @@ public class TeleopSwerveTarget extends TeleopSwerveBase {
                 rotVelo,
                 swerve.getYawWrappedRot());
 
-        swerve.driveChassisSpeeds(chassisSpeeds, false);
+        swerve.drive(chassisSpeeds, false);
     }
 }

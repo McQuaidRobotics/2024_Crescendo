@@ -10,15 +10,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kSwerve;
+import com.igknighters.util.Tracer;
 
 /**
  * "Inspired" by FRC team 254.
  *
  * <p>
  * Takes a prior setpoint (ChassisSpeeds), a desired setpoint (from a driver, or
- * from a path
- * follower), and outputs a new setpoint that respects all of the kinematic
+ * from a path follower),
+ * and outputs a new setpoint that respects all of the kinematic
  * constraints on module
  * rotation speed and wheel velocity/acceleration. By generating a new setpoint
  * every iteration, the
@@ -27,17 +29,37 @@ import com.igknighters.constants.ConstValues.kSwerve;
  * kinematically infeasible (and can result in wheel slip or robot heading drift
  * as a result).
  */
-public class SwerveSetpointGenerator {
-    public static record SwerveSetpoint(ChassisSpeeds chassisSpeeds, SwerveModuleState[] moduleStates) {}
-    public static record ModuleLimits(double maxDriveVelocity, double maxDriveAcceleration, double maxSteeringVelocity) {}
+public class SwerveSetpointProcessor {
+    public static record SwerveSetpoint(ChassisSpeeds chassisSpeeds, SwerveModuleState[] moduleStates) {
+    }
+
+    public static record ModuleLimits(
+            /** M/S */
+            double maxDriveVelocity,
+            /** M/S^2 */
+            double maxDriveAcceleration,
+            /** Rad/S */
+            double maxSteeringVelocity) {
+    }
 
     private final SwerveDriveKinematics kinematics = kSwerve.SWERVE_KINEMATICS;
     private final Translation2d[] moduleLocations = new Translation2d[] {
-        kSwerve.Mod0.CHASSIS_OFFSET,
-        kSwerve.Mod1.CHASSIS_OFFSET,
-        kSwerve.Mod2.CHASSIS_OFFSET,
-        kSwerve.Mod3.CHASSIS_OFFSET
+            kSwerve.Mod0.CHASSIS_OFFSET,
+            kSwerve.Mod1.CHASSIS_OFFSET,
+            kSwerve.Mod2.CHASSIS_OFFSET,
+            kSwerve.Mod3.CHASSIS_OFFSET
     };
+    private final ModuleLimits limits = new ModuleLimits(
+            kSwerve.MAX_DRIVE_VELOCITY,
+            kSwerve.MAX_DRIVE_ACCELERATION,
+            kSwerve.MAX_STEERING_VELOCITY);
+    private SwerveSetpoint prevSetpoint = new SwerveSetpoint(new ChassisSpeeds(), new SwerveModuleState[] {
+            new SwerveModuleState(0.0, new Rotation2d()),
+            new SwerveModuleState(0.0, new Rotation2d()),
+            new SwerveModuleState(0.0, new Rotation2d()),
+            new SwerveModuleState(0.0, new Rotation2d())
+    });
+    private boolean disabled = false;
 
     /**
      * Check if it would be faster to go to the opposite of the goal heading (and
@@ -140,7 +162,7 @@ public class SwerveSetpointGenerator {
         }
     }
 
-    protected double findSteeringMaxS(
+    private double findSteeringMaxS(
             double x_0,
             double y_0,
             double f_0,
@@ -162,7 +184,7 @@ public class SwerveSetpointGenerator {
         return findRoot(func, x_0, y_0, f_0 - offset, x_1, y_1, f_1 - offset, max_iterations);
     }
 
-    protected double findDriveMaxS(
+    private double findDriveMaxS(
             double x_0,
             double y_0,
             double f_0,
@@ -183,50 +205,42 @@ public class SwerveSetpointGenerator {
         return findRoot(func, x_0, y_0, f_0 - offset, x_1, y_1, f_1 - offset, max_iterations);
     }
 
-    // protected double findDriveMaxS(
-    //         double x_0, double y_0, double x_1, double y_1, double max_vel_step) {
-    //     // Our drive velocity between s=0 and s=1 is quadratic in s:
-    //     // v^2 = ((x_1 - x_0) * s + x_0)^2 + ((y_1 - y_0) * s + y_0)^2
-    //     // = a * s^2 + b * s + c
-    //     // Where:
-    //     // a = (x_1 - x_0)^2 + (y_1 - y_0)^2
-    //     // b = 2 * x_0 * (x_1 - x_0) + 2 * y_0 * (y_1 - y_0)
-    //     // c = x_0^2 + y_0^2
-    //     // We want to find where this quadratic results in a velocity that is >
-    //     // max_vel_step from our
-    //     // velocity at s=0:
-    //     // sqrt(x_0^2 + y_0^2) +/- max_vel_step = ...quadratic...
-    //     final double dx = x_1 - x_0;
-    //     final double dy = y_1 - y_0;
-    //     final double a = dx * dx + dy * dy;
-    //     final double b = 2.0 * x_0 * dx + 2.0 * y_0 * dy;
-    //     final double c = x_0 * x_0 + y_0 * y_0;
-    //     final double v_limit_upper_2 = Math.pow(Math.hypot(x_0, y_0) + max_vel_step, 2.0);
-    //     final double v_limit_lower_2 = Math.pow(Math.hypot(x_0, y_0) - max_vel_step, 2.0);
-    //     return 0.0;
-    // }
+    /**
+     * Set the disabled flag, which will cause the next call to
+     * processSetpoint() to skip the optimizations and constraint considerations.
+     * 
+     * @param disabled True to disable the optimizations and constraints.
+     *                 Default is false.
+     */
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
 
     /**
-     * Generate a new setpoint.
+     * Generates a new setpoint.
      *
-     * @param limits       The kinematic limits to respect for this setpoint.
-     * @param prevSetpoint The previous setpoint motion. Normally, you'd pass in the
-     *                     previous
-     *                     iteration setpoint instead of the actual
-     *                     measured/estimated kinematic state.
      * @param desiredState The desired state of motion, such as from the driver
      *                     sticks or a path
      *                     following algorithm.
-     * @param dt           The loop time.
      * @return A Setpoint object that satisfies all of the KinematicLimits while
-     *         converging to
-     *         desiredState quickly.
+     *         converging to desiredState quickly.
      */
-    public SwerveSetpoint generateSetpoint(
-            final ModuleLimits limits,
-            final SwerveSetpoint prevSetpoint,
+    public SwerveSetpoint processSetpoint(ChassisSpeeds desiredState) {
+        if (disabled) {
+            return new SwerveSetpoint(
+                    desiredState,
+                    kinematics.toSwerveModuleStates(desiredState));
+        }
+        Tracer.startTrace("GenerateSetpoint");
+        prevSetpoint = generateSetpointInner(desiredState, ConstValues.PERIODIC_TIME);
+        Tracer.endTrace();
+        return prevSetpoint;
+    }
+
+    private SwerveSetpoint generateSetpointInner(
             ChassisSpeeds desiredState,
             double dt) {
+
         final Translation2d[] modules = moduleLocations;
 
         SwerveModuleState[] desiredModuleState = kinematics.toSwerveModuleStates(desiredState);
@@ -286,7 +300,7 @@ public class SwerveSetpointGenerator {
             // the complement
             // of the desired
             // angle, and accelerate again.
-            return generateSetpoint(limits, prevSetpoint, new ChassisSpeeds(), dt);
+            return generateSetpointInner(new ChassisSpeeds(), dt);
         }
 
         // Compute the deltas between start and goal. We can then interpolate from the

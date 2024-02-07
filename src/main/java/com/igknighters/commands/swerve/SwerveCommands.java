@@ -22,7 +22,7 @@ public class SwerveCommands {
     }
 
     public static Command commandStopDrives(final Swerve swerve) {
-        return swerve.runOnce(() -> swerve.setModuleStates(new ChassisSpeeds(), false)).withName("commandStopDrives");
+        return swerve.runOnce(() -> swerve.drive(new ChassisSpeeds(), false)).withName("commandStopDrives");
     }
 
     public static Command orientGyro(final Swerve swerve) {

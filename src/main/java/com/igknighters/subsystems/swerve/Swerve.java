@@ -28,35 +28,38 @@ import com.igknighters.util.Tracer;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.FieldConstants;
 
-
 /**
  * This is the subsystem for our swerve drivetrain.
  * The Swerve subsystem is composed of 5 components, 4 SwerveModules and 1 Gyro.
- * The SwerveModules are the physical wheels and the Gyro is the sensor that measures the robot's rotation.
- * The Swerve subsystem is responsible for controlling the SwerveModules and reading the Gyro.
+ * The SwerveModules are the physical wheels and the Gyro is the sensor that
+ * measures the robot's rotation.
+ * The Swerve subsystem is responsible for controlling the SwerveModules and
+ * reading the Gyro.
  * 
- * The Swerve subsystem is also responsible for updating the robot's pose and submitting data to the GlobalState.
+ * The Swerve subsystem is also responsible for updating the robot's pose and
+ * submitting data to the GlobalState.
  * 
  * {@link https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html}
  * 
  * The coordinate system used in this code is the field coordinate system.
  */
 // Field Coordinate System from the blue alliance driver station
-//-------------------------
-//|           ^           |
-//|          Xpos         |
-//|           |           |
-//|           |           |
-//| <-Ypos----+----negY-> |
-//|           |           |
-//|           |           |
-//|          Xneg         |
-//|           v           |
-//-------------------------
+// -------------------------
+// | ^ |
+// | Xpos |
+// | | |
+// | | |
+// | <-Ypos----+----negY-> |
+// | | |
+// | | |
+// | Xneg |
+// | v |
+// -------------------------
 public class Swerve extends SubsystemBase {
+    private final Gyro gyro;
     private final SwerveModule[] swerveMods;
     private final SwerveVisualizer visualizer;
-    private final Gyro gyro;
+    private final SwerveSetpointProcessor setpointProcessor = new SwerveSetpointProcessor();
 
     public Swerve() {
 
@@ -80,28 +83,29 @@ public class Swerve extends SubsystemBase {
 
         GlobalState.setLocalizer(
                 new SwerveDrivePoseEstimator(
-                    kSwerve.SWERVE_KINEMATICS,
-                    getYawWrappedRot(),
-                    getModulePositions(),
-                    new Pose2d(
-                        new Translation2d(
-                            FieldConstants.FIELD_LENGTH / 2.0,
-                            FieldConstants.FIELD_WIDTH / 2.0
-                        ),
-                        new Rotation2d()
-                    )),
+                        kSwerve.SWERVE_KINEMATICS,
+                        getYawWrappedRot(),
+                        getModulePositions(),
+                        new Pose2d(
+                                new Translation2d(
+                                        FieldConstants.FIELD_LENGTH / 2.0,
+                                        FieldConstants.FIELD_WIDTH / 2.0),
+                                new Rotation2d())),
                 GlobalState.LocalizerType.Hybrid);
 
         visualizer = new SwerveVisualizer(this, swerveMods);
     }
 
-    public void driveChassisSpeeds(ChassisSpeeds speeds, boolean isOpenLoop) {
-        if (RobotBase.isReal())
-            speeds.omegaRadiansPerSecond *= -1.0;
+    public void drive(ChassisSpeeds speeds, boolean isOpenLoop) {
+        // if (RobotBase.isReal()) speeds.omegaRadiansPerSecond *= -1.0;
 
-        Logger.recordOutput("Swerve/targetChassisSpeed", speeds);
+        Logger.recordOutput("Swerve/rawTargetChassisSpeed", speeds);
 
-        setModuleStates(speeds, isOpenLoop);
+        var output = setpointProcessor.processSetpoint(speeds);
+
+        Logger.recordOutput("Swerve/processedTargetChassisSpeed", output.chassisSpeeds());
+
+        setModuleStates(output.moduleStates(), isOpenLoop);
     }
 
     /**
@@ -157,10 +161,6 @@ public class Swerve extends SubsystemBase {
         for (SwerveModule module : swerveMods) {
             module.setDesiredState(desiredStates[module.getModuleNumber()], isOpenLoop);
         }
-    }
-
-    public void setModuleStates(ChassisSpeeds chassisSpeeds, boolean isOpenLoop) {
-        setModuleStates(kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(chassisSpeeds), isOpenLoop);
     }
 
     public SwerveModuleState[] getModuleStates() {

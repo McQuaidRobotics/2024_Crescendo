@@ -51,7 +51,7 @@ public class RobotContainer {
             Autos.createSendableChooser(swerve);
         }
 
-        if (allSubsystems.umbrella.isPresent()){
+        if (allSubsystems.umbrella.isPresent()) {
             var umbrella = allSubsystems.umbrella.get();
             umbrella.setDefaultCommand(UmbrellaCommands.spinUmbrella(umbrella));
         }
@@ -71,7 +71,7 @@ public class RobotContainer {
                 swerve::getPose,
                 swerve::resetOdometry,
                 swerve::getChassisSpeed,
-                chassisSpeeds -> swerve.driveChassisSpeeds(
+                chassisSpeeds -> swerve.drive(
                         chassisSpeeds, false),
                 new HolonomicPathFollowerConfig(
                         kAuto.AUTO_TRANSLATION_PID,

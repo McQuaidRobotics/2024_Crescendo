@@ -168,6 +168,8 @@ public final class ConstValues {
         public static final double MAX_ANGULAR_VELOCITY = MAX_DRIVE_VELOCITY / DRIVEBASE_RADIUS;
         public static final double MAX_ANGULAR_ACCELERATION = MAX_ANGULAR_VELOCITY / ACCELERATION_TIME;
 
+        public static final double MAX_STEERING_VELOCITY = Motors.Falcon500Foc.FREE_SPEED / (ANGLE_GEAR_RATIO * MOTOR_CLOSED_LOOP_OUTPUT_SCALAR);
+
         /* Inverts */
         public static final InvertedValue ANGLE_MOTOR_INVERT = InvertedValue.Clockwise_Positive;
         public static final InvertedValue DRIVE_MOTOR_INVERT = InvertedValue.CounterClockwise_Positive;
