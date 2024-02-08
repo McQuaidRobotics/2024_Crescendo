@@ -19,16 +19,13 @@ public class AutosCmdRegister {
         NamedCommands.registerCommand("StowPosition", new InstantCommand());
         NamedCommands.registerCommand("Aim", new InstantCommand());
         NamedCommands.registerCommand("Shoot", new InstantCommand());
-        try {
-            SpecializedNamedCommands.registerCommand(
-                "Aim",
-                SpecializedNamedCommand.fromMethod(
-                    TestCmdMakers.class.getMethod("makeAim", Double.class),
-                    Double.class
-            ));
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
+        SpecializedNamedCommands.registerCommand(
+            "Aim",
+            SpecializedNamedCommand.fromMethod(
+                TestCmdMakers.class,
+                "makeAim",
+                Double.class
+        ));
 
         SpecializedNamedCommands.generateSpecialized();
     }

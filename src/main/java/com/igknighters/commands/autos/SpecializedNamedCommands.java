@@ -1,7 +1,6 @@
 package com.igknighters.commands.autos;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -42,10 +41,10 @@ public class SpecializedNamedCommands {
             return fn.apply(paramObjects);
         }
 
-        public static SpecializedNamedCommand fromMethod(Method method, Class<?>... params) {
+        public static SpecializedNamedCommand fromMethod(Class<?> clazz, String methodName, Class<?>... params) {
             return new SpecializedNamedCommand(args -> {
                 try {
-                    return (Command) method.invoke(null, args);
+                    return (Command) clazz.getMethod(methodName, params).invoke(null, args);
                 } catch (Exception e) {
                     DriverStation.reportError(e.getMessage(), true);
                     throw new IllegalArgumentException("Error constructing command");
