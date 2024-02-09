@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class SpecializedNamedCommands {
-    private static HashMap<String, SpecializedNamedCommand> commands = new HashMap<>();
+    private final static HashMap<String, SpecializedNamedCommand> commands = new HashMap<>();
 
     private static Object fromString(String s, Class<?> clazz) {
         if (clazz == Integer.class) {
@@ -110,5 +110,7 @@ public class SpecializedNamedCommands {
                 }
             }
         }
+
+        commands.clear();
     }
 }
