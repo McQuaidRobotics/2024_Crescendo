@@ -45,7 +45,7 @@ public class PivotReal implements Pivot {
 
     public PivotReal() {
         gyro = new Pigeon2(kPivot.PIGEON_ID);
-        gyroMeasurement = gyro.getPitch();
+        gyroMeasurement = gyro.getRoll();
 
         gyroMeasurement.setUpdateFrequency(100);
 
@@ -168,7 +168,7 @@ public class PivotReal implements Pivot {
 
         inputs.radians = motorRotsToMechRadians(motorRots.getValue());
         inputs.radiansPerSecond = motorRotsToMechRadians(motorVelo.getValue());
-        inputs.gyroRadians = Units.degreesToRadians(gyroMeasurement.getValue());
+        inputs.gyroRadians = Math.abs(Units.degreesToRadians(gyroMeasurement.getValue()));
         inputs.leftVolts = leaderMotorVolts.getValue();
         inputs.rightVolts = followerMotorVolts.getValue();
         inputs.leftAmps = leaderMotorAmps.getValue();
@@ -176,7 +176,7 @@ public class PivotReal implements Pivot {
         inputs.leftTemp = leaderMotorTemp.getValue();
         inputs.rightTemp = followerMotorTemp.getValue();
 
-        if (Math.abs(inputs.radiansPerSecond - inputs.targetRadians) < kPivot.RESEED_TOLERANCE
+        if (Math.abs(inputs.radiansPerSecond) < 0.33
                 && inputs.radians < Math.PI / 2.2 // ensuers backlash is going the right way (kinda)
         ) {
             seedPivot();
