@@ -19,11 +19,15 @@ public class TestingController extends ControllerParent {
         /// FACE BUTTONS
         this.A.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
             trig.onTrue(Commands.runOnce(() -> {
-                allss.stem.get().setStemPosition(StemPosition.fromDegrees(50.0, 0.0, 0.0));
+                allss.stem.get().setStemPosition(StemPosition.fromDegrees(80.0, 0.0, 0.0));
             }));
         });
 
-        // this.B.binding =
+        this.B.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
+            trig.onTrue(Commands.runOnce(() -> {
+                allss.stem.get().setStemPosition(StemPosition.fromDegrees(20.0, 0.0, 0.0));
+            }));
+        });
 
         // this.X.binding =
 

@@ -301,8 +301,8 @@ public final class ConstValues {
             public static final int PIGEON_ID = 31;
 
             public static final double MOTOR_kP = 0.1;
-            public static final double MOTOR_kI = 0;
-            public static final double MOTOR_kD = 0;
+            public static final double MOTOR_kI = 0.0;
+            public static final double MOTOR_kD = 0.0;
 
             public static final double MAX_VELOCITY = 100;
             public static final double MAX_ACCELERATION = 100;

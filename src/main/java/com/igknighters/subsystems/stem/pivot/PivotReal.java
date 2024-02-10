@@ -138,7 +138,8 @@ public class PivotReal implements Pivot {
             return;
         }
         inputs.targetRadians = radians;
-        this.leaderMotor.setControl(new MotionMagicDutyCycle(mechRadiansToMotorRots(radians)));
+        // this.leaderMotor.setControl(new MotionMagicDutyCycle(mechRadiansToMotorRots(radians))); <- needs to be tuned
+        this.leaderMotor.setControl(new PositionDutyCycle(mechRadiansToMotorRots(radians)));
     }
 
     @Override
