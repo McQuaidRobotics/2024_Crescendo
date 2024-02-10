@@ -1,5 +1,8 @@
 package com.igknighters;
 
+
+import java.util.ArrayList;
+
 import com.ctre.phoenix.led.Animation;
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdleConfiguration;
@@ -13,11 +16,12 @@ import com.pathplanner.lib.auto.AutoBuilder.TriFunction;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class LED {
+    private final static int NUMLEDS = 308;
+
 
     private static LED instance;
 
@@ -28,6 +32,16 @@ public class LED {
         return instance;
     }
 
+    private final CANdle candle;
+
+    private final Timer timer;
+    private double duration;
+
+    private ArrayList<PartialAnimation> animations;
+
+    /**
+     * Defines specific behavior for a pattern
+     */
     public static class LEDAnimDescriptor {
         public int r = 0, g = 0, b = 0;
         public double speed;
@@ -51,13 +65,10 @@ public class LED {
             return fn.apply(this, numLed, ledOffset);
         }
     }
-
-    private final static int NUMLEDS = 8;
-    private static int numPatterns = 1;
     
     public enum LedAnimations {
         DISABLED(
-            new LEDAnimDescriptor(255, 0, 0, 0.2, Direction.Forward),
+            new LEDAnimDescriptor(190, 250, 255, 0.5, Direction.Forward),
             (desc, num, offset) -> {
                 return new ColorFlowAnimation(
                     desc.r, desc.g, desc.b, 0, desc.speed, num, desc.direction, offset
@@ -73,7 +84,7 @@ public class LED {
         AUTO(new LEDAnimDescriptor(1.0, 0.5),
             (desc, num, offset) -> {
                 return new RainbowAnimation(
-                    desc.brightness, desc.speed, num
+                    desc.brightness, desc.speed, num, false, offset
                 );
             }),
         TEST(new LEDAnimDescriptor(0, 0, 255, 0.2, Direction.Forward),
@@ -99,7 +110,12 @@ public class LED {
                 return new StrobeAnimation(
                     desc.r, desc.g, desc.b, 0, desc.speed, num, offset
                 );
-            });
+            }),
+        OFF(new LEDAnimDescriptor(0, 0), (desc, num, offset) -> {
+            return new RainbowAnimation(
+                desc.brightness, desc.speed, num
+            );
+        });
 
         private final LEDAnimDescriptor desc;
         private final TriFunction<LEDAnimDescriptor, Integer, Integer, Animation> genFn;
@@ -113,106 +129,171 @@ public class LED {
             this.genFn = fn;
         }
     }
+
+    private static record PartialAnimation(
+        int leds,
+        int offset,
+        LedAnimations anim
+    ) {
+        public Animation getAnim() {
+            return this.anim.getAnim(leds, offset);
+        }
+    }
+
+    public class DurationHandle {
+        LED led;
+        private DurationHandle(LED led) {
+            this.led = led;
+        }
+
+        public void withDuration(double duration) {
+            led.duration = duration;
+        }
+    }
     
-    
-    
-    private Timer timer;
-    private Double duration;
-    private LedAnimations animation1;
-    private LedAnimations animation2;
-    private LedAnimations lastAnimation;
-    private CANdle candle;
-    private CANdleConfiguration config;
-    private XboxController controller = new XboxController(0);
 
     public LED() {
         this.timer = new Timer();
-        this.animation1 = LedAnimations.DISABLED;
-        this.animation2 = LedAnimations.DISABLED;
-        this.lastAnimation = LedAnimations.DISABLED;
         this.duration = 0.0;
         candle = new CANdle(52);
-        config = new CANdleConfiguration();
+        var config = new CANdleConfiguration();
         config.v5Enabled = true;
         config.stripType = LEDStripType.RGB;
-        config.brightnessScalar = 0.1;
+        config.brightnessScalar = 1.0;
         config.disableWhenLOS = true;
         candle.configAllSettings(config);
-        sendAnimation(animation1, 0);
 
         new Trigger(DriverStation::isFMSAttached)
-                .and(() -> Math.abs(DriverStation.getMatchTime() - 30.0) < 0.2)
-                .onTrue(new InstantCommand(() -> this.setLed(LedAnimations._20S_LEFT, 2)));
-
+                .and(() -> Math.abs(DriverStation.getMatchTime() - 20.0) < 0.2)
+                .onTrue(new InstantCommand(() -> this.sendAnimation(LedAnimations._20S_LEFT).withDuration(2.0)));
     }
 
     
-    private void sendAnimation(LedAnimations anim, int offset) {
-        candle.animate(anim.getAnim(NUMLEDS/numPatterns, offset));
+    public DurationHandle sendAnimation(LedAnimations anim) {
+        return sendMultiAnimation(1.0, anim);
     }
     
-    private void sendMultiAnimation(LedAnimations anim1, LedAnimations anim2){
-        candle.animate(anim1.getAnim(NUMLEDS/numPatterns, 0), 0);
-        candle.animate(anim2.getAnim(NUMLEDS/numPatterns, NUMLEDS/numPatterns), 1);
+    public DurationHandle sendMultiAnimation(
+        double percent1, LedAnimations anim1
+    ){
+        this.sendMultiAnimation(
+            new double[] {percent1},
+            new LedAnimations[] {anim1}
+        );
+        return new DurationHandle(this);
     }
 
-    public void setLed(LedAnimations anim, double seconds) {
+    public DurationHandle sendMultiAnimation(
+        double percent1, LedAnimations anim1,
+        double percent2, LedAnimations anim2
+    ){
+        this.sendMultiAnimation(
+            new double[] {percent1, percent2},
+            new LedAnimations[] {anim1, anim2}
+        );
+        return new DurationHandle(this);
+    }
+
+    public DurationHandle sendMultiAnimation(
+        double percent1, LedAnimations anim1,
+        double percent2, LedAnimations anim2,
+        double percent3, LedAnimations anim3
+    ){
+        this.sendMultiAnimation(
+            new double[] {percent1, percent2, percent3},
+            new LedAnimations[] {anim1, anim2, anim3}
+        );
+        return new DurationHandle(this);
+    }
+
+    public DurationHandle sendMultiAnimation(
+        double percent1, LedAnimations anim1,
+        double percent2, LedAnimations anim2,
+        double percent3, LedAnimations anim3,
+        double percent4, LedAnimations anim4
+    ){
+        this.sendMultiAnimation(
+            new double[] {percent1, percent2, percent3, percent4},
+            new LedAnimations[] {anim1, anim2, anim3, anim4}
+        );
+        return new DurationHandle(this);
+    }
+
+    public DurationHandle sendMultiAnimation(
+        double percent1, LedAnimations anim1,
+        double percent2, LedAnimations anim2,
+        double percent3, LedAnimations anim3,
+        double percent4, LedAnimations anim4,
+        double percent5, LedAnimations anim5
+    ){
+        this.sendMultiAnimation(
+            new double[] {percent1, percent2, percent3, percent4, percent5},
+            new LedAnimations[] {anim1, anim2, anim3, anim4, anim5}
+        );
+        return new DurationHandle(this);
+    }
+
+    public DurationHandle sendMultiAnimation(
+        final double[] percents, final LedAnimations[] anims
+    ) {
+        if (percents.length != anims.length || anims.length > 10) {
+            DriverStation.reportError(
+                "Send Multi Animation Error: AnimsLength(" + anims.length
+                + ") PercentsLength(" + percents.length + ")",
+                true
+            );
+        }
+
+        this.animations = new ArrayList<>();
+        
+        int offset = 0;
+        double used = 0.0;
+
+        for (int i = 0; i < percents.length; i++) {
+            double percent = percents[i];
+            LedAnimations anim = anims[i];
+
+            if (1.0 - used < percent) {
+                percent = 1.0-used;
+            }
+
+            used += percent;
+
+            int numPixels = (int) Math.floor(NUMLEDS * percent);
+
+            this.animations.add(new PartialAnimation(numPixels, offset, anim));
+
+            offset += numPixels;
+
+            if (offset == NUMLEDS) {
+                break;
+            }
+        }
+
+        this.duration = 9999.0;
         this.timer.restart();
-        this.animation1 = anim;
-        this.duration = seconds;
-    }
-
-
-    public void setLed(LedAnimations anim) {
-        setLed(anim, Double.POSITIVE_INFINITY);
+        return new DurationHandle(this);
     }
 
     public void setDefault() {
-        numPatterns = 1;
-        animation2 = LedAnimations.DISABLED;
         this.duration = 0.0;
         if (DriverStation.isDisabled()) {
-            this.animation1 = LedAnimations.DISABLED;
+            sendAnimation(LedAnimations.DISABLED);
         } else if (DriverStation.isAutonomous()) {
-            this.animation1 = LedAnimations.AUTO;
+            sendAnimation(LedAnimations.TELEOP);
         } else {
-            this.animation1 = LedAnimations.TELEOP;
+            sendAnimation(LedAnimations.AUTO);
         }
         
     }
 
-    public void shooting() {
-        duration = 3.0;
-        numPatterns++;
-        if (timer.hasElapsed(duration)){
-            this.animation2 = LedAnimations.DISABLED;
-        }
-        else{
-            if (DriverStation.isDisabled()) {
-            this.animation1 = LedAnimations.DISABLED;
-        } else if (DriverStation.isAutonomous()) {
-            this.animation1 = LedAnimations.AUTO;
-        } else {
-            this.animation1 = LedAnimations.TELEOP;
-        }
-            this.animation2 = LedAnimations.SHOOTING;
-            sendMultiAnimation(animation1, animation2);
-        }
-    }
-
     public void run() {
-        if (controller.getAButton()) {
-            shooting();
-        }
         if (timer.hasElapsed(duration)) {
             setDefault();
         }
-        if (animation1 != lastAnimation || duration == 0) {
-            sendMultiAnimation(animation1, animation2);
-            lastAnimation = animation1;
+        for (int i = 0; i < this.animations.size(); i++) {
+            var partial = this.animations.get(i);
+            candle.animate(partial.getAnim(), i);
         }
-
     }
-    
-
 }

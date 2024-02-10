@@ -7,10 +7,10 @@ import com.igknighters.LED;
 
 public class LEDCommands {
     public Command commandSetLED(LedAnimations pattern) {
-        return Commands.runOnce(() -> LED.getInstance().setLed(pattern));
+        return Commands.runOnce(() -> LED.getInstance().sendAnimation(pattern));
     }
 
     public Command commandSetLED(LedAnimations pattern, double seconds) {
-        return Commands.runOnce(() -> LED.getInstance().setLed(pattern, seconds));
+        return Commands.runOnce(() -> LED.getInstance().sendAnimation(pattern).withDuration(seconds));
     }
 }
