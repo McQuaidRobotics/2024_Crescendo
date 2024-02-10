@@ -56,16 +56,16 @@ public class RobotContainer {
         // umbrella.setDefaultCommand(UmbrellaCommands.spinUmbrella(umbrella));
         // }
 
-        // if (allSubsystems.stem.isPresent()) {
-        //     var stem = allSubsystems.stem.get();
-        //     stem.setDefaultCommand(
-        //             stem.run(() -> {
-        //                 stem.setStemVolts(
-        //                         6.0 * driverController.leftStickY(0.1).getAsDouble(),
-        //                         0.0,
-        //                         0.0);
-        //             }));
-        // }
+        if (allSubsystems.stem.isPresent()) {
+            var stem = allSubsystems.stem.get();
+            stem.setDefaultCommand(
+                    stem.run(() -> {
+                        stem.setStemVolts(
+                                6.0 * driverController.leftStickY(0.1).getAsDouble(),
+                                0.0,
+                                0.0);
+                    }));
+        }
     }
 
     private void setupAutos(Swerve swerve) {

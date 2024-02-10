@@ -33,7 +33,7 @@ public class PivotReal implements Pivot {
 
     private final StatusSignal<Double> motorRots, motorVelo, leaderMotorVolts, followerMotorVolts;
     private final StatusSignal<Double> leaderMotorAmps, followerMotorAmps, leaderMotorTemp, followerMotorTemp;
-    /**Could be pitch or roll */
+    /** Could be pitch or roll */
     private final StatusSignal<Double> gyroMeasurement;
 
     private final PivotInputs inputs;
@@ -95,8 +95,7 @@ public class PivotReal implements Pivot {
         followerMotor.optimizeBusUtilization();
 
         followerMotor.setControl(
-            new Follower(kPivot.LEFT_MOTOR_ID, true)
-        );
+                new Follower(kPivot.LEFT_MOTOR_ID, true));
 
         BootupLogger.bootupLog("    Pivot initialized (real)");
     }
@@ -122,7 +121,7 @@ public class PivotReal implements Pivot {
         motorCfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
         motorCfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = mechRadiansToMotorRots(kPivot.PIVOT_MAX_RADIANS);
-        motorCfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = mechRadiansToMotorRots(kPivot.PIVOT_MAX_RADIANS);
+        motorCfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = mechRadiansToMotorRots(kPivot.PIVOT_MIN_RADIANS);
 
         motorCfg.Voltage.PeakForwardVoltage = kPivot.VOLTAGE_COMP;
         motorCfg.Voltage.PeakReverseVoltage = -kPivot.VOLTAGE_COMP;
@@ -133,12 +132,13 @@ public class PivotReal implements Pivot {
     @Override
     public void setPivotRadians(double radians) {
         if (radians > kPivot.PIVOT_MAX_RADIANS || radians < kPivot.PIVOT_MIN_RADIANS) {
-            String errorMsg = "Pivot setpoint of " + radians + " radians is outside the scope of minimum " + kPivot.PIVOT_MIN_RADIANS + " radians and maximum " + kPivot.PIVOT_MAX_RADIANS + " radians!";
+            String errorMsg = "Pivot setpoint of " + radians + " radians is outside the scope of minimum "
+                    + kPivot.PIVOT_MIN_RADIANS + " radians and maximum " + kPivot.PIVOT_MAX_RADIANS + " radians!";
             DriverStation.reportWarning(errorMsg, false);
             return;
         }
         inputs.targetRadians = radians;
-        this.leaderMotor.setControl(new PositionDutyCycle(mechRadiansToMotorRots(radians)));
+        this.leaderMotor.setControl(new MotionMagicDutyCycle(mechRadiansToMotorRots(radians)));
     }
 
     @Override
@@ -168,8 +168,7 @@ public class PivotReal implements Pivot {
                 BaseStatusSignal.refreshAll(
                         motorRots, motorVelo,
                         leaderMotorVolts, leaderMotorAmps,
-                        leaderMotorTemp
-                    ));
+                        leaderMotorTemp));
 
         FaultManager.captureFault(
                 StemHW.FollowerMotor,
