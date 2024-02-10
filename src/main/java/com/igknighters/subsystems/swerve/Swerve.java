@@ -94,18 +94,23 @@ public class Swerve extends SubsystemBase {
                 GlobalState.LocalizerType.Hybrid);
 
         visualizer = new SwerveVisualizer(this, swerveMods);
+
+        setpointProcessor.setDisabled(true);
     }
 
     public void drive(ChassisSpeeds speeds, boolean isOpenLoop) {
         // if (RobotBase.isReal()) speeds.omegaRadiansPerSecond *= -1.0;
 
-        Logger.recordOutput("Swerve/rawTargetChassisSpeed", speeds);
+        // Logger.recordOutput("Swerve/rawTargetChassisSpeed", speeds);
 
-        var output = setpointProcessor.processSetpoint(speeds);
+        // var output = setpointProcessor.processSetpoint(speeds);
 
-        Logger.recordOutput("Swerve/processedTargetChassisSpeed", output.chassisSpeeds());
+        // Logger.recordOutput("Swerve/processedTargetChassisSpeed", output.chassisSpeeds());
 
-        setModuleStates(output.moduleStates(), isOpenLoop);
+        setModuleStates(
+            kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(speeds),
+            isOpenLoop
+        );
     }
 
     /**
