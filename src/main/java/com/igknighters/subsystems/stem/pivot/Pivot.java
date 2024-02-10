@@ -6,8 +6,6 @@ import org.littletonrobotics.junction.inputs.LoggableInputs;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.subsystems.Component;
 
-import edu.wpi.first.wpilibj.DriverStation;
-
 public interface Pivot extends Component {
 
     public static class PivotInputs implements LoggableInputs {

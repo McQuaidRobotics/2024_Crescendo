@@ -300,13 +300,13 @@ public final class ConstValues {
             public static final int RIGHT_MOTOR_ID = 12;
             public static final int PIGEON_ID = 31;
 
-            public static final double MOTOR_kP = 0.1;
+            public static final double MOTOR_kP = 1.0;
             public static final double MOTOR_kI = 0.0;
             public static final double MOTOR_kD = 0.0;
 
             public static final double MAX_VELOCITY = 100;
-            public static final double MAX_ACCELERATION = 100;
-            public static final double MAX_JERK = 100;
+            public static final double MAX_ACCELERATION = 500;
+            public static final double MAX_JERK = 1000;
 
             public static final double PIVOT_MIN_RADIANS = 2.0 * Conv.DEGREES_TO_RADIANS;
 

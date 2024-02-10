@@ -4,8 +4,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
-import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -13,7 +12,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -138,8 +136,7 @@ public class PivotReal implements Pivot {
             return;
         }
         inputs.targetRadians = radians;
-        // this.leaderMotor.setControl(new MotionMagicDutyCycle(mechRadiansToMotorRots(radians))); <- needs to be tuned
-        this.leaderMotor.setControl(new PositionDutyCycle(mechRadiansToMotorRots(radians)));
+        this.leaderMotor.setControl(new MotionMagicVoltage(mechRadiansToMotorRots(radians)));
     }
 
     @Override

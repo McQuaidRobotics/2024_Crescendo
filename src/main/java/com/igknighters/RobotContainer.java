@@ -7,7 +7,6 @@ import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.controllers.DriverController;
 import com.igknighters.controllers.OperatorController;
 import com.igknighters.controllers.TestingController;
-import com.igknighters.controllers.ControllerParent.ControllerType;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
