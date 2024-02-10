@@ -3,6 +3,8 @@ package com.igknighters;
 
 import java.util.ArrayList;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix.led.Animation;
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdleConfiguration;
@@ -154,6 +156,7 @@ public class LED {
 
     public LED() {
         this.timer = new Timer();
+        timer.start();
         this.duration = 0.0;
         candle = new CANdle(52);
         var config = new CANdleConfiguration();
@@ -276,24 +279,27 @@ public class LED {
     }
 
     public void setDefault() {
-        this.duration = 0.0;
         if (DriverStation.isDisabled()) {
             sendAnimation(LedAnimations.DISABLED);
         } else if (DriverStation.isAutonomous()) {
-            sendAnimation(LedAnimations.TELEOP);
-        } else {
             sendAnimation(LedAnimations.AUTO);
+        } else {
+            sendAnimation(LedAnimations.TELEOP);
         }
-        
+        this.duration = 0.0;
     }
 
     public void run() {
         if (timer.hasElapsed(duration)) {
             setDefault();
         }
+        String log = "[";
         for (int i = 0; i < this.animations.size(); i++) {
             var partial = this.animations.get(i);
             candle.animate(partial.getAnim(), i);
+            log += partial.toString() + ",";
         }
+        Logger.recordOutput("LED", log + "]");
+        
     }
 }
