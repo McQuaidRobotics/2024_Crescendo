@@ -5,12 +5,15 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
+import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -115,6 +118,12 @@ public class PivotReal implements Pivot {
         motorCfg.HardwareLimitSwitch.ReverseLimitEnable = true;
         motorCfg.HardwareLimitSwitch.ForwardLimitEnable = true;
 
+        motorCfg.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+        motorCfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+
+        motorCfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = mechRadiansToMotorRots(kPivot.PIVOT_MAX_RADIANS);
+        motorCfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = mechRadiansToMotorRots(kPivot.PIVOT_MAX_RADIANS);
+
         motorCfg.Voltage.PeakForwardVoltage = kPivot.VOLTAGE_COMP;
         motorCfg.Voltage.PeakReverseVoltage = -kPivot.VOLTAGE_COMP;
 
@@ -123,8 +132,13 @@ public class PivotReal implements Pivot {
 
     @Override
     public void setPivotRadians(double radians) {
+        if (radians > kPivot.PIVOT_MAX_RADIANS || radians < kPivot.PIVOT_MIN_RADIANS) {
+            String errorMsg = "Pivot setpoint of " + radians + " radians is outside the scope of minimum " + kPivot.PIVOT_MIN_RADIANS + " radians and maximum " + kPivot.PIVOT_MAX_RADIANS + " radians!";
+            DriverStation.reportWarning(errorMsg, false);
+            return;
+        }
         inputs.targetRadians = radians;
-        this.leaderMotor.setControl(new MotionMagicDutyCycle(mechRadiansToMotorRots(radians)));
+        this.leaderMotor.setControl(new PositionDutyCycle(mechRadiansToMotorRots(radians)));
     }
 
     @Override

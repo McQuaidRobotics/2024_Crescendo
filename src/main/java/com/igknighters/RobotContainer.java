@@ -7,6 +7,7 @@ import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.controllers.DriverController;
 import com.igknighters.controllers.OperatorController;
 import com.igknighters.controllers.TestingController;
+import com.igknighters.controllers.ControllerParent.ControllerType;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
@@ -51,22 +52,20 @@ public class RobotContainer {
         }
 
         // if (allSubsystems.umbrella.isPresent()){
-        //     var umbrella = allSubsystems.umbrella.get();
-        //     umbrella.setDefaultCommand(UmbrellaCommands.spinUmbrella(umbrella));
+        // var umbrella = allSubsystems.umbrella.get();
+        // umbrella.setDefaultCommand(UmbrellaCommands.spinUmbrella(umbrella));
         // }
 
-        if (allSubsystems.stem.isPresent()) {
-            var stem = allSubsystems.stem.get();
-            stem.setDefaultCommand(
-                stem.run(() -> {
-                    stem.setStemVolts(
-                        6.0 * driverController.leftStickY(0.1).getAsDouble(),
-                        0.0,
-                        0.0
-                    );
-                })
-            );
-        }
+        // if (allSubsystems.stem.isPresent()) {
+        //     var stem = allSubsystems.stem.get();
+        //     stem.setDefaultCommand(
+        //             stem.run(() -> {
+        //                 stem.setStemVolts(
+        //                         6.0 * driverController.leftStickY(0.1).getAsDouble(),
+        //                         0.0,
+        //                         0.0);
+        //             }));
+        // }
     }
 
     private void setupAutos(Swerve swerve) {
