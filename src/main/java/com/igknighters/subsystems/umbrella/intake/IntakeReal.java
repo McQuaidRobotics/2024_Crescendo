@@ -7,13 +7,15 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.ForwardLimitSourceValue;
 import com.ctre.phoenix6.signals.ForwardLimitValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.ReverseLimitSourceValue;
 import com.ctre.phoenix6.signals.ReverseLimitValue;
 import com.igknighters.constants.ConstValues.kUmbrella.kIntake;
 import com.igknighters.util.BootupLogger;
 import com.igknighters.util.FaultManager;
 import com.igknighters.constants.HardwareIndex.UmbrellaHW;
-
 
 import edu.wpi.first.math.util.Units;
 
@@ -29,15 +31,16 @@ public class IntakeReal implements Intake {
 
     public IntakeReal() {
         FaultManager.captureFault(
-            UmbrellaHW.IntakeMotor,
-            upperMotor.getConfigurator()
-                .apply(new TalonFXConfiguration())
-        );
+                UmbrellaHW.IntakeMotor,
+                upperMotor.getConfigurator()
+                        .apply(new TalonFXConfiguration()));
         FaultManager.captureFault(
-            UmbrellaHW.IntakeMotor,
-            lowerMotor.getConfigurator()
-                .apply(new TalonFXConfiguration())
-        );
+                UmbrellaHW.IntakeMotor,
+                lowerMotor.getConfigurator()
+                        .apply(new TalonFXConfiguration()));
+
+        upperMotor.getConfigurator().apply(motorUpperFollower());
+        lowerMotor.getConfigurator().apply(motorLowerUpper());
 
         veloSignalUpper = upperMotor.getVelocity();
         voltSignalUpper = upperMotor.getMotorVoltage();
@@ -76,6 +79,40 @@ public class IntakeReal implements Intake {
         BootupLogger.bootupLog("    Intake initialized (real)");
     }
 
+    public TalonFXConfiguration motorUpperFollower() {
+        var cfg = new TalonFXConfiguration();
+
+        cfg.HardwareLimitSwitch.ForwardLimitEnable = true;
+        cfg.HardwareLimitSwitch.ReverseLimitEnable = true;
+
+        cfg.HardwareLimitSwitch.ForwardLimitRemoteSensorID = kIntake.LOWER_MOTOR_ID;
+        cfg.HardwareLimitSwitch.ReverseLimitRemoteSensorID = kIntake.LOWER_MOTOR_ID;
+
+        cfg.HardwareLimitSwitch.ForwardLimitSource = ForwardLimitSourceValue.RemoteTalonFX;
+        cfg.HardwareLimitSwitch.ReverseLimitSource = ReverseLimitSourceValue.RemoteTalonFX;
+
+        cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+        cfg.CurrentLimits.StatorCurrentLimitEnable = true;
+        cfg.CurrentLimits.StatorCurrentLimit = 80.0;
+
+        return cfg;
+    }
+
+    public TalonFXConfiguration motorLowerUpper() {
+        var cfg = new TalonFXConfiguration();
+
+        cfg.HardwareLimitSwitch.ForwardLimitEnable = true;
+        cfg.HardwareLimitSwitch.ReverseLimitEnable = true;
+
+        cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+        cfg.CurrentLimits.StatorCurrentLimitEnable = true;
+        cfg.CurrentLimits.StatorCurrentLimit = 80.0;
+
+        return cfg;
+    }
+
     @Override
     public void setVoltageOut(double volts) {
         inputs.voltsLower = volts;
@@ -88,13 +125,11 @@ public class IntakeReal implements Intake {
     public void turnIntakeRads(double radians) {
         setVoltageOut(0.0);
         upperMotor.setControl(new PositionDutyCycle(
-            upperMotor.getRotorPosition().getValue()
-            + Units.radiansToRotations(radians * kIntake.UPPER_DIFF))
-        );
+                upperMotor.getRotorPosition().getValue()
+                        + Units.radiansToRotations(radians * kIntake.UPPER_DIFF)));
         lowerMotor.setControl(new PositionDutyCycle(
-            lowerMotor.getRotorPosition().getValue()
-            + Units.radiansToRotations(radians))
-        );
+                lowerMotor.getRotorPosition().getValue()
+                        + Units.radiansToRotations(radians)));
     }
 
     @Override
@@ -110,10 +145,10 @@ public class IntakeReal implements Intake {
     @Override
     public void periodic() {
         FaultManager.captureFault(
-            UmbrellaHW.IntakeMotor,
-            BaseStatusSignal.refreshAll(
-                    veloSignalUpper, voltSignalUpper,
-                    currentSignalUpper, tempSignalUpper));
+                UmbrellaHW.IntakeMotor,
+                BaseStatusSignal.refreshAll(
+                        veloSignalUpper, voltSignalUpper,
+                        currentSignalUpper, tempSignalUpper));
 
         inputs.entranceBeamBroken = revLimitSignal.getValue().equals(ReverseLimitValue.ClosedToGround);
         inputs.exitBeamBroken = fwdLimitSignal.getValue().equals(ForwardLimitValue.ClosedToGround);
