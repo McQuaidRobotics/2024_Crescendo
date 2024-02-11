@@ -18,10 +18,10 @@ import com.igknighters.controllers.ControllerParent;
 public class TeleopSwerveTarget extends TeleopSwerveBase {
 
     private Translation2d targetTranslation = FieldConstants.APRIL_TAG_FIELD
-        .getTagPose(7)
-        .get()
-        .getTranslation()
-        .toTranslation2d();
+            .getTagPose(7)
+            .get()
+            .getTranslation()
+            .toTranslation2d();
 
     private double speedMultiplier = 0.85;
 
@@ -64,6 +64,6 @@ public class TeleopSwerveTarget extends TeleopSwerveBase {
                 rotVelo,
                 swerve.getYawWrappedRot());
 
-        swerve.driveChassisSpeeds(chassisSpeeds, false);
+        swerve.drive(chassisSpeeds, false);
     }
 }

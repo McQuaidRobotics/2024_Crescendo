@@ -61,8 +61,7 @@ public class SimplePathfindingCommand extends Command {
             double rotationDelayDistance,
             PathConstraints constraints,
             Optional<Supplier<Rotation2d>> rotationOverrideSupplier,
-            Swerve swerve
-    ) {
+            Swerve swerve) {
         addRequirements(swerve);
         this.swerve = swerve;
 
@@ -81,7 +80,7 @@ public class SimplePathfindingCommand extends Command {
                 kSwerve.DRIVEBASE_RADIUS);
         this.poseSupplier = swerve::getPose;
         this.speedsSupplier = swerve::getChassisSpeed;
-        this.output = chassisSpeeds -> swerve.driveChassisSpeeds(
+        this.output = chassisSpeeds -> swerve.drive(
                 chassisSpeeds, false);
         this.rotationDelayDistance = rotationDelayDistance;
         this.replanningConfig = kAuto.DYNAMIC_REPLANNING_CONFIG;
@@ -115,57 +114,52 @@ public class SimplePathfindingCommand extends Command {
 
     public SimplePathfindingCommand withEndVelo(double velo) {
         return new SimplePathfindingCommand(
-            targetPose,
-            velo,
-            rotationDelayDistance,
-            constraints,
-            rotationOverrideSupplier,
-            swerve
-        );
+                targetPose,
+                velo,
+                rotationDelayDistance,
+                constraints,
+                rotationOverrideSupplier,
+                swerve);
     }
 
     public SimplePathfindingCommand withRotDelayDist(double rotationDelayDistance) {
         return new SimplePathfindingCommand(
-            targetPose,
-            goalEndState.getVelocity(),
-            rotationDelayDistance,
-            constraints,
-            rotationOverrideSupplier,
-            swerve
-        );
+                targetPose,
+                goalEndState.getVelocity(),
+                rotationDelayDistance,
+                constraints,
+                rotationOverrideSupplier,
+                swerve);
     }
 
     public SimplePathfindingCommand withConstraints(PathConstraints constraints) {
         return new SimplePathfindingCommand(
-            targetPose,
-            goalEndState.getVelocity(),
-            rotationDelayDistance,
-            constraints,
-            rotationOverrideSupplier,
-            swerve
-        );
+                targetPose,
+                goalEndState.getVelocity(),
+                rotationDelayDistance,
+                constraints,
+                rotationOverrideSupplier,
+                swerve);
     }
 
     public SimplePathfindingCommand withRotationOverride(Supplier<Rotation2d> rotationOverrideSupplier) {
         return new SimplePathfindingCommand(
-            targetPose,
-            goalEndState.getVelocity(),
-            rotationDelayDistance,
-            constraints,
-            Optional.of(rotationOverrideSupplier),
-            swerve
-        );
+                targetPose,
+                goalEndState.getVelocity(),
+                rotationDelayDistance,
+                constraints,
+                Optional.of(rotationOverrideSupplier),
+                swerve);
     }
 
     public SimplePathfindingCommand withReplanningConfig(ReplanningConfig replanningConfig) {
         return new SimplePathfindingCommand(
-            targetPose,
-            goalEndState.getVelocity(),
-            rotationDelayDistance,
-            constraints,
-            rotationOverrideSupplier,
-            swerve
-        );
+                targetPose,
+                goalEndState.getVelocity(),
+                rotationDelayDistance,
+                constraints,
+                rotationOverrideSupplier,
+                swerve);
     }
 
     @Override
@@ -175,7 +169,8 @@ public class SimplePathfindingCommand extends Command {
         }
 
         if (rotationOverrideSupplier.isPresent()) {
-            PPHolonomicDriveController.setRotationTargetOverride(() -> Optional.of(rotationOverrideSupplier.get().get()));
+            PPHolonomicDriveController
+                    .setRotationTargetOverride(() -> Optional.of(rotationOverrideSupplier.get().get()));
         }
 
         currentTrajectoryOpt = Optional.empty();

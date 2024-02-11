@@ -5,7 +5,6 @@ import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 
 import org.littletonrobotics.junction.Logger;
@@ -19,11 +18,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
+
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kSwerve.AngleMotorConstants;
 import com.igknighters.constants.ConstValues.kSwerve.DriveMotorConstants;
 import com.igknighters.util.BootupLogger;
-import com.igknighters.util.SwerveModuleConstants;
 
 public class SwerveModuleReal implements SwerveModule {
     private final TalonFX driveMotor;
@@ -55,22 +55,41 @@ public class SwerveModuleReal implements SwerveModule {
         angleMotor = new TalonFX(moduleConstants.angleMotorID, kSwerve.CANBUS);
         angleEncoder = new CANcoder(moduleConstants.cancoderID, kSwerve.CANBUS);
 
-        configureDriveMotor();
-        configureAngleMotor();
-        configureCANcoder();
+        driveMotor.getConfigurator().apply(driveMotorConfig());
+        angleMotor.getConfigurator().apply(angleMotorConfig());
+        angleEncoder.getConfigurator().apply(cancoderConfig());
 
         drivePositionSignal = driveMotor.getPosition();
         driveVelocitySignal = driveMotor.getVelocity();
         driveVoltSignal = driveMotor.getMotorVoltage();
         driveAmpSignal = driveMotor.getTorqueCurrent();
 
+        drivePositionSignal.setUpdateFrequency(100);
+        driveVelocitySignal.setUpdateFrequency(100);
+        driveVoltSignal.setUpdateFrequency(100);
+        driveAmpSignal.setUpdateFrequency(100);
+
+        driveMotor.optimizeBusUtilization();
+
         anglePositionSignal = angleMotor.getPosition();
         angleVelocitySignal = angleMotor.getVelocity();
         angleVoltSignal = angleMotor.getMotorVoltage();
         angleAmpSignal = angleMotor.getTorqueCurrent();
 
+        anglePositionSignal.setUpdateFrequency(100);
+        angleVelocitySignal.setUpdateFrequency(100);
+        angleVoltSignal.setUpdateFrequency(100);
+        angleAmpSignal.setUpdateFrequency(100);
+
+        angleMotor.optimizeBusUtilization();
+
         angleAbsoluteSignal = angleEncoder.getAbsolutePosition();
         angleAbsoluteVeloSignal = angleEncoder.getVelocity();
+
+        angleAbsoluteSignal.setUpdateFrequency(100);
+        angleAbsoluteVeloSignal.setUpdateFrequency(100);
+
+        angleEncoder.optimizeBusUtilization();
 
         inputs = new SwerveModuleInputs();
 
@@ -80,7 +99,7 @@ public class SwerveModuleReal implements SwerveModule {
                         + ")");
     }
 
-    private void configureDriveMotor() {
+    private TalonFXConfiguration driveMotorConfig() {
         var driveConfig = new TalonFXConfiguration();
 
         driveConfig.MotorOutput.Inverted = kSwerve.DRIVE_MOTOR_INVERT;
@@ -91,16 +110,17 @@ public class SwerveModuleReal implements SwerveModule {
         driveConfig.Slot0.kD = DriveMotorConstants.kD;
         driveConfig.Slot0.kV = 12.0
                 / (kSwerve.MAX_DRIVE_VELOCITY / (kSwerve.WHEEL_CIRCUMFERENCE / kSwerve.DRIVE_GEAR_RATIO));
+        driveConfig.Slot0.kS = DriveMotorConstants.kS;
 
         driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         driveConfig.CurrentLimits.StatorCurrentLimit = kSwerve.SLIP_CURRENT;
         driveConfig.TorqueCurrent.PeakForwardTorqueCurrent = kSwerve.SLIP_CURRENT;
         driveConfig.TorqueCurrent.PeakReverseTorqueCurrent = -kSwerve.SLIP_CURRENT;
 
-        driveMotor.getConfigurator().apply(driveConfig);
+        return driveConfig;
     }
 
-    private void configureAngleMotor() {
+    private TalonFXConfiguration angleMotorConfig() {
         var angleConfig = new TalonFXConfiguration();
 
         angleConfig.MotorOutput.Inverted = kSwerve.ANGLE_MOTOR_INVERT;
@@ -119,16 +139,14 @@ public class SwerveModuleReal implements SwerveModule {
         }
         angleConfig.ClosedLoopGeneral.ContinuousWrap = true;
 
-        angleMotor.getConfigurator().apply(angleConfig);
+        return angleConfig;
     }
 
-    private void configureCANcoder() {
+    private CANcoderConfiguration cancoderConfig() {
         var canCoderConfig = new CANcoderConfiguration();
-        canCoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
-        canCoderConfig.MagnetSensor.SensorDirection = kSwerve.CANCODER_INVERT;
         canCoderConfig.MagnetSensor.MagnetOffset = -rotationOffset.getRotations();
 
-        angleEncoder.getConfigurator().apply(canCoderConfig);
+        return canCoderConfig;
     }
 
     public int getModuleNumber() {
@@ -161,8 +179,9 @@ public class SwerveModuleReal implements SwerveModule {
             var controlRequest = new DutyCycleOut(percentOutput).withEnableFOC(isPro);
             driveMotor.setControl(controlRequest);
         } else {
-            double rps = desiredState.speedMetersPerSecond / (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO);
+            double rps = (desiredState.speedMetersPerSecond / kSwerve.WHEEL_CIRCUMFERENCE) * kSwerve.DRIVE_GEAR_RATIO;
             var veloRequest = new VelocityVoltage(rps).withEnableFOC(isPro);
+            Logger.recordOutput("Swerve/SwerveModule[" + this.moduleNumber + "]/DriveRPS", rps);
             driveMotor.setControl(veloRequest);
         }
     }
@@ -185,7 +204,7 @@ public class SwerveModuleReal implements SwerveModule {
     }
 
     private double driveRotationsToMeters(double rotations) {
-        return rotations * (kSwerve.WHEEL_CIRCUMFERENCE * kSwerve.DRIVE_GEAR_RATIO);
+        return (rotations / kSwerve.DRIVE_GEAR_RATIO) * kSwerve.WHEEL_CIRCUMFERENCE;
     }
 
     @Override
@@ -197,8 +216,8 @@ public class SwerveModuleReal implements SwerveModule {
                 angleVoltSignal, angleAmpSignal,
                 angleAbsoluteSignal, angleAbsoluteVeloSignal);
 
-        inputs.angleAbsoluteRads = angleAbsoluteSignal.getValue() * (2.0 * Math.PI);
-        inputs.angleVeloRadPS = angleAbsoluteVeloSignal.getValue() * (2.0 * Math.PI);
+        inputs.angleAbsoluteRads = Units.rotationsToRadians(angleAbsoluteSignal.getValue());
+        inputs.angleVeloRadPS = Units.rotationsToRadians(angleAbsoluteVeloSignal.getValue());
         inputs.angleVolts = angleVoltSignal.getValue();
         inputs.angleAmps = angleAmpSignal.getValue();
 

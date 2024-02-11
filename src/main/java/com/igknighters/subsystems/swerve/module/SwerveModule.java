@@ -38,6 +38,7 @@ public interface SwerveModule extends Component {
             table.put("TargetAngleAbsoluteRadians", targetAngleAbsoluteRads);
             table.put("AngleVolts", angleVolts);
             table.put("AngleAmps", angleAmps);
+            table.put("AngleAbsoluteDegrees", angleAbsoluteRads * (180/Math.PI));
         }
 
         @Override

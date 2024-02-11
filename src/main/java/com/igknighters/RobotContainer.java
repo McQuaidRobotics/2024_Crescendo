@@ -65,7 +65,7 @@ public class RobotContainer {
                 swerve::getPose,
                 swerve::resetOdometry,
                 swerve::getChassisSpeed,
-                chassisSpeeds -> swerve.driveChassisSpeeds(
+                chassisSpeeds -> swerve.drive(
                         chassisSpeeds, false),
                 new HolonomicPathFollowerConfig(
                         kAuto.AUTO_TRANSLATION_PID,
