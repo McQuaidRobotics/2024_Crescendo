@@ -342,6 +342,7 @@ public final class ConstValues {
             public static final double MAX_ACCELERATION = 700;
             public static final double MAX_JERK = 10000;// effectively infinite
 
+            // TODO: find these values
             public static final double MIN_METERS = 0.2;
             public static final double MAX_METERS = 1.0;
 
@@ -351,6 +352,9 @@ public final class ConstValues {
 
             public static final boolean INVERTED = false;
 
+            /**
+             * Tolerance in meters
+             */
             public static final double TARGET_TOLERANCE = 0.03;
         }
 
@@ -377,6 +381,9 @@ public final class ConstValues {
             public static final double WRIST_MIN_ANGLE = 24.0 * Conv.DEGREES_TO_RADIANS;
             public static final double WRIST_MAX_ANGLE = 125.0 * Conv.DEGREES_TO_RADIANS;
 
+            /**
+             * Tolerance in radians
+             */
             public static final double TARGET_TOLERANCE = TAU * (1.0 / 360.0); // effectively 1 degree
 
         }

@@ -2,8 +2,8 @@ package com.igknighters.subsystems.stem.telescope;
 
 import org.littletonrobotics.junction.Logger;
 
-import com.fasterxml.jackson.annotation.JsonFormat.Feature;
 import com.igknighters.GlobalState;
+import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.util.BootupLogger;
 
@@ -23,22 +23,22 @@ public class TelescopeSim implements Telescope {
     private final PIDController pidController;
     private final SimBoolean fwdLimitSwitch, revLimitSwitch;
 
-    public TelescopeSim(){
+    public TelescopeSim() {
         pidController = new PIDController(
-            kTelescope.MOTOR_kP, 
-            kTelescope.MOTOR_kI, 
-            kTelescope.MOTOR_kD);
+                kTelescope.MOTOR_kP,
+                kTelescope.MOTOR_kI,
+                kTelescope.MOTOR_kD);
 
-        sim = new ElevatorSim( 
-            DCMotor.getFalcon500(1),
-            kTelescope.MOTOR_TO_MECHANISM_RATIO,
-            0.0, //TODO find values
-            0.0, 
-            kTelescope.MIN_METERS,
-            kTelescope.MAX_METERS, 
-            false, 
-            kTelescope.MIN_METERS);
-        
+        sim = new ElevatorSim(
+                DCMotor.getFalcon500(1),
+                kTelescope.MOTOR_TO_MECHANISM_RATIO,
+                10.0,
+                0.0,
+                kTelescope.MIN_METERS,
+                kTelescope.MAX_METERS,
+                false,
+                kTelescope.MIN_METERS);
+
         inputs = new TelescopeInputs(kTelescope.MIN_METERS);
 
         if (RobotBase.isReal()) {
@@ -60,9 +60,10 @@ public class TelescopeSim implements Telescope {
             revLimitSwitch = SimDevice.create("" + Math.random() + Math.random()).createBoolean("", Direction.kInput,
                     false);
         } else {
-            fwdLimitSwitch = SimDevice.create("TelescopeFwdLimitSwitch").createBoolean("tripped", Direction.kInput, false);
-            revLimitSwitch = SimDevice.create("TelescopeRevLimitSwitch").createBoolean("tripped", Direction.kInput, false);
-
+            fwdLimitSwitch = SimDevice.create("TelescopeFwdLimitSwitch").createBoolean("tripped", Direction.kInput,
+                    false);
+            revLimitSwitch = SimDevice.create("TelescopeRevLimitSwitch").createBoolean("tripped", Direction.kInput,
+                    false);
         }
 
         BootupLogger.bootupLog("    Telescope initialized (sim)");
@@ -70,17 +71,19 @@ public class TelescopeSim implements Telescope {
 
     @Override
     public void setVoltageOut(double volts) {
-      sim.setInputVoltage(volts);
-      inputs.volts = volts;
-      inputs.targetMeters = 0;
+        sim.setInputVoltage(volts);
+        inputs.volts = volts;
+        inputs.targetMeters = 0;
     }
 
     @Override
     public void setTelescopeMeters(double meters) {
-       inputs.targetMeters = meters; //set target meters to what we want
-       double telescopeVoltageFeedback = pidController.calculate(inputs.meters, meters); //makes a voltage feedback with the new controller output
-       sim.setInputVoltage(telescopeVoltageFeedback); //sets voltage to the feedback
-       inputs.volts = telescopeVoltageFeedback;
+        inputs.targetMeters = meters; // set target meters to what we want
+        double telescopeVoltageFeedback = pidController.calculate(inputs.meters, meters); // makes a voltage feedback
+                                                                                          // with the new controller
+                                                                                          // output
+        sim.setInputVoltage(telescopeVoltageFeedback); // sets voltage to the feedback
+        inputs.volts = telescopeVoltageFeedback;
     }
 
     @Override
@@ -98,29 +101,21 @@ public class TelescopeSim implements Telescope {
         return revLimitSwitch.get();
     }
 
-    public void triggerFwdLimitSwitch(){
-        fwdLimitSwitch.set(true);
-    }
-
-    public void triggerRevLimitSwitch(){
-        revLimitSwitch.set(true);
-    }
-
- @Override
+    @Override
     public void periodic() {
         if (DriverStation.isDisabled()) {
             sim.setInputVoltage(0);
         }
 
-        sim.update(0.2);
+        sim.update(ConstValues.PERIODIC_TIME);
 
         inputs.meters = sim.getPositionMeters();
         inputs.metersPerSecond = sim.getVelocityMetersPerSecond();
         inputs.temp = 0.0;
-        inputs.amps =  sim.getCurrentDrawAmps();
+        inputs.amps = sim.getCurrentDrawAmps();
 
         if (RobotBase.isReal()) {
-             inputs.isLimitFwdSwitchHit = NetworkTableInstance.getDefault()
+            inputs.isLimitFwdSwitchHit = NetworkTableInstance.getDefault()
                     .getTable("SimDevices")
                     .getSubTable("TelescopeFwdLimitSwitch")
                     .getEntry("tripped")
@@ -138,11 +133,10 @@ public class TelescopeSim implements Telescope {
         if (isFwdLimitSwitchHit())
             setTelescopeMeters(kTelescope.MAX_METERS);
 
-        if (isRevLimitSwitchHit()) //if limitswitch is triggered, home the telescope
+        if (isRevLimitSwitchHit()) // if limitswitch is triggered, home the telescope
             setTelescopeMeters(kTelescope.MIN_METERS);
-        
 
         Logger.processInputs("Stem/Telescope", inputs);
     }
-    
+
 }

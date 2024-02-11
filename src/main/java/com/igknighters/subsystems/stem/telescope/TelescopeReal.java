@@ -137,7 +137,6 @@ public class TelescopeReal implements Telescope {
         inputs.isLimitRevSwitchHit = reverseLimitSwitch.getValue() == ReverseLimitValue.Open;
 
         Logger.processInputs("Stem/Telescope", inputs);
-
     }
 
 }
