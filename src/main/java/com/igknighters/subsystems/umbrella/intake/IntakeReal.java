@@ -4,11 +4,10 @@ import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.ForwardLimitSourceValue;
-import com.ctre.phoenix6.signals.ForwardLimitValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.ReverseLimitSourceValue;
 import com.ctre.phoenix6.signals.ReverseLimitValue;
@@ -26,21 +25,27 @@ public class IntakeReal implements Intake {
     private final StatusSignal<Double> veloSignalUpper, voltSignalUpper, currentSignalUpper, tempSignalUpper;
     private final StatusSignal<Double> veloSignalLower, voltSignalLower, currentSignalLower, tempSignalLower;
     private final StatusSignal<ReverseLimitValue> revLimitSignal;
-    private final StatusSignal<ForwardLimitValue> fwdLimitSignal;
     private final IntakeInputs inputs = new IntakeInputs();
+    private final HardwareLimitSwitchConfigs lowerLimitCfg, upperLimitCfg;
+    private boolean wasBeamBroken = false;
 
     public IntakeReal() {
         FaultManager.captureFault(
                 UmbrellaHW.IntakeMotor,
                 upperMotor.getConfigurator()
-                        .apply(new TalonFXConfiguration()));
+                        .apply(motorUpper()));
         FaultManager.captureFault(
                 UmbrellaHW.IntakeMotor,
                 lowerMotor.getConfigurator()
-                        .apply(new TalonFXConfiguration()));
+                        .apply(motorLower()));
 
-        upperMotor.getConfigurator().apply(motorUpperFollower());
-        lowerMotor.getConfigurator().apply(motorLowerUpper());
+        var lowerLimitCfg = new HardwareLimitSwitchConfigs();
+        lowerMotor.getConfigurator().refresh(lowerLimitCfg);
+        this.lowerLimitCfg = lowerLimitCfg;
+
+        var upperLimitCfg = new HardwareLimitSwitchConfigs();
+        upperMotor.getConfigurator().refresh(upperLimitCfg);
+        this.upperLimitCfg = upperLimitCfg;
 
         veloSignalUpper = upperMotor.getVelocity();
         voltSignalUpper = upperMotor.getMotorVoltage();
@@ -64,14 +69,11 @@ public class IntakeReal implements Intake {
 
         if (kIntake.BEAM_IS_UPPER) {
             revLimitSignal = upperMotor.getReverseLimit();
-            fwdLimitSignal = upperMotor.getForwardLimit();
         } else {
             revLimitSignal = lowerMotor.getReverseLimit();
-            fwdLimitSignal = lowerMotor.getForwardLimit();
         }
 
         revLimitSignal.setUpdateFrequency(250);
-        fwdLimitSignal.setUpdateFrequency(250);
 
         upperMotor.optimizeBusUtilization();
         lowerMotor.optimizeBusUtilization();
@@ -79,36 +81,42 @@ public class IntakeReal implements Intake {
         BootupLogger.bootupLog("    Intake initialized (real)");
     }
 
-    public TalonFXConfiguration motorUpperFollower() {
+    public TalonFXConfiguration motorUpper() {
         var cfg = new TalonFXConfiguration();
 
-        cfg.HardwareLimitSwitch.ForwardLimitEnable = true;
-        cfg.HardwareLimitSwitch.ReverseLimitEnable = true;
-
-        cfg.HardwareLimitSwitch.ForwardLimitRemoteSensorID = kIntake.LOWER_MOTOR_ID;
-        cfg.HardwareLimitSwitch.ReverseLimitRemoteSensorID = kIntake.LOWER_MOTOR_ID;
-
-        cfg.HardwareLimitSwitch.ForwardLimitSource = ForwardLimitSourceValue.RemoteTalonFX;
-        cfg.HardwareLimitSwitch.ReverseLimitSource = ReverseLimitSourceValue.RemoteTalonFX;
+        cfg.HardwareLimitSwitch.ForwardLimitEnable = false;
+        cfg.HardwareLimitSwitch.ReverseLimitEnable = false;
 
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-        cfg.CurrentLimits.StatorCurrentLimitEnable = true;
-        cfg.CurrentLimits.StatorCurrentLimit = 80.0;
+        cfg.CurrentLimits.SupplyCurrentLimitEnable = true;
+        cfg.CurrentLimits.SupplyCurrentThreshold = 65.0;
+        cfg.CurrentLimits.SupplyCurrentLimit = 40.0;
+        cfg.CurrentLimits.SupplyTimeThreshold = 0.3;
+
+        cfg.Audio.BeepOnConfig = false;
 
         return cfg;
     }
 
-    public TalonFXConfiguration motorLowerUpper() {
+    public TalonFXConfiguration motorLower() {
         var cfg = new TalonFXConfiguration();
 
-        cfg.HardwareLimitSwitch.ForwardLimitEnable = true;
-        cfg.HardwareLimitSwitch.ReverseLimitEnable = true;
+        cfg.HardwareLimitSwitch.ForwardLimitEnable = false;
+        cfg.HardwareLimitSwitch.ReverseLimitEnable = false;
+
+        cfg.HardwareLimitSwitch.ReverseLimitRemoteSensorID = kIntake.UPPER_MOTOR_ID;
+
+        cfg.HardwareLimitSwitch.ReverseLimitSource = ReverseLimitSourceValue.RemoteTalonFX;
 
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-        cfg.CurrentLimits.StatorCurrentLimitEnable = true;
-        cfg.CurrentLimits.StatorCurrentLimit = 80.0;
+        cfg.CurrentLimits.SupplyCurrentLimitEnable = true;
+        cfg.CurrentLimits.SupplyCurrentThreshold = 65.0;
+        cfg.CurrentLimits.SupplyCurrentLimit = 40.0;
+        cfg.CurrentLimits.SupplyTimeThreshold = 0.3;
+
+        cfg.Audio.BeepOnConfig = false;
 
         return cfg;
     }
@@ -117,24 +125,24 @@ public class IntakeReal implements Intake {
     public void setVoltageOut(double volts) {
         inputs.voltsLower = volts;
         inputs.voltsUpper = volts * kIntake.UPPER_DIFF;
-        lowerMotor.setVoltage(volts);
-        upperMotor.setVoltage(volts * kIntake.UPPER_DIFF);
+        if (wasBeamBroken) {
+            lowerMotor.setVoltage(0.0);
+            upperMotor.setVoltage(0.0);
+        } else {
+            lowerMotor.setVoltage(volts);
+            upperMotor.setVoltage(volts * kIntake.UPPER_DIFF);
+        }
     }
 
     @Override
     public void turnIntakeRads(double radians) {
         setVoltageOut(0.0);
-        upperMotor.setControl(new PositionDutyCycle(
+        upperMotor.setControl(new PositionVoltage(
                 upperMotor.getRotorPosition().getValue()
                         + Units.radiansToRotations(radians * kIntake.UPPER_DIFF)));
-        lowerMotor.setControl(new PositionDutyCycle(
+        lowerMotor.setControl(new PositionVoltage(
                 lowerMotor.getRotorPosition().getValue()
                         + Units.radiansToRotations(radians)));
-    }
-
-    @Override
-    public boolean isEntranceBeamBroken() {
-        return inputs.entranceBeamBroken;
     }
 
     @Override
@@ -150,8 +158,7 @@ public class IntakeReal implements Intake {
                         veloSignalUpper, voltSignalUpper,
                         currentSignalUpper, tempSignalUpper));
 
-        inputs.entranceBeamBroken = revLimitSignal.getValue().equals(ReverseLimitValue.ClosedToGround);
-        inputs.exitBeamBroken = fwdLimitSignal.getValue().equals(ForwardLimitValue.ClosedToGround);
+        inputs.exitBeamBroken = revLimitSignal.getValue().equals(ReverseLimitValue.ClosedToGround);
         inputs.radiansPerSecondUpper = Units.rotationsToRadians(veloSignalUpper.getValue());
         inputs.voltsUpper = voltSignalUpper.getValue();
         inputs.ampsUpper = currentSignalUpper.getValue();
@@ -160,6 +167,16 @@ public class IntakeReal implements Intake {
         inputs.voltsLower = voltSignalLower.getValue();
         inputs.ampsLower = currentSignalLower.getValue();
         inputs.tempLower = tempSignalLower.getValue();
+
+        if (inputs.exitBeamBroken && !wasBeamBroken) {
+            lowerMotor.getConfigurator().apply(lowerLimitCfg.withReverseLimitEnable(false));
+            upperMotor.getConfigurator().apply(upperLimitCfg.withReverseLimitEnable(false));
+            wasBeamBroken = true;
+        } else if (!inputs.exitBeamBroken && wasBeamBroken) {
+            lowerMotor.getConfigurator().apply(lowerLimitCfg.withReverseLimitEnable(true));
+            upperMotor.getConfigurator().apply(upperLimitCfg.withReverseLimitEnable(true));
+            wasBeamBroken = false;
+        }
 
         Logger.processInputs("/Umbrella/Intake", inputs);
     }

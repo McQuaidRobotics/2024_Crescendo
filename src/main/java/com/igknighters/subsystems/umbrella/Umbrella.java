@@ -19,7 +19,7 @@ public class Umbrella extends SubsystemBase {
             intake = new IntakeSim();
             shooter = new ShooterSim();
         } else {
-            intake = new IntakeSim();
+            intake = new IntakeReal();
             shooter = new ShooterReal();
         }
     }
@@ -71,16 +71,9 @@ public class Umbrella extends SubsystemBase {
     }
 
     /**
-     * @return If the entrance beam is broken
-     */
-    public boolean isEntranceBeamBroken() {
-        return intake.isEntranceBeamBroken();
-    }
-
-    /**
      * @return If the exit beam is broken
      */
-    public boolean isExitBeamBroken() {
+    public boolean holdingGamepiece() {
         return intake.isExitBeamBroken();
     }
 
