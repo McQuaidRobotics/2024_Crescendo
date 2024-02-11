@@ -27,7 +27,7 @@ public class DriverController extends ControllerParent {
         /// CENTER BUTTONS
         // this.Back.binding =
 
-        this.Start.binding = new SingleDepBinding(Subsystems.Swerve, (trig, allss) -> {
+        this.Start.binding = new Binding(Subsystems.Swerve, (trig, allss) -> {
             trig.onTrue(Commands.runOnce(() -> allss.swerve.get().setYaw(0.0)));
         });
 

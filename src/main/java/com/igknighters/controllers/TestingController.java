@@ -17,13 +17,13 @@ public class TestingController extends ControllerParent {
         // disregard null safety as it is checked on assignment
 
         /// FACE BUTTONS
-        this.A.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
+        this.A.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
             trig.onTrue(Commands.runOnce(() -> {
                 allss.stem.get().setStemPosition(StemPosition.fromDegrees(80.0, 0.0, 0.0));
             }));
         });
 
-        this.B.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
+        this.B.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
             trig.onTrue(Commands.runOnce(() -> {
                 allss.stem.get().setStemPosition(StemPosition.fromDegrees(20.0, 0.0, 0.0));
             }));
