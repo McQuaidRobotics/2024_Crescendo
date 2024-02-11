@@ -1,7 +1,11 @@
 package com.igknighters.controllers;
 
 import com.igknighters.SubsystemResources.Subsystems;
+import com.igknighters.commands.HigherOrderCommands;
+import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.SwerveCommands;
+import com.igknighters.commands.umbrella.UmbrellaCommands;
+import com.igknighters.subsystems.stem.StemPosition;
 
 public class DriverController extends ControllerParent {
 
@@ -10,18 +14,50 @@ public class DriverController extends ControllerParent {
         // disregard null safety for subsystems as it is checked on assignment
 
         /// FACE BUTTONS
-        // this.A.binding = 
+        this.A.binding = new Binding((trig, allss) -> {
+            trig.onTrue(
+                    HigherOrderCommands.intakeGamepiece(
+                            allss.stem.get(),
+                            allss.umbrella.get()));
+        }, Subsystems.Stem, Subsystems.Umbrella);
 
-        // this.B.binding =
+        this.B.binding = new Binding(
+                (trig, allss) -> {
+                    trig.onTrue(
+                            HigherOrderCommands.scoreAmp(
+                                    allss.swerve.get(),
+                                    allss.stem.get(),
+                                    allss.umbrella.get()));
+                },
+                Subsystems.Swerve,
+                Subsystems.Stem,
+                Subsystems.Umbrella);
 
-        // this.X.binding =
+        this.X.binding = new Binding((trig, allss) -> {
+            trig.onTrue(
+                StemCommands.holdAt(
+                    allss.stem.get(),
+                    StemPosition.STOW
+                )
+            );
+        }, Subsystems.Stem);
 
-        // this.Y.binding =
+        this.Y.binding = new Binding(
+            (trig, allss) -> {
+                trig.onTrue(
+                    UmbrellaCommands.expell(
+                        allss.umbrella.get()
+                    )
+                );
+            },
+            Subsystems.Umbrella
+        );
 
         /// BUMPER
-        // this.LB.binding =
+        // # Our main driver doesn't use bumpers
+        // this.LB.binding = # Dont use
 
-        // this.RB.binding =
+        // this.RB.binding = # Dont use
 
         /// CENTER BUTTONS
         // this.Back.binding =
@@ -31,14 +67,30 @@ public class DriverController extends ControllerParent {
         });
 
         /// STICKS
-        // this.LS.binding =
+        // # Our main driver doesn't use sticks
+        // this.LS.binding = # Dont use
 
-        // this.RS.binding =
+        // this.RS.binding = # Dont use
 
         /// TRIGGERS
-        // this.LT.binding = 
+        this.LT.binding = new Binding((trig, allss) -> {
+            trig.onTrue(
+                HigherOrderCommands.aim(
+                    allss.swerve.get(),
+                    allss.stem.get(),
+                    allss.umbrella.get(),
+                    this
+                )
+            );
+        }, Subsystems.Swerve, Subsystems.Stem, Subsystems.Umbrella);
 
-        // this.RT.binding =
+        this.RT.binding = new Binding((trig, allss) -> {
+            trig.onTrue(
+                UmbrellaCommands.shoot(
+                    allss.umbrella.get()
+                )
+            );
+        }, Subsystems.Umbrella);
 
         /// DPAD
         // this.DPR.binding =

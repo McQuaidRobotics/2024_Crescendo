@@ -70,7 +70,7 @@ public class UmbrellaCommands {
                     return umbrella.run(
                             () -> {
                                 umbrella.spinupShooter(umbrella.getShooterTargetSpeed());
-                                umbrella.runIntakeAt(-1.0);
+                                umbrella.turnIntakeBy(-1.0);
                             }).until(
                                     () -> !umbrella.holdingGamepiece())
                             .andThen(
@@ -102,9 +102,7 @@ public class UmbrellaCommands {
     public static Command feed(Umbrella umbrella) {
         return umbrella.runOnce(
                 () -> umbrella.turnIntakeBy(0.5)).repeatedly()
-                .withTimeout(1.0)
-                .finallyDo(
-                        () -> umbrella.runIntakeAt(0));
+                .until(() -> umbrella.holdingGamepiece());
     }
 
     public static Command spinUmbrellaBoth(Umbrella umbrella) {
