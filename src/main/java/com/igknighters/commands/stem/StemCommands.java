@@ -5,7 +5,9 @@ import java.util.function.DoubleSupplier;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 
 public class StemCommands {
 
@@ -75,6 +77,17 @@ public class StemCommands {
      */
     public static Command holdAt(Stem stem, StemPosition pose) {
         return stem.run(() -> stem.setStemPosition(pose));
+    }
+
+    /**
+     * Will continously move the stem to target a point in space.
+     * @param stem The stem subsystem
+     * @param target The point in space to aim at
+     * @return A command to be scheduled
+     */
+    public static Command aimAt(Stem stem, Translation3d target, double rpm) {
+        //TODO
+        return Commands.none();
     }
 
     /**

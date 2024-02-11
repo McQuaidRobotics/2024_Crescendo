@@ -7,7 +7,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj.DriverStation;
 
 public class UmbrellaCommands {
     /**
@@ -18,6 +17,17 @@ public class UmbrellaCommands {
      */
     public static Command stopShooter(Umbrella umbrella) {
         return umbrella.runOnce(() -> umbrella.spinupShooterToRPM(0));
+    }
+
+    /**
+     * Spins up the shooter to a certain speed
+     * 
+     * @param umbrella The umbrella subsystem
+     * @param rpm      The target speed
+     * @return A command to be scheduled
+     */
+    public static Command spinupShooter(Umbrella umbrella, double rpm) {
+        return umbrella.runOnce(() -> umbrella.spinupShooterToRPM(rpm));
     }
 
     /**
@@ -54,22 +64,20 @@ public class UmbrellaCommands {
     public static Command shoot(Umbrella umbrella) {
         return umbrella.defer(
                 () -> {
-                    if (!umbrella.holdingGamepiece() || umbrella.getShooterTargetSpeed() < kShooter.MIN_SHOOT_SPEED) {
-                        DriverStation.reportWarning("Robot state is not fit for shooting", false);
+                    if (!umbrella.holdingGamepiece()) {
                         return Commands.none();
                     }
                     return umbrella.run(
-                        () -> {
-                            umbrella.spinupShooter(umbrella.getShooterTargetSpeed());
-                            umbrella.runIntakeAt(-1.0);
-                        }).until(
-                            () -> !umbrella.holdingGamepiece())
-                        .andThen(
                             () -> {
-                                umbrella.runIntakeAt(0.0);
-                                umbrella.spinupShooterToRPM(0);
-                            }
-                        );
+                                umbrella.spinupShooter(umbrella.getShooterTargetSpeed());
+                                umbrella.runIntakeAt(-1.0);
+                            }).until(
+                                    () -> !umbrella.holdingGamepiece())
+                            .andThen(
+                                    () -> {
+                                        umbrella.runIntakeAt(0.0);
+                                        umbrella.spinupShooterToRPM(0);
+                                    });
                 });
     }
 
@@ -82,8 +90,21 @@ public class UmbrellaCommands {
     public static Command intake(Umbrella umbrella) {
         return umbrella.runEnd(
                 () -> umbrella.runIntakeAt(-1.0),
-                () -> umbrella.runIntakeAt(0.0)).until(
-                        () -> umbrella.holdingGamepiece());
+                () -> umbrella.runIntakeAt(0.0)).until(() -> umbrella.holdingGamepiece());
+    }
+
+    public static Command expell(Umbrella umbrella) {
+        return umbrella.runEnd(
+                () -> umbrella.runIntakeAt(1.0),
+                () -> umbrella.runIntakeAt(0.0));
+    }
+
+    public static Command feed(Umbrella umbrella) {
+        return umbrella.runOnce(
+                () -> umbrella.turnIntakeBy(0.5)).repeatedly()
+                .withTimeout(1.0)
+                .finallyDo(
+                        () -> umbrella.runIntakeAt(0));
     }
 
     public static Command spinUmbrellaBoth(Umbrella umbrella) {

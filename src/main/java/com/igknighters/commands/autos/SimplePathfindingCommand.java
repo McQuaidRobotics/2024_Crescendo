@@ -5,6 +5,7 @@ import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kAuto;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.subsystems.swerve.Swerve;
+import com.igknighters.util.AllianceFlip;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.controllers.PathFollowingController;
 import com.pathplanner.lib.path.*;
@@ -98,6 +99,17 @@ public class SimplePathfindingCommand extends Command {
      */
     public SimplePathfindingCommand(Pose2d targetPose, Swerve swerve) {
         this(targetPose, 0.0, 0.05, kAuto.DYNAMIC_PATH_CONSTRAINTS, Optional.empty(), swerve);
+    }
+
+    public SimplePathfindingCommand flipForAlliance() {
+        return new SimplePathfindingCommand(
+                AllianceFlip.flipPose(targetPose),
+                goalEndState.getVelocity(),
+                rotationDelayDistance,
+                constraints,
+                rotationOverrideSupplier,
+                swerve
+        );
     }
 
 

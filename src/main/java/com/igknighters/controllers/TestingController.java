@@ -7,8 +7,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 import com.igknighters.SubsystemResources.Subsystems;
 
-@SuppressWarnings("unused")
-
 /** If debug is false this controller does not initialize */
 public class TestingController extends ControllerParent {
     public TestingController(int port) {
@@ -17,17 +15,17 @@ public class TestingController extends ControllerParent {
         // disregard null safety as it is checked on assignment
 
         /// FACE BUTTONS
-        this.A.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
+        this.A.binding = new Binding((trig, allss) -> {
             trig.onTrue(Commands.runOnce(() -> {
                 allss.stem.get().setStemPosition(StemPosition.fromDegrees(80.0, 0.0, 0.0));
             }));
-        });
+        }, Subsystems.Stem);
 
-        this.B.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
+        this.B.binding = new Binding((trig, allss) -> {
             trig.onTrue(Commands.runOnce(() -> {
                 allss.stem.get().setStemPosition(StemPosition.fromDegrees(20.0, 0.0, 0.0));
             }));
-        });
+        }, Subsystems.Stem);
 
         // this.X.binding =
 

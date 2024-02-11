@@ -1,10 +1,13 @@
 package com.igknighters.commands.swerve;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+
+import com.igknighters.commands.autos.SimplePathfindingCommand;
 import com.igknighters.subsystems.swerve.Swerve;
 
 public class SwerveCommands {
@@ -22,5 +25,16 @@ public class SwerveCommands {
 
     public static Command commandStopDrives(final Swerve swerve) {
         return swerve.runOnce(() -> swerve.setModuleStates(new ChassisSpeeds(), false)).withName("commandStopDrives");
+    }
+
+    public static Command driveToAmp(Swerve swerve) {
+        return new SimplePathfindingCommand(
+                new Pose2d(1.84, 7.2, Rotation2d.fromDegrees(90)),
+                swerve)
+                .flipForAlliance()
+                .andThen(
+                        new SimplePathfindingCommand(
+                                new Pose2d(1.84, 7.5, Rotation2d.fromDegrees(90)),
+                                swerve).flipForAlliance());
     }
 }

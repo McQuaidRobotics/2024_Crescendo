@@ -3,8 +3,6 @@ package com.igknighters.constants;
 import java.util.List;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
@@ -29,10 +27,6 @@ public final class FieldConstants {
 
     public static final class Speaker {
 
-        /** Center of the speaker opening (blue alliance) */
-        public static final Pose2d CENTER_SPEAKER_OPENING = new Pose2d(0.0, FIELD_WIDTH - Units.inchesToMeters(104.0),
-                new Rotation2d());
-
         // corners (blue alliance origin)
         public static final Translation3d TOP_RIGHT_SPEAKER = new Translation3d(
                 Units.inchesToMeters(18.055),
@@ -52,6 +46,12 @@ public final class FieldConstants {
                 0.0,
                 Units.inchesToMeters(197.765),
                 Units.inchesToMeters(78.324));
+
+        public static final Translation3d SPEAKER_CENTER = TOP_LEFT_SPEAKER
+                .interpolate(TOP_LEFT_SPEAKER, 0.5)
+                .interpolate(
+                        BOTTOM_LEFT_SPEAKER.interpolate(BOTTOM_RIGHT_SPEAKER, 0.5),
+                        0.5);
     }
 
     public static final AprilTagFieldLayout APRIL_TAG_FIELD = new AprilTagFieldLayout(

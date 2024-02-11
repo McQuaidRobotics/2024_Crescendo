@@ -23,21 +23,27 @@ public class TeleopSwerveTarget extends TeleopSwerveBase {
         .getTranslation()
         .toTranslation2d();
 
+    private double speedMultiplier = 0.85;
+
     public TeleopSwerveTarget(Swerve swerve, ControllerParent controller) {
         super(swerve, controller);
     }
 
+    public TeleopSwerveTarget withTarget(Translation2d target) {
+        this.targetTranslation = target;
+        return this;
+    }
+
+    public TeleopSwerveTarget withSpeedMultiplier(double multiplier) {
+        this.speedMultiplier = multiplier;
+        return this;
+    }
+
     @Override
     public void execute() {
-        targetTranslation = targetTranslation
-            .plus(orientForUser(new Translation2d(
-                        getRotationX() * 0.1,
-                        getRotationY() * 0.1
-                    )));
-
         var vt = orientForUser(new Translation2d(
-                getTranslationX() * kSwerve.MAX_DRIVE_VELOCITY * 0.85,
-                getTranslationY() * kSwerve.MAX_DRIVE_VELOCITY * 0.85));
+                getTranslationX() * kSwerve.MAX_DRIVE_VELOCITY * speedMultiplier,
+                getTranslationY() * kSwerve.MAX_DRIVE_VELOCITY * speedMultiplier));
 
         GlobalState.modifyField(field -> {
             field.getObject("target").setPose(new Pose2d(targetTranslation, new Rotation2d()));
@@ -51,10 +57,6 @@ public class TeleopSwerveTarget extends TeleopSwerveBase {
         var rotVelo = swerve.rotVeloForRotation(targetAngle);
 
         Logger.recordOutput("/Swerve/rotvelo", rotVelo);
-
-        if (Math.abs(vt.getX()) < 0.25 && Math.abs(vt.getX()) < 0.25 && Math.abs(rotVelo) < 0.75) {
-            rotVelo = 0.0;
-        }
 
         var chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 vt.getX(),
