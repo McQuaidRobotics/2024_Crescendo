@@ -262,33 +262,46 @@ public final class ConstValues {
     public static final class kUmbrella {
 
         public static final class kShooter {
-            public static final double MOTOR_UPPER_kP = 0.05;
+            public static final double MOTOR_UPPER_kP = 0.08;
             public static final double MOTOR_UPPER_kI = 0.0;
             public static final double MOTOR_UPPER_kD = 0.00;
-            public static final double MOTOR_UPPER_kS = 0.032;
-            public static final double MOTOR_UPPER_kV = 0.01;
+            public static final double MOTOR_UPPER_kS = 0.1;
+            public static final double MOTOR_UPPER_kV = 0.111;
 
-            public static final double MOTOR_LOWER_kP = 0.05;
+            public static final double MOTOR_LOWER_kP = 0.08;
             public static final double MOTOR_LOWER_kI = 0.0;
             public static final double MOTOR_LOWER_kD = 0.00;
-            public static final double MOTOR_LOWER_kS = 0.032;
-            public static final double MOTOR_LOWER_kV = 0.01;
+            public static final double MOTOR_LOWER_kS = 0.1;
+            public static final double MOTOR_LOWER_kV = 0.111;
 
             public static final int LEFT_MOTOR_ID = 17;
             public static final int RIGHT_MOTOR_ID = 18;
 
-            public static final double MECHANISM_RATIO = 2.0;
+            public static final double MECHANISM_RATIO = 1.5;
             public static final double WHEEL_DIAMETER = 4.0;
 
-            public static final double DEFAULT_TOLERANCE = 0.5;
+            public static final double DEFAULT_TOLERANCE = 0.03;
 
             public static final double PEAK_CURRENT = 80.0;
             public static final double MIN_SHOOT_SPEED = 1000.0 * Conv.RPM_TO_RADIANS_PER_SECOND;
+
+            public static final double LEFT_MOTOR_DIFF = 0.9;
         }
 
         public static final class kIntake {
             public static final int UPPER_MOTOR_ID = 19;
             public static final int LOWER_MOTOR_ID = 20;
+
+            public static final double UPPER_DIAMETER = 2.0625 * Conv.INCHES_TO_METERS;
+            public static final double LOWER_DIAMETER = 1.25 * Conv.INCHES_TO_METERS;
+
+            public static final double UPPER_MECHANISM_RATIO = 2.0;
+            public static final double LOWER_MECHANISM_RATIO = 22.0 / 12.0;
+
+            public static final double UPPER_DIFF = (LOWER_DIAMETER / UPPER_DIAMETER)
+                    * (UPPER_MECHANISM_RATIO / LOWER_MECHANISM_RATIO);
+
+            public static final boolean BEAM_IS_UPPER = true;
         }
 
     }
