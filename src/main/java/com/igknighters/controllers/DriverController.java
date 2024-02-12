@@ -74,7 +74,7 @@ public class DriverController extends ControllerParent {
 
         /// TRIGGERS
         this.LT.binding = new Binding((trig, allss) -> {
-            trig.onTrue(
+            trig.whileTrue(
                 HigherOrderCommands.aim(
                     allss.swerve.get(),
                     allss.stem.get(),
