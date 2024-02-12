@@ -30,7 +30,7 @@ public final class ConstValues {
     // all measurements are in meters unless otherwise specified
     // all angles are in radians unless otherwise specified
     @SuppressWarnings("unused")
-    private static final class Conv {
+    static final class Conv {
         public static final double FEET_TO_METERS = 0.3048;
         public static final double INCHES_TO_METERS = 0.0254;
         public static final double DEGREES_TO_RADIANS = Math.PI / 180.0;
