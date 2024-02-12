@@ -226,7 +226,8 @@ public final class ConstValues {
             public static final int DRIVE_MOTOR_ID = 3;
             public static final int ANLGE_MOTOR_ID = 4;
             public static final int CANCODER_ID = 22;
-            public static final double ROTATION_OFFSET = 0.1357;
+            @DoubleConst(crash = 0.0, burn = 0.1357)
+            public static double ROTATION_OFFSET;
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0,
                     -TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
@@ -238,7 +239,8 @@ public final class ConstValues {
             public static final int DRIVE_MOTOR_ID = 5;
             public static final int ANGLE_MOTOR_ID = 6;
             public static final int CANCODER_ID = 23;
-            public static final double ROTATION_OFFSET = 0.5774;
+            @DoubleConst(crash = 0.0, burn = 0.5774)
+            public static double ROTATION_OFFSET;
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0, TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
                     ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
@@ -249,7 +251,8 @@ public final class ConstValues {
             public static final int DRIVE_MOTOR_ID = 7;
             public static final int ANGLE_MOTOR_ID = 8;
             public static final int CANCODER_ID = 24;
-            public static final double ROTATION_OFFSET = 1.2545;
+            @DoubleConst(crash = 0.0, burn = 1.2545)
+            public static double ROTATION_OFFSET;
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0,
                     TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
