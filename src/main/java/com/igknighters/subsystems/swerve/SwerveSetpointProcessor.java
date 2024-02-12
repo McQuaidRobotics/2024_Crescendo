@@ -51,7 +51,7 @@ public class SwerveSetpointProcessor {
     };
     private final ModuleLimits limits = new ModuleLimits(
             kSwerve.MAX_DRIVE_VELOCITY,
-            kSwerve.MAX_DRIVE_ACCELERATION,
+            kSwerve.MAX_DRIVE_ACCELERATION * 5.0,
             kSwerve.MAX_STEERING_VELOCITY);
     private SwerveSetpoint prevSetpoint = new SwerveSetpoint(new ChassisSpeeds(), new SwerveModuleState[] {
             new SwerveModuleState(0.0, new Rotation2d()),

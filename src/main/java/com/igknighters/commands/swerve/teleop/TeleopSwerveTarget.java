@@ -41,24 +41,29 @@ public class TeleopSwerveTarget extends TeleopSwerveBase {
 
     @Override
     public void execute() {
-        var vt = orientForUser(new Translation2d(
+        Translation2d vt = orientForUser(
+            new Translation2d(
                 getTranslationX() * kSwerve.MAX_DRIVE_VELOCITY * speedMultiplier,
-                getTranslationY() * kSwerve.MAX_DRIVE_VELOCITY * speedMultiplier));
+                getTranslationY() * kSwerve.MAX_DRIVE_VELOCITY * speedMultiplier
+            ));
 
         GlobalState.modifyField(field -> {
             field.getObject("target").setPose(new Pose2d(targetTranslation, new Rotation2d()));
         });
 
-        var targetAngle = swerve.rotationRelativeToPose(
+        Rotation2d targetAngle = swerve.rotationRelativeToPose(
                 Rotation2d.fromDegrees(180),
                 targetTranslation.plus(new Translation2d(
                         vt.getX() * ConstValues.PERIODIC_TIME,
                         vt.getY() * ConstValues.PERIODIC_TIME)));
+
+        Logger.recordOutput("/Commands/SwerveTarget/TargetAngle", targetAngle.getRadians());
+
         var rotVelo = swerve.rotVeloForRotation(targetAngle);
 
-        Logger.recordOutput("/Swerve/rotvelo", rotVelo);
+        Logger.recordOutput("/Commands/SwerveTarget/RotationalVelocity", rotVelo);
 
-        var chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+        ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 vt.getX(),
                 vt.getY(),
                 rotVelo,

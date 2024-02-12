@@ -79,29 +79,28 @@ public final class ConstValues {
 
         private static enum CameraConfigs {
             CRASH(
-                new CameraConfig[] {
-                    Camera.createConfig(
-                            "photonvision-15",
-                            0,
-                            new Pose3d(
-                                    new Translation3d(Units.inchesToMeters(10.0), Units.inchesToMeters(10.0),
-                                            Units.inchesToMeters(3.0)),
-                                    new Rotation3d(
-                                            0.0,
-                                            Units.degreesToRadians(15.0),
-                                            Units.degreesToRadians(45.0)))),
-                    Camera.createConfig(
-                            "photonvision-16",
-                            1,
-                            new Pose3d(
-                                    new Translation3d(Units.inchesToMeters(10.0), Units.inchesToMeters(-10.0),
-                                            Units.inchesToMeters(3.0)),
-                                    new Rotation3d(
-                                            0.0,
-                                            Units.degreesToRadians(15.0),
-                                            Units.degreesToRadians(-45.0))))
-                }
-            ),
+                    new CameraConfig[] {
+                            Camera.createConfig(
+                                    "photonvision-15",
+                                    0,
+                                    new Pose3d(
+                                            new Translation3d(Units.inchesToMeters(10.0), Units.inchesToMeters(10.0),
+                                                    Units.inchesToMeters(3.0)),
+                                            new Rotation3d(
+                                                    0.0,
+                                                    Units.degreesToRadians(15.0),
+                                                    Units.degreesToRadians(45.0)))),
+                            Camera.createConfig(
+                                    "photonvision-16",
+                                    1,
+                                    new Pose3d(
+                                            new Translation3d(Units.inchesToMeters(10.0), Units.inchesToMeters(-10.0),
+                                                    Units.inchesToMeters(3.0)),
+                                            new Rotation3d(
+                                                    0.0,
+                                                    Units.degreesToRadians(15.0),
+                                                    Units.degreesToRadians(-45.0))))
+                    }),
             BURN(new CameraConfig[] {});
 
             public final CameraConfig[] cameras;
@@ -115,7 +114,7 @@ public final class ConstValues {
          * The cameras used for vision.
          */
         public final static CameraConfig[] CAMERA_CONFIGS = CameraConfigs.valueOf(
-            RobotSetup.getRobotID().constID.name() // most based java code of the century
+                RobotSetup.getRobotID().constID.name() // most based java code of the century
         ).cameras;
     }
 
@@ -168,7 +167,8 @@ public final class ConstValues {
         public static final double MAX_ANGULAR_VELOCITY = MAX_DRIVE_VELOCITY / DRIVEBASE_RADIUS;
         public static final double MAX_ANGULAR_ACCELERATION = MAX_ANGULAR_VELOCITY / ACCELERATION_TIME;
 
-        public static final double MAX_STEERING_VELOCITY = Motors.Falcon500Foc.FREE_SPEED / (ANGLE_GEAR_RATIO * MOTOR_CLOSED_LOOP_OUTPUT_SCALAR);
+        public static final double MAX_STEERING_VELOCITY = Motors.Falcon500Foc.FREE_SPEED
+                / (ANGLE_GEAR_RATIO * MOTOR_CLOSED_LOOP_OUTPUT_SCALAR);
 
         /* Inverts */
         public static final InvertedValue ANGLE_MOTOR_INVERT = InvertedValue.Clockwise_Positive;
@@ -194,7 +194,8 @@ public final class ConstValues {
             public static final double kD = 0.0;
         }
 
-        public static final double ANGLE_CONTROLLER_KP = 4.0;
+        public static final double ROTATIONAL_CONTROLLER_KP = 4.0;
+        public static final double ROTATIONAL_CONTROLLER_TOLERANCE = 2.0 * Conv.DEGREES_TO_RADIANS;
 
         public static final boolean ORIENT_TELEOP_FOR_SIM = true;
 

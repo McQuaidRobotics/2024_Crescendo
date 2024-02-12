@@ -105,12 +105,12 @@ public class Swerve extends SubsystemBase {
 
         // var output = setpointProcessor.processSetpoint(speeds);
 
-        // Logger.recordOutput("Swerve/processedTargetChassisSpeed", output.chassisSpeeds());
+        // Logger.recordOutput("Swerve/processedTargetChassisSpeed",
+        // output.chassisSpeeds());
 
         setModuleStates(
-            kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(speeds),
-            isOpenLoop
-        );
+                kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(speeds),
+                isOpenLoop);
     }
 
     /**
@@ -189,10 +189,14 @@ public class Swerve extends SubsystemBase {
     }
 
     public double rotVeloForRotation(Rotation2d wantedAngle) {
-        var wantedAngleRads = wantedAngle.getRadians();
-        var currentAngleRads = getYawRads();
+        double wantedAngleRads = wantedAngle.getRadians();
+        double currentAngleRads = getYawRads();
 
-        var rotVelo = kSwerve.ANGLE_CONTROLLER_KP
+        if (Math.abs(wantedAngleRads - currentAngleRads) < kSwerve.ROTATIONAL_CONTROLLER_TOLERANCE) {
+            return 0;
+        }
+
+        double rotVelo = kSwerve.ROTATIONAL_CONTROLLER_KP
                 * MathUtil.inputModulus(wantedAngleRads - currentAngleRads, -Math.PI, Math.PI);
         return Math.max(Math.min(rotVelo, kSwerve.MAX_ANGULAR_VELOCITY), -kSwerve.MAX_ANGULAR_VELOCITY);
     }
