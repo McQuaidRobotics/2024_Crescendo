@@ -14,14 +14,11 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 
 public final class ConstValues {
@@ -66,13 +63,6 @@ public final class ConstValues {
     }
 
     public static final class kVision {
-        /** The least trustworthy std dev */
-        public static final Vector<N3> visionStdDevs = VecBuilder.fill(0.9, 0.9, 0.9);
-        /** The middle trustworthy std dev */
-        public static final Vector<N3> visionStdDevsTrust = VecBuilder.fill(0.4, 0.4, 0.4);
-        /** The most trustworthy std dev */
-        public static final Vector<N3> visionStdDevsReal = VecBuilder.fill(0.15, 0.15, 0.15);
-
         public static final double AMBIGUITY_CUTOFF = 0.5;
 
         public static final double MAX_Z_DELTA = 100.0;
