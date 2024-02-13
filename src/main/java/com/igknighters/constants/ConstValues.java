@@ -372,8 +372,8 @@ public final class ConstValues {
             @DoubleConst(crash = -0.41137, burn = 0.0)
             public static double CANCODER_OFFSET;;
 
-            public static final double WRIST_MIN_ANGLE = 24.0 * Conv.DEGREES_TO_RADIANS;
-            public static final double WRIST_MAX_ANGLE = 125.0 * Conv.DEGREES_TO_RADIANS;
+            public static final double MIN_ANGLE = 24.0 * Conv.DEGREES_TO_RADIANS;
+            public static final double MAX_ANGLE = 125.0 * Conv.DEGREES_TO_RADIANS;
 
             public static final double TARGET_TOLERANCE = TAU * (1.0 / 360.0); // effectively 1 degree
 

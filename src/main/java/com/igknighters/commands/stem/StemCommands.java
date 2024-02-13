@@ -50,7 +50,8 @@ public class StemCommands {
      * @return A command to be scheduled
      */
     public static Command moveTo(Stem stem, StemPosition pose) {
-        return new MoveToCommand(stem, pose, 1.0);
+        return new MoveToCommand(stem, pose, 1.0)
+            .withName("Move Stem(" + pose + ")");
     }
 
     /**
@@ -63,7 +64,8 @@ public class StemCommands {
      * @return A command to be scheduled
      */
     public static Command moveTo(Stem stem, StemPosition pose, double toleranceMult) {
-        return new MoveToCommand(stem, pose, toleranceMult);
+        return new MoveToCommand(stem, pose, toleranceMult)
+            .withName("Move Stem(" + pose + ")");
     }
 
     /**
@@ -74,7 +76,8 @@ public class StemCommands {
      * @return A command to be scheduled
      */
     public static Command holdAt(Stem stem, StemPosition pose) {
-        return stem.run(() -> stem.setStemPosition(pose));
+        return stem.run(() -> stem.setStemPosition(pose))
+            .withName("Hold Stem(" + pose + ")");
     }
 
     /**
@@ -93,9 +96,9 @@ public class StemCommands {
         return stem.run(() -> {
             stem.setStemVolts(
                 pivotPercentOut.getAsDouble() * 12.0,
-                telescopePercentOut.getAsDouble() * 12.0,
-                wristPercentOut.getAsDouble() * 12.0
+                wristPercentOut.getAsDouble() * 12.0,
+                telescopePercentOut.getAsDouble() * 12.0
             );
-        });
+        }).withName("Test Stem");
     }
 }
