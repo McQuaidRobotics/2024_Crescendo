@@ -91,6 +91,8 @@ public class SwerveModuleReal implements SwerveModule {
 
         angleEncoder.optimizeBusUtilization();
 
+        driveMotor.setPosition(0.0);
+
         inputs = new SwerveModuleInputs();
 
         BootupLogger.bootupLog(
