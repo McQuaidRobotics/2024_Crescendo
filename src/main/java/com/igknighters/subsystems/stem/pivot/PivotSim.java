@@ -90,7 +90,8 @@ public class PivotSim implements Pivot {
 
         sim.update(0.2);
 
-        inputs.radians = Units.radiansToDegrees(sim.getAngleRads());
+        // inputs.radians = Units.radiansToDegrees(sim.getAngleRads());
+        inputs.radians = 0.0;
         inputs.radiansPerSecond = Units.radiansToDegrees(sim.getVelocityRadPerSec());
         inputs.leftAmps = sim.getCurrentDrawAmps() / 2.0;
         inputs.rightAmps = sim.getCurrentDrawAmps() / 2.0;

@@ -36,7 +36,7 @@ public class Stem extends SubsystemBase {
      * stem to that position. This method will return false if any of the
      * mechanisms have not yet reached their target position.
      * 
-     * @param position The position to set the stem to
+     * @param position      The position to set the stem to
      * @param toleranceMult A value to multiply the accepted positional tolerance by
      * @return True if all mechanisms have reached their target position
      */
