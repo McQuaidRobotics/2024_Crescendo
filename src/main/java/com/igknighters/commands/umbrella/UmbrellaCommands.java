@@ -14,7 +14,8 @@ public class UmbrellaCommands {
      * @return A command to be scheduled
      */
     public static Command stopShooter(Umbrella umbrella) {
-        return umbrella.runOnce(() -> umbrella.spinupShooterToRPM(0));
+        return umbrella.runOnce(() -> umbrella.spinupShooterToRPM(0))
+            .withName("Stop Shooter");
     }
 
     /**
@@ -39,7 +40,8 @@ public class UmbrellaCommands {
     public static Command waitUntilSpunUp(Umbrella umbrella, double rpm, double tolerance) {
         return umbrella.run(
                 () -> umbrella.spinupShooterToRPM(rpm)).until(
-                        () -> umbrella.isShooterAtSpeed(tolerance));
+                () -> umbrella.isShooterAtSpeed(tolerance))
+            .withName("Wait Until Spun Up");
     }
 
     /**
@@ -65,7 +67,8 @@ public class UmbrellaCommands {
                     umbrella.spinupShooter(umbrella.getShooterTargetSpeed());
                     umbrella.runIntakeAt(-1.0, true);;
                 }).until(umbrella::notHoldingGamepiece)
-                .andThen(umbrella::stopAll);
+                .andThen(umbrella::stopAll)
+                .withName("Shoot");
         }
 
     /**
@@ -78,7 +81,8 @@ public class UmbrellaCommands {
         return umbrella.runEnd(
                 () -> umbrella.runIntakeAt(-1.0, false),
                 umbrella::stopAll
-        ).until(umbrella::holdingGamepiece);
+        ).until(umbrella::holdingGamepiece)
+        .withName("Intake");
     }
 
     /**
@@ -90,7 +94,8 @@ public class UmbrellaCommands {
     public static Command expell(Umbrella umbrella) {
         return umbrella.runEnd(
                 () -> umbrella.runIntakeAt(1.0, true),
-                umbrella::stopAll);
+                umbrella::stopAll)
+            .withName("Expell");
     }
 
     /**
@@ -108,6 +113,6 @@ public class UmbrellaCommands {
                     SmartDashboard.getNumber("IntakePercent", 0));
             umbrella.spinupShooterToRPM(
                     SmartDashboard.getNumber("RPMumbrella", 0));
-        });
+        }).withName("Spin Umbrella Both");
     }
 }
