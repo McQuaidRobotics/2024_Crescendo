@@ -62,9 +62,11 @@ public class WristSim implements Wrist {
 
         motorRads = sim.getAngularVelocityRadPerSec() * ConstValues.PERIODIC_TIME;
 
-        inputs.radiansPerSecond = (inputs.radians - Wrist.motorRadsToMechanismRads(motorRads))
+        //TODO: Fix motorRadsToMechanismRads function
+
+        inputs.radiansPerSecond = (inputs.radians - setRadians)
                 / ConstValues.PERIODIC_TIME;
-        inputs.radians = Wrist.motorRadsToMechanismRads(motorRads);
+        inputs.radians = setRadians;
         inputs.volts = AppliedVolts;
         inputs.amps = sim.getCurrentDrawAmps();
         inputs.temp = 0.0;
