@@ -34,7 +34,7 @@ public class TestingController extends ControllerParent {
 
         /// BUMPER
         this.LB.binding = new Binding((trig, allss) -> {
-            trig.whileTrue(
+            trig.onTrue(
                 UmbrellaCommands.spinupShooter(
                     allss.umbrella.get(),
                     3800
@@ -43,7 +43,7 @@ public class TestingController extends ControllerParent {
         }, Subsystems.Umbrella);
 
         this.RB.binding = new Binding((trig, allss) -> {
-            trig.whileTrue(
+            trig.onTrue(
                 UmbrellaCommands.spinupShooter(
                     allss.umbrella.get(),
                     0
