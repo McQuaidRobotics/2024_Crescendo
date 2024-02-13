@@ -36,7 +36,7 @@ This command will move the `Stem` to aim at the target.
 
 ### Description
 
-Should not be used inside of a path. This command will maintain `Shooter` speed, point the `Swerve` and `Stem` at the target, and shoot the note.
+Should not be used inside of a path. This command will reach `Shooter` speed, point the `Swerve` and `Stem` at the target, and shoot the note.
 
 ### Parameters
 

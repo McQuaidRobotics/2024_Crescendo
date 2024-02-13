@@ -17,6 +17,7 @@ import com.pathplanner.lib.auto.AutoBuilder.TriFunction;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 
 public class SpecializedNamedCommands {
     private final static HashMap<String, SpecializedNamedCommand> commands = new HashMap<>();
@@ -78,29 +79,33 @@ public class SpecializedNamedCommands {
             }, params);
         }
 
-        public static SpecializedNamedCommand fromLambda1(Function<Object, Command> fn, Class<?>... params) {
+        public static SpecializedNamedCommand empty(String name, Class<?>... params) {
+            return new SpecializedNamedCommand(args -> Commands.none().withName(name));
+        }
+
+        public static SpecializedNamedCommand fromLambda(Function<Object, Command> fn, Class<?>... params) {
             return new SpecializedNamedCommand(
-                args -> fn.apply(args[0]),
-                params);
+                    args -> fn.apply(args[0]),
+                    params);
         }
 
         public static SpecializedNamedCommand fromLambda2(BiFunction<Object, Object, Command> fn, Class<?>... params) {
             return new SpecializedNamedCommand(
-                args -> fn.apply(args[0], args[1]),
-                params);
+                    args -> fn.apply(args[0], args[1]),
+                    params);
         }
 
         public static SpecializedNamedCommand fromLambda3(
-            TriFunction<Object, Object, Object, Command> fn,
-            Class<?>... params) {
+                TriFunction<Object, Object, Object, Command> fn,
+                Class<?>... params) {
             return new SpecializedNamedCommand(
-                args -> fn.apply(args[0], args[1], args[2]),
-                params);
+                    args -> fn.apply(args[0], args[1], args[2]),
+                    params);
         }
     }
 
     public record DefaultableNamedCommand(String name) {
-        public void setDefault(Object... args) {
+        public void withDefault(Object... args) {
             NamedCommands.registerCommand(name, commands.get(name).construct(args));
         }
     }
@@ -108,6 +113,10 @@ public class SpecializedNamedCommands {
     public static DefaultableNamedCommand registerCommand(String name, SpecializedNamedCommand command) {
         commands.put(name, command);
         return new DefaultableNamedCommand(name);
+    }
+
+    public static DefaultableNamedCommand registerEmptyCommand(String name, Class<?>... params) {
+        return registerCommand(name, SpecializedNamedCommand.empty(name, params));
     }
 
     public static void generateSpecialized() {
