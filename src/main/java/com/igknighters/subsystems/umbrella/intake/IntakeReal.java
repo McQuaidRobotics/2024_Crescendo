@@ -85,7 +85,7 @@ public class IntakeReal implements Intake {
         var cfg = new TalonFXConfiguration();
 
         cfg.HardwareLimitSwitch.ForwardLimitEnable = false;
-        cfg.HardwareLimitSwitch.ReverseLimitEnable = false;
+        cfg.HardwareLimitSwitch.ReverseLimitEnable = true;
 
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
@@ -103,7 +103,7 @@ public class IntakeReal implements Intake {
         var cfg = new TalonFXConfiguration();
 
         cfg.HardwareLimitSwitch.ForwardLimitEnable = false;
-        cfg.HardwareLimitSwitch.ReverseLimitEnable = false;
+        cfg.HardwareLimitSwitch.ReverseLimitEnable = true;
 
         cfg.HardwareLimitSwitch.ReverseLimitRemoteSensorID = kIntake.UPPER_MOTOR_ID;
 
@@ -125,7 +125,7 @@ public class IntakeReal implements Intake {
     public void setVoltageOut(double volts) {
         inputs.voltsLower = volts;
         inputs.voltsUpper = volts * kIntake.UPPER_DIFF;
-        if (wasBeamBroken) {
+        if (inputs.exitBeamBroken) {
             lowerMotor.setVoltage(0.0);
             upperMotor.setVoltage(0.0);
         } else {
@@ -136,7 +136,8 @@ public class IntakeReal implements Intake {
 
     @Override
     public void turnIntakeRads(double radians) {
-        setVoltageOut(0.0);
+        inputs.voltsLower = 0.0;
+        inputs.voltsUpper = 0.0;
         upperMotor.setControl(new PositionVoltage(
                 upperMotor.getRotorPosition().getValue()
                         + Units.radiansToRotations(radians * kIntake.UPPER_DIFF)));
@@ -156,7 +157,8 @@ public class IntakeReal implements Intake {
                 UmbrellaHW.IntakeMotor,
                 BaseStatusSignal.refreshAll(
                         veloSignalUpper, voltSignalUpper,
-                        currentSignalUpper, tempSignalUpper));
+                        currentSignalUpper, tempSignalUpper,
+                        revLimitSignal));
 
         inputs.exitBeamBroken = revLimitSignal.getValue().equals(ReverseLimitValue.ClosedToGround);
         inputs.radiansPerSecondUpper = Units.rotationsToRadians(veloSignalUpper.getValue());
@@ -169,6 +171,7 @@ public class IntakeReal implements Intake {
         inputs.tempLower = tempSignalLower.getValue();
 
         if (inputs.exitBeamBroken && !wasBeamBroken) {
+            this.setVoltageOut(0.0);
             lowerMotor.getConfigurator().apply(lowerLimitCfg.withReverseLimitEnable(false));
             upperMotor.getConfigurator().apply(upperLimitCfg.withReverseLimitEnable(false));
             wasBeamBroken = true;
@@ -177,6 +180,8 @@ public class IntakeReal implements Intake {
             upperMotor.getConfigurator().apply(upperLimitCfg.withReverseLimitEnable(true));
             wasBeamBroken = false;
         }
+
+        Logger.recordOutput("/Umbrella/Intake/WasBeamBroken", wasBeamBroken);
 
         Logger.processInputs("/Umbrella/Intake", inputs);
     }
