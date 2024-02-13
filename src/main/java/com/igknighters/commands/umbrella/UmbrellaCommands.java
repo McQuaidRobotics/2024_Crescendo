@@ -3,10 +3,8 @@ package com.igknighters.commands.umbrella;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.umbrella.Umbrella;
 
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 
 public class UmbrellaCommands {
     /**
@@ -62,65 +60,54 @@ public class UmbrellaCommands {
      * @return A command to be scheduled
      */
     public static Command shoot(Umbrella umbrella) {
-        return umbrella.defer(
+            return umbrella.run(
                 () -> {
-                    if (!umbrella.holdingGamepiece()) {
-                        return Commands.none();
-                    }
-                    return umbrella.run(
-                            () -> {
-                                umbrella.spinupShooter(umbrella.getShooterTargetSpeed());
-                                umbrella.turnIntakeBy(-1.0);
-                            }).until(
-                                    () -> !umbrella.holdingGamepiece())
-                            .andThen(
-                                    () -> {
-                                        umbrella.runIntakeAt(0.0);
-                                        umbrella.spinupShooterToRPM(0);
-                                    });
-                });
-    }
+                    umbrella.spinupShooter(umbrella.getShooterTargetSpeed());
+                    umbrella.runIntakeAt(-1.0, true);;
+                }).until(umbrella::notHoldingGamepiece)
+                .andThen(umbrella::stopAll);
+        }
 
     /**
-     * A command that waits until the intake is not holding a game piece
+     * Will spin the intake inwards until a game piece is held
      * 
      * @param umbrella The umbrella subsystem
      * @return A command to be scheduled
      */
     public static Command intake(Umbrella umbrella) {
         return umbrella.runEnd(
-                () -> umbrella.runIntakeAt(-1.0),
-                () -> umbrella.runIntakeAt(0.0)).until(() -> umbrella.holdingGamepiece());
+                () -> umbrella.runIntakeAt(-1.0, false),
+                umbrella::stopAll
+        ).until(umbrella::holdingGamepiece);
     }
 
+    /**
+     * Will spin the intake outwards until canceled
+     * 
+     * @param umbrella The umbrella subsystem
+     * @return A command to be scheduled
+     */
     public static Command expell(Umbrella umbrella) {
         return umbrella.runEnd(
-                () -> umbrella.runIntakeAt(1.0),
-                () -> umbrella.runIntakeAt(0.0));
+                () -> umbrella.runIntakeAt(1.0, true),
+                umbrella::stopAll);
     }
 
-    public static Command feed(Umbrella umbrella) {
-        return umbrella.runOnce(
-                () -> umbrella.turnIntakeBy(0.5)).repeatedly()
-                .until(() -> umbrella.holdingGamepiece());
-    }
-
+    /**
+     * A command primarily for testing, will run the intake and shooter at the
+     * provided values in SmartDashboard
+     * 
+     * @param umbrella The umbrella subsystem
+     * @return A command to be scheduled
+     */
     public static Command spinUmbrellaBoth(Umbrella umbrella) {
         SmartDashboard.putNumber("IntakePercent", 0.0);
         SmartDashboard.putNumber("RPMumbrella", 0.0);
         return umbrella.run(() -> {
             umbrella.runIntakeAt(
-                    NetworkTableInstance
-                            .getDefault()
-                            .getTable("/SmartDashboard")
-                            .getEntry("IntakePercent")
-                            .getDouble(0.0));
+                    SmartDashboard.getNumber("IntakePercent", 0));
             umbrella.spinupShooterToRPM(
-                    NetworkTableInstance
-                            .getDefault()
-                            .getTable("/SmartDashboard")
-                            .getEntry("RPMumbrella")
-                            .getDouble(0.0));
+                    SmartDashboard.getNumber("RPMumbrella", 0));
         });
     }
 }

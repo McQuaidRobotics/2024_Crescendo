@@ -40,14 +40,9 @@ public interface Intake extends Component {
     }
 
     /**
-     * Turns the rotor on the {@code Intake} a specified number of radians
-     * 
-     * @param radians The number of radians to turn the rotor
-     */
-    public void turnIntakeRads(double radians);
-
-    /**
      * @return If the exit beam is broken
      */
     public boolean isExitBeamBroken();
+
+    public void setVoltageOut(double volts, boolean force);
 }
