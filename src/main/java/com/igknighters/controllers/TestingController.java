@@ -1,9 +1,12 @@
 package com.igknighters.controllers;
 
 import com.igknighters.constants.ConstValues;
-import com.igknighters.SubsystemResources.Subsystems;
+import com.igknighters.subsystems.stem.StemPosition;
 
-@SuppressWarnings("unused")
+import edu.wpi.first.wpilibj2.command.Commands;
+
+import com.igknighters.SubsystemResources.Subsystems;
+import com.igknighters.commands.umbrella.UmbrellaCommands;
 
 /** If debug is false this controller does not initialize */
 public class TestingController extends ControllerParent {
@@ -13,23 +16,45 @@ public class TestingController extends ControllerParent {
         // disregard null safety as it is checked on assignment
 
         /// FACE BUTTONS
-        // this.A.binding =
+        this.A.binding = new Binding((trig, allss) -> {
+            trig.onTrue(Commands.runOnce(() -> {
+                allss.stem.get().setStemPosition(StemPosition.fromDegrees(80.0, 0.0, 0.0));
+            }));
+        }, Subsystems.Stem);
 
-        // this.B.binding =
+        this.B.binding = new Binding((trig, allss) -> {
+            trig.onTrue(Commands.runOnce(() -> {
+                allss.stem.get().setStemPosition(StemPosition.fromDegrees(20.0, 0.0, 0.0));
+            }));
+        }, Subsystems.Stem);
 
         // this.X.binding =
 
         // this.Y.binding =
 
         /// BUMPER
-        // this.LB.binding =
+        this.LB.binding = new Binding((trig, allss) -> {
+            trig.onTrue(
+                UmbrellaCommands.spinupShooter(
+                    allss.umbrella.get(),
+                    3800
+                )
+            );
+        }, Subsystems.Umbrella);
 
-        // this.RB.binding =
+        this.RB.binding = new Binding((trig, allss) -> {
+            trig.onTrue(
+                UmbrellaCommands.spinupShooter(
+                    allss.umbrella.get(),
+                    0
+                )
+            );
+        }, Subsystems.Umbrella);
 
         /// CENTER BUTTONS
         // this.Back.binding =
 
-        // this.Start.binding =
+        // this.Start.binding = 
 
         /// STICKS
         // this.LS.binding =
@@ -37,9 +62,21 @@ public class TestingController extends ControllerParent {
         // this.RS.binding =
 
         /// TRIGGERS
-        // this.LT.binding =
+        this.LT.binding = new Binding((trig, allss) -> {
+            trig.whileTrue(
+                UmbrellaCommands.intake(
+                    allss.umbrella.get()
+                )
+            );
+        }, Subsystems.Umbrella);
 
-        // this.RT.binding =
+        this.RT.binding = new Binding((trig, allss) -> {
+            trig.onTrue(
+                UmbrellaCommands.shoot(
+                    allss.umbrella.get()
+                )
+            );
+        }, Subsystems.Umbrella);
 
         /// DPAD
         // this.DPR.binding =

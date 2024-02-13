@@ -1,4 +1,4 @@
-package com.igknighters.util;
+package com.igknighters.subsystems.swerve.module;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;

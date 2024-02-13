@@ -3,6 +3,7 @@ package com.igknighters.controllers;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -39,65 +40,25 @@ public class ControllerParent {
         }
     }
 
-    private interface Binding {
-        public boolean hasDeps(HashSet<Subsystems> enabledSubsystems);
-
-        public void assign(Trigger trigger, AllSubsystems subsystems);
-
-        public boolean isBound();
-    }
-
-    protected static class SingleDepBinding implements Binding {
-        public final Subsystems subsystem;
-        public final Boolean empty;
+    protected static class Binding {
+        public final List<Subsystems> subsystemArray;
         public final BiConsumer<Trigger, AllSubsystems> action;
 
-        public SingleDepBinding(Subsystems subsystem, BiConsumer<Trigger, AllSubsystems> action) {
-            this.subsystem = subsystem;
-            this.action = action;
-            this.empty = false;
-        }
-
-        private SingleDepBinding(Subsystems subsystem, BiConsumer<Trigger, AllSubsystems> action, Boolean empty) {
-            this.subsystem = subsystem;
-            this.action = action;
-            this.empty = false;
-        }
-
-        public static SingleDepBinding empty() {
-            return new SingleDepBinding(null, (controller, allSS) -> {
-            }, true);
-        }
-
-        @Override
-        public boolean hasDeps(HashSet<Subsystems> enabledSubsystems) {
-            if (empty) {
-                return false;
-            }
-            return enabledSubsystems.contains(subsystem);
-        }
-
-        @Override
-        public void assign(Trigger trigger, AllSubsystems subsystems) {
-            action.accept(trigger, subsystems);
-        }
-
-        @Override
-        public boolean isBound() {
-            return !empty;
-        }
-    }
-
-    protected static class MultiDepBinding implements Binding {
-        public final Subsystems[] subsystemArray;
-        public final BiConsumer<Trigger, AllSubsystems> action;
-
-        public MultiDepBinding(Subsystems[] subsystemArray, BiConsumer<Trigger, AllSubsystems> action) {
-            this.subsystemArray = subsystemArray;
+        public Binding(Subsystems[] subsystemArray, BiConsumer<Trigger, AllSubsystems> action) {
+            this.subsystemArray = Arrays.asList(subsystemArray);
             this.action = action;
         }
 
-        @Override
+        public Binding(Subsystems subsystem, BiConsumer<Trigger, AllSubsystems> action) {
+            this.subsystemArray = List.of(subsystem);
+            this.action = action;
+        }
+
+        public Binding(BiConsumer<Trigger, AllSubsystems> action, Subsystems... subsystemArray) {
+            this.subsystemArray = Arrays.asList(subsystemArray);
+            this.action = action;
+        }
+
         public boolean hasDeps(HashSet<Subsystems> enabledSubsystems) {
             for (Subsystems subsystem : subsystemArray) {
                 if (!enabledSubsystems.contains(subsystem)) {
@@ -107,23 +68,46 @@ public class ControllerParent {
             return true;
         }
 
-        @Override
         public void assign(Trigger trigger, AllSubsystems subsystems) {
             action.accept(trigger, subsystems);
         }
 
-        @Override
         public boolean isBound() {
             return true;
         }
+
+        public static Binding empty() {
+            return new Binding((controller, allSS) -> {});
+        }
     }
 
-    protected final TriggerBindingTuple A, B, X, Y, LB, RB, LS, RS, LT, RT, DPR, DPD, DPL, DPU;
+    protected final TriggerBindingTuple A, B, X, Y;
     // i alwayss forget which is which
     /** Left Center */
     protected final TriggerBindingTuple Back;
     /** Right Center */
     protected final TriggerBindingTuple Start;
+    /** Left Bumper */
+    protected final TriggerBindingTuple LB;
+    /** Right Bumper */
+    protected final TriggerBindingTuple RB;
+    /** Left Stick */
+    protected final TriggerBindingTuple LS;
+    /** Right Stick */
+    protected final TriggerBindingTuple RS;
+    /** Left Trigger */
+    protected final TriggerBindingTuple LT;
+    /** Right Trigger */
+    protected final TriggerBindingTuple RT;
+    /** DPad Right */
+    protected final TriggerBindingTuple DPR;
+    /** DPad Down */
+    protected final TriggerBindingTuple DPD;
+    /** DPad Left */
+    protected final TriggerBindingTuple DPL;
+    /** DPad Up */
+    protected final TriggerBindingTuple DPU;
+
 
     /**
      * for button idx (nice for sim)
@@ -137,41 +121,41 @@ public class ControllerParent {
         } else {
             controller = null;
             BootupLogger.bootupLog("Controller " + port + " not initialized");
-            A = new TriggerBindingTuple(null, SingleDepBinding.empty());
-            B = new TriggerBindingTuple(null, SingleDepBinding.empty());
-            X = new TriggerBindingTuple(null, SingleDepBinding.empty());
-            Y = new TriggerBindingTuple(null, SingleDepBinding.empty());
-            LB = new TriggerBindingTuple(null, SingleDepBinding.empty());
-            RB = new TriggerBindingTuple(null, SingleDepBinding.empty());
-            Back = new TriggerBindingTuple(null, SingleDepBinding.empty());
-            Start = new TriggerBindingTuple(null, SingleDepBinding.empty());
-            LS = new TriggerBindingTuple(null, SingleDepBinding.empty());
-            RS = new TriggerBindingTuple(null, SingleDepBinding.empty());
-            LT = new TriggerBindingTuple(null, SingleDepBinding.empty());
-            RT = new TriggerBindingTuple(null, SingleDepBinding.empty());
-            DPR = new TriggerBindingTuple(null, SingleDepBinding.empty());
-            DPD = new TriggerBindingTuple(null, SingleDepBinding.empty());
-            DPL = new TriggerBindingTuple(null, SingleDepBinding.empty());
-            DPU = new TriggerBindingTuple(null, SingleDepBinding.empty());
+            A = new TriggerBindingTuple(null, Binding.empty());
+            B = new TriggerBindingTuple(null, Binding.empty());
+            X = new TriggerBindingTuple(null, Binding.empty());
+            Y = new TriggerBindingTuple(null, Binding.empty());
+            LB = new TriggerBindingTuple(null, Binding.empty());
+            RB = new TriggerBindingTuple(null, Binding.empty());
+            Back = new TriggerBindingTuple(null, Binding.empty());
+            Start = new TriggerBindingTuple(null, Binding.empty());
+            LS = new TriggerBindingTuple(null, Binding.empty());
+            RS = new TriggerBindingTuple(null, Binding.empty());
+            LT = new TriggerBindingTuple(null, Binding.empty());
+            RT = new TriggerBindingTuple(null, Binding.empty());
+            DPR = new TriggerBindingTuple(null, Binding.empty());
+            DPD = new TriggerBindingTuple(null, Binding.empty());
+            DPL = new TriggerBindingTuple(null, Binding.empty());
+            DPU = new TriggerBindingTuple(null, Binding.empty());
             return;
         }
         controllers.put(type, this);
-        A = new TriggerBindingTuple(controller.a(), SingleDepBinding.empty());
-        B = new TriggerBindingTuple(controller.b(), SingleDepBinding.empty());
-        X = new TriggerBindingTuple(controller.x(), SingleDepBinding.empty());
-        Y = new TriggerBindingTuple(controller.y(), SingleDepBinding.empty());
-        LB = new TriggerBindingTuple(controller.leftBumper(), SingleDepBinding.empty());
-        RB = new TriggerBindingTuple(controller.rightBumper(), SingleDepBinding.empty());
-        Back = new TriggerBindingTuple(controller.back(), SingleDepBinding.empty());
-        Start = new TriggerBindingTuple(controller.start(), SingleDepBinding.empty());
-        LS = new TriggerBindingTuple(controller.leftStick(), SingleDepBinding.empty());
-        RS = new TriggerBindingTuple(controller.rightStick(), SingleDepBinding.empty());
-        LT = new TriggerBindingTuple(controller.leftTrigger(), SingleDepBinding.empty());
-        RT = new TriggerBindingTuple(controller.rightTrigger(), SingleDepBinding.empty());
-        DPR = new TriggerBindingTuple(controller.povRight(), SingleDepBinding.empty());
-        DPD = new TriggerBindingTuple(controller.povDown(), SingleDepBinding.empty());
-        DPL = new TriggerBindingTuple(controller.povLeft(), SingleDepBinding.empty());
-        DPU = new TriggerBindingTuple(controller.povUp(), SingleDepBinding.empty());
+        A = new TriggerBindingTuple(controller.a(), Binding.empty());
+        B = new TriggerBindingTuple(controller.b(), Binding.empty());
+        X = new TriggerBindingTuple(controller.x(), Binding.empty());
+        Y = new TriggerBindingTuple(controller.y(), Binding.empty());
+        LB = new TriggerBindingTuple(controller.leftBumper(), Binding.empty());
+        RB = new TriggerBindingTuple(controller.rightBumper(), Binding.empty());
+        Back = new TriggerBindingTuple(controller.back(), Binding.empty());
+        Start = new TriggerBindingTuple(controller.start(), Binding.empty());
+        LS = new TriggerBindingTuple(controller.leftStick(), Binding.empty());
+        RS = new TriggerBindingTuple(controller.rightStick(), Binding.empty());
+        LT = new TriggerBindingTuple(controller.leftTrigger(), Binding.empty());
+        RT = new TriggerBindingTuple(controller.rightTrigger(), Binding.empty());
+        DPR = new TriggerBindingTuple(controller.povRight(), Binding.empty());
+        DPD = new TriggerBindingTuple(controller.povDown(), Binding.empty());
+        DPL = new TriggerBindingTuple(controller.povLeft(), Binding.empty());
+        DPU = new TriggerBindingTuple(controller.povUp(), Binding.empty());
     }
 
     public void assignButtons(AllSubsystems subsystems) {

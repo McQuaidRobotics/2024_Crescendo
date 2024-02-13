@@ -15,7 +15,6 @@ import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.commands.autos.Autos;
 import com.igknighters.commands.autos.AutosCmdRegister;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
-import com.igknighters.commands.umbrella.UmbrellaCommands;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -50,11 +49,6 @@ public class RobotContainer {
 
             Autos.createSendableChooser(swerve);
         }
-
-        if (allSubsystems.umbrella.isPresent()){
-            var umbrella = allSubsystems.umbrella.get();
-            umbrella.setDefaultCommand(UmbrellaCommands.spinUmbrella(umbrella));
-        }
     }
 
     private void setupAutos(Swerve swerve) {
@@ -71,7 +65,7 @@ public class RobotContainer {
                 swerve::getPose,
                 swerve::resetOdometry,
                 swerve::getChassisSpeed,
-                chassisSpeeds -> swerve.driveChassisSpeeds(
+                chassisSpeeds -> swerve.drive(
                         chassisSpeeds, false),
                 new HolonomicPathFollowerConfig(
                         kAuto.AUTO_TRANSLATION_PID,

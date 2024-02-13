@@ -4,8 +4,11 @@ import com.igknighters.subsystems.swerve.Swerve;
 
 import java.util.function.DoubleSupplier;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -20,6 +23,7 @@ public class TeleopSwerveBase extends Command {
      * If simulation and {@link kSwerve#ORIENT_TELEOP_FOR_SIM} is true,
      * it will make up on the translation stick move up on the field visualization.
      * If simulation and {@link kSwerve#ORIENT_TELEOP_FOR_SIM} is false it will replicate the real robot.
+     * 
      * @param input The controller input
      * @return The adjusted controller input
      */
@@ -52,32 +56,50 @@ public class TeleopSwerveBase extends Command {
         this.rawRotationYSup = controller.rightStickY();
     }
 
+    private double invert() {
+        if (RobotBase.isSimulation() && kSwerve.ORIENT_TELEOP_FOR_SIM) {
+            return 1;
+        } else if (DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Blue).equals(DriverStation.Alliance.Red)) {
+            return -1;
+        } else {
+            return 1;
+        }
+    }
+
     protected double getTranslationX() {
         // inverted because left is positive for field due to Y being increased but left
         // is negative for controller
-        var v = -kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(rawTranslationXSup.getAsDouble());
-        SmartDashboard.putNumber("getTranslationX", v);
-        return v;
+        final double raw = rawTranslationXSup.getAsDouble();
+        Logger.recordOutput("Swerve/TeleopCommand/RawTranslationX", raw);
+        var processed = -kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(raw) * invert();
+        Logger.recordOutput("Swerve/TeleopCommand/TranslationX", processed);
+        return processed;
     }
 
     protected double getTranslationY() {
-        var v = kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(rawTranslationYSup.getAsDouble());
-        SmartDashboard.putNumber("getTranslationY", v);
-        return v;
+        final double raw = rawTranslationYSup.getAsDouble();
+        Logger.recordOutput("Swerve/TeleopCommand/RawTranslationY", raw);
+        var processed = kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(raw) * invert();
+        Logger.recordOutput("Swerve/TeleopCommand/TranslationY", processed);
+        return processed;
     }
 
     protected double getRotationX() {
         // inverted because left is positive for field due to Y being increased but left
         // is negative for controller
-        var v = -kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(rawRotationXSup.getAsDouble());
-        SmartDashboard.putNumber("getRotationX", v);
-        return v;
+        final double raw = rawRotationXSup.getAsDouble();
+        Logger.recordOutput("Swerve/TeleopCommand/RawRotationX", raw);
+        var processed = -kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(raw) * invert();
+        Logger.recordOutput("Swerve/TeleopCommand/RotationX", processed);
+        return processed;
     }
 
     protected double getRotationY() {
-        var v = kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(rawRotationYSup.getAsDouble());
-        SmartDashboard.putNumber("getRotationY", v);
-        return v;
+        final double raw = rawRotationYSup.getAsDouble();
+        Logger.recordOutput("Swerve/TeleopCommand/RawRotationY", raw);
+        var processed = kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(raw) * invert();
+        Logger.recordOutput("Swerve/TeleopCommand/RotationY", processed);
+        return processed;
     }
 
     public static class TeleopSwerveOmni extends Command {

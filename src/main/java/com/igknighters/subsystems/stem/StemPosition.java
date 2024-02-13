@@ -1,5 +1,7 @@
 package com.igknighters.subsystems.stem;
 
+import edu.wpi.first.math.util.Units;
+
 public class StemPosition {
     public double pivotRads, wristRads, telescopeMeters;
 
@@ -21,4 +23,9 @@ public class StemPosition {
         return new StemPosition(Math.toRadians(pivotPosRot * 360.0), Math.toRadians(wristPosRot * 360.0),
                 telescopePosMeters);
     }
+
+    //TODO: Get these values from cad and irl
+    public static final StemPosition INTAKE = fromDegrees(0, 55, Units.inchesToMeters(28));
+    public static final StemPosition STOW = fromDegrees(30, 30, Units.inchesToMeters(20));
+    public static final StemPosition AMP = fromDegrees(93, 45, Units.inchesToMeters(28));
 }
