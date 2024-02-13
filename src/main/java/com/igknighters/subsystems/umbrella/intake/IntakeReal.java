@@ -6,7 +6,6 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.ReverseLimitSourceValue;
@@ -135,15 +134,15 @@ public class IntakeReal implements Intake {
     }
 
     @Override
-    public void turnIntakeRads(double radians) {
-        inputs.voltsLower = 0.0;
-        inputs.voltsUpper = 0.0;
-        upperMotor.setControl(new PositionVoltage(
-                upperMotor.getRotorPosition().getValue()
-                        + Units.radiansToRotations(radians * kIntake.UPPER_DIFF)));
-        lowerMotor.setControl(new PositionVoltage(
-                lowerMotor.getRotorPosition().getValue()
-                        + Units.radiansToRotations(radians)));
+    public void setVoltageOut(double volts, boolean force) {
+        if (!force) {
+            setVoltageOut(volts);
+            return;
+        }
+        inputs.voltsLower = volts;
+        inputs.voltsUpper = volts * kIntake.UPPER_DIFF;
+        lowerMotor.setVoltage(volts);
+        upperMotor.setVoltage(volts * kIntake.UPPER_DIFF);
     }
 
     @Override
