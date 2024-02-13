@@ -86,6 +86,12 @@ public class TelescopeSim implements Telescope {
         inputs.volts = telescopeVoltageFeedback;
     }
 
+    private void setSimStateMeters(double meters) {
+        inputs.volts = 0.0;
+        inputs.amps = 0.0;
+        sim.setState(meters, 0.0);
+    }
+
     @Override
     public double getTelescopeMeters() {
         return inputs.meters;
@@ -131,10 +137,10 @@ public class TelescopeSim implements Telescope {
         }
 
         if (isFwdLimitSwitchHit())
-            setTelescopeMeters(kTelescope.MAX_METERS);
+            setSimStateMeters(kTelescope.MAX_METERS);
 
-        if (isRevLimitSwitchHit()) // if limitswitch is triggered, home the telescope
-            setTelescopeMeters(kTelescope.MIN_METERS);
+        if (isRevLimitSwitchHit())
+            setSimStateMeters(kTelescope.MIN_METERS);
 
         Logger.processInputs("Stem/Telescope", inputs);
     }

@@ -2,6 +2,8 @@ package com.igknighters.subsystems.stem.telescope;
 
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 
+import edu.wpi.first.math.MathUtil;
+
 public class TelescopeDisabled implements Telescope {
     double targetMeters = kTelescope.MIN_METERS;
 
@@ -12,7 +14,7 @@ public class TelescopeDisabled implements Telescope {
 
     @Override
     public void setTelescopeMeters(double meters) {
-        targetMeters = meters;
+        targetMeters = MathUtil.clamp(meters, kTelescope.MIN_METERS, kTelescope.MAX_METERS);
     }
 
     @Override
@@ -20,13 +22,11 @@ public class TelescopeDisabled implements Telescope {
 
     @Override
     public boolean isFwdLimitSwitchHit() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'isFwdLimitSwitchHit'");
+        return targetMeters >= kTelescope.MAX_METERS * 0.98;
     }
 
     @Override
     public boolean isRevLimitSwitchHit() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'isRevLimitSwitchHit'");
+        return targetMeters <= kTelescope.MIN_METERS * 0.98;
     }
 }

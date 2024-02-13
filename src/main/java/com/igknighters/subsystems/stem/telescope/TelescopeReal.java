@@ -126,7 +126,8 @@ public class TelescopeReal implements Telescope {
             BaseStatusSignal.refreshAll(
                 motorRots, motorVelo,
                 motorVolts, motorAmps,
-                motorTemp));
+                motorTemp, forwardLimitSwitch,
+                reverseLimitSwitch));
 
         inputs.meters = motorRotsToMechMeters(motorRots.getValue());
         inputs.metersPerSecond = motorRotsToMechMeters(motorVelo.getValue());
