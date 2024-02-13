@@ -45,7 +45,7 @@ public final class ConstValues {
         }
 
         private static final class Falcon500Foc {
-            public static final double FREE_SPEED = 636.69;
+            public static final double FREE_SPEED = 636.7;
             public static final double FREE_CURRENT = 1.5;
             public static final double STALL_TORQUE = 5.84;
             public static final double STALL_CURRENT = 304.0;
@@ -56,10 +56,10 @@ public final class ConstValues {
     public static final double PERIODIC_TIME = 0.02; // 20ms
 
     public static final class kDimensions {
-        public static final double ROBOT_WIDTH = Units.inchesToMeters(26);
-        public static final double ROBOT_LENGTH = Units.inchesToMeters(26);
-        public static final double BUMPER_THICKNESS = Units.inchesToMeters(2.7);
-        public static final double BELLYPAN_HEIGHT = Units.inchesToMeters(2);
+        public static final double ROBOT_WIDTH = 26 * Conv.INCHES_TO_METERS;
+        public static final double ROBOT_LENGTH = 26 * Conv.INCHES_TO_METERS;
+        public static final double BUMPER_THICKNESS = 2.7 * Conv.INCHES_TO_METERS;
+        public static final double BELLYPAN_HEIGHT = 2 * Conv.INCHES_TO_METERS;
     }
 
     public static final class kVision {
