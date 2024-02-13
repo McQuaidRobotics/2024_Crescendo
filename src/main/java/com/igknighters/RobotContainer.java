@@ -30,9 +30,9 @@ public class RobotContainer {
     public RobotContainer() {
         DriverStation.silenceJoystickConnectionWarning(ConstValues.DEBUG);
 
-        driverController = new DriverController(3);
+        driverController = new DriverController(0);
         operatorController = new OperatorController(1);
-        testingController = new TestingController(0);
+        testingController = new TestingController(3);
 
         allSubsystems = new AllSubsystems(RobotSetup.getRobotID().subsystems);
 

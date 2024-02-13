@@ -33,14 +33,7 @@ public class TestingController extends ControllerParent {
         // this.Y.binding =
 
         /// BUMPER
-        // this.LB.binding =
-
-        // this.RB.binding =
-
-        /// CENTER BUTTONS
-        // this.Back.binding =
-
-        this.Start.binding = new Binding((trig, allss) -> {
+        this.LB.binding = new Binding((trig, allss) -> {
             trig.whileTrue(
                 UmbrellaCommands.spinupShooter(
                     allss.umbrella.get(),
@@ -48,6 +41,20 @@ public class TestingController extends ControllerParent {
                 )
             );
         }, Subsystems.Umbrella);
+
+        this.RB.binding = new Binding((trig, allss) -> {
+            trig.whileTrue(
+                UmbrellaCommands.spinupShooter(
+                    allss.umbrella.get(),
+                    0
+                )
+            );
+        }, Subsystems.Umbrella);
+
+        /// CENTER BUTTONS
+        // this.Back.binding =
+
+        // this.Start.binding = 
 
         /// STICKS
         // this.LS.binding =
