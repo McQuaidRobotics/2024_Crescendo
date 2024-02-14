@@ -45,7 +45,7 @@ public class LED {
     private int lastMode = 0;
 
     /**
-     * Defines specific behavior for a pattern
+     * Defines specific behavior for an animation
      */
     public static class LEDAnimDescriptor {
         public int r = 0, g = 0, b = 0;
@@ -53,6 +53,14 @@ public class LED {
         public Direction direction;
         public double brightness;
 
+        /**
+         * Descriptor used for generating animations
+         * @param r The red value [0, 255]
+         * @param g The green value [0, 255]
+         * @param b The blue value [0, 255]
+         * @param speed The speed of the animation. Effective [0.1, 1.0]
+         * @param direction The direction of the animation. Either forward or backward
+         */
         public LEDAnimDescriptor(int r, int g, int b, double speed, Direction direction) {
             this.r = r;
             this.g = g;
@@ -61,11 +69,23 @@ public class LED {
             this.direction = direction;
         }
 
+        /**
+         * Descriptor used for generating rainbow animations
+         * @param brightness Brightness of LEDs [0, 1]
+         * @param speed The speed of the animation. Effective [0.1, 1]
+         */
         public LEDAnimDescriptor(double brightness, double speed) {
             this.brightness = brightness;
             this.speed = speed;
         }
 
+/**
+ * Generates an animation to be passed into the CANdle
+ * @param fn Values used for animation generation other than the number of LEDs and the offset.
+ * @param numLed
+ * @param ledOffset
+ * @return Newly generated Animation object
+ */
         public Animation generateAnim(TriFunction<LEDAnimDescriptor, Integer, Integer, Animation> fn, int numLed, int ledOffset) {
             return fn.apply(this, numLed, ledOffset);
         }
@@ -125,6 +145,12 @@ public class LED {
         private final LEDAnimDescriptor desc;
         private final TriFunction<LEDAnimDescriptor, Integer, Integer, Animation> genFn;
 
+        /**
+         * Gets the animation defined by the enumeration
+         * @param numLed The number of LEDs to use for the animation [0, <code>NUMLEDS</code>]
+         * @param ledOffset The number of LEDs to offset the animation by [0, <code>NUMLEDS</code>]
+         * @return Newly generated animation as defined by <code>generateAnim()</code>
+         */
         public Animation getAnim(int numLed, int ledOffset){
             return desc.generateAnim(genFn, numLed, ledOffset);
         }
@@ -135,6 +161,12 @@ public class LED {
         }
     }
 
+    /**
+     * Creates a partial animation which has a number of LEDs, an offset, and an animation to animate on the CANdle
+     * @param leds The number of LEDs to animate on
+     * @param offset The number of LEDs to offset the animation by
+     * @param anim The animation to pass through the CANdle
+     */
     private static record PartialAnimation(
         int leds,
         int offset,
@@ -145,6 +177,9 @@ public class LED {
         }
     }
 
+    /**
+     * Handles the duration that animations should run for.
+     */
     public class DurationHandle {
         LED led;
         private DurationHandle(LED led) {
@@ -174,7 +209,11 @@ public class LED {
                 .onTrue(new InstantCommand(() -> this.sendAnimation(LedAnimations._20S_LEFT).withDuration(2.0)));
     }
 
-    
+    /**
+     * Sends an animation to be animated on the CANdle on 100% of the strip
+     * @param anim The animation to be animated
+     * @return A <code>DurationHandle</code>
+     */
     public DurationHandle sendAnimation(LedAnimations anim) {
         return sendMultiAnimation(1.0, anim);
     }
@@ -225,6 +264,20 @@ public class LED {
         return new DurationHandle(this);
     }
 
+    /**
+     * Sends animation(s) to be animated by the CANdle on a certain percent of the strip. Handles up to 5 animations and 5 percents.
+     * @param percent1 The first percent of the LEDs to be used for an animation. Pairs with <code>anim1</code>
+     * @param anim1 The first animation to be animated on the CANdle. Pairs with <code>percent1</code>
+     * @param percent2 The second percent of the LEDs to be used for an animation. Pairs with <code>anim2</code>
+     * @param anim2 The second animation to be animated on the CANdle. Pairs with <code>percent2</code>
+     * @param percent3 The third percent of the LEDs to be used for an animation. Pairs with <code>anim3</code>
+     * @param anim3 The third animation to be animated on the CANdle. Pairs with <code>percent3</code>
+     * @param percent4 The fourth percent of the LEDs to be used for an animation. Pairs with <code>anim4</code>
+     * @param anim4 The fourth animation to be animated on the CANdle. Pairs with <code>percent4</code>
+     * @param percent5 The fifth percent of the LEDs to be used for an animation. Pairs with <code>anim5</code>
+     * @param anim5 The fifth animation to be animated on the CANdle. Pairs with <code>percent5</code>
+     * @return A {@code DurationHandle}
+     */
     public DurationHandle sendMultiAnimation(
         double percent1, LedAnimations anim1,
         double percent2, LedAnimations anim2,
@@ -239,6 +292,14 @@ public class LED {
         return new DurationHandle(this);
     }
 
+    /**
+     * Creates new partial animations defined by {@code sendMultiAnimation}
+     * @param percents The percents for each animation to be applied to
+     * @param anims The animations to be passed through the CANdle
+     * @return A {@code DurationHandle}
+     * @error If an animation tries to use more LEDs than available, throws a "Multi Animation Error". 
+     * Also throws if more than 10 animations are passed through due to the CANdle's limit of 10 simultaneous animations maximum.
+     */
     public DurationHandle sendMultiAnimation(
         final double[] percents, final LedAnimations[] anims
     ) {
@@ -281,6 +342,11 @@ public class LED {
         return new DurationHandle(this);
     }
 
+    /**
+     * Sends an animation to be animated based on the state of the robot {@code [DISABLED, AUTO, TELEOP]}.
+     * Also sets the {@code robotMode} variable to a value based on the mode of the robot to track the most recent mode.
+     * Also sets the {@code duration} to 0.0
+     */
     public void setDefault() {
         if (DriverStation.isDisabled()) {
             sendAnimation(LedAnimations.DISABLED);
@@ -295,6 +361,10 @@ public class LED {
         this.duration = 0.0;
     }
 
+    /**
+     * Runs the {@code LED} code, passing animations through the CANdle. Clears current animation if {@code robotMode != lastMode}.
+     * Logs the current pattern that is expected to be passed through the CANdle
+     */
     public void run() {
         if (timer.hasElapsed(duration)) {
             setDefault();
