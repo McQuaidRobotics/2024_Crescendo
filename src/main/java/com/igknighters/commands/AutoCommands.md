@@ -16,11 +16,7 @@ and run the intake until it picks up a note or until it times out.
 
 ### Description
 
-This command will move the `Stem` to the stow location and stop the intake and spin up the shooter.
-
-### Parameters
-
-- `rpm` - The speed to spin the shooter at in RPM. Default is 3750.
+This command will move the `Stem` to the stow location and stop the intake.
 
 ## Aim
 
@@ -28,9 +24,10 @@ This command will move the `Stem` to the stow location and stop the intake and s
 
 This command will move the `Stem` to aim at the target.
 
-### Parameters
+<!-- ### Parameters -->
 
-- `angle` - The angle to aim at in degrees. Default is auto-aim.
+<!-- - `x offset` -  -->
+<!-- - `y offset` -  -->
 
 ## Shoot
 
