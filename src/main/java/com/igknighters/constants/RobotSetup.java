@@ -18,7 +18,7 @@ public class RobotSetup {
         CRASH(Subsystems.list(Subsystems.Umbrella),
                 RobotConstID.CRASH),
 
-        BURN(Subsystems.list("Swerve"),
+        BURN(Subsystems.list(Subsystems.Umbrella),
                 RobotConstID.BURN),
 
         SIM_CRASH(Subsystems.all(), RobotConstID.CRASH),
@@ -53,7 +53,7 @@ public class RobotSetup {
             "bbbbbbbb", RobotID.BURN,
             "03260abb", RobotID.CRASH,
             "0306adb6", RobotID.TestBoard,
-            "03260af0", RobotID.CRASH);
+            "03260af0", RobotID.BURN);
 
     private static RobotID currentID = RobotID.Unlabeled;
 

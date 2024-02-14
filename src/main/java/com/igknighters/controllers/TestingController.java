@@ -2,6 +2,7 @@ package com.igknighters.controllers;
 
 import com.igknighters.constants.ConstValues;
 import com.igknighters.SubsystemResources.Subsystems;
+import com.igknighters.commands.umbrella.UmbrellaCommands;
 
 @SuppressWarnings("unused")
 
@@ -13,13 +14,21 @@ public class TestingController extends ControllerParent {
         // disregard null safety as it is checked on assignment
 
         /// FACE BUTTONS
-        // this.A.binding =
+        this.A.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
+            trig.onTrue(UmbrellaCommands.intake(allss.umbrella.get()));
+        });
 
-        // this.B.binding =
+        this.B.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
+            trig.onTrue(UmbrellaCommands.shoot(allss.umbrella.get()));
+        });
 
-        // this.X.binding =
+        this.X.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
+            trig.onTrue(UmbrellaCommands.stopShooter(allss.umbrella.get()));
+        });
 
-        // this.Y.binding =
+        this.Y.binding = this.X.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
+            trig.onTrue(UmbrellaCommands.waitUntilSpunUp(allss.umbrella.get(), 3800));
+        });
 
         /// BUMPER
         // this.LB.binding =

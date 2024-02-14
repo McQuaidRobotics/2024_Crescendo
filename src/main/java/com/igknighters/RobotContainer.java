@@ -51,10 +51,10 @@ public class RobotContainer {
             Autos.createSendableChooser(swerve);
         }
 
-        if (allSubsystems.umbrella.isPresent()){
-            var umbrella = allSubsystems.umbrella.get();
-            umbrella.setDefaultCommand(UmbrellaCommands.spinUmbrellaBoth(umbrella));
-        }
+        // if (allSubsystems.umbrella.isPresent()){
+        //     var umbrella = allSubsystems.umbrella.get();
+        //     umbrella.setDefaultCommand(UmbrellaCommands.spinUmbrellaBoth(umbrella));
+        // }
     }
 
     private void setupAutos(Swerve swerve) {
