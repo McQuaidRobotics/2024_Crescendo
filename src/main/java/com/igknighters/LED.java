@@ -41,6 +41,9 @@ public class LED {
 
     private ArrayList<PartialAnimation> animations;
 
+    private int robotMode = 0;
+    private int lastMode = 0;
+
     /**
      * Defines specific behavior for a pattern
      */
@@ -97,7 +100,7 @@ public class LED {
             }),
         _20S_LEFT(new LEDAnimDescriptor(255, 0, 255, 0.2, Direction.Forward),
             (desc, num, offset) -> {
-                return new SingleFadeAnimation(
+                return new StrobeAnimation(
                     desc.r, desc.g, desc.b, 0, desc.speed, num, offset
                 );
             }),
@@ -281,10 +284,13 @@ public class LED {
     public void setDefault() {
         if (DriverStation.isDisabled()) {
             sendAnimation(LedAnimations.DISABLED);
+            robotMode=0;
         } else if (DriverStation.isAutonomous()) {
             sendAnimation(LedAnimations.AUTO);
+            robotMode=1;
         } else {
             sendAnimation(LedAnimations.TELEOP);
+            robotMode=2;
         }
         this.duration = 0.0;
     }
@@ -296,8 +302,12 @@ public class LED {
         String log = "[";
         for (int i = 0; i < this.animations.size(); i++) {
             var partial = this.animations.get(i);
+            if(lastMode!=robotMode){
+                candle.animate(null);
+            }
             candle.animate(partial.getAnim(), i);
             log += partial.toString() + ",";
+            lastMode=robotMode;
         }
         Logger.recordOutput("LED", log + "]");
         
