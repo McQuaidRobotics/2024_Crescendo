@@ -4,7 +4,6 @@ import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -40,10 +39,6 @@ public class GlobalState {
         }
     }
 
-    public static enum GamepieceState {
-        None, Held, Confirmed;
-    }
-
     private static final ReentrantLock globalLock = new ReentrantLock();
 
     private static LocalizerType localizerType = LocalizerType.None;
@@ -56,8 +51,6 @@ public class GlobalState {
     private static boolean autoChooserCreated = false;
 
     private static AtomicBoolean isUnitTest = new AtomicBoolean(false);
-
-    private static AtomicReference<GamepieceState> gamePieceState = new AtomicReference<GlobalState.GamepieceState>(GamepieceState.None);
 
     private GlobalState() {
         throw new UnsupportedOperationException("This is a utility class!");
@@ -247,14 +240,6 @@ public class GlobalState {
         } finally {
             globalLock.unlock();
         }
-    }
-
-    public static GamepieceState getGamePieceState() {
-        return gamePieceState.get();
-    }
-
-    public static void setHasGamePiece(GamepieceState state) {
-        gamePieceState.set(state);
     }
 
     /**

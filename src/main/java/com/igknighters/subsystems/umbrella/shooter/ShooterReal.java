@@ -5,8 +5,9 @@ import org.littletonrobotics.junction.Logger;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.util.BootupLogger;
@@ -66,7 +67,7 @@ public class ShooterReal implements Shooter {
         cfg.CurrentLimits.StatorCurrentLimit = kShooter.PEAK_CURRENT;
         cfg.CurrentLimits.StatorCurrentLimitEnable = true;
 
-        cfg.MotorOutput.PeakReverseDutyCycle = 0.0;
+        // cfg.MotorOutput.PeakReverseDutyCycle = 0.0;
 
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
@@ -84,7 +85,9 @@ public class ShooterReal implements Shooter {
         cfg.CurrentLimits.StatorCurrentLimit = kShooter.PEAK_CURRENT;
         cfg.CurrentLimits.StatorCurrentLimitEnable = true;
 
-        cfg.MotorOutput.PeakReverseDutyCycle = 0.0;
+        cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+        // cfg.MotorOutput.PeakReverseDutyCycle = 0.0;
 
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
@@ -105,7 +108,7 @@ public class ShooterReal implements Shooter {
     public void setSpeed(double speedRadPerSec) {
         inputs.targetRadiansPerSecondRight = speedRadPerSec;
         inputs.targetRadiansPerSecondLeft = speedRadPerSec;
-        var req = new VelocityDutyCycle(Units.radiansToRotations(speedRadPerSec));
+        var req = new VelocityVoltage(Units.radiansToRotations(speedRadPerSec));
         rightMotor.setControl(req);
         leftMotor.setControl(req);
     }
