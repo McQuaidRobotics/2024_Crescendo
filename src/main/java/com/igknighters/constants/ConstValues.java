@@ -50,6 +50,13 @@ public final class ConstValues {
             public static final double STALL_TORQUE = 5.84;
             public static final double STALL_CURRENT = 304.0;
         }
+
+        public static final class KrakenX60Foc {
+            public static final double FREE_SPEED = 608.0;
+            public static final double FREE_CURRENT = 2.0;
+            public static final double STALL_TORQUE = 9.37;
+            public static final double STALL_CURRENT = 483.0;
+        }
     }
 
     public static final boolean DEBUG = true; // this should be false for competition
