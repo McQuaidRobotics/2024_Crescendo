@@ -81,24 +81,46 @@ public final class ConstValues {
                                     "photonvision-15",
                                     0,
                                     new Pose3d(
-                                            new Translation3d(Units.inchesToMeters(10.0), Units.inchesToMeters(10.0),
-                                                    Units.inchesToMeters(3.0)),
+                                            new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(8.75),
+                                                    Units.inchesToMeters(8.0)-kDimensions.BELLYPAN_HEIGHT),
                                             new Rotation3d(
                                                     0.0,
                                                     Units.degreesToRadians(15.0),
-                                                    Units.degreesToRadians(45.0)))),
+                                                    0.0))),
                             Camera.createConfig(
                                     "photonvision-16",
                                     1,
                                     new Pose3d(
-                                            new Translation3d(Units.inchesToMeters(10.0), Units.inchesToMeters(-10.0),
-                                                    Units.inchesToMeters(3.0)),
+                                            new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(-8.75),
+                                                    Units.inchesToMeters(8.0) - kDimensions.BELLYPAN_HEIGHT),
                                             new Rotation3d(
                                                     0.0,
                                                     Units.degreesToRadians(15.0),
-                                                    Units.degreesToRadians(-45.0))))
+                                                    0.0)))
                     }),
-            BURN(new CameraConfig[] {});
+            BURN(
+                new CameraConfig[] {
+                        Camera.createConfig(
+                                "photonvision-15",
+                                0,
+                                new Pose3d(
+                                        new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(8.75),
+                                                Units.inchesToMeters(8.0)-kDimensions.BELLYPAN_HEIGHT),
+                                        new Rotation3d(
+                                                0.0,
+                                                Units.degreesToRadians(15.0),
+                                                0.0))),
+                        Camera.createConfig(
+                                "photonvision-16",
+                                1,
+                                new Pose3d(
+                                        new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(-8.75),
+                                                Units.inchesToMeters(8.0) - kDimensions.BELLYPAN_HEIGHT),
+                                        new Rotation3d(
+                                                0.0,
+                                                Units.degreesToRadians(15.0),
+                                                0.0)))
+                });
 
             public final CameraConfig[] cameras;
 
@@ -213,7 +235,7 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 2;
             public static final int CANCODER_ID = 21;
             @DoubleConst(crash = -0.406250, burn = 0.25193)
-            public static double ROTATION_OFFSET = -0.406250 ;
+            public static double ROTATION_OFFSET = -0.406250;
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0, -TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
                     ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
