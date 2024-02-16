@@ -1,6 +1,5 @@
 package com.igknighters.subsystems.swerve.module;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 public class SwerveModuleConstants {
@@ -42,19 +41,7 @@ public class SwerveModuleConstants {
         this.rotationOffset = rotationOffset;
     }
 
-    public Rotation2d getRotationOffset(ModuleId module) {
-        if (module == ModuleId.m3)
-            return Rotation2d.fromDegrees(findCoterminalAngle((rotationOffset * 360) + 225));
-        else if (module == ModuleId.m0)
-            return Rotation2d.fromDegrees(findCoterminalAngle((rotationOffset * 360) + 315));
-        else if (module == ModuleId.m2)
-            return Rotation2d.fromDegrees(findCoterminalAngle((rotationOffset * 360) + 125));
-        else if (module == ModuleId.m1)
-            return Rotation2d.fromDegrees(findCoterminalAngle((rotationOffset * 360) + 45));
-        throw new IllegalArgumentException("Module not found");
-    }
-
-    private double findCoterminalAngle(double angleOffset) {
-        return (angleOffset > 360) ? angleOffset % 360 : angleOffset;
+    public double getRotationOffset() {
+        return rotationOffset;
     }
 }
