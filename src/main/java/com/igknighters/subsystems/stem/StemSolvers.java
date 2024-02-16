@@ -9,14 +9,34 @@ import edu.wpi.first.math.geometry.Translation3d;
 public class StemSolvers {
 
     /**
+     * Returns the theta of the wrist given the input parameters in radians.
+     * 
+     * @apiNote When using with the telescope enabled make sure to factor in the current exention of the telescope in meters into your stem length
+     * 
+     * @param stemLength The length of the stem from the pivot axel to the wrist axel
+     * @param pivotTheta The angle of the pivot in radians 
+     * @param horizDist The horizontal distance from the pivot axel to the target
+     * @param vertDist The vertical distance from the pivot axel to the target
+     * @return The angle of the wrist in radians
+     */
+    public static double linearSolveWristTheta(
+        double stemLength,
+        double pivotTheta,
+        double horizDist,
+        double vertDist
+    ) {
+        Translation2d wristLocation = solveWristLocationSimple2d(stemLength, pivotTheta);
+        return Math.atan((vertDist - wristLocation.getY()) / (horizDist + wristLocation.getX()));
+    }
+
+    /**
      * Returns the theta of the pivot given the input parameters in radians.
      * 
-     * @apiNote This is mean to be used with a variant of the stem without a mobile wrist
+     * @apiNote This is meant to be used with a variant of the stem without a mobile wrist
      * as this solve is less accurate than a solve involving just varying the theta
      * of the wrist at a known position.
      * 
-     * @param stemLength The length of the stem from pivot axel to where the note
-     *                   leaves the shooter
+     * @param stemLength The length of the stem from the pivot axel to the wrist axel
      * @param wristAngle The angle of the wrist in radians
      * @param horizDist  The horizontal distance from the pivot axel to the target
      * @param vertDist   The vertical distance from the pivot axel to the target
@@ -38,7 +58,7 @@ public class StemSolvers {
      * Calculates the difference between the vertical distance to the target and the
      * distance below the target that a note would land if shot with the given parameters.
      * 
-     * @param endEffectorTheta The angle of the end effector in radians
+     * @param wristAngle The angle of the wrist in radians
      * @param noteInitialVelocity The initial velocity of the note
      * @param horizontalDist The horizontal distance from the wrist axel to the target
      * @param verticalDist The vertical distance from the wrist axel to the target
@@ -46,12 +66,12 @@ public class StemSolvers {
      *         distance below the target that a note would land if shot with the given parameters
      */
     public static double linearSolveVerticalDistError(
-            double endEffectorTheta,
+            double wristAngle,
             double noteInitialVelocity,
             double horizontalDist,
             double verticalDist) {
         // double initialVerticalVelo = noteInitialVelocity * Math.sin(endEffectorTheta);
-        double initialHorizontalVelo = noteInitialVelocity * Math.cos(endEffectorTheta);
+        double initialHorizontalVelo = noteInitialVelocity * Math.cos(wristAngle);
         double time = (horizontalDist / initialHorizontalVelo);
         double distanceBelowTarget = (noteInitialVelocity * time) + (0.5 * -9.8 * (time * time));
         return verticalDist - distanceBelowTarget;
