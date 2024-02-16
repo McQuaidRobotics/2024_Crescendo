@@ -12,7 +12,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
+import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.constants.HardwareIndex.StemHW;
 import com.igknighters.util.BootupLogger;
@@ -31,7 +31,7 @@ public class WristReal implements Wrist {
     private final WristInputs inputs;
 
     public WristReal() {
-        motor = new TalonFX(kWrist.MOTOR_ID);
+        motor = new TalonFX(kWrist.MOTOR_ID, kStem.CANBUS);
         motor.getConfigurator().apply(motorConfig());
 
         motorRots = motor.getRotorPosition();

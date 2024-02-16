@@ -260,6 +260,7 @@ public final class ConstValues {
     }
 
     public static final class kUmbrella {
+        public static final String CANBUS = "SuperStructureBus";
 
         public static final class kShooter {
             public static final double MOTOR_UPPER_kP = 0.05;
@@ -294,6 +295,7 @@ public final class ConstValues {
     }
 
     public static final class kStem {
+        public static final String CANBUS = "SuperStructureBus";
 
         public static final class kPivot {
             public static final int LEFT_MOTOR_ID = 11;

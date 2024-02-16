@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 
 import org.littletonrobotics.junction.Logger;
 
+import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.constants.HardwareIndex.StemHW;
 import com.igknighters.util.BootupLogger;
@@ -45,15 +46,15 @@ public class PivotReal implements Pivot {
     }
 
     public PivotReal() {
-        gyro = new Pigeon2(kPivot.PIGEON_ID);
+        gyro = new Pigeon2(kPivot.PIGEON_ID, kStem.CANBUS);
         gyroMeasurement = gyro.getRoll();
 
         gyroMeasurement.setUpdateFrequency(100);
 
         gyro.optimizeBusUtilization();
 
-        leaderMotor = new TalonFX(kPivot.LEFT_MOTOR_ID);
-        followerMotor = new TalonFX(kPivot.RIGHT_MOTOR_ID);
+        leaderMotor = new TalonFX(kPivot.LEFT_MOTOR_ID, kStem.CANBUS);
+        followerMotor = new TalonFX(kPivot.RIGHT_MOTOR_ID, kStem.CANBUS);
 
         FaultManager.captureFault(
                 StemHW.LeaderMotor,
