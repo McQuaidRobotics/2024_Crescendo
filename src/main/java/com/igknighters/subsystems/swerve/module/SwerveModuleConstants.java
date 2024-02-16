@@ -21,7 +21,7 @@ public class SwerveModuleConstants {
     public final int angleMotorID;
     public final int cancoderID;
     public final Translation2d moduleChassisPose;
-    private final double rotationOffset;
+    public final double rotationOffset;
 
     /**
      * Swerve Module Constants to be used when creating swerve modules.
@@ -39,9 +39,5 @@ public class SwerveModuleConstants {
         this.cancoderID = canCoderID;
         this.moduleChassisPose = modulePosition;
         this.rotationOffset = rotationOffset;
-    }
-
-    public double getRotationOffset() {
-        return rotationOffset;
     }
 }
