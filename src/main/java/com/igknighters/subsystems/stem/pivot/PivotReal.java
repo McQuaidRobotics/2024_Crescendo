@@ -11,18 +11,14 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.constants.HardwareIndex.StemHW;
-import com.igknighters.subsystems.stem.StemSolvers;
 import com.igknighters.util.BootupLogger;
 import com.igknighters.util.FaultManager;
 import com.igknighters.util.SafeTalonFXConfiguration;
-import com.igknighters.util.Tracer;
 
 public class PivotReal implements Pivot {
 
