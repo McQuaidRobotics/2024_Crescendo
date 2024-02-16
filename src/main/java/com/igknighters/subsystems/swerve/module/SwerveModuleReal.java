@@ -38,7 +38,7 @@ public class SwerveModuleReal implements SwerveModule {
     private final StatusSignal<Double> angleAbsoluteSignal, angleAbsoluteVeloSignal;
 
     public final int moduleNumber;
-    private final Rotation2d rotationOffset;
+    private final double rotationOffset;
     @SuppressWarnings("unused")
     private final Translation2d moduleChassisPose;
     private Rotation2d lastAngle = new Rotation2d();
@@ -48,7 +48,7 @@ public class SwerveModuleReal implements SwerveModule {
     public SwerveModuleReal(final SwerveModuleConstants moduleConstants, boolean isPro) {
         this.isPro = isPro;
         this.moduleNumber = moduleConstants.moduleId.num;
-        this.rotationOffset = moduleConstants.getRotationOffset(moduleConstants.moduleId);
+        this.rotationOffset = moduleConstants.rotationOffset;
         this.moduleChassisPose = moduleConstants.moduleChassisPose;
 
         driveMotor = new TalonFX(moduleConstants.driveMotorID, kSwerve.CANBUS);
@@ -146,7 +146,7 @@ public class SwerveModuleReal implements SwerveModule {
 
     private CANcoderConfiguration cancoderConfig() {
         var canCoderConfig = new CANcoderConfiguration();
-        canCoderConfig.MagnetSensor.MagnetOffset = -rotationOffset.getRotations();
+        canCoderConfig.MagnetSensor.MagnetOffset = rotationOffset;
 
         return canCoderConfig;
     }
