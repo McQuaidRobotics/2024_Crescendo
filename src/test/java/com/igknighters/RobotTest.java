@@ -26,6 +26,7 @@ public class RobotTest {
     protected void startSim() {
         GlobalState.setUnitTest(true);
         assert HAL.initialize(500, 0);
+        DriverStationSim.setDsAttached(true);
     }
 
     @AfterEach
