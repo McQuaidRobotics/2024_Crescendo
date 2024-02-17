@@ -242,7 +242,8 @@ public final class ConstValues {
             public static final int CANCODER_ID = 21;
 
             // @DoubleConst(crash = -0.406250, burn = -0.127441)
-            public static final double ROTATION_OFFSET = -0.127441;
+            public static final double ROTATION_OFFSET = -0.406250; // crash
+            // public static final double ROTATION_OFFSET = -0.127441; burn
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0, -TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
@@ -256,7 +257,8 @@ public final class ConstValues {
             public static final int CANCODER_ID = 22;
 
         //     @DoubleConst(crash = -0.270508, burn = -0.259521)
-            public static final double ROTATION_OFFSET = -0.259521;
+            public static final double ROTATION_OFFSET = -0.270508; // crash
+            // public static final double ROTATION_OFFSET = -0.259521; burn
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0,
                     -TRACK_WIDTH / 2.0);
@@ -271,7 +273,8 @@ public final class ConstValues {
             public static final int CANCODER_ID = 23;
 
         //     @DoubleConst(crash = -0.457764, burn = 0.077393)
-            public static final double ROTATION_OFFSET = 0.077393;
+            public static final double ROTATION_OFFSET = -0.457764; // crash
+            // public static final double ROTATION_OFFSET = 0.077393; burn
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0, TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
@@ -285,7 +288,8 @@ public final class ConstValues {
             public static final int CANCODER_ID = 24;
 
             // @DoubleConst(crash = -0.041504, burn = 0.123291)
-            public static final double ROTATION_OFFSET = 0.123291;
+            public static final double ROTATION_OFFSET = -0.041504; // crash
+            // public static final double ROTATION_OFFSET = 0.123291; burn
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0,
                     TRACK_WIDTH / 2.0);
