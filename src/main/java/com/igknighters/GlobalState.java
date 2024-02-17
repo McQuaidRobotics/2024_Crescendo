@@ -3,6 +3,7 @@ package com.igknighters;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.littletonrobotics.junction.Logger;
@@ -18,6 +19,7 @@ import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -52,6 +54,8 @@ public class GlobalState {
 
     private static AtomicBoolean isUnitTest = new AtomicBoolean(false);
 
+    private static Supplier<Rotation3d> rotSupplier = Rotation3d::new;
+
     private GlobalState() {
         throw new UnsupportedOperationException("This is a utility class!");
     }
@@ -68,6 +72,20 @@ public class GlobalState {
             // autoChooserCreated = false;
         } finally {
             globalLock.unlock();
+        }
+    }
+
+    /**
+     * Set the gyro rotation supplier.
+     * 
+     * @param rotSup
+     */
+    public static void setRotSupplier(Supplier<Rotation3d> rotSup) {
+        globalLock.lock();
+        try {
+            rotSupplier = rotSup;
+        } finally {
+            globalLock.lock();
         }
     }
 
