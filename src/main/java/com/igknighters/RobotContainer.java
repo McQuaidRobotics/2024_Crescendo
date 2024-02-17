@@ -14,6 +14,7 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.commands.autos.Autos;
 import com.igknighters.commands.autos.AutosCmdRegister;
+import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -50,10 +51,16 @@ public class RobotContainer {
             Autos.createSendableChooser(swerve);
         }
 
-        // if (allSubsystems.umbrella.isPresent()){
-        //     var umbrella = allSubsystems.umbrella.get();
-        //     umbrella.setDefaultCommand(UmbrellaCommands.spinUmbrellaBoth(umbrella));
-        // }
+        if (allSubsystems.stem.isPresent()) {
+            var stem = allSubsystems.stem.get();
+
+            stem.setDefaultCommand(StemCommands.testStem(
+                stem,
+                () -> 0.0,
+                () -> 0.0,
+                testingController.leftStickY(0.1)
+            ));
+        }
     }
 
     private void setupAutos(Swerve swerve) {

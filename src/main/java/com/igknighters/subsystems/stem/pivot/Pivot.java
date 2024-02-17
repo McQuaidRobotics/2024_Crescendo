@@ -10,7 +10,7 @@ public interface Pivot extends Component {
 
     public static class PivotInputs implements LoggableInputs {
         public double radians, targetRadians, radiansPerSecond = 0.0;
-        public double volts = 0.0;
+        public double leftVolts = 0.0, rightVolts = 0.0;
         public double leftAmps = 0.0, rightAmps = 0.0;
         public double leftTemp = 0.0, rightTemp = 0.0;
         public double gyroRadians = 0.0;
@@ -26,12 +26,13 @@ public interface Pivot extends Component {
             table.put("radians", radians);
             table.put("targetRadians", targetRadians);
             table.put("radiansPerSecond", radiansPerSecond);
-            table.put("volts", volts);
+            table.put("leftVolts", leftVolts);
+            table.put("rightVolts", rightVolts);
             table.put("leftAmps", leftAmps);
             table.put("rightAmps", rightAmps);
             table.put("leftTemp", leftTemp);
             table.put("rightTemp", rightTemp);
-            table.put("gyroPitchRadians", gyroRadians);
+            table.put("gyroRadians", gyroRadians);
             table.put("isLimitSwitchHit", isLimitSwitchHit);
 
             // A subtable, thats only written to when in debug mode and never read from,
@@ -40,7 +41,6 @@ public interface Pivot extends Component {
                 table.put("#Human/degrees", Math.toDegrees(radians));
                 table.put("#Human/targetDegrees", Math.toDegrees(targetRadians));
                 table.put("#Human/degreesPerSecond", Math.toDegrees(radiansPerSecond));
-                table.put("#Human/watts", volts * (leftAmps + rightAmps));
             }
         }
 
@@ -49,12 +49,13 @@ public interface Pivot extends Component {
             radians = table.get("radians", radians);
             targetRadians = table.get("targetRadians", targetRadians);
             radiansPerSecond = table.get("radiansPerSecond", radiansPerSecond);
-            volts = table.get("volts", volts);
+            leftVolts = table.get("leftVolts", leftVolts);
+            rightVolts = table.get("rightVolts", rightVolts);
             leftAmps = table.get("leftAmps", leftAmps);
             rightAmps = table.get("rightAmps", rightAmps);
             leftTemp = table.get("leftTemp", leftTemp);
             rightTemp = table.get("rightTemp", rightTemp);
-            gyroRadians = table.get("gyroPitchRadians", gyroRadians);
+            gyroRadians = table.get("gyroRadians", gyroRadians);
             isLimitSwitchHit = table.get("isLimitSwitchHit", isLimitSwitchHit);
         }
     }
