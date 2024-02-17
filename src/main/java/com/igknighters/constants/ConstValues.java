@@ -241,9 +241,8 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 2;
             public static final int CANCODER_ID = 21;
 
-            // @DoubleConst(crash = -0.406250, burn = 0.25193)
-            // @DoubleConst(crash = -0.406250, burn = 0.12692999)
-            public static final double ROTATION_OFFSET = 0.127441;
+            // @DoubleConst(crash = -0.406250, burn = -0.127441)
+            public static final double ROTATION_OFFSET = -0.127441;
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0, -TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
@@ -256,9 +255,8 @@ public final class ConstValues {
             public static final int ANLGE_MOTOR_ID = 4;
             public static final int CANCODER_ID = 22;
 
-            // @DoubleConst(crash = -0.270508, burn = 0.1357)
-        //     @DoubleConst(crash = -0.270508, burn = 0.2607)
-            public static final double ROTATION_OFFSET = 0.259521;
+        //     @DoubleConst(crash = -0.270508, burn = -0.259521)
+            public static final double ROTATION_OFFSET = -0.259521;
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0,
                     -TRACK_WIDTH / 2.0);
@@ -272,9 +270,8 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 6;
             public static final int CANCODER_ID = 23;
 
-            // @DoubleConst(crash = -0.457764, burn = 0.5774)
-        //     @DoubleConst(crash = -0.457764, burn = 0.9246222)
-            public static final double ROTATION_OFFSET = -0.077393;
+        //     @DoubleConst(crash = -0.457764, burn = 0.077393)
+            public static final double ROTATION_OFFSET = 0.077393;
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0, TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
@@ -287,9 +284,8 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 8;
             public static final int CANCODER_ID = 24;
 
-            // @DoubleConst(crash = -0.041504, burn = 1.2545)
-            // @DoubleConst(crash = -0.041504, burn = 0.8795)
-            public static final double ROTATION_OFFSET = -0.123291;
+            // @DoubleConst(crash = -0.041504, burn = 0.123291)
+            public static final double ROTATION_OFFSET = 0.123291;
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0,
                     TRACK_WIDTH / 2.0);
