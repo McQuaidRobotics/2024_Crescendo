@@ -24,6 +24,7 @@ import com.igknighters.subsystems.swerve.gyro.GyroSim;
 import com.igknighters.subsystems.swerve.module.SwerveModule;
 import com.igknighters.subsystems.swerve.module.SwerveModuleReal;
 import com.igknighters.subsystems.swerve.module.SwerveModuleSim;
+import com.igknighters.util.CANBusLogging;
 import com.igknighters.util.Tracer;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.FieldConstants;
@@ -96,11 +97,11 @@ public class Swerve extends SubsystemBase {
         visualizer = new SwerveVisualizer(this, swerveMods);
 
         setpointProcessor.setDisabled(true);
+
+        CANBusLogging.logBus(ConstValues.kSwerve.CANBUS);
     }
 
     public void drive(ChassisSpeeds speeds, boolean isOpenLoop) {
-        // if (RobotBase.isReal()) speeds.omegaRadiansPerSecond *= -1.0;
-
         // Logger.recordOutput("Swerve/rawTargetChassisSpeed", speeds);
 
         // var output = setpointProcessor.processSetpoint(speeds);

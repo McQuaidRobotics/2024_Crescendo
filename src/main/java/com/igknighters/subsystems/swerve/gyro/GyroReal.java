@@ -17,6 +17,7 @@ public class GyroReal implements Gyro {
     private final Pigeon2 gyro;
     private final StatusSignal<Double> rollSignal, pitchSignal, yawSignal;
     private final StatusSignal<Double> rollVeloSignal, pitchVeloSignal, yawVeloSignal;
+    private final StatusSignal<Double> xAccel, yAccel;
 
     private final GyroInputs inputs = new GyroInputs();
 
@@ -32,12 +33,18 @@ public class GyroReal implements Gyro {
         rollVeloSignal = gyro.getAngularVelocityYDevice();
         yawVeloSignal = gyro.getAngularVelocityZDevice();
 
+        xAccel = gyro.getAccelerationX();
+        yAccel = gyro.getAccelerationY();
+
         rollSignal.setUpdateFrequency(100);
         pitchSignal.setUpdateFrequency(100);
         yawSignal.setUpdateFrequency(100);
         rollVeloSignal.setUpdateFrequency(100);
         pitchVeloSignal.setUpdateFrequency(100);
         yawVeloSignal.setUpdateFrequency(100);
+
+        xAccel.setUpdateFrequency(100);
+        yAccel.setUpdateFrequency(100);
 
         gyro.optimizeBusUtilization();
 
@@ -74,13 +81,17 @@ public class GyroReal implements Gyro {
         BaseStatusSignal.refreshAll(
                 pitchSignal, pitchVeloSignal,
                 rollSignal, rollVeloSignal,
-                yawSignal, yawVeloSignal);
+                yawSignal, yawVeloSignal,
+                xAccel, yAccel);
 
         inputs.pitchRads = Units.degreesToRadians(pitchSignal.getValue());
         inputs.pitchVelRadsPerSec = Units.degreesToRadians(pitchVeloSignal.getValue());
         inputs.rollRads = Units.degreesToRadians(rollSignal.getValue());
         inputs.yawRads = Units.degreesToRadians(yawSignal.getValue());
         inputs.yawVelRadsPerSec = Units.degreesToRadians(yawVeloSignal.getValue());
+
+        Logger.recordOutput("Swerve/Gyro/XAccel", xAccel.getValue());
+        Logger.recordOutput("Swerve/Gyro/YAccel", yAccel.getValue());
 
         Logger.processInputs("Swerve/Gyro", inputs);
     }
