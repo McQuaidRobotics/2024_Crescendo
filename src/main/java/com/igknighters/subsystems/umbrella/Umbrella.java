@@ -19,7 +19,7 @@ public class Umbrella extends SubsystemBase {
             intake = new IntakeSim();
             shooter = new ShooterSim();
         } else {
-            intake = new IntakeSim();
+            intake = new IntakeReal();
             shooter = new ShooterReal();
         }
     }
@@ -71,30 +71,38 @@ public class Umbrella extends SubsystemBase {
     }
 
     /**
-     * @return If the entrance beam is broken
-     */
-    public boolean isEntranceBeamBroken() {
-        return intake.isEntranceBeamBroken();
-    }
-
-    /**
      * @return If the exit beam is broken
      */
-    public boolean isExitBeamBroken() {
+    public boolean holdingGamepiece() {
         return intake.isExitBeamBroken();
     }
 
     /**
+     * @return If the exit beam is not broken
+     */
+    public boolean notHoldingGamepiece() {
+        return !intake.isExitBeamBroken();
+    }
+
+    /**
+     * Runs the {@code Intake} at certain percent of its nominal voltage
+     * 
+     * @param percent The percent to run the intake at,
+     *          1.0 is outtake, -1.0 is intake
+     * @param force   If the intake should be forced to run
+     */
+    public void runIntakeAt(double percent, boolean force) {
+        intake.setVoltageOut(12.0 * percent, force);
+    }
+
+    /**
      * Sets the intakes percent out
+     * 
+     * @param percent The percent to run the intake at,
+     *          1.0 is outtake, -1.0 is intake
      */
     public void runIntakeAt(double percent) {
         intake.setVoltageOut(12.0 * percent);
-    }
-
-    public void turnIntakeBy(double meters) {
-        // TODO
-        // var wheelCircum = kIntake.WHEEL_DIAMETER * Math.PI;
-        // intake.turnIntakeMeters(Units.rotationsToRadians(surfaceMPS / wheelCircum));
     }
 
     /**
@@ -123,5 +131,13 @@ public class Umbrella extends SubsystemBase {
      */
     public void spinupShooterToRPM(double RPM) {
         shooter.setSpeed(Units.rotationsPerMinuteToRadiansPerSecond(RPM));
+    }
+
+    /**
+     * Stops the {@code Intake} and {@code Shooter}
+     */
+    public void stopAll() {
+        intake.setVoltageOut(0.0);
+        shooter.setSpeed(0.0);
     }
 }

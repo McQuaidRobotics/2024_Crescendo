@@ -27,6 +27,14 @@ public class UnitTestableRobot extends LoggedRobot {
         }
     }
 
+    public static class UnitTestableRobotTimedOut extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
+        public UnitTestableRobotTimedOut() {
+            super("Unit test robot timed out");
+        }
+    }
+
     public static enum Mode {
         kNone,
         kDisabled,
@@ -93,7 +101,7 @@ public class UnitTestableRobot extends LoggedRobot {
                 throw new UnitTestableRobotExited();
             }
             if (timer.hasElapsed(timeoutDuration)) {
-                throw new RuntimeException("Robot timed out");
+                throw new UnitTestableRobotTimedOut();
             }
         }
         DriverStation.refreshData();
