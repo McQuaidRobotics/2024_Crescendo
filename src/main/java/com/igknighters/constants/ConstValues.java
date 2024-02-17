@@ -340,17 +340,23 @@ public final class ConstValues {
             public static final double MOTOR_kI = 0.0;
             public static final double MOTOR_kD = 0.0;
 
-            public static final double MAX_VELOCITY = 105;
-            public static final double MAX_ACCELERATION = 700;
-            public static final double MAX_JERK = 10000;// effectively infinite
+            public static final double MAX_VELOCITY = 600;
+            public static final double MAX_ACCELERATION = 3000;
+            public static final double MAX_JERK = 0;
 
+            // TODO: find these values
             public static final double MIN_METERS = 0.2;
             public static final double MAX_METERS = 1.0;
 
             public static final double MOTOR_TO_MECHANISM_RATIO = 1.0;
 
+            public static final double SPROCKET_CIRCUMFERENCE = 1.0;
+
             public static final boolean INVERTED = false;
 
+            /**
+             * Tolerance in meters
+             */
             public static final double TARGET_TOLERANCE = 0.03;
         }
 
@@ -377,6 +383,9 @@ public final class ConstValues {
             public static final double MIN_ANGLE = 24.0 * Conv.DEGREES_TO_RADIANS;
             public static final double MAX_ANGLE = 125.0 * Conv.DEGREES_TO_RADIANS;
 
+            /**
+             * Tolerance in radians
+             */
             public static final double TARGET_TOLERANCE = TAU * (1.0 / 360.0); // effectively 1 degree
 
         }
