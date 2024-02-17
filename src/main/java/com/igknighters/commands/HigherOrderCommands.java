@@ -44,7 +44,7 @@ public class HigherOrderCommands {
         final double rpm = 3780;
         return Commands.parallel(
             new TeleopSwerveTarget(swerve, controller)
-                .withTarget(speakerTranslation.toTranslation2d())
+                .withTarget(AllianceFlip.flipTranslation(speakerTranslation.toTranslation2d()))
                 .withSpeedMultiplier(0.1),
             StemCommands.aimAt(stem, speakerTranslation, rpm),
             UmbrellaCommands.spinupShooter(umbrella, rpm)
