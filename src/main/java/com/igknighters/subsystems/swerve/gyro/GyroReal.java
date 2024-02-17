@@ -8,6 +8,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.igknighters.GlobalState;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.util.BootupLogger;
 
@@ -21,7 +22,7 @@ public class GyroReal implements Gyro {
     private final StatusSignal<Double> rollSignal, pitchSignal, yawSignal;
     private final StatusSignal<Double> rollVeloSignal, pitchVeloSignal, yawVeloSignal;
     private final StatusSignal<Double> xAccel, yAccel;
-
+    
     private final GyroInputs inputs = new GyroInputs();
 
     public GyroReal() {
@@ -58,6 +59,7 @@ public class GyroReal implements Gyro {
                 Math.toRadians(yawSignal.getValue())
             );
         };
+        GlobalState.setGyroRotSupplier(sup);
 
         BootupLogger.bootupLog("    Gyro initialized (real)");
     }

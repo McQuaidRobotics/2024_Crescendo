@@ -80,13 +80,22 @@ public class GlobalState {
      * 
      * @param rotSup
      */
-    public static void setRotSupplier(Supplier<Rotation3d> rotSup) {
+    public static void setGyroRotSupplier(Supplier<Rotation3d> rotSup) {
         globalLock.lock();
         try {
             rotSupplier = rotSup;
         } finally {
             globalLock.lock();
         }
+    }
+
+    /**
+     * Get the gyro rotation.
+     * 
+     * @return Rotation3d containing the gyro's rotation.
+     */
+    public static Rotation3d getGyroRot() {
+        return rotSupplier.get();
     }
 
     /**
