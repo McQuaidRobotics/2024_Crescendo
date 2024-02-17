@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.RobotController;
 public class RobotSetup {
 
     public enum RobotID {
-        CRASH(Subsystems.list(Subsystems.none()),
+        CRASH(Subsystems.list(Subsystems.Swerve),
                 RobotConstID.CRASH),
 
         BURN(Subsystems.list(Subsystems.Swerve),
@@ -53,8 +53,12 @@ public class RobotSetup {
             "bbbbbbbb", RobotID.BURN,
             "03260abb", RobotID.CRASH,
             "0306adb6", RobotID.TestBoard,
+<<<<<<< HEAD
             "03260af0", RobotID.BURN,
             "032b4b20", RobotID.CRASH);
+=======
+            "03260af0", RobotID.CRASH);
+>>>>>>> main
 
     private static RobotID currentID = RobotID.Unlabeled;
 
