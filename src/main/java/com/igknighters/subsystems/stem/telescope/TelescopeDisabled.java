@@ -29,4 +29,9 @@ public class TelescopeDisabled implements Telescope {
     public boolean isRevLimitSwitchHit() {
         return targetMeters <= kTelescope.MIN_METERS * 0.98;
     }
+
+    @Override
+    public boolean hasHomed() {
+        return true;
+    }
 }

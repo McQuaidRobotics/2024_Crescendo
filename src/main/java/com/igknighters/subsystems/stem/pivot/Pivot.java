@@ -96,4 +96,6 @@ public interface Pivot extends Component {
     default public boolean target(double radians) {
         return target(radians, 1.0);
     }
+
+    default public void setCoast(boolean shouldBeCoasting) {}
 }

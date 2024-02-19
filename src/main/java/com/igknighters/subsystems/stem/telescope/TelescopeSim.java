@@ -108,6 +108,11 @@ public class TelescopeSim implements Telescope {
     }
 
     @Override
+    public boolean hasHomed() {
+        return true;
+    }
+
+    @Override
     public void periodic() {
         if (DriverStation.isDisabled()) {
             sim.setInputVoltage(0);

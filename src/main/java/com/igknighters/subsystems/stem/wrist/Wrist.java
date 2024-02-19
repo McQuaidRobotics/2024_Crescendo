@@ -130,4 +130,7 @@ public interface Wrist extends Component {
     static double motorRadsToMechanismRads(double motorRads) {
         return motorRotsToMechanismRads(Units.radiansToRotations(motorRads));
     }
+
+    default public void setCoast(boolean shouldBeCoasting) {
+    }
 }

@@ -7,8 +7,14 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.ForwardLimitSourceValue;
+import com.ctre.phoenix6.signals.ForwardLimitTypeValue;
+import com.ctre.phoenix6.signals.ForwardLimitValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.ReverseLimitSourceValue;
+import com.ctre.phoenix6.signals.ReverseLimitTypeValue;
+import com.ctre.phoenix6.signals.ReverseLimitValue;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -35,6 +41,8 @@ public class PivotReal implements Pivot {
     private final StatusSignal<Double> leaderMotorAmps, followerMotorAmps, leaderMotorTemp, followerMotorTemp;
     /** Could be pitch or roll */
     private final StatusSignal<Double> gyroMeasurement;
+    private final StatusSignal<ForwardLimitValue> forwardLimitSwitch;
+    private final StatusSignal<ReverseLimitValue> reverseLimitSwitch;
 
     private final PivotInputs inputs;
 
@@ -59,10 +67,10 @@ public class PivotReal implements Pivot {
 
         FaultManager.captureFault(
                 StemHW.LeaderMotor,
-                leaderMotor.getConfigurator().apply(getMotorConfig()));
+                leaderMotor.getConfigurator().apply(getMotorConfig(true)));
         FaultManager.captureFault(
                 StemHW.FollowerMotor,
-                followerMotor.getConfigurator().apply(getMotorConfig()));
+                followerMotor.getConfigurator().apply(getMotorConfig(false)));
 
         FaultManager.captureFault(
                 StemHW.FollowerMotor,
@@ -81,6 +89,8 @@ public class PivotReal implements Pivot {
         followerMotorVolts = followerMotor.getMotorVoltage();
         followerMotorTemp = leaderMotor.getDeviceTemp();
         leaderMotorTemp = followerMotor.getDeviceTemp();
+        forwardLimitSwitch = leaderMotor.getForwardLimit();
+        reverseLimitSwitch = leaderMotor.getReverseLimit();
 
         motorRots.setUpdateFrequency(100);
         motorVelo.setUpdateFrequency(100);
@@ -90,6 +100,8 @@ public class PivotReal implements Pivot {
         followerMotorVolts.setUpdateFrequency(100);
         followerMotorTemp.setUpdateFrequency(4);
         leaderMotorTemp.setUpdateFrequency(4);
+        forwardLimitSwitch.setUpdateFrequency(100);
+        reverseLimitSwitch.setUpdateFrequency(100);
 
         leaderMotor.optimizeBusUtilization();
         followerMotor.optimizeBusUtilization();
@@ -100,33 +112,46 @@ public class PivotReal implements Pivot {
         BootupLogger.bootupLog("    Pivot initialized (real)");
     }
 
-    private TalonFXConfiguration getMotorConfig() {
-        TalonFXConfiguration motorCfg = new SafeTalonFXConfiguration();
-        motorCfg.Slot0.kP = kPivot.MOTOR_kP;
-        motorCfg.Slot0.kI = kPivot.MOTOR_kI;
-        motorCfg.Slot0.kD = kPivot.MOTOR_kD;
+    private TalonFXConfiguration getMotorConfig(boolean leader) {
+        TalonFXConfiguration cfg = new SafeTalonFXConfiguration();
+        cfg.Slot0.kP = kPivot.MOTOR_kP;
+        cfg.Slot0.kI = kPivot.MOTOR_kI;
+        cfg.Slot0.kD = kPivot.MOTOR_kD;
 
-        motorCfg.MotionMagic.MotionMagicCruiseVelocity = kPivot.MAX_VELOCITY;
-        motorCfg.MotionMagic.MotionMagicAcceleration = kPivot.MAX_ACCELERATION;
-        motorCfg.MotionMagic.MotionMagicJerk = kPivot.MAX_JERK;
+        cfg.MotionMagic.MotionMagicCruiseVelocity = kPivot.MAX_VELOCITY;
+        cfg.MotionMagic.MotionMagicAcceleration = kPivot.MAX_ACCELERATION;
+        cfg.MotionMagic.MotionMagicJerk = kPivot.MAX_JERK;
 
-        motorCfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        motorCfg.MotorOutput.Inverted = kPivot.INVERTED ? InvertedValue.Clockwise_Positive
+        cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        cfg.MotorOutput.Inverted = kPivot.INVERTED ? InvertedValue.Clockwise_Positive
                 : InvertedValue.CounterClockwise_Positive;
 
-        motorCfg.HardwareLimitSwitch.ReverseLimitEnable = true;
-        motorCfg.HardwareLimitSwitch.ForwardLimitEnable = true;
+        cfg.HardwareLimitSwitch.ReverseLimitEnable = true;
+        cfg.HardwareLimitSwitch.ForwardLimitEnable = true;
 
-        motorCfg.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-        motorCfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+        cfg.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+        cfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
-        motorCfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = mechRadiansToMotorRots(kPivot.PIVOT_MAX_RADIANS);
-        motorCfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = mechRadiansToMotorRots(kPivot.PIVOT_MIN_RADIANS);
+        cfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = mechRadiansToMotorRots(kPivot.PIVOT_MAX_RADIANS);
+        cfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = mechRadiansToMotorRots(kPivot.PIVOT_MIN_RADIANS);
 
-        motorCfg.Voltage.PeakForwardVoltage = kPivot.VOLTAGE_COMP;
-        motorCfg.Voltage.PeakReverseVoltage = -kPivot.VOLTAGE_COMP;
+        cfg.Voltage.PeakForwardVoltage = kPivot.VOLTAGE_COMP;
+        cfg.Voltage.PeakReverseVoltage = -kPivot.VOLTAGE_COMP;
 
-        return motorCfg;
+        cfg.HardwareLimitSwitch.ForwardLimitEnable = true;
+        cfg.HardwareLimitSwitch.ReverseLimitEnable = true;
+
+        cfg.HardwareLimitSwitch.ForwardLimitType = ForwardLimitTypeValue.NormallyClosed;
+        cfg.HardwareLimitSwitch.ReverseLimitType = ReverseLimitTypeValue.NormallyClosed;
+
+        if (leader) {
+            cfg.HardwareLimitSwitch.ForwardLimitSource = ForwardLimitSourceValue.RemoteTalonFX;
+            cfg.HardwareLimitSwitch.ReverseLimitSource = ReverseLimitSourceValue.RemoteTalonFX;
+            cfg.HardwareLimitSwitch.ForwardLimitRemoteSensorID = kPivot.RIGHT_MOTOR_ID;
+            cfg.HardwareLimitSwitch.ReverseLimitRemoteSensorID = kPivot.RIGHT_MOTOR_ID;
+        }
+
+        return cfg;
     }
 
     @Override
@@ -161,7 +186,19 @@ public class PivotReal implements Pivot {
         inputs.radians = getPivotRadiansPigeon();
     }
 
-//TODO add limit switch logging 
+    @Override
+    public void setCoast(boolean shouldBeCoasting) {
+        this.followerMotor.setNeutralMode(
+            shouldBeCoasting
+            ? NeutralModeValue.Coast
+            : NeutralModeValue.Brake
+        );
+        this.leaderMotor.setNeutralMode(
+            shouldBeCoasting
+            ? NeutralModeValue.Coast
+            : NeutralModeValue.Brake
+        );
+    }
 
     @Override
     public void periodic() {

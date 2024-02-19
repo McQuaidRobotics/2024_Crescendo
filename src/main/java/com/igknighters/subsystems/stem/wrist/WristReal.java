@@ -106,6 +106,15 @@ public class WristReal implements Wrist {
     }
 
     @Override
+    public void setCoast(boolean shouldBeCoasting) {
+        this.motor.setNeutralMode(
+            shouldBeCoasting
+            ? NeutralModeValue.Coast
+            : NeutralModeValue.Brake
+        );
+    }
+
+    @Override
     public void periodic() {
         FaultManager.captureFault(
                 StemHW.WristMotor,

@@ -1,13 +1,16 @@
 package com.igknighters.subsystems.stem;
 
+import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.subsystems.stem.pivot.*;
 import com.igknighters.subsystems.stem.telescope.*;
 import com.igknighters.subsystems.stem.wrist.*;
 import com.igknighters.util.Tracer;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class Stem extends SubsystemBase {
 
@@ -16,6 +19,8 @@ public class Stem extends SubsystemBase {
     private final Wrist wrist;
 
     private final StemVisualizer visualizer;
+
+    private final DigitalInput coastSwitch = new DigitalInput(kStem.COAST_SWITCH_CHANNEL);
 
     public Stem() {
         if (RobotBase.isSimulation()) {
@@ -29,6 +34,18 @@ public class Stem extends SubsystemBase {
         }
 
         visualizer = new StemVisualizer();
+
+        new Trigger(() -> coastSwitch.get() && DriverStation.isDisabled())
+            .onTrue(this.runOnce(() -> {
+                pivot.setCoast(true);
+                telescope.setCoast(true);
+                wrist.setCoast(true);
+            }).ignoringDisable(true))
+            .onFalse(this.runOnce(() -> {
+                pivot.setCoast(false);
+                telescope.setCoast(false);
+                wrist.setCoast(false);
+            }).ignoringDisable(true));
     }
 
     /**
@@ -46,9 +63,20 @@ public class Stem extends SubsystemBase {
             DriverStation.reportError(
                     "Invalid stem position: " + position.toString(),
                     true);
+            // LED
             return true;
         }
         visualizer.updateSetpoint(position);
+        if (!telescope.hasHomed()) {
+            if (!position.isStow()) {
+                DriverStation.reportWarning("Stem Telescope has not been homed, run stow to home", false);
+                // LED
+                return false;
+            }
+            return pivot.target(position.pivotRads, 1.0)
+                && wrist.target(position.wristRads, 1.0)
+                && telescope.target(position.telescopeMeters, 1.0);
+        }
         StemPosition validated = StemValidator.stepTowardsTargetPosition(getStemPosition(), position);
         boolean pivotSuccess = pivot.target(validated.pivotRads, toleranceMult);
         boolean wristSuccess = wrist.target(validated.wristRads, toleranceMult);

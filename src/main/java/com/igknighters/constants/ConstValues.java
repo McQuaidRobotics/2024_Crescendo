@@ -310,6 +310,8 @@ public final class ConstValues {
     public static final class kStem {
         public static final String CANBUS = "SuperStructureBus";
 
+        public static final int COAST_SWITCH_CHANNEL = 0;
+
         public static final class kPivot {
             public static final int LEFT_MOTOR_ID = 11;
             public static final int RIGHT_MOTOR_ID = 12;

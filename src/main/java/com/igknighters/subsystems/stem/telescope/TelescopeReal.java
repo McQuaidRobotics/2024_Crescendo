@@ -20,11 +20,13 @@ import com.igknighters.util.SafeTalonFXConfiguration;
 public class TelescopeReal implements Telescope {
     private final TalonFX motor;
 
-    private final StatusSignal <Double> motorVolts, motorTemp, motorAmps, motorVelo, motorRots;
+    private final StatusSignal<Double> motorVolts, motorTemp, motorAmps, motorVelo, motorRots;
     private final StatusSignal<ForwardLimitValue> forwardLimitSwitch;
     private final StatusSignal<ReverseLimitValue> reverseLimitSwitch;
 
     private final TelescopeInputs inputs;
+
+    private boolean hasHomed = false;
 
     public TelescopeReal(){
         motor = new TalonFX(kTelescope.MOTOR_ID);
@@ -120,6 +122,20 @@ public class TelescopeReal implements Telescope {
     }
 
     @Override
+    public boolean hasHomed() {
+        return hasHomed;
+    }
+
+    @Override
+    public void setCoast(boolean shouldBeCoasting) {
+        this.motor.setNeutralMode(
+            shouldBeCoasting
+            ? NeutralModeValue.Coast
+            : NeutralModeValue.Brake
+        );
+    }
+
+    @Override
     public void periodic(){
         FaultManager.captureFault(
             StemHW.TelescopeMotor,
@@ -136,6 +152,10 @@ public class TelescopeReal implements Telescope {
         inputs.amps =  motorAmps.getValue();
         inputs.isLimitFwdSwitchHit = forwardLimitSwitch.getValue() == ForwardLimitValue.Open;
         inputs.isLimitRevSwitchHit = reverseLimitSwitch.getValue() == ReverseLimitValue.Open;
+
+        if (!hasHomed && (inputs.isLimitFwdSwitchHit || inputs.isLimitRevSwitchHit)){
+            hasHomed = true;
+        }
 
         Logger.processInputs("Stem/Telescope", inputs);
     }

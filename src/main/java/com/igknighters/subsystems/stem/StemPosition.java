@@ -1,5 +1,9 @@
 package com.igknighters.subsystems.stem;
 
+import com.igknighters.constants.ConstValues.kStem.kTelescope;
+
+import edu.wpi.first.math.util.Units;
+
 public class StemPosition {
     public double pivotRads, wristRads, telescopeMeters;
 
@@ -37,4 +41,29 @@ public class StemPosition {
     public boolean isValid() {
         return StemValidator.isValidPosition(this);
     }
+
+    public boolean isStow() {
+        return false;
+    }
+
+    public static StemPosition STOW = new StemPosition(
+        Units.degreesToRadians(35.0),
+        kTelescope.MIN_METERS,
+        Units.degreesToRadians(60.0)
+    ) {
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return "Stow";
+        }
+
+        @Override
+        public boolean isStow() {
+            return true;
+        }
+    };
 }
