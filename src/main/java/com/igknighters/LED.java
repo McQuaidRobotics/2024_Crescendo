@@ -10,7 +10,6 @@ import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdleConfiguration;
 import com.ctre.phoenix.led.ColorFlowAnimation;
 import com.ctre.phoenix.led.RainbowAnimation;
-import com.ctre.phoenix.led.SingleFadeAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.ColorFlowAnimation.Direction;
@@ -23,7 +22,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class LED {
     private final static int NUMLEDS = 308;
-
 
     private static LED instance;
 
@@ -79,18 +77,18 @@ public class LED {
             this.speed = speed;
         }
 
-/**
- * Generates an animation to be passed into the CANdle
- * @param fn Values used for animation generation other than the number of LEDs and the offset.
- * @param numLed
- * @param ledOffset
- * @return Newly generated Animation object
- */
-        public Animation generateAnim(TriFunction<LEDAnimDescriptor, Integer, Integer, Animation> fn, int numLed, int ledOffset) {
+        /**
+         * Generates an animation to be passed into the CANdle
+         * @param fn Values used for animation generation other than the number of LEDs and the offset.
+         * @param numLed
+         * @param ledOffset
+         * @return Newly generated Animation object
+         */
+        public Animation generateAnimation(TriFunction<LEDAnimDescriptor, Integer, Integer, Animation> fn, int numLed, int ledOffset) {
             return fn.apply(this, numLed, ledOffset);
         }
     }
-    
+
     public enum LedAnimations {
         DISABLED(
             new LEDAnimDescriptor(190, 250, 255, 0.5, Direction.Forward),
@@ -151,10 +149,10 @@ public class LED {
          * @param ledOffset The number of LEDs to offset the animation by [0, <code>NUMLEDS</code>]
          * @return Newly generated animation as defined by <code>generateAnim()</code>
          */
-        public Animation getAnim(int numLed, int ledOffset){
-            return desc.generateAnim(genFn, numLed, ledOffset);
+        public Animation getAnimation(int numLed, int ledOffset){
+            return desc.generateAnimation(genFn, numLed, ledOffset);
         }
-        
+
         private LedAnimations(LEDAnimDescriptor desc, TriFunction<LEDAnimDescriptor, Integer, Integer, Animation> fn) {
             this.desc = desc;
             this.genFn = fn;
@@ -173,7 +171,7 @@ public class LED {
         LedAnimations anim
     ) {
         public Animation getAnim() {
-            return this.anim.getAnim(leds, offset);
+            return this.anim.getAnimation(leds, offset);
         }
     }
 
@@ -190,7 +188,6 @@ public class LED {
             led.duration = duration;
         }
     }
-    
 
     public LED() {
         this.timer = new Timer();
@@ -217,7 +214,7 @@ public class LED {
     public DurationHandle sendAnimation(LedAnimations anim) {
         return sendMultiAnimation(1.0, anim);
     }
-    
+
     public DurationHandle sendMultiAnimation(
         double percent1, LedAnimations anim1
     ){
@@ -294,11 +291,14 @@ public class LED {
 
     /**
      * Creates new partial animations defined by {@code sendMultiAnimation}
+     * 
+     * If {@code percents} and {@code anims} are not the same length,
+     * or if the length is greater than 10, an error is reported to the DriverStation.
+     * These warnings can cause loss of sent animations, if expected behavior is not happening check for these warnings.
+     * 
      * @param percents The percents for each animation to be applied to
      * @param anims The animations to be passed through the CANdle
      * @return A {@code DurationHandle}
-     * @error If an animation tries to use more LEDs than available, throws a "Multi Animation Error". 
-     * Also throws if more than 10 animations are passed through due to the CANdle's limit of 10 simultaneous animations maximum.
      */
     public DurationHandle sendMultiAnimation(
         final double[] percents, final LedAnimations[] anims
@@ -311,12 +311,14 @@ public class LED {
             );
         }
 
+        int count = Math.min(percents.length, anims.length);
+
         this.animations = new ArrayList<>();
-        
+
         int offset = 0;
         double used = 0.0;
 
-        for (int i = 0; i < percents.length; i++) {
+        for (int i = 0; i < count; i++) {
             double percent = percents[i];
             LedAnimations anim = anims[i];
 
@@ -380,6 +382,5 @@ public class LED {
             lastMode=robotMode;
         }
         Logger.recordOutput("LED", log + "]");
-        
     }
 }

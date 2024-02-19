@@ -14,7 +14,7 @@ import com.igknighters.constants.ConstValues;
 import com.igknighters.util.ShuffleboardApi;
 import com.igknighters.util.Tracer;
 import com.igknighters.util.UnitTestableRobot;
-import com.igknighters.util.akit.ExtensibleWPILOGWriter;
+// import com.igknighters.util.akit.ExtensibleWPILOGWriter;
 import com.igknighters.util.pathplanner.LocalADStarAK;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 
