@@ -32,7 +32,7 @@ public class Stem extends SubsystemBase {
 
     /**
      * Meant as the main api for controlling the stem,
-     * this method takes in a {@link StemPosition.StemPosition} and sets the
+     * this method takes in a {@link StemPosition} and sets the
      * stem to that position. This method will return false if any of the
      * mechanisms have not yet reached their target position.
      * 
@@ -50,7 +50,7 @@ public class Stem extends SubsystemBase {
 
     /**
      * Meant as the main api for controlling the stem,
-     * this method takes in a {@link StemPosition.StemPosition} and sets the
+     * this method takes in a {@link StemPosition} and sets the
      * stem to that position. This method will return false if any of the
      * mechanisms have not yet reached their target position.
      * 
