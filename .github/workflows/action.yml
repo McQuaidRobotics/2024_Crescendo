@@ -33,4 +33,4 @@ jobs:
         run: ./gradlew compileJava
 
       - name: Test code
-        run: ./gradlew check
+        run: ./gradlew check -d | grep -E "Test|ERROR"

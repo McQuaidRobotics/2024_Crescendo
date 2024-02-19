@@ -106,7 +106,7 @@ public class SubsystemResources {
 
         private <T extends Subsystem> Optional<T> createSubsystem(Supplier<T> subsystemSupplier) {
             T subsystem = subsystemSupplier.get();
-            BootupLogger.BootupLog("Subsystem " + subsystem.getClass().getSimpleName() + " created");
+            BootupLogger.bootupLog("Subsystem " + subsystem.getClass().getSimpleName() + " created");
             subsystemsList.add(subsystem);
             return Optional.of(subsystem);
         }

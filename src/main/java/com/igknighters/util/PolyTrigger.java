@@ -2,33 +2,41 @@ package com.igknighters.util;
 
 import java.util.function.Supplier;
 
+import com.igknighters.GlobalState;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import java.awt.Polygon;
 import java.awt.geom.PathIterator;
 
 public class PolyTrigger {
-    private Supplier<Pose2d> poseSupplier;
-    private Polygon polygon;
-    private Trigger trigger;
+    private final Polygon polygon;
+    private final Trigger trigger;
 
     public PolyTrigger(Supplier<Pose2d> poseSupplier, Polygon polygon) {
-        this.poseSupplier = poseSupplier;
         this.polygon = polygon;
-        trigger = new Trigger(() -> polygon.contains(poseSupplier.get().getX(), poseSupplier.get().getY()));
+        this.trigger = new Trigger(() -> {
+            Pose2d pose = poseSupplier.get();
+            return polygon.contains(pose.getX(), pose.getY());
+        });
     }
 
-    public PolyTrigger onTrue(Command cmd) {
-        trigger.onTrue(cmd);
-        return this;
+    public PolyTrigger(Supplier<Pose2d> poseSupplier, Translation2d... polygon) {
+        this(poseSupplier, PolyTrigger.getPolygonFromPoints(polygon));
     }
 
-    public PolyTrigger onFalse(Command cmd) {
-        trigger.onFalse(cmd);
-        return this;
+    public PolyTrigger(Polygon polygon) {
+        this(GlobalState::getLocalizedPose, polygon);
+    }
+
+    public PolyTrigger(Translation2d... polygon) {
+        this(PolyTrigger.getPolygonFromPoints(polygon));
+    }
+
+    public Trigger toTrigger() {
+        return trigger;
     }
 
     public Polygon getPolygon() {
@@ -45,5 +53,15 @@ public class PolyTrigger {
             pathIterator.next();
         }
         return points;
+    }
+
+    public static Polygon getPolygonFromPoints(Translation2d[] points) {
+        int[] xPoints = new int[points.length];
+        int[] yPoints = new int[points.length];
+        for (int i = 0; i < points.length; i++) {
+            xPoints[i] = (int) points[i].getX();
+            yPoints[i] = (int) points[i].getY();
+        }
+        return new Polygon(xPoints, yPoints, points.length);
     }
 }

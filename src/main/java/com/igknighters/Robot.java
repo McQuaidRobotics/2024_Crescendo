@@ -5,22 +5,24 @@ import java.util.function.BiConsumer;
 
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
-import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
+import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.util.ShuffleboardApi;
 import com.igknighters.util.Tracer;
 import com.igknighters.util.UnitTestableRobot;
-import com.igknighters.util.pathfinders.LocalADStarAK;
+import com.igknighters.util.akit.ExtensibleWPILOGWriter;
+import com.igknighters.util.pathplanner.LocalADStarAK;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 
 public class Robot extends UnitTestableRobot {
 
     private Command autoCmd;
     private final CommandScheduler scheduler = CommandScheduler.getInstance();
+    private RobotContainer roboContainer;
 
     @Override
     public void robotInit() {
@@ -31,14 +33,14 @@ public class Robot extends UnitTestableRobot {
 
         GlobalState.publishField();
 
-        new RobotContainer();
+        roboContainer = new RobotContainer();
     }
 
     @Override
     public void robotPeriodic() {
         Tracer.traceFunc("Shuffleboard", ShuffleboardApi::run);
-        Tracer.traceFunc("CommandScheduler", () -> scheduler.run());
-        Tracer.traceFunc("LEDUpdate", () -> LED.getInstance().run());
+        Tracer.traceFunc("CommandScheduler", scheduler::run);
+        Tracer.traceFunc("LEDUpdate", LED.getInstance()::run);
         GlobalState.log();
     }
 
@@ -129,7 +131,11 @@ public class Robot extends UnitTestableRobot {
         }
 
         if (Robot.isReal()) {
-            // Logger.addDataReceiver(new WPILOGWriter("/media/sda1/robotlogs/"));
+            // Logger.addDataReceiver(
+            //     new ExtensibleWPILOGWriter("/media/sda1/robotlogs/")
+            //         .withNTPrefixListener("/Visualizers")
+            //         .withNTPrefixListener("/PathPlanner")
+            // );
         }
         Logger.addDataReceiver(new NT4Publisher());
         Logger.start();
@@ -158,5 +164,13 @@ public class Robot extends UnitTestableRobot {
                         (Command command) -> {
                             logCommandFunction.accept(command, false);
                         });
+    }
+
+    @Override
+    public AllSubsystems getAllSubsystemsForTest() {
+        if (!GlobalState.isUnitTest()) {
+            throw new RuntimeException("This method should only be called in unit tests");
+        }
+        return roboContainer.getAllSubsystemsForTest();
     }
 }

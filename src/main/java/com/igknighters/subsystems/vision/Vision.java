@@ -22,14 +22,13 @@ public class Vision extends SubsystemBase {
 
     public Vision() {
         this.cameras = List.of(kVision.CAMERA_CONFIGS)
-            .stream()
-            .map(Camera::create)
-            .toList();
+                .stream()
+                .map(Camera::create)
+                .toList();
 
         GlobalState.setLocalizer(
-            new VisionOnlyPoseEstimator(),
-            LocalizerType.VISION
-        );
+                new VisionOnlyPoseEstimator(),
+                LocalizerType.Vision);
     }
 
     @Override
@@ -37,32 +36,32 @@ public class Vision extends SubsystemBase {
         Tracer.startTrace("VisionPeriodic");
         HashSet<Integer> seenTags = new HashSet<>();
         for (var camera : cameras) {
+            Tracer.startTrace(camera.getName() + "Periodic");
             camera.periodic();
             var optEval = camera.evalPose();
             if (optEval.isPresent()) {
                 var eval = optEval.get();
 
                 if (Math.abs(eval.pose.getTranslation().getZ() - kDimensions.BELLYPAN_HEIGHT) > kVision.MAX_Z_DELTA) {
-                    // The cameras height does not change typically, so if it does, it is likely a false positive
+                    // The cameras height does not change typically, so if it does, it is likely a
+                    // false positive
                     GlobalState.submitVisionData(eval, Math.min(eval.ambiguity * 3.0, 1.0));
                 } else {
                     GlobalState.submitVisionData(eval, eval.ambiguity);
                 }
 
-
                 seenTags.addAll(eval.apriltags);
             }
+            Tracer.endTrace();
         }
         GlobalState.modifyField(field -> {
             field.getObject("seen_apriltags").setPoses(
-                seenTags.stream()
-                    .map(tagId -> FieldConstants.APRIL_TAG_FIELD
-                        .getTagPose(tagId)
-                        .orElseGet(() -> new Pose3d(new Translation3d(0.0, 0.0, 0.0), new Rotation3d()))
-                        .toPose2d()
-                    )
-                    .toList()
-            );
+                    seenTags.stream()
+                            .map(tagId -> FieldConstants.APRIL_TAG_FIELD
+                                    .getTagPose(tagId)
+                                    .orElseGet(() -> new Pose3d(new Translation3d(0.0, 0.0, 0.0), new Rotation3d()))
+                                    .toPose2d())
+                            .toList());
         });
         Tracer.endTrace();
     }

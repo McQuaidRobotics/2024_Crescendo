@@ -16,26 +16,25 @@ import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kSwerve.AngleMotorConstants;
 import com.igknighters.constants.ConstValues.kSwerve.DriveMotorConstants;
+import com.igknighters.util.BootupLogger;
 import com.igknighters.util.SwerveModuleConstants;
 
 public class SwerveModuleSim implements SwerveModule {
-    private FlywheelSim driveSim = new FlywheelSim(DCMotor.getFalcon500(1), 1.0 / kSwerve.DRIVE_GEAR_RATIO, 0.025);
-    private FlywheelSim angleSim = new FlywheelSim(DCMotor.getFalcon500(1), 1.0 / kSwerve.ANGLE_GEAR_RATIO, 0.004);
+    private FlywheelSim driveSim = new FlywheelSim(DCMotor.getFalcon500(1), kSwerve.DRIVE_GEAR_RATIO, 0.025);
+    private FlywheelSim angleSim = new FlywheelSim(DCMotor.getFalcon500(1), kSwerve.ANGLE_GEAR_RATIO, 0.004);
 
     private final PIDController driveFeedback = new PIDController(
-        DriveMotorConstants.kP,
-        DriveMotorConstants.kI,
-        DriveMotorConstants.kD,
-        ConstValues.PERIODIC_TIME
-    );
+            DriveMotorConstants.kP,
+            DriveMotorConstants.kI,
+            DriveMotorConstants.kD,
+            ConstValues.PERIODIC_TIME);
     private final PIDController angleFeedback = new PIDController(
-        AngleMotorConstants.kP,
-        AngleMotorConstants.kI,
-        AngleMotorConstants.kD,
-        ConstValues.PERIODIC_TIME
-    );
+            AngleMotorConstants.kP,
+            AngleMotorConstants.kI,
+            AngleMotorConstants.kD,
+            ConstValues.PERIODIC_TIME);
 
-    public int moduleNumber;
+    public final int moduleNumber;
 
     private final SwerveModuleInputs inputs;
 
@@ -45,7 +44,9 @@ public class SwerveModuleSim implements SwerveModule {
 
         inputs = new SwerveModuleInputs();
 
-        inputs.angleAbsolute = Math.random() * 2.0 * Math.PI;
+        inputs.angleAbsoluteRads = Math.random() * 2.0 * Math.PI;
+
+        BootupLogger.bootupLog("    SwerveModule[" + this.moduleNumber + "] initialized (sim)");
     }
 
     private double driveRotationsToMeters(double rotations) {
@@ -64,13 +65,13 @@ public class SwerveModuleSim implements SwerveModule {
 
     public SwerveModulePosition getCurrentPosition() {
         return new SwerveModulePosition(
-                inputs.drivePosition,
+                inputs.drivePositionMeters,
                 getAngle());
     }
 
     public SwerveModuleState getCurrentState() {
         return new SwerveModuleState(
-                inputs.driveVelo,
+                inputs.driveVeloMPS,
                 getAngle());
     }
 
@@ -79,27 +80,27 @@ public class SwerveModuleSim implements SwerveModule {
     }
 
     private Rotation2d getAngle() {
-        return new Rotation2d(inputs.angleAbsolute);
+        return new Rotation2d(inputs.angleAbsoluteRads);
     }
 
     private void setAngle(SwerveModuleState desiredState) {
         Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (kSwerve.MAX_DRIVE_VELOCITY * 0.01))
-                ? new Rotation2d(inputs.angleAbsolute)
+                ? new Rotation2d(inputs.angleAbsoluteRads)
                 : desiredState.angle;
-        inputs.targetAngleAbsolute = angle.getRadians();
+        inputs.targetAngleAbsoluteRads = angle.getRadians();
 
         var angleAppliedVolts = MathUtil.clamp(
                 angleFeedback.calculate(getAngle().getRadians(), angle.getRadians()),
-                -1.0 * RobotController.getBatteryVoltage(),
+                -RobotController.getBatteryVoltage(),
                 RobotController.getBatteryVoltage());
         angleSim.setInputVoltage(angleAppliedVolts);
 
         inputs.angleVolts = angleAppliedVolts;
-        inputs.angleAbsolute = angle.getRadians();
+        inputs.angleAbsoluteRads = angle.getRadians();
     }
 
     private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop) {
-        inputs.targetDriveVelo = desiredState.speedMetersPerSecond;
+        inputs.targetDriveVeloMPS = desiredState.speedMetersPerSecond;
 
         desiredState.speedMetersPerSecond *= Math.cos(angleFeedback.getPositionError());
 
@@ -122,25 +123,29 @@ public class SwerveModuleSim implements SwerveModule {
         driveSim.update(ConstValues.PERIODIC_TIME);
         angleSim.update(ConstValues.PERIODIC_TIME);
 
-        inputs.drivePosition += driveRadiansToMeters(
+        inputs.drivePositionMeters += driveRadiansToMeters(
                 driveSim.getAngularVelocityRadPerSec() * ConstValues.PERIODIC_TIME);
 
         double angleDiffRad = angleSim.getAngularVelocityRadPerSec() * ConstValues.PERIODIC_TIME;
-        inputs.angleAbsolute += angleDiffRad;
+        inputs.angleAbsoluteRads += angleDiffRad;
 
-        while (inputs.angleAbsolute < 0) {
-            inputs.angleAbsolute += 2 * Math.PI;
+        while (inputs.angleAbsoluteRads < 0) {
+            inputs.angleAbsoluteRads += 2 * Math.PI;
         }
-        while (inputs.angleAbsolute > 2 * Math.PI) {
-            inputs.angleAbsolute -= 2 * Math.PI;
+        while (inputs.angleAbsoluteRads > 2 * Math.PI) {
+            inputs.angleAbsoluteRads -= 2 * Math.PI;
         }
 
-        inputs.angleVelo = angleSim.getAngularVelocityRadPerSec();
+        inputs.angleVeloRadPS = angleSim.getAngularVelocityRadPerSec();
         inputs.angleAmps = angleSim.getCurrentDrawAmps();
 
-        inputs.driveVelo = driveRotationsToMeters(driveSim.getAngularVelocityRPM() / 60.0);
+        inputs.driveVeloMPS = driveRotationsToMeters(driveSim.getAngularVelocityRPM() / 60.0);
         inputs.driveAmps = driveSim.getCurrentDrawAmps();
 
         Logger.processInputs("Swerve/SwerveModule[" + this.moduleNumber + "]", inputs);
+    }
+
+    @Override
+    public void setVoltageOut(double volts) {
     }
 }

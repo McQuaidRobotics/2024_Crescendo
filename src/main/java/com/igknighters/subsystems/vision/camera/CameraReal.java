@@ -52,10 +52,9 @@ public class CameraReal implements Camera {
                 new Pose3d(),
                 0,
                 List.of(),
-                0.0
-        ));
+                0.0));
 
-        BootupLogger.BootupLog(cameraName + " camera initialized");
+        BootupLogger.bootupLog("    " + cameraName + " camera initialized (real)");
     }
 
     private Optional<VisionPoseEst> realEvaluatePose() {
@@ -65,16 +64,14 @@ public class CameraReal implements Camera {
                         estRoboPose.estimatedPose,
                         estRoboPose.timestampSeconds,
                         estRoboPose.targetsUsed
-                            .stream()
-                            .map(PhotonTrackedTarget::getFiducialId)
-                            .toList(),
+                                .stream()
+                                .map(PhotonTrackedTarget::getFiducialId)
+                                .toList(),
                         estRoboPose.targetsUsed
-                            .stream()
-                            .map(PhotonTrackedTarget::getPoseAmbiguity)
-                            .reduce(0.0, Double::sum)
-                            / estRoboPose.targetsUsed.size()
-                    )
-                );
+                                .stream()
+                                .map(PhotonTrackedTarget::getPoseAmbiguity)
+                                .reduce(0.0, Double::sum)
+                                / estRoboPose.targetsUsed.size()));
     }
 
     @Override
