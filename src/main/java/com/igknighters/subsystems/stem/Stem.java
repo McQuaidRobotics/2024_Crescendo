@@ -5,6 +5,7 @@ import com.igknighters.subsystems.stem.telescope.*;
 import com.igknighters.subsystems.stem.wrist.*;
 import com.igknighters.util.Tracer;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -41,10 +42,17 @@ public class Stem extends SubsystemBase {
      * @return True if all mechanisms have reached their target position
      */
     public boolean setStemPosition(StemPosition position, double toleranceMult) {
+        if (!position.isValid()) {
+            DriverStation.reportError(
+                    "Invalid stem position: " + position.toString(),
+                    true);
+            return true;
+        }
         visualizer.updateSetpoint(position);
-        boolean pivotSuccess = pivot.target(position.pivotRads, toleranceMult);
-        boolean wristSuccess = wrist.target(position.wristRads, toleranceMult);
-        boolean telescopeSuccess = telescope.target(position.telescopeMeters, toleranceMult);
+        StemPosition validated = StemValidator.stepTowardsTargetPosition(getStemPosition(), position);
+        boolean pivotSuccess = pivot.target(validated.pivotRads, toleranceMult);
+        boolean wristSuccess = wrist.target(validated.wristRads, toleranceMult);
+        boolean telescopeSuccess = telescope.target(validated.telescopeMeters, toleranceMult);
         return pivotSuccess && wristSuccess && telescopeSuccess;
     }
 

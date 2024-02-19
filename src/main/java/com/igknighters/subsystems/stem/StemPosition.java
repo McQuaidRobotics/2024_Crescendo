@@ -21,4 +21,20 @@ public class StemPosition {
         return new StemPosition(Math.toRadians(pivotPosRot * 360.0), Math.toRadians(wristPosRot * 360.0),
                 telescopePosMeters);
     }
+
+    public double getPivotRads() {
+        return pivotRads;
+    }
+
+    public double getWristRads() {
+        return wristRads;
+    }
+
+    public double getTelescopeMeters() {
+        return telescopeMeters;
+    }
+
+    public boolean isValid() {
+        return StemValidator.isValidPosition(this);
+    }
 }
