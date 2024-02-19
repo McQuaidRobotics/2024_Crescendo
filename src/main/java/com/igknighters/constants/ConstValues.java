@@ -357,13 +357,12 @@ public final class ConstValues {
             public static final double MAX_ACCELERATION = 3000;
             public static final double MAX_JERK = 0;
 
-            // TODO: find these values
-            public static final double MIN_METERS = 0.2;
-            public static final double MAX_METERS = 1.0;
+            public static final double MOTOR_TO_MECHANISM_RATIO = 25.0;
 
-            public static final double MOTOR_TO_MECHANISM_RATIO = 1.0;
+            public static final double SPROCKET_CIRCUMFERENCE = 0.895 * TAU * Conv.INCHES_TO_METERS;
 
-            public static final double SPROCKET_CIRCUMFERENCE = 1.0;
+            public static final double MIN_METERS = 16.0 * Conv.INCHES_TO_METERS;
+            public static final double MAX_METERS = MIN_METERS + ((51.1 / MOTOR_TO_MECHANISM_RATIO) * SPROCKET_CIRCUMFERENCE);
 
             public static final boolean INVERTED = false;
 
