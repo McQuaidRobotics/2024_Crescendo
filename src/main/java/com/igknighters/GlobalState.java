@@ -3,6 +3,7 @@ package com.igknighters;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.littletonrobotics.junction.Logger;
@@ -18,6 +19,8 @@ import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -43,14 +46,15 @@ public class GlobalState {
 
     private static LocalizerType localizerType = LocalizerType.None;
     private static Optional<PoseEstimator<?>> localizer = Optional.empty();
-
-    // private static final PoseHistory poseHistory = new PoseHistory();
+    private static ChassisSpeeds velocity = new ChassisSpeeds();
 
     private static Optional<Field2d> field = Optional.empty();
 
     private static boolean autoChooserCreated = false;
 
     private static AtomicBoolean isUnitTest = new AtomicBoolean(false);
+
+    private static Supplier<Rotation3d> rotSupplier = Rotation3d::new;
 
     private GlobalState() {
         throw new UnsupportedOperationException("This is a utility class!");
@@ -63,9 +67,68 @@ public class GlobalState {
             localizer = Optional.empty();
             field = Optional.empty();
             isUnitTest.set(false);
+            rotSupplier = Rotation3d::new;
+            velocity = new ChassisSpeeds();
             // intentionally ignore as this is dependent on AutoBuilder state and that
             // cannot be restored
             // autoChooserCreated = false;
+        } finally {
+            globalLock.unlock();
+        }
+    }
+
+    /**
+     * Set the gyro rotation supplier.
+     * 
+     * @param rotSup
+     */
+    public static void setGyroRotSupplier(Supplier<Rotation3d> rotSup) {
+        globalLock.lock();
+        try {
+            rotSupplier = rotSup;
+        } finally {
+            globalLock.lock();
+        }
+    }
+
+    /**
+     * Get the gyro rotation.
+     * 
+     * @return Rotation3d containing the gyro's rotation.
+     */
+    public static Rotation3d getGyroRot() {
+        globalLock.lock();
+        try {
+            return rotSupplier.get();
+        } finally {
+            globalLock.lock();
+        }
+    }
+
+    public static void setVelocity(ChassisSpeeds velo) {
+        globalLock.lock();
+        try {
+            velocity = velo;
+        } finally {
+            globalLock.unlock();
+        }
+    }
+
+    public static ChassisSpeeds getVelocity() {
+        globalLock.lock();
+        try {
+            return velocity;
+        } finally {
+            globalLock.unlock();
+        }
+    }
+
+    public static ChassisSpeeds getFieldRelativeVelocity() {
+        globalLock.lock();
+        try {
+            return ChassisSpeeds.fromFieldRelativeSpeeds(
+                    velocity,
+                    getGyroRot().toRotation2d());
         } finally {
             globalLock.unlock();
         }
@@ -202,10 +265,11 @@ public class GlobalState {
 
     /**
      * Create and publish the field to network tables,
-     * this is also called by {@link GlobalState#modifyField(Consumer)} if the field
+     * this is also called by {@link GlobalState#modifyField2d(Consumer)} if the
+     * field
      * is not already published.
      */
-    public static void publishField() {
+    public static void publishField2d() {
         globalLock.lock();
         try {
             if (field.isPresent()) {
@@ -230,11 +294,11 @@ public class GlobalState {
      * 
      * @param modifier The function to receive the field
      */
-    public static void modifyField(Consumer<Field2d> modifier) {
+    public static void modifyField2d(Consumer<Field2d> modifier) {
         globalLock.lock();
         try {
             if (!field.isPresent()) {
-                publishField();
+                publishField2d();
             }
             modifier.accept(field.get());
         } finally {
@@ -295,6 +359,7 @@ public class GlobalState {
 
     /**
      * Declare if the code is being run as part of a unit test
+     * 
      * @param isTest If the code should be run as a unit test
      */
     public static void setUnitTest(boolean isTest) {

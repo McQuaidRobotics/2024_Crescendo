@@ -144,7 +144,7 @@ public class TeleopSwerveBase extends Command {
                         currentCmd = new TeleopSwerveAbsRot(swerve, controller);
                         break;
                     case TARGET:
-                        currentCmd = new TeleopSwerveTarget(swerve, controller);
+                        currentCmd = new TeleopSwerveTargetSpeaker(swerve, controller);
                         break;
                 }
             }

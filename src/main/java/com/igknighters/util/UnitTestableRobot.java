@@ -9,6 +9,7 @@ import org.littletonrobotics.junction.Logger;
 
 import com.igknighters.GlobalState;
 import com.igknighters.SubsystemResources.AllSubsystems;
+import com.igknighters.constants.ConstValues;
 
 import edu.wpi.first.hal.DriverStationJNI;
 import edu.wpi.first.hal.HAL;
@@ -27,6 +28,14 @@ public class UnitTestableRobot extends LoggedRobot {
         }
     }
 
+    public static class UnitTestableRobotTimedOut extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
+        public UnitTestableRobotTimedOut() {
+            super("Unit test robot timed out");
+        }
+    }
+
     public static enum Mode {
         kNone,
         kDisabled,
@@ -36,7 +45,7 @@ public class UnitTestableRobot extends LoggedRobot {
     }
 
     public UnitTestableRobot() {
-        super();
+        super(ConstValues.PERIODIC_TIME);
         isUnitTest = GlobalState.isUnitTest();
 
         if (isUnitTest) {
@@ -93,7 +102,7 @@ public class UnitTestableRobot extends LoggedRobot {
                 throw new UnitTestableRobotExited();
             }
             if (timer.hasElapsed(timeoutDuration)) {
-                throw new RuntimeException("Robot timed out");
+                throw new UnitTestableRobotTimedOut();
             }
         }
         DriverStation.refreshData();

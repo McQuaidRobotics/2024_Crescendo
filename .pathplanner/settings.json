@@ -2,11 +2,17 @@
   "robotWidth": 0.75,
   "robotLength": 0.75,
   "holonomicMode": true,
-  "pathFolders": [],
+  "pathFolders": [
+    "4 piece",
+    "4 piece subwoofer",
+    "5.5 piece",
+    "Auto Testing Paths",
+    "5 piece subwoofer"
+  ],
   "autoFolders": [],
-  "defaultMaxVel": 3.0,
-  "defaultMaxAccel": 3.0,
-  "defaultMaxAngVel": 540.0,
+  "defaultMaxVel": 5.0,
+  "defaultMaxAccel": 5.0,
+  "defaultMaxAngVel": 720.0,
   "defaultMaxAngAccel": 720.0,
-  "maxModuleSpeed": 4.5
+  "maxModuleSpeed": 5.0
 }

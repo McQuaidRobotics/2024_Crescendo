@@ -2,6 +2,7 @@ package com.igknighters.commands.swerve;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -48,5 +49,36 @@ public class SwerveCommands {
                         new SimplePathfindingCommand(
                                 new Pose2d(1.84, 7.5, Rotation2d.fromDegrees(90)),
                                 swerve).flipForAlliance());
+    }
+
+    private static class PointTowardsCommand extends Command {
+        private final Swerve swerve;
+        private final Translation2d target;
+        private double velo = 1.0;
+
+        public PointTowardsCommand(Swerve swerve, Translation2d target) {
+            this.swerve = swerve;
+            this.target = target;
+            addRequirements(swerve);
+        }
+
+        @Override
+        public void initialize() {
+            velo = swerve.rotVeloForRotation(
+                    swerve.rotationRelativeToPose(
+                            new Rotation2d(), target));
+            swerve.drive(
+                    new ChassisSpeeds(0, 0, velo),
+                    false);
+        }
+
+        @Override
+        public boolean isFinished() {
+            return velo < 0.05;
+        }
+    }
+
+    public static Command pointTowards(Swerve swerve, Translation2d target) {
+        return new PointTowardsCommand(swerve, target);
     }
 }

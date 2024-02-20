@@ -259,9 +259,9 @@ public class SimplePathfindingCommand extends Command {
                     // This can prevent an issue where the robot will remain stationary if new paths
                     // come in
                     // every loop
-                    if (timeOffset <= 0.02
+                    if (timeOffset <= ConstValues.PERIODIC_TIME
                             && Math.hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond) < 0.1) {
-                        timeOffset = 0.02;
+                        timeOffset = ConstValues.PERIODIC_TIME;
                     }
                 } else {
                     currentPathOpt = Optional.ofNullable(currentPath.replan(currentPose, currentSpeeds));

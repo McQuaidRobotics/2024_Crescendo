@@ -2,7 +2,7 @@ package com.igknighters.commands;
 
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.SwerveCommands;
-import com.igknighters.commands.swerve.teleop.TeleopSwerveTarget;
+import com.igknighters.commands.swerve.teleop.TeleopSwerveTargetSpeaker;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.FieldConstants;
 import com.igknighters.controllers.ControllerParent;
@@ -43,8 +43,7 @@ public class HigherOrderCommands {
         final var speakerTranslation = AllianceFlip.flipTranslation(FieldConstants.Speaker.SPEAKER_CENTER);
         final double rpm = 3780;
         return Commands.parallel(
-            new TeleopSwerveTarget(swerve, controller)
-                .withTarget(AllianceFlip.flipTranslation(speakerTranslation.toTranslation2d()))
+            new TeleopSwerveTargetSpeaker(swerve, controller)
                 .withSpeedMultiplier(0.1),
             StemCommands.aimAt(stem, speakerTranslation, rpm),
             UmbrellaCommands.spinupShooter(umbrella, rpm)

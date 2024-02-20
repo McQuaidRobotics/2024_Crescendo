@@ -15,10 +15,10 @@ import edu.wpi.first.wpilibj.RobotController;
 public class RobotSetup {
 
     public enum RobotID {
-        CRASH(Subsystems.list(Subsystems.Umbrella),
+        CRASH(Subsystems.list(Subsystems.Swerve, Subsystems.Vision),
                 RobotConstID.CRASH),
 
-        BURN(Subsystems.list(Subsystems.Umbrella),
+        BURN(Subsystems.list(Subsystems.Swerve),
                 RobotConstID.BURN),
 
         SIM_CRASH(Subsystems.all(), RobotConstID.CRASH),
@@ -44,7 +44,9 @@ public class RobotSetup {
             this.constID = constants;
         }
     }
-
+    /**
+     * If there are duplicate serial entries the tests will fail!!!!
+     */
     private static final Map<String, RobotID> serialToID = Map.of(
             "0306adcf", RobotID.TestBoard,
             "0306adf3", RobotID.TestBoard,

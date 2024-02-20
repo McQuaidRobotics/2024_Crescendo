@@ -2,6 +2,8 @@ package com.igknighters.util;
 
 import org.littletonrobotics.junction.Logger;
 
+import com.igknighters.GlobalState;
+
 public class BootupLogger {
     private static final String println_prefix = "[Bootup] ";
 
@@ -15,6 +17,8 @@ public class BootupLogger {
     public static synchronized void bootupLog(String message) {
         Logger.recordOutput("/Bootup", message);
 
-        System.out.println(println_prefix + message);
+        if (!GlobalState.isUnitTest()) {
+            System.out.println(println_prefix + message);
+        }
     }
 }
