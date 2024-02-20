@@ -47,16 +47,16 @@ public class PivotReal implements Pivot {
     private final PivotInputs inputs;
 
     private double mechRadiansToMotorRots(Double mechRads) {
-        return (mechRads / (2 * Math.PI)) * kPivot.MOTOR_TO_MECHANISM_RATIO;
+        return Units.radiansToRotations(Math.PI - mechRads) * kPivot.MOTOR_TO_MECHANISM_RATIO;
     }
 
     private double motorRotsToMechRadians(Double motorRots) {
-        return (motorRots * (2 * Math.PI)) / kPivot.MOTOR_TO_MECHANISM_RATIO;
+        return Math.PI - Units.rotationsToRadians(motorRots / kPivot.MOTOR_TO_MECHANISM_RATIO);
     }
 
     public PivotReal() {
         gyro = new Pigeon2(kPivot.PIGEON_ID, kStem.CANBUS);
-        gyroMeasurement = gyro.getRoll();
+        gyroMeasurement = gyro.getPitch();
 
         gyroMeasurement.setUpdateFrequency(100);
 
@@ -126,14 +126,11 @@ public class PivotReal implements Pivot {
         cfg.MotorOutput.Inverted = kPivot.INVERTED ? InvertedValue.Clockwise_Positive
                 : InvertedValue.CounterClockwise_Positive;
 
-        cfg.HardwareLimitSwitch.ReverseLimitEnable = true;
-        cfg.HardwareLimitSwitch.ForwardLimitEnable = true;
+        // cfg.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+        // cfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
-        cfg.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-        cfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-
-        cfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = mechRadiansToMotorRots(kPivot.PIVOT_MAX_RADIANS);
-        cfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = mechRadiansToMotorRots(kPivot.PIVOT_MIN_RADIANS);
+        // cfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = mechRadiansToMotorRots(kPivot.PIVOT_MAX_RADIANS);
+        // cfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = mechRadiansToMotorRots(kPivot.PIVOT_MIN_RADIANS);
 
         cfg.Voltage.PeakForwardVoltage = kPivot.VOLTAGE_COMP;
         cfg.Voltage.PeakReverseVoltage = -kPivot.VOLTAGE_COMP;
@@ -219,8 +216,7 @@ public class PivotReal implements Pivot {
                 gyroMeasurement.refresh().getStatus());
 
         inputs.radians = motorRotsToMechRadians(motorRots.getValue());
-        inputs.radiansPerSecond = motorRotsToMechRadians(motorVelo.getValue());
-        inputs.gyroRadians = Math.abs(Units.degreesToRadians(gyroMeasurement.getValue()));
+        inputs.radiansPerSecond = -Units.rotationsToRadians(motorVelo.getValue()) / kPivot.MOTOR_TO_MECHANISM_RATIO;
         inputs.leftVolts = leaderMotorVolts.getValue();
         inputs.rightVolts = followerMotorVolts.getValue();
         inputs.leftAmps = leaderMotorAmps.getValue();
@@ -228,14 +224,17 @@ public class PivotReal implements Pivot {
         inputs.leftTemp = leaderMotorTemp.getValue();
         inputs.rightTemp = followerMotorTemp.getValue();
 
-        if (Math.abs(inputs.radiansPerSecond) < 0.33
-                && inputs.radians < Math.PI / 2.2 // ensuers backlash is going the right way (kinda)
-        ) {
+
+        inputs.gyroRadians = Units.degreesToRadians(gyroMeasurement.getValue() + 90);
+
+        if (Math.abs(inputs.radiansPerSecond) < 0.1) {
             seedPivot();
             Logger.recordOutput("Stem/Pivot/SeededPivot", true);
         } else {
             Logger.recordOutput("Stem/Pivot/SeededPivot", false);
         }
+
+        Logger.recordOutput("Stem/Pivot/GyroSeed", mechRadiansToMotorRots(getPivotRadiansPigeon()));
 
         Logger.processInputs("Stem/Pivot", inputs);
     }

@@ -6,6 +6,7 @@ import com.igknighters.subsystems.stem.StemPosition;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 import com.igknighters.SubsystemResources.Subsystems;
+import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 
 @SuppressWarnings("unused")
@@ -19,9 +20,14 @@ public class TestingController extends ControllerParent {
 
         /// FACE BUTTONS
         this.A.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
-            trig.onTrue(Commands.runOnce(() -> {
-                allss.stem.get().setStemPosition(StemPosition.fromDegrees(80.0, 0.0, 0.0));
-            }));
+            trig.onTrue(
+                StemCommands.holdAt(
+                    allss.stem.get(), StemPosition.fromDegrees(
+                        70.0,
+                        80.0,
+                        0.53
+                    ))
+            );
         });
 
         this.B.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {

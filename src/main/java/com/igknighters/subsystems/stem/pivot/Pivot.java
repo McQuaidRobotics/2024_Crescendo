@@ -14,7 +14,7 @@ public interface Pivot extends Component {
         public double leftAmps = 0.0, rightAmps = 0.0;
         public double leftTemp = 0.0, rightTemp = 0.0;
         public double gyroRadians = 0.0;
-        public boolean isLimitSwitchHit = false;
+        public boolean isLimitFwdSwitchHit = false, isLimitRevSwitchHit = false;
 
         public PivotInputs(double startingRadians) {
             this.radians = startingRadians;
@@ -33,12 +33,14 @@ public interface Pivot extends Component {
             table.put("leftTemp", leftTemp);
             table.put("rightTemp", rightTemp);
             table.put("gyroRadians", gyroRadians);
-            table.put("isLimitSwitchHit", isLimitSwitchHit);
+            table.put("isLimitFwdSwitchHit", isLimitFwdSwitchHit);
+            table.put("isLimitRevSwitchHit", isLimitRevSwitchHit);
 
             // A subtable, thats only written to when in debug mode and never read from,
             // that provides some more human readable values
             if (ConstValues.DEBUG) {
                 table.put("#Human/degrees", Math.toDegrees(radians));
+                table.put("#Human/gyroDegrees", Math.toDegrees(gyroRadians));
                 table.put("#Human/targetDegrees", Math.toDegrees(targetRadians));
                 table.put("#Human/degreesPerSecond", Math.toDegrees(radiansPerSecond));
             }
@@ -56,7 +58,8 @@ public interface Pivot extends Component {
             leftTemp = table.get("leftTemp", leftTemp);
             rightTemp = table.get("rightTemp", rightTemp);
             gyroRadians = table.get("gyroRadians", gyroRadians);
-            isLimitSwitchHit = table.get("isLimitSwitchHit", isLimitSwitchHit);
+            isLimitFwdSwitchHit = table.get("isLimitFwdSwitchHit", isLimitFwdSwitchHit);
+            isLimitRevSwitchHit = table.get("isLimitRevSwitchHit", isLimitRevSwitchHit);
         }
     }
 
