@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import org.littletonrobotics.junction.Logger;
 
+import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.led.Animation;
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdleConfiguration;
@@ -401,7 +402,15 @@ public class LED {
             if(lastMode!=robotMode){
                 candle.animate(null);
             }
-            candle.animate(partial.getAnim(), i);
+            var err = candle.animate(partial.getAnim(), i);
+
+            if (err.value != ErrorCode.OK.value) {
+                Logger.recordOutput("LED", "Error: " + err.toString());
+                candle.destroyObject();
+                LED.instance = new NoLED();
+                return;
+            }
+
             log += partial.toString() + ",";
             lastMode=robotMode;
         }
