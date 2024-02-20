@@ -78,7 +78,7 @@ public final class ConstValues {
             CRASH(
                     new CameraConfig[] {
                             Camera.createConfig(
-                                    "photonvision-15",
+                                    "photon_module_1",
                                     0,
                                     new Pose3d(
                                             new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(8.75),
@@ -88,7 +88,7 @@ public final class ConstValues {
                                                     Units.degreesToRadians(15.0),
                                                     0.0))),
                             Camera.createConfig(
-                                    "photonvision-16",
+                                    "photon__module_2",
                                     1,
                                     new Pose3d(
                                             new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(-8.75),
@@ -101,7 +101,7 @@ public final class ConstValues {
             BURN(
                     new CameraConfig[] {
                             Camera.createConfig(
-                                    "photonvision-15",
+                                    "photon_module_1",
                                     0,
                                     new Pose3d(
                                             new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(8.75),
@@ -111,7 +111,7 @@ public final class ConstValues {
                                                     Units.degreesToRadians(15.0),
                                                     0.0))),
                             Camera.createConfig(
-                                    "photonvision-16",
+                                    "photon_module_2",
                                     1,
                                     new Pose3d(
                                             new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(-8.75),

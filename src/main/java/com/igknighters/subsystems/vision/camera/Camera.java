@@ -1,5 +1,6 @@
 package com.igknighters.subsystems.vision.camera;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 
 import java.util.List;
@@ -109,7 +110,12 @@ public interface Camera {
         if (RobotBase.isSimulation()) {
             return new CameraDisabled(config.cameraName, config.id, config.cameraPose);
         } else {
-            return new CameraReal(config.cameraName, config.id, config.cameraPose);
+            try {
+                return new CameraReal(config.cameraName, config.id, config.cameraPose);
+            } catch (Exception e) {
+                DriverStation.reportError(e.getMessage(), e.getStackTrace());
+                return new CameraDisabled(config.cameraName, config.id, config.cameraPose);
+            }
         }
     }
 
