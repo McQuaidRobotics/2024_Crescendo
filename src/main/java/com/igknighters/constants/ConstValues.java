@@ -82,7 +82,7 @@ public final class ConstValues {
                                     0,
                                     new Pose3d(
                                             new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(8.75),
-                                                    Units.inchesToMeters(8.0)-kDimensions.BELLYPAN_HEIGHT),
+                                                    Units.inchesToMeters(8.0) - kDimensions.BELLYPAN_HEIGHT),
                                             new Rotation3d(
                                                     0.0,
                                                     Units.degreesToRadians(15.0),
@@ -99,28 +99,28 @@ public final class ConstValues {
                                                     0.0)))
                     }),
             BURN(
-                new CameraConfig[] {
-                        Camera.createConfig(
-                                "photon_module_1",
-                                0,
-                                new Pose3d(
-                                        new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(8.75),
-                                                Units.inchesToMeters(8.0)-kDimensions.BELLYPAN_HEIGHT),
-                                        new Rotation3d(
-                                                0.0,
-                                                Units.degreesToRadians(15.0),
-                                                0.0))),
-                        Camera.createConfig(
-                                "photon_module_2",
-                                1,
-                                new Pose3d(
-                                        new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(-8.75),
-                                                Units.inchesToMeters(8.0) - kDimensions.BELLYPAN_HEIGHT),
-                                        new Rotation3d(
-                                                0.0,
-                                                Units.degreesToRadians(15.0),
-                                                0.0)))
-                });
+                    new CameraConfig[] {
+                            Camera.createConfig(
+                                    "photon_module_1",
+                                    0,
+                                    new Pose3d(
+                                            new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(8.75),
+                                                    Units.inchesToMeters(8.0) - kDimensions.BELLYPAN_HEIGHT),
+                                            new Rotation3d(
+                                                    0.0,
+                                                    Units.degreesToRadians(15.0),
+                                                    0.0))),
+                            Camera.createConfig(
+                                    "photon_module_2",
+                                    1,
+                                    new Pose3d(
+                                            new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(-8.75),
+                                                    Units.inchesToMeters(8.0) - kDimensions.BELLYPAN_HEIGHT),
+                                            new Rotation3d(
+                                                    0.0,
+                                                    Units.degreesToRadians(15.0),
+                                                    0.0)))
+                    });
 
             public final CameraConfig[] cameras;
 
@@ -213,15 +213,16 @@ public final class ConstValues {
             public static final double kD = 0.0;
         }
 
-        public static final double ANGLE_CONTROLLER_KP = 4.0;
+        public static final class RotationControllerConstants {
+            public static final double kP = 5.5;
+            public static final double kI = 0.0;
+            public static final double kD = 0.2;
+
+            public static final double DEADBAND = 2.5 * Conv.DEGREES_TO_RADIANS;
+            public static final double CONSTRAINT_SCALAR = 0.7;
+        }
 
         public static final boolean ORIENT_TELEOP_FOR_SIM = true;
-
-        // public static final LerpTable TELEOP_TRANSLATION_AXIS_CURVE = new LerpTable(
-        //         new LerpTableEntry(0.0, 0.0),
-        //         new LerpTableEntry(0.1, 0.0), // deadzone
-        //         new LerpTableEntry(0.7, 0.4),
-        //         new LerpTableEntry(1.0, 1.0));
 
         public static final LerpTable TELEOP_TRANSLATION_AXIS_CURVE = new LerpTable(
                 new LerpTableEntry(0.0, 0.0),
@@ -231,54 +232,66 @@ public final class ConstValues {
 
         public static final LerpTable TELEOP_ROTATION_AXIS_CURVE = new LerpTable(
                 new LerpTableEntry(0.0, 0.0),
-                new LerpTableEntry(0.2, 0.0), // deadzone
+                new LerpTableEntry(0.1, 0.0), // deadzone
                 new LerpTableEntry(0.7, 0.4),
                 new LerpTableEntry(1.0, 1.0));
 
-        public static final class Mod0 { // 1-burn | 2 crash
+        public static final class Mod0 {
             public static final ModuleId MODULE = ModuleId.m0;
             public static final int DRIVE_MOTOR_ID = 1;
             public static final int ANGLE_MOTOR_ID = 2;
             public static final int CANCODER_ID = 21;
-            //@DoubleConst(crash = -0.406250, burn = 0.25193)\][]
-            public static double ROTATION_OFFSET = 0.0249;
+
+            // @DoubleConst(crash = -0.406250, burn = -0.127441)
+            public static final double ROTATION_OFFSET = -0.323; // crash
+            // public static final double ROTATION_OFFSET = -0.127441; burn
+
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0, -TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
                     ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
         }
 
-        public static final class Mod1 { // 7-burn | 9 crash
+        public static final class Mod1 {
             public static final ModuleId MODULE = ModuleId.m1;
             public static final int DRIVE_MOTOR_ID = 3;
             public static final int ANLGE_MOTOR_ID = 4;
             public static final int CANCODER_ID = 22;
-            //@DoubleConst(crash = -0.270508, burn = 0.1357)
-            public static double ROTATION_OFFSET = -0.350;
+
+            // @DoubleConst(crash = -0.270508, burn = -0.259521)
+            public static final double ROTATION_OFFSET = -0.270508; // crash
+            // public static final double ROTATION_OFFSET = -0.259521; burn
+
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0,
                     -TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
                     ANLGE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
         }
 
-        public static final class Mod2 { // 5-burn | 4 crash
+        public static final class Mod2 {
             public static final ModuleId MODULE = ModuleId.m2;
             public static final int DRIVE_MOTOR_ID = 5;
             public static final int ANGLE_MOTOR_ID = 6;
             public static final int CANCODER_ID = 23;
-           // @DoubleConst(crash = -0.457764, burn = 0.5774)
-            public static double ROTATION_OFFSET = -0.4155;
+
+            // @DoubleConst(crash = -0.457764, burn = 0.077393)
+            public static final double ROTATION_OFFSET = -0.457764; // crash
+            // public static final double ROTATION_OFFSET = 0.077393; burn
+
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0, TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
                     ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
         }
 
-        public static final class Mod3 { // 3-burn | 8 crash
+        public static final class Mod3 {
             public static final ModuleId MODULE = ModuleId.m3;
             public static final int DRIVE_MOTOR_ID = 7;
             public static final int ANGLE_MOTOR_ID = 8;
             public static final int CANCODER_ID = 24;
-            //@DoubleConst(crash = -0.041504, burn = 1.2545)
-            public static double ROTATION_OFFSET = -0.102;
+
+            // @DoubleConst(crash = -0.041504, burn = 0.123291)
+            public static final double ROTATION_OFFSET = -0.041504; // crash
+            // public static final double ROTATION_OFFSET = 0.123291; burn
+
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0,
                     TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
@@ -310,35 +323,50 @@ public final class ConstValues {
     }
 
     public static final class kUmbrella {
+        public static final double NOTE_VELO = 50.0;
+        public static final double NOTE_VELO_AUTO = 50.0;
 
         public static final class kShooter {
-            public static final double MOTOR_UPPER_kP = 0.05;
+            public static final double MOTOR_UPPER_kP = 0.08;
             public static final double MOTOR_UPPER_kI = 0.0;
             public static final double MOTOR_UPPER_kD = 0.00;
-            public static final double MOTOR_UPPER_kS = 0.032;
-            public static final double MOTOR_UPPER_kV = 0.01;
+            public static final double MOTOR_UPPER_kS = 0.1;
+            public static final double MOTOR_UPPER_kV = 0.111;
 
-            public static final double MOTOR_LOWER_kP = 0.05;
+            public static final double MOTOR_LOWER_kP = 0.08;
             public static final double MOTOR_LOWER_kI = 0.0;
             public static final double MOTOR_LOWER_kD = 0.00;
-            public static final double MOTOR_LOWER_kS = 0.032;
-            public static final double MOTOR_LOWER_kV = 0.01;
+            public static final double MOTOR_LOWER_kS = 0.1;
+            public static final double MOTOR_LOWER_kV = 0.111;
 
             public static final int LEFT_MOTOR_ID = 17;
             public static final int RIGHT_MOTOR_ID = 18;
 
-            public static final double MECHANISM_RATIO = 2.0;
+            public static final double MECHANISM_RATIO = 1.5;
             public static final double WHEEL_DIAMETER = 4.0;
 
-            public static final double DEFAULT_TOLERANCE = 0.5;
+            public static final double DEFAULT_TOLERANCE = 0.03;
 
             public static final double PEAK_CURRENT = 80.0;
             public static final double MIN_SHOOT_SPEED = 1000.0 * Conv.RPM_TO_RADIANS_PER_SECOND;
+
+            public static final double LEFT_MOTOR_DIFF = 0.9;
         }
 
         public static final class kIntake {
             public static final int UPPER_MOTOR_ID = 19;
             public static final int LOWER_MOTOR_ID = 20;
+
+            public static final double UPPER_DIAMETER = 2.0625 * Conv.INCHES_TO_METERS;
+            public static final double LOWER_DIAMETER = 1.25 * Conv.INCHES_TO_METERS;
+
+            public static final double UPPER_MECHANISM_RATIO = 2.0;
+            public static final double LOWER_MECHANISM_RATIO = 22.0 / 12.0;
+
+            public static final double UPPER_DIFF = (LOWER_DIAMETER / UPPER_DIAMETER)
+                    * (UPPER_MECHANISM_RATIO / LOWER_MECHANISM_RATIO);
+
+            public static final boolean BEAM_IS_UPPER = true;
         }
 
     }

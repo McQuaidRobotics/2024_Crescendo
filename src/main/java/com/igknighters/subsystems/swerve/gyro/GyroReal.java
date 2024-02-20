@@ -1,14 +1,18 @@
 package com.igknighters.subsystems.swerve.gyro;
 
+import java.util.function.Supplier;
+
 import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.igknighters.GlobalState;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.util.BootupLogger;
 
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 
@@ -18,7 +22,7 @@ public class GyroReal implements Gyro {
     private final StatusSignal<Double> rollSignal, pitchSignal, yawSignal;
     private final StatusSignal<Double> rollVeloSignal, pitchVeloSignal, yawVeloSignal;
     private final StatusSignal<Double> xAccel, yAccel;
-
+    
     private final GyroInputs inputs = new GyroInputs();
 
     public GyroReal() {
@@ -47,6 +51,15 @@ public class GyroReal implements Gyro {
         yAccel.setUpdateFrequency(100);
 
         gyro.optimizeBusUtilization();
+
+        Supplier<Rotation3d> sup = () -> {
+            return new Rotation3d(
+                Math.toRadians(BaseStatusSignal.getLatencyCompensatedValue(rollSignal, rollVeloSignal)),
+                Math.toRadians(BaseStatusSignal.getLatencyCompensatedValue(pitchSignal, pitchVeloSignal)),
+                Math.toRadians(yawSignal.getValue())
+            );
+        };
+        GlobalState.setGyroRotSupplier(sup);
 
         BootupLogger.bootupLog("    Gyro initialized (real)");
     }

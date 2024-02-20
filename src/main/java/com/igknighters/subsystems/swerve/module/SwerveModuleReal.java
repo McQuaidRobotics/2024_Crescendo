@@ -48,7 +48,7 @@ public class SwerveModuleReal implements SwerveModule {
     public SwerveModuleReal(final SwerveModuleConstants moduleConstants, boolean isPro) {
         this.isPro = isPro;
         this.moduleNumber = moduleConstants.moduleId.num;
-        this.rotationOffset = moduleConstants.getRotationOffset();
+        this.rotationOffset = moduleConstants.rotationOffset;
         this.moduleChassisPose = moduleConstants.moduleChassisPose;
 
         driveMotor = new TalonFX(moduleConstants.driveMotorID, kSwerve.CANBUS);
