@@ -67,6 +67,8 @@ public class GlobalState {
             localizer = Optional.empty();
             field = Optional.empty();
             isUnitTest.set(false);
+            rotSupplier = Rotation3d::new;
+            velocity = new ChassisSpeeds();
             // intentionally ignore as this is dependent on AutoBuilder state and that
             // cannot be restored
             // autoChooserCreated = false;
@@ -116,6 +118,17 @@ public class GlobalState {
         globalLock.lock();
         try {
             return velocity;
+        } finally {
+            globalLock.unlock();
+        }
+    }
+
+    public static ChassisSpeeds getFieldRelativeVelocity() {
+        globalLock.lock();
+        try {
+            return ChassisSpeeds.fromFieldRelativeSpeeds(
+                    velocity,
+                    getGyroRot().toRotation2d());
         } finally {
             globalLock.unlock();
         }
