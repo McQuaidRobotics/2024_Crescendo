@@ -3,8 +3,8 @@ package com.igknighters;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -20,6 +20,7 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -41,10 +42,6 @@ public class GlobalState {
         }
     }
 
-    public static enum GamepieceState {
-        None, Held, Confirmed;
-    }
-
     private static final ReentrantLock globalLock = new ReentrantLock();
 
     private static LocalizerType localizerType = LocalizerType.None;
@@ -57,8 +54,7 @@ public class GlobalState {
 
     private static AtomicBoolean isUnitTest = new AtomicBoolean(false);
 
-    private static AtomicReference<GamepieceState> gamePieceState = new AtomicReference<GlobalState.GamepieceState>(
-            GamepieceState.None);
+    private static Supplier<Rotation3d> rotSupplier = Rotation3d::new;
 
     private GlobalState() {
         throw new UnsupportedOperationException("This is a utility class!");
@@ -74,6 +70,52 @@ public class GlobalState {
             // intentionally ignore as this is dependent on AutoBuilder state and that
             // cannot be restored
             // autoChooserCreated = false;
+        } finally {
+            globalLock.unlock();
+        }
+    }
+
+    /**
+     * Set the gyro rotation supplier.
+     * 
+     * @param rotSup
+     */
+    public static void setGyroRotSupplier(Supplier<Rotation3d> rotSup) {
+        globalLock.lock();
+        try {
+            rotSupplier = rotSup;
+        } finally {
+            globalLock.lock();
+        }
+    }
+
+    /**
+     * Get the gyro rotation.
+     * 
+     * @return Rotation3d containing the gyro's rotation.
+     */
+    public static Rotation3d getGyroRot() {
+        globalLock.lock();
+        try {
+            return rotSupplier.get();
+        } finally {
+            globalLock.lock();
+        }
+    }
+
+    public static void setVelocity(ChassisSpeeds velo) {
+        globalLock.lock();
+        try {
+            velocity = velo;
+        } finally {
+            globalLock.unlock();
+        }
+    }
+
+    public static ChassisSpeeds getVelocity() {
+        globalLock.lock();
+        try {
+            return velocity;
         } finally {
             globalLock.unlock();
         }
@@ -249,22 +291,6 @@ public class GlobalState {
         } finally {
             globalLock.unlock();
         }
-    }
-
-    public static void setVelocity(ChassisSpeeds velo) {
-        velocity = velo;
-    }
-
-    public static ChassisSpeeds getVelocity() {
-        return velocity;
-    }
-
-    public static GamepieceState getGamePieceState() {
-        return gamePieceState.get();
-    }
-
-    public static void setHasGamePiece(GamepieceState state) {
-        gamePieceState.set(state);
     }
 
     /**

@@ -53,7 +53,7 @@ public class RobotContainer {
 
         if (allSubsystems.umbrella.isPresent()) {
             var umbrella = allSubsystems.umbrella.get();
-            umbrella.setDefaultCommand(UmbrellaCommands.spinUmbrella(umbrella));
+            umbrella.setDefaultCommand(UmbrellaCommands.spinUmbrellaBoth(umbrella));
         }
     }
 

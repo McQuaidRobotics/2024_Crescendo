@@ -241,9 +241,9 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 2;
             public static final int CANCODER_ID = 21;
 
-            // @DoubleConst(crash = -0.406250, burn = 0.25193)
-            @DoubleConst(crash = -0.406250, burn = 0.404053)
-            public static double ROTATION_OFFSET;
+            // @DoubleConst(crash = -0.406250, burn = -0.127441)
+            public static final double ROTATION_OFFSET = -0.406250; // crash
+            // public static final double ROTATION_OFFSET = -0.127441; burn
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0, -TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
@@ -256,9 +256,9 @@ public final class ConstValues {
             public static final int ANLGE_MOTOR_ID = 4;
             public static final int CANCODER_ID = 22;
 
-            // @DoubleConst(crash = -0.270508, burn = 0.1357)
-            @DoubleConst(crash = -0.270508, burn = -0.479980)
-            public static double ROTATION_OFFSET;
+        //     @DoubleConst(crash = -0.270508, burn = -0.259521)
+            public static final double ROTATION_OFFSET = -0.270508; // crash
+            // public static final double ROTATION_OFFSET = -0.259521; burn
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0,
                     -TRACK_WIDTH / 2.0);
@@ -272,9 +272,9 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 6;
             public static final int CANCODER_ID = 23;
 
-            // @DoubleConst(crash = -0.457764, burn = 0.5774)
-            @DoubleConst(crash = -0.457764, burn = 0.185791)
-            public static double ROTATION_OFFSET;
+        //     @DoubleConst(crash = -0.457764, burn = 0.077393)
+            public static final double ROTATION_OFFSET = -0.457764; // crash
+            // public static final double ROTATION_OFFSET = 0.077393; burn
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0, TRACK_WIDTH / 2.0);
             public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
@@ -287,9 +287,9 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 8;
             public static final int CANCODER_ID = 24;
 
-            // @DoubleConst(crash = -0.041504, burn = 1.2545)
-            @DoubleConst(crash = -0.041504, burn = 0.148438)
-            public static double ROTATION_OFFSET;
+            // @DoubleConst(crash = -0.041504, burn = 0.123291)
+            public static final double ROTATION_OFFSET = -0.041504; // crash
+            // public static final double ROTATION_OFFSET = 0.123291; burn
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0,
                     TRACK_WIDTH / 2.0);
@@ -324,33 +324,46 @@ public final class ConstValues {
     public static final class kUmbrella {
 
         public static final class kShooter {
-            public static final double MOTOR_UPPER_kP = 0.05;
+            public static final double MOTOR_UPPER_kP = 0.08;
             public static final double MOTOR_UPPER_kI = 0.0;
             public static final double MOTOR_UPPER_kD = 0.00;
-            public static final double MOTOR_UPPER_kS = 0.032;
-            public static final double MOTOR_UPPER_kV = 0.01;
+            public static final double MOTOR_UPPER_kS = 0.1;
+            public static final double MOTOR_UPPER_kV = 0.111;
 
-            public static final double MOTOR_LOWER_kP = 0.05;
+            public static final double MOTOR_LOWER_kP = 0.08;
             public static final double MOTOR_LOWER_kI = 0.0;
             public static final double MOTOR_LOWER_kD = 0.00;
-            public static final double MOTOR_LOWER_kS = 0.032;
-            public static final double MOTOR_LOWER_kV = 0.01;
+            public static final double MOTOR_LOWER_kS = 0.1;
+            public static final double MOTOR_LOWER_kV = 0.111;
 
             public static final int LEFT_MOTOR_ID = 17;
             public static final int RIGHT_MOTOR_ID = 18;
 
-            public static final double MECHANISM_RATIO = 2.0;
+            public static final double MECHANISM_RATIO = 1.5;
             public static final double WHEEL_DIAMETER = 4.0;
 
-            public static final double DEFAULT_TOLERANCE = 0.5;
+            public static final double DEFAULT_TOLERANCE = 0.03;
 
             public static final double PEAK_CURRENT = 80.0;
             public static final double MIN_SHOOT_SPEED = 1000.0 * Conv.RPM_TO_RADIANS_PER_SECOND;
+
+            public static final double LEFT_MOTOR_DIFF = 0.9;
         }
 
         public static final class kIntake {
             public static final int UPPER_MOTOR_ID = 19;
             public static final int LOWER_MOTOR_ID = 20;
+
+            public static final double UPPER_DIAMETER = 2.0625 * Conv.INCHES_TO_METERS;
+            public static final double LOWER_DIAMETER = 1.25 * Conv.INCHES_TO_METERS;
+
+            public static final double UPPER_MECHANISM_RATIO = 2.0;
+            public static final double LOWER_MECHANISM_RATIO = 22.0 / 12.0;
+
+            public static final double UPPER_DIFF = (LOWER_DIAMETER / UPPER_DIAMETER)
+                    * (UPPER_MECHANISM_RATIO / LOWER_MECHANISM_RATIO);
+
+            public static final boolean BEAM_IS_UPPER = true;
         }
 
     }
