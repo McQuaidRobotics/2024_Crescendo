@@ -19,6 +19,7 @@ import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -48,8 +49,7 @@ public class GlobalState {
 
     private static LocalizerType localizerType = LocalizerType.None;
     private static Optional<PoseEstimator<?>> localizer = Optional.empty();
-
-    // private static final PoseHistory poseHistory = new PoseHistory();
+    private static ChassisSpeeds velocity = new ChassisSpeeds();
 
     private static Optional<Field2d> field = Optional.empty();
 
@@ -57,7 +57,8 @@ public class GlobalState {
 
     private static AtomicBoolean isUnitTest = new AtomicBoolean(false);
 
-    private static AtomicReference<GamepieceState> gamePieceState = new AtomicReference<GlobalState.GamepieceState>(GamepieceState.None);
+    private static AtomicReference<GamepieceState> gamePieceState = new AtomicReference<GlobalState.GamepieceState>(
+            GamepieceState.None);
 
     private GlobalState() {
         throw new UnsupportedOperationException("This is a utility class!");
@@ -209,10 +210,11 @@ public class GlobalState {
 
     /**
      * Create and publish the field to network tables,
-     * this is also called by {@link GlobalState#modifyField(Consumer)} if the field
+     * this is also called by {@link GlobalState#modifyField2d(Consumer)} if the
+     * field
      * is not already published.
      */
-    public static void publishField() {
+    public static void publishField2d() {
         globalLock.lock();
         try {
             if (field.isPresent()) {
@@ -237,16 +239,24 @@ public class GlobalState {
      * 
      * @param modifier The function to receive the field
      */
-    public static void modifyField(Consumer<Field2d> modifier) {
+    public static void modifyField2d(Consumer<Field2d> modifier) {
         globalLock.lock();
         try {
             if (!field.isPresent()) {
-                publishField();
+                publishField2d();
             }
             modifier.accept(field.get());
         } finally {
             globalLock.unlock();
         }
+    }
+
+    public static void setVelocity(ChassisSpeeds velo) {
+        velocity = velo;
+    }
+
+    public static ChassisSpeeds getVelocity() {
+        return velocity;
     }
 
     public static GamepieceState getGamePieceState() {
@@ -310,6 +320,7 @@ public class GlobalState {
 
     /**
      * Declare if the code is being run as part of a unit test
+     * 
      * @param isTest If the code should be run as a unit test
      */
     public static void setUnitTest(boolean isTest) {

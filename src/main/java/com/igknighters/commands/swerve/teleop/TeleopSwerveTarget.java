@@ -29,16 +29,16 @@ public class TeleopSwerveTarget extends TeleopSwerveBase {
 
     @Override
     public void execute() {
+        var vt = orientForUser(new Translation2d(
+                getTranslationX() * kSwerve.MAX_DRIVE_VELOCITY * 0.85,
+                getTranslationY() * kSwerve.MAX_DRIVE_VELOCITY * 0.85));
+
         targetTranslation = targetTranslation
                 .plus(orientForUser(new Translation2d(
                         getRotationX() * 0.1,
                         getRotationY() * 0.1)));
 
-        var vt = orientForUser(new Translation2d(
-                getTranslationX() * kSwerve.MAX_DRIVE_VELOCITY * 0.85,
-                getTranslationY() * kSwerve.MAX_DRIVE_VELOCITY * 0.85));
-
-        GlobalState.modifyField(field -> {
+        GlobalState.modifyField2d(field -> {
             field.getObject("target").setPose(new Pose2d(targetTranslation, new Rotation2d()));
         });
 

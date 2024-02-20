@@ -54,7 +54,7 @@ public class Vision extends SubsystemBase {
             }
             Tracer.endTrace();
         }
-        GlobalState.modifyField(field -> {
+        GlobalState.modifyField2d(field -> {
             field.getObject("seen_apriltags").setPoses(
                     seenTags.stream()
                             .map(tagId -> FieldConstants.APRIL_TAG_FIELD
