@@ -33,7 +33,7 @@ public class TelescopeSim implements Telescope {
                 DCMotor.getFalcon500(1),
                 kTelescope.MOTOR_TO_MECHANISM_RATIO,
                 10.0,
-                0.0,
+                0.1,
                 kTelescope.MIN_METERS,
                 kTelescope.MAX_METERS,
                 false,
