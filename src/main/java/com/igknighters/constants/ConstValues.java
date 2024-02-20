@@ -78,7 +78,7 @@ public final class ConstValues {
             CRASH(
                     new CameraConfig[] {
                             Camera.createConfig(
-                                    "photonvision-15",
+                                    "photon_module_1",
                                     0,
                                     new Pose3d(
                                             new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(8.75),
@@ -88,7 +88,7 @@ public final class ConstValues {
                                                     Units.degreesToRadians(15.0),
                                                     0.0))),
                             Camera.createConfig(
-                                    "photonvision-16",
+                                    "photon__module_2",
                                     1,
                                     new Pose3d(
                                             new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(-8.75),
@@ -101,7 +101,7 @@ public final class ConstValues {
             BURN(
                     new CameraConfig[] {
                             Camera.createConfig(
-                                    "photonvision-15",
+                                    "photon_module_1",
                                     0,
                                     new Pose3d(
                                             new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(8.75),
@@ -111,7 +111,7 @@ public final class ConstValues {
                                                     Units.degreesToRadians(15.0),
                                                     0.0))),
                             Camera.createConfig(
-                                    "photonvision-16",
+                                    "photon_module_2",
                                     1,
                                     new Pose3d(
                                             new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(-8.75),
@@ -213,16 +213,16 @@ public final class ConstValues {
             public static final double kD = 0.0;
         }
 
-        public static final double ROTATIONAL_CONTROLLER_KP = 4.0;
-        public static final double ROTATIONAL_CONTROLLER_TOLERANCE = 2.0 * Conv.DEGREES_TO_RADIANS;
+        public static final class RotationControllerConstants {
+            public static final double kP = 5.5;
+            public static final double kI = 0.0;
+            public static final double kD = 0.2;
+
+            public static final double DEADBAND = 2.5 * Conv.DEGREES_TO_RADIANS;
+            public static final double CONSTRAINT_SCALAR = 0.7;
+        }
 
         public static final boolean ORIENT_TELEOP_FOR_SIM = true;
-
-        // public static final LerpTable TELEOP_TRANSLATION_AXIS_CURVE = new LerpTable(
-        // new LerpTableEntry(0.0, 0.0),
-        // new LerpTableEntry(0.1, 0.0), // deadzone
-        // new LerpTableEntry(0.7, 0.4),
-        // new LerpTableEntry(1.0, 1.0));
 
         public static final LerpTable TELEOP_TRANSLATION_AXIS_CURVE = new LerpTable(
                 new LerpTableEntry(0.0, 0.0),
@@ -232,7 +232,7 @@ public final class ConstValues {
 
         public static final LerpTable TELEOP_ROTATION_AXIS_CURVE = new LerpTable(
                 new LerpTableEntry(0.0, 0.0),
-                new LerpTableEntry(0.2, 0.0), // deadzone
+                new LerpTableEntry(0.1, 0.0), // deadzone
                 new LerpTableEntry(0.7, 0.4),
                 new LerpTableEntry(1.0, 1.0));
 
@@ -243,7 +243,7 @@ public final class ConstValues {
             public static final int CANCODER_ID = 21;
 
             // @DoubleConst(crash = -0.406250, burn = -0.127441)
-            public static final double ROTATION_OFFSET = -0.406250; // crash
+            public static final double ROTATION_OFFSET = -0.323; // crash
             // public static final double ROTATION_OFFSET = -0.127441; burn
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0, -TRACK_WIDTH / 2.0);
@@ -257,7 +257,7 @@ public final class ConstValues {
             public static final int ANLGE_MOTOR_ID = 4;
             public static final int CANCODER_ID = 22;
 
-        //     @DoubleConst(crash = -0.270508, burn = -0.259521)
+            // @DoubleConst(crash = -0.270508, burn = -0.259521)
             public static final double ROTATION_OFFSET = -0.270508; // crash
             // public static final double ROTATION_OFFSET = -0.259521; burn
 
@@ -273,7 +273,7 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 6;
             public static final int CANCODER_ID = 23;
 
-        //     @DoubleConst(crash = -0.457764, burn = 0.077393)
+            // @DoubleConst(crash = -0.457764, burn = 0.077393)
             public static final double ROTATION_OFFSET = -0.457764; // crash
             // public static final double ROTATION_OFFSET = 0.077393; burn
 
@@ -323,6 +323,8 @@ public final class ConstValues {
     }
 
     public static final class kUmbrella {
+        public static final double NOTE_VELO = 50.0;
+        public static final double NOTE_VELO_AUTO = 50.0;
 
         public static final class kShooter {
             public static final double MOTOR_UPPER_kP = 0.08;

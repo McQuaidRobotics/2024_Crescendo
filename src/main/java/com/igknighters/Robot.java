@@ -32,7 +32,7 @@ public class Robot extends UnitTestableRobot {
 
         com.igknighters.ConstantHelper.applyRoboConst(ConstValues.class);
 
-        GlobalState.publishField();
+        GlobalState.publishField2d();
 
         roboContainer = new RobotContainer();
     }
