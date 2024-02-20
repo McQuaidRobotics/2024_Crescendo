@@ -3,13 +3,14 @@ package com.igknighters.subsystems.vision;
 import com.igknighters.GlobalState;
 import com.igknighters.GlobalState.LocalizerType;
 import com.igknighters.constants.FieldConstants;
-import com.igknighters.constants.ConstValues.kDimensions;
 import com.igknighters.constants.ConstValues.kVision;
 import com.igknighters.subsystems.vision.camera.Camera;
 import com.igknighters.util.Tracer;
 
 import java.util.HashSet;
 import java.util.List;
+
+import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -42,9 +43,10 @@ public class Vision extends SubsystemBase {
             if (optEval.isPresent()) {
                 var eval = optEval.get();
 
-                if (Math.abs(eval.pose.getTranslation().getZ() - kDimensions.BELLYPAN_HEIGHT) > kVision.MAX_Z_DELTA) {
+                if (Math.abs(eval.pose.getTranslation().getZ()) > kVision.MAX_Z_DELTA) {
                     // The cameras height does not change typically, so if it does, it is likely a
                     // false positive
+                    Logger.recordOutput("/Vision/" + camera.getName() + "/WeirdZ", true);
                     GlobalState.submitVisionData(eval, Math.min(eval.ambiguity * 3.0, 1.0));
                 } else {
                     GlobalState.submitVisionData(eval, eval.ambiguity);
