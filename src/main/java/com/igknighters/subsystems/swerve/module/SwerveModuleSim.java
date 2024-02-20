@@ -9,6 +9,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -38,7 +39,15 @@ public class SwerveModuleSim implements SwerveModule {
     private final SwerveModuleInputs inputs;
 
     public SwerveModuleSim(final SwerveModuleConstants moduleConstants) {
-        this.moduleNumber = moduleConstants.moduleId.num;
+        this.moduleNumber = moduleConstants.getModuleId().num;
+
+        //just to test the consts
+        moduleConstants.getDriveMotorID();
+        moduleConstants.getAngleMotorID();
+        moduleConstants.getCancoderID();
+        SmartDashboard.putNumber("SwerveModuleOffset[" + moduleNumber + "]", moduleConstants.getRotationOffset());
+        moduleConstants.getModuleChassisPose();
+
         angleFeedback.enableContinuousInput(-Math.PI, Math.PI);
 
         inputs = new SwerveModuleInputs();

@@ -242,29 +242,25 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 2;
             public static final int CANCODER_ID = 21;
 
-            // @DoubleConst(crash = -0.406250, burn = -0.127441)
-            public static final double ROTATION_OFFSET = -0.323; // crash
-            // public static final double ROTATION_OFFSET = -0.127441; burn
+            @DoubleConst(crash = -0.323, burn = -0.127441)
+            public static double ROTATION_OFFSET;
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0, -TRACK_WIDTH / 2.0);
-            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
-                    ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
+            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(Mod0.class);
         }
 
         public static final class Mod1 {
             public static final ModuleId MODULE = ModuleId.m1;
             public static final int DRIVE_MOTOR_ID = 3;
-            public static final int ANLGE_MOTOR_ID = 4;
+            public static final int ANGLE_MOTOR_ID = 4;
             public static final int CANCODER_ID = 22;
 
-            // @DoubleConst(crash = -0.270508, burn = -0.259521)
-            public static final double ROTATION_OFFSET = -0.270508; // crash
-            // public static final double ROTATION_OFFSET = -0.259521; burn
+            @DoubleConst(crash = -0.270508, burn = -0.259521)
+            public static double ROTATION_OFFSET;
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0,
                     -TRACK_WIDTH / 2.0);
-            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
-                    ANLGE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
+            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(Mod1.class);
         }
 
         public static final class Mod2 {
@@ -273,13 +269,11 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 6;
             public static final int CANCODER_ID = 23;
 
-            // @DoubleConst(crash = -0.457764, burn = 0.077393)
-            public static final double ROTATION_OFFSET = -0.457764; // crash
-            // public static final double ROTATION_OFFSET = 0.077393; burn
+            @DoubleConst(crash = -0.457764, burn = 0.077393)
+            public static double ROTATION_OFFSET;
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0, TRACK_WIDTH / 2.0);
-            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
-                    ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
+            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(Mod2.class);
         }
 
         public static final class Mod3 {
@@ -288,14 +282,12 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 8;
             public static final int CANCODER_ID = 24;
 
-            // @DoubleConst(crash = -0.041504, burn = 0.123291)
-            public static final double ROTATION_OFFSET = -0.041504; // crash
-            // public static final double ROTATION_OFFSET = 0.123291; burn
+            @DoubleConst(crash = -0.041504, burn = 0.123291)
+            public static double ROTATION_OFFSET = -0.041504;
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0,
                     TRACK_WIDTH / 2.0);
-            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
-                    ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
+            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(Mod3.class);
         }
 
         public static final Translation2d[] MODULE_CHASSIS_OFFSETS = new Translation2d[] {

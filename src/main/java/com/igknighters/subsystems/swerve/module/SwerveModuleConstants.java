@@ -16,28 +16,53 @@ public class SwerveModuleConstants {
         }
     }
 
-    public final ModuleId moduleId;
-    public final int driveMotorID;
-    public final int angleMotorID;
-    public final int cancoderID;
-    public final Translation2d moduleChassisPose;
-    public final double rotationOffset;
+    private final String moduleIdFieldName = "MODULE";
+    private final String driveMotorIDFieldName = "DRIVE_MOTOR_ID";
+    private final String angleMotorIDFieldName = "ANGLE_MOTOR_ID";
+    private final String cancoderIDFieldName = "CANCODER_ID";
+    private final String rotationOffsetFieldName = "ROTATION_OFFSET";
+    private final String moduleChassisPoseFieldName = "CHASSIS_OFFSET";
+
+    private Class<?> moduleconsts;
 
     /**
      * Swerve Module Constants to be used when creating swerve modules.
      * 
-     * @param driveMotorID The ID of the drive motor
-     * @param angleMotorID The ID of the angle motor
-     * @param canCoderID  The ID of the cancoder
-     * @param rotationOffset The rotation offset of the cancoder
+     * @param moduleconsts The class containing the constants for the module
      */
-    public SwerveModuleConstants(ModuleId moduleId, int driveMotorID, int angleMotorID, int canCoderID,
-            Translation2d modulePosition, double rotationOffset) {
-        this.moduleId = moduleId;
-        this.driveMotorID = driveMotorID;
-        this.angleMotorID = angleMotorID;
-        this.cancoderID = canCoderID;
-        this.moduleChassisPose = modulePosition;
-        this.rotationOffset = rotationOffset;
+    public SwerveModuleConstants(Class<?> moduleconsts) {
+        this.moduleconsts = moduleconsts;
+    }
+
+    public Object getConst(String fieldName) {
+        try {
+            return moduleconsts.getField(fieldName).get(null);
+        } catch (Exception e) {
+            throw new RuntimeException("Could not get field " + fieldName + " from " + moduleconsts.getName());
+        }
+    }
+
+    public ModuleId getModuleId() {
+        return (ModuleId) getConst(moduleIdFieldName);
+    }
+
+    public int getDriveMotorID() {
+        return (int) getConst(driveMotorIDFieldName);
+    }
+
+    public int getAngleMotorID() {
+        return (int) getConst(angleMotorIDFieldName);
+    }
+
+    public int getCancoderID() {
+        return (int) getConst(cancoderIDFieldName);
+    }
+
+    public double getRotationOffset() {
+        return (double) getConst(rotationOffsetFieldName);
+    }
+
+    public Translation2d getModuleChassisPose() {
+        return (Translation2d) getConst(moduleChassisPoseFieldName);
     }
 }
