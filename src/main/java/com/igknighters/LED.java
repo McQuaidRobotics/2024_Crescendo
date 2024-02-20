@@ -13,6 +13,7 @@ import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.ColorFlowAnimation.Direction;
+import com.igknighters.constants.ConstValues;
 import com.pathplanner.lib.auto.AutoBuilder.TriFunction;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -21,23 +22,44 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class LED {
+    private static class NoLED extends LED {
+        NoLED() {
+            super(false);
+        }
+
+        @Override
+        public void run() {
+            // Do nothing
+        }
+
+        @Override
+        public DurationHandle sendMultiAnimation(double[] percents, LedAnimations[] anims) {
+            return new DurationHandle(this);
+        }
+    }
+
+
     private final static int NUMLEDS = 308;
 
     private static LED instance;
 
     public static LED getInstance() {
         if (instance == null) {
-            instance = new LED();
+            if (ConstValues.LED_ENABLED && !Robot.isSimulation()) {
+                instance = new LED(true);
+            } else {
+                instance = new NoLED();
+            }
         }
         return instance;
     }
 
-    private final CANdle candle;
+    protected final CANdle candle;
 
-    private final Timer timer;
-    private double duration;
+    private final Timer timer = new Timer();
+    private double duration = 0;
 
-    private ArrayList<PartialAnimation> animations;
+    private final ArrayList<PartialAnimation> animations = new ArrayList<>();
 
     private int robotMode = 0;
     private int lastMode = 0;
@@ -189,21 +211,23 @@ public class LED {
         }
     }
 
-    public LED() {
-        this.timer = new Timer();
+    public LED(boolean makeLed) {
         timer.start();
-        this.duration = 0.0;
-        candle = new CANdle(52);
-        var config = new CANdleConfiguration();
-        config.v5Enabled = true;
-        config.stripType = LEDStripType.RGB;
-        config.brightnessScalar = 1.0;
-        config.disableWhenLOS = true;
-        candle.configAllSettings(config);
+        if (makeLed) {
+            candle = new CANdle(52);
+            var config = new CANdleConfiguration();
+            config.v5Enabled = true;
+            config.stripType = LEDStripType.RGB;
+            config.brightnessScalar = 1.0;
+            config.disableWhenLOS = true;
+            candle.configAllSettings(config);
 
-        new Trigger(DriverStation::isFMSAttached)
+            new Trigger(DriverStation::isFMSAttached)
                 .and(() -> Math.abs(DriverStation.getMatchTime() - 20.0) < 0.2)
                 .onTrue(new InstantCommand(() -> this.sendAnimation(LedAnimations._20S_LEFT).withDuration(2.0)));
+        } else {
+            candle = null;
+        }
     }
 
     /**
@@ -313,7 +337,7 @@ public class LED {
 
         int count = Math.min(percents.length, anims.length);
 
-        this.animations = new ArrayList<>();
+        this.animations.clear();
 
         int offset = 0;
         double used = 0.0;
