@@ -30,12 +30,12 @@ public class Stem extends SubsystemBase {
         } else {
             pivot = new PivotReal();
             telescope = new TelescopeReal();
-            wrist = new WristSim();
+            wrist = new WristReal();
         }
 
         visualizer = new StemVisualizer();
 
-        new Trigger(() -> false)
+        new Trigger(coastSwitch::get)
             .and(DriverStation::isDisabled)
             .or(DriverStation::isTestEnabled)
             .onTrue(this.runOnce(() -> {

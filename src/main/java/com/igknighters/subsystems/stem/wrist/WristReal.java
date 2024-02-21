@@ -6,7 +6,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
@@ -48,7 +48,7 @@ public class WristReal implements Wrist {
 
         motor.optimizeBusUtilization();
 
-        cancoder = new CANcoder(kWrist.CANCODER_ID);
+        cancoder = new CANcoder(kWrist.CANCODER_ID, kStem.CANBUS);
         cancoder.getConfigurator().apply(cancoderConfig());
 
         cancoderRots = cancoder.getAbsolutePosition();
@@ -89,7 +89,7 @@ public class WristReal implements Wrist {
     @Override
     public void setWristRadians(Double radians) {
         inputs.targetRadians = radians;
-        var posControlRequest = new PositionDutyCycle(
+        var posControlRequest = new PositionVoltage(
                 Wrist.mechanismRadsToMotorRots(radians));
         this.motor.setControl(posControlRequest);
     }

@@ -56,7 +56,8 @@ public class RobotContainer {
             stem.setDefaultCommand(stem.run(() -> {
                 stem.setStemVolts(
                     testingController.leftStickY(0.1).getAsDouble() * RobotController.getBatteryVoltage(),
-                    0.0,
+                    (testingController.rightTrigger(true).getAsDouble()
+                    - testingController.leftTrigger(true).getAsDouble()) * 6.0,
                     testingController.rightStickY(0.1).getAsDouble() * RobotController.getBatteryVoltage()
                 );
             }));
