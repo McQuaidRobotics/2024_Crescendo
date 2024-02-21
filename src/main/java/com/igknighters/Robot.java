@@ -6,6 +6,7 @@ import java.util.function.BiConsumer;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -131,11 +132,16 @@ public class Robot extends UnitTestableRobot {
         }
 
         if (Robot.isReal()) {
-            Logger.addDataReceiver(
-                new ExtensibleWPILOGWriter("/media/sda1/robotlogs/")
-                    .withNTPrefixListener("/Visualizers")
-                    .withNTPrefixListener("/PathPlanner")
-            );
+            var path = "/media/sda1/robotlogs/";
+            if (!new java.io.File(path).exists() && ConstValues.DEBUG) {
+                DriverStation.reportWarning("DATALOGS USB NOT PLUGGED IN!!!", false);
+            } else {
+                Logger.addDataReceiver(
+                    new ExtensibleWPILOGWriter(path)
+                        .withNTPrefixListener("/Visualizers")
+                        .withNTPrefixListener("/PathPlanner")
+                );
+            }
         }
         Logger.addDataReceiver(new NT4Publisher());
         Logger.start();

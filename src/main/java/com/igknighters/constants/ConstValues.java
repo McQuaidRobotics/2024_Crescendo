@@ -104,6 +104,9 @@ public final class ConstValues {
         };
     }
 
+    @BoolConst(crash = true, burn = false)
+    public static boolean LED_ENABLED;
+
     public static final class kSwerve {
         /**
          * The gear ratios for the swerve modules for easier constant definition.
