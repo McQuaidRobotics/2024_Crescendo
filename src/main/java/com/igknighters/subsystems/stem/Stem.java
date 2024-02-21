@@ -1,5 +1,7 @@
 package com.igknighters.subsystems.stem;
 
+import com.igknighters.LED;
+import com.igknighters.LED.LedAnimations;
 import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.subsystems.stem.pivot.*;
 import com.igknighters.subsystems.stem.telescope.*;
@@ -72,7 +74,9 @@ public class Stem extends SubsystemBase {
         if (!telescope.hasHomed()) {
             if (!position.isStow()) {
                 DriverStation.reportWarning("Stem Telescope has not been homed, run stow to home", false);
-                // LED
+                LED.getInstance().sendAnimation(
+                    LedAnimations.WARNING
+                ).withDuration(1.0);
                 return false;
             }
             return pivot.target(position.pivotRads, 1.0)
