@@ -345,9 +345,9 @@ public final class ConstValues {
             public static final double MAX_ACCELERATION = 2400;
             public static final double MAX_JERK = 0;
 
-            public static final double PIVOT_MIN_RADIANS = 2.0 * Conv.DEGREES_TO_RADIANS;
+            public static final double PIVOT_MIN_RADIANS = 9.0 * Conv.DEGREES_TO_RADIANS;
 
-            public static final double PIVOT_MAX_RADIANS = 100.0 * Conv.DEGREES_TO_RADIANS;
+            public static final double PIVOT_MAX_RADIANS = 97.0 * Conv.DEGREES_TO_RADIANS;
 
             public static final double PIGEON_OFFSET = 0.0;
 
