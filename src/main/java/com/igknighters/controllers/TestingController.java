@@ -1,7 +1,12 @@
 package com.igknighters.controllers;
 
 import com.igknighters.constants.ConstValues;
+import com.igknighters.subsystems.stem.StemPosition;
+
+import edu.wpi.first.wpilibj2.command.Commands;
+
 import com.igknighters.SubsystemResources.Subsystems;
+import com.igknighters.commands.umbrella.UmbrellaCommands;
 
 @SuppressWarnings("unused")
 
@@ -13,13 +18,25 @@ public class TestingController extends ControllerParent {
         // disregard null safety as it is checked on assignment
 
         /// FACE BUTTONS
-        // this.A.binding =
+        this.A.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
+            trig.onTrue(Commands.runOnce(() -> {
+                allss.stem.get().setStemPosition(StemPosition.fromDegrees(80.0, 0.0, 0.0));
+            }));
+        });
 
-        // this.B.binding =
+        this.B.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
+            trig.onTrue(Commands.runOnce(() -> {
+                allss.stem.get().setStemPosition(StemPosition.fromDegrees(20.0, 0.0, 0.0));
+            }));
+        });
 
-        // this.X.binding =
+        this.X.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
+            trig.onTrue(UmbrellaCommands.stopShooter(allss.umbrella.get()));
+        });
 
-        // this.Y.binding =
+        this.Y.binding = this.X.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
+            trig.onTrue(UmbrellaCommands.waitUntilSpunUp(allss.umbrella.get(), 3800));
+        });
 
         /// BUMPER
         // this.LB.binding =

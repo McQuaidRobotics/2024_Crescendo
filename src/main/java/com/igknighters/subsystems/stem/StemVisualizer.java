@@ -1,6 +1,7 @@
 package com.igknighters.subsystems.stem;
 
 import com.igknighters.constants.ConstValues.kStem;
+import com.igknighters.constants.ConstValues.kStem.kTelescope;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -20,16 +21,19 @@ public class StemVisualizer {
     public StemVisualizer() {
         mechanism = new Mechanism2d(2.0, 2.0);
 
-        rootCurrent = mechanism.getRoot("Current", 1.0, 1.0);
-        rootSetpoint = mechanism.getRoot("Setpoint", 1.0, 1.0);
+        rootCurrent = mechanism.getRoot("Current", 0.5, 1.0);
+        rootSetpoint = mechanism.getRoot("Setpoint", 0.5, 1.0);
 
-        telescopeCurrent = rootCurrent.append(new MechanismLigament2d("Telescope Current", 0.0, 0.0));
-        wristLowerCurrent = telescopeCurrent.append(new MechanismLigament2d("Wrist Lower Current", 0.13, -54.0));
-        wristUpperCurrent = telescopeCurrent.append(new MechanismLigament2d("Wrist Upper Current", 0.2, 180.0 - 54.0));
+        telescopeCurrent = rootCurrent.append(new MechanismLigament2d("Telescope Current", kTelescope.MIN_METERS, 0.0));
+        wristLowerCurrent = telescopeCurrent.append(new MechanismLigament2d("Wrist Lower Current", 0.3, -54.0));
+        wristUpperCurrent = telescopeCurrent.append(new MechanismLigament2d("Wrist Upper Current", 0.03, 180.0 - 54.0));
 
-        telescopeSetpoint = rootSetpoint.append(new MechanismLigament2d("Telescope Setpoint", 0.0, 0.0));
-        wristLowerSetpoint = telescopeSetpoint.append(new MechanismLigament2d("Wrist Lower Setpoint", 0.13, -54.0));
-        wristUpperSetpoint = telescopeSetpoint.append(new MechanismLigament2d("Wrist Upper Setpoint", 0.2, 180.0 - 54.0));
+        wristLowerCurrent.setColor(new Color8Bit(255, 255, 255));
+        wristUpperCurrent.setColor(new Color8Bit(255, 255, 255));
+
+        telescopeSetpoint = rootSetpoint.append(new MechanismLigament2d("Telescope Setpoint", kTelescope.MIN_METERS, 0.0));
+        wristLowerSetpoint = telescopeSetpoint.append(new MechanismLigament2d("Wrist Lower Setpoint", 0.3, -54.0));
+        wristUpperSetpoint = telescopeSetpoint.append(new MechanismLigament2d("Wrist Upper Setpoint", 0.03, 180.0 - 54.0));
 
         telescopeSetpoint.setColor(new Color8Bit(170, 180, 180));
         wristLowerSetpoint.setColor(new Color8Bit(170, 180, 180));
@@ -38,8 +42,8 @@ public class StemVisualizer {
         wristLowerSetpoint.setLineWeight(3.0);
         wristUpperSetpoint.setLineWeight(3.0);
 
-        wristLowerSetpoint.setColor(new Color8Bit(0, 0, 180));
-        wristUpperSetpoint.setColor(new Color8Bit(0, 0, 180));
+        wristLowerSetpoint.setColor(new Color8Bit(180, 180, 180));
+        wristUpperSetpoint.setColor(new Color8Bit(180, 180, 180));
 
         var table = NetworkTableInstance.getDefault()
             .getTable("Visualizers")
@@ -61,14 +65,14 @@ public class StemVisualizer {
         int green = (int) ((1 - percent) * 255);
         telescopeCurrent.setColor(new Color8Bit(red, green, 0));
 
-        wristLowerCurrent.setAngle(Units.radiansToDegrees(currentPose.wristRads) + 90);
-        wristUpperCurrent.setAngle(Units.radiansToDegrees(currentPose.wristRads) - 90);
+        wristLowerCurrent.setAngle(-Units.radiansToDegrees(currentPose.wristRads));
+        wristUpperCurrent.setAngle(180.0 - Units.radiansToDegrees(currentPose.wristRads));
     }
 
     public void updateSetpoint(StemPosition desiredPose) {
         telescopeSetpoint.setAngle((Units.radiansToDegrees(desiredPose.pivotRads)));
         telescopeSetpoint.setLength(desiredPose.telescopeMeters);
-        wristLowerSetpoint.setAngle(Units.radiansToDegrees(desiredPose.wristRads) + 90);
-        wristUpperSetpoint.setAngle(Units.radiansToDegrees(desiredPose.wristRads) - 90);
+        wristLowerSetpoint.setAngle(-Units.radiansToDegrees(desiredPose.wristRads));
+        wristUpperSetpoint.setAngle(180.0 - Units.radiansToDegrees(desiredPose.wristRads));
     }
 }
