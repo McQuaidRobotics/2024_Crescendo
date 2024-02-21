@@ -25,17 +25,19 @@ public class Stem extends SubsystemBase {
     public Stem() {
         if (RobotBase.isSimulation()) {
             pivot = new PivotSim();
-            telescope = new TelescopeDisabled();
+            telescope = new TelescopeSim();
             wrist = new WristSim();
         } else {
             pivot = new PivotReal();
-            telescope = new TelescopeDisabled();
+            telescope = new TelescopeReal();
             wrist = new WristSim();
         }
 
         visualizer = new StemVisualizer();
 
-        new Trigger(() -> coastSwitch.get() && DriverStation.isDisabled())
+        new Trigger(() -> false)
+            .and(DriverStation::isDisabled)
+            .or(DriverStation::isTestEnabled)
             .onTrue(this.runOnce(() -> {
                 pivot.setCoast(true);
                 telescope.setCoast(true);
@@ -59,13 +61,13 @@ public class Stem extends SubsystemBase {
      * @return True if all mechanisms have reached their target position
      */
     public boolean setStemPosition(StemPosition position, double toleranceMult) {
-        if (!position.isValid()) {
-            DriverStation.reportError(
-                    "Invalid stem position: " + position.toString(),
-                    true);
-            // LED
-            return true;
-        }
+        // if (!position.isValid()) {
+        //     DriverStation.reportError(
+        //             "Invalid stem position: " + position.toString(),
+        //             true);
+        //     // LED
+        //     return true;
+        // }
         visualizer.updateSetpoint(position);
         if (!telescope.hasHomed()) {
             if (!position.isStow()) {
@@ -77,7 +79,8 @@ public class Stem extends SubsystemBase {
                 && wrist.target(position.wristRads, 1.0)
                 && telescope.target(position.telescopeMeters, 1.0);
         }
-        StemPosition validated = StemValidator.stepTowardsTargetPosition(getStemPosition(), position);
+        // StemPosition validated = StemValidator.stepTowardsTargetPosition(getStemPosition(), position);
+        StemPosition validated = position;
         boolean pivotSuccess = pivot.target(validated.pivotRads, toleranceMult);
         boolean wristSuccess = wrist.target(validated.wristRads, toleranceMult);
         boolean telescopeSuccess = telescope.target(validated.telescopeMeters, toleranceMult);

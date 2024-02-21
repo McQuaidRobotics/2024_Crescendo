@@ -331,9 +331,9 @@ public final class ConstValues {
             public static final double MOTOR_kI = 0.0;
             public static final double MOTOR_kD = 0.0;
 
-            public static final double MAX_VELOCITY = 100;
-            public static final double MAX_ACCELERATION = 500;
-            public static final double MAX_JERK = 1000;
+            public static final double MAX_VELOCITY = 1200;
+            public static final double MAX_ACCELERATION = 2400;
+            public static final double MAX_JERK = 0;
 
             public static final double PIVOT_MIN_RADIANS = 2.0 * Conv.DEGREES_TO_RADIANS;
 
@@ -347,7 +347,7 @@ public final class ConstValues {
             // motor -> gbx(100:1) -> (15 -> 42) -> mechanism
             public static final double MOTOR_TO_MECHANISM_RATIO = 100.0 * (42.0 / 15.0);
 
-            public static final boolean INVERTED = false;
+            public static final boolean INVERTED = true;
 
             /**
              * The max voltage of the motors to behave more predictably
@@ -364,8 +364,8 @@ public final class ConstValues {
             public static final double MOTOR_kI = 0.0;
             public static final double MOTOR_kD = 0.0;
 
-            public static final double MAX_VELOCITY = 600;
-            public static final double MAX_ACCELERATION = 3000;
+            public static final double MAX_VELOCITY = 400;
+            public static final double MAX_ACCELERATION = 1200;
             public static final double MAX_JERK = 0;
 
             public static final double MOTOR_TO_MECHANISM_RATIO = 25.0;
