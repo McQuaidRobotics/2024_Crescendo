@@ -156,9 +156,9 @@ public final class ConstValues {
         public static final double MOTOR_CLOSED_LOOP_OUTPUT_SCALAR = 0.95;
 
         /** User defined acceleration time in seconds */
-        public static final double ACCELERATION_TIME = 1.0;
+        public static final double ACCELERATION_TIME = 0.9;
 
-        public static final double SLIP_CURRENT = 45.0;
+        public static final double SLIP_CURRENT = 75.0;
 
         public static final double MAX_DRIVE_VELOCITY = ((Motors.Falcon500Foc.FREE_SPEED / TAU) / DRIVE_GEAR_RATIO)
                 * WHEEL_CIRCUMFERENCE * MOTOR_CLOSED_LOOP_OUTPUT_SCALAR;
