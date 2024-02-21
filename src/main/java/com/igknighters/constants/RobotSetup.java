@@ -11,7 +11,7 @@ import com.igknighters.ConstantHelper.RobotConstID;
 
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
-
+ 
 public class RobotSetup {
 
     public enum RobotID {
@@ -24,7 +24,7 @@ public class RobotSetup {
         SIM_CRASH(Subsystems.all(), RobotConstID.CRASH),
         SIM_BURN(Subsystems.none(), RobotConstID.BURN),
 
-        TestBoard("testBoard(crash)", Subsystems.list(Subsystems.Stem), RobotConstID.CRASH),
+        TestBoard("testBoard(crash)", Subsystems.none(), RobotConstID.CRASH),
 
         Unlabeled("", Subsystems.none(), RobotConstID.BURN);
 
@@ -50,10 +50,9 @@ public class RobotSetup {
             "0306adf3", RobotID.TestBoard,
             "ffffffff", RobotID.SIM_CRASH,
             "aaaaaaaa", RobotID.CRASH,
-            "bbbbbbbb", RobotID.BURN,
+            "03260af0", RobotID.BURN,
             "03260abb", RobotID.CRASH,
             "0306adb6", RobotID.TestBoard,
-            "03260af0", RobotID.BURN,
             "032b4b20", RobotID.CRASH);
 
     private static RobotID currentID = RobotID.Unlabeled;

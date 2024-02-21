@@ -68,7 +68,7 @@ public class UmbrellaCommands {
      */
     public static Command intake(Umbrella umbrella) {
         return umbrella.runEnd(
-                () -> umbrella.runIntakeAt(-1.0, false),
+                () -> umbrella.runIntakeAt(-0.5, false),
                 umbrella::stopAll
         ).until(umbrella::holdingGamepiece)
         .withName("Intake");

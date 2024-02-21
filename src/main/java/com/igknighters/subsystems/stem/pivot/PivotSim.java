@@ -65,7 +65,8 @@ public class PivotSim implements Pivot {
         double pivotVoltageFeedback = pidController.calculate(
                 inputs.radians, radians);
         sim.setInputVoltage(pivotVoltageFeedback);
-        inputs.volts = pivotVoltageFeedback;
+        inputs.leftVolts = pivotVoltageFeedback;
+        inputs.rightVolts = pivotVoltageFeedback;
     }
 
     @Override
@@ -76,7 +77,8 @@ public class PivotSim implements Pivot {
     @Override
     public void setVoltageOut(double volts) {
         sim.setInputVoltage(volts);
-        inputs.volts = volts;
+        inputs.leftVolts = volts;
+        inputs.rightVolts = volts;
         inputs.targetRadians = 0;
     }
 
@@ -88,7 +90,8 @@ public class PivotSim implements Pivot {
 
         sim.update(0.2);
 
-        inputs.radians = Units.radiansToDegrees(sim.getAngleRads());
+        // inputs.radians = Units.radiansToDegrees(sim.getAngleRads());
+        inputs.radians = 0.0;
         inputs.radiansPerSecond = Units.radiansToDegrees(sim.getVelocityRadPerSec());
         inputs.leftAmps = sim.getCurrentDrawAmps() / 2.0;
         inputs.rightAmps = sim.getCurrentDrawAmps() / 2.0;

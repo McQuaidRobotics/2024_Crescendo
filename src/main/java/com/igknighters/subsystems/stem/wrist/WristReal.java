@@ -12,17 +12,14 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
+import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.constants.HardwareIndex.StemHW;
 import com.igknighters.util.BootupLogger;
 import com.igknighters.util.FaultManager;
 import com.igknighters.util.SafeTalonFXConfiguration;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class WristReal implements Wrist {
     private final TalonFX motor;
@@ -34,7 +31,7 @@ public class WristReal implements Wrist {
     private final WristInputs inputs;
 
     public WristReal() {
-        motor = new TalonFX(kWrist.MOTOR_ID);
+        motor = new TalonFX(kWrist.MOTOR_ID, kStem.CANBUS);
         motor.getConfigurator().apply(motorConfig());
 
         motorRots = motor.getRotorPosition();
@@ -89,44 +86,11 @@ public class WristReal implements Wrist {
         return wristCancoderCfg;
     }
 
-    private double mechanismRadsToMotorRots(Double radians) {
-        double clampedRadians = MathUtil.clamp(
-            radians,
-            kWrist.WRIST_MIN_ANGLE,
-            kWrist.WRIST_MAX_ANGLE
-        );
-
-        if (clampedRadians != radians) {
-            DriverStation.reportWarning(
-                "[Wrist] requested mechanism rads out of bounds: " + radians
-                + " (clamped to " + clampedRadians + ")",
-                false);
-        }
-
-        SmartDashboard.putNumber("clampedrads", clampedRadians);
-
-        double scopedRadians = (Math.PI / 2.0) - (clampedRadians - (Math.PI / 2.0));
-
-        double beta = scopedRadians - kWrist.kDimensions.ANGLE_OFFSET;
-
-        SmartDashboard.putNumber("beta", beta);
-
-        double leadscrewLength = Math.sqrt(
-            Math.pow(kWrist.kDimensions.MOTOR_PIVOT_TO_WRIST_PIVOT, 2)
-            + Math.pow(kWrist.kDimensions.WRIST_PIVOT_TO_NUT, 2)
-            - (2 * kWrist.kDimensions.MOTOR_PIVOT_TO_WRIST_PIVOT * kWrist.kDimensions.WRIST_PIVOT_TO_NUT * Math.cos(beta))
-        );
-
-        SmartDashboard.putNumber("leadscrewInches", Units.metersToInches(leadscrewLength));
-
-        return Units.metersToInches(leadscrewLength) * 20.0;
-    }
-
     @Override
     public void setWristRadians(Double radians) {
         inputs.targetRadians = radians;
         var posControlRequest = new PositionDutyCycle(
-                mechanismRadsToMotorRots(radians));
+                Wrist.mechanismRadsToMotorRots(radians));
         this.motor.setControl(posControlRequest);
     }
 
@@ -156,7 +120,7 @@ public class WristReal implements Wrist {
                         cancoderRots, cancoderVelo));
 
         motor.setPosition(
-            mechanismRadsToMotorRots(
+            Wrist.mechanismRadsToMotorRots(
                 Units.rotationsToRadians(cancoderRots.getValue())
         ));
 

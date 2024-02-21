@@ -9,6 +9,7 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.util.BootupLogger;
 import com.igknighters.util.FaultManager;
@@ -18,8 +19,8 @@ import edu.wpi.first.math.util.Units;
 
 public class ShooterReal implements Shooter {
 
-    private final TalonFX rightMotor = new TalonFX(kShooter.RIGHT_MOTOR_ID);
-    private final TalonFX leftMotor = new TalonFX(kShooter.LEFT_MOTOR_ID);
+    private final TalonFX rightMotor = new TalonFX(kShooter.RIGHT_MOTOR_ID, kUmbrella.CANBUS);
+    private final TalonFX leftMotor = new TalonFX(kShooter.LEFT_MOTOR_ID, kUmbrella.CANBUS);
     private final ShooterInputs inputs = new ShooterInputs();
     private final StatusSignal<Double> veloSignalRight, voltSignalRight, currentSignalRight, tempSignalRight;
     private final StatusSignal<Double> veloSignalLeft, voltSignalLeft, currentSignalLeft, tempSignalLeft;

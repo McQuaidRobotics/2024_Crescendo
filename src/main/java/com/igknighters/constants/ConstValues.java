@@ -115,6 +115,9 @@ public final class ConstValues {
         ).cameras;
     }
 
+    @BoolConst(crash = true, burn = false)
+    public static boolean LED_ENABLED;
+
     public static final class kSwerve {
         /**
          * The gear ratios for the swerve modules for easier constant definition.
@@ -295,6 +298,7 @@ public final class ConstValues {
     public static final class kUmbrella {
         public static final double NOTE_VELO = 50.0;
         public static final double NOTE_VELO_AUTO = 50.0;
+        public static final String CANBUS = "SuperStructureBus";
 
         public static final class kShooter {
             public static final double MOTOR_UPPER_kP = 0.08;
@@ -342,6 +346,7 @@ public final class ConstValues {
     }
 
     public static final class kStem {
+        public static final String CANBUS = "SuperStructureBus";
 
         public static final class kPivot {
             public static final int LEFT_MOTOR_ID = 11;
@@ -349,14 +354,14 @@ public final class ConstValues {
             public static final int PIGEON_ID = 31;
 
             public static final double MOTOR_kP = 1.0;
-            public static final double MOTOR_kI = 0;
-            public static final double MOTOR_kD = 0;
+            public static final double MOTOR_kI = 0.0;
+            public static final double MOTOR_kD = 0.0;
 
             public static final double MAX_VELOCITY = 100;
-            public static final double MAX_ACCELERATION = 100;
-            public static final double MAX_JERK = 100;
+            public static final double MAX_ACCELERATION = 500;
+            public static final double MAX_JERK = 1000;
 
-            public static final double PIVOT_MIN_RADIANS = 0.0;
+            public static final double PIVOT_MIN_RADIANS = 2.0 * Conv.DEGREES_TO_RADIANS;
 
             public static final double PIVOT_MAX_RADIANS = 100.0 * Conv.DEGREES_TO_RADIANS;
 
@@ -386,17 +391,23 @@ public final class ConstValues {
             public static final double MOTOR_kI = 0.0;
             public static final double MOTOR_kD = 0.0;
 
-            public static final double MAX_VELOCITY = 105;
-            public static final double MAX_ACCELERATION = 700;
-            public static final double MAX_JERK = 10000;// effectively infinite
+            public static final double MAX_VELOCITY = 600;
+            public static final double MAX_ACCELERATION = 3000;
+            public static final double MAX_JERK = 0;
 
+            // TODO: find these values
             public static final double MIN_METERS = 0.2;
             public static final double MAX_METERS = 1.0;
 
             public static final double MOTOR_TO_MECHANISM_RATIO = 1.0;
 
+            public static final double SPROCKET_CIRCUMFERENCE = 1.0;
+
             public static final boolean INVERTED = false;
 
+            /**
+             * Tolerance in meters
+             */
             public static final double TARGET_TOLERANCE = 0.03;
         }
 
@@ -420,9 +431,12 @@ public final class ConstValues {
             @DoubleConst(crash = -0.41137, burn = 0.0)
             public static double CANCODER_OFFSET;;
 
-            public static final double WRIST_MIN_ANGLE = 24.0 * Conv.DEGREES_TO_RADIANS;
-            public static final double WRIST_MAX_ANGLE = 125.0 * Conv.DEGREES_TO_RADIANS;
+            public static final double MIN_ANGLE = 24.0 * Conv.DEGREES_TO_RADIANS;
+            public static final double MAX_ANGLE = 125.0 * Conv.DEGREES_TO_RADIANS;
 
+            /**
+             * Tolerance in radians
+             */
             public static final double TARGET_TOLERANCE = TAU * (1.0 / 360.0); // effectively 1 degree
 
         }
