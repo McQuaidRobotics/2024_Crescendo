@@ -10,7 +10,7 @@ import com.igknighters.util.LerpTable;
 import com.igknighters.util.SwerveModuleConstants;
 import com.igknighters.util.LerpTable.LerpTableEntry;
 import com.igknighters.util.SwerveModuleConstants.ModuleId;
-import com.igknighters.util.geom.Rectandlge2d;
+import com.igknighters.util.geom.Rectangle2d;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
@@ -60,19 +60,26 @@ public final class ConstValues {
     public static final double PERIODIC_TIME = 0.02; // 20ms
 
     public static final class kRobotGeometry {
+        public static final double BUMPER_THICKNESS = 3.3 * Conv.INCHES_TO_METERS;
+        public static final double BUMPER_HEIGHT = 5.75 * Conv.INCHES_TO_METERS;
+        public static final double FRAME_WIDTH = 26.0 * Conv.INCHES_TO_METERS;
+
         public static final double UMBRELLA_LENGTH = 13.25 * Conv.INCHES_TO_METERS;
         public static final double UMBRELLA_HEIGHT = 7.0 * Conv.INCHES_TO_METERS;
         public static final double UMBRELLA_OFFSET = 2.375 * Conv.INCHES_TO_METERS;
-        public static final Rectandlge2d DRIVE_BASE = new Rectandlge2d(
-            0.0,
-            0.0,
-            32.6 * Conv.INCHES_TO_METERS,
-            5.75 * Conv.INCHES_TO_METERS
-        );
+        public static final Rectangle2d DRIVE_BASE = new Rectangle2d(
+                0.0,
+                0.0,
+                FRAME_WIDTH + (BUMPER_THICKNESS * 2),
+                BUMPER_HEIGHT);
+        public static final Rectangle2d BOUNDS = new Rectangle2d(
+                BUMPER_THICKNESS - (12.0 * Conv.INCHES_TO_METERS),
+                0.0,
+                FRAME_WIDTH + BUMPER_THICKNESS + (12.0 * Conv.INCHES_TO_METERS),
+                48.0 * Conv.INCHES_TO_METERS);
         public static final Translation2d PIVOT_LOCATION = new Translation2d(
-            ((32.6 / 2.0) - 9.5) * Conv.INCHES_TO_METERS,
-            7.25 * Conv.INCHES_TO_METERS
-        );
+                ((32.6 / 2.0) - 9.5) * Conv.INCHES_TO_METERS,
+                7.25 * Conv.INCHES_TO_METERS);
     }
 
     public static final class kVision {
@@ -376,7 +383,8 @@ public final class ConstValues {
             public static final double SPROCKET_CIRCUMFERENCE = 0.895 * TAU * Conv.INCHES_TO_METERS;
 
             public static final double MIN_METERS = 16.0 * Conv.INCHES_TO_METERS;
-            public static final double MAX_METERS = MIN_METERS + ((51.1 / MOTOR_TO_MECHANISM_RATIO) * SPROCKET_CIRCUMFERENCE);
+            public static final double MAX_METERS = MIN_METERS
+                    + ((51.1 / MOTOR_TO_MECHANISM_RATIO) * SPROCKET_CIRCUMFERENCE);
 
             public static final boolean INVERTED = false;
 
