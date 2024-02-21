@@ -233,7 +233,7 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 4;
             public static final int CANCODER_ID = 22;
 
-            @DoubleConst(crash = -0.270508, burn = -0.259521)
+            @DoubleConst(crash = -0.352, burn = -0.259521)
             public static double ROTATION_OFFSET;
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0,
@@ -247,7 +247,7 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 6;
             public static final int CANCODER_ID = 23;
 
-            @DoubleConst(crash = -0.457764, burn = 0.077393)
+            @DoubleConst(crash = -0.4189, burn = 0.077393)
             public static double ROTATION_OFFSET;
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0, TRACK_WIDTH / 2.0);
@@ -260,7 +260,7 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 8;
             public static final int CANCODER_ID = 24;
 
-            @DoubleConst(crash = -0.041504, burn = 0.123291)
+            @DoubleConst(crash = -0.1025, burn = 0.123291)
             public static double ROTATION_OFFSET = -0.041504;
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0,

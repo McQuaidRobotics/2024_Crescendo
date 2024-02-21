@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kSwerve.AngleMotorConstants;
@@ -50,6 +51,8 @@ public class SwerveModuleReal implements SwerveModule {
         this.moduleNumber = moduleConstants.getModuleId().num;
         this.rotationOffset = moduleConstants.getRotationOffset();
         this.moduleChassisPose = moduleConstants.getModuleChassisPose();
+
+        SmartDashboard.putNumber("SwerveModuleOffset[" + moduleNumber + "]", moduleConstants.getRotationOffset());
 
         driveMotor = new TalonFX(moduleConstants.getDriveMotorID(), kSwerve.CANBUS);
         angleMotor = new TalonFX(moduleConstants.getAngleMotorID(), kSwerve.CANBUS);

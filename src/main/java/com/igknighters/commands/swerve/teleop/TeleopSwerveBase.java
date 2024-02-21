@@ -89,7 +89,7 @@ public class TeleopSwerveBase extends Command {
         // is negative for controller
         final double raw = rawRotationXSup.getAsDouble();
         Logger.recordOutput("Swerve/TeleopCommand/RawRotationX", raw);
-        var processed = -kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(raw) * invert();
+        var processed = -kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(raw);
         Logger.recordOutput("Swerve/TeleopCommand/RotationX", processed);
         return processed;
     }
@@ -97,7 +97,7 @@ public class TeleopSwerveBase extends Command {
     protected double getRotationY() {
         final double raw = rawRotationYSup.getAsDouble();
         Logger.recordOutput("Swerve/TeleopCommand/RawRotationY", raw);
-        var processed = kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(raw) * invert();
+        var processed = kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(raw);
         Logger.recordOutput("Swerve/TeleopCommand/RotationY", processed);
         return processed;
     }
