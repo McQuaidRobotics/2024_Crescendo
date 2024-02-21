@@ -354,8 +354,7 @@ public final class ConstValues {
              * throughout the match.
              */
             public static final double VOLTAGE_COMP = 11.8;
-            public static final double RESEED_TOLERANCE = TAU * (2.0 / 360.0); // effectively 2 degrees
-            public static final double TARGET_TOLERANCE = TAU * (1.0 / 360.0); // effectively 1 degree
+            public static final double TARGET_TOLERANCE = 0.5 * Conv.DEGREES_TO_RADIANS;
         }
 
         public static final class kTelescope {
@@ -401,16 +400,15 @@ public final class ConstValues {
 
             public static final boolean INVERTED = false;
 
-            @DoubleConst(crash = -0.41137, burn = 0.0)
-            public static double CANCODER_OFFSET;;
+            public static final double CANCODER_OFFSET = -0.2439;
 
-            public static final double MIN_ANGLE = 24.0 * Conv.DEGREES_TO_RADIANS;
-            public static final double MAX_ANGLE = 125.0 * Conv.DEGREES_TO_RADIANS;
+            public static final double MIN_ANGLE = 45.0 * Conv.DEGREES_TO_RADIANS;
+            public static final double MAX_ANGLE = 110.0 * Conv.DEGREES_TO_RADIANS;
 
             /**
              * Tolerance in radians
              */
-            public static final double TARGET_TOLERANCE = TAU * (1.0 / 360.0); // effectively 1 degree
+            public static final double TARGET_TOLERANCE = 0.5 * Conv.DEGREES_TO_RADIANS;
 
         }
     }
