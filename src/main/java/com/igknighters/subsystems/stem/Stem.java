@@ -1,5 +1,6 @@
 package com.igknighters.subsystems.stem;
 
+import com.igknighters.GlobalState;
 import com.igknighters.LED;
 import com.igknighters.LED.LedAnimations;
 import com.igknighters.constants.ConstValues.kStem;
@@ -22,7 +23,7 @@ public class Stem extends SubsystemBase {
 
     private final StemVisualizer visualizer;
 
-    private final DigitalInput coastSwitch = new DigitalInput(kStem.COAST_SWITCH_CHANNEL);
+    private final DigitalInput coastSwitch;
 
     public Stem() {
         if (RobotBase.isSimulation()) {
@@ -37,19 +38,24 @@ public class Stem extends SubsystemBase {
 
         visualizer = new StemVisualizer();
 
-        new Trigger(coastSwitch::get)
-            .and(DriverStation::isDisabled)
-            .or(DriverStation::isTestEnabled)
-            .onTrue(this.runOnce(() -> {
-                pivot.setCoast(true);
-                telescope.setCoast(true);
-                wrist.setCoast(true);
-            }).ignoringDisable(true))
-            .onFalse(this.runOnce(() -> {
-                pivot.setCoast(false);
-                telescope.setCoast(false);
-                wrist.setCoast(false);
-            }).ignoringDisable(true));
+        if (!GlobalState.isUnitTest()) {
+            coastSwitch = new DigitalInput(kStem.COAST_SWITCH_CHANNEL);
+            new Trigger(coastSwitch::get)
+                .and(DriverStation::isDisabled)
+                .or(DriverStation::isTestEnabled)
+                .onTrue(this.runOnce(() -> {
+                    pivot.setCoast(true);
+                    telescope.setCoast(true);
+                    wrist.setCoast(true);
+                }).ignoringDisable(true))
+                .onFalse(this.runOnce(() -> {
+                    pivot.setCoast(false);
+                    telescope.setCoast(false);
+                    wrist.setCoast(false);
+                }).ignoringDisable(true));
+        } else {
+            coastSwitch = null;
+        }
     }
 
     /**
