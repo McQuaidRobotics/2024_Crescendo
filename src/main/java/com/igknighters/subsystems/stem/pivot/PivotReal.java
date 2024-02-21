@@ -204,7 +204,8 @@ public class PivotReal implements Pivot {
                 BaseStatusSignal.refreshAll(
                         motorRots, motorVelo,
                         leaderMotorVolts, leaderMotorAmps,
-                        leaderMotorTemp));
+                        leaderMotorTemp, reverseLimitSwitch,
+                        forwardLimitSwitch));
 
         FaultManager.captureFault(
                 StemHW.FollowerMotor,
@@ -223,6 +224,9 @@ public class PivotReal implements Pivot {
         inputs.rightAmps = followerMotorAmps.getValue();
         inputs.leftTemp = leaderMotorTemp.getValue();
         inputs.rightTemp = followerMotorTemp.getValue();
+
+        inputs.isLimitFwdSwitchHit = forwardLimitSwitch.getValue() == ForwardLimitValue.Open;
+        inputs.isLimitRevSwitchHit = reverseLimitSwitch.getValue() == ReverseLimitValue.Open;
 
 
         inputs.gyroRadians = Units.degreesToRadians(gyroMeasurement.getValue() + 90);

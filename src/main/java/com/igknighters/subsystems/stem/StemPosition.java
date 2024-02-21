@@ -39,7 +39,7 @@ public class StemPosition {
     }
 
     public boolean isValid() {
-        return StemValidator.isValidPosition(this);
+        return StemValidator.isValidPosition(this).isValid();
     }
 
     public boolean isStow() {
