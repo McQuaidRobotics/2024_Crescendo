@@ -256,6 +256,11 @@ public class StemValidator {
         boolean stemCollidesDrivebase = isWristAxelPointBelowDrivebase && (topStemInterceptInRect || bottomStemInterceptInRect);
         boolean drivebaseCollides = umbrellaCollidesDrivebase || stemCollidesDrivebase;
 
+        DOT_SENDER.send(new StemVisualizerDot("boundsTopRight", kRobotGeometry.BOUNDS.getTopRight()));
+        DOT_SENDER.send(new StemVisualizerDot("boundsBottomRight", kRobotGeometry.BOUNDS.getBottomRight()));
+        DOT_SENDER.send(new StemVisualizerDot("boundsTopLeft", kRobotGeometry.BOUNDS.getTopLeft()));
+        DOT_SENDER.send(new StemVisualizerDot("boundsBottomLeft", kRobotGeometry.BOUNDS.getBottomLeft()));
+
         return ValidationResponse.collisionFrom(drivebaseCollides, mechPts.outsideBounds());
     }
 

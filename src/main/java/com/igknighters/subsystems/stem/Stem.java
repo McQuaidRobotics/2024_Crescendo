@@ -6,6 +6,7 @@ import com.igknighters.GlobalState;
 import com.igknighters.LED;
 import com.igknighters.LED.LedAnimations;
 import com.igknighters.constants.ConstValues.kStem;
+import com.igknighters.subsystems.stem.StemValidator.ValidationResponse;
 import com.igknighters.subsystems.stem.pivot.*;
 import com.igknighters.subsystems.stem.telescope.*;
 import com.igknighters.subsystems.stem.wrist.*;
@@ -74,13 +75,14 @@ public class Stem extends SubsystemBase {
      * @return True if all mechanisms have reached their target position
      */
     public boolean setStemPosition(StemPosition position, double toleranceMult) {
-        // if (!position.isValid()) {
-        //     DriverStation.reportError(
-        //             "Invalid stem position: " + position.toString(),
-        //             true);
-        //     // LED
-        //     return true;
-        // }
+        ValidationResponse validity = StemValidator.isValidPosition(position);
+        if (!validity.isValid()) {
+            DriverStation.reportError(
+                    "Invalid stem position(" +  validity.name()+ "): " + position.toString(),
+                    true);
+            // LED
+            return true;
+        }
 
         visualizer.updateSetpoint(position);
         if (!telescope.hasHomed()) {
@@ -95,8 +97,8 @@ public class Stem extends SubsystemBase {
                 && wrist.target(position.wristRads, 1.0)
                 && telescope.target(position.telescopeMeters, 1.0);
         }
-        // StemPosition validated = StemValidator.stepTowardsTargetPosition(getStemPosition(), position);
-        StemPosition validated = position;
+        StemPosition validated = StemValidator.stepTowardsTargetPosition(getStemPosition(), position);
+        // StemPosition validated = position;
         boolean pivotSuccess = pivot.target(validated.pivotRads, toleranceMult);
         boolean telescopeSuccess = telescope.target(validated.telescopeMeters, toleranceMult);
         boolean wristSuccess = wrist.target(validated.wristRads, toleranceMult);
