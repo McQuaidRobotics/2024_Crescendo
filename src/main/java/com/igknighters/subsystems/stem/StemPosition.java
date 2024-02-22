@@ -46,6 +46,12 @@ public class StemPosition {
         return false;
     }
 
+    @Override
+    public String toString() {
+        return "StemPosition(" + Units.radiansToDegrees(pivotRads) + ", " + Units.radiansToDegrees(wristRads) + ", "
+                + telescopeMeters + ")";
+    }
+
     public static StemPosition STOW = new StemPosition(
         Units.degreesToRadians(35.0),
         kTelescope.MIN_METERS,

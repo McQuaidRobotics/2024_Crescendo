@@ -15,7 +15,7 @@ public class StemValidator {
     private static final double SMOL = 0.00000001;
 
     private static final Sender<StemVisualizerDot> DOT_SENDER = Sender.broadcast(
-        "StemVisualizerDots", StemVisualizerDot.class);
+            "StemVisualizerDots", StemVisualizerDot.class);
 
     public static class MechanismPoints {
         public final Translation2d wristAxelPoint, umbrellaBottomRightPoint, umbrellaTopRightPoint,
@@ -253,8 +253,10 @@ public class StemValidator {
         SmartDashboard.putBoolean("bottomStemInterceptInRect", bottomStemInterceptInRect);
         SmartDashboard.putBoolean("isWristAxelPointBelowDrivebase", isWristAxelPointBelowDrivebase);
 
-        boolean umbrellaCollidesDrivebase = isUmbrellaRightPointsBelowDriveBase && (topUmbrellaInterceptInRect || bottomUmbrellaIntrceptInRect);
-        boolean stemCollidesDrivebase = isWristAxelPointBelowDrivebase && (topStemInterceptInRect || bottomStemInterceptInRect);
+        boolean umbrellaCollidesDrivebase = isUmbrellaRightPointsBelowDriveBase
+                && (topUmbrellaInterceptInRect || bottomUmbrellaIntrceptInRect);
+        boolean stemCollidesDrivebase = isWristAxelPointBelowDrivebase
+                && (topStemInterceptInRect || bottomStemInterceptInRect);
         boolean drivebaseCollides = umbrellaCollidesDrivebase || stemCollidesDrivebase;
 
         DOT_SENDER.send(new StemVisualizerDot("boundsTopRight", kRobotGeometry.BOUNDS.getTopRight()));
