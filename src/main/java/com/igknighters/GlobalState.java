@@ -251,9 +251,12 @@ public class GlobalState {
                 field.ifPresent(field2d -> field2d.setRobotPose(pose));
             } else if (localizerType == LocalizerType.Hybrid) {
                 ((SwerveDrivePoseEstimator) localizer.get()).addVisionMeasurement(
-                        value.pose.toPose2d(),
+                        new Pose2d(
+                            value.pose.getTranslation().toTranslation2d(),
+                            GlobalState.rotSupplier.get().toRotation2d()
+                        ),
                         value.timestamp,
-                        VecBuilder.fill(ambiguity, ambiguity, 0.0));
+                        VecBuilder.fill(ambiguity, ambiguity, 1.0));
             } else {
                 DriverStation.reportError("[GlobalState] Localizer does not support Vision", true);
                 return;
