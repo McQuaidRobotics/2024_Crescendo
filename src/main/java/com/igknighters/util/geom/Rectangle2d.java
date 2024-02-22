@@ -85,8 +85,8 @@ public class Rectangle2d {
     }
 
     public boolean contains(Translation2d point) {
-        return point.getX() >= topLeft.getX() && point.getX() <= topRight.getX() &&
-            point.getY() <= topLeft.getY() && point.getY() >= bottomLeft.getY();
+        return point.getX() >= getLeftX() && point.getX() <= getRightX() &&
+            point.getY() <= getTopY() && point.getY() >= getBottomY();
     }
 
     public boolean intersects(Rectangle2d other) {

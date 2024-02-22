@@ -2,8 +2,9 @@ package com.igknighters.subsystems.stem;
 
 import edu.wpi.first.math.geometry.Translation2d;
 
-import static com.igknighters.constants.ConstValues.kRobotGeometry;
-
+import com.igknighters.constants.ConstValues.kRobotGeometry;
+import com.igknighters.subsystems.stem.StemVisualizer.StemVisualizerDot;
+import com.igknighters.util.Channels.Sender;
 import com.igknighters.util.geom.Rectangle2d;
 
 public class StemValidator {
@@ -11,6 +12,9 @@ public class StemValidator {
      * An effectively miniscule value used to define incredibly steep slopes
      */
     private static final double SMOL = 0.00000001;
+
+    private static final Sender<StemVisualizerDot> DOT_SENDER = Sender.broadcast(
+        "StemVisualizerDots", StemVisualizerDot.class);
 
     public static class MechanismPoints {
         public final Translation2d wristAxelPoint, umbrellaBottomRightPoint, umbrellaTopRightPoint,
@@ -38,7 +42,7 @@ public class StemValidator {
                             * Math.cos(stemPosition.getPivotRads() + (Math.PI / 2.0) - stemPosition.getWristRads()),
                     kRobotGeometry.UMBRELLA_OFFSET
                             * Math.sin(stemPosition.getPivotRads() + (Math.PI / 2.0) - stemPosition.getWristRads()))
-                            .plus(this.wristAxelPoint);
+                    .plus(this.wristAxelPoint);
 
             this.umbrellaBottomRightPoint = umbrellaLengthVector.plus(this.umbrellaBottomLeftPoint);
 
@@ -174,6 +178,12 @@ public class StemValidator {
         // umbrella within the x y coordinate plane from (0, 0)
         MechanismPoints mechPts = new MechanismPoints(stemPosition);
 
+        DOT_SENDER.send(new StemVisualizerDot("wristAxel", mechPts.wristAxelPoint));
+        DOT_SENDER.send(new StemVisualizerDot("umbrellaBottomRight", mechPts.umbrellaBottomRightPoint));
+        DOT_SENDER.send(new StemVisualizerDot("umbrellaTopRight", mechPts.umbrellaTopRightPoint));
+        DOT_SENDER.send(new StemVisualizerDot("umbrellaBottomLeft", mechPts.umbrellaBottomLeftPoint));
+        DOT_SENDER.send(new StemVisualizerDot("umbrellaTopLeft", mechPts.umbrellaTopLeftPoint));
+
         // The x coordinates of where on the top and bottom of the drive base's
         // y coordinates intesects with the function of the line of the angle
         // of the wrist with the umbrella length from the umbrella point of
@@ -204,6 +214,18 @@ public class StemValidator {
                         kRobotGeometry.PIVOT_LOCATION.getY() + SMOL),
                 mechPts.wristAxelPoint,
                 kRobotGeometry.DRIVE_BASE.getBottomY());
+
+        DOT_SENDER.send(new StemVisualizerDot("wristDriveBaseTopIntersect",
+                new Translation2d(wristDriveBaseTopIntersect, kRobotGeometry.DRIVE_BASE.getTopY())));
+
+        DOT_SENDER.send(new StemVisualizerDot("wristDriveBaseTopIntersect",
+                new Translation2d(wristDriveBaseTopIntersect, kRobotGeometry.DRIVE_BASE.getTopY())));
+
+        DOT_SENDER.send(new StemVisualizerDot("wristDriveBaseTopIntersect",
+                new Translation2d(wristDriveBaseTopIntersect, kRobotGeometry.DRIVE_BASE.getTopY())));
+
+        DOT_SENDER.send(new StemVisualizerDot("wristDriveBaseBottomIntersect",
+                new Translation2d(wristDriveBaseBottomIntersect, kRobotGeometry.DRIVE_BASE.getBottomY())));
 
         // Boolean logic for recognizing when the intersection points on the drive
         // base are within the interval of the drive base left and right side.
