@@ -157,12 +157,6 @@ public class PivotReal implements Pivot {
 
     @Override
     public void setPivotRadians(double radians) {
-        if (radians > kPivot.MAX_ANGLE || radians < kPivot.MIN_ANGLE) {
-            String errorMsg = "Pivot setpoint of " + radians + " radians is outside the scope of minimum "
-                    + kPivot.MIN_ANGLE + " radians and maximum " + kPivot.MAX_ANGLE + " radians!";
-            DriverStation.reportWarning(errorMsg, false);
-            return;
-        }
         inputs.targetRadians = radians;
         this.leaderMotor.setControl(new MotionMagicVoltage(mechRadiansToMotorRots(radians)));
     }
