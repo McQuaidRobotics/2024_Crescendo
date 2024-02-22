@@ -1,10 +1,11 @@
 package com.igknighters.controllers;
 
 import com.igknighters.constants.ConstValues;
-import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.subsystems.stem.StemPosition;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
 import com.igknighters.SubsystemResources.Subsystems;
 import com.igknighters.commands.stem.StemCommands;
@@ -30,26 +31,21 @@ public class TestingController extends ControllerParent {
         });
 
         // this.B.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
-        //     trig.onTrue(
-        //             StemCommands.holdAt(
-        //                     allss.stem.get(), StemPosition.fromDegrees(
-        //                             40.0,
-        //                             90.0,
-        //                             kTelescope.MIN_METERS)));
+        // trig.onTrue(
+        // StemCommands.holdAt(
+        // allss.stem.get(), StemPosition.fromDegrees(
+        // 40.0,
+        // 90.0,
+        // kTelescope.MIN_METERS)));
         // });
 
         this.B.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
-            trig.onTrue(
-                    StemCommands.holdAt(
-                            allss.stem.get(), StemPosition.fromDegrees(
-                                    65.0,
-                                    90.0,
-                                    kTelescope.MIN_METERS)));
+            trig.onTrue(Commands.runOnce(() -> {
+                allss.stem.get().setStemPosition(StemPosition.fromDegrees(20.0, 0.0, 0.0));
+            }));
         });
 
-        this.X.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
-            trig.onTrue(UmbrellaCommands.stopShooter(allss.umbrella.get()));
-        });
+        // this.X.binding = 
 
         this.Y.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
             trig.onTrue(UmbrellaCommands.waitUntilSpunUp(allss.umbrella.get(), 5000));
@@ -59,7 +55,7 @@ public class TestingController extends ControllerParent {
         this.LB.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
             trig.onTrue(UmbrellaCommands.intake(allss.umbrella.get()));
         });
-    
+
         this.RB.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
             trig.onTrue(UmbrellaCommands.shoot(allss.umbrella.get()));
         });

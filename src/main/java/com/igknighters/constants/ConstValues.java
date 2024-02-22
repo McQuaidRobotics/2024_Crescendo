@@ -69,13 +69,13 @@ public final class ConstValues {
         public static final double UMBRELLA_OFFSET = 2.375 * Conv.INCHES_TO_METERS;
         public static final Rectangle2d DRIVE_BASE = new Rectangle2d(
                 0.0,
-                0.0,
+                BUMPER_HEIGHT,
                 FRAME_WIDTH + (BUMPER_THICKNESS * 2),
                 BUMPER_HEIGHT);
         public static final Rectangle2d BOUNDS = new Rectangle2d(
-                BUMPER_THICKNESS - (12.0 * Conv.INCHES_TO_METERS),
-                0.0,
-                FRAME_WIDTH + BUMPER_THICKNESS + (12.0 * Conv.INCHES_TO_METERS),
+                DRIVE_BASE.getLeftX() - (12.0 * Conv.INCHES_TO_METERS),
+                48.0 * Conv.INCHES_TO_METERS,
+                DRIVE_BASE.getRightX() + 2.0 * (12.0 * Conv.INCHES_TO_METERS),
                 48.0 * Conv.INCHES_TO_METERS);
         public static final Translation2d PIVOT_LOCATION = new Translation2d(
                 ((32.6 / 2.0) - 9.5) * Conv.INCHES_TO_METERS,

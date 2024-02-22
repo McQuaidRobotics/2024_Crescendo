@@ -8,11 +8,11 @@ import com.igknighters.util.geom.Rectangle2d;
 
 public class StemValidator {
     /**
-     * An eefectively minisclue value used to define incredibly steep slopes
+     * An effectively miniscule value used to define incredibly steep slopes
      */
     private static final double SMOL = 0.00000001;
 
-    private static class MechanismPoints {
+    public static class MechanismPoints {
         public final Translation2d wristAxelPoint, umbrellaBottomRightPoint, umbrellaTopRightPoint,
                 umbrellaBottomLeftPoint, umbrellaTopLeftPoint;
 
@@ -37,7 +37,8 @@ public class StemValidator {
                     kRobotGeometry.UMBRELLA_OFFSET
                             * Math.cos(stemPosition.getPivotRads() + (Math.PI / 2.0) - stemPosition.getWristRads()),
                     kRobotGeometry.UMBRELLA_OFFSET
-                            * Math.sin(stemPosition.getPivotRads() + (Math.PI / 2.0) - stemPosition.getWristRads()));
+                            * Math.sin(stemPosition.getPivotRads() + (Math.PI / 2.0) - stemPosition.getWristRads()))
+                            .plus(this.wristAxelPoint);
 
             this.umbrellaBottomRightPoint = umbrellaLengthVector.plus(this.umbrellaBottomLeftPoint);
 
@@ -80,7 +81,7 @@ public class StemValidator {
                     Math.abs(umbrellaRectTop - umbrellRectBottom));
         }
 
-        private Translation2d[] getPoints() {
+        public Translation2d[] getPoints() {
             return new Translation2d[] {
                     wristAxelPoint,
                     umbrellaBottomRightPoint,
@@ -286,7 +287,8 @@ public class StemValidator {
                 // gets the difference outside the drive base's allowed bounds that rectangle is
                 // and adds or subtracts the differences so that rectangle is now within the
                 // drive base's allowed bounds. Then gets the distance from the pivot axel to
-                // the bottem left corner of the umbrella and turns it into a new mid state for the
+                // the bottem left corner of the umbrella and turns it into a new mid state for
+                // the
                 // telescope. After this, the new telescope mid state is used to derive a new
                 // pivot rads mid state that when applies to the new telescope mid state results
                 // in the umbrella beingat the desired x and y coordinates from (0,0).

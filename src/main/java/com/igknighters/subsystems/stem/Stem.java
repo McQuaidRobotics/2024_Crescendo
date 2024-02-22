@@ -30,7 +30,7 @@ public class Stem extends SubsystemBase {
     public Stem() {
         if (RobotBase.isSimulation()) {
             pivot = new PivotSim();
-            telescope = new TelescopeSim();
+            telescope = new TelescopeDisabled();
             wrist = new WristSim();
         } else {
             pivot = new PivotReal();
@@ -78,6 +78,7 @@ public class Stem extends SubsystemBase {
         //     // LED
         //     return true;
         // }
+
         visualizer.updateSetpoint(position);
         if (!telescope.hasHomed()) {
             if (!position.isStow()) {

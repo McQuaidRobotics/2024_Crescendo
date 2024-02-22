@@ -7,6 +7,14 @@ public class Rectangle2d {
 
     private final Translation2d topLeft, topRight, bottomLeft, bottomRight;
 
+    /**
+     * Defines a rectangle that is drawn from its top left corner down to its bottom right corner
+     * 
+     * @param topLeft The top left point of the rectangle
+     * @param topRight The top right point of the rectangle
+     * @param bottomLeft The bottom left point of the rectangle
+     * @param bottomRight The bottom right point of the rectangle
+     */
     public Rectangle2d(
         Translation2d topLeft,
         Translation2d topRight,
@@ -19,21 +27,20 @@ public class Rectangle2d {
         this.bottomLeft = bottomLeft;
     }
 
+    /**
+     * Defines a rectangle where (x,y) is the top left corner
+     * 
+     * @param x The x value for the top left corner of the rectangle
+     * @param y The y value for the top left corner of the rectangle
+     * @param width The width of the rectangle
+     * @param height The height of the rectangle
+     */
     public Rectangle2d(double x, double y, double width, double height) {
         this(
             new Translation2d(x, y),
             new Translation2d(x + width, y),
-            new Translation2d(x, y + height),
-            new Translation2d(x + width, y + height)
-        );
-    }
-
-    public Rectangle2d(Translation2d topLeft, Translation2d bottomRight) {
-        this(
-            topLeft,
-            new Translation2d(bottomRight.getX(), topLeft.getY()),
-            new Translation2d(topLeft.getX(), bottomRight.getY()),
-            bottomRight
+            new Translation2d(x, y - height),
+            new Translation2d(x + width, y - height)
         );
     }
 
@@ -79,14 +86,16 @@ public class Rectangle2d {
 
     public boolean contains(Translation2d point) {
         return point.getX() >= topLeft.getX() && point.getX() <= topRight.getX() &&
-            point.getY() >= topLeft.getY() && point.getY() <= bottomLeft.getY();
+            point.getY() <= topLeft.getY() && point.getY() >= bottomLeft.getY();
     }
 
     public boolean intersects(Rectangle2d other) {
-        return topLeft.getX() < other.getBottomRight().getX() &&
-            topRight.getX() > other.getTopLeft().getX() &&
-            topLeft.getY() < other.getBottomRight().getY() &&
-            bottomLeft.getY() > other.getTopLeft().getY();
+        return (
+            contains(other.getTopLeft()) ||
+            contains(other.getTopRight()) ||
+            contains(other.getBottomLeft()) ||
+            contains(other.getBottomRight())
+        );
     }
 
     public Rectangle2d translate(Translation2d translation) {

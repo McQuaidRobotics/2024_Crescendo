@@ -5,7 +5,6 @@ import edu.wpi.first.hal.SimDevice;
 import edu.wpi.first.hal.SimDevice.Direction;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
@@ -60,11 +59,13 @@ public class PivotSim implements Pivot {
     @Override
     public void setPivotRadians(double radians) {
         inputs.targetRadians = radians;
-        double pivotVoltageFeedback = pidController.calculate(
-                inputs.radians, radians);
-        sim.setInputVoltage(pivotVoltageFeedback);
-        inputs.leftVolts = pivotVoltageFeedback;
-        inputs.rightVolts = pivotVoltageFeedback;
+        // double pivotVoltageFeedback = pidController.calculate(
+        //         inputs.radians, radians);
+        // sim.setInputVoltage(pivotVoltageFeedback);
+        // inputs.leftVolts = pivotVoltageFeedback;
+        // inputs.rightVolts = pivotVoltageFeedback;
+        // sim.setState(radians, 0.0);
+        inputs.radians = radians;
     }
 
     @Override
@@ -88,9 +89,9 @@ public class PivotSim implements Pivot {
 
         sim.update(0.2);
 
-        // inputs.radians = Units.radiansToDegrees(sim.getAngleRads());
-        inputs.radians = 0.0;
-        inputs.radiansPerSecond = Units.radiansToDegrees(sim.getVelocityRadPerSec());
+        // inputs.radians = sim.getAngleRads();
+        // inputs.radiansPerSecond = sim.getVelocityRadPerSec();
+        inputs.radiansPerSecond = 0.0;
         inputs.leftAmps = sim.getCurrentDrawAmps() / 2.0;
         inputs.rightAmps = sim.getCurrentDrawAmps() / 2.0;
         inputs.leftTemp = 0.0;
