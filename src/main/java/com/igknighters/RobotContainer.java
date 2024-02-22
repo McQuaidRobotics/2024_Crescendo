@@ -17,6 +17,7 @@ import com.igknighters.commands.autos.AutosCmdRegister;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class RobotContainer {
@@ -50,17 +51,17 @@ public class RobotContainer {
             Autos.createSendableChooser(swerve);
         }
 
-        // if (allSubsystems.stem.isPresent()) {
-        //     var stem = allSubsystems.stem.get();
-        //     stem.setDefaultCommand(stem.run(() -> {
-        //         stem.setStemVolts(
-        //             testingController.leftStickY(0.1).getAsDouble() * RobotController.getBatteryVoltage(),
-        //             (testingController.rightTrigger(true).getAsDouble()
-        //             - testingController.leftTrigger(true).getAsDouble()) * 6.0,
-        //             testingController.rightStickY(0.1).getAsDouble() * RobotController.getBatteryVoltage()
-        //         );
-        //     }));
-        // }
+        if (allSubsystems.stem.isPresent()) {
+            var stem = allSubsystems.stem.get();
+            stem.setDefaultCommand(stem.run(() -> {
+                stem.setStemVolts(
+                    testingController.leftStickY(0.1).getAsDouble() * RobotController.getBatteryVoltage(),
+                    (testingController.rightTrigger(true).getAsDouble()
+                    - testingController.leftTrigger(true).getAsDouble()) * 6.0,
+                    testingController.rightStickY(0.1).getAsDouble() * RobotController.getBatteryVoltage()
+                );
+            }));
+        }
     }
 
     private void setupAutos(Swerve swerve) {

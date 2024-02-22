@@ -64,13 +64,13 @@ public class TestingController extends ControllerParent {
         });
 
         /// BUMPER
-        this.LB.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
-            trig.onTrue(UmbrellaCommands.intake(allss.umbrella.get()));
-        });
+        // this.LB.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
+        //     trig.onTrue(UmbrellaCommands.intake(allss.umbrella.get()));
+        // });
 
-        this.RB.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
-            trig.onTrue(UmbrellaCommands.shoot(allss.umbrella.get()));
-        });
+        // this.RB.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
+        //     trig.onTrue(UmbrellaCommands.shoot(allss.umbrella.get()));
+        // });
 
         /// CENTER BUTTONS
         // this.Back.binding =

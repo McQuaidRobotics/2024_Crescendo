@@ -230,7 +230,7 @@ public final class ConstValues {
 
         public static final LerpTable TELEOP_ROTATION_AXIS_CURVE = new LerpTable(
                 new LerpTableEntry(0.0, 0.0),
-                new LerpTableEntry(0.1, 0.0), // deadzone
+                new LerpTableEntry(0.15, 0.0), // deadzone
                 new LerpTableEntry(0.7, 0.4),
                 new LerpTableEntry(1.0, 1.0));
 
@@ -377,8 +377,8 @@ public final class ConstValues {
             public static final double MOTOR_kD = 0.0;
 
             public static final double MAX_VELOCITY = 1200;
-            public static final double MAX_ACCELERATION = 2400;
-            public static final double MAX_JERK = 0;
+            public static final double MAX_ACCELERATION = 2000;
+            public static final double MAX_JERK = 2000;
 
             public static final double MIN_ANGLE = 9.0 * Conv.DEGREES_TO_RADIANS;
 
@@ -460,7 +460,7 @@ public final class ConstValues {
             /**
              * Tolerance in radians
              */
-            public static final double TARGET_TOLERANCE = 0.5 * Conv.DEGREES_TO_RADIANS;
+            public static final double TARGET_TOLERANCE = 1.0 * Conv.DEGREES_TO_RADIANS;
         }
     }
 }
