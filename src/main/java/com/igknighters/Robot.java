@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.constants.ConstValues;
+import com.igknighters.util.CANBusLogging;
 import com.igknighters.util.ShuffleboardApi;
 import com.igknighters.util.Tracer;
 import com.igknighters.util.UnitTestableRobot;
@@ -32,7 +33,7 @@ public class Robot extends UnitTestableRobot {
 
         com.igknighters.ConstantHelper.applyRoboConst(ConstValues.class);
 
-        GlobalState.publishField();
+        GlobalState.publishField2d();
 
         roboContainer = new RobotContainer();
     }
@@ -42,6 +43,7 @@ public class Robot extends UnitTestableRobot {
         Tracer.traceFunc("Shuffleboard", ShuffleboardApi::run);
         Tracer.traceFunc("CommandScheduler", scheduler::run);
         Tracer.traceFunc("LEDUpdate", LED.getInstance()::run);
+        Tracer.traceFunc("CANBusLoggung", CANBusLogging::run);
         GlobalState.log();
     }
 

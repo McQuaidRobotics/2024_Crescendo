@@ -15,10 +15,10 @@ import edu.wpi.first.wpilibj.RobotController;
 public class RobotSetup {
 
     public enum RobotID {
-        CRASH(Subsystems.list(Subsystems.Umbrella),
+        CRASH(Subsystems.list(Subsystems.Swerve, Subsystems.Vision),
                 RobotConstID.CRASH),
 
-        BURN(Subsystems.list(Subsystems.Stem),
+        BURN(Subsystems.list(Subsystems.Swerve),
                 RobotConstID.BURN),
 
         SIM_CRASH(Subsystems.all(), RobotConstID.CRASH),
@@ -52,7 +52,8 @@ public class RobotSetup {
             "aaaaaaaa", RobotID.CRASH,
             "03260af0", RobotID.BURN,
             "03260abb", RobotID.CRASH,
-            "0306adb6", RobotID.TestBoard);
+            "0306adb6", RobotID.TestBoard,
+            "032b4b20", RobotID.CRASH);
 
     private static RobotID currentID = RobotID.Unlabeled;
 
