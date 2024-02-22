@@ -1,6 +1,9 @@
 package com.igknighters.controllers;
 
 import com.igknighters.constants.ConstValues;
+import com.igknighters.constants.ConstValues.kStem.kPivot;
+import com.igknighters.constants.ConstValues.kStem.kTelescope;
+import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.subsystems.stem.StemPosition;
 
 import edu.wpi.first.math.MathUtil;
@@ -30,19 +33,15 @@ public class TestingController extends ControllerParent {
                                     0.53)));
         });
 
-        // this.B.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
-        // trig.onTrue(
-        // StemCommands.holdAt(
-        // allss.stem.get(), StemPosition.fromDegrees(
-        // 40.0,
-        // 90.0,
-        // kTelescope.MIN_METERS)));
-        // });
-
         this.B.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
-            trig.onTrue(Commands.runOnce(() -> {
-                allss.stem.get().setStemPosition(StemPosition.fromDegrees(20.0, 0.0, 0.0));
-            }));
+            trig.onTrue(
+                new ProxyCommand(() -> {
+                    return StemCommands.moveTo(allss.stem.get(), StemPosition.fromRadians(
+                        kPivot.PIVOT_MIN_RADIANS + (Math.random() * (kPivot.PIVOT_MAX_RADIANS - kPivot.PIVOT_MIN_RADIANS)), 
+                        kWrist.MIN_ANGLE + (Math.random() * (kWrist.MAX_ANGLE - kWrist.MIN_ANGLE)), 
+                        kTelescope.MIN_METERS + (Math.random() * (kTelescope.MAX_METERS - kTelescope.MIN_METERS))));
+                })
+            );
         });
 
         // this.X.binding = 
