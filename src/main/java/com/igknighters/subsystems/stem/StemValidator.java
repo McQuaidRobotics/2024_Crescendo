@@ -131,7 +131,7 @@ public class StemValidator {
             } else if (!drivebaseCollides && boundsCollide) {
                 return COLLIDES_BOUNDS;
             } else if (drivebaseCollides && boundsCollide) {
-                return COLLIDES_BOUNDS;
+                return COLLIDES_DRIVE_BASE_AND_BOUNDS;
             }
             return VALID;
         }
@@ -252,9 +252,9 @@ public class StemValidator {
         SmartDashboard.putBoolean("bottomStemInterceptInRect", bottomStemInterceptInRect);
         SmartDashboard.putBoolean("isWristAxelPointBelowDrivebase", isWristAxelPointBelowDrivebase);
 
-        boolean drivebaseCollides = (isUmbrellaRightPointsBelowDriveBase
-                && (topUmbrellaInterceptInRect || bottomUmbrellaIntrceptInRect))
-                || (isWristAxelPointBelowDrivebase && (topStemInterceptInRect || bottomStemInterceptInRect));
+        boolean umbrellaCollidesDrivebase = isUmbrellaRightPointsBelowDriveBase && (topUmbrellaInterceptInRect || bottomUmbrellaIntrceptInRect);
+        boolean stemCollidesDrivebase = isWristAxelPointBelowDrivebase && (topStemInterceptInRect || bottomStemInterceptInRect);
+        boolean drivebaseCollides = umbrellaCollidesDrivebase || stemCollidesDrivebase;
 
         return ValidationResponse.collisionFrom(drivebaseCollides, mechPts.outsideBounds());
     }
