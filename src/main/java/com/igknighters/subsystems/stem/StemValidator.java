@@ -1,6 +1,7 @@
 package com.igknighters.subsystems.stem;
 
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.igknighters.constants.ConstValues.kRobotGeometry;
 import com.igknighters.subsystems.stem.StemVisualizer.StemVisualizerDot;
@@ -243,6 +244,13 @@ public class StemValidator {
                 stemDriveBaseBottomIntersect);
         boolean isWristAxelPointBelowDrivebase = mechPts.wristAxelPoint.getY() <= kRobotGeometry.DRIVE_BASE.getTopLeft()
                 .getY();
+
+        SmartDashboard.putBoolean("topUmbrellaInterceptInRect", topUmbrellaInterceptInRect);
+        SmartDashboard.putBoolean("bottomUmbrellaIntrceptInRect", bottomUmbrellaIntrceptInRect);
+        SmartDashboard.putBoolean("isUmbrellaRightPointsBelowDriveBase", isUmbrellaRightPointsBelowDriveBase);
+        SmartDashboard.putBoolean("topStemInterceptInRect", topStemInterceptInRect);
+        SmartDashboard.putBoolean("bottomStemInterceptInRect", bottomStemInterceptInRect);
+        SmartDashboard.putBoolean("isWristAxelPointBelowDrivebase", isWristAxelPointBelowDrivebase);
 
         boolean drivebaseCollides = (isUmbrellaRightPointsBelowDriveBase
                 && (topUmbrellaInterceptInRect || bottomUmbrellaIntrceptInRect))
