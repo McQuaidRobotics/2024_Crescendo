@@ -39,7 +39,7 @@ public class StemPosition {
     }
 
     public boolean isValid() {
-        return StemValidator.isValidPosition(this).isValid();
+        return StemValidator.validatePosition(this).isValid();
     }
 
     public boolean isStow() {
@@ -53,10 +53,9 @@ public class StemPosition {
     }
 
     public static StemPosition STOW = new StemPosition(
-        Units.degreesToRadians(35.0),
-        kTelescope.MIN_METERS,
-        Units.degreesToRadians(60.0)
-    ) {
+            Units.degreesToRadians(35.0),
+            kTelescope.MIN_METERS,
+            Units.degreesToRadians(60.0)) {
         @Override
         public boolean isValid() {
             return true;

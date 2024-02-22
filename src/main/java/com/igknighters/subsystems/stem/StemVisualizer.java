@@ -18,235 +18,238 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 
 public class StemVisualizer {
-    public static record StemVisualizerDot(String name, Translation2d position) {
-    };
+        public static record StemVisualizerDot(String name, Translation2d position) {
+        };
 
-    private final Mechanism2d mechanism;
-    private final MechanismRoot2d rootCurrent, rootSetpoint;
-    private final MechanismLigament2d telescopeCurrent, wristCurrent;
-    private final MechanismLigament2d telescopeSetpoint, wristSetpoint;
+        private final Mechanism2d mechanism;
+        private final MechanismRoot2d rootCurrent, rootSetpoint;
+        private final MechanismLigament2d telescopeCurrent, wristCurrent;
+        private final MechanismLigament2d telescopeSetpoint, wristSetpoint;
 
-    private final Color8Bit backgroundColor = new Color8Bit(0, 0, 0);
-    private final Color8Bit debugColor = new Color8Bit(170, 180, 180);
-    private final Color8Bit boundsColor = new Color8Bit(255, 180, 20);
-    private final Translation2d pivotOrigin = new Translation2d(0.5, 0.5);
+        private final Color8Bit backgroundColor = new Color8Bit(0, 0, 0);
+        private final Color8Bit debugColor = new Color8Bit(170, 180, 180);
+        private final Color8Bit boundsColor = new Color8Bit(255, 180, 20);
+        private final Translation2d pivotOrigin = new Translation2d(0.5, 0.5);
 
-    private final double wristOffset = 90;
+        private final double wristOffset = 90;
 
-    private final HashMap<String, MechanismRoot2d> dots = new HashMap<>();
+        private final HashMap<String, MechanismRoot2d> dots = new HashMap<>();
 
-    public StemVisualizer() {
-        mechanism = new Mechanism2d(2.0, 2.0);
+        public StemVisualizer() {
+                mechanism = new Mechanism2d(2.0, 2.0);
 
-        mechanism.setBackgroundColor(backgroundColor);
+                mechanism.setBackgroundColor(backgroundColor);
 
-        rootCurrent = mechanism.getRoot("Current", pivotOrigin.getX(), pivotOrigin.getY());
-        rootSetpoint = mechanism.getRoot("Setpoint", pivotOrigin.getX(), pivotOrigin.getY());
+                rootCurrent = mechanism.getRoot("Current", pivotOrigin.getX(), pivotOrigin.getY());
+                rootSetpoint = mechanism.getRoot("Setpoint", pivotOrigin.getX(), pivotOrigin.getY());
 
-        telescopeCurrent = rootCurrent.append(new MechanismLigament2d("Telescope Current", kTelescope.MIN_METERS, 0.0));
-        wristCurrent = telescopeCurrent
-                .append(new MechanismLigament2d("Wrist Lower Current", kRobotGeometry.UMBRELLA_OFFSET,
-                        -54.0 + wristOffset));
+                telescopeCurrent = rootCurrent
+                                .append(new MechanismLigament2d("Telescope Current", kTelescope.MIN_METERS, 0.0));
+                wristCurrent = telescopeCurrent
+                                .append(new MechanismLigament2d("Wrist Lower Current", kRobotGeometry.UMBRELLA_OFFSET,
+                                                -54.0 + wristOffset));
 
-        wristCurrent.setColor(backgroundColor);
-        wristCurrent.setLineWeight(4.0);
+                wristCurrent.setColor(backgroundColor);
+                wristCurrent.setLineWeight(4.0);
 
-        telescopeSetpoint = rootSetpoint
-                .append(new MechanismLigament2d("Telescope Setpoint", kTelescope.MIN_METERS, 0.0));
-        wristSetpoint = telescopeSetpoint
-                .append(new MechanismLigament2d("Wrist Lower Setpoint", kRobotGeometry.UMBRELLA_OFFSET,
-                        -54.0 + wristOffset));
+                telescopeSetpoint = rootSetpoint
+                                .append(new MechanismLigament2d("Telescope Setpoint", kTelescope.MIN_METERS, 0.0));
+                wristSetpoint = telescopeSetpoint
+                                .append(new MechanismLigament2d("Wrist Lower Setpoint", kRobotGeometry.UMBRELLA_OFFSET,
+                                                -54.0 + wristOffset));
 
-        telescopeSetpoint.setColor(debugColor);
-        telescopeSetpoint.setLineWeight(3.0);
+                telescopeSetpoint.setColor(debugColor);
+                telescopeSetpoint.setLineWeight(3.0);
 
-        wristSetpoint.setColor(backgroundColor);
-        wristSetpoint.setLineWeight(1.0);
+                wristSetpoint.setColor(backgroundColor);
+                wristSetpoint.setLineWeight(1.0);
 
-        drawDriveBase();
-        drawUmbrella(wristCurrent, false);
-        drawUmbrella(wristSetpoint, true);
-        drawMaxBounds();
+                drawDriveBase();
+                drawUmbrella(wristCurrent, false);
+                drawUmbrella(wristSetpoint, true);
+                drawMaxBounds();
 
-        Receiver.reactor(
-            "StemVisualizerDots",
-            StemVisualizerDot.class,
-            this::addDot
-        );
+                Receiver.reactor(
+                                "StemVisualizerDots",
+                                StemVisualizerDot.class,
+                                this::addDot);
 
-        var table = NetworkTableInstance.getDefault()
-                .getTable("Visualizers")
-                .getSubTable("Stem");
-        var builder = new SendableBuilderImpl();
-        builder.setTable(table);
-        mechanism.initSendable(builder);
-    }
-
-    private void drawUmbrella(MechanismLigament2d wristRoot, boolean isSetpoint) {
-        MechanismLigament2d leftSide = wristRoot.append(
-                new MechanismLigament2d(
-                        "Umbrella Left Side",
-                        kRobotGeometry.UMBRELLA_HEIGHT,
-                        0.0));
-        MechanismLigament2d topSide = leftSide.append(
-                new MechanismLigament2d(
-                        "Umbrella Top Side",
-                        kRobotGeometry.UMBRELLA_LENGTH,
-                        -90.0));
-        MechanismLigament2d rightSide = topSide.append(
-                new MechanismLigament2d(
-                        "Umbrella Right Side",
-                        kRobotGeometry.UMBRELLA_HEIGHT,
-                        -90.0));
-        MechanismLigament2d bottomSide = rightSide.append(
-                new MechanismLigament2d(
-                        "Umbrella Bottom Side",
-                        kRobotGeometry.UMBRELLA_LENGTH,
-                        -90.0));
-
-        if (isSetpoint) {
-            Color8Bit wristColor = new Color8Bit(200, 200, 255);
-            leftSide.setColor(wristColor);
-            topSide.setColor(wristColor);
-            rightSide.setColor(wristColor);
-            bottomSide.setColor(wristColor);
-
-            leftSide.setLineWeight(4.0);
-            topSide.setLineWeight(4.0);
-            rightSide.setLineWeight(4.0);
-            bottomSide.setLineWeight(4.0);
-        } else {
-            leftSide.setColor(debugColor);
-            topSide.setColor(debugColor);
-            rightSide.setColor(debugColor);
-            bottomSide.setColor(debugColor);
-
-            leftSide.setLineWeight(3.0);
-            topSide.setLineWeight(3.0);
-            rightSide.setLineWeight(3.0);
-            bottomSide.setLineWeight(3.0);
+                var table = NetworkTableInstance.getDefault()
+                                .getTable("Visualizers")
+                                .getSubTable("Stem");
+                var builder = new SendableBuilderImpl();
+                builder.setTable(table);
+                mechanism.initSendable(builder);
         }
-    }
 
-    private void drawDriveBase() {
-        Translation2d drivebaseOrigin = pivotOrigin.minus(kRobotGeometry.PIVOT_LOCATION);
+        private void drawUmbrella(MechanismLigament2d wristRoot, boolean isSetpoint) {
+                MechanismLigament2d leftSide = wristRoot.append(
+                                new MechanismLigament2d(
+                                                "Umbrella Left Side",
+                                                kRobotGeometry.UMBRELLA_HEIGHT,
+                                                0.0));
+                MechanismLigament2d topSide = leftSide.append(
+                                new MechanismLigament2d(
+                                                "Umbrella Top Side",
+                                                kRobotGeometry.UMBRELLA_LENGTH,
+                                                -90.0));
+                MechanismLigament2d rightSide = topSide.append(
+                                new MechanismLigament2d(
+                                                "Umbrella Right Side",
+                                                kRobotGeometry.UMBRELLA_HEIGHT,
+                                                -90.0));
+                MechanismLigament2d bottomSide = rightSide.append(
+                                new MechanismLigament2d(
+                                                "Umbrella Bottom Side",
+                                                kRobotGeometry.UMBRELLA_LENGTH,
+                                                -90.0));
 
-        MechanismRoot2d drivebaseRoot = mechanism.getRoot("Drivebase", drivebaseOrigin.getX(), drivebaseOrigin.getY());
-        MechanismLigament2d leftSide = drivebaseRoot.append(
-                new MechanismLigament2d(
-                        "DriveBase Left Side",
-                        kRobotGeometry.DRIVE_BASE.getHeight(),
-                        90.0));
-        MechanismLigament2d topSide = leftSide.append(
-                new MechanismLigament2d(
-                        "DriveBase Top Side",
-                        kRobotGeometry.DRIVE_BASE.getWidth(),
-                        -90.0));
-        MechanismLigament2d rightSide = topSide.append(
-                new MechanismLigament2d(
-                        "DriveBase Right Side",
-                        kRobotGeometry.DRIVE_BASE.getHeight(),
-                        -90.0));
-        MechanismLigament2d bottomSide = rightSide.append(
-                new MechanismLigament2d(
-                        "DriveBase Bottom Side",
-                        kRobotGeometry.DRIVE_BASE.getWidth(),
-                        -90.0));
+                if (isSetpoint) {
+                        Color8Bit wristColor = new Color8Bit(200, 200, 255);
+                        leftSide.setColor(wristColor);
+                        topSide.setColor(wristColor);
+                        rightSide.setColor(wristColor);
+                        bottomSide.setColor(wristColor);
 
-        leftSide.setColor(new Color8Bit(100, 100, 100));
-        topSide.setColor(new Color8Bit(100, 100, 100));
-        rightSide.setColor(new Color8Bit(100, 100, 100));
-        bottomSide.setColor(new Color8Bit(100, 100, 100));
+                        leftSide.setLineWeight(4.0);
+                        topSide.setLineWeight(4.0);
+                        rightSide.setLineWeight(4.0);
+                        bottomSide.setLineWeight(4.0);
+                } else {
+                        leftSide.setColor(debugColor);
+                        topSide.setColor(debugColor);
+                        rightSide.setColor(debugColor);
+                        bottomSide.setColor(debugColor);
 
-        leftSide.setLineWeight(2.0);
-        topSide.setLineWeight(2.0);
-        rightSide.setLineWeight(2.0);
-        bottomSide.setLineWeight(2.0);
-    }
-
-    private void drawMaxBounds() {
-        Translation2d drivebaseOrigin = pivotOrigin.minus(kRobotGeometry.PIVOT_LOCATION);
-
-        MechanismRoot2d boundsRoot = mechanism.getRoot("MaxBounds", drivebaseOrigin.getX(), drivebaseOrigin.getY());
-        MechanismLigament2d leftBottomSide = boundsRoot.append(
-                new MechanismLigament2d(
-                        "MaxBounds Left Bottom Side",
-                        Units.inchesToMeters(12.0)
-                                - ((kRobotGeometry.DRIVE_BASE.getWidth() - Units.inchesToMeters(26.0)) / 2.0),
-                        180.0));
-        MechanismLigament2d leftSide = leftBottomSide.append(
-                new MechanismLigament2d(
-                        "MaxBounds Left Side",
-                        Units.inchesToMeters(48.0),
-                        -90.0));
-        MechanismLigament2d topSide = leftSide.append(
-                new MechanismLigament2d(
-                        "MaxBounds Top Side",
-                        Units.inchesToMeters(26.0 + 24.0),
-                        -90.0));
-        MechanismLigament2d rightSide = topSide.append(
-                new MechanismLigament2d(
-                        "MaxBounds Right Side",
-                        Units.inchesToMeters(48.0),
-                        -90.0));
-        MechanismLigament2d rightBottomSide = rightSide.append(
-                new MechanismLigament2d(
-                        "MaxBounds Right Bottom Side",
-                        Units.inchesToMeters(12.0)
-                                - ((kRobotGeometry.DRIVE_BASE.getWidth() - Units.inchesToMeters(26.0)) / 2.0),
-                        -90.0));
-
-        leftBottomSide.setColor(boundsColor);
-        leftSide.setColor(boundsColor);
-        topSide.setColor(boundsColor);
-        rightSide.setColor(boundsColor);
-        rightBottomSide.setColor(boundsColor);
-
-        leftBottomSide.setLineWeight(2.0);
-        leftSide.setLineWeight(2.0);
-        topSide.setLineWeight(2.0);
-        rightSide.setLineWeight(2.0);
-        rightBottomSide.setLineWeight(2.0);
-    }
-
-    public void addDot(StemVisualizerDot dot) {
-        Translation2d drivebaseOrigin = pivotOrigin.minus(kRobotGeometry.PIVOT_LOCATION);
-        Translation2d pose = dot.position.plus(drivebaseOrigin);
-        if (dots.containsKey(dot.name)) {
-            dots.get(dot.name).setPosition(pose.getX() - 0.01, pose.getY());
-        } else {
-            dots.put(dot.name, mechanism.getRoot(dot.name, pose.getX() - 0.01, pose.getY()));
-            dots.get(dot.name).append(
-                    new MechanismLigament2d(
-                            dot.name + " Dot",
-                            0.02,
-                            0.0,
-                            2.0,
-                            new Color8Bit(255, 255, 255))
-            );
+                        leftSide.setLineWeight(3.0);
+                        topSide.setLineWeight(3.0);
+                        rightSide.setLineWeight(3.0);
+                        bottomSide.setLineWeight(3.0);
+                }
         }
-    }
 
-    public void updateCurrent(StemPosition currentPose) {
-        telescopeCurrent.setAngle(Units.radiansToDegrees(currentPose.pivotRads));
-        telescopeCurrent.setLength(currentPose.telescopeMeters);
+        private void drawDriveBase() {
+                Translation2d drivebaseOrigin = pivotOrigin.minus(kRobotGeometry.PIVOT_LOCATION);
 
-        // lerp the elevator color based on % of range
-        // 0% = green, 100% = red
-        Double percent = (currentPose.telescopeMeters - kStem.kTelescope.MIN_METERS)
-                / (kStem.kTelescope.MAX_METERS - kStem.kTelescope.MIN_METERS);
-        int red = (int) (percent * 255);
-        int green = (int) ((1 - percent) * 255);
-        telescopeCurrent.setColor(new Color8Bit(red, green, 0));
+                MechanismRoot2d drivebaseRoot = mechanism.getRoot("Drivebase", drivebaseOrigin.getX(),
+                                drivebaseOrigin.getY());
+                MechanismLigament2d leftSide = drivebaseRoot.append(
+                                new MechanismLigament2d(
+                                                "DriveBase Left Side",
+                                                kRobotGeometry.DRIVE_BASE.getHeight(),
+                                                90.0));
+                MechanismLigament2d topSide = leftSide.append(
+                                new MechanismLigament2d(
+                                                "DriveBase Top Side",
+                                                kRobotGeometry.DRIVE_BASE.getWidth(),
+                                                -90.0));
+                MechanismLigament2d rightSide = topSide.append(
+                                new MechanismLigament2d(
+                                                "DriveBase Right Side",
+                                                kRobotGeometry.DRIVE_BASE.getHeight(),
+                                                -90.0));
+                MechanismLigament2d bottomSide = rightSide.append(
+                                new MechanismLigament2d(
+                                                "DriveBase Bottom Side",
+                                                kRobotGeometry.DRIVE_BASE.getWidth(),
+                                                -90.0));
 
-        wristCurrent.setAngle(-Units.radiansToDegrees(currentPose.wristRads) + wristOffset);
+                leftSide.setColor(new Color8Bit(100, 100, 100));
+                topSide.setColor(new Color8Bit(100, 100, 100));
+                rightSide.setColor(new Color8Bit(100, 100, 100));
+                bottomSide.setColor(new Color8Bit(100, 100, 100));
 
-        SmartDashboard.putString("Stem Position Valid", StemValidator.isValidPosition(currentPose).name());
-    }
+                leftSide.setLineWeight(2.0);
+                topSide.setLineWeight(2.0);
+                rightSide.setLineWeight(2.0);
+                bottomSide.setLineWeight(2.0);
+        }
 
-    public void updateSetpoint(StemPosition desiredPose) {
-        telescopeSetpoint.setAngle((Units.radiansToDegrees(desiredPose.pivotRads)));
-        telescopeSetpoint.setLength(desiredPose.telescopeMeters);
-        wristSetpoint.setAngle(-Units.radiansToDegrees(desiredPose.wristRads) + wristOffset);
-    }
+        private void drawMaxBounds() {
+                Translation2d drivebaseOrigin = pivotOrigin.minus(kRobotGeometry.PIVOT_LOCATION);
+
+                MechanismRoot2d boundsRoot = mechanism.getRoot("MaxBounds", drivebaseOrigin.getX(),
+                                drivebaseOrigin.getY());
+                MechanismLigament2d leftBottomSide = boundsRoot.append(
+                                new MechanismLigament2d(
+                                                "MaxBounds Left Bottom Side",
+                                                Units.inchesToMeters(12.0)
+                                                                - ((kRobotGeometry.DRIVE_BASE.getWidth()
+                                                                                - Units.inchesToMeters(26.0)) / 2.0),
+                                                180.0));
+                MechanismLigament2d leftSide = leftBottomSide.append(
+                                new MechanismLigament2d(
+                                                "MaxBounds Left Side",
+                                                Units.inchesToMeters(48.0),
+                                                -90.0));
+                MechanismLigament2d topSide = leftSide.append(
+                                new MechanismLigament2d(
+                                                "MaxBounds Top Side",
+                                                Units.inchesToMeters(26.0 + 24.0),
+                                                -90.0));
+                MechanismLigament2d rightSide = topSide.append(
+                                new MechanismLigament2d(
+                                                "MaxBounds Right Side",
+                                                Units.inchesToMeters(48.0),
+                                                -90.0));
+                MechanismLigament2d rightBottomSide = rightSide.append(
+                                new MechanismLigament2d(
+                                                "MaxBounds Right Bottom Side",
+                                                Units.inchesToMeters(12.0)
+                                                                - ((kRobotGeometry.DRIVE_BASE.getWidth()
+                                                                                - Units.inchesToMeters(26.0)) / 2.0),
+                                                -90.0));
+
+                leftBottomSide.setColor(boundsColor);
+                leftSide.setColor(boundsColor);
+                topSide.setColor(boundsColor);
+                rightSide.setColor(boundsColor);
+                rightBottomSide.setColor(boundsColor);
+
+                leftBottomSide.setLineWeight(2.0);
+                leftSide.setLineWeight(2.0);
+                topSide.setLineWeight(2.0);
+                rightSide.setLineWeight(2.0);
+                rightBottomSide.setLineWeight(2.0);
+        }
+
+        public void addDot(StemVisualizerDot dot) {
+                Translation2d drivebaseOrigin = pivotOrigin.minus(kRobotGeometry.PIVOT_LOCATION);
+                Translation2d pose = dot.position.plus(drivebaseOrigin);
+                if (dots.containsKey(dot.name)) {
+                        dots.get(dot.name).setPosition(pose.getX() - 0.01, pose.getY());
+                } else {
+                        dots.put(dot.name, mechanism.getRoot(dot.name, pose.getX() - 0.01, pose.getY()));
+                        dots.get(dot.name).append(
+                                        new MechanismLigament2d(
+                                                        dot.name + " Dot",
+                                                        0.02,
+                                                        0.0,
+                                                        2.0,
+                                                        new Color8Bit(255, 255, 255)));
+                }
+        }
+
+        public void updateCurrent(StemPosition currentPose) {
+                telescopeCurrent.setAngle(Units.radiansToDegrees(currentPose.pivotRads));
+                telescopeCurrent.setLength(currentPose.telescopeMeters);
+
+                // lerp the elevator color based on % of range
+                // 0% = green, 100% = red
+                Double percent = (currentPose.telescopeMeters - kStem.kTelescope.MIN_METERS)
+                                / (kStem.kTelescope.MAX_METERS - kStem.kTelescope.MIN_METERS);
+                int red = (int) (percent * 255);
+                int green = (int) ((1 - percent) * 255);
+                telescopeCurrent.setColor(new Color8Bit(red, green, 0));
+
+                wristCurrent.setAngle(-Units.radiansToDegrees(currentPose.wristRads) + wristOffset);
+
+                SmartDashboard.putString("Stem Position Valid", StemValidator.validatePosition(currentPose).name());
+        }
+
+        public void updateSetpoint(StemPosition desiredPose) {
+                telescopeSetpoint.setAngle((Units.radiansToDegrees(desiredPose.pivotRads)));
+                telescopeSetpoint.setLength(desiredPose.telescopeMeters);
+                wristSetpoint.setAngle(-Units.radiansToDegrees(desiredPose.wristRads) + wristOffset);
+        }
 }

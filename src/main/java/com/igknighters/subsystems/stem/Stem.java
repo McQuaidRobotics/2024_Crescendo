@@ -45,18 +45,18 @@ public class Stem extends SubsystemBase {
         if (!GlobalState.isUnitTest()) {
             coastSwitch = new DigitalInput(kStem.COAST_SWITCH_CHANNEL);
             new Trigger(coastSwitch::get)
-                .and(DriverStation::isDisabled)
-                .or(DriverStation::isTestEnabled)
-                .onTrue(this.runOnce(() -> {
-                    pivot.setCoast(true);
-                    telescope.setCoast(true);
-                    wrist.setCoast(true);
-                }).ignoringDisable(true))
-                .onFalse(this.runOnce(() -> {
-                    pivot.setCoast(false);
-                    telescope.setCoast(false);
-                    wrist.setCoast(false);
-                }).ignoringDisable(true));
+                    .and(DriverStation::isDisabled)
+                    .or(DriverStation::isTestEnabled)
+                    .onTrue(this.runOnce(() -> {
+                        pivot.setCoast(true);
+                        telescope.setCoast(true);
+                        wrist.setCoast(true);
+                    }).ignoringDisable(true))
+                    .onFalse(this.runOnce(() -> {
+                        pivot.setCoast(false);
+                        telescope.setCoast(false);
+                        wrist.setCoast(false);
+                    }).ignoringDisable(true));
         } else {
             coastSwitch = null;
         }
@@ -75,10 +75,10 @@ public class Stem extends SubsystemBase {
      * @return True if all mechanisms have reached their target position
      */
     public boolean setStemPosition(StemPosition position, double toleranceMult) {
-        ValidationResponse validity = StemValidator.isValidPosition(position);
+        ValidationResponse validity = StemValidator.validatePosition(position);
         if (!validity.isValid()) {
             DriverStation.reportError(
-                    "Invalid stem position(" +  validity.name()+ "): " + position.toString(),
+                    "Invalid stem position(" + validity.name() + "): " + position.toString(),
                     true);
             // LED
             return true;
@@ -89,13 +89,12 @@ public class Stem extends SubsystemBase {
             if (!position.isStow()) {
                 DriverStation.reportWarning("Stem Telescope has not been homed, run stow to home", false);
                 LED.getInstance().sendAnimation(
-                    LedAnimations.WARNING
-                ).withDuration(1.0);
+                        LedAnimations.WARNING).withDuration(1.0);
                 return false;
             }
             return pivot.target(position.pivotRads, 1.0)
-                && wrist.target(position.wristRads, 1.0)
-                && telescope.target(position.telescopeMeters, 1.0);
+                    && wrist.target(position.wristRads, 1.0)
+                    && telescope.target(position.telescopeMeters, 1.0);
         }
         StemPosition validated = StemValidator.stepTowardsTargetPosition(getStemPosition(), position, 1.0);
         pivot.setPivotRadians(validated.pivotRads);
