@@ -19,7 +19,7 @@ public class PivotSim implements Pivot {
     private final PivotInputs inputs;
     private final SingleJointedArmSim sim;
     // private final PIDController pidController = new PIDController(
-    //         kPivot.MOTOR_kP, kPivot.MOTOR_kI, kPivot.MOTOR_kD, 0.2);
+    // kPivot.MOTOR_kP, kPivot.MOTOR_kI, kPivot.MOTOR_kD, 0.2);
     private final SimBoolean fwdLimitSwitch, revLimitSwitch;
 
     public PivotSim() {
@@ -28,10 +28,10 @@ public class PivotSim implements Pivot {
                 kPivot.MOTOR_TO_MECHANISM_RATIO,
                 0.07, // TODO: get real values
                 0.55,
-                kPivot.PIVOT_MIN_RADIANS,
-                kPivot.PIVOT_MAX_RADIANS,
+                kPivot.MIN_ANGLE,
+                kPivot.MAX_ANGLE,
                 false,
-                kPivot.PIVOT_MIN_RADIANS);
+                kPivot.MIN_ANGLE);
         sim.setState(0.0, 0);
         inputs = new PivotInputs(0.0);
 
@@ -60,7 +60,7 @@ public class PivotSim implements Pivot {
     public void setPivotRadians(double radians) {
         inputs.targetRadians = radians;
         // double pivotVoltageFeedback = pidController.calculate(
-        //         inputs.radians, radians);
+        // inputs.radians, radians);
         // sim.setInputVoltage(pivotVoltageFeedback);
         // inputs.leftVolts = pivotVoltageFeedback;
         // inputs.rightVolts = pivotVoltageFeedback;

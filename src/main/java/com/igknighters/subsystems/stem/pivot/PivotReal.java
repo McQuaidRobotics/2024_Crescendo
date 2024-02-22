@@ -131,8 +131,10 @@ public class PivotReal implements Pivot {
         // cfg.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
         // cfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
-        // cfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = mechRadiansToMotorRots(kPivot.PIVOT_MAX_RADIANS);
-        // cfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = mechRadiansToMotorRots(kPivot.PIVOT_MIN_RADIANS);
+        // cfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
+        // mechRadiansToMotorRots(kPivot.PIVOT_MAX_RADIANS);
+        // cfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
+        // mechRadiansToMotorRots(kPivot.PIVOT_MIN_RADIANS);
 
         cfg.Voltage.PeakForwardVoltage = kPivot.VOLTAGE_COMP;
         cfg.Voltage.PeakReverseVoltage = -kPivot.VOLTAGE_COMP;
@@ -155,9 +157,9 @@ public class PivotReal implements Pivot {
 
     @Override
     public void setPivotRadians(double radians) {
-        if (radians > kPivot.PIVOT_MAX_RADIANS || radians < kPivot.PIVOT_MIN_RADIANS) {
+        if (radians > kPivot.MAX_ANGLE || radians < kPivot.MIN_ANGLE) {
             String errorMsg = "Pivot setpoint of " + radians + " radians is outside the scope of minimum "
-                    + kPivot.PIVOT_MIN_RADIANS + " radians and maximum " + kPivot.PIVOT_MAX_RADIANS + " radians!";
+                    + kPivot.MIN_ANGLE + " radians and maximum " + kPivot.MAX_ANGLE + " radians!";
             DriverStation.reportWarning(errorMsg, false);
             return;
         }
@@ -188,15 +190,13 @@ public class PivotReal implements Pivot {
     @Override
     public void setCoast(boolean shouldBeCoasting) {
         this.followerMotor.setNeutralMode(
-            shouldBeCoasting
-            ? NeutralModeValue.Coast
-            : NeutralModeValue.Brake
-        );
+                shouldBeCoasting
+                        ? NeutralModeValue.Coast
+                        : NeutralModeValue.Brake);
         this.leaderMotor.setNeutralMode(
-            shouldBeCoasting
-            ? NeutralModeValue.Coast
-            : NeutralModeValue.Brake
-        );
+                shouldBeCoasting
+                        ? NeutralModeValue.Coast
+                        : NeutralModeValue.Brake);
     }
 
     @Override
@@ -230,11 +230,10 @@ public class PivotReal implements Pivot {
         inputs.isLimitFwdSwitchHit = forwardLimitSwitch.getValue() == ForwardLimitValue.Open;
         inputs.isLimitRevSwitchHit = reverseLimitSwitch.getValue() == ReverseLimitValue.Open;
 
-
         inputs.gyroRadians = Units.degreesToRadians(gyroMeasurement.getValue() + 90);
 
         if (Math.abs(inputs.radiansPerSecond) < 0.1
-            && Math.abs(inputs.radians - getPivotRadiansPigeon()) > 0.1) {
+                && Math.abs(inputs.radians - getPivotRadiansPigeon()) > 0.1) {
             seedPivot();
             Logger.recordOutput("Stem/Pivot/SeededPivot", true);
         } else {

@@ -30,9 +30,9 @@ public class Stem extends SubsystemBase {
 
     public Stem() {
         if (RobotBase.isSimulation()) {
-            pivot = new PivotSim();
+            pivot = new PivotDisabled();
             telescope = new TelescopeDisabled();
-            wrist = new WristSim();
+            wrist = new WristDisabled();
         } else {
             pivot = new PivotReal();
             telescope = new TelescopeReal();

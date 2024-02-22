@@ -35,16 +35,16 @@ public class TestingController extends ControllerParent {
 
         this.B.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
             trig.onTrue(
-                new ProxyCommand(() -> {
-                    return StemCommands.moveTo(allss.stem.get(), StemPosition.fromRadians(
-                        kPivot.PIVOT_MIN_RADIANS + (Math.random() * (kPivot.PIVOT_MAX_RADIANS - kPivot.PIVOT_MIN_RADIANS)), 
-                        kWrist.MIN_ANGLE + (Math.random() * (kWrist.MAX_ANGLE - kWrist.MIN_ANGLE)), 
-                        kTelescope.MIN_METERS + (Math.random() * (kTelescope.MAX_METERS - kTelescope.MIN_METERS))));
-                })
-            );
+                    new ProxyCommand(() -> {
+                        return StemCommands.moveTo(allss.stem.get(), StemPosition.fromRadians(
+                                kPivot.MIN_ANGLE + (Math.random() * (kPivot.MAX_ANGLE - kPivot.MIN_ANGLE)),
+                                kWrist.MIN_ANGLE + (Math.random() * (kWrist.MAX_ANGLE - kWrist.MIN_ANGLE)),
+                                kTelescope.MIN_METERS
+                                        + (Math.random() * (kTelescope.MAX_METERS - kTelescope.MIN_METERS))));
+                    }));
         });
 
-        // this.X.binding = 
+        // this.X.binding =
 
         this.Y.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
             trig.onTrue(UmbrellaCommands.waitUntilSpunUp(allss.umbrella.get(), 5000));
