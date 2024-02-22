@@ -9,6 +9,7 @@ import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.subsystems.stem.pivot.*;
 import com.igknighters.subsystems.stem.telescope.*;
 import com.igknighters.subsystems.stem.wrist.*;
+import com.igknighters.util.CANBusLogging;
 import com.igknighters.util.Tracer;
 
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -58,6 +59,8 @@ public class Stem extends SubsystemBase {
         } else {
             coastSwitch = null;
         }
+
+        CANBusLogging.logBus(kStem.CANBUS);
     }
 
     /**
