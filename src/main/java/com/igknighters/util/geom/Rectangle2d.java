@@ -28,7 +28,7 @@ public class Rectangle2d {
     }
 
     /**
-     * Defines a rectangle where (x,y) is the top left corner
+     * Defines a rectangle where (x,y) is the bottom left corner
      * 
      * @param x The x value for the top left corner of the rectangle
      * @param y The y value for the top left corner of the rectangle
@@ -37,10 +37,10 @@ public class Rectangle2d {
      */
     public Rectangle2d(double x, double y, double width, double height) {
         this(
+            new Translation2d(x, y + height),
+            new Translation2d(x + width, y + height),
             new Translation2d(x, y),
-            new Translation2d(x + width, y),
-            new Translation2d(x, y - height),
-            new Translation2d(x + width, y - height)
+            new Translation2d(x + width, y)
         );
     }
 

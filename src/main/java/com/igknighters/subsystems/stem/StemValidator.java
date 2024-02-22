@@ -82,8 +82,9 @@ public class StemValidator {
                     umbrellaTopLeftPoint.getY(), umbrellaTopRightPoint.getY());
             double umbrellRectBottom = getSmallest(umbrellaBottomLeftPoint.getY(), umbrellaBottomRightPoint.getY(),
                     umbrellaTopLeftPoint.getY(), umbrellaTopRightPoint.getY());
-            return new Rectangle2d(umbrellaRectLeft, umbrellaRectTop, Math.abs(umbrellaRectLeft - umbrellaRectRight),
-                    Math.abs(umbrellaRectTop - umbrellRectBottom));
+            double width = Math.abs(umbrellaRectLeft - umbrellaRectRight);
+            double height = Math.abs(umbrellaRectTop - umbrellRectBottom);
+            return new Rectangle2d(umbrellaRectLeft, umbrellRectBottom, width, height);
         }
 
         public Translation2d[] getPoints() {
