@@ -370,21 +370,21 @@ public final class ConstValues {
         public static final class kTelescope {
             public static final int MOTOR_ID = 15;
 
-            public static final double MOTOR_kP = 1.0;
+            public static final double MOTOR_kP = 3.5;
             public static final double MOTOR_kI = 0.0;
             public static final double MOTOR_kD = 0.0;
 
-            public static final double MAX_VELOCITY = 400;
-            public static final double MAX_ACCELERATION = 1200;
+            public static final double MAX_VELOCITY = 60;
+            public static final double MAX_ACCELERATION = 200;
             public static final double MAX_JERK = 0;
 
-            public static final double MOTOR_TO_MECHANISM_RATIO = 25.0;
+            public static final double MOTOR_TO_MECHANISM_RATIO = 45.0;
 
             public static final double SPROCKET_CIRCUMFERENCE = 0.895 * TAU * Conv.INCHES_TO_METERS;
 
             public static final double MIN_METERS = 16.0 * Conv.INCHES_TO_METERS;
             public static final double MAX_METERS = MIN_METERS
-                    + ((51.1 / MOTOR_TO_MECHANISM_RATIO) * SPROCKET_CIRCUMFERENCE);
+                    + ((91.9 / MOTOR_TO_MECHANISM_RATIO) * SPROCKET_CIRCUMFERENCE);
 
             public static final boolean INVERTED = false;
 
@@ -405,9 +405,11 @@ public final class ConstValues {
             public static final int MOTOR_ID = 16;
             public static final int CANCODER_ID = 26;
 
-            public static final double MOTOR_kP = 1.0;
+            public static final double MOTOR_kP = 3.0;
             public static final double MOTOR_kI = 0.0;
-            public static final double MOTOR_kD = 0.0;
+            public static final double MOTOR_kD = 0.5;
+            public static final double MOTOR_kS = 0.13;
+            public static final double MOTOR_kV = 0.111;
 
             public static final boolean INVERTED = false;
 
@@ -416,11 +418,14 @@ public final class ConstValues {
             public static final double MIN_ANGLE = 45.0 * Conv.DEGREES_TO_RADIANS;
             public static final double MAX_ANGLE = 110.0 * Conv.DEGREES_TO_RADIANS;
 
+            public static final double MAX_VELOCITY = 1200;
+            public static final double MAX_ACCELERATION = 1800;
+            public static final double MAX_JERK = 1800;
+
             /**
              * Tolerance in radians
              */
             public static final double TARGET_TOLERANCE = 0.5 * Conv.DEGREES_TO_RADIANS;
-
         }
     }
 }

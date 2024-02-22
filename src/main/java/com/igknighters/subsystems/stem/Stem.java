@@ -1,5 +1,7 @@
 package com.igknighters.subsystems.stem;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.igknighters.GlobalState;
 import com.igknighters.LED;
 import com.igknighters.LED.LedAnimations;
@@ -92,8 +94,13 @@ public class Stem extends SubsystemBase {
         // StemPosition validated = StemValidator.stepTowardsTargetPosition(getStemPosition(), position);
         StemPosition validated = position;
         boolean pivotSuccess = pivot.target(validated.pivotRads, toleranceMult);
-        boolean wristSuccess = wrist.target(validated.wristRads, toleranceMult);
         boolean telescopeSuccess = telescope.target(validated.telescopeMeters, toleranceMult);
+        boolean wristSuccess = wrist.target(validated.wristRads, toleranceMult);
+
+        Logger.recordOutput("/Stem/PivotReached", pivotSuccess);
+        Logger.recordOutput("/Stem/TelescopeReached", telescopeSuccess);
+        Logger.recordOutput("/Stem/WristReached", wristSuccess);
+
         return pivotSuccess && wristSuccess && telescopeSuccess;
     }
 

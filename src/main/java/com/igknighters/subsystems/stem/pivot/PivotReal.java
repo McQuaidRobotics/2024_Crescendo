@@ -109,6 +109,8 @@ public class PivotReal implements Pivot {
         followerMotor.setControl(
                 new Follower(kPivot.LEFT_MOTOR_ID, true));
 
+        seedPivot();
+
         BootupLogger.bootupLog("    Pivot initialized (real)");
     }
 
@@ -231,7 +233,8 @@ public class PivotReal implements Pivot {
 
         inputs.gyroRadians = Units.degreesToRadians(gyroMeasurement.getValue() + 90);
 
-        if (Math.abs(inputs.radiansPerSecond) < 0.1) {
+        if (Math.abs(inputs.radiansPerSecond) < 0.1
+            && Math.abs(inputs.radians - getPivotRadiansPigeon()) > 0.1) {
             seedPivot();
             Logger.recordOutput("Stem/Pivot/SeededPivot", true);
         } else {
