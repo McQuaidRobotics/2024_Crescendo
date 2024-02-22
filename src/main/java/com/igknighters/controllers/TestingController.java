@@ -47,7 +47,7 @@ public class TestingController extends ControllerParent {
 
         this.X.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
             trig.onTrue(
-                    StemCommands.moveTo(
+                    StemCommands.holdAt(
                             allss.stem.get(), StemPosition.fromDegrees(
                                     11.0,
                                     72.0,

@@ -71,4 +71,15 @@ public class StemPosition {
             return true;
         }
     };
+
+    public static StemPosition INTAKE = new StemPosition(
+            Units.degreesToRadians(7.5),
+            0.493,
+            1.2){
+
+        @Override
+        public String toString() {
+            return "Intake";
+        }
+    };
 }

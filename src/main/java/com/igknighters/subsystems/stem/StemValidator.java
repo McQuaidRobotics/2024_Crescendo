@@ -300,6 +300,10 @@ public class StemValidator {
                                 currentState.getPivotRads(),
                                 currentState.getWristRads(),
                                 targetState.getTelescopeMeters()));
+                
+                SmartDashboard.putString("pivotMovementValidationReason", pivotMovementValidReason.name());
+                SmartDashboard.putString("wristMovementValidationReason", wristMovementValidReason.name());
+                SmartDashboard.putString("telescopeMovementValidationReason", telescopeMovementValidReason.name());
 
                 double midStatePivotRads = pivotMovementValidReason.isValid()
                                 ? currentState.getPivotRads()

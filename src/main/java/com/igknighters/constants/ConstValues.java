@@ -64,13 +64,13 @@ public final class ConstValues {
     public static final double PERIODIC_TIME = 0.02; // 20ms
 
     public static final class kRobotGeometry {
-        public static final double BUMPER_THICKNESS = 3.3 * Conv.INCHES_TO_METERS;
+        public static final double BUMPER_THICKNESS = 2.8 * Conv.INCHES_TO_METERS;
         public static final double BUMPER_HEIGHT = 5.75 * Conv.INCHES_TO_METERS;
         public static final double FRAME_WIDTH = 26.0 * Conv.INCHES_TO_METERS;
 
         public static final double UMBRELLA_LENGTH = 13.25 * Conv.INCHES_TO_METERS;
         public static final double UMBRELLA_HEIGHT = 5.0 * Conv.INCHES_TO_METERS;
-        public static final double UMBRELLA_OFFSET = 2.375 * Conv.INCHES_TO_METERS;
+        public static final double UMBRELLA_OFFSET = 2.45 * Conv.INCHES_TO_METERS;
         public static final Rectangle2d DRIVE_BASE = new Rectangle2d(
                 0.0,
                 0.0,
@@ -380,7 +380,7 @@ public final class ConstValues {
             public static final double MAX_ACCELERATION = 2000;
             public static final double MAX_JERK = 2000;
 
-            public static final double MIN_ANGLE = 9.0 * Conv.DEGREES_TO_RADIANS;
+            public static final double MIN_ANGLE = 7.0 * Conv.DEGREES_TO_RADIANS;
 
             public static final double MAX_ANGLE = 97.0 * Conv.DEGREES_TO_RADIANS;
 
