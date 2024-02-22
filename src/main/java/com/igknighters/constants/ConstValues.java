@@ -426,7 +426,7 @@ public final class ConstValues {
             /**
              * Tolerance in meters
              */
-            public static final double TARGET_TOLERANCE = 0.03;
+            public static final double TARGET_TOLERANCE = 0.02;
         }
 
         public static final class kWrist {

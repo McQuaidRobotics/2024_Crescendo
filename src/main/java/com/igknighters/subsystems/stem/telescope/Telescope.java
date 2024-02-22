@@ -87,20 +87,18 @@ public interface Telescope extends Component {
      */
     default public boolean target(double meters, double tolerancMult) {
         this.setTelescopeMeters(meters);
-        return Math.abs(this.getTelescopeMeters() - meters) < ConstValues.kStem.kTelescope.TARGET_TOLERANCE
-                * tolerancMult;
+        return isAt(meters, tolerancMult);
     }
 
     /**
-     * Move the telescope to the target and returns if it has reached the target.
-     * Meant to be used in a kind of polling loop to wait the mechanism to reach
-     * the target.
-     * 
-     * @param meters The target distance to move to
-     * @return If the mechanism has reached the target
+     * Returns if the mechanism is within a tolerance of a certain angle.
+     * @param radians The angle to check against
+     * @param toleranceMult The multiplier to apply to the tolerance, higher mult
+     *                    means more tolerance
+     * @return If the mechanism is within the tolerance of the angle
      */
-    default public boolean target(double meters) {
-        return target(meters, 1.0);
+    default public boolean isAt(double radians, double toleranceMult) {
+        return Math.abs(this.getTelescopeMeters() - radians) < ConstValues.kStem.kTelescope.TARGET_TOLERANCE * toleranceMult;
     }
 
     default public void setCoast(boolean shouldBeCoasting) {

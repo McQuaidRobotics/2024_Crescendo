@@ -270,7 +270,7 @@ public class StemValidator {
     /**
      * Will
      */
-    public static StemPosition stepTowardsTargetPosition(StemPosition currentState, StemPosition targetState) {
+    public static StemPosition stepTowardsTargetPosition(StemPosition currentState, StemPosition targetState, double proportion) {
         ValidationResponse pivotMovementValidReason = isValidPosition(StemPosition.fromRadians(
                 targetState.getPivotRads(),
                 currentState.getWristRads(),
@@ -284,15 +284,15 @@ public class StemValidator {
                 currentState.getWristRads(),
                 targetState.getTelescopeMeters()));
 
-        double midStatePivotRads = !pivotMovementValidReason.isValid()
-                ? currentState.getPivotRads()
-                : targetState.getPivotRads();
-        double midStateWristRads = !wristMovementValidReason.isValid()
-                ? currentState.getPivotRads()
-                : targetState.getWristRads();
-        double midStateTelescopeMeters = !telescopeMovementValidReason.isValid()
-                ? currentState.getTelescopeMeters()
-                : targetState.getTelescopeMeters();
+        double midStatePivotRads = pivotMovementValidReason.isValid()
+                ? currentState.getPivotRads() + ((targetState.getPivotRads() - currentState.getPivotRads()) * proportion)
+                : currentState.getPivotRads();
+        double midStateWristRads = wristMovementValidReason.isValid()
+                ? currentState.getWristRads() + ((targetState.getWristRads() - currentState.getWristRads()) * proportion)
+                : currentState.getWristRads();
+        double midStateTelescopeMeters = telescopeMovementValidReason.isValid()
+                ? currentState.getTelescopeMeters() + ((targetState.getTelescopeMeters() - currentState.getTelescopeMeters()) * proportion)
+                : currentState.getTelescopeMeters();
 
         if (!pivotMovementValidReason.isValid()) {
             StemPosition invalidPosition = StemPosition.fromRadians(

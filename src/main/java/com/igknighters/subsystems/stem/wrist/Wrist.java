@@ -56,19 +56,18 @@ public interface Wrist extends Component {
      */
     default public boolean target(double radians, double tolerancMult) {
         this.setWristRadians(radians);
-        return Math.abs(this.getWristRadians() - radians) < ConstValues.kStem.kWrist.TARGET_TOLERANCE * tolerancMult;
+        return isAt(radians, tolerancMult);
     }
 
     /**
-     * Moves the wrist to the target and returns if it has reached the target.
-     * Meant to be used in a kind of polling loop to wait the mechanism to reach
-     * the target.
-     * 
-     * @param radians The target angle to move to
-     * @return If the mechanism has reached the target
+     * Returns if the mechanism is within a tolerance of a certain angle.
+     * @param radians The angle to check against
+     * @param toleranceMult The multiplier to apply to the tolerance, higher mult
+     *                    means more tolerance
+     * @return If the mechanism is within the tolerance of the angle
      */
-    default public boolean target(double radians) {
-        return target(radians, 1.0);
+    default public boolean isAt(double radians, double toleranceMult) {
+        return Math.abs(this.getWristRadians() - radians) < ConstValues.kStem.kWrist.TARGET_TOLERANCE * toleranceMult;
     }
 
     static double mechanismRadsToMotorRots(Double radians) {

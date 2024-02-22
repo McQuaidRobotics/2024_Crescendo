@@ -97,17 +97,20 @@ public class Stem extends SubsystemBase {
                 && wrist.target(position.wristRads, 1.0)
                 && telescope.target(position.telescopeMeters, 1.0);
         }
-        StemPosition validated = StemValidator.stepTowardsTargetPosition(getStemPosition(), position);
-        // StemPosition validated = position;
-        boolean pivotSuccess = pivot.target(validated.pivotRads, toleranceMult);
-        boolean telescopeSuccess = telescope.target(validated.telescopeMeters, toleranceMult);
-        boolean wristSuccess = wrist.target(validated.wristRads, toleranceMult);
+        StemPosition validated = StemValidator.stepTowardsTargetPosition(getStemPosition(), position, 1.0);
+        pivot.setPivotRadians(validated.pivotRads);
+        telescope.setTelescopeMeters(validated.telescopeMeters);
+        wrist.setWristRadians(validated.wristRads);
+
+        boolean pivotSuccess = pivot.isAt(position.pivotRads, toleranceMult);
+        boolean telescopeSuccess = telescope.isAt(position.telescopeMeters, toleranceMult);
+        boolean wristSuccess = wrist.isAt(position.wristRads, toleranceMult);
 
         Logger.recordOutput("/Stem/PivotReached", pivotSuccess);
         Logger.recordOutput("/Stem/TelescopeReached", telescopeSuccess);
         Logger.recordOutput("/Stem/WristReached", wristSuccess);
 
-        return pivotSuccess && wristSuccess && telescopeSuccess;
+        return pivotSuccess && telescopeSuccess && wristSuccess;
     }
 
     /**
