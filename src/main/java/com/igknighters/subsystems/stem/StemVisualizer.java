@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 
 public class StemVisualizer {
@@ -24,6 +25,14 @@ public class StemVisualizer {
     private final Color8Bit debugColor = new Color8Bit(170, 180, 180);
     private final Color8Bit boundsColor = new Color8Bit(255, 180, 20);
     private final Translation2d pivotOrigin = new Translation2d(0.5, 0.5);
+
+    // --- Temporary for debugging ---
+    private MechanismRoot2d pivotAxelPointRoot;
+    private MechanismRoot2d wristAxelPointRoot;
+    private MechanismRoot2d umbrellaBottomLeftPointRoot;
+    private MechanismRoot2d umbrellaBottomRightPointRoot;
+    private MechanismRoot2d umbrellaTopLeftPointRoot;
+    private MechanismRoot2d umbrellaTopRightPointRoot;
 
     private final double wristOffset = 90;
 
@@ -59,6 +68,62 @@ public class StemVisualizer {
         drawUmbrella(wristCurrent, false);
         drawUmbrella(wristSetpoint, true);
         drawMaxBounds();
+
+        pivotAxelPointRoot = mechanism.getRoot("pivotAxelPoint", 0, 0);
+        wristAxelPointRoot = mechanism.getRoot("wristAxelPoint", 0, 0);
+        umbrellaBottomLeftPointRoot = mechanism.getRoot("umbrellaBottomLeftPoint", 0, 0);
+        umbrellaBottomRightPointRoot = mechanism.getRoot("umbrellaBottomRightPoint", 0, 0);
+        umbrellaTopLeftPointRoot = mechanism.getRoot("umbrellaTopLeftPoint", 0, 0);
+        umbrellaTopRightPointRoot = mechanism.getRoot("umbrellaTopRightPoint", 0, 0);
+
+        pivotAxelPointRoot.append(
+                new MechanismLigament2d(
+                        pivotAxelPointRoot.getName(), 
+                        0.02, 
+                        0.0,
+                        2.0,
+                        new Color8Bit(255, 255, 255))
+        );
+        wristAxelPointRoot.append(
+                new MechanismLigament2d(
+                        wristAxelPointRoot.getName(), 
+                        0.02,
+                        0.0,
+                        2.0,
+                        new Color8Bit(255, 255, 255))
+        );
+        umbrellaBottomLeftPointRoot.append(
+                new MechanismLigament2d(
+                        umbrellaBottomLeftPointRoot.getName(), 
+                        0.02,
+                        0.0,
+                        2.0,
+                        new Color8Bit(255, 255, 255))
+        );
+        umbrellaBottomRightPointRoot.append(
+                new MechanismLigament2d(
+                        umbrellaBottomRightPointRoot.getName(), 
+                        0.02,
+                        0.0,
+                        2.0,
+                        new Color8Bit(255, 255, 255))
+        );
+        umbrellaTopLeftPointRoot.append(
+                new MechanismLigament2d(
+                        umbrellaTopLeftPointRoot.getName(), 
+                        0.02,
+                        0.0,
+                        2.0,
+                        new Color8Bit(255, 255, 255))
+        );
+        umbrellaTopRightPointRoot.append(
+                new MechanismLigament2d(
+                        umbrellaTopRightPointRoot.getName(), 
+                        0.02, 
+                        0.0,
+                        2.0,
+                        new Color8Bit(255, 255, 255))
+        );
 
         var table = NetworkTableInstance.getDefault()
                 .getTable("Visualizers")
@@ -206,6 +271,41 @@ public class StemVisualizer {
         telescopeCurrent.setColor(new Color8Bit(red, green, 0));
 
         wristCurrent.setAngle(-Units.radiansToDegrees(currentPose.wristRads) + wristOffset);
+
+        SmartDashboard.putString("Stem Position Valid", StemValidator.isValidPosition(currentPose).name());
+
+        Translation2d drivebaseOrigin = pivotOrigin.minus(kRobotGeometry.PIVOT_LOCATION);
+        StemValidator.MechanismPoints mechPts = new StemValidator.MechanismPoints(currentPose);
+        var pivotAxelPoint = kRobotGeometry.PIVOT_LOCATION.plus(drivebaseOrigin);
+        var wristAxelPoint = mechPts.wristAxelPoint.plus(drivebaseOrigin);
+        var umbrellaBottomLeftPoint = mechPts.umbrellaBottomLeftPoint.plus(drivebaseOrigin);
+        var umbrellaBottomRightPoint = mechPts.umbrellaBottomRightPoint.plus(drivebaseOrigin);
+        var umbrellaTopLeftPoint = mechPts.umbrellaTopLeftPoint.plus(drivebaseOrigin);
+        var umbrellaTopRightPoint = mechPts.umbrellaTopRightPoint.plus(drivebaseOrigin);
+
+        pivotAxelPointRoot.setPosition(pivotAxelPoint.getX(), pivotAxelPoint.getY());
+        wristAxelPointRoot.setPosition(wristAxelPoint.getX(), wristAxelPoint.getY());
+        umbrellaBottomLeftPointRoot.setPosition(umbrellaBottomLeftPoint.getX(), umbrellaBottomLeftPoint.getY());
+        umbrellaBottomRightPointRoot.setPosition(umbrellaBottomRightPoint.getX(), umbrellaBottomRightPoint.getY()); 
+        umbrellaTopLeftPointRoot.setPosition(umbrellaTopLeftPoint.getX(), umbrellaTopLeftPoint.getY());
+        umbrellaTopRightPointRoot.setPosition(umbrellaTopRightPoint.getX(), umbrellaTopRightPoint.getY());
+
+        SmartDashboard.putString("pivotAxelPoint", kRobotGeometry.PIVOT_LOCATION.toString());
+        SmartDashboard.putString("wristAxelPoint", mechPts.wristAxelPoint.toString());
+        SmartDashboard.putString("umbrellaBottomLeftPoint", mechPts.umbrellaBottomLeftPoint.toString());
+        SmartDashboard.putString("umbrellaBottomRightPoint", mechPts.umbrellaBottomRightPoint.toString());
+        SmartDashboard.putString("umbrellaTopLeftPoint", mechPts.umbrellaTopLeftPoint.toString());
+        SmartDashboard.putString("umbrellaTopRightPoint", mechPts.umbrellaTopRightPoint.toString());
+
+        SmartDashboard.putString("Drive Base Bottom Left", kRobotGeometry.DRIVE_BASE.getBottomLeft().toString());
+        SmartDashboard.putString("Drive Base Bottom Right", kRobotGeometry.DRIVE_BASE.getBottomRight().toString());
+        SmartDashboard.putString("Drive Base Top Left", kRobotGeometry.DRIVE_BASE.getTopLeft().toString());
+        SmartDashboard.putString("Drive Base Top Right", kRobotGeometry.DRIVE_BASE.getTopRight().toString());
+
+        SmartDashboard.putString("Allowed Bounds Bottom Left", kRobotGeometry.BOUNDS.getBottomLeft().toString());
+        SmartDashboard.putString("Allowed Bounds Bottom Right", kRobotGeometry.BOUNDS.getBottomRight().toString());
+        SmartDashboard.putString("Allowed Bounds Top Left", kRobotGeometry.BOUNDS.getTopLeft().toString());
+        SmartDashboard.putString("Allowed Bounds Top Right", kRobotGeometry.BOUNDS.getTopRight().toString());
     }
 
     public void updateSetpoint(StemPosition desiredPose) {

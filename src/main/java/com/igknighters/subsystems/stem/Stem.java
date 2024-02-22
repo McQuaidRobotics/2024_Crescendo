@@ -3,6 +3,7 @@ package com.igknighters.subsystems.stem;
 import com.igknighters.GlobalState;
 import com.igknighters.LED;
 import com.igknighters.LED.LedAnimations;
+import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.subsystems.stem.pivot.*;
 import com.igknighters.subsystems.stem.telescope.*;
@@ -12,6 +13,7 @@ import com.igknighters.util.Tracer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -28,7 +30,7 @@ public class Stem extends SubsystemBase {
     public Stem() {
         if (RobotBase.isSimulation()) {
             pivot = new PivotSim();
-            telescope = new TelescopeSim();
+            telescope = new TelescopeDisabled();
             wrist = new WristSim();
         } else {
             pivot = new PivotReal();
@@ -76,6 +78,7 @@ public class Stem extends SubsystemBase {
         //     // LED
         //     return true;
         // }
+
         visualizer.updateSetpoint(position);
         if (!telescope.hasHomed()) {
             if (!position.isStow()) {

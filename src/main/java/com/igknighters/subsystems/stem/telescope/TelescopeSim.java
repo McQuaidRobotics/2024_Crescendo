@@ -79,11 +79,12 @@ public class TelescopeSim implements Telescope {
     @Override
     public void setTelescopeMeters(double meters) {
         inputs.targetMeters = meters; // set target meters to what we want
-        double telescopeVoltageFeedback = pidController.calculate(inputs.meters, meters); // makes a voltage feedback
-                                                                                          // with the new controller
-                                                                                          // output
-        sim.setInputVoltage(telescopeVoltageFeedback); // sets voltage to the feedback
-        inputs.volts = telescopeVoltageFeedback;
+        // double telescopeVoltageFeedback = pidController.calculate(inputs.meters, meters); // makes a voltage feedback
+        //                                                                                   // with the new controller
+        //                                                                                   // output
+        // sim.setInputVoltage(telescopeVoltageFeedback); // sets voltage to the feedback
+        // inputs.volts = telescopeVoltageFeedback;
+        sim.setState(meters, 0.0);
     }
 
     private void setSimStateMeters(double meters) {
