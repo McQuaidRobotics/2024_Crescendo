@@ -15,7 +15,8 @@ import edu.wpi.first.wpilibj.RobotController;
 public class RobotSetup {
 
     public enum RobotID {
-        CRASH(Subsystems.list(Subsystems.Swerve, Subsystems.Vision),
+        CRASH(Subsystems.list(Subsystems.Stem, Subsystems.Umbrella,
+                Subsystems.Swerve, Subsystems.Vision),
                 RobotConstID.CRASH),
 
         BURN(Subsystems.list(Subsystems.Swerve),
@@ -24,7 +25,7 @@ public class RobotSetup {
         SIM_CRASH(Subsystems.all(), RobotConstID.CRASH),
         SIM_BURN(Subsystems.none(), RobotConstID.BURN),
 
-        TestBoard("testBoard(crash)", Subsystems.list(Subsystems.Stem), RobotConstID.CRASH),
+        TestBoard("testBoard(crash)", Subsystems.none(), RobotConstID.CRASH),
 
         Unlabeled("", Subsystems.none(), RobotConstID.BURN);
 

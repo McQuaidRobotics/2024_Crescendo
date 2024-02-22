@@ -1,12 +1,23 @@
 package com.igknighters.subsystems.stem;
 
+import org.littletonrobotics.junction.Logger;
+
+import com.igknighters.GlobalState;
+import com.igknighters.LED;
+import com.igknighters.LED.LedAnimations;
+import com.igknighters.constants.ConstValues.kStem;
+import com.igknighters.subsystems.stem.StemValidator.ValidationResponse;
 import com.igknighters.subsystems.stem.pivot.*;
 import com.igknighters.subsystems.stem.telescope.*;
 import com.igknighters.subsystems.stem.wrist.*;
+import com.igknighters.util.CANBusLogging;
 import com.igknighters.util.Tracer;
 
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class Stem extends SubsystemBase {
 
@@ -16,23 +27,46 @@ public class Stem extends SubsystemBase {
 
     private final StemVisualizer visualizer;
 
+    private final DigitalInput coastSwitch;
+
     public Stem() {
         if (RobotBase.isSimulation()) {
-            pivot = new PivotSim();
+            pivot = new PivotDisabled();
             telescope = new TelescopeDisabled();
-            wrist = new WristSim();
+            wrist = new WristDisabled();
         } else {
             pivot = new PivotReal();
-            telescope = new TelescopeDisabled();
-            wrist = new WristSim();
+            telescope = new TelescopeReal();
+            wrist = new WristReal();
         }
 
         visualizer = new StemVisualizer();
+
+        if (!GlobalState.isUnitTest()) {
+            coastSwitch = new DigitalInput(kStem.COAST_SWITCH_CHANNEL);
+            new Trigger(coastSwitch::get)
+                    .and(DriverStation::isDisabled)
+                    .or(DriverStation::isTestEnabled)
+                    .onTrue(this.runOnce(() -> {
+                        pivot.setCoast(true);
+                        telescope.setCoast(true);
+                        wrist.setCoast(true);
+                    }).ignoringDisable(true))
+                    .onFalse(this.runOnce(() -> {
+                        pivot.setCoast(false);
+                        telescope.setCoast(false);
+                        wrist.setCoast(false);
+                    }).ignoringDisable(true));
+        } else {
+            coastSwitch = null;
+        }
+
+        CANBusLogging.logBus(kStem.CANBUS);
     }
 
     /**
      * Meant as the main api for controlling the stem,
-     * this method takes in a {@link StemPosition.StemPosition} and sets the
+     * this method takes in a {@link StemPosition} and sets the
      * stem to that position. This method will return false if any of the
      * mechanisms have not yet reached their target position.
      * 
@@ -41,16 +75,46 @@ public class Stem extends SubsystemBase {
      * @return True if all mechanisms have reached their target position
      */
     public boolean setStemPosition(StemPosition position, double toleranceMult) {
+        ValidationResponse validity = StemValidator.validatePosition(position);
+        if (!validity.isValid()) {
+            DriverStation.reportError(
+                    "Invalid stem position(" + validity.name() + "): " + position.toString(),
+                    true);
+            // LED
+            return true;
+        }
+
         visualizer.updateSetpoint(position);
-        boolean pivotSuccess = pivot.target(position.pivotRads, toleranceMult);
-        boolean wristSuccess = wrist.target(position.wristRads, toleranceMult);
-        boolean telescopeSuccess = telescope.target(position.telescopeMeters, toleranceMult);
-        return pivotSuccess && wristSuccess && telescopeSuccess;
+        if (!telescope.hasHomed()) {
+            if (!position.isStow()) {
+                DriverStation.reportWarning("Stem Telescope has not been homed, run stow to home", false);
+                LED.getInstance().sendAnimation(
+                        LedAnimations.WARNING).withDuration(1.0);
+                return false;
+            }
+            return pivot.target(position.pivotRads, 1.0)
+                    && wrist.target(position.wristRads, 1.0)
+                    && telescope.target(position.telescopeMeters, 1.0);
+        }
+        StemPosition validated = StemValidator.stepTowardsTargetPosition(getStemPosition(), position, 1.0);
+        pivot.setPivotRadians(validated.pivotRads);
+        telescope.setTelescopeMeters(validated.telescopeMeters);
+        wrist.setWristRadians(validated.wristRads);
+
+        boolean pivotSuccess = pivot.isAt(position.pivotRads, toleranceMult);
+        boolean telescopeSuccess = telescope.isAt(position.telescopeMeters, toleranceMult);
+        boolean wristSuccess = wrist.isAt(position.wristRads, toleranceMult);
+
+        Logger.recordOutput("/Stem/PivotReached", pivotSuccess);
+        Logger.recordOutput("/Stem/TelescopeReached", telescopeSuccess);
+        Logger.recordOutput("/Stem/WristReached", wristSuccess);
+
+        return pivotSuccess && telescopeSuccess && wristSuccess;
     }
 
     /**
      * Meant as the main api for controlling the stem,
-     * this method takes in a {@link StemPosition.StemPosition} and sets the
+     * this method takes in a {@link StemPosition} and sets the
      * stem to that position. This method will return false if any of the
      * mechanisms have not yet reached their target position.
      * 

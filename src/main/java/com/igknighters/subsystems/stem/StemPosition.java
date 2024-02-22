@@ -1,5 +1,8 @@
 package com.igknighters.subsystems.stem;
 
+import com.fasterxml.jackson.databind.deser.std.UntypedObjectDeserializer;
+import com.igknighters.constants.ConstValues.kStem.kTelescope;
+
 import edu.wpi.first.math.util.Units;
 
 public class StemPosition {
@@ -24,8 +27,72 @@ public class StemPosition {
                 telescopePosMeters);
     }
 
-    //TODO: Get these values from cad and irl
-    public static final StemPosition INTAKE = fromDegrees(0, 55, Units.inchesToMeters(28));
-    public static final StemPosition STOW = fromDegrees(30, 30, Units.inchesToMeters(20));
-    public static final StemPosition AMP = fromDegrees(93, 45, Units.inchesToMeters(28));
+    public double getPivotRads() {
+        return pivotRads;
+    }
+
+    public double getWristRads() {
+        return wristRads;
+    }
+
+    public double getTelescopeMeters() {
+        return telescopeMeters;
+    }
+
+    public boolean isValid() {
+        return StemValidator.validatePosition(this).isValid();
+    }
+
+    public boolean isStow() {
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return "StemPosition(" + Units.radiansToDegrees(pivotRads) + ", " + Units.radiansToDegrees(wristRads) + ", "
+                + telescopeMeters + ")";
+    }
+
+    public static StemPosition STOW = new StemPosition(
+            Units.degreesToRadians(35.0),
+            kTelescope.MIN_METERS,
+            Units.degreesToRadians(60.0)) {
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return "Stow";
+        }
+
+        @Override
+        public boolean isStow() {
+            return true;
+        }
+    };
+
+    public static StemPosition INTAKE = new StemPosition(
+            Units.degreesToRadians(7.5),
+            0.493,
+            1.2) {
+
+        @Override
+        public String toString() {
+            return "Intake";
+        }
+    };
+
+    public static StemPosition AMP = new StemPosition(
+            Units.degreesToRadians(94.0),
+            Units.degreesToRadians(58.0),
+            kTelescope.MIN_METERS + Units.inchesToMeters(5.5)) {
+
+        @Override
+        public String toString() {
+            return "Amp";
+        }
+
+    };
 }

@@ -1,12 +1,22 @@
 package com.igknighters.controllers;
 
 import com.igknighters.constants.ConstValues;
+import com.igknighters.constants.ConstValues.kStem.kPivot;
+import com.igknighters.constants.ConstValues.kStem.kTelescope;
+import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.subsystems.stem.StemPosition;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
 import com.igknighters.SubsystemResources.Subsystems;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
+import com.igknighters.commands.stem.StemCommands;
+import com.igknighters.commands.umbrella.UmbrellaCommands;
+
+@SuppressWarnings("unused")
 
 /** If debug is false this controller does not initialize */
 public class TestingController extends ControllerParent {
@@ -16,21 +26,43 @@ public class TestingController extends ControllerParent {
         // disregard null safety as it is checked on assignment
 
         /// FACE BUTTONS
-        this.A.binding = new Binding((trig, allss) -> {
-            trig.onTrue(Commands.runOnce(() -> {
-                allss.stem.get().setStemPosition(StemPosition.fromDegrees(80.0, 0.0, 0.0));
-            }));
-        }, Subsystems.Stem);
+        this.A.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
+            trig.onTrue(
+                    StemCommands.holdAt(
+                            allss.stem.get(), StemPosition.fromDegrees(
+                                    70.0,
+                                    80.0,
+                                    0.53)));
+        });
 
-        this.B.binding = new Binding((trig, allss) -> {
-            trig.onTrue(Commands.runOnce(() -> {
-                allss.stem.get().setStemPosition(StemPosition.fromDegrees(20.0, 0.0, 0.0));
-            }));
-        }, Subsystems.Stem);
+        this.B.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
+            trig.onTrue(
+                    new ProxyCommand(() -> {
+                        return StemCommands.moveTo(allss.stem.get(), StemPosition.fromRadians(
+                                kPivot.MIN_ANGLE + (Math.random() * (kPivot.MAX_ANGLE - kPivot.MIN_ANGLE)),
+                                kWrist.MIN_ANGLE + (Math.random() * (kWrist.MAX_ANGLE - kWrist.MIN_ANGLE)),
+                                kTelescope.MIN_METERS
+                                        + (Math.random() * (kTelescope.MAX_METERS - kTelescope.MIN_METERS))));
+                    }));
+        });
 
-        // this.X.binding =
+        this.X.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
+            trig.onTrue(
+                    StemCommands.holdAt(
+                            allss.stem.get(), StemPosition.fromDegrees(
+                                    11.0,
+                                    72.0,
+                                    kTelescope.MIN_METERS + Units.inchesToMeters(4.7))));
+        });
 
-        // this.Y.binding =
+        this.Y.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
+            trig.onTrue(
+                    StemCommands.moveTo(
+                            allss.stem.get(), StemPosition.fromDegrees(
+                                    41.0,
+                                    108.0,
+                                    kTelescope.MIN_METERS)));
+        });
 
         /// BUMPER
         this.LB.binding = new Binding((trig, allss) -> {

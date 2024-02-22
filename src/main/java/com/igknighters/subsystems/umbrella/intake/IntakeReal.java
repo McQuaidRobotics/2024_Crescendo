@@ -10,6 +10,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.ReverseLimitSourceValue;
 import com.ctre.phoenix6.signals.ReverseLimitValue;
+import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.constants.ConstValues.kUmbrella.kIntake;
 import com.igknighters.util.BootupLogger;
 import com.igknighters.util.FaultManager;
@@ -19,8 +20,8 @@ import edu.wpi.first.math.util.Units;
 
 public class IntakeReal implements Intake {
 
-    private final TalonFX upperMotor = new TalonFX(kIntake.UPPER_MOTOR_ID);
-    private final TalonFX lowerMotor = new TalonFX(kIntake.LOWER_MOTOR_ID);
+    private final TalonFX upperMotor = new TalonFX(kIntake.UPPER_MOTOR_ID, kUmbrella.CANBUS);
+    private final TalonFX lowerMotor = new TalonFX(kIntake.LOWER_MOTOR_ID, kUmbrella.CANBUS);
     private final StatusSignal<Double> veloSignalUpper, voltSignalUpper, currentSignalUpper, tempSignalUpper;
     private final StatusSignal<Double> veloSignalLower, voltSignalLower, currentSignalLower, tempSignalLower;
     private final StatusSignal<ReverseLimitValue> revLimitSignal;

@@ -12,12 +12,12 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
+import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.constants.HardwareIndex.StemHW;
 import com.igknighters.util.BootupLogger;
 import com.igknighters.util.FaultManager;
-import com.igknighters.util.SafeTalonFXConfiguration;
 
 import edu.wpi.first.math.util.Units;
 
@@ -31,7 +31,7 @@ public class WristReal implements Wrist {
     private final WristInputs inputs;
 
     public WristReal() {
-        motor = new TalonFX(kWrist.MOTOR_ID);
+        motor = new TalonFX(kWrist.MOTOR_ID, kStem.CANBUS);
         motor.getConfigurator().apply(motorConfig());
 
         motorRots = motor.getRotorPosition();
@@ -48,7 +48,7 @@ public class WristReal implements Wrist {
 
         motor.optimizeBusUtilization();
 
-        cancoder = new CANcoder(kWrist.CANCODER_ID);
+        cancoder = new CANcoder(kWrist.CANCODER_ID, kStem.CANBUS);
         cancoder.getConfigurator().apply(cancoderConfig());
 
         cancoderRots = cancoder.getAbsolutePosition();
@@ -60,37 +60,62 @@ public class WristReal implements Wrist {
         cancoder.optimizeBusUtilization();
 
         inputs = new WristInputs(Units.rotationsToRadians(cancoderRots.getValue()));
+        seedWrist();
 
         BootupLogger.bootupLog("    Wrist initialized (real)");
     }
 
     private TalonFXConfiguration motorConfig() {
-        TalonFXConfiguration wristMotorCfg = new SafeTalonFXConfiguration();
-        wristMotorCfg.Slot0.kP = kWrist.MOTOR_kP;
-        wristMotorCfg.Slot0.kI = kWrist.MOTOR_kI;
-        wristMotorCfg.Slot0.kD = kWrist.MOTOR_kD;
+        TalonFXConfiguration cfg = new TalonFXConfiguration();
+        cfg.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
+        cfg.Slot0.kP = kWrist.MOTOR_kP;
+        cfg.Slot0.kI = kWrist.MOTOR_kI;
+        cfg.Slot0.kD = kWrist.MOTOR_kD;
+        cfg.Slot0.kS = kWrist.MOTOR_kS;
+        cfg.Slot0.kV = kWrist.MOTOR_kV;
 
-        wristMotorCfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        wristMotorCfg.MotorOutput.Inverted = kWrist.INVERTED
-            ? InvertedValue.Clockwise_Positive
-            : InvertedValue.CounterClockwise_Positive;
+        cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        cfg.MotorOutput.Inverted = kWrist.INVERTED
+                ? InvertedValue.Clockwise_Positive
+                : InvertedValue.CounterClockwise_Positive;
 
-        return wristMotorCfg;
+        // cfg.CurrentLimits.StatorCurrentLimitEnable = true;
+        // cfg.CurrentLimits.StatorCurrentLimit = 65.0;
+
+        // cfg.TorqueCurrent.PeakForwardTorqueCurrent = 65.0;
+        // cfg.TorqueCurrent.PeakReverseTorqueCurrent = -65.0;
+
+        // cfg.CurrentLimits.SupplyCurrentLimitEnable = true;
+        // cfg.CurrentLimits.SupplyCurrentThreshold = 40.0;
+        // cfg.CurrentLimits.SupplyTimeThreshold = 0.5;
+        // cfg.CurrentLimits.SupplyCurrentLimit = 30.0;
+
+        // cfg.MotionMagic.MotionMagicCruiseVelocity = kWrist.MAX_VELOCITY;
+        // cfg.MotionMagic.MotionMagicAcceleration = kWrist.MAX_ACCELERATION;
+        // cfg.MotionMagic.MotionMagicJerk = kWrist.MAX_JERK;
+
+        cfg.ClosedLoopRamps.DutyCycleClosedLoopRampPeriod = 0.5;
+
+        return cfg;
     }
 
     private CANcoderConfiguration cancoderConfig() {
-        CANcoderConfiguration wristCancoderCfg = new CANcoderConfiguration();
-        wristCancoderCfg.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
-        wristCancoderCfg.MagnetSensor.MagnetOffset = kWrist.CANCODER_OFFSET;
+        CANcoderConfiguration cfg = new CANcoderConfiguration();
+        cfg.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
+        cfg.MagnetSensor.MagnetOffset = kWrist.CANCODER_OFFSET;
 
-        return wristCancoderCfg;
+        return cfg;
+    }
+
+    private void seedWrist() {
+        motor.setPosition(Wrist.mechanismRadsToMotorRots(inputs.radians));
     }
 
     @Override
     public void setWristRadians(Double radians) {
         inputs.targetRadians = radians;
         var posControlRequest = new PositionDutyCycle(
-                Wrist.mechanismRadsToMotorRots(radians));
+                Wrist.mechanismRadsToMotorRots(radians)).withEnableFOC(false);
         this.motor.setControl(posControlRequest);
     }
 
@@ -103,6 +128,14 @@ public class WristReal implements Wrist {
     public void setVoltageOut(double volts) {
         inputs.targetRadians = 0.0;
         motor.setVoltage(volts);
+    }
+
+    @Override
+    public void setCoast(boolean shouldBeCoasting) {
+        this.motor.setNeutralMode(
+                shouldBeCoasting
+                        ? NeutralModeValue.Coast
+                        : NeutralModeValue.Brake);
     }
 
     @Override
@@ -119,11 +152,6 @@ public class WristReal implements Wrist {
                 BaseStatusSignal.refreshAll(
                         cancoderRots, cancoderVelo));
 
-        motor.setPosition(
-            Wrist.mechanismRadsToMotorRots(
-                Units.rotationsToRadians(cancoderRots.getValue())
-        ));
-
         inputs.radians = Units.rotationsToRadians(cancoderRots.getValue());
         inputs.radiansPerSecond = Units.rotationsToRadians(cancoderVelo.getValue());
         Logger.recordOutput("Stem/Wrist/MotorRads", Units.rotationsToRadians(motorRots.getValue()));
@@ -131,6 +159,14 @@ public class WristReal implements Wrist {
         inputs.amps = motorAmps.getValue();
         inputs.volts = motorVolts.getValue();
         inputs.temp = motorTemp.getValue();
+
+        if (Math.abs(inputs.radiansPerSecond) < 0.1
+                && Math.abs(inputs.radians - Wrist.motorRotsToMechanismRads(motorRots.getValue())) > 0.1) {
+            seedWrist();
+            Logger.recordOutput("Stem/Wrist/SeededWrist", true);
+        } else {
+            Logger.recordOutput("Stem/Wrist/SeededWrist", false);
+        }
 
         Logger.processInputs("Stem/Wrist", inputs);
     }

@@ -1,7 +1,6 @@
 package com.igknighters;
 
 import edu.wpi.first.wpilibj.RobotBase;
-@SuppressWarnings("unmappable character for encoding ASCII")
 
 /**
  * 
