@@ -6,7 +6,7 @@ import edu.wpi.first.math.MathUtil;
 
 public class PivotDisabled implements Pivot {
     double targetRads = kPivot.MIN_ANGLE;
-    final double slewRate = 1.2 / 50.0;
+    final double slewRate = 2.37 / 50.0;
 
     @Override
     public double getPivotRadians() {
@@ -15,8 +15,8 @@ public class PivotDisabled implements Pivot {
 
     @Override
     public void setPivotRadians(double radians) {
-        var clampedTarget = MathUtil.clamp(radians, kPivot.MIN_ANGLE, kPivot.MAX_ANGLE);
-        targetRads = targetRads + MathUtil.clamp(clampedTarget - targetRads, -slewRate, slewRate);
+        // var clampedTarget = MathUtil.clamp(radians, kPivot.MIN_ANGLE, kPivot.MAX_ANGLE);
+        targetRads = targetRads + MathUtil.clamp(radians - targetRads, -slewRate, slewRate);
     }
 
     @Override

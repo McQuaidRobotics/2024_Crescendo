@@ -15,8 +15,8 @@ public class TelescopeDisabled implements Telescope {
 
     @Override
     public void setTelescopeMeters(double meters) {
-        var clampedTarget = MathUtil.clamp(meters, kTelescope.MIN_METERS, kTelescope.MAX_METERS);
-        targetMeters = targetMeters + MathUtil.clamp(clampedTarget - targetMeters, -slewRate, slewRate);
+        // var clampedTarget = MathUtil.clamp(meters, kTelescope.MIN_METERS, kTelescope.MAX_METERS);
+        targetMeters = targetMeters + MathUtil.clamp(meters - targetMeters, -slewRate, slewRate);
     }
 
     @Override

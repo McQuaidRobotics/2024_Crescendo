@@ -69,7 +69,7 @@ public final class ConstValues {
         public static final double FRAME_WIDTH = 26.0 * Conv.INCHES_TO_METERS;
 
         public static final double UMBRELLA_LENGTH = 13.25 * Conv.INCHES_TO_METERS;
-        public static final double UMBRELLA_HEIGHT = 7.0 * Conv.INCHES_TO_METERS;
+        public static final double UMBRELLA_HEIGHT = 5.0 * Conv.INCHES_TO_METERS;
         public static final double UMBRELLA_OFFSET = 2.375 * Conv.INCHES_TO_METERS;
         public static final Rectangle2d DRIVE_BASE = new Rectangle2d(
                 0.0,

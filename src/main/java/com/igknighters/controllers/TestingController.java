@@ -7,6 +7,7 @@ import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.subsystems.stem.StemPosition;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
@@ -44,10 +45,22 @@ public class TestingController extends ControllerParent {
                     }));
         });
 
-        // this.X.binding =
+        this.X.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
+            trig.onTrue(
+                    StemCommands.moveTo(
+                            allss.stem.get(), StemPosition.fromDegrees(
+                                    11.0,
+                                    72.0,
+                                    kTelescope.MIN_METERS + Units.inchesToMeters(4.7))));
+        });
 
-        this.Y.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
-            trig.onTrue(UmbrellaCommands.waitUntilSpunUp(allss.umbrella.get(), 5000));
+        this.Y.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
+            trig.onTrue(
+                    StemCommands.moveTo(
+                            allss.stem.get(), StemPosition.fromDegrees(
+                                    41.0,
+                                    108.0,
+                                    kTelescope.MIN_METERS)));
         });
 
         /// BUMPER

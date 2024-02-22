@@ -6,7 +6,7 @@ import edu.wpi.first.math.MathUtil;
 
 public class WristDisabled implements Wrist {
     double targetRads = kWrist.MIN_ANGLE;
-    final double slewRate = 1.2 / 50.0;
+    final double slewRate = 4.3 / 50.0;
 
     @Override
     public double getWristRadians() {
@@ -15,8 +15,8 @@ public class WristDisabled implements Wrist {
 
     @Override
     public void setWristRadians(Double radians) {
-        var clampedTarget = MathUtil.clamp(radians, kWrist.MIN_ANGLE, kWrist.MAX_ANGLE);
-        targetRads = targetRads + MathUtil.clamp(clampedTarget - targetRads, -slewRate, slewRate);
+        // var clampedTarget = MathUtil.clamp(radians, kWrist.MIN_ANGLE, kWrist.MAX_ANGLE);
+        targetRads = targetRads + MathUtil.clamp(radians - targetRads, -slewRate, slewRate);
     }
 
     @Override
