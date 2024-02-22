@@ -3,7 +3,7 @@ package com.igknighters.subsystems.stem.pivot;
 import edu.wpi.first.hal.SimBoolean;
 import edu.wpi.first.hal.SimDevice;
 import edu.wpi.first.hal.SimDevice.Direction;
-import edu.wpi.first.math.controller.PIDController;
+// import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -18,8 +18,8 @@ import com.igknighters.util.BootupLogger;
 public class PivotSim implements Pivot {
     private final PivotInputs inputs;
     private final SingleJointedArmSim sim;
-    private final PIDController pidController = new PIDController(
-            kPivot.MOTOR_kP, kPivot.MOTOR_kI, kPivot.MOTOR_kD, 0.2);
+    // private final PIDController pidController = new PIDController(
+    //         kPivot.MOTOR_kP, kPivot.MOTOR_kI, kPivot.MOTOR_kD, 0.2);
     private final SimBoolean fwdLimitSwitch, revLimitSwitch;
 
     public PivotSim() {

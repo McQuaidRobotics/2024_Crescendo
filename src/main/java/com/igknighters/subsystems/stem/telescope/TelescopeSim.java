@@ -10,7 +10,7 @@ import com.igknighters.util.BootupLogger;
 import edu.wpi.first.hal.SimBoolean;
 import edu.wpi.first.hal.SimDevice;
 import edu.wpi.first.hal.SimDevice.Direction;
-import edu.wpi.first.math.controller.PIDController;
+// import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -20,14 +20,14 @@ import edu.wpi.first.wpilibj.simulation.ElevatorSim;;
 public class TelescopeSim implements Telescope {
     private final TelescopeInputs inputs;
     private final ElevatorSim sim;
-    private final PIDController pidController;
+    // private final PIDController pidController;
     private final SimBoolean fwdLimitSwitch, revLimitSwitch;
 
     public TelescopeSim() {
-        pidController = new PIDController(
-                kTelescope.MOTOR_kP,
-                kTelescope.MOTOR_kI,
-                kTelescope.MOTOR_kD);
+        // pidController = new PIDController(
+        //         kTelescope.MOTOR_kP,
+        //         kTelescope.MOTOR_kI,
+        //         kTelescope.MOTOR_kD);
 
         sim = new ElevatorSim(
                 DCMotor.getFalcon500(1),

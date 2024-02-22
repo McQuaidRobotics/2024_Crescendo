@@ -4,25 +4,22 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.igknighters.ConstantHelper.*;
+import com.igknighters.subsystems.swerve.module.SwerveModuleConstants;
+import com.igknighters.subsystems.swerve.module.SwerveModuleConstants.ModuleId;
 import com.igknighters.subsystems.vision.camera.Camera;
 import com.igknighters.subsystems.vision.camera.Camera.CameraConfig;
 import com.igknighters.util.LerpTable;
-import com.igknighters.util.SwerveModuleConstants;
 import com.igknighters.util.LerpTable.LerpTableEntry;
-import com.igknighters.util.SwerveModuleConstants.ModuleId;
 import com.igknighters.util.geom.Rectangle2d;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 
 public final class ConstValues {
@@ -49,10 +46,17 @@ public final class ConstValues {
         }
 
         private static final class Falcon500Foc {
-            public static final double FREE_SPEED = 636.69;
+            public static final double FREE_SPEED = 636.7;
             public static final double FREE_CURRENT = 1.5;
             public static final double STALL_TORQUE = 5.84;
             public static final double STALL_CURRENT = 304.0;
+        }
+
+        public static final class KrakenX60Foc {
+            public static final double FREE_SPEED = 608.0;
+            public static final double FREE_CURRENT = 2.0;
+            public static final double STALL_TORQUE = 9.37;
+            public static final double STALL_CURRENT = 483.0;
         }
     }
 
@@ -83,42 +87,49 @@ public final class ConstValues {
     }
 
     public static final class kVision {
-        /** The least trustworthy std dev */
-        public static final Vector<N3> visionStdDevs = VecBuilder.fill(0.9, 0.9, 0.9);
-        /** The middle trustworthy std dev */
-        public static final Vector<N3> visionStdDevsTrust = VecBuilder.fill(0.4, 0.4, 0.4);
-        /** The most trustworthy std dev */
-        public static final Vector<N3> visionStdDevsReal = VecBuilder.fill(0.15, 0.15, 0.15);
-
         public static final double AMBIGUITY_CUTOFF = 0.5;
 
         public static final double MAX_Z_DELTA = 0.2;
 
+        private static enum CameraConfigs {
+            CRASH(
+                    new CameraConfig[] {
+                            Camera.createConfig(
+                                    "photon_module_1",
+                                    0,
+                                    new Pose3d(
+                                            new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(8.75),
+                                                    Units.inchesToMeters(8.0)),
+                                            new Rotation3d(
+                                                    0.0,
+                                                    Units.degreesToRadians(15.0),
+                                                    0.0))),
+                            Camera.createConfig(
+                                    "photon__module_2",
+                                    1,
+                                    new Pose3d(
+                                            new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(-8.75),
+                                                    Units.inchesToMeters(8.0)),
+                                            new Rotation3d(
+                                                    0.0,
+                                                    Units.degreesToRadians(15.0),
+                                                    0.0)))
+                    }),
+            BURN(new CameraConfig[] {});
+
+            public final CameraConfig[] cameras;
+
+            private CameraConfigs(CameraConfig[] cameras) {
+                this.cameras = cameras;
+            }
+        }
+
         /**
          * The cameras used for vision.
          */
-        public static final CameraConfig[] CAMERA_CONFIGS = new CameraConfig[] {
-                Camera.createConfig(
-                        "photonvision-15",
-                        0,
-                        new Pose3d(
-                                new Translation3d(Units.inchesToMeters(10.0), Units.inchesToMeters(10.0),
-                                        Units.inchesToMeters(3.0)),
-                                new Rotation3d(
-                                        0.0,
-                                        Units.degreesToRadians(15.0),
-                                        Units.degreesToRadians(45.0)))),
-                Camera.createConfig(
-                        "photonvision-16",
-                        1,
-                        new Pose3d(
-                                new Translation3d(Units.inchesToMeters(10.0), Units.inchesToMeters(-10.0),
-                                        Units.inchesToMeters(3.0)),
-                                new Rotation3d(
-                                        0.0,
-                                        Units.degreesToRadians(15.0),
-                                        Units.degreesToRadians(-45.0))))
-        };
+        public final static CameraConfig[] CAMERA_CONFIGS = CameraConfigs.valueOf(
+                RobotSetup.getRobotID().constID.name() // most based java code of the century
+        ).cameras;
     }
 
     @BoolConst(crash = true, burn = false)
@@ -162,16 +173,19 @@ public final class ConstValues {
         public static final double MOTOR_CLOSED_LOOP_OUTPUT_SCALAR = 0.95;
 
         /** User defined acceleration time in seconds */
-        public static final double ACCELERATION_TIME = 1.0;
+        public static final double ACCELERATION_TIME = 0.9;
 
-        public static final double SLIP_CURRENT = 50.0;
+        public static final double SLIP_CURRENT = 75.0;
 
-        public static final double MAX_DRIVE_VELOCITY = (Motors.Falcon500Foc.FREE_SPEED / TAU) * DRIVE_GEAR_RATIO
+        public static final double MAX_DRIVE_VELOCITY = ((Motors.Falcon500Foc.FREE_SPEED / TAU) / DRIVE_GEAR_RATIO)
                 * WHEEL_CIRCUMFERENCE * MOTOR_CLOSED_LOOP_OUTPUT_SCALAR;
         public static final double MAX_DRIVE_ACCELERATION = MAX_DRIVE_VELOCITY / ACCELERATION_TIME;
 
         public static final double MAX_ANGULAR_VELOCITY = MAX_DRIVE_VELOCITY / DRIVEBASE_RADIUS;
         public static final double MAX_ANGULAR_ACCELERATION = MAX_ANGULAR_VELOCITY / ACCELERATION_TIME;
+
+        public static final double MAX_STEERING_VELOCITY = Motors.Falcon500Foc.FREE_SPEED
+                / (ANGLE_GEAR_RATIO * MOTOR_CLOSED_LOOP_OUTPUT_SCALAR);
 
         /* Inverts */
         public static final InvertedValue ANGLE_MOTOR_INVERT = InvertedValue.Clockwise_Positive;
@@ -183,9 +197,12 @@ public final class ConstValues {
         public static final NeutralModeValue DRIVE_NEUTRAL_MODE = NeutralModeValue.Brake;
 
         public static final class DriveMotorConstants {
-            public static final double kP = 0.4;
+            public static final double kP = 0.27;
             public static final double kI = 0.0;
             public static final double kD = 0.0;
+
+            public static final double kS = 0.15;
+            public static final double kV = 0.0;
         }
 
         public static final class AngleMotorConstants {
@@ -194,7 +211,14 @@ public final class ConstValues {
             public static final double kD = 0.0;
         }
 
-        public static final double ANGLE_CONTROLLER_KP = 4.0;
+        public static final class RotationControllerConstants {
+            public static final double kP = 5.5;
+            public static final double kI = 0.0;
+            public static final double kD = 0.2;
+
+            public static final double DEADBAND = 2.5 * Conv.DEGREES_TO_RADIANS;
+            public static final double CONSTRAINT_SCALAR = 0.7;
+        }
 
         public static final boolean ORIENT_TELEOP_FOR_SIM = true;
 
@@ -215,21 +239,26 @@ public final class ConstValues {
             public static final int DRIVE_MOTOR_ID = 1;
             public static final int ANGLE_MOTOR_ID = 2;
             public static final int CANCODER_ID = 21;
-            public static final double ROTATION_OFFSET = 0.21875;
-            public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0, TRACK_WIDTH / 2.0);
-            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
-                    ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
+
+            @DoubleConst(crash = -0.323, burn = -0.127441)
+            public static double ROTATION_OFFSET;
+
+            public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0, -TRACK_WIDTH / 2.0);
+            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(Mod0.class);
         }
 
         public static final class Mod1 {
             public static final ModuleId MODULE = ModuleId.m1;
             public static final int DRIVE_MOTOR_ID = 3;
-            public static final int ANLGE_MOTOR_ID = 4;
+            public static final int ANGLE_MOTOR_ID = 4;
             public static final int CANCODER_ID = 22;
-            public static final double ROTATION_OFFSET = 0.3278805;
-            public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0, TRACK_WIDTH / 2.0);
-            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
-                    ANLGE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
+
+            @DoubleConst(crash = -0.352, burn = -0.259521)
+            public static double ROTATION_OFFSET;
+
+            public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0,
+                    -TRACK_WIDTH / 2.0);
+            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(Mod1.class);
         }
 
         public static final class Mod2 {
@@ -237,10 +266,12 @@ public final class ConstValues {
             public static final int DRIVE_MOTOR_ID = 5;
             public static final int ANGLE_MOTOR_ID = 6;
             public static final int CANCODER_ID = 23;
-            public static final double ROTATION_OFFSET = 0.65;
-            public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0, -TRACK_WIDTH / 2.0);
-            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
-                    ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
+
+            @DoubleConst(crash = -0.4189, burn = 0.077393)
+            public static double ROTATION_OFFSET;
+
+            public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0, TRACK_WIDTH / 2.0);
+            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(Mod2.class);
         }
 
         public static final class Mod3 {
@@ -248,11 +279,13 @@ public final class ConstValues {
             public static final int DRIVE_MOTOR_ID = 7;
             public static final int ANGLE_MOTOR_ID = 8;
             public static final int CANCODER_ID = 24;
-            public static final double ROTATION_OFFSET = 0.5776361;
-            public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0,
-                    -TRACK_WIDTH / 2.0);
-            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(MODULE, DRIVE_MOTOR_ID,
-                    ANGLE_MOTOR_ID, CANCODER_ID, CHASSIS_OFFSET, ROTATION_OFFSET);
+
+            @DoubleConst(crash = -0.1025, burn = 0.123291)
+            public static double ROTATION_OFFSET = -0.041504;
+
+            public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0,
+                    TRACK_WIDTH / 2.0);
+            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(Mod3.class);
         }
 
         public static final Translation2d[] MODULE_CHASSIS_OFFSETS = new Translation2d[] {
@@ -280,6 +313,8 @@ public final class ConstValues {
     }
 
     public static final class kUmbrella {
+        public static final double NOTE_VELO = 50.0;
+        public static final double NOTE_VELO_AUTO = 50.0;
         public static final String CANBUS = "SuperStructureBus";
 
         public static final class kShooter {

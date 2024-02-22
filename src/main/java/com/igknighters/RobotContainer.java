@@ -17,7 +17,6 @@ import com.igknighters.commands.autos.AutosCmdRegister;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class RobotContainer {
@@ -78,7 +77,7 @@ public class RobotContainer {
                 swerve::getPose,
                 swerve::resetOdometry,
                 swerve::getChassisSpeed,
-                chassisSpeeds -> swerve.driveChassisSpeeds(
+                chassisSpeeds -> swerve.drive(
                         chassisSpeeds, false),
                 new HolonomicPathFollowerConfig(
                         kAuto.AUTO_TRANSLATION_PID,

@@ -18,7 +18,7 @@ public class RobotSetup {
         CRASH(Subsystems.list(Subsystems.Stem, Subsystems.Umbrella),
                 RobotConstID.CRASH),
 
-        BURN(Subsystems.list(Subsystems.Stem),
+        BURN(Subsystems.list(Subsystems.Swerve),
                 RobotConstID.BURN),
 
         SIM_CRASH(Subsystems.all(), RobotConstID.CRASH),

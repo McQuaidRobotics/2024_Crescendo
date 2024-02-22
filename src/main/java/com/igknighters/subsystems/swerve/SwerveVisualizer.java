@@ -30,19 +30,18 @@ public class SwerveVisualizer {
         MechanismLigament2d moduleLig;
 
         public ModuleVisualizer(int modNum) {
-            mechanism = new Mechanism2d(MAX_LENGTH*2.2, MAX_LENGTH*2.2);
+            mechanism = new Mechanism2d(MAX_LENGTH * 2.2, MAX_LENGTH * 2.2);
 
             moduleLig = new MechanismLigament2d(
-                "Module " + modNum + " Visualizer",
-                5.0,
-                0.0,
-                2.0,
-                new Color8Bit(0, 0, 255)
-            );
+                    "Module " + modNum + " Visualizer",
+                    5.0,
+                    0.0,
+                    2.0,
+                    new Color8Bit(0, 0, 255));
 
             mechanism
-                .getRoot("azmith", MAX_LENGTH*1.1, MAX_LENGTH*1.1)
-                .append(moduleLig);
+                    .getRoot("azmith", MAX_LENGTH * 1.1, MAX_LENGTH * 1.1)
+                    .append(moduleLig);
 
         }
 
@@ -59,10 +58,9 @@ public class SwerveVisualizer {
             moduleLig.setLength(length);
 
             var color = new Color8Bit(
-                (int) (Math.abs(percent) * (MAX_COLOR.red - MIN_COLOR.red) + MIN_COLOR.red),
-                (int) (Math.abs(percent) * (MAX_COLOR.green - MIN_COLOR.green) + MIN_COLOR.green),
-                (int) (Math.abs(percent) * (MAX_COLOR.blue - MIN_COLOR.blue) + MIN_COLOR.blue)
-            );
+                    (int) (Math.abs(percent) * (MAX_COLOR.red - MIN_COLOR.red) + MIN_COLOR.red),
+                    (int) (Math.abs(percent) * (MAX_COLOR.green - MIN_COLOR.green) + MIN_COLOR.green),
+                    (int) (Math.abs(percent) * (MAX_COLOR.blue - MIN_COLOR.blue) + MIN_COLOR.blue));
 
             moduleLig.setColor(color);
         }
@@ -90,19 +88,18 @@ public class SwerveVisualizer {
         table = NetworkTableInstance.getDefault().getTable("Visualizers");
 
         modulesOnField = table
-            .getSubTable("SwerveModules")
-            .getBooleanTopic("OnField")
-            .getEntry(false);
+                .getSubTable("SwerveModules")
+                .getBooleanTopic("OnField")
+                .getEntry(false);
 
         moduleVisual = new ModuleVisualizer[this.modules.length];
         for (int i = 0; i < modules.length; i++) {
             moduleVisual[i] = new ModuleVisualizer(modules[i].getModuleNumber());
             moduleVisual[i]
-                .getMechanism()
-                .initSendable(
-                getBuilder(
-                    "SwerveModules/Module[" + modules[i].getModuleNumber() + "]"
-            ));
+                    .getMechanism()
+                    .initSendable(
+                            getBuilder(
+                                    "SwerveModules/Module[" + modules[i].getModuleNumber() + "]"));
         }
 
         modulesOnField.set(false);
@@ -116,43 +113,40 @@ public class SwerveVisualizer {
     }
 
     public void update(Pose2d pose) {
-        if (!ConstValues.DEBUG) return;
-
+        if (!ConstValues.DEBUG)
+            return;
 
         for (int i = 0; i < modules.length; i++) {
             moduleVisual[i].update(
-                modules[i].getCurrentState()
-            );
+                    modules[i].getCurrentState());
         }
         updateField(pose);
     }
 
     private void updateField(Pose2d roboPose) {
-        GlobalState.modifyField(field -> field.setRobotPose(roboPose));
+        GlobalState.modifyField2d(field -> field.setRobotPose(roboPose));
 
-        if (!modulesOnField.get(false)) return;
+        if (!modulesOnField.get(false))
+            return;
 
         var trans = roboPose.getTranslation();
         ArrayList<Pose2d> modulePoses = new ArrayList<Pose2d>();
         var moduleTranslations = List.of(kSwerve.MODULE_CHASSIS_OFFSETS);
         var moduleRotations = List.of(swerve.getModuleStates())
-            .stream()
-            .map(state -> state.angle)
-            .toList();
+                .stream()
+                .map(state -> state.angle)
+                .toList();
 
         for (int i = 0; i < modules.length; i++) {
             modulePoses.add(
-                new Pose2d(
-                    moduleTranslations.get(i).plus(trans),
-                    moduleRotations.get(i)
-                )
-            );
+                    new Pose2d(
+                            moduleTranslations.get(i).plus(trans),
+                            moduleRotations.get(i)));
         }
 
-        GlobalState.modifyField(field -> {
+        GlobalState.modifyField2d(field -> {
             field.getObject("SwerveModules").setPoses(
-                modulePoses.toArray(new Pose2d[0])
-            );
+                    modulePoses.toArray(new Pose2d[0]));
         });
     }
 }
