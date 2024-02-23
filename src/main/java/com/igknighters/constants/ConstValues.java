@@ -107,22 +107,22 @@ public final class ConstValues {
                                     "photon_module_1",
                                     0,
                                     new Pose3d(
-                                            new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(8.75),
+                                            new Translation3d(Units.inchesToMeters(-11.3), Units.inchesToMeters(8.75),
                                                     Units.inchesToMeters(8.0)),
                                             new Rotation3d(
                                                     0.0,
-                                                    Units.degreesToRadians(15.0),
-                                                    0.0))),
+                                                    Units.degreesToRadians(20.0),
+                                                    180.0))),
                             Camera.createConfig(
                                     "photon__module_2",
                                     1,
                                     new Pose3d(
-                                            new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(-8.75),
+                                            new Translation3d(Units.inchesToMeters(-11.3), Units.inchesToMeters(-8.75),
                                                     Units.inchesToMeters(8.0)),
                                             new Rotation3d(
                                                     0.0,
-                                                    Units.degreesToRadians(15.0),
-                                                    0.0)))
+                                                    Units.degreesToRadians(20.0),
+                                                    180.0)))
                     }),
             BURN(new CameraConfig[] {});
 
@@ -225,7 +225,7 @@ public final class ConstValues {
             public static final double kI = 0.0;
             public static final double kD = 0.2;
 
-            public static final double DEADBAND = 2.5 * Conv.DEGREES_TO_RADIANS;
+            public static final double DEADBAND = 1.0 * Conv.DEGREES_TO_RADIANS;
             public static final double CONSTRAINT_SCALAR = 0.7;
         }
 
