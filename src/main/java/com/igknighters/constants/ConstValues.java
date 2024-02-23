@@ -222,7 +222,6 @@ public final class ConstValues {
 
         public static final class RotationControllerConstants {
             public static final double kP = 5.5;
-            public static final double kI = 0.0;
             public static final double kD = 0.2;
 
             public static final double DEADBAND = 1.0 * Conv.DEGREES_TO_RADIANS;

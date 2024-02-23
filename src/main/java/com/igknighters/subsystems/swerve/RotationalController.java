@@ -1,34 +1,54 @@
 package com.igknighters.subsystems.swerve;
 
 import com.igknighters.constants.ConstValues;
+import com.igknighters.constants.ConstValues.kSwerve;
+import com.igknighters.constants.ConstValues.kSwerve.RotationControllerConstants;
+
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+
 
 public class RotationalController {
-    private final double kP, kD;
-    private final double maxVelocity, maxAcceleration;
     private double positionError = 0, prevError = 0, velocityError = 0;
 
-    public RotationalController(double kP, double kI, double kD, double maxVelocity, double maxAcceleration) {
-        this.kP = kP;
-        this.kD = kD;
-        this.maxVelocity = maxVelocity;
-        this.maxAcceleration = maxAcceleration;
-    }
+    private TrapezoidProfile profile = new TrapezoidProfile(
+        new TrapezoidProfile.Constraints(
+            kSwerve.MAX_ANGULAR_VELOCITY * RotationControllerConstants.CONSTRAINT_SCALAR,
+            kSwerve.MAX_ANGULAR_ACCELERATION * RotationControllerConstants.CONSTRAINT_SCALAR
+        )
+    );
+    private TrapezoidProfile.State goalState = new TrapezoidProfile.State();
+    private TrapezoidProfile.State setpointState = new TrapezoidProfile.State();
 
-    public double calculate(double setpoint, double measurement) {
+    public double calculate(double measurement, double target) {
+        if (Math.abs(measurement - target) < RotationControllerConstants.DEADBAND) {
+            return 0.0;
+        }
+
+        goalState = new TrapezoidProfile.State(target, 0.0);
+
+        double goalMinDistance = MathUtil.angleModulus(goalState.position - measurement);
+        double setpointMinDistance = MathUtil.angleModulus(setpointState.position - measurement);
+
+        goalState.position = goalMinDistance + measurement;
+        setpointState.position = setpointMinDistance + measurement;
+
+        setpointState = profile.calculate(ConstValues.PERIODIC_TIME, setpointState, goalState);
+
         prevError = positionError;
 
-        double input = setpoint - measurement;
-
-        // Wrap input if it's above the maximum input
-        int numMax = (int) ((input + Math.PI) / (Math.PI * 2.0));
-        input -= numMax * (Math.PI * 2.0);
-
-        // Wrap input if it's below the minimum input
-        int numMin = (int) ((input - Math.PI) / (Math.PI * 2.0));
-        input -= numMin * (Math.PI * 2.0);
+        positionError = MathUtil.angleModulus(setpointState.position - measurement);
 
         velocityError = (positionError - prevError) / ConstValues.PERIODIC_TIME;
 
-        return (kP * positionError) + (kD * velocityError);
+        return (RotationControllerConstants.kP * positionError)
+            + (RotationControllerConstants.kD * velocityError);
+    }
+
+    public void reset(double measuredPosition, double measuredVelocity) {
+        positionError = 0;
+        prevError = 0;
+        velocityError = 0;
+        setpointState = new TrapezoidProfile.State(measuredPosition, measuredVelocity);
     }
 }
