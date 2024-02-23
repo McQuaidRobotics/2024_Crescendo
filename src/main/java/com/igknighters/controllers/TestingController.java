@@ -40,8 +40,7 @@ public class TestingController extends ControllerParent {
         this.B.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
             trig.onTrue(
                 StemCommands.aimAt(
-                    allss.stem.get(), 
-                    FieldConstants.Speaker.SPEAKER_CENTER,
+                    allss.stem.get(),
                     Units.degreesToRadians(40.0),
                     kTelescope.MIN_METERS)
             );

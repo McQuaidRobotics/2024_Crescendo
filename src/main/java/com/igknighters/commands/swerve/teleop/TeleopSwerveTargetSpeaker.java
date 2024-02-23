@@ -40,7 +40,7 @@ public class TeleopSwerveTargetSpeaker extends TeleopSwerveBase {
     @Override
     public void execute() {
         boolean blueAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue).equals(Alliance.Blue);
-        Translation2d speaker = FieldConstants.Speaker.SPEAKER_CENTER.toTranslation2d();
+        Translation2d speaker = FieldConstants.SPEAKER.toTranslation2d();
         Translation2d targetTranslation = blueAlliance ? speaker : AllianceFlip.flipTranslation(speaker);
 
         GlobalState.modifyField2d(field -> {

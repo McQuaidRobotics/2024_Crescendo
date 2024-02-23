@@ -12,7 +12,6 @@ import com.igknighters.util.AllianceFlip;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -62,7 +61,7 @@ public class StemCommands {
         private double pivotRads;
         private double stemLength;
 
-        private AimAtCommand(Stem stem, Translation3d target, double pivotRads, double telescopeMeters) {
+        private AimAtCommand(Stem stem, double pivotRads, double telescopeMeters) {
             addRequirements(stem);
             this.stem = stem;
             this.pivotRads = pivotRads;
@@ -72,7 +71,7 @@ public class StemCommands {
         @Override
         public void execute() {
             boolean blueAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue).equals(Alliance.Blue);
-            Translation2d speaker = FieldConstants.Speaker.SPEAKER_CENTER.toTranslation2d();
+            Translation2d speaker = FieldConstants.SPEAKER.toTranslation2d();
             Translation2d targetTranslation = blueAlliance ? speaker : AllianceFlip.flipTranslation(speaker);
 
             ChassisSpeeds currentChassisSpeed = GlobalState.getFieldRelativeVelocity();
@@ -89,7 +88,7 @@ public class StemCommands {
                     stemLength,
                     pivotRads,
                     currentPose.getTranslation().getDistance(adjustedTarget),
-                    FieldConstants.Speaker.SPEAKER_CENTER.getZ());
+                    FieldConstants.SPEAKER.getZ());
 
             stem.setStemPosition(StemPosition.fromRadians(
                     pivotRads,
@@ -145,9 +144,9 @@ public class StemCommands {
      * @param target The point in space to aim at
      * @return A command to be scheduled
      */
-    public static Command aimAt(Stem stem, Translation3d target, double pivotRads, double telescopeMeters) {
-        return new AimAtCommand(stem, target, pivotRads, telescopeMeters)
-                .withName("Aim At(" + target.toString() + ")");
+    public static Command aimAt(Stem stem, double pivotRads, double telescopeMeters) {
+        return new AimAtCommand(stem, pivotRads, telescopeMeters)
+                .withName("Aim At(Speaker)");
     }
 
     /**
