@@ -34,10 +34,10 @@ public class CameraReal implements Camera {
      * @param id         The ID of the camera
      * @param cameraPose The pose of the camera relative to the robot
      */
-    public CameraReal(String cameraName, Integer id, Pose3d cameraPose) {
+    public CameraReal(String cameraName, Integer id, Transform3d cameraPose) {
         this.camera = new PhotonCamera(cameraName);
         this.id = id;
-        this.cameraPose = new Transform3d(cameraPose.getTranslation(), cameraPose.getRotation());
+        this.cameraPose = cameraPose;
 
         poseEstimator = new PhotonPoseEstimator(
                 FieldConstants.APRIL_TAG_FIELD,

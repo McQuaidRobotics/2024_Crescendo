@@ -16,8 +16,8 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -106,23 +106,23 @@ public final class ConstValues {
                             Camera.createConfig(
                                     "photon_module_1",
                                     0,
-                                    new Pose3d(
+                                    new Transform3d(
                                             new Translation3d(Units.inchesToMeters(-11.3), Units.inchesToMeters(-8.6),
                                                     Units.inchesToMeters(8.0)),
                                             new Rotation3d(
                                                     0.0,
                                                     Units.degreesToRadians(20.0),
-                                                    180.0))),
+                                                    Math.PI))),
                             Camera.createConfig(
                                     "photon__module_2",
                                     1,
-                                    new Pose3d(
+                                    new Transform3d(
                                             new Translation3d(Units.inchesToMeters(-11.3), Units.inchesToMeters(8.6),
                                                     Units.inchesToMeters(8.0)),
                                             new Rotation3d(
                                                     0.0,
                                                     Units.degreesToRadians(20.0),
-                                                    180.0)))
+                                                    Math.PI)))
                     }),
             BURN(new CameraConfig[] {});
 

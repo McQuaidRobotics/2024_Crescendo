@@ -81,9 +81,9 @@ public interface Camera {
     public static class CameraConfig {
         public final String cameraName;
         public final Integer id;
-        public final Pose3d cameraPose;
+        public final Transform3d cameraPose;
 
-        public CameraConfig(String cameraName, Integer id, Pose3d cameraPose) {
+        public CameraConfig(String cameraName, Integer id, Transform3d cameraPose) {
             this.cameraName = cameraName;
             this.id = id;
             this.cameraPose = cameraPose;
@@ -98,7 +98,7 @@ public interface Camera {
      * @param cameraPose The pose of the camera relative to the robot
      * @return The configuration
      */
-    public static CameraConfig createConfig(String cameraName, Integer id, Pose3d cameraPose) {
+    public static CameraConfig createConfig(String cameraName, Integer id, Transform3d cameraPose) {
         return new CameraConfig(cameraName, id, cameraPose);
     }
 

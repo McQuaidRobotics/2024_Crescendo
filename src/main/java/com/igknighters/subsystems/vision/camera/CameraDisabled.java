@@ -24,9 +24,9 @@ public class CameraDisabled implements Camera {
 
     private final CameraInput cameraInput;
 
-    public CameraDisabled(String cameraName, Integer id, Pose3d cameraPose) {
+    public CameraDisabled(String cameraName, Integer id, Transform3d cameraPose) {
         this.id = id;
-        this.cameraPose = new Transform3d(cameraPose.getTranslation(), cameraPose.getRotation());
+        this.cameraPose = cameraPose;
         this.cameraName = cameraName;
 
         cameraInput = new CameraInput(new VisionPoseEstimate(

@@ -16,12 +16,17 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.networktables.BooleanEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Vision extends SubsystemBase {
 
     private final List<Camera> cameras;
+
+    private final BooleanEntry visionFieldVisualizer;
 
     public Vision() {
         this.cameras = List.of(kVision.CAMERA_CONFIGS)
@@ -32,6 +37,13 @@ public class Vision extends SubsystemBase {
         GlobalState.setLocalizer(
                 new VisionOnlyPoseEstimator(),
                 LocalizerType.Vision);
+
+        visionFieldVisualizer = NetworkTableInstance.getDefault()
+                .getTable("Visualizers")
+                .getBooleanTopic("CamerasOnField")
+                .getEntry(false);
+
+        visionFieldVisualizer.accept(false);
     }
 
     @Override
@@ -42,6 +54,17 @@ public class Vision extends SubsystemBase {
         for (Camera camera : cameras) {
             Tracer.startTrace(camera.getName() + "Periodic");
             camera.periodic();
+
+            if (visionFieldVisualizer.get(false)) {
+                GlobalState.modifyField2d(field -> {
+                    Transform2d tf = new Transform2d(
+                            camera.getRobotToCameraTransform3d().getTranslation().toTranslation2d(),
+                            camera.getRobotToCameraTransform3d().getRotation().toRotation2d());
+                    field.getObject(camera.getName()).setPose(
+                            field.getRobotPose().plus(tf));
+                });
+            }
+
             Optional<VisionPoseEstimate> optEval = camera.evalPose();
 
             if (!optEval.isPresent()) {
@@ -61,6 +84,7 @@ public class Vision extends SubsystemBase {
             }
 
             seenTags.addAll(eval.apriltags);
+
             Tracer.endTrace();
         }
 
