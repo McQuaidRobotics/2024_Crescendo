@@ -5,12 +5,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 import com.igknighters.commands.autos.SimplePathfindingCommand;
 import com.igknighters.subsystems.swerve.Swerve;
+import com.igknighters.util.geom.AllianceFlip;
 
 public class SwerveCommands {
     public static Command commandXDrives(final Swerve swerve) {
@@ -31,14 +31,13 @@ public class SwerveCommands {
 
     public static Command orientGyro(final Swerve swerve) {
         return swerve.runOnce(() -> {
-            var alliance = DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Blue);
-            if (alliance.equals(DriverStation.Alliance.Red)) {
-                swerve.setYaw(Rotation2d.fromDegrees(180));
-                var pose = new Pose2d(swerve.getPose().getTranslation(), Rotation2d.fromDegrees(180));
-                swerve.resetOdometry(pose);
-            } else {
+            if (AllianceFlip.isBlue()) {
                 swerve.setYaw(Rotation2d.fromDegrees(0));
                 var pose = new Pose2d(swerve.getPose().getTranslation(), Rotation2d.fromDegrees(0));
+                swerve.resetOdometry(pose);
+            } else {
+                swerve.setYaw(Rotation2d.fromDegrees(180));
+                var pose = new Pose2d(swerve.getPose().getTranslation(), Rotation2d.fromDegrees(180));
                 swerve.resetOdometry(pose);
             }
         });

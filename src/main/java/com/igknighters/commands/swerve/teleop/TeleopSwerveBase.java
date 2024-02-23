@@ -1,6 +1,7 @@
 package com.igknighters.commands.swerve.teleop;
 
 import com.igknighters.subsystems.swerve.Swerve;
+import com.igknighters.util.geom.AllianceFlip;
 
 import java.util.function.DoubleSupplier;
 
@@ -8,7 +9,6 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -22,7 +22,8 @@ public class TeleopSwerveBase extends Command {
      * If real robot this means up on translation stick moves away from driver.
      * If simulation and {@link kSwerve#ORIENT_TELEOP_FOR_SIM} is true,
      * it will make up on the translation stick move up on the field visualization.
-     * If simulation and {@link kSwerve#ORIENT_TELEOP_FOR_SIM} is false it will replicate the real robot.
+     * If simulation and {@link kSwerve#ORIENT_TELEOP_FOR_SIM} is false it will
+     * replicate the real robot.
      * 
      * @param input The controller input
      * @return The adjusted controller input
@@ -59,7 +60,7 @@ public class TeleopSwerveBase extends Command {
     private double invert() {
         if (RobotBase.isSimulation() && kSwerve.ORIENT_TELEOP_FOR_SIM) {
             return 1;
-        } else if (DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Blue).equals(DriverStation.Alliance.Red)) {
+        } else if (!AllianceFlip.isBlue()) {
             return -1;
         } else {
             return 1;

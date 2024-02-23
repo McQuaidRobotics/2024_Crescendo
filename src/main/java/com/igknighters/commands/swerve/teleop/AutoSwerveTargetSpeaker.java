@@ -6,8 +6,6 @@ import com.igknighters.util.geom.AllianceFlip;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import org.littletonrobotics.junction.Logger;
@@ -32,9 +30,8 @@ public class AutoSwerveTargetSpeaker extends Command {
 
     @Override
     public void execute() {
-        boolean blueAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue).equals(Alliance.Blue);
         Translation2d speaker = FieldConstants.SPEAKER.toTranslation2d();
-        Translation2d targetTranslation = blueAlliance ? speaker : AllianceFlip.flipTranslation(speaker);
+        Translation2d targetTranslation = AllianceFlip.isBlue() ? speaker : AllianceFlip.flipTranslation(speaker);
 
         var targetAngle = swerve.rotationRelativeToPose(
                 Rotation2d.fromDegrees(180),

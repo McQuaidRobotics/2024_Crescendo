@@ -9,16 +9,12 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-public class PolyTrigger {
+public class PolyTrigger extends Trigger {
     private final Polygon2d polygon;
-    private final Trigger trigger;
 
     public PolyTrigger(Supplier<Pose2d> poseSupplier, Polygon2d polygon) {
+        super(() -> polygon.contains(poseSupplier.get().getTranslation()));
         this.polygon = polygon;
-        this.trigger = new Trigger(() -> {
-            Pose2d pose = poseSupplier.get();
-            return polygon.contains(pose.getX(), pose.getY());
-        });
     }
 
     public PolyTrigger(Supplier<Pose2d> poseSupplier, Translation2d... polygonVertecies) {
@@ -31,10 +27,6 @@ public class PolyTrigger {
 
     public PolyTrigger(Translation2d... polygonVertecies) {
         this(new Polygon2d(polygonVertecies));
-    }
-
-    public Trigger toTrigger() {
-        return trigger;
     }
 
     public Polygon2d getPolygon() {
