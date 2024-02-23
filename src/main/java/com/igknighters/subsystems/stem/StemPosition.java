@@ -52,10 +52,15 @@ public class StemPosition {
                 + telescopeMeters + ")";
     }
 
+    // StemPosition.fromDegrees(
+    //     11.0,
+    //     72.0,
+    //     kTelescope.MIN_METERS + Units.inchesToMeters(4.7))
+
     public static StemPosition STOW = new StemPosition(
-            Units.degreesToRadians(35.0),
-            kTelescope.MIN_METERS,
-            Units.degreesToRadians(60.0)) {
+            Units.degreesToRadians(41.0),
+            Units.degreesToRadians(108.0),
+            kTelescope.MIN_METERS) {
         @Override
         public boolean isValid() {
             return true;
@@ -73,9 +78,9 @@ public class StemPosition {
     };
 
     public static StemPosition INTAKE = new StemPosition(
-            Units.degreesToRadians(7.5),
-            0.493,
-            1.2) {
+            Units.degreesToRadians(11),
+            kTelescope.MIN_METERS + Units.inchesToMeters(4.7),
+            Units.degreesToRadians(72.0)) {
 
         @Override
         public String toString() {
