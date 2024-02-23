@@ -52,7 +52,7 @@ public class HigherOrderCommands {
         return Commands.parallel(
             new TeleopSwerveTargetSpeaker(swerve, controller)
                 .withSpeedMultiplier(0.1),
-            StemCommands.aimAt(stem, speakerTranslation, rpm),
+            StemCommands.aimAt(stem, speakerTranslation, Units.degreesToRadians(40.0), kTelescope.MIN_METERS),
             UmbrellaCommands.spinupShooter(umbrella, rpm)
         );
     }

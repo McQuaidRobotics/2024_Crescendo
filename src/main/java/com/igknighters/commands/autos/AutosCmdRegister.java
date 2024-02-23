@@ -6,10 +6,13 @@ import com.igknighters.commands.autos.SpecializedNamedCommands.SpecializedNamedC
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.FieldConstants;
+import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.pathplanner.lib.auto.NamedCommands;
+
+import edu.wpi.first.math.util.Units;
 
 public class AutosCmdRegister {
     public static void registerCommands(AllSubsystems allSubsystems) {
@@ -58,7 +61,8 @@ public class AutosCmdRegister {
                 StemCommands.aimAt(
                     stem,
                     FieldConstants.Speaker.SPEAKER_CENTER,
-                    3780.0
+                    Units.degreesToRadians(40.0),
+                    kTelescope.MIN_METERS
                 )
             );
 

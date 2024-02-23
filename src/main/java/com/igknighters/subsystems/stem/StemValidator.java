@@ -3,7 +3,7 @@ package com.igknighters.subsystems.stem;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import com.igknighters.constants.ConstValues.kRobotGeometry;
+import com.igknighters.constants.ConstValues.kRobotCollisionGeometry;
 import com.igknighters.subsystems.stem.StemVisualizer.StemVisualizerDot;
 import com.igknighters.util.Channels.Sender;
 import com.igknighters.util.geom.Rectangle2d;
@@ -29,23 +29,23 @@ public class StemValidator {
                         Translation2d wristAxelPointTransform = new Translation2d(
                                         stemPosition.getTelescopeMeters() * Math.cos(stemPosition.getPivotRads()),
                                         stemPosition.getTelescopeMeters() * Math.sin(stemPosition.getPivotRads()));
-                        this.wristAxelPoint = kRobotGeometry.PIVOT_LOCATION.plus(wristAxelPointTransform);
+                        this.wristAxelPoint = kRobotCollisionGeometry.PIVOT_LOCATION.plus(wristAxelPointTransform);
 
                         Translation2d umbrellaLengthVector = new Translation2d(
-                                        kRobotGeometry.UMBRELLA_LENGTH
+                                        kRobotCollisionGeometry.UMBRELLA_LENGTH
                                                         * Math.cos(Math.PI - (Math.PI - stemPosition.getWristRads())
                                                                         - stemPosition.getPivotRads()),
-                                        kRobotGeometry.UMBRELLA_LENGTH * -1.0
+                                        kRobotCollisionGeometry.UMBRELLA_LENGTH * -1.0
                                                         * Math.sin(
                                                                         Math.PI - (Math.PI
                                                                                         - stemPosition.getWristRads())
                                                                                         - stemPosition.getPivotRads()));
 
                         this.umbrellaBottomLeftPoint = new Translation2d(
-                                        kRobotGeometry.UMBRELLA_OFFSET
+                                        kRobotCollisionGeometry.UMBRELLA_OFFSET
                                                         * Math.cos(stemPosition.getPivotRads() + (Math.PI / 2.0)
                                                                         - stemPosition.getWristRads()),
-                                        kRobotGeometry.UMBRELLA_OFFSET
+                                        kRobotCollisionGeometry.UMBRELLA_OFFSET
                                                         * Math.sin(stemPosition.getPivotRads() + (Math.PI / 2.0)
                                                                         - stemPosition.getWristRads()))
                                         .plus(this.wristAxelPoint);
@@ -53,10 +53,10 @@ public class StemValidator {
                         this.umbrellaBottomRightPoint = umbrellaLengthVector.plus(this.umbrellaBottomLeftPoint);
 
                         Translation2d umbrellaTopTransform = new Translation2d(
-                                        kRobotGeometry.UMBRELLA_HEIGHT
+                                        kRobotCollisionGeometry.UMBRELLA_HEIGHT
                                                         * Math.cos(stemPosition.getPivotRads() + (Math.PI / 2.0)
                                                                         - stemPosition.getWristRads()),
-                                        kRobotGeometry.UMBRELLA_HEIGHT
+                                        kRobotCollisionGeometry.UMBRELLA_HEIGHT
                                                         * Math.sin(stemPosition.getPivotRads() + (Math.PI / 2.0)
                                                                         - stemPosition.getWristRads()));
 
@@ -110,7 +110,7 @@ public class StemValidator {
 
                 private boolean outsideBounds() {
                         for (Translation2d point : getPoints()) {
-                                if (!kRobotGeometry.BOUNDS.contains(point)) {
+                                if (!kRobotCollisionGeometry.BOUNDS.contains(point)) {
                                         return true;
                                 }
                         }
@@ -205,60 +205,66 @@ public class StemValidator {
                                 mechPts.umbrellaBottomLeftPoint,
                                 new Translation2d(mechPts.umbrellaBottomRightPoint.getX() + SMOL,
                                                 mechPts.umbrellaBottomRightPoint.getY() + SMOL),
-                                kRobotGeometry.DRIVE_BASE.getTopY());
+                                kRobotCollisionGeometry.DRIVE_BASE.getTopY());
 
                 double wristDriveBaseBottomIntersect = computeIntersection(
                                 mechPts.umbrellaBottomLeftPoint,
                                 new Translation2d(mechPts.umbrellaBottomRightPoint.getX() + SMOL,
                                                 mechPts.umbrellaBottomRightPoint.getY() + SMOL),
-                                kRobotGeometry.DRIVE_BASE.getBottomY());
+                                kRobotCollisionGeometry.DRIVE_BASE.getBottomY());
 
                 // The x coordinates of where on the top and bottom of the drive base's
                 // y coordinates intesects with the function of the line of the angle
                 // of the pivot with the stem length.
                 double stemDriveBaseTopIntersect = computeIntersection(
-                                new Translation2d(kRobotGeometry.PIVOT_LOCATION.getX() + SMOL,
-                                                kRobotGeometry.PIVOT_LOCATION.getY() + SMOL),
+                                new Translation2d(kRobotCollisionGeometry.PIVOT_LOCATION.getX() + SMOL,
+                                                kRobotCollisionGeometry.PIVOT_LOCATION.getY() + SMOL),
                                 mechPts.wristAxelPoint,
-                                kRobotGeometry.DRIVE_BASE.getTopY());
+                                kRobotCollisionGeometry.DRIVE_BASE.getTopY());
 
                 double stemDriveBaseBottomIntersect = computeIntersection(
-                                new Translation2d(kRobotGeometry.PIVOT_LOCATION.getX() + SMOL,
-                                                kRobotGeometry.PIVOT_LOCATION.getY() + SMOL),
+                                new Translation2d(kRobotCollisionGeometry.PIVOT_LOCATION.getX() + SMOL,
+                                                kRobotCollisionGeometry.PIVOT_LOCATION.getY() + SMOL),
                                 mechPts.wristAxelPoint,
-                                kRobotGeometry.DRIVE_BASE.getBottomY());
+                                kRobotCollisionGeometry.DRIVE_BASE.getBottomY());
 
                 DOT_SENDER.send(new StemVisualizerDot("wristDriveBaseTopIntersect",
-                                new Translation2d(wristDriveBaseTopIntersect, kRobotGeometry.DRIVE_BASE.getTopY())));
+                                new Translation2d(wristDriveBaseTopIntersect,
+                                                kRobotCollisionGeometry.DRIVE_BASE.getTopY())));
 
                 DOT_SENDER.send(new StemVisualizerDot("wristDriveBaseTopIntersect",
-                                new Translation2d(wristDriveBaseTopIntersect, kRobotGeometry.DRIVE_BASE.getTopY())));
+                                new Translation2d(wristDriveBaseTopIntersect,
+                                                kRobotCollisionGeometry.DRIVE_BASE.getTopY())));
 
                 DOT_SENDER.send(new StemVisualizerDot("wristDriveBaseTopIntersect",
-                                new Translation2d(wristDriveBaseTopIntersect, kRobotGeometry.DRIVE_BASE.getTopY())));
+                                new Translation2d(wristDriveBaseTopIntersect,
+                                                kRobotCollisionGeometry.DRIVE_BASE.getTopY())));
 
                 DOT_SENDER.send(new StemVisualizerDot("wristDriveBaseBottomIntersect",
                                 new Translation2d(wristDriveBaseBottomIntersect,
-                                                kRobotGeometry.DRIVE_BASE.getBottomY())));
+                                                kRobotCollisionGeometry.DRIVE_BASE.getBottomY())));
 
                 // Boolean logic for recognizing when the intersection points on the drive
                 // base are within the interval of the drive base left and right side.
                 // Also boolean logic to determine when the actual mechanism is outside the
                 // drive base's allowed bounds.
-                boolean topUmbrellaInterceptInRect = withinXBoundsOf(kRobotGeometry.DRIVE_BASE,
+                boolean topUmbrellaInterceptInRect = withinXBoundsOf(kRobotCollisionGeometry.DRIVE_BASE,
                                 wristDriveBaseTopIntersect);
-                boolean bottomUmbrellaIntrceptInRect = withinXBoundsOf(kRobotGeometry.DRIVE_BASE,
+                boolean bottomUmbrellaIntrceptInRect = withinXBoundsOf(kRobotCollisionGeometry.DRIVE_BASE,
                                 wristDriveBaseBottomIntersect);
                 boolean isUmbrellaRightPointsBelowDriveBase = (mechPts.umbrellaBottomRightPoint
-                                .getY() <= kRobotGeometry.DRIVE_BASE.getTopLeft().getY() ||
-                                mechPts.umbrellaTopRightPoint.getY() <= kRobotGeometry.DRIVE_BASE.getTopLeft().getY());
+                                .getY() <= kRobotCollisionGeometry.DRIVE_BASE.getTopLeft().getY() ||
+                                mechPts.umbrellaTopRightPoint.getY() <= kRobotCollisionGeometry.DRIVE_BASE.getTopLeft()
+                                                .getY());
 
-                boolean topStemInterceptInRect = withinXBoundsOf(kRobotGeometry.DRIVE_BASE, stemDriveBaseTopIntersect);
-                boolean bottomStemInterceptInRect = withinXBoundsOf(kRobotGeometry.DRIVE_BASE,
+                boolean topStemInterceptInRect = withinXBoundsOf(kRobotCollisionGeometry.DRIVE_BASE,
+                                stemDriveBaseTopIntersect);
+                boolean bottomStemInterceptInRect = withinXBoundsOf(kRobotCollisionGeometry.DRIVE_BASE,
                                 stemDriveBaseBottomIntersect);
-                boolean isWristAxelPointBelowDrivebase = mechPts.wristAxelPoint.getY() <= kRobotGeometry.DRIVE_BASE
-                                .getTopLeft()
-                                .getY();
+                boolean isWristAxelPointBelowDrivebase = mechPts.wristAxelPoint
+                                .getY() <= kRobotCollisionGeometry.DRIVE_BASE
+                                                .getTopLeft()
+                                                .getY();
 
                 SmartDashboard.putBoolean("topUmbrellaInterceptInRect", topUmbrellaInterceptInRect);
                 SmartDashboard.putBoolean("bottomUmbrellaIntrceptInRect", bottomUmbrellaIntrceptInRect);
@@ -273,10 +279,12 @@ public class StemValidator {
                                 && (topStemInterceptInRect || bottomStemInterceptInRect);
                 boolean drivebaseCollides = umbrellaCollidesDrivebase || stemCollidesDrivebase;
 
-                DOT_SENDER.send(new StemVisualizerDot("boundsTopRight", kRobotGeometry.BOUNDS.getTopRight()));
-                DOT_SENDER.send(new StemVisualizerDot("boundsBottomRight", kRobotGeometry.BOUNDS.getBottomRight()));
-                DOT_SENDER.send(new StemVisualizerDot("boundsTopLeft", kRobotGeometry.BOUNDS.getTopLeft()));
-                DOT_SENDER.send(new StemVisualizerDot("boundsBottomLeft", kRobotGeometry.BOUNDS.getBottomLeft()));
+                DOT_SENDER.send(new StemVisualizerDot("boundsTopRight", kRobotCollisionGeometry.BOUNDS.getTopRight()));
+                DOT_SENDER.send(new StemVisualizerDot("boundsBottomRight",
+                                kRobotCollisionGeometry.BOUNDS.getBottomRight()));
+                DOT_SENDER.send(new StemVisualizerDot("boundsTopLeft", kRobotCollisionGeometry.BOUNDS.getTopLeft()));
+                DOT_SENDER.send(new StemVisualizerDot("boundsBottomLeft",
+                                kRobotCollisionGeometry.BOUNDS.getBottomLeft()));
 
                 return ValidationResponse.collisionFrom(drivebaseCollides, mechPts.outsideBounds());
         }
@@ -300,7 +308,7 @@ public class StemValidator {
                                 currentState.getPivotRads(),
                                 currentState.getWristRads(),
                                 targetState.getTelescopeMeters()));
-                
+
                 SmartDashboard.putString("pivotMovementValidationReason", pivotMovementValidReason.name());
                 SmartDashboard.putString("wristMovementValidationReason", wristMovementValidReason.name());
                 SmartDashboard.putString("telescopeMovementValidationReason", telescopeMovementValidReason.name());
@@ -342,7 +350,8 @@ public class StemValidator {
                                                 mechPts.umbrellaBottomRightPoint.getY(),
                                                 mechPts.umbrellaTopRightPoint.getY());
                                 double difference = Math
-                                                .abs(lowestOfUmbrellaPoints - kRobotGeometry.DRIVE_BASE.getTopY());
+                                                .abs(lowestOfUmbrellaPoints
+                                                                - kRobotCollisionGeometry.DRIVE_BASE.getTopY());
                                 double opposite = (currentState.telescopeMeters
                                                 * Math.sin(invalidPosition.getPivotRads())) + difference;
                                 midStatePivotRads = Math.asin(opposite / currentState.getTelescopeMeters());
@@ -358,7 +367,7 @@ public class StemValidator {
                                 // pivot rads mid state that when applies to the new telescope mid state results
                                 // in the umbrella beingat the desired x and y coordinates from (0,0).
 
-                                Rectangle2d bounds = kRobotGeometry.BOUNDS;
+                                Rectangle2d bounds = kRobotCollisionGeometry.BOUNDS;
 
                                 double rightDiff = diffIfGreater(umbrellaRect.getRightX(), bounds.getRightX());
                                 double leftDiff = diffIfGreater(bounds.getLeftX(), umbrellaRect.getLeftX());
@@ -371,8 +380,10 @@ public class StemValidator {
                                                                 bottomDiff - topDiff));
 
                                 Translation2d pivotAxelToWristAxelSlope = new Translation2d(
-                                                midWristAxelPoint.getX() - kRobotGeometry.PIVOT_LOCATION.getX(),
-                                                midWristAxelPoint.getY() - kRobotGeometry.PIVOT_LOCATION.getY());
+                                                midWristAxelPoint.getX()
+                                                                - kRobotCollisionGeometry.PIVOT_LOCATION.getX(),
+                                                midWristAxelPoint.getY()
+                                                                - kRobotCollisionGeometry.PIVOT_LOCATION.getY());
 
                                 midStateTelescopeMeters = Math.sqrt(
                                                 Math.pow(pivotAxelToWristAxelSlope.getX(), 2)
