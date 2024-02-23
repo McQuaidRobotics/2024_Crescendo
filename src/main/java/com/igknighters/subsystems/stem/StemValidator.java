@@ -341,7 +341,7 @@ public class StemValidator {
                                                 - currentState.getTelescopeMeters()) * proportion)
                                 : currentState.getTelescopeMeters();
 
-                if (!pivotMovementValidReason.isValid()) {
+                if (!pivotMovementValidReason.isValid() && !pivotMovementValidReason.equals(ValidationResponse.NOT_MECHANICALLY_VIABLE)) {
                         StemPosition invalidPosition = StemPosition.fromRadians(
                                         targetState.getPivotRads(),
                                         currentState.getWristRads(),
