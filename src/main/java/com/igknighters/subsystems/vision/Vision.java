@@ -74,14 +74,25 @@ public class Vision extends SubsystemBase {
 
             VisionPoseEstimate eval = optEval.get();
 
+            double ambiguity = eval.ambiguity;
+
+            if (eval.apriltags.isEmpty() || ambiguity > 0.5 || eval.maxDistance > 5.5) {
+                Tracer.endTrace();
+                continue;
+            }
+
+            if (eval.apriltags.size() < 2) {
+                ambiguity *= 2.0;
+            }
+
             if (Math.abs(eval.pose.getTranslation().getZ()) > kVision.MAX_Z_DELTA) {
                 // The cameras height does not change typically, so if it does, it is likely a
                 // false positive
                 Logger.recordOutput("/Vision/" + camera.getName() + "/WeirdZ", true);
-                GlobalState.submitVisionData(eval, Math.min(eval.ambiguity * 3.0, 1.0));
-            } else {
-                GlobalState.submitVisionData(eval, eval.ambiguity);
+                ambiguity *= 2.0;
             }
+
+            GlobalState.submitVisionData(eval, ambiguity);
 
             seenTags.addAll(eval.apriltags);
 

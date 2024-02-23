@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.littletonrobotics.junction.Logger;
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -15,6 +16,8 @@ import com.igknighters.util.BootupLogger;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 
 /**
  * An abstraction for a photon camera.
@@ -52,26 +55,63 @@ public class CameraReal implements Camera {
                 new Pose3d(),
                 0,
                 List.of(),
-                0.0));
+                0.0,
+                0.0
+        ));
 
         BootupLogger.bootupLog("    " + cameraName + " camera initialized (real)");
     }
 
     private Optional<VisionPoseEstimate> realEvaluatePose() {
-        return poseEstimator.update()
-                .map(estRoboPose -> new VisionPoseEstimate(
-                        this.id,
-                        estRoboPose.estimatedPose,
-                        estRoboPose.timestampSeconds,
-                        estRoboPose.targetsUsed
-                                .stream()
-                                .map(PhotonTrackedTarget::getFiducialId)
-                                .toList(),
-                        estRoboPose.targetsUsed
-                                .stream()
-                                .map(PhotonTrackedTarget::getPoseAmbiguity)
-                                .reduce(0.0, Double::sum)
-                                / estRoboPose.targetsUsed.size()));
+        // return poseEstimator.update()
+        //         .map(estRoboPose -> new VisionPoseEstimate(
+        //                 this.id,
+        //                 estRoboPose.estimatedPose,
+        //                 estRoboPose.timestampSeconds,
+        //                 estRoboPose.targetsUsed
+        //                         .stream()
+        //                         .map(PhotonTrackedTarget::getFiducialId)
+        //                         .toList(),
+        //                 estRoboPose.targetsUsed
+        //                         .stream()
+        //                         .map(PhotonTrackedTarget::getPoseAmbiguity)
+        //                         .reduce(0.0, Double::sum)
+        //                         / estRoboPose.targetsUsed.size()));
+
+        Optional<EstimatedRobotPose> opt = poseEstimator.update();
+
+        if (!opt.isPresent()) {
+            return Optional.empty();
+        }
+
+        EstimatedRobotPose estRoboPose = opt.get();
+
+        List<Integer> targetIds = estRoboPose.targetsUsed
+                .stream()
+                .map(PhotonTrackedTarget::getFiducialId)
+                .toList();
+
+        double avgAmbiguity = estRoboPose.targetsUsed
+                .stream()
+                .map(PhotonTrackedTarget::getPoseAmbiguity)
+                .reduce(0.0, Double::sum)
+                / estRoboPose.targetsUsed.size();
+
+        double maxDistance = estRoboPose.targetsUsed
+                .stream()
+                .map(PhotonTrackedTarget::getBestCameraToTarget)
+                .map(Transform3d::getTranslation)
+                .map(Translation3d::toTranslation2d)
+                .map(Translation2d::getNorm)
+                .reduce(0.0, Math::max);
+
+        return Optional.of(new VisionPoseEstimate(
+                this.id,
+                estRoboPose.estimatedPose,
+                estRoboPose.timestampSeconds,
+                targetIds,
+                avgAmbiguity,
+                maxDistance));
     }
 
     @Override

@@ -87,17 +87,17 @@ public class TestingController extends ControllerParent {
         // this.RS.binding =
 
         /// TRIGGERS
-        this.LT.binding = new Binding((trig, allss) -> {
-            trig.whileTrue(
-                    UmbrellaCommands.intake(
-                            allss.umbrella.get()));
-        }, Subsystems.Umbrella);
+        // this.LT.binding = new Binding((trig, allss) -> {
+        //     trig.whileTrue(
+        //             UmbrellaCommands.intake(
+        //                     allss.umbrella.get()));
+        // }, Subsystems.Umbrella);
 
-        this.RT.binding = new Binding((trig, allss) -> {
-            trig.onTrue(
-                    UmbrellaCommands.shoot(
-                            allss.umbrella.get()));
-        }, Subsystems.Umbrella);
+        // this.RT.binding = new Binding((trig, allss) -> {
+        //     trig.onTrue(
+        //             UmbrellaCommands.shoot(
+        //                     allss.umbrella.get()));
+        // }, Subsystems.Umbrella);
 
         /// DPAD
         // this.DPR.binding =

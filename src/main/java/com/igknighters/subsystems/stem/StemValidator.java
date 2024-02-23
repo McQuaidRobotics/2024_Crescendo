@@ -2,6 +2,7 @@ package com.igknighters.subsystems.stem;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.igknighters.constants.ConstValues.kRobotCollisionGeometry;
@@ -198,7 +199,10 @@ public class StemValidator {
          * if it's not, how its invalid.
          */
         public static ValidationResponse validatePosition(StemPosition stemPosition) {
-                if (!isMechanicallyViable(stemPosition)) return ValidationResponse.NOT_MECHANICALLY_VIABLE;
+                if (!isMechanicallyViable(stemPosition)) {
+                        DriverStation.reportWarning("Your target stem position is not mechannically viable. Your stem position will remain the same for now!", false);
+                        return ValidationResponse.NOT_MECHANICALLY_VIABLE;
+                } 
 
                 // Gets the location of differect corners and joints on the stem mechanism and
                 // umbrella within the x y coordinate plane from (0, 0)

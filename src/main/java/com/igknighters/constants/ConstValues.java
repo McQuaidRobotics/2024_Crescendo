@@ -141,7 +141,7 @@ public final class ConstValues {
         ).cameras;
     }
 
-    @BoolConst(crash = true, burn = false)
+    @BoolConst(crash = false, burn = false)
     public static boolean LED_ENABLED;
 
     public static final class kSwerve {
@@ -321,8 +321,8 @@ public final class ConstValues {
     }
 
     public static final class kUmbrella {
-        public static final double NOTE_VELO = 50.0;
-        public static final double NOTE_VELO_AUTO = 50.0;
+        public static final double NOTE_VELO = 35.0;
+        public static final double NOTE_VELO_AUTO = 35.0;
         public static final String CANBUS = "SuperStructureBus";
 
         public static final class kShooter {
@@ -330,13 +330,13 @@ public final class ConstValues {
             public static final double MOTOR_UPPER_kI = 0.0;
             public static final double MOTOR_UPPER_kD = 0.00;
             public static final double MOTOR_UPPER_kS = 0.1;
-            public static final double MOTOR_UPPER_kV = 0.111;
+            public static final double MOTOR_UPPER_kV = 0.124;
 
             public static final double MOTOR_LOWER_kP = 0.08;
             public static final double MOTOR_LOWER_kI = 0.0;
             public static final double MOTOR_LOWER_kD = 0.00;
             public static final double MOTOR_LOWER_kS = 0.1;
-            public static final double MOTOR_LOWER_kV = 0.111;
+            public static final double MOTOR_LOWER_kV = 0.124;
 
             public static final int LEFT_MOTOR_ID = 17;
             public static final int RIGHT_MOTOR_ID = 18;
@@ -395,8 +395,8 @@ public final class ConstValues {
             public static final double MOTOR_kD = 0.0;
 
             public static final double MAX_VELOCITY = 1300;
-            public static final double MAX_ACCELERATION = 2000;
-            public static final double MAX_JERK = 2000;
+            public static final double MAX_ACCELERATION = 2600;
+            public static final double MAX_JERK = 5200;
 
             public static final double MIN_ANGLE = 7.0 * Conv.DEGREES_TO_RADIANS;
 
@@ -466,8 +466,8 @@ public final class ConstValues {
 
             public static final double CANCODER_OFFSET = -0.2439;
 
-            public static final double MIN_ANGLE = 45.0 * Conv.DEGREES_TO_RADIANS;
-            public static final double MAX_ANGLE = 110.0 * Conv.DEGREES_TO_RADIANS;
+            public static final double MIN_ANGLE = 29.0 * Conv.DEGREES_TO_RADIANS;
+            public static final double MAX_ANGLE = 115.0 * Conv.DEGREES_TO_RADIANS;
 
             public static final double MAX_VELOCITY = 1200;
             public static final double MAX_ACCELERATION = 1800;
@@ -476,7 +476,7 @@ public final class ConstValues {
             /**
              * Tolerance in radians
              */
-            public static final double TARGET_TOLERANCE = 1.0 * Conv.DEGREES_TO_RADIANS;
+            public static final double TARGET_TOLERANCE = 2.5 * Conv.DEGREES_TO_RADIANS;
 
             public static final double V1_WRIST_ANGLE = Units.degreesToRadians(70.0);
         }

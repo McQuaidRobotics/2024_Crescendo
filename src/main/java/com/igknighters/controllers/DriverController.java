@@ -5,7 +5,11 @@ import com.igknighters.commands.HigherOrderCommands;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.SwerveCommands;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
+import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.subsystems.stem.StemPosition;
+
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
 public class DriverController extends ControllerParent {
 
@@ -75,20 +79,50 @@ public class DriverController extends ControllerParent {
         /// TRIGGERS
         this.LT.binding = new Binding((trig, allss) -> {
             trig.whileTrue(
-                HigherOrderCommands.aim(
-                    allss.swerve.get(),
-                    allss.stem.get(),
-                    allss.umbrella.get(),
-                    this
-                )
+                Commands.parallel(
+                    HigherOrderCommands.aim(
+                        allss.swerve.get(),
+                        allss.stem.get(),
+                        this
+                    ),
+                    UmbrellaCommands.spinupShooter(
+                        allss.umbrella.get(),
+                        kControls.SHOOTER_RPM
+                    )
+                ).finallyDo(
+                    allss.umbrella.get()::stopAll
+                ).withName("Highorder Aim")
             );
         }, Subsystems.Swerve, Subsystems.Stem, Subsystems.Umbrella);
 
         this.RT.binding = new Binding((trig, allss) -> {
             trig.onTrue(
-                UmbrellaCommands.shoot(
-                    allss.umbrella.get()
-                )
+                new ProxyCommand(
+                    () -> {
+                        if (this.LT.trigger.getAsBoolean()) {
+                            return Commands.parallel(
+                                HigherOrderCommands.aim(
+                                    allss.swerve.get(),
+                                    allss.stem.get(),
+                                    this
+                                ),
+                                UmbrellaCommands.shoot(
+                                    allss.umbrella.get()
+                                )
+                            ).until(
+                                () -> !this.LT.trigger.getAsBoolean()
+                            ).finallyDo(
+                                allss.umbrella.get()::stopAll
+                            ).withName("Highorder Aim and Shoot");
+                        } else {
+                            return UmbrellaCommands.shoot(
+                                allss.umbrella.get()
+                            ).finallyDo(
+                                allss.umbrella.get()::stopAll
+                            ).withName("Shoot");
+                        }
+                    }
+                ).withName("Proxy Shoot")
             );
         }, Subsystems.Umbrella);
 

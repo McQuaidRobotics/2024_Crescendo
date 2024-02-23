@@ -45,12 +45,12 @@ public class SwerveCommands {
 
     public static Command driveToAmp(Swerve swerve) {
         return new SimplePathfindingCommand(
-                new Pose2d(1.84, 7.2, Rotation2d.fromDegrees(90)),
+                new Pose2d(1.84, 7.2, Rotation2d.fromDegrees(-90)),
                 swerve)
                 .flipForAlliance()
                 .andThen(
                         new SimplePathfindingCommand(
-                                new Pose2d(1.84, 7.5, Rotation2d.fromDegrees(90)),
+                                new Pose2d(1.84, 7.5, Rotation2d.fromDegrees(-90)),
                                 swerve).flipForAlliance());
     }
 

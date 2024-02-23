@@ -13,6 +13,7 @@ import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.stem.StemSolvers;
 import com.igknighters.util.geom.AllianceFlip;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -107,7 +108,7 @@ public class StemCommands {
 
                 hasFinished = stem.setStemPosition(StemPosition.fromRadians(
                         kControls.V2_AIM_AT_PIVOT_RADIANS,
-                        wristRads + kControls.V2_AIM_AT_PIVOT_RADIANS,
+                        MathUtil.clamp(wristRads + kControls.V2_AIM_AT_PIVOT_RADIANS, kWrist.MIN_ANGLE, kWrist.MAX_ANGLE),
                         kTelescope.MIN_METERS));
             }
         }

@@ -48,6 +48,7 @@ public interface Camera {
             table.put("latestPoseEst/pose", latestPoseEst.pose);
             table.put("latestPoseEst/tags", latestPoseEst.apriltags.stream().mapToInt(i -> i).toArray());
             table.put("latestPoseEst/ambiguity", latestPoseEst.ambiguity);
+            table.put("latestPoseEst/maxDistance", latestPoseEst.maxDistance);
         }
 
         @Override
@@ -59,6 +60,7 @@ public interface Camera {
             int[] tagsPrim = table.get("latestPoseEst/tags",
                     latestPoseEst.apriltags.stream().mapToInt(i -> i).toArray());
             double ambiguity = table.get("latestPoseEst/ambiguity", latestPoseEst.ambiguity);
+            double maxDistance = table.get("latestPoseEst/maxDistance", latestPoseEst.maxDistance);
 
             ArrayList<Integer> tags = new ArrayList<>();
             for (int tag : tagsPrim) {
@@ -70,7 +72,9 @@ public interface Camera {
                     pose,
                     timestamp,
                     tags,
-                    ambiguity);
+                    ambiguity,
+                    maxDistance
+                );
         }
     }
 
@@ -164,14 +168,16 @@ public interface Camera {
         public final double timestamp;
         public final List<Integer> apriltags;
         public final double ambiguity;
+        public final double maxDistance;
 
         public VisionPoseEstimate(int cameraId, Pose3d pose, double timestamp, List<Integer> apriltags,
-                double ambiguity) {
+                double ambiguity, double maxDistance) {
             this.cameraId = cameraId;
             this.pose = pose;
             this.timestamp = timestamp;
             this.apriltags = apriltags;
             this.ambiguity = ambiguity;
+            this.maxDistance = maxDistance;
         }
     }
 }

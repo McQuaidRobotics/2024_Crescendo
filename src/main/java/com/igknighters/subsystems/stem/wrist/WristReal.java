@@ -106,7 +106,7 @@ public class WristReal implements Wrist {
     public void setWristRadians(Double radians) {
         inputs.targetRadians = radians;
         var posControlRequest = new PositionDutyCycle(
-                Wrist.mechanismRadsToMotorRots(radians)).withEnableFOC(false);
+                Wrist.mechanismRadsToMotorRots(radians)).withEnableFOC(true);
         this.motor.setControl(posControlRequest);
     }
 

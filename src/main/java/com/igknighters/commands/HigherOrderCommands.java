@@ -4,8 +4,8 @@ import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.SwerveCommands;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveTargetSpeaker;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
-import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
+import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.controllers.ControllerParent;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
@@ -15,6 +15,7 @@ import com.igknighters.subsystems.umbrella.Umbrella;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 public class HigherOrderCommands {
 
@@ -24,7 +25,15 @@ public class HigherOrderCommands {
                         11.0,
                         72.0,
                         kTelescope.MIN_METERS + Units.inchesToMeters(4.7))),
-                UmbrellaCommands.intake(umbrella)).until(() -> umbrella.holdingGamepiece())
+                new WaitCommand(3).until(
+                        () -> {
+                            var pose = stem.getStemPosition();
+                            return pose.wristRads > (StemPosition.INTAKE.wristRads
+                                    + kWrist.MIN_ANGLE) / 2.0
+                                    && pose.telescopeMeters > kTelescope.MIN_METERS;
+                        }).andThen(
+                                UmbrellaCommands.intake(umbrella))
+                        .until(() -> umbrella.holdingGamepiece()))
                 .andThen(StemCommands.moveTo(stem, StemPosition.STOW));
     }
 
@@ -32,19 +41,16 @@ public class HigherOrderCommands {
         return Commands.parallel(
                 StemCommands.moveTo(stem, StemPosition.AMP),
                 SwerveCommands.driveToAmp(swerve),
-                UmbrellaCommands.spinupShooter(umbrella, 1500)).andThen(
-                        UmbrellaCommands.shoot(umbrella));
+                UmbrellaCommands.spinupShooter(umbrella, 1500));
     }
 
     public static Command aim(
             Swerve swerve,
             Stem stem,
-            Umbrella umbrella,
             ControllerParent controller) {
         return Commands.parallel(
                 new TeleopSwerveTargetSpeaker(swerve, controller)
-                        .withSpeedMultiplier(0.1),
-                StemCommands.aimAtSpeaker(stem, false),
-                UmbrellaCommands.spinupShooter(umbrella, kControls.SHOOTER_RPM));
+                        .withSpeedMultiplier(0.5),
+                StemCommands.aimAtSpeaker(stem, false));
     }
 }

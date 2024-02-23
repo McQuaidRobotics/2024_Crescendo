@@ -34,7 +34,9 @@ public class CameraDisabled implements Camera {
                 new Pose3d(),
                 0,
                 List.of(),
-                0.0));
+                0.0,
+                0.0
+        ));
 
         BootupLogger.bootupLog("    " + cameraName + " camera initialized (disabled)");
     }

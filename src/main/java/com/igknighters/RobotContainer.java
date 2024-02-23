@@ -1,7 +1,6 @@
 package com.igknighters;
 
 import com.igknighters.constants.ConstValues;
-import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.RobotSetup;
 import com.igknighters.constants.ConstValues.kAuto;
 import com.igknighters.constants.ConstValues.kSwerve;
@@ -9,9 +8,7 @@ import com.igknighters.controllers.DriverController;
 import com.igknighters.controllers.OperatorController;
 import com.igknighters.controllers.TestingController;
 import com.igknighters.subsystems.swerve.Swerve;
-import com.igknighters.util.PolyTrigger;
 import com.igknighters.util.geom.AllianceFlip;
-import com.igknighters.util.geom.Rectangle2d;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 
@@ -19,6 +16,7 @@ import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.commands.autos.Autos;
 import com.igknighters.commands.autos.AutosCmdRegister;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
+// import com.igknighters.commands.umbrella.UmbrellaCommands;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
@@ -65,20 +63,33 @@ public class RobotContainer {
             }).withName("StemDefaultCommand"));
         }
 
-        if (allSubsystems.umbrella.isPresent()) {
-            var umbrella = allSubsystems.umbrella.get();
-            PolyTrigger trigger = new PolyTrigger(
-                    new Rectangle2d(
-                            0, 0,
-                            FieldConstants.FIELD_LENGTH * 0.65,
-                            FieldConstants.FIELD_WIDTH).asPolygon2d());
-            umbrella.setDefaultCommand(umbrella.run(() -> {
-                if (trigger.getAsBoolean()) {
-                    umbrella.spinupShooterToRPM(400);
-                    umbrella.runIntakeAt(0);
-                }
-            }).withName("UmbrellaDefaultCommand"));
-        }
+        // if (allSubsystems.umbrella.isPresent()) {
+        //     var umbrella = allSubsystems.umbrella.get();
+        //     Rectangle2d friendlyArea = new Rectangle2d(
+        //             0, 0,
+        //             FieldConstants.FIELD_LENGTH * 0.65,
+        //             FieldConstants.FIELD_WIDTH);
+        //     PolyTrigger trigger = new PolyTrigger(
+        //         (AllianceFlip.isBlue()
+        //             ? friendlyArea
+        //             : AllianceFlip.flipRectangle(friendlyArea)
+        //         ).asPolygon2d()
+        //     );
+        //     umbrella.setDefaultCommand(umbrella.run(() -> {
+        //         if (trigger.getAsBoolean()) {
+        //             umbrella.spinupShooterToRPM(400);
+        //             umbrella.runIntakeAt(0);
+        //         }
+        //     }).withName("UmbrellaDefaultCommand"));
+        // }
+
+        // if (allSubsystems.umbrella.isPresent()) {
+        //     var umbrella = allSubsystems.umbrella.get();
+        //     umbrella.setDefaultCommand(
+        //         UmbrellaCommands.spinUmbrellaBoth(umbrella)
+        //             .withName("UmbrellaDefaultCommand")
+        //     );
+        // }
     }
 
     private void setupAutos(Swerve swerve) {
