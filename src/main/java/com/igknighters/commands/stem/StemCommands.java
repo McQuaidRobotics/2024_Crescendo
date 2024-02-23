@@ -6,7 +6,6 @@ import com.igknighters.GlobalState;
 import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
-import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.stem.StemSolvers;
@@ -14,7 +13,6 @@ import com.igknighters.util.AllianceFlip;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -73,7 +71,7 @@ public class StemCommands {
         @Override
         public void execute() {
             boolean blueAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue).equals(Alliance.Blue);
-            Translation2d speaker = FieldConstants.Speaker.SPEAKER_CENTER.toTranslation2d();
+            Translation2d speaker = FieldConstants.SPEAKER.toTranslation2d();
             Translation2d targetTranslation = blueAlliance ? speaker : AllianceFlip.flipTranslation(speaker);
 
             ChassisSpeeds currentChassisSpeed = GlobalState.getFieldRelativeVelocity();
@@ -97,7 +95,7 @@ public class StemCommands {
                             kTelescope.MAX_METERS,
                             Units.degreesToRadians(40.0),
                             currentPose.getTranslation().getDistance(adjustedTarget),
-                            FieldConstants.Speaker.SPEAKER_CENTER.getZ());
+                            FieldConstants.SPEAKER.getZ());
 
                     stem.setStemPosition(StemPosition.fromRadians(
                             Units.degreesToRadians(40.0),
@@ -157,7 +155,7 @@ public class StemCommands {
      */
     public static Command aimAt(Stem stem, AimStrategy aimStrategy) {
         return new AimAtCommand(stem, aimStrategy)
-                .withName("Aim At(" + FieldConstants.Speaker.SPEAKER_CENTER.toString() + ")");
+                .withName("Aim At SPEAKER");
     }
 
     public enum AimStrategy {

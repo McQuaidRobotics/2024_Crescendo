@@ -15,12 +15,6 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 
 public class SubsystemResources {
 
-    //## I'm adding a new subsystem, what do i do?
-    //1. add a new subsystem to the Subsystems enum with pascal case name
-    //2. add a new subsystem to the AllSubsystems class
-    //3. add it to wanted robot ids in ..\constants\RobotSetup.java
-
-
     /**
      * a way to pass around data about enabled subsystems
      */
@@ -117,6 +111,15 @@ public class SubsystemResources {
 
         public List<Subsystem> getEnabledSubsystems() {
             return subsystemsList;
+        }
+
+        public boolean hasAllSubsystems() {
+{%for ss in subsystems%}
+            if (!{{ss|lower}}.isPresent()) {
+                return false;
+            }
+{%endfor%}
+            return true;
         }
     }
 }

@@ -81,9 +81,16 @@ public final class ConstValues {
                 0.0,
                 FRAME_WIDTH + (24.0 * Conv.INCHES_TO_METERS),
                 48.0 * Conv.INCHES_TO_METERS);
+
         public static final Translation2d PIVOT_LOCATION = new Translation2d(
                 ((32.6 / 2.0) - 9.5) * Conv.INCHES_TO_METERS,
                 7.25 * Conv.INCHES_TO_METERS);
+    }
+
+    public static final class kControls {
+        public static final double SHOOTER_RPM = 3780.0;
+        public static final double INTAKE_PERCENT = 0.8;
+        public static final double V2_AIM_AT_PIVOT_RADIANS = 42.5 * Conv.DEGREES_TO_RADIANS;
     }
 
     public static final class kVision {

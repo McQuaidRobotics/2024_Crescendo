@@ -5,6 +5,7 @@ import com.igknighters.commands.stem.StemCommands.AimStrategy;
 import com.igknighters.commands.swerve.SwerveCommands;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveTargetSpeaker;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
+import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.controllers.ControllerParent;
 import com.igknighters.subsystems.stem.Stem;
@@ -45,12 +46,11 @@ public class HigherOrderCommands {
         Umbrella umbrella,
         ControllerParent controller
     ) {
-        final double rpm = 3780;
         return Commands.parallel(
             new TeleopSwerveTargetSpeaker(swerve, controller)
                 .withSpeedMultiplier(0.1),
             StemCommands.aimAt(stem, AimStrategy.SIMPLE_V2),
-            UmbrellaCommands.spinupShooter(umbrella, rpm)
+            UmbrellaCommands.spinupShooter(umbrella, kControls.SHOOTER_RPM)
         );
     }
 }
