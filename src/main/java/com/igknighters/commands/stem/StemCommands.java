@@ -4,8 +4,10 @@ import java.util.function.DoubleSupplier;
 
 import com.igknighters.GlobalState;
 import com.igknighters.constants.FieldConstants;
+import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
+import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.stem.StemSolvers;
@@ -58,11 +60,11 @@ public class StemCommands {
      * A command class that continually calculates the wrist radians needed to aim
      * at a target
      */
-    private static class AimAtCommand extends Command {
+    private static class AimAtSpeakerCommand extends Command {
         private Stem stem;
         private AimStrategy aimStrategy;
 
-        private AimAtCommand(Stem stem, AimStrategy aimStrategy) {
+        private AimAtSpeakerCommand(Stem stem, AimStrategy aimStrategy) {
             addRequirements(stem);
             this.stem = stem;
             this.aimStrategy = aimStrategy;
@@ -86,22 +88,28 @@ public class StemCommands {
                     targetTranslation.getY()
                             - (currentChassisSpeed.vyMetersPerSecond * (distance / kUmbrella.NOTE_VELO)));
 
-            switch (aimStrategy) {
-                case SIMPLE_V1:
-                    // double wristRads = kWrist.V1_WRIST_ANGLE;
-                    break;
-                case SIMPLE_V2:
-                    double wristRads = StemSolvers.linearSolveWristTheta(
-                            kTelescope.MAX_METERS,
-                            Units.degreesToRadians(40.0),
-                            currentPose.getTranslation().getDistance(adjustedTarget),
-                            FieldConstants.SPEAKER.getZ());
+            if (aimStrategy.equals(AimStrategy.SIMPLE_V1)) {
+                double pivotRads = StemSolvers.linearSolvePivotTheta(
+                        kTelescope.MIN_METERS,
+                        kWrist.V1_WRIST_ANGLE,
+                        currentPose.getTranslation().getDistance(adjustedTarget),
+                        FieldConstants.SPEAKER.getZ());
 
-                    stem.setStemPosition(StemPosition.fromRadians(
-                            Units.degreesToRadians(40.0),
-                            wristRads + Units.degreesToRadians(40.0),
-                            kTelescope.MIN_METERS));
-                    break;
+                stem.setStemPosition(StemPosition.fromRadians(
+                        pivotRads,
+                        kWrist.V1_WRIST_ANGLE,
+                        kTelescope.MIN_METERS));
+            } else if (aimStrategy.equals(AimStrategy.SIMPLE_V2)) {
+                double wristRads = StemSolvers.linearSolveWristTheta(
+                        kTelescope.MAX_METERS,
+                        kControls.V2_AIM_AT_PIVOT_RADIANS,
+                        currentPose.getTranslation().getDistance(adjustedTarget),
+                        FieldConstants.SPEAKER.getZ());
+
+                stem.setStemPosition(StemPosition.fromRadians(
+                        kControls.V2_AIM_AT_PIVOT_RADIANS,
+                        wristRads + kControls.V2_AIM_AT_PIVOT_RADIANS,
+                        kTelescope.MIN_METERS));
             }
         }
     }
@@ -146,15 +154,25 @@ public class StemCommands {
     }
 
     /**
-     * Will continously move the stem to target a point in space until the command
-     * is canceled or overidden with a new command.
+     * Continuously aims the pivot or wrist or both depending on the aim strategy.
      * 
-     * @param stem   The stem subsystem
-     * @param target The point in space to aim at
+     * @param stem The stem subsystem
      * @return A command to be scheduled
      */
-    public static Command aimAt(Stem stem, AimStrategy aimStrategy) {
-        return new AimAtCommand(stem, aimStrategy)
+    public static Command aimAtSpeaker(Stem stem) {
+        return new AimAtSpeakerCommand(stem, kControls.DEFAULT_AIM_STRATEGY)
+                .withName("Aim At SPEAKER");
+    }
+
+    /**
+     * Continuously aims the pivot or wrist or both depending on the default aim strategy in constants.
+     * 
+     * @param stem The stem subsystem
+     * @param aimStrategy The aiming strategy to use when targeting the speaker
+     * @return A command to be scheduled
+     */
+    public static Command aimAtSpeaker(Stem stem, AimStrategy aimStrategy) {
+        return new AimAtSpeakerCommand(stem, aimStrategy)
                 .withName("Aim At SPEAKER");
     }
 

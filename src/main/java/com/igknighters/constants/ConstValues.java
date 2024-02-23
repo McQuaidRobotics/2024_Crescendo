@@ -4,6 +4,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.igknighters.ConstantHelper.*;
+import com.igknighters.commands.stem.StemCommands.AimStrategy;
 import com.igknighters.subsystems.swerve.module.SwerveModuleConstants;
 import com.igknighters.subsystems.swerve.module.SwerveModuleConstants.ModuleId;
 import com.igknighters.subsystems.vision.camera.Camera;
@@ -91,6 +92,7 @@ public final class ConstValues {
         public static final double SHOOTER_RPM = 3780.0;
         public static final double INTAKE_PERCENT = 0.8;
         public static final double V2_AIM_AT_PIVOT_RADIANS = 42.5 * Conv.DEGREES_TO_RADIANS;
+        public static final AimStrategy DEFAULT_AIM_STRATEGY = AimStrategy.SIMPLE_V2;
     }
 
     public static final class kVision {
@@ -380,8 +382,8 @@ public final class ConstValues {
                  * From the center of the robot
                  */
                 public static final Translation2d PIVOT_AXEL_LOCATION = new Translation2d(
-                    Units.inchesToMeters(-9), 
-                    Units.inchesToMeters(7.25));
+                        Units.inchesToMeters(-9),
+                        Units.inchesToMeters(7.25));
             }
 
             public static final int LEFT_MOTOR_ID = 11;
@@ -476,7 +478,7 @@ public final class ConstValues {
              */
             public static final double TARGET_TOLERANCE = 1.0 * Conv.DEGREES_TO_RADIANS;
 
-            public static final double V1_WRIST_ANGLE = Units.degreesToRadians(55.0);
+            public static final double V1_WRIST_ANGLE = Units.degreesToRadians(70.0);
         }
     }
 }

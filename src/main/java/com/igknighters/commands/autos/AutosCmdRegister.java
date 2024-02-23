@@ -26,48 +26,40 @@ public class AutosCmdRegister {
         Swerve swerve = allSubsystems.swerve.get();
 
         SpecializedNamedCommands.registerCommand(
-            "Intake",
-            SpecializedNamedCommand.fromLambda(
-                (Object timeout) -> {
-                    return HigherOrderCommands
-                            .intakeGamepiece(stem, umbrella)
-                            .withTimeout((Double) timeout);
-                },
-                Double.class)
-        ).withDefault(9999.0);
+                "Intake",
+                SpecializedNamedCommand.fromLambda(
+                        (Object timeout) -> {
+                            return HigherOrderCommands
+                                    .intakeGamepiece(stem, umbrella)
+                                    .withTimeout((Double) timeout);
+                        },
+                        Double.class))
+                .withDefault(9999.0);
 
         NamedCommands.registerCommand(
-            "Stow",
-            StemCommands.holdAt(stem, StemPosition.STOW)
-        );
+                "Stow",
+                StemCommands.holdAt(stem, StemPosition.STOW));
 
         SpecializedNamedCommands.registerCommand(
-            "Spinup",
-            SpecializedNamedCommand.fromLambda(
-                    (Object rpm) -> {
-                        return UmbrellaCommands
-                            .spinupShooter(umbrella, (Double) rpm);
-                    },
-                    Double.class)
-        ).withDefault(kControls.SHOOTER_RPM);
+                "Spinup",
+                SpecializedNamedCommand.fromLambda(
+                        (Object rpm) -> {
+                            return UmbrellaCommands
+                                    .spinupShooter(umbrella, (Double) rpm);
+                        },
+                        Double.class))
+                .withDefault(kControls.SHOOTER_RPM);
 
         NamedCommands.registerCommand(
-            "Aim",
-            StemCommands.aimAt(
-                stem,
-                AimStrategy.SIMPLE_V2
-            )
-        );
+                "Aim",
+                StemCommands.aimAtSpeaker(stem));
 
         NamedCommands.registerCommand(
-            "Shoot",
-            Commands.parallel(
-                new AutoSwerveTargetSpeaker(swerve),
-                StemCommands.aimAt(stem, AimStrategy.SIMPLE_V2),
-                UmbrellaCommands.waitUntilSpunUp(umbrella, kControls.SHOOTER_RPM, 1.2)
-            ).andThen(
-                UmbrellaCommands.shoot(umbrella)
-            )
-        );
+                "Shoot",
+                Commands.parallel(
+                        new AutoSwerveTargetSpeaker(swerve),
+                        StemCommands.aimAtSpeaker(stem),
+                        UmbrellaCommands.waitUntilSpunUp(umbrella, kControls.SHOOTER_RPM, 1.2)).andThen(
+                                UmbrellaCommands.shoot(umbrella)));
     }
 }

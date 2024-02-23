@@ -40,10 +40,7 @@ public class TestingController extends ControllerParent {
 
         this.B.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
             trig.onTrue(
-                StemCommands.aimAt(
-                    allss.stem.get(), 
-                    AimStrategy.SIMPLE_V2)
-            );
+                    StemCommands.aimAtSpeaker(allss.stem.get()));
         });
 
         this.X.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
@@ -67,26 +64,22 @@ public class TestingController extends ControllerParent {
         /// BUMPER
         this.LB.binding = new Binding((trig, allss) -> {
             trig.onTrue(
-                UmbrellaCommands.spinupShooter(
-                    allss.umbrella.get(),
-                    3800
-                )
-            );
+                    UmbrellaCommands.spinupShooter(
+                            allss.umbrella.get(),
+                            3800));
         }, Subsystems.Umbrella);
 
         this.RB.binding = new Binding((trig, allss) -> {
             trig.onTrue(
-                UmbrellaCommands.spinupShooter(
-                    allss.umbrella.get(),
-                    0
-                )
-            );
+                    UmbrellaCommands.spinupShooter(
+                            allss.umbrella.get(),
+                            0));
         }, Subsystems.Umbrella);
 
         /// CENTER BUTTONS
         // this.Back.binding =
 
-        // this.Start.binding = 
+        // this.Start.binding =
 
         /// STICKS
         // this.LS.binding =
@@ -96,18 +89,14 @@ public class TestingController extends ControllerParent {
         /// TRIGGERS
         this.LT.binding = new Binding((trig, allss) -> {
             trig.whileTrue(
-                UmbrellaCommands.intake(
-                    allss.umbrella.get()
-                )
-            );
+                    UmbrellaCommands.intake(
+                            allss.umbrella.get()));
         }, Subsystems.Umbrella);
 
         this.RT.binding = new Binding((trig, allss) -> {
             trig.onTrue(
-                UmbrellaCommands.shoot(
-                    allss.umbrella.get()
-                )
-            );
+                    UmbrellaCommands.shoot(
+                            allss.umbrella.get()));
         }, Subsystems.Umbrella);
 
         /// DPAD
