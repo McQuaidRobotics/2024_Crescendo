@@ -60,7 +60,7 @@ public class AutosCmdRegister {
         );
 
         NamedCommands.registerCommand(
-            "Shoot",
+            "AutoShoot",
             Commands.parallel(
                 new AutoSwerveTargetSpeaker(swerve),
                 StemCommands.aimAt(stem, AimStrategy.SIMPLE_V2),
@@ -68,6 +68,11 @@ public class AutosCmdRegister {
             ).andThen(
                 UmbrellaCommands.shoot(umbrella)
             )
+        );
+
+        NamedCommands.registerCommand(
+            "FeedShooter",
+            UmbrellaCommands.shoot(umbrella)
         );
     }
 }
