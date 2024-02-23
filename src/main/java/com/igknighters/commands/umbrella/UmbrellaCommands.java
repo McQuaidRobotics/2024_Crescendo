@@ -15,7 +15,7 @@ public class UmbrellaCommands {
      */
     public static Command stopShooter(Umbrella umbrella) {
         return umbrella.runOnce(() -> umbrella.spinupShooterToRPM(0))
-            .withName("Stop Shooter");
+                .withName("Stop Shooter");
     }
 
     /**
@@ -40,8 +40,8 @@ public class UmbrellaCommands {
     public static Command waitUntilSpunUp(Umbrella umbrella, double rpm, double tolerance) {
         return umbrella.run(
                 () -> umbrella.spinupShooterToRPM(rpm)).until(
-                () -> umbrella.isShooterAtSpeed(tolerance))
-            .withName("Wait Until Spun Up");
+                        () -> umbrella.isShooterAtSpeed(tolerance))
+                .withName("Wait Until Spun Up");
     }
 
     /**
@@ -62,14 +62,15 @@ public class UmbrellaCommands {
      * @return A command to be scheduled
      */
     public static Command shoot(Umbrella umbrella) {
-            return umbrella.run(
+        return umbrella.run(
                 () -> {
                     umbrella.spinupShooter(umbrella.getShooterTargetSpeed());
-                    umbrella.runIntakeAt(-1.0, true);;
+                    umbrella.runIntakeAt(-1.0, true);
                 }).until(umbrella::notHoldingGamepiece)
-                .andThen(umbrella::stopAll)
+                .unless(() -> umbrella.getShooterSpeed() < 30.0)
+                .finallyDo(umbrella::stopAll)
                 .withName("Shoot");
-        }
+    }
 
     /**
      * Will spin the intake inwards until a game piece is held
@@ -80,9 +81,8 @@ public class UmbrellaCommands {
     public static Command intake(Umbrella umbrella) {
         return umbrella.runEnd(
                 () -> umbrella.runIntakeAt(-0.7, false),
-                umbrella::stopAll
-        ).until(umbrella::holdingGamepiece)
-        .withName("Intake");
+                umbrella::stopAll).until(umbrella::holdingGamepiece)
+                .withName("Intake");
     }
 
     /**
@@ -95,7 +95,7 @@ public class UmbrellaCommands {
         return umbrella.runEnd(
                 () -> umbrella.runIntakeAt(1.0, true),
                 umbrella::stopAll)
-            .withName("Expell");
+                .withName("Expell");
     }
 
     /**

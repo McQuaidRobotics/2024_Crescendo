@@ -5,7 +5,6 @@ import java.util.function.DoubleSupplier;
 import com.igknighters.GlobalState;
 import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kUmbrella;
-import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.stem.StemSolvers;
@@ -127,7 +126,6 @@ public class StemCommands {
      * @return A command to be scheduled
      */
     public static Command moveTo(Stem stem, StemPosition pose, double toleranceMult) {
-
         return new MoveToCommand(stem, pose, toleranceMult)
                 .withName("Move Stem(" + pose + ")");
     }
