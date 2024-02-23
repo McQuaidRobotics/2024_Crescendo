@@ -1,9 +1,13 @@
 package com.igknighters.subsystems.stem;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.igknighters.constants.ConstValues.kRobotCollisionGeometry;
+import com.igknighters.constants.ConstValues.kStem.kPivot;
+import com.igknighters.constants.ConstValues.kStem.kTelescope;
+import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.subsystems.stem.StemVisualizer.StemVisualizerDot;
 import com.igknighters.util.Channels.Sender;
 import com.igknighters.util.geom.Rectangle2d;
@@ -122,7 +126,8 @@ public class StemValidator {
                 VALID,
                 COLLIDES_DRIVE_BASE,
                 COLLIDES_BOUNDS,
-                COLLIDES_DRIVE_BASE_AND_BOUNDS;
+                COLLIDES_DRIVE_BASE_AND_BOUNDS,
+                NOT_MECHANICALLY_VIABLE;
 
                 /**
                  * Returns true if the response is valid
@@ -180,12 +185,20 @@ public class StemValidator {
                 return 0.0;
         }
 
+        public static boolean isMechanicallyViable(StemPosition stemPosition) {
+                if (MathUtil.clamp(stemPosition.pivotRads, kPivot.MIN_ANGLE, kPivot.MAX_ANGLE) != stemPosition.pivotRads) return false;
+                if (MathUtil.clamp(stemPosition.wristRads, kWrist.MIN_ANGLE, kWrist.MAX_ANGLE) != stemPosition.wristRads) return false;
+                if (MathUtil.clamp(stemPosition.telescopeMeters, kTelescope.MIN_METERS, kTelescope.MAX_METERS) != stemPosition.telescopeMeters) return false;
+                return true;
+        }
+
         /**
          * Returns an {@link InvalidationResponse} that defines if the position is valid
          * and
          * if it's not, how its invalid.
          */
         public static ValidationResponse validatePosition(StemPosition stemPosition) {
+                if (!isMechanicallyViable(stemPosition)) return ValidationResponse.NOT_MECHANICALLY_VIABLE;
 
                 // Gets the location of differect corners and joints on the stem mechanism and
                 // umbrella within the x y coordinate plane from (0, 0)
