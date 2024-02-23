@@ -107,7 +107,7 @@ public final class ConstValues {
                                     "photon_module_1",
                                     0,
                                     new Pose3d(
-                                            new Translation3d(Units.inchesToMeters(-11.3), Units.inchesToMeters(8.75),
+                                            new Translation3d(Units.inchesToMeters(-11.3), Units.inchesToMeters(-8.6),
                                                     Units.inchesToMeters(8.0)),
                                             new Rotation3d(
                                                     0.0,
@@ -117,7 +117,7 @@ public final class ConstValues {
                                     "photon__module_2",
                                     1,
                                     new Pose3d(
-                                            new Translation3d(Units.inchesToMeters(-11.3), Units.inchesToMeters(-8.75),
+                                            new Translation3d(Units.inchesToMeters(-11.3), Units.inchesToMeters(8.6),
                                                     Units.inchesToMeters(8.0)),
                                             new Rotation3d(
                                                     0.0,

@@ -20,7 +20,6 @@ import com.igknighters.controllers.ControllerParent;
 
 public class TeleopSwerveTargetSpeaker extends TeleopSwerveBase {
 
-    private Translation2d targetTranslation;
     private double speedMult = 0.4;
 
     public TeleopSwerveTargetSpeaker(Swerve swerve, ControllerParent controller) {
@@ -36,13 +35,14 @@ public class TeleopSwerveTargetSpeaker extends TeleopSwerveBase {
     @Override
     public void initialize() {
         swerve.resetRotController();
-        boolean blueAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue).equals(Alliance.Blue);
-        var speaker = FieldConstants.Speaker.SPEAKER_CENTER.toTranslation2d();
-        targetTranslation = blueAlliance ? speaker : AllianceFlip.flipTranslation(speaker);
     }
 
     @Override
     public void execute() {
+        boolean blueAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue).equals(Alliance.Blue);
+        Translation2d speaker = FieldConstants.Speaker.SPEAKER_CENTER.toTranslation2d();
+        Translation2d targetTranslation = blueAlliance ? speaker : AllianceFlip.flipTranslation(speaker);
+
         GlobalState.modifyField2d(field -> {
             field.getObject("target").setPose(new Pose2d(targetTranslation, new Rotation2d()));
         });

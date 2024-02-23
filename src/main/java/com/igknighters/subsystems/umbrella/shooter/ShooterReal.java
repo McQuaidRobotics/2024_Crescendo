@@ -68,7 +68,10 @@ public class ShooterReal implements Shooter {
         cfg.CurrentLimits.StatorCurrentLimit = kShooter.PEAK_CURRENT;
         cfg.CurrentLimits.StatorCurrentLimitEnable = true;
 
-        // cfg.MotorOutput.PeakReverseDutyCycle = 0.0;
+        cfg.MotorOutput.PeakReverseDutyCycle = 0.0;
+        cfg.Voltage.PeakReverseVoltage = 0.0;
+        cfg.TorqueCurrent.PeakReverseTorqueCurrent = 0.0;
+        
 
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 

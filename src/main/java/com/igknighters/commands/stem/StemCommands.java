@@ -57,38 +57,33 @@ public class StemCommands {
      * A command class that continually calculates the wrist radians needed to aim
      * at a target
      */
-    private static class aimAtCommand extends Command {
+    private static class AimAtCommand extends Command {
         private Stem stem;
-        private Translation2d absoluteTarget;
-        private Translation2d allianceFlippedTarget;
         private double pivotRads;
         private double stemLength;
 
-        private aimAtCommand(Stem stem, Translation3d target, double pivotRads, double telescopeMeters) {
+        private AimAtCommand(Stem stem, Translation3d target, double pivotRads, double telescopeMeters) {
             addRequirements(stem);
             this.stem = stem;
-            this.absoluteTarget = target.toTranslation2d();
             this.pivotRads = pivotRads;
             this.stemLength = telescopeMeters;
         }
 
         @Override
-        public void initialize() {
-            boolean blueAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue).equals(Alliance.Blue);
-            this.allianceFlippedTarget = blueAlliance ? absoluteTarget : AllianceFlip.flipTranslation(absoluteTarget);
-        }
-
-        @Override
         public void execute() {
+            boolean blueAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue).equals(Alliance.Blue);
+            Translation2d speaker = FieldConstants.Speaker.SPEAKER_CENTER.toTranslation2d();
+            Translation2d targetTranslation = blueAlliance ? speaker : AllianceFlip.flipTranslation(speaker);
+
             ChassisSpeeds currentChassisSpeed = GlobalState.getFieldRelativeVelocity();
 
             Pose2d currentPose = GlobalState.getLocalizedPose();
 
-            double distance = currentPose.getTranslation().getDistance(allianceFlippedTarget);
+            double distance = currentPose.getTranslation().getDistance(targetTranslation);
 
             Translation2d adjustedTarget = new Translation2d(
-                    allianceFlippedTarget.getX() - (currentChassisSpeed.vxMetersPerSecond * (distance / kUmbrella.NOTE_VELO)),
-                    allianceFlippedTarget.getY() - (currentChassisSpeed.vyMetersPerSecond * (distance / kUmbrella.NOTE_VELO)));
+                    targetTranslation.getX() - (currentChassisSpeed.vxMetersPerSecond * (distance / kUmbrella.NOTE_VELO)),
+                    targetTranslation.getY() - (currentChassisSpeed.vyMetersPerSecond * (distance / kUmbrella.NOTE_VELO)));
 
             double wristRads = StemSolvers.linearSolveWristTheta(
                     stemLength,
@@ -151,7 +146,7 @@ public class StemCommands {
      * @return A command to be scheduled
      */
     public static Command aimAt(Stem stem, Translation3d target, double pivotRads, double telescopeMeters) {
-        return new aimAtCommand(stem, target, pivotRads, telescopeMeters)
+        return new AimAtCommand(stem, target, pivotRads, telescopeMeters)
                 .withName("Aim At(" + target.toString() + ")");
     }
 
