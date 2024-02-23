@@ -1,6 +1,7 @@
 package com.igknighters.controllers;
 
 import com.igknighters.constants.ConstValues;
+import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
@@ -11,6 +12,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
+import com.igknighters.GlobalState;
 import com.igknighters.SubsystemResources.Subsystems;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.commands.stem.StemCommands;
@@ -37,13 +39,12 @@ public class TestingController extends ControllerParent {
 
         this.B.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
             trig.onTrue(
-                    new ProxyCommand(() -> {
-                        return StemCommands.moveTo(allss.stem.get(), StemPosition.fromRadians(
-                                kPivot.MIN_ANGLE + (Math.random() * (kPivot.MAX_ANGLE - kPivot.MIN_ANGLE)),
-                                kWrist.MIN_ANGLE + (Math.random() * (kWrist.MAX_ANGLE - kWrist.MIN_ANGLE)),
-                                kTelescope.MIN_METERS
-                                        + (Math.random() * (kTelescope.MAX_METERS - kTelescope.MIN_METERS))));
-                    }));
+                StemCommands.aimAt(
+                    allss.stem.get(), 
+                    FieldConstants.Speaker.SPEAKER_CENTER,
+                    Units.degreesToRadians(40.0),
+                    kTelescope.MIN_METERS)
+            );
         });
 
         this.X.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
