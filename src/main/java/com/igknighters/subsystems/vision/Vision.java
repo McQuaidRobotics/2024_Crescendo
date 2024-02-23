@@ -5,10 +5,12 @@ import com.igknighters.GlobalState.LocalizerType;
 import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kVision;
 import com.igknighters.subsystems.vision.camera.Camera;
+import com.igknighters.subsystems.vision.camera.Camera.VisionPoseEstimate;
 import com.igknighters.util.Tracer;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -36,26 +38,32 @@ public class Vision extends SubsystemBase {
     public void periodic() {
         Tracer.startTrace("VisionPeriodic");
         HashSet<Integer> seenTags = new HashSet<>();
-        for (var camera : cameras) {
+
+        for (Camera camera : cameras) {
             Tracer.startTrace(camera.getName() + "Periodic");
             camera.periodic();
-            var optEval = camera.evalPose();
-            if (optEval.isPresent()) {
-                var eval = optEval.get();
+            Optional<VisionPoseEstimate> optEval = camera.evalPose();
 
-                if (Math.abs(eval.pose.getTranslation().getZ()) > kVision.MAX_Z_DELTA) {
-                    // The cameras height does not change typically, so if it does, it is likely a
-                    // false positive
-                    Logger.recordOutput("/Vision/" + camera.getName() + "/WeirdZ", true);
-                    GlobalState.submitVisionData(eval, Math.min(eval.ambiguity * 3.0, 1.0));
-                } else {
-                    GlobalState.submitVisionData(eval, eval.ambiguity);
-                }
-
-                seenTags.addAll(eval.apriltags);
+            if (!optEval.isPresent()) {
+                Tracer.endTrace();
+                continue;
             }
+
+            VisionPoseEstimate eval = optEval.get();
+
+            if (Math.abs(eval.pose.getTranslation().getZ()) > kVision.MAX_Z_DELTA) {
+                // The cameras height does not change typically, so if it does, it is likely a
+                // false positive
+                Logger.recordOutput("/Vision/" + camera.getName() + "/WeirdZ", true);
+                GlobalState.submitVisionData(eval, Math.min(eval.ambiguity * 3.0, 1.0));
+            } else {
+                GlobalState.submitVisionData(eval, eval.ambiguity);
+            }
+
+            seenTags.addAll(eval.apriltags);
             Tracer.endTrace();
         }
+
         GlobalState.modifyField2d(field -> {
             field.getObject("seen_apriltags").setPoses(
                     seenTags.stream()
@@ -65,6 +73,7 @@ public class Vision extends SubsystemBase {
                                     .toPose2d())
                             .toList());
         });
+
         Tracer.endTrace();
     }
 }

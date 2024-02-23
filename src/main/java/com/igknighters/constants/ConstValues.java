@@ -393,15 +393,13 @@ public final class ConstValues {
             public static final double MOTOR_kI = 0.0;
             public static final double MOTOR_kD = 0.0;
 
-            public static final double MAX_VELOCITY = 1200;
+            public static final double MAX_VELOCITY = 1300;
             public static final double MAX_ACCELERATION = 2000;
             public static final double MAX_JERK = 2000;
 
             public static final double MIN_ANGLE = 7.0 * Conv.DEGREES_TO_RADIANS;
 
             public static final double MAX_ANGLE = 97.0 * Conv.DEGREES_TO_RADIANS;
-
-            public static final double PIGEON_OFFSET = 0.0;
 
             public static final boolean ENABLE_SOFTLIMITS = true;
 

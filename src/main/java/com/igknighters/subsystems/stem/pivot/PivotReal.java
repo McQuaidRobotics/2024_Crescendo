@@ -76,7 +76,7 @@ public class PivotReal implements Pivot {
                 followerMotor.setControl(
                         new Follower(kPivot.LEFT_MOTOR_ID, true)));
 
-        inputs = new PivotInputs(Units.degreesToRadians(gyroMeasurement.getValue()) - kPivot.PIGEON_OFFSET);
+        inputs = new PivotInputs(Units.degreesToRadians(gyroMeasurement.getValue()));
 
         leaderMotor.setPosition(mechRadiansToMotorRots(getPivotRadiansPigeon()));
 
@@ -172,7 +172,7 @@ public class PivotReal implements Pivot {
     }
 
     private double getPivotRadiansPigeon() {
-        return inputs.gyroRadians - kPivot.PIGEON_OFFSET;
+        return inputs.gyroRadians;
     }
 
     private void seedPivot() {

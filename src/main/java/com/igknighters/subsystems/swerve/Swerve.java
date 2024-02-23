@@ -59,7 +59,8 @@ public class Swerve extends SubsystemBase {
             RotationControllerConstants.kD,
             new Constraints(
                     RotationControllerConstants.CONSTRAINT_SCALAR * kSwerve.MAX_ANGULAR_VELOCITY,
-                    RotationControllerConstants.CONSTRAINT_SCALAR * kSwerve.MAX_ANGULAR_ACCELERATION));
+                    RotationControllerConstants.CONSTRAINT_SCALAR * kSwerve.MAX_ANGULAR_ACCELERATION),
+            ConstValues.PERIODIC_TIME);
 
     public Swerve() {
 
@@ -186,15 +187,13 @@ public class Swerve extends SubsystemBase {
     }
 
     public double rotVeloForRotation(Rotation2d wantedAngle) {
-        var wantedAngleRads = wantedAngle.getRadians();
-        var currentAngleRads = MathUtil.angleModulus(getYawRads());
+        double targetAngleRads = wantedAngle.getRadians();
+        double currentAngleRads = getYawRads();
 
+        Logger.recordOutput("/Swerve/WantedAngle", targetAngleRads);
         Logger.recordOutput("/Swerve/CurrentAngle", currentAngleRads);
 
-        return rotController.calculate(
-            currentAngleRads,
-            wantedAngleRads
-        );
+        return rotController.calculate(currentAngleRads, targetAngleRads);
     }
 
     public void resetRotController() {
@@ -204,8 +203,8 @@ public class Swerve extends SubsystemBase {
     }
 
     public Rotation2d rotationRelativeToPose(Rotation2d wantedAngleOffet, Translation2d pose) {
-        var currentTrans = getPose().getTranslation();
-        var angleBetween = Math.atan2(
+        Translation2d currentTrans = getPose().getTranslation();
+        double angleBetween = Math.atan2(
                 pose.getY() - currentTrans.getY(),
                 pose.getX() - currentTrans.getX());
         return Rotation2d.fromRadians(angleBetween)

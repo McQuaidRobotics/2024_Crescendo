@@ -71,7 +71,7 @@ public class ShooterReal implements Shooter {
         cfg.MotorOutput.PeakReverseDutyCycle = 0.0;
         cfg.Voltage.PeakReverseVoltage = 0.0;
         cfg.TorqueCurrent.PeakReverseTorqueCurrent = 0.0;
-        
+
 
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 

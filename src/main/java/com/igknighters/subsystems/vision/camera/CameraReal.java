@@ -47,7 +47,7 @@ public class CameraReal implements Camera {
         poseEstimator.setTagModel(TargetModel.kAprilTag36h11);
         poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_CAMERA_HEIGHT);
 
-        cameraInput = new CameraInput(new VisionPoseEst(
+        cameraInput = new CameraInput(new VisionPoseEstimate(
                 id,
                 new Pose3d(),
                 0,
@@ -57,9 +57,9 @@ public class CameraReal implements Camera {
         BootupLogger.bootupLog("    " + cameraName + " camera initialized (real)");
     }
 
-    private Optional<VisionPoseEst> realEvaluatePose() {
+    private Optional<VisionPoseEstimate> realEvaluatePose() {
         return poseEstimator.update()
-                .map(estRoboPose -> new VisionPoseEst(
+                .map(estRoboPose -> new VisionPoseEstimate(
                         this.id,
                         estRoboPose.estimatedPose,
                         estRoboPose.timestampSeconds,
@@ -75,7 +75,7 @@ public class CameraReal implements Camera {
     }
 
     @Override
-    public Optional<VisionPoseEst> evalPose() {
+    public Optional<VisionPoseEstimate> evalPose() {
         return cameraInput.getLatestPoseEst();
     }
 

@@ -52,11 +52,6 @@ public class StemPosition {
                 + telescopeMeters + ")";
     }
 
-    // StemPosition.fromDegrees(
-    //     11.0,
-    //     72.0,
-    //     kTelescope.MIN_METERS + Units.inchesToMeters(4.7))
-
     public static StemPosition STOW = new StemPosition(
             Units.degreesToRadians(41.0),
             Units.degreesToRadians(108.0),
@@ -78,7 +73,7 @@ public class StemPosition {
     };
 
     public static StemPosition INTAKE = new StemPosition(
-            Units.degreesToRadians(11),
+            Units.degreesToRadians(11.0),
             kTelescope.MIN_METERS + Units.inchesToMeters(4.7),
             Units.degreesToRadians(72.0)) {
 

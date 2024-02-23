@@ -12,7 +12,7 @@ import com.igknighters.commands.autos.Autos;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.vision.VisionOnlyPoseEstimator;
 import com.igknighters.subsystems.vision.VisionOnlyPoseEstimator.FakeWheelPositions;
-import com.igknighters.subsystems.vision.camera.Camera.VisionPoseEst;
+import com.igknighters.subsystems.vision.camera.Camera.VisionPoseEstimate;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.PoseEstimator;
@@ -232,7 +232,7 @@ public class GlobalState {
      * @param value           The vision data
      * @param trustworthyness The trustworthyness of the vision data
      */
-    public static void submitVisionData(VisionPoseEst value, double ambiguity) {
+    public static void submitVisionData(VisionPoseEstimate value, double ambiguity) {
         globalLock.lock();
         try {
             if (!localizer.isPresent() || localizerType == LocalizerType.None) {
@@ -252,9 +252,8 @@ public class GlobalState {
             } else if (localizerType == LocalizerType.Hybrid) {
                 ((SwerveDrivePoseEstimator) localizer.get()).addVisionMeasurement(
                         new Pose2d(
-                            value.pose.getTranslation().toTranslation2d(),
-                            GlobalState.rotSupplier.get().toRotation2d()
-                        ),
+                                value.pose.getTranslation().toTranslation2d(),
+                                GlobalState.rotSupplier.get().toRotation2d()),
                         value.timestamp,
                         VecBuilder.fill(ambiguity, ambiguity, 1.0));
             } else {

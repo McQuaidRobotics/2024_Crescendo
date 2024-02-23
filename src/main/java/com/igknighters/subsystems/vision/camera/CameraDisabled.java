@@ -29,7 +29,7 @@ public class CameraDisabled implements Camera {
         this.cameraPose = new Transform3d(cameraPose.getTranslation(), cameraPose.getRotation());
         this.cameraName = cameraName;
 
-        cameraInput = new CameraInput(new VisionPoseEst(
+        cameraInput = new CameraInput(new VisionPoseEstimate(
                 id,
                 new Pose3d(),
                 0,
@@ -40,7 +40,7 @@ public class CameraDisabled implements Camera {
     }
 
     @Override
-    public Optional<VisionPoseEst> evalPose() {
+    public Optional<VisionPoseEstimate> evalPose() {
         return cameraInput.getLatestPoseEst();
     }
 
