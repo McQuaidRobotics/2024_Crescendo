@@ -60,7 +60,7 @@ public class TeleopSwerveBase extends Command {
     private double invert() {
         if (RobotBase.isSimulation() && kSwerve.ORIENT_TELEOP_FOR_SIM) {
             return 1;
-        } else if (!AllianceFlip.isBlue()) {
+        } else if (AllianceFlip.isRed()) {
             return -1;
         } else {
             return 1;

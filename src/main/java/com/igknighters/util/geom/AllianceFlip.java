@@ -18,6 +18,10 @@ public class AllianceFlip {
         return DriverStation.getAlliance().orElseGet(() -> Alliance.Blue).equals(Alliance.Blue);
     }
 
+    public static boolean isRed() {
+        return !isBlue();
+    }
+
     /**
      * @param translation
      * @return Translation object with its x coordinate flipped over the y-axis

@@ -44,14 +44,17 @@ public class AutosCmdRegister {
                 SpecializedNamedCommand.fromLambda(
                         (Object rpm) -> {
                             return UmbrellaCommands
-                                    .spinupShooter(umbrella, (Double) rpm);
+                                    .spinupShooter(umbrella, (Double) rpm)
+                                        .withName("Spinup");
                         },
                         Double.class))
                 .withDefault(kControls.SHOOTER_RPM);
 
         NamedCommands.registerCommand(
                 "Aim",
-                StemCommands.aimAtSpeaker(stem, false));
+                StemCommands.aimAtSpeaker(stem, false)
+                    .withName("Aim")
+        );
 
         NamedCommands.registerCommand(
             "AutoShoot",
@@ -61,12 +64,16 @@ public class AutosCmdRegister {
                 UmbrellaCommands.waitUntilSpunUp(umbrella, kControls.SHOOTER_RPM, 1.2)
             ).andThen(
                 UmbrellaCommands.shoot(umbrella)
-            )
+            ).withName("AutoShoot")
         );
 
         NamedCommands.registerCommand(
             "FeedShooter",
             UmbrellaCommands.shoot(umbrella)
+                .withTimeout(0.5)
+                .withName("FeedShooter")
         );
+
+        SpecializedNamedCommands.generateSpecialized();;
     }
 }

@@ -62,7 +62,7 @@ public class RobotContainer {
                         (testingController.rightTrigger(true).getAsDouble()
                                 - testingController.leftTrigger(true).getAsDouble()) * 6.0,
                         testingController.rightStickY(0.1).getAsDouble() * RobotController.getBatteryVoltage());
-            }));
+            }).withName("StemDefaultCommand"));
         }
 
         if (allSubsystems.umbrella.isPresent()) {
@@ -77,7 +77,7 @@ public class RobotContainer {
                     umbrella.spinupShooterToRPM(400);
                     umbrella.runIntakeAt(0);
                 }
-            }));
+            }).withName("UmbrellaDefaultCommand"));
         }
     }
 
@@ -103,7 +103,7 @@ public class RobotContainer {
                         kSwerve.MAX_DRIVE_VELOCITY,
                         kSwerve.DRIVEBASE_RADIUS,
                         kAuto.DYNAMIC_REPLANNING_CONFIG),
-                AllianceFlip::isBlue,
+                AllianceFlip::isRed,
                 swerve);
 
         GlobalState.onceInitAutoChooser(swerve);

@@ -44,6 +44,15 @@ public class Rectangle2d {
         );
     }
 
+    public Rectangle2d(Translation2d center, double radius) {
+        this(
+            center.plus(new Translation2d(-radius, radius)),
+            center.plus(new Translation2d(radius, radius)),
+            center.plus(new Translation2d(-radius, -radius)),
+            center.plus(new Translation2d(radius, -radius)
+        ));
+    }
+
     public Translation2d getTopLeft() {
         return topLeft;
     }
