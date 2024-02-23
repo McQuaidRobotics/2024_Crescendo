@@ -4,6 +4,7 @@ import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.commands.HigherOrderCommands;
 import com.igknighters.commands.autos.SpecializedNamedCommands.SpecializedNamedCommand;
 import com.igknighters.commands.stem.StemCommands;
+import com.igknighters.commands.stem.StemCommands.AimStrategy;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
@@ -60,9 +61,7 @@ public class AutosCmdRegister {
                 "Aim",
                 StemCommands.aimAt(
                     stem,
-                    FieldConstants.Speaker.SPEAKER_CENTER,
-                    Units.degreesToRadians(40.0),
-                    kTelescope.MIN_METERS
+                    AimStrategy.SIMPLE_V2
                 )
             );
 

@@ -81,15 +81,6 @@ public final class ConstValues {
                 0.0,
                 FRAME_WIDTH + (24.0 * Conv.INCHES_TO_METERS),
                 48.0 * Conv.INCHES_TO_METERS);
-
-        // robot width = 0.80264 meters
-        // robot center = 0.40132 meters
-
-        // x = 0.17272 meters
-        // y = 0.18415 meters
-
-        // new x = 0.2286
-        // new y =
         public static final Translation2d PIVOT_LOCATION = new Translation2d(
                 ((32.6 / 2.0) - 9.5) * Conv.INCHES_TO_METERS,
                 7.25 * Conv.INCHES_TO_METERS);
@@ -377,12 +368,14 @@ public final class ConstValues {
 
         public static final class kPivot {
 
-            /**
-             * From the center of the robot
-             */
-            public static final Translation2d PIVOT_AXEL_LOCATION = new Translation2d(
-                Units.inchesToMeters(-9), 
-                Units.inchesToMeters(7.25));
+            public static final class kDimensions {
+                /**
+                 * From the center of the robot
+                 */
+                public static final Translation2d PIVOT_AXEL_LOCATION = new Translation2d(
+                    Units.inchesToMeters(-9), 
+                    Units.inchesToMeters(7.25));
+            }
 
             public static final int LEFT_MOTOR_ID = 11;
             public static final int RIGHT_MOTOR_ID = 12;
@@ -475,6 +468,8 @@ public final class ConstValues {
              * Tolerance in radians
              */
             public static final double TARGET_TOLERANCE = 1.0 * Conv.DEGREES_TO_RADIANS;
+
+            public static final double V1_WRIST_ANGLE = Units.degreesToRadians(55.0);
         }
     }
 }

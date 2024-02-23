@@ -101,7 +101,7 @@ public class StemSolvers {
             stemLength * Math.cos(pivotRads),
             stemLength * Math.sin(pivotRads)
         );
-        return kPivot.PIVOT_AXEL_LOCATION.plus(wristLocationVector);
+        return kPivot.kDimensions.PIVOT_AXEL_LOCATION.plus(wristLocationVector);
     }
 
     /**

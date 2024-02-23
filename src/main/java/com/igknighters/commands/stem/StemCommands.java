@@ -5,6 +5,8 @@ import java.util.function.DoubleSupplier;
 import com.igknighters.GlobalState;
 import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kUmbrella;
+import com.igknighters.constants.ConstValues.kStem.kTelescope;
+import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.stem.StemSolvers;
@@ -14,6 +16,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -59,14 +62,12 @@ public class StemCommands {
      */
     private static class AimAtCommand extends Command {
         private Stem stem;
-        private double pivotRads;
-        private double stemLength;
+        private AimStrategy aimStrategy;
 
-        private AimAtCommand(Stem stem, Translation3d target, double pivotRads, double telescopeMeters) {
+        private AimAtCommand(Stem stem, AimStrategy aimStrategy) {
             addRequirements(stem);
             this.stem = stem;
-            this.pivotRads = pivotRads;
-            this.stemLength = telescopeMeters;
+            this.aimStrategy = aimStrategy;
         }
 
         @Override
@@ -82,19 +83,28 @@ public class StemCommands {
             double distance = currentPose.getTranslation().getDistance(targetTranslation);
 
             Translation2d adjustedTarget = new Translation2d(
-                    targetTranslation.getX() - (currentChassisSpeed.vxMetersPerSecond * (distance / kUmbrella.NOTE_VELO)),
-                    targetTranslation.getY() - (currentChassisSpeed.vyMetersPerSecond * (distance / kUmbrella.NOTE_VELO)));
+                    targetTranslation.getX()
+                            - (currentChassisSpeed.vxMetersPerSecond * (distance / kUmbrella.NOTE_VELO)),
+                    targetTranslation.getY()
+                            - (currentChassisSpeed.vyMetersPerSecond * (distance / kUmbrella.NOTE_VELO)));
 
-            double wristRads = StemSolvers.linearSolveWristTheta(
-                    stemLength,
-                    pivotRads,
-                    currentPose.getTranslation().getDistance(adjustedTarget),
-                    FieldConstants.Speaker.SPEAKER_CENTER.getZ());
+            switch (aimStrategy) {
+                case SIMPLE_V1:
+                    // double wristRads = kWrist.V1_WRIST_ANGLE;
+                    break;
+                case SIMPLE_V2:
+                    double wristRads = StemSolvers.linearSolveWristTheta(
+                            kTelescope.MAX_METERS,
+                            Units.degreesToRadians(40.0),
+                            currentPose.getTranslation().getDistance(adjustedTarget),
+                            FieldConstants.Speaker.SPEAKER_CENTER.getZ());
 
-            stem.setStemPosition(StemPosition.fromRadians(
-                    pivotRads,
-                    wristRads + pivotRads,
-                    stemLength));
+                    stem.setStemPosition(StemPosition.fromRadians(
+                            Units.degreesToRadians(40.0),
+                            wristRads + Units.degreesToRadians(40.0),
+                            kTelescope.MIN_METERS));
+                    break;
+            }
         }
     }
 
@@ -145,9 +155,14 @@ public class StemCommands {
      * @param target The point in space to aim at
      * @return A command to be scheduled
      */
-    public static Command aimAt(Stem stem, Translation3d target, double pivotRads, double telescopeMeters) {
-        return new AimAtCommand(stem, target, pivotRads, telescopeMeters)
-                .withName("Aim At(" + target.toString() + ")");
+    public static Command aimAt(Stem stem, AimStrategy aimStrategy) {
+        return new AimAtCommand(stem, aimStrategy)
+                .withName("Aim At(" + FieldConstants.Speaker.SPEAKER_CENTER.toString() + ")");
+    }
+
+    public enum AimStrategy {
+        SIMPLE_V1,
+        SIMPLE_V2
     }
 
     /**

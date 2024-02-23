@@ -1,17 +1,16 @@
 package com.igknighters.commands;
 
 import com.igknighters.commands.stem.StemCommands;
+import com.igknighters.commands.stem.StemCommands.AimStrategy;
 import com.igknighters.commands.swerve.SwerveCommands;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveTargetSpeaker;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
-import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.controllers.ControllerParent;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
-import com.igknighters.util.AllianceFlip;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -46,12 +45,11 @@ public class HigherOrderCommands {
         Umbrella umbrella,
         ControllerParent controller
     ) {
-        final var speakerTranslation = AllianceFlip.flipTranslation(FieldConstants.Speaker.SPEAKER_CENTER);
         final double rpm = 3780;
         return Commands.parallel(
             new TeleopSwerveTargetSpeaker(swerve, controller)
                 .withSpeedMultiplier(0.1),
-            StemCommands.aimAt(stem, speakerTranslation, Units.degreesToRadians(45.0), kTelescope.MIN_METERS),
+            StemCommands.aimAt(stem, AimStrategy.SIMPLE_V2),
             UmbrellaCommands.spinupShooter(umbrella, rpm)
         );
     }

@@ -16,6 +16,7 @@ import com.igknighters.GlobalState;
 import com.igknighters.SubsystemResources.Subsystems;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.commands.stem.StemCommands;
+import com.igknighters.commands.stem.StemCommands.AimStrategy;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 
 @SuppressWarnings("unused")
@@ -41,9 +42,7 @@ public class TestingController extends ControllerParent {
             trig.onTrue(
                 StemCommands.aimAt(
                     allss.stem.get(), 
-                    FieldConstants.Speaker.SPEAKER_CENTER,
-                    Units.degreesToRadians(40.0),
-                    kTelescope.MIN_METERS)
+                    AimStrategy.SIMPLE_V2)
             );
         });
 
