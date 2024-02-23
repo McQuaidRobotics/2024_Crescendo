@@ -4,7 +4,6 @@ import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.commands.HigherOrderCommands;
 import com.igknighters.commands.autos.SpecializedNamedCommands.SpecializedNamedCommand;
 import com.igknighters.commands.stem.StemCommands;
-import com.igknighters.commands.stem.StemCommands.AimStrategy;
 import com.igknighters.commands.swerve.teleop.AutoSwerveTargetSpeaker;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.ConstValues.kControls;
@@ -52,13 +51,13 @@ public class AutosCmdRegister {
 
         NamedCommands.registerCommand(
                 "Aim",
-                StemCommands.aimAtSpeaker(stem));
+                StemCommands.aimAtSpeaker(stem, false));
 
         NamedCommands.registerCommand(
             "AutoShoot",
             Commands.parallel(
                 new AutoSwerveTargetSpeaker(swerve),
-                StemCommands.aimAtSpeaker(stem, AimStrategy.SIMPLE_V2, true),
+                StemCommands.aimAtSpeaker(stem, true),
                 UmbrellaCommands.waitUntilSpunUp(umbrella, kControls.SHOOTER_RPM, 1.2)
             ).andThen(
                 UmbrellaCommands.shoot(umbrella)

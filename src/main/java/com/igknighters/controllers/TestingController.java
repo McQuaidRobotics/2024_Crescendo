@@ -40,7 +40,7 @@ public class TestingController extends ControllerParent {
 
         this.B.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
             trig.onTrue(
-                    StemCommands.aimAtSpeaker(allss.stem.get()));
+                    StemCommands.aimAtSpeaker(allss.stem.get(), false));
         });
 
         this.X.binding = new Binding(Subsystems.Stem, (trig, allss) -> {

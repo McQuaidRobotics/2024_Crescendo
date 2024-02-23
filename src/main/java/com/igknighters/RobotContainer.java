@@ -44,7 +44,7 @@ public class RobotContainer {
         if (allSubsystems.swerve.isPresent()) {
             var swerve = allSubsystems.swerve.get();
 
-            swerve.setDefaultCommand(new TeleopSwerveBase.TeleopSwerveOmni(swerve, testingController));
+            swerve.setDefaultCommand(new TeleopSwerveBase.TeleopSwerveOmni(swerve, driverController));
 
             setupAutos(swerve);
 

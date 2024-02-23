@@ -161,18 +161,19 @@ public class StemCommands {
     }
 
     /**
-     * Continuously aims the pivot or wrist or both depending on the aim strategy.
+     * Aims the pivot or wrist or both depending on the aim strategy.
      * 
      * @param stem The stem subsystem
+     * @param canFinish Whether the command can finish
      * @return A command to be scheduled
      */
-    public static Command aimAtSpeaker(Stem stem) {
-        return new AimAtSpeakerCommand(stem, kControls.DEFAULT_AIM_STRATEGY, false)
+    public static Command aimAtSpeaker(Stem stem, boolean canFinish) {
+        return new AimAtSpeakerCommand(stem, kControls.DEFAULT_AIM_STRATEGY, canFinish)
                 .withName("Aim At SPEAKER");
     }
 
     /**
-     * Continuously aims the pivot or wrist or both depending on the default aim
+     * Aims the pivot or wrist or both depending on the default aim
      * strategy in constants.
      * 
      * @param stem        The stem subsystem

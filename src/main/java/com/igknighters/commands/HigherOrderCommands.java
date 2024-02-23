@@ -44,7 +44,7 @@ public class HigherOrderCommands {
         return Commands.parallel(
                 new TeleopSwerveTargetSpeaker(swerve, controller)
                         .withSpeedMultiplier(0.1),
-                StemCommands.aimAtSpeaker(stem),
+                StemCommands.aimAtSpeaker(stem, false),
                 UmbrellaCommands.spinupShooter(umbrella, kControls.SHOOTER_RPM));
     }
 }
