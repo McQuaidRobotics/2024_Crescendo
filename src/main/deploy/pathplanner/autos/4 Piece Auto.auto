@@ -14,13 +14,13 @@
         {
           "type": "named",
           "data": {
-            "name": "waitSpinup(2000)"
+            "name": "Spinup(2000)"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "feedShooter"
+            "name": "FeedShooter"
           }
         },
         {
@@ -36,7 +36,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "intake"
+                  "name": "Intake"
                 }
               }
             ]
@@ -45,13 +45,13 @@
         {
           "type": "named",
           "data": {
-            "name": "shoot"
+            "name": "AutoShoot"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "intake"
+            "name": "Intake"
           }
         },
         {
@@ -63,7 +63,7 @@
         {
           "type": "named",
           "data": {
-            "name": "shoot"
+            "name": "AutoShoot"
           }
         },
         {
@@ -79,7 +79,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "intake"
+                  "name": "Intake"
                 }
               }
             ]
@@ -88,7 +88,7 @@
         {
           "type": "named",
           "data": {
-            "name": "shoot"
+            "name": "AutoShoot"
           }
         }
       ]
