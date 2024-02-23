@@ -11,7 +11,7 @@ import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.stem.StemSolvers;
-import com.igknighters.util.AllianceFlip;
+import com.igknighters.util.geom.AllianceFlip;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -163,7 +163,7 @@ public class StemCommands {
     /**
      * Aims the pivot or wrist or both depending on the aim strategy.
      * 
-     * @param stem The stem subsystem
+     * @param stem      The stem subsystem
      * @param canFinish Whether the command can finish
      * @return A command to be scheduled
      */

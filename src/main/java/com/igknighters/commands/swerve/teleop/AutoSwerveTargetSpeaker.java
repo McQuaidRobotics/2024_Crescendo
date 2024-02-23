@@ -1,7 +1,7 @@
 package com.igknighters.commands.swerve.teleop;
 
 import com.igknighters.subsystems.swerve.Swerve;
-import com.igknighters.util.AllianceFlip;
+import com.igknighters.util.geom.AllianceFlip;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;

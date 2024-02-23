@@ -5,7 +5,7 @@ import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kAuto;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.subsystems.swerve.Swerve;
-import com.igknighters.util.AllianceFlip;
+import com.igknighters.util.geom.AllianceFlip;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.controllers.PathFollowingController;
 import com.pathplanner.lib.path.*;
@@ -107,10 +107,8 @@ public class SimplePathfindingCommand extends Command {
                 rotationDelayDistance,
                 constraints,
                 rotationOverrideSupplier,
-                swerve
-        );
+                swerve);
     }
-
 
     public SimplePathfindingCommand withEndVelo(double velo) {
         return new SimplePathfindingCommand(
