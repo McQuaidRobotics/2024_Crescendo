@@ -1,7 +1,6 @@
 package com.igknighters.commands;
 
 import com.igknighters.commands.stem.StemCommands;
-import com.igknighters.commands.stem.StemCommands.AimStrategy;
 import com.igknighters.commands.swerve.SwerveCommands;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveTargetSpeaker;
 import com.igknighters.commands.umbrella.UmbrellaCommands;

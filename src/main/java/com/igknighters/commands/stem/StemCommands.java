@@ -16,7 +16,6 @@ import com.igknighters.util.AllianceFlip;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -64,10 +63,13 @@ public class StemCommands {
         private Stem stem;
         private AimStrategy aimStrategy;
 
-        private AimAtSpeakerCommand(Stem stem, AimStrategy aimStrategy) {
+        private boolean hasFinished = false, canFinish = false;
+
+        private AimAtSpeakerCommand(Stem stem, AimStrategy aimStrategy, boolean canFinish) {
             addRequirements(stem);
             this.stem = stem;
             this.aimStrategy = aimStrategy;
+            this.canFinish = canFinish;
         }
 
         @Override
@@ -95,7 +97,7 @@ public class StemCommands {
                         currentPose.getTranslation().getDistance(adjustedTarget),
                         FieldConstants.SPEAKER.getZ());
 
-                stem.setStemPosition(StemPosition.fromRadians(
+                hasFinished = stem.setStemPosition(StemPosition.fromRadians(
                         pivotRads,
                         kWrist.V1_WRIST_ANGLE,
                         kTelescope.MIN_METERS));
@@ -106,11 +108,16 @@ public class StemCommands {
                         currentPose.getTranslation().getDistance(adjustedTarget),
                         FieldConstants.SPEAKER.getZ());
 
-                stem.setStemPosition(StemPosition.fromRadians(
+                hasFinished = stem.setStemPosition(StemPosition.fromRadians(
                         kControls.V2_AIM_AT_PIVOT_RADIANS,
                         wristRads + kControls.V2_AIM_AT_PIVOT_RADIANS,
                         kTelescope.MIN_METERS));
             }
+        }
+
+        @Override
+        public boolean isFinished() {
+            return hasFinished && canFinish;
         }
     }
 
@@ -160,19 +167,20 @@ public class StemCommands {
      * @return A command to be scheduled
      */
     public static Command aimAtSpeaker(Stem stem) {
-        return new AimAtSpeakerCommand(stem, kControls.DEFAULT_AIM_STRATEGY)
+        return new AimAtSpeakerCommand(stem, kControls.DEFAULT_AIM_STRATEGY, false)
                 .withName("Aim At SPEAKER");
     }
 
     /**
-     * Continuously aims the pivot or wrist or both depending on the default aim strategy in constants.
+     * Continuously aims the pivot or wrist or both depending on the default aim
+     * strategy in constants.
      * 
-     * @param stem The stem subsystem
+     * @param stem        The stem subsystem
      * @param aimStrategy The aiming strategy to use when targeting the speaker
      * @return A command to be scheduled
      */
-    public static Command aimAtSpeaker(Stem stem, AimStrategy aimStrategy) {
-        return new AimAtSpeakerCommand(stem, aimStrategy)
+    public static Command aimAtSpeaker(Stem stem, AimStrategy aimStrategy, boolean canFinish) {
+        return new AimAtSpeakerCommand(stem, aimStrategy, canFinish)
                 .withName("Aim At SPEAKER");
     }
 
