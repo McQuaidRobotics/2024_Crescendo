@@ -16,7 +16,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 
 import com.igknighters.constants.FieldConstants;
-import com.igknighters.util.AllianceFlip;
+import com.igknighters.util.geom.AllianceFlip;
 
 public class AllianceFlipTests {
     Random rnd = new Random();

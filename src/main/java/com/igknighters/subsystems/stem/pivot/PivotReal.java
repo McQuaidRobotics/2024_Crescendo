@@ -25,7 +25,6 @@ import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.constants.HardwareIndex.StemHW;
 import com.igknighters.util.BootupLogger;
 import com.igknighters.util.FaultManager;
-import com.igknighters.util.SafeTalonFXConfiguration;
 
 public class PivotReal implements Pivot {
 
@@ -114,7 +113,7 @@ public class PivotReal implements Pivot {
     }
 
     private TalonFXConfiguration getMotorConfig(boolean leader) {
-        TalonFXConfiguration cfg = new SafeTalonFXConfiguration();
+        TalonFXConfiguration cfg = new TalonFXConfiguration();
         cfg.Slot0.kP = kPivot.MOTOR_kP;
         cfg.Slot0.kI = kPivot.MOTOR_kI;
         cfg.Slot0.kD = kPivot.MOTOR_kD;

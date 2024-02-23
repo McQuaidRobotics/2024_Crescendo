@@ -79,22 +79,13 @@ public class WristReal implements Wrist {
                 ? InvertedValue.Clockwise_Positive
                 : InvertedValue.CounterClockwise_Positive;
 
-        // cfg.CurrentLimits.StatorCurrentLimitEnable = true;
-        // cfg.CurrentLimits.StatorCurrentLimit = 65.0;
-
-        // cfg.TorqueCurrent.PeakForwardTorqueCurrent = 65.0;
-        // cfg.TorqueCurrent.PeakReverseTorqueCurrent = -65.0;
-
-        // cfg.CurrentLimits.SupplyCurrentLimitEnable = true;
-        // cfg.CurrentLimits.SupplyCurrentThreshold = 40.0;
-        // cfg.CurrentLimits.SupplyTimeThreshold = 0.5;
-        // cfg.CurrentLimits.SupplyCurrentLimit = 30.0;
-
-        // cfg.MotionMagic.MotionMagicCruiseVelocity = kWrist.MAX_VELOCITY;
-        // cfg.MotionMagic.MotionMagicAcceleration = kWrist.MAX_ACCELERATION;
-        // cfg.MotionMagic.MotionMagicJerk = kWrist.MAX_JERK;
-
         cfg.ClosedLoopRamps.DutyCycleClosedLoopRampPeriod = 0.5;
+
+        cfg.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+        cfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+
+        cfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Wrist.mechanismRadsToMotorRots(kWrist.MAX_ANGLE);
+        cfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Wrist.mechanismRadsToMotorRots(kWrist.MIN_ANGLE);
 
         return cfg;
     }
