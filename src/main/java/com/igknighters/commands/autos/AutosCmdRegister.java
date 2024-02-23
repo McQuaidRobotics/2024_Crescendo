@@ -55,11 +55,19 @@ public class AutosCmdRegister {
                 StemCommands.aimAtSpeaker(stem));
 
         NamedCommands.registerCommand(
-                "Shoot",
-                Commands.parallel(
-                        new AutoSwerveTargetSpeaker(swerve),
-                        StemCommands.aimAtSpeaker(stem),
-                        UmbrellaCommands.waitUntilSpunUp(umbrella, kControls.SHOOTER_RPM, 1.2)).andThen(
-                                UmbrellaCommands.shoot(umbrella)));
+            "AutoShoot",
+            Commands.parallel(
+                new AutoSwerveTargetSpeaker(swerve),
+                StemCommands.aimAtSpeaker(stem),
+                UmbrellaCommands.waitUntilSpunUp(umbrella, kControls.SHOOTER_RPM, 1.2)
+            ).andThen(
+                UmbrellaCommands.shoot(umbrella)
+            )
+        );
+
+        NamedCommands.registerCommand(
+            "FeedShooter",
+            UmbrellaCommands.shoot(umbrella)
+        );
     }
 }
