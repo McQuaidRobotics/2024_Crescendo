@@ -154,7 +154,7 @@ public class StemCommands {
      * @return A command to be scheduled
      */
     public static Command holdAt(Stem stem, StemPosition pose) {
-        return stem.run(() -> stem.setStemPosition(pose))
+        return stem.run(() -> stem.setStemPosition(pose, 0.0))
                 .withName("Hold Stem(" + pose + ")");
     }
 

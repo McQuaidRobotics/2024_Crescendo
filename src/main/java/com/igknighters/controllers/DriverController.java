@@ -28,14 +28,21 @@ public class DriverController extends ControllerParent {
         this.B.binding = new Binding(
                 (trig, allss) -> {
                     trig.onTrue(
-                            HigherOrderCommands.scoreAmp(
-                                    allss.swerve.get(),
-                                    allss.stem.get(),
-                                    allss.umbrella.get()));
+                        Commands.parallel(
+                            StemCommands.holdAt(
+                                allss.stem.get(),
+                                StemPosition.AMP
+                            ),
+                            UmbrellaCommands.spinupShooter(
+                                allss.umbrella.get(),
+                                1000
+                            )
+                        ).finallyDo(
+                            () -> allss.umbrella.get().stopAll()
+                        )
+                    );
                 },
-                Subsystems.Swerve,
-                Subsystems.Stem,
-                Subsystems.Umbrella);
+                Subsystems.Stem);
 
         this.X.binding = new Binding((trig, allss) -> {
             trig.onTrue(
@@ -47,15 +54,23 @@ public class DriverController extends ControllerParent {
         }, Subsystems.Stem);
 
         this.Y.binding = new Binding(
-            (trig, allss) -> {
-                trig.onTrue(
-                    UmbrellaCommands.expell(
-                        allss.umbrella.get()
-                    )
-                );
-            },
-            Subsystems.Umbrella
-        );
+                (trig, allss) -> {
+                    trig.onTrue(
+                        Commands.parallel(
+                            StemCommands.holdAt(
+                                allss.stem.get(),
+                                StemPosition.STARTING
+                            ),
+                            UmbrellaCommands.spinupShooter(
+                                allss.umbrella.get(),
+                                3000
+                            )
+                        ).finallyDo(
+                            () -> allss.umbrella.get().stopAll()
+                        )
+                    );
+                },
+                Subsystems.Stem);
 
         /// BUMPER
         // # Our main driver doesn't use bumpers
@@ -114,7 +129,7 @@ public class DriverController extends ControllerParent {
                             ).finallyDo(
                                 allss.umbrella.get()::stopAll
                             ).andThen(
-                                StemCommands.holdAt(
+                                StemCommands.moveTo(
                                     allss.stem.get(),
                                     StemPosition.STOW
                                 )
@@ -125,7 +140,7 @@ public class DriverController extends ControllerParent {
                             ).finallyDo(
                                 allss.umbrella.get()::stopAll
                             ).andThen(
-                                StemCommands.holdAt(
+                                StemCommands.moveTo(
                                     allss.stem.get(),
                                     StemPosition.STOW
                                 )

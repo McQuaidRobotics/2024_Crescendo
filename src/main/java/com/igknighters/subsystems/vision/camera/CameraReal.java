@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+// import edu.wpi.first.wpilibj.Timer;
 
 /**
  * An abstraction for a photon camera.
@@ -29,6 +30,9 @@ public class CameraReal implements Camera {
     private final PhotonPoseEstimator poseEstimator;
 
     private final CameraInput cameraInput;
+
+    // private final Timer lastValueTimer = new Timer();
+    // private Optional<VisionPoseEstimate> lastValue = Optional.empty();
 
     /**
      * Creates an abstraction for a photon camera.
@@ -63,21 +67,6 @@ public class CameraReal implements Camera {
     }
 
     private Optional<VisionPoseEstimate> realEvaluatePose() {
-        // return poseEstimator.update()
-        //         .map(estRoboPose -> new VisionPoseEstimate(
-        //                 this.id,
-        //                 estRoboPose.estimatedPose,
-        //                 estRoboPose.timestampSeconds,
-        //                 estRoboPose.targetsUsed
-        //                         .stream()
-        //                         .map(PhotonTrackedTarget::getFiducialId)
-        //                         .toList(),
-        //                 estRoboPose.targetsUsed
-        //                         .stream()
-        //                         .map(PhotonTrackedTarget::getPoseAmbiguity)
-        //                         .reduce(0.0, Double::sum)
-        //                         / estRoboPose.targetsUsed.size()));
-
         Optional<EstimatedRobotPose> opt = poseEstimator.update();
 
         if (!opt.isPresent()) {
@@ -105,13 +94,25 @@ public class CameraReal implements Camera {
                 .map(Translation2d::getNorm)
                 .reduce(0.0, Math::max);
 
-        return Optional.of(new VisionPoseEstimate(
+        var result = Optional.of(new VisionPoseEstimate(
                 this.id,
                 estRoboPose.estimatedPose,
                 estRoboPose.timestampSeconds,
                 targetIds,
                 avgAmbiguity,
                 maxDistance));
+
+        // if (lastValue.isPresent()) {
+        //     if (lastValueTimer.hasElapsed(0.5)) {
+        //         lastValueTimer.restart();
+        //         lastValue = result;
+        //         return result;
+        //     } else {
+        //         if (result.get().pose.getTranslation().toTranslation2d())
+        //     }
+        // }
+
+        return result;
     }
 
     @Override

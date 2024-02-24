@@ -74,6 +74,6 @@ public class AutosCmdRegister {
                 .withName("FeedShooter")
         );
 
-        SpecializedNamedCommands.generateSpecialized();;
+        SpecializedNamedCommands.generateSpecialized();
     }
 }

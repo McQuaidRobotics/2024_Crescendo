@@ -62,7 +62,7 @@ public final class ConstValues {
     }
 
     public static final boolean DEBUG = true; // this should be false for competition
-    public static final double PERIODIC_TIME = 0.02; // 20ms
+    public static final double PERIODIC_TIME = 0.03; // 20ms
 
     public static final class kRobotCollisionGeometry {
         public static final double BUMPER_THICKNESS = 2.8 * Conv.INCHES_TO_METERS;
@@ -374,6 +374,8 @@ public final class ConstValues {
         public static final String CANBUS = "SuperStructureBus";
 
         public static final int COAST_SWITCH_CHANNEL = 9;
+
+        public static final double MECHANICALLY_VIABLE_BUFFER = 0.03;
 
         public static final class kPivot {
 

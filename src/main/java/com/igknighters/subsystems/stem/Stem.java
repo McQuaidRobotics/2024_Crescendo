@@ -1,3 +1,4 @@
+
 package com.igknighters.subsystems.stem;
 
 import org.littletonrobotics.junction.Logger;
@@ -84,7 +85,7 @@ public class Stem extends SubsystemBase {
                     "Invalid TARGET stem position(" + validity.name() + "): " + position.toString(),
                     true);
         }
-        
+
         if (!telescope.hasHomed()) {
             if (!position.isStow()) {
                 DriverStation.reportWarning("Stem Telescope has not been homed, run stow to home", false);
@@ -92,11 +93,16 @@ public class Stem extends SubsystemBase {
                         LedAnimations.WARNING).withDuration(1.0);
                 return false;
             }
-            return pivot.target(position.pivotRads, 1.0)
-                    && wrist.target(position.wristRads, 1.0)
-                    && telescope.target(position.telescopeMeters, 1.0);
+            boolean wristAndPivot = pivot.target(position.pivotRads, 1.0)
+                    && wrist.target(position.wristRads, 1.0);
+
+            if (wristAndPivot) {
+                telescope.setVoltageOut(-4.0);
+            }
+
+            return telescope.hasHomed();
         }
-        
+
         StemPosition validated = StemValidator.stepTowardsTargetPosition(getStemPosition(), position, 1.0);
         pivot.setPivotRadians(validated.pivotRads);
         telescope.setTelescopeMeters(validated.telescopeMeters);

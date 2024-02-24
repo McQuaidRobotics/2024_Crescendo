@@ -147,91 +147,91 @@ gversion {
 }
 
 
-import groovy.json.JsonSlurper;
-import com.hubspot.jinjava.Jinjava;
-import com.hubspot.jinjava.JinjavaConfig;
+// import groovy.json.JsonSlurper;
+// import com.hubspot.jinjava.Jinjava;
+// import com.hubspot.jinjava.JinjavaConfig;
 
-sourceSets.main.java.srcDir "${buildDir}/generated/main/java"
+// sourceSets.main.java.srcDir "${buildDir}/generated/main/java"
 
-def constJinjaInputDir = file("src/generators/java")
-def constJinjaOutputDir = file("$buildDir/generated/main/java/com/igknighters")
+// def constJinjaInputDir = file("src/generators/java")
+// def constJinjaOutputDir = file("$buildDir/generated/main/java/com/igknighters")
 
-def constTypesInputFile = file("src/generators/types.json")
-def constRobotsInputFile = file("src/generators/robots.json")
-task robotConstantHelperGen() {
-    description = "Generates Constant Helper Classes"
-    group = "Robot Constants Helper"
+// def constTypesInputFile = file("src/generators/types.json")
+// def constRobotsInputFile = file("src/generators/robots.json")
+// task robotConstantHelperGen() {
+//     description = "Generates Constant Helper Classes"
+//     group = "Robot Constants Helper"
 
-    inputs.file constTypesInputFile
-    inputs.dir constJinjaInputDir
-    outputs.dir constJinjaOutputDir
+//     inputs.file constTypesInputFile
+//     inputs.dir constJinjaInputDir
+//     outputs.dir constJinjaOutputDir
 
-    doLast {
-        def jsonSlurper = new JsonSlurper()
-        def types = jsonSlurper.parseText(constTypesInputFile.text)
-        def robots = jsonSlurper.parseText(constRobotsInputFile.text)
+//     doLast {
+//         def jsonSlurper = new JsonSlurper()
+//         def types = jsonSlurper.parseText(constTypesInputFile.text)
+//         def robots = jsonSlurper.parseText(constRobotsInputFile.text)
 
-        def builder = JinjavaConfig.newBuilder()
-        builder.withTrimBlocks(true)
-        builder.withLstripBlocks(true)
-        def config = builder.build()
-        def jinjava = new Jinjava(config)
+//         def builder = JinjavaConfig.newBuilder()
+//         builder.withTrimBlocks(true)
+//         builder.withLstripBlocks(true)
+//         def config = builder.build()
+//         def jinjava = new Jinjava(config)
 
-        def template = file("src/generators/java/ConstantHelper.java.jinja").text
-        def replacements = new HashMap<String,?>()
-        replacements.put("types", types)
-        replacements.put("robots", robots)
-        def output = jinjava.render(template, replacements)
-        new File(constJinjaOutputDir, "ConstantHelper.java").write(output)
-    }
-}
+//         def template = file("src/generators/java/ConstantHelper.java.jinja").text
+//         def replacements = new HashMap<String,?>()
+//         replacements.put("types", types)
+//         replacements.put("robots", robots)
+//         def output = jinjava.render(template, replacements)
+//         new File(constJinjaOutputDir, "ConstantHelper.java").write(output)
+//     }
+// }
 
-compileJava.dependsOn(robotConstantHelperGen)
+// compileJava.dependsOn(robotConstantHelperGen)
 
-def srcInputDir = file("src/main/java/com/igknighters")
-task getSubsystems() {
-    description = "Goes through the entire `src/main/java/com/igknighters/subsystems` tree and finds all the subsystems"
-    group = "Robot Subsystems"
+// def srcInputDir = file("src/main/java/com/igknighters")
+// task getSubsystems() {
+//     description = "Goes through the entire `src/main/java/com/igknighters/subsystems` tree and finds all the subsystems"
+//     group = "Robot Subsystems"
 
-    inputs.dir constJinjaInputDir
-    inputs.dir srcInputDir
-    outputs.dir constJinjaOutputDir
+//     inputs.dir constJinjaInputDir
+//     inputs.dir srcInputDir
+//     outputs.dir constJinjaOutputDir
 
-    //go through and get all subsystems, then use them to generate the SubsystemResources.java file using the jinja template
+//     //go through and get all subsystems, then use them to generate the SubsystemResources.java file using the jinja template
 
-    doLast {
-        // grep each file recursively for the string "extends SubsystemBase", then get the name of the file.
-        def subsystems = []
-        def subsystemPackages = []
-        //get all files by walking through the dir
-        def filesToCheck = fileTree(srcInputDir).filter { it.isFile() }
-        for (file in filesToCheck) {
-            //check if the file extends SubsystemBase
-            def fileContents = file.text
-            if (fileContents.contains("extends SubsystemBase")) {
-                //get the name of the file
-                def subsystemName = file.getName().split("\\.")[0]
-                //remove the .java suffix
-                subsystems.add(subsystemName.substring(0, subsystemName.length()))
-                //get first line of file and remove 'package ' from it
-                def packageLine = fileContents.split("\n")[0].replace("package ", "").replace(";", "")
-                subsystemPackages.add(packageLine + "." + subsystemName)
-            }
-        }
+//     doLast {
+//         // grep each file recursively for the string "extends SubsystemBase", then get the name of the file.
+//         def subsystems = []
+//         def subsystemPackages = []
+//         //get all files by walking through the dir
+//         def filesToCheck = fileTree(srcInputDir).filter { it.isFile() }
+//         for (file in filesToCheck) {
+//             //check if the file extends SubsystemBase
+//             def fileContents = file.text
+//             if (fileContents.contains("extends SubsystemBase")) {
+//                 //get the name of the file
+//                 def subsystemName = file.getName().split("\\.")[0]
+//                 //remove the .java suffix
+//                 subsystems.add(subsystemName.substring(0, subsystemName.length()))
+//                 //get first line of file and remove 'package ' from it
+//                 def packageLine = fileContents.split("\n")[0].replace("package ", "").replace(";", "")
+//                 subsystemPackages.add(packageLine + "." + subsystemName)
+//             }
+//         }
 
-        def builder = JinjavaConfig.newBuilder()
-        builder.withTrimBlocks(true)
-        builder.withLstripBlocks(true)
-        def config = builder.build()
-        def jinjava = new Jinjava(config)
+//         def builder = JinjavaConfig.newBuilder()
+//         builder.withTrimBlocks(true)
+//         builder.withLstripBlocks(true)
+//         def config = builder.build()
+//         def jinjava = new Jinjava(config)
 
-        def template = file("src/generators/java/SubsystemResources.java.jinja").text
-        def replacements = new HashMap<String,?>()
-        replacements.put("subsystems", subsystems)
-        replacements.put("subsystemPackages", subsystemPackages)
-        def output = jinjava.render(template, replacements)
-        new File(constJinjaOutputDir, "SubsystemResources.java").write(output)
-    }
-}
+//         def template = file("src/generators/java/SubsystemResources.java.jinja").text
+//         def replacements = new HashMap<String,?>()
+//         replacements.put("subsystems", subsystems)
+//         replacements.put("subsystemPackages", subsystemPackages)
+//         def output = jinjava.render(template, replacements)
+//         new File(constJinjaOutputDir, "SubsystemResources.java").write(output)
+//     }
+// }
 
-compileJava.dependsOn(getSubsystems)
+// compileJava.dependsOn(getSubsystems)

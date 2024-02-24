@@ -66,7 +66,8 @@ public class UmbrellaCommands {
                 () -> {
                     umbrella.spinupShooter(umbrella.getShooterTargetSpeed());
                     umbrella.runIntakeAt(-1.0, true);
-                }).until(umbrella::notHoldingGamepiece)
+                }).withTimeout(0.3)
+                // .until(umbrella::notHoldingGamepiece)
                 .unless(() -> umbrella.getShooterSpeed() < 30.0)
                 .finallyDo(umbrella::stopAll)
                 .withName("Shoot");
@@ -80,7 +81,7 @@ public class UmbrellaCommands {
      */
     public static Command intake(Umbrella umbrella) {
         return umbrella.runEnd(
-                () -> umbrella.runIntakeAt(-0.7, false),
+                () -> umbrella.runIntakeAt(-0.9, false),
                 umbrella::stopAll).until(umbrella::holdingGamepiece)
                 .withName("Intake");
     }

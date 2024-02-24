@@ -143,8 +143,7 @@ public class WristReal implements Wrist {
 
         inputs.radians = Units.rotationsToRadians(cancoderRots.getValue());
         inputs.radiansPerSecond = Units.rotationsToRadians(cancoderVelo.getValue());
-        Logger.recordOutput("Stem/Wrist/MotorRads", Units.rotationsToRadians(motorRots.getValue()));
-        Logger.recordOutput("Stem/Wrist/MotorRadsPs", Units.rotationsToRadians(motorVelo.getValue()));
+        Logger.recordOutput("Stem/Wrist/MotorRads", Wrist.motorRotsToMechanismRads(Units.rotationsToRadians(motorRots.getValue())));
         inputs.amps = motorAmps.getValue();
         inputs.volts = motorVolts.getValue();
         inputs.temp = motorTemp.getValue();

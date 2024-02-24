@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import org.littletonrobotics.junction.Logger;
 
 import com.igknighters.constants.ConstValues.kRobotCollisionGeometry;
+import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
@@ -186,15 +187,15 @@ public class StemValidator {
         return 0.0;
     }
 
-    public static boolean isMechanicallyViable(StemPosition stemPosition) {
-        if (MathUtil.clamp(stemPosition.pivotRads, kPivot.MIN_ANGLE,
-                kPivot.MAX_ANGLE) != stemPosition.pivotRads)
+    public static boolean isMechanicallyViable(StemPosition stemPosition, double buffer) {
+        if (MathUtil.clamp(stemPosition.pivotRads, kPivot.MIN_ANGLE * (1.0 - buffer),
+                kPivot.MAX_ANGLE * (1.0 + buffer)) != stemPosition.pivotRads)
             return false;
-        if (MathUtil.clamp(stemPosition.wristRads, kWrist.MIN_ANGLE,
-                kWrist.MAX_ANGLE) != stemPosition.wristRads)
+        if (MathUtil.clamp(stemPosition.wristRads, kWrist.MIN_ANGLE * (1.0 - buffer),
+                kWrist.MAX_ANGLE * (1.0 + buffer)) != stemPosition.wristRads)
             return false;
-        if (MathUtil.clamp(stemPosition.telescopeMeters, kTelescope.MIN_METERS,
-                kTelescope.MAX_METERS) != stemPosition.telescopeMeters)
+        if (MathUtil.clamp(stemPosition.telescopeMeters, kTelescope.MIN_METERS * (1.0 - buffer),
+                kTelescope.MAX_METERS * (1.0 + buffer)) != stemPosition.telescopeMeters)
             return false;
         return true;
     }
@@ -205,7 +206,7 @@ public class StemValidator {
      * if it's not, how its invalid.
      */
     public static ValidationResponse validatePosition(StemPosition stemPosition) {
-        if (!isMechanicallyViable(stemPosition)) {
+        if (!isMechanicallyViable(stemPosition, kStem.MECHANICALLY_VIABLE_BUFFER)) {
             return ValidationResponse.NOT_MECHANICALLY_VIABLE;
         }
 
@@ -412,7 +413,8 @@ public class StemValidator {
 
         Logger.recordOutput("Stem/Stem Validator/StemTowardsTargetPosition/Mid State Stem Position", StemPosition
                 .fromRadians(midStatePivotRads, midStateWristRads, midStateTelescopeMeters).toString());
-        Logger.recordOutput("Stem/Stem Validator/StemTowardsTargetPosition/Target Stem Position", targetState.toString());
+        Logger.recordOutput("Stem/Stem Validator/StemTowardsTargetPosition/Target Stem Position",
+                targetState.toString());
 
         return StemPosition.fromRadians(midStatePivotRads, midStateWristRads, midStateTelescopeMeters);
     }

@@ -76,7 +76,7 @@ public class Vision extends SubsystemBase {
 
             double ambiguity = eval.ambiguity;
 
-            if (eval.apriltags.isEmpty() || ambiguity > 0.5 || eval.maxDistance > 5.5) {
+            if (eval.apriltags.isEmpty() || ambiguity > 0.2 || eval.maxDistance > 4.5) {
                 Tracer.endTrace();
                 continue;
             }
