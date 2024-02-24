@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.RobotController;
 public class RobotSetup {
 
     public enum RobotID {
-        CRASH(Subsystems.none(),
+        CRASH(Subsystems.all(),
                 RobotConstID.CRASH),
 
         BURN(Subsystems.list(Subsystems.Swerve),
