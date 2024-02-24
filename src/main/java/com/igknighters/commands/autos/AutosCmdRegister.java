@@ -39,16 +39,23 @@ public class AutosCmdRegister {
                 "Stow",
                 StemCommands.holdAt(stem, StemPosition.STOW));
 
-        SpecializedNamedCommands.registerCommand(
-                "Spinup",
-                SpecializedNamedCommand.fromLambda(
-                        (Object rpm) -> {
-                            return UmbrellaCommands
-                                    .spinupShooter(umbrella, (Double) rpm)
-                                        .withName("Spinup");
-                        },
-                        Double.class))
-                .withDefault(kControls.SHOOTER_RPM);
+        // SpecializedNamedCommands.registerCommand(
+        //         "Spinup",
+        //         SpecializedNamedCommand.fromLambda(
+        //                 (Object rpm) -> {
+        //                     return UmbrellaCommands
+        //                             .spinupShooter(umbrella, (Double) rpm)
+        //                                 .withName("Spinup");
+        //                 },
+        //                 Double.class))
+        //         .withDefault(kControls.SHOOTER_RPM);
+
+        NamedCommands.registerCommand(
+            "Spinup",
+            UmbrellaCommands
+                .spinupShooter(umbrella, kControls.SHOOTER_RPM)
+                .withName("Spinup")
+        );
 
         NamedCommands.registerCommand(
                 "Aim",

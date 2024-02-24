@@ -48,8 +48,6 @@ public class RobotContainer {
             swerve.setDefaultCommand(new TeleopSwerveBase.TeleopSwerveOmni(swerve, driverController));
 
             setupAutos(swerve);
-
-            Autos.createSendableChooser(swerve);
         }
 
         if (allSubsystems.stem.isPresent()) {
