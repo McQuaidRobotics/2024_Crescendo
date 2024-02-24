@@ -7,9 +7,12 @@ import org.littletonrobotics.junction.Logger;
 import com.ctre.phoenix6.CANBus;
 import com.igknighters.Robot;
 
+import edu.wpi.first.wpilibj.Timer;
+
 public class CANBusLogging {
     private static final ArrayList<String> loggedBuses = new ArrayList<>();
     private static final String path = "CANBus";
+    private static final Timer timer = new Timer();
     private static int index = 0;
 
     public static void logBus(String busName) {
@@ -22,11 +25,19 @@ public class CANBusLogging {
             CANBus.isNetworkFD(busName)
         );
 
+        timer.start();
+
         loggedBuses.add(busName);
     }
 
     public static void run() {
         if (Robot.isSimulation() || loggedBuses.isEmpty()) {
+            return;
+        }
+
+        if (timer.hasElapsed(5.0)) {
+            timer.reset();
+        } else {
             return;
         }
 

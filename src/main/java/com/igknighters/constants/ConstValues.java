@@ -62,7 +62,7 @@ public final class ConstValues {
     }
 
     public static final boolean DEBUG = true; // this should be false for competition
-    public static final double PERIODIC_TIME = 0.03; // 20ms
+    public static final double PERIODIC_TIME = 0.02; // 20ms
 
     public static final class kRobotCollisionGeometry {
         public static final double BUMPER_THICKNESS = 2.8 * Conv.INCHES_TO_METERS;
@@ -92,7 +92,8 @@ public final class ConstValues {
         public static final double SHOOTER_RPM = 3780.0;
         public static final double INTAKE_PERCENT = 0.8;
         public static final double V2_AIM_AT_PIVOT_RADIANS = 42.5 * Conv.DEGREES_TO_RADIANS;
-        public static final AimStrategy DEFAULT_AIM_STRATEGY = AimStrategy.SIMPLE_V2;
+        public static final double V1_WRIST_ANGLE = Units.degreesToRadians(74.0);
+        public static final AimStrategy DEFAULT_AIM_STRATEGY = AimStrategy.SIMPLE_V1;
     }
 
     public static final class kVision {
@@ -141,7 +142,7 @@ public final class ConstValues {
         ).cameras;
     }
 
-    @BoolConst(crash = false, burn = false)
+    @BoolConst(crash = true, burn = false)
     public static boolean LED_ENABLED;
 
     public static final class kSwerve {
@@ -480,7 +481,6 @@ public final class ConstValues {
              */
             public static final double TARGET_TOLERANCE = 2.5 * Conv.DEGREES_TO_RADIANS;
 
-            public static final double V1_WRIST_ANGLE = Units.degreesToRadians(70.0);
         }
     }
 }

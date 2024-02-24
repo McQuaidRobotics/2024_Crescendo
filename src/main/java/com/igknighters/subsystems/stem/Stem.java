@@ -89,7 +89,7 @@ public class Stem extends SubsystemBase {
         if (!telescope.hasHomed()) {
             if (!position.isStow()) {
                 DriverStation.reportWarning("Stem Telescope has not been homed, run stow to home", false);
-                LED.getInstance().sendAnimation(
+                LED.sendAnimation(
                         LedAnimations.WARNING).withDuration(1.0);
                 return false;
             }
@@ -167,12 +167,12 @@ public class Stem extends SubsystemBase {
     @Override
     public void periodic() {
         Tracer.startTrace("StemPeriodic");
-        
+
         Tracer.traceFunc("PivotPeriodic", pivot::periodic);
         Tracer.traceFunc("TelescopePeriodic", telescope::periodic);
         Tracer.traceFunc("WristPeriodic", wrist::periodic);
-        
-        Logger.recordOutput("Stem/Stem Validator/Current State Validation", StemValidator.validatePosition(getStemPosition()).toString());
+
+        Logger.recordOutput("Stem/StemValidator/CurrentStateValidation", StemValidator.validatePosition(getStemPosition()).toString());
 
         visualizer.updateCurrent(getStemPosition());
 

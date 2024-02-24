@@ -91,13 +91,13 @@ public class StemCommands {
             if (aimStrategy.equals(AimStrategy.SIMPLE_V1)) {
                 double pivotRads = StemSolvers.linearSolvePivotTheta(
                         kTelescope.MIN_METERS,
-                        kWrist.V1_WRIST_ANGLE,
+                        kControls.V1_WRIST_ANGLE,
                         currentPose.getTranslation().getDistance(adjustedTarget),
                         FieldConstants.SPEAKER.getZ());
 
                 hasFinished = stem.setStemPosition(StemPosition.fromRadians(
                         pivotRads,
-                        kWrist.V1_WRIST_ANGLE,
+                        kControls.V1_WRIST_ANGLE,
                         kTelescope.MIN_METERS));
             } else if (aimStrategy.equals(AimStrategy.SIMPLE_V2)) {
                 double wristRads = StemSolvers.linearSolveWristTheta(

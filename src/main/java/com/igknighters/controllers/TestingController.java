@@ -2,6 +2,7 @@ package com.igknighters.controllers;
 
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.FieldConstants;
+import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
@@ -13,6 +14,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
 import com.igknighters.GlobalState;
+import com.igknighters.LED;
+import com.igknighters.LED.LedAnimations;
 import com.igknighters.SubsystemResources.Subsystems;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.commands.stem.StemCommands;
@@ -48,7 +51,7 @@ public class TestingController extends ControllerParent {
                     StemCommands.holdAt(
                             allss.stem.get(), StemPosition.fromDegrees(
                                     11.0,
-                                    72.0,
+                                    kControls.V1_WRIST_ANGLE,
                                     kTelescope.MIN_METERS + Units.inchesToMeters(4.7))));
         });
 
@@ -100,12 +103,20 @@ public class TestingController extends ControllerParent {
         // }, Subsystems.Umbrella);
 
         /// DPAD
-        // this.DPR.binding =
+        this.DPR.binding = new Binding((trig, allss) -> {
+            trig.onTrue(Commands.runOnce(() -> LED.sendAnimation(LedAnimations.TELEOP)).ignoringDisable(true));
+        });
 
-        // this.DPD.binding =
+        this.DPD.binding = new Binding((trig, allss) -> {
+            trig.onTrue(Commands.runOnce(() -> LED.sendAnimation(LedAnimations.ERROR)).ignoringDisable(true));
+        });
 
-        // this.DPL.binding =
+        this.DPL.binding = new Binding((trig, allss) -> {
+            trig.onTrue(Commands.runOnce(() -> LED.sendAnimation(LedAnimations.SHOOTING)).ignoringDisable(true));
+        });
 
-        // this.DPU.binding =
+        this.DPU.binding = new Binding((trig, allss) -> {
+            trig.onTrue(Commands.runOnce(() -> LED.sendAnimation(LedAnimations.BOOTING)).ignoringDisable(true));
+        });
     }
 }
