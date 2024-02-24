@@ -48,10 +48,12 @@ public class SwerveCommands {
                 new Pose2d(1.84, 7.2, Rotation2d.fromDegrees(-90)),
                 swerve)
                 .flipForAlliance()
+                .withEndVelo(1.0)
+                .withConstraints(0.5)
                 .andThen(
                         new SimplePathfindingCommand(
                                 new Pose2d(1.84, 7.5, Rotation2d.fromDegrees(-90)),
-                                swerve).flipForAlliance());
+                                swerve).flipForAlliance().withConstraints(0.2));
     }
 
     private static class PointTowardsCommand extends Command {

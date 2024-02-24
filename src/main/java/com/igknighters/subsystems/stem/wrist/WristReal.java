@@ -6,7 +6,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
@@ -79,8 +79,6 @@ public class WristReal implements Wrist {
                 ? InvertedValue.Clockwise_Positive
                 : InvertedValue.CounterClockwise_Positive;
 
-        cfg.ClosedLoopRamps.DutyCycleClosedLoopRampPeriod = 0.5;
-
         cfg.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
         cfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
@@ -105,8 +103,8 @@ public class WristReal implements Wrist {
     @Override
     public void setWristRadians(Double radians) {
         inputs.targetRadians = radians;
-        var posControlRequest = new PositionDutyCycle(
-                Wrist.mechanismRadsToMotorRots(radians)).withEnableFOC(true);
+        var posControlRequest = new PositionTorqueCurrentFOC(
+                Wrist.mechanismRadsToMotorRots(radians));
         this.motor.setControl(posControlRequest);
     }
 

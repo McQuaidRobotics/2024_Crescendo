@@ -113,12 +113,22 @@ public class DriverController extends ControllerParent {
                                 () -> !this.LT.trigger.getAsBoolean()
                             ).finallyDo(
                                 allss.umbrella.get()::stopAll
+                            ).andThen(
+                                StemCommands.holdAt(
+                                    allss.stem.get(),
+                                    StemPosition.STOW
+                                )
                             ).withName("Highorder Aim and Shoot");
                         } else {
                             return UmbrellaCommands.shoot(
                                 allss.umbrella.get()
                             ).finallyDo(
                                 allss.umbrella.get()::stopAll
+                            ).andThen(
+                                StemCommands.holdAt(
+                                    allss.stem.get(),
+                                    StemPosition.STOW
+                                )
                             ).withName("Shoot");
                         }
                     }

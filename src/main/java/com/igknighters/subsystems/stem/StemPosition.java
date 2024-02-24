@@ -53,7 +53,7 @@ public class StemPosition {
     }
 
     public static StemPosition STOW = new StemPosition(
-            Units.degreesToRadians(42.4),
+            Units.degreesToRadians(42.0),
             Units.degreesToRadians(112.0),
             kTelescope.MIN_METERS) {
         @Override
@@ -73,7 +73,7 @@ public class StemPosition {
     };
 
     public static StemPosition INTAKE = new StemPosition(
-            Units.degreesToRadians(11.0),
+            Units.degreesToRadians(10.8),
             kTelescope.MIN_METERS + Units.inchesToMeters(4.7),
             Units.degreesToRadians(72.0)) {
 
@@ -93,5 +93,16 @@ public class StemPosition {
             return "Amp";
         }
 
+    };
+
+    public static StemPosition CLIMB = new StemPosition(
+            1.245,
+            0.783,
+            0.626) {
+
+        @Override
+        public String toString() {
+            return "CLIMB";
+        }
     };
 }

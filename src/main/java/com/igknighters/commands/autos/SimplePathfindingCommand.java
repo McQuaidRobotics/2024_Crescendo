@@ -140,6 +140,21 @@ public class SimplePathfindingCommand extends Command {
                 swerve);
     }
 
+    public SimplePathfindingCommand withConstraints(double constraintsMult) {
+        return new SimplePathfindingCommand(
+                targetPose,
+                goalEndState.getVelocity(),
+                rotationDelayDistance,
+                new PathConstraints(
+                    constraints.getMaxVelocityMps() * constraintsMult,
+                    constraints.getMaxAccelerationMpsSq() * constraintsMult,
+                    constraints.getMaxAngularVelocityRps() * constraintsMult,
+                    constraints.getMaxAngularAccelerationRpsSq() * constraintsMult
+                ),
+                rotationOverrideSupplier,
+                swerve);
+    }
+
     public SimplePathfindingCommand withRotationOverride(Supplier<Rotation2d> rotationOverrideSupplier) {
         return new SimplePathfindingCommand(
                 targetPose,

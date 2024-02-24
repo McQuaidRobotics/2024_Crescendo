@@ -456,15 +456,15 @@ public final class ConstValues {
             public static final int MOTOR_ID = 16;
             public static final int CANCODER_ID = 26;
 
-            public static final double MOTOR_kP = 3.0;
+            public static final double MOTOR_kP = 120.0;
             public static final double MOTOR_kI = 0.0;
-            public static final double MOTOR_kD = 0.5;
-            public static final double MOTOR_kS = 0.13;
-            public static final double MOTOR_kV = 0.111;
+            public static final double MOTOR_kD = 4.0;
+            public static final double MOTOR_kS = 0.2;
+            public static final double MOTOR_kV = 3.0;
 
             public static final boolean INVERTED = false;
 
-            public static final double CANCODER_OFFSET = -0.2439;
+            public static final double CANCODER_OFFSET = -0.0769;
 
             public static final double MIN_ANGLE = 29.0 * Conv.DEGREES_TO_RADIANS;
             public static final double MAX_ANGLE = 115.0 * Conv.DEGREES_TO_RADIANS;
