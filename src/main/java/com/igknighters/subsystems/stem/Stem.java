@@ -76,15 +76,15 @@ public class Stem extends SubsystemBase {
      */
     public boolean setStemPosition(StemPosition position, double toleranceMult) {
         ValidationResponse validity = StemValidator.validatePosition(position);
-        if (!validity.isValid()) {
-            DriverStation.reportError(
-                    "Invalid stem position(" + validity.name() + "): " + position.toString(),
-                    true);
-            // LED
-            return true;
-        }
 
         visualizer.updateSetpoint(position);
+
+        if (!validity.isValid()) {
+            DriverStation.reportError(
+                    "Invalid TARGET stem position(" + validity.name() + "): " + position.toString(),
+                    true);
+        }
+        
         if (!telescope.hasHomed()) {
             if (!position.isStow()) {
                 DriverStation.reportWarning("Stem Telescope has not been homed, run stow to home", false);
@@ -96,6 +96,7 @@ public class Stem extends SubsystemBase {
                     && wrist.target(position.wristRads, 1.0)
                     && telescope.target(position.telescopeMeters, 1.0);
         }
+        
         StemPosition validated = StemValidator.stepTowardsTargetPosition(getStemPosition(), position, 1.0);
         pivot.setPivotRadians(validated.pivotRads);
         telescope.setTelescopeMeters(validated.telescopeMeters);
@@ -160,10 +161,12 @@ public class Stem extends SubsystemBase {
     @Override
     public void periodic() {
         Tracer.startTrace("StemPeriodic");
-
+        
         Tracer.traceFunc("PivotPeriodic", pivot::periodic);
         Tracer.traceFunc("TelescopePeriodic", telescope::periodic);
         Tracer.traceFunc("WristPeriodic", wrist::periodic);
+        
+        Logger.recordOutput("Stem/Stem Validator/Current State Validation", StemValidator.validatePosition(getStemPosition()).toString());
 
         visualizer.updateCurrent(getStemPosition());
 
