@@ -14,7 +14,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Spinup(2000)"
+            "name": "Spinup"
           }
         },
         {
@@ -24,7 +24,7 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "sequential",
           "data": {
             "commands": [
               {
@@ -32,45 +32,8 @@
                 "data": {
                   "pathName": "2 piece - 1"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake"
-                }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "AutoShoot"
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "2 piece - 2"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "AutoShoot"
           }
         }
       ]
