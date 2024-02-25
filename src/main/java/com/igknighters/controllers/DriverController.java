@@ -42,7 +42,8 @@ public class DriverController extends ControllerParent {
                         )
                     );
                 },
-                Subsystems.Stem);
+                Subsystems.Stem,
+                Subsystems.Umbrella);
 
         this.X.binding = new Binding((trig, allss) -> {
             trig.onTrue(
@@ -70,7 +71,8 @@ public class DriverController extends ControllerParent {
                         )
                     );
                 },
-                Subsystems.Stem);
+                Subsystems.Stem,
+                Subsystems.Umbrella);
 
         /// BUMPER
         // # Our main driver doesn't use bumpers
@@ -149,7 +151,7 @@ public class DriverController extends ControllerParent {
                     }
                 ).withName("Proxy Shoot")
             );
-        }, Subsystems.Umbrella);
+        }, Subsystems.Umbrella, Subsystems.Stem);
 
         /// DPAD
         // this.DPR.binding =
