@@ -30,18 +30,12 @@ public class CameraDisabled implements Camera {
         this.cameraPose = cameraPose;
         this.cameraName = cameraName;
 
-        cameraInput = new CameraInput(new VisionPoseEstimate(
-                id,
-                new Pose3d(),
-                0,
-                List.of(),
-                0.0,
-                0.0));
+        cameraInput = new CameraInput(VisionPoseEstimate.empty(id));
 
         cameraInput.update(
             Optional.of(
                 Pair.of(
-                    cameraInput.getLatestPoseEst().get(),
+                    VisionPoseEstimate.empty(id),
                     getFaults()
                 )
             ),

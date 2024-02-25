@@ -206,6 +206,16 @@ public interface Camera {
             return new VisionPoseEstimate(cameraId, pose, timestamp, tags, ambiguity, maxDistance);
         }
 
+        public static VisionPoseEstimate empty(int id) {
+            return new VisionPoseEstimate(
+                id,
+                new Pose3d(),
+                0,
+                List.of(),
+                0.0,
+                0.0);
+        }
+
         public Pair<VisionPoseEstimate, VisionEstimateFault> withFault(
                 VisionPoseEstimate last,
                 Timer jitterTimer,

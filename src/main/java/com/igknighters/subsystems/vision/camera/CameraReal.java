@@ -14,7 +14,6 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import com.igknighters.constants.FieldConstants;
 import com.igknighters.util.BootupLogger;
 
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -54,14 +53,7 @@ public class CameraReal implements Camera {
         poseEstimator.setTagModel(TargetModel.kAprilTag36h11);
         poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_CAMERA_HEIGHT);
 
-        cameraInput = new CameraInput(new VisionPoseEstimate(
-                id,
-                new Pose3d(),
-                0,
-                List.of(),
-                0.0,
-                0.0
-        ));
+        cameraInput = new CameraInput(VisionPoseEstimate.empty(id));
 
         BootupLogger.bootupLog("    " + cameraName + " camera initialized (real)");
     }

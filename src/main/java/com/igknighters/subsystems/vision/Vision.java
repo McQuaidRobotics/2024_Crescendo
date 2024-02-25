@@ -12,6 +12,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -54,6 +56,12 @@ public class Vision extends SubsystemBase {
             camera.periodic();
 
             if (cameraPositionFieldVisualizer.get(false)) {
+                Logger.recordOutput(
+                    "/Vision/" + camera.getName() + "/3d",
+                    GlobalState.getLocalizedPose3d().plus(
+                        camera.getRobotToCameraTransform3d()
+                    )
+                );
                 GlobalState.modifyField2d(field -> {
                     Transform2d tf = new Transform2d(
                             camera.getRobotToCameraTransform3d().getTranslation().toTranslation2d(),

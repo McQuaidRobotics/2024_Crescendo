@@ -18,9 +18,12 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -164,6 +167,27 @@ public class GlobalState {
                 return new Pose2d();
             }
             return localizer.get().getEstimatedPosition();
+        } finally {
+            globalLock.unlock();
+        }
+    }
+
+    public static Pose3d getLocalizedPose3d() {
+        globalLock.lock();
+        try {
+            if (!localizer.isPresent() || localizerType == LocalizerType.None) {
+                DriverStation.reportError("[GlobalState] Odometry not present", true);
+                return new Pose3d();
+            }
+            if (Robot.isSimulation()) {
+                return new Pose3d(getLocalizedPose());
+            } else {
+                Translation2d translation = getLocalizedPose().getTranslation();
+                return new Pose3d(
+                    new Translation3d(translation.getX(), translation.getY(), 0),
+                    rotSupplier.get()
+                );
+            }
         } finally {
             globalLock.unlock();
         }
