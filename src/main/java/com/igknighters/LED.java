@@ -244,7 +244,8 @@ public class LED {
 
             new Trigger(DriverStation::isFMSAttached)
                     .and(() -> Math.abs(DriverStation.getMatchTime() - 20.0) < 0.2)
-                    .onTrue(new InstantCommand(() -> LED.sendAnimation(LedAnimations._20S_LEFT).withDuration(2.0)));
+                    .onTrue(new InstantCommand(() -> LED.sendAnimation(LedAnimations._20S_LEFT)
+                        .withDuration(2.0)).withName("20sLeftLED"));
         } else {
             candle = null;
         }
