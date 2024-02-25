@@ -2,28 +2,39 @@ package com.igknighters.subsystems.vision.camera;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Timer;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.ArrayList;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
+
 import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
+
+import com.igknighters.constants.FieldConstants;
+import com.igknighters.constants.ConstValues.kSwerve;
+import com.igknighters.constants.ConstValues.kVision;
 
 public interface Camera {
     public static class CameraInput implements LoggableInputs {
         private VisionPoseEstimate latestPoseEst;
+        private VisionEstimateFault latestFault;
         private boolean isPresent = false;
 
         public CameraInput(VisionPoseEstimate pose) {
             this.latestPoseEst = pose;
         }
 
-        public void update(Optional<VisionPoseEstimate> pose) {
-            if (pose.isPresent()) {
-                latestPoseEst = pose.get();
+        public void update(Optional<Pair<VisionPoseEstimate, VisionEstimateFault>> estimate) {
+            if (estimate.isPresent()) {
+                latestPoseEst = estimate.get().getFirst();
+                latestFault = estimate.get().getSecond();
                 isPresent = true;
             } else {
                 isPresent = false;
@@ -38,43 +49,34 @@ public interface Camera {
             }
         }
 
+        public VisionEstimateFault getLatestFault() {
+            if (isPresent) {
+                return latestFault;
+            } else {
+                return new VisionEstimateFault(false, false, false, false, false, false, false, false);
+            }
+        }
+
         @Override
         public void toLog(LogTable table) {
             table.put("isPresent", isPresent);
             if (!isPresent) {
                 return;
             }
-            table.put("latestPoseEst/timestamp", latestPoseEst.timestamp);
-            table.put("latestPoseEst/pose", latestPoseEst.pose);
-            table.put("latestPoseEst/tags", latestPoseEst.apriltags.stream().mapToInt(i -> i).toArray());
-            table.put("latestPoseEst/ambiguity", latestPoseEst.ambiguity);
-            table.put("latestPoseEst/maxDistance", latestPoseEst.maxDistance);
+            latestPoseEst.toLog(table);
+            latestFault.toLog(table);
         }
 
         @Override
         public void fromLog(LogTable table) {
             isPresent = table.get("isPresent", isPresent);
 
-            Pose3d pose = table.get("latestPoseEst/pose", latestPoseEst.pose);
-            double timestamp = table.get("latestPoseEst/timestamp", latestPoseEst.timestamp);
-            int[] tagsPrim = table.get("latestPoseEst/tags",
-                    latestPoseEst.apriltags.stream().mapToInt(i -> i).toArray());
-            double ambiguity = table.get("latestPoseEst/ambiguity", latestPoseEst.ambiguity);
-            double maxDistance = table.get("latestPoseEst/maxDistance", latestPoseEst.maxDistance);
-
-            ArrayList<Integer> tags = new ArrayList<>();
-            for (int tag : tagsPrim) {
-                tags.add(tag);
+            if (!isPresent) {
+                return;
             }
 
-            latestPoseEst = new VisionPoseEstimate(
-                    latestPoseEst.cameraId,
-                    pose,
-                    timestamp,
-                    tags,
-                    ambiguity,
-                    maxDistance
-                );
+            latestPoseEst = VisionPoseEstimate.fromLog(table);
+            latestFault = VisionEstimateFault.fromLog(table);
         }
     }
 
@@ -133,6 +135,13 @@ public interface Camera {
     public Optional<VisionPoseEstimate> evalPose();
 
     /**
+     * Gets the faults of the last pose estimation.
+     * 
+     * @return The faults
+     */
+    public VisionEstimateFault getFaults();
+
+    /**
      * Gets the transform from the robot to the camera.
      * 
      * @return The transform
@@ -158,26 +167,106 @@ public interface Camera {
 
     public void periodic();
 
-    /**
-     * A pose estimation from a camera.
-     */
-    public class VisionPoseEstimate {
-        public final int cameraId;
-        public final Pose3d pose;
-        /** The timestamp of the measurement in seconds */
-        public final double timestamp;
-        public final List<Integer> apriltags;
-        public final double ambiguity;
-        public final double maxDistance;
+    public record VisionPoseEstimate(
+            int cameraId,
+            Pose3d pose,
+            double timestamp,
+            List<Integer> apriltags,
+            double ambiguity,
+            double maxDistance) {
+        public double distanceFrom(VisionPoseEstimate other) {
+            return pose.getTranslation().getDistance(other.pose.getTranslation());
+        }
 
-        public VisionPoseEstimate(int cameraId, Pose3d pose, double timestamp, List<Integer> apriltags,
-                double ambiguity, double maxDistance) {
-            this.cameraId = cameraId;
-            this.pose = pose;
-            this.timestamp = timestamp;
-            this.apriltags = apriltags;
-            this.ambiguity = ambiguity;
-            this.maxDistance = maxDistance;
+        public void toLog(LogTable table) {
+            table.put("cameraId", cameraId);
+            table.put("pose", pose);
+            table.put("timestamp", timestamp);
+            table.put("apriltags", apriltags.stream().mapToInt(i -> i).toArray());
+            table.put("ambiguity", ambiguity);
+            table.put("maxDistance", maxDistance);
+        }
+
+        public static VisionPoseEstimate fromLog(LogTable table) {
+            int cameraId = table.get("cameraId", 0);
+            Pose3d pose = table.get("pose", new Pose3d());
+            double timestamp = table.get("timestamp", 0.0);
+            int[] tagsPrim = table.get("apriltags", new int[0]);
+            double ambiguity = table.get("ambiguity", 0.0);
+            double maxDistance = table.get("maxDistance", 0.0);
+
+            ArrayList<Integer> tags = new ArrayList<>();
+            for (int tag : tagsPrim) {
+                tags.add(tag);
+            }
+
+            return new VisionPoseEstimate(cameraId, pose, timestamp, tags, ambiguity, maxDistance);
+        }
+
+        public Pair<VisionPoseEstimate, VisionEstimateFault> withFault(
+                VisionPoseEstimate last,
+                Timer jitterTimer,
+                Consumer<VisionPoseEstimate> jitterReseter) {
+            Translation2d simplePose = pose.getTranslation().toTranslation2d();
+            boolean oob = simplePose.getX() < 0.0
+                    || simplePose.getX() > FieldConstants.FIELD_LENGTH
+                    || simplePose.getY() < 0.0
+                    || simplePose.getY() > FieldConstants.FIELD_WIDTH;
+            VisionEstimateFault fault = new VisionEstimateFault(
+                    oob,
+                    maxDistance > 4.5,
+                    ambiguity > kVision.AMBIGUITY_CUTOFF,
+                    this.distanceFrom(last) > jitterTimer.get() * kSwerve.MAX_DRIVE_VELOCITY,
+                    apriltags.isEmpty(),
+                    Math.abs(pose.getTranslation().getZ()) > kVision.MAX_Z_DELTA,
+                    pose.getRotation().getY() > kVision.MAX_ANGLE_DELTA,
+                    pose.getRotation().getX() > kVision.MAX_ANGLE_DELTA);
+
+            if (!fault.extremeJitter) {
+                jitterReseter.accept(this);
+            }
+
+            return new Pair<>(this, fault);
+        }
+    }
+
+    public record VisionEstimateFault(
+            boolean outOfBounds,
+            boolean outOfRange,
+            boolean tooAmbiguous,
+            boolean extremeJitter,
+            boolean noTags,
+            boolean infeasibleZValue,
+            boolean infeasiblePitchValue,
+            boolean infeasibleRollValue) {
+        public void toLog(LogTable table) {
+            final String p = "VisionEstimateFault/";
+            table.put(p + "outOfBounds", outOfBounds);
+            table.put(p + "outOfRange", outOfRange);
+            table.put(p + "tooAmbiguous", tooAmbiguous);
+            table.put(p + "extremeJitter", extremeJitter);
+            table.put(p + "noTags", noTags);
+            table.put(p + "infeasibleZValue", infeasibleZValue);
+            table.put(p + "infeasiblePitchValue", infeasiblePitchValue);
+            table.put(p + "infeasibleRollValue", infeasibleRollValue);
+        }
+
+        public static VisionEstimateFault fromLog(LogTable table) {
+            final String p = "VisionEstimateFault/";
+            return new VisionEstimateFault(
+                    table.get(p + "outOfBounds", false),
+                    table.get(p + "outOfRange", false),
+                    table.get(p + "tooAmbiguous", false),
+                    table.get(p + "extremeJitter", false),
+                    table.get(p + "noTags", false),
+                    table.get(p + "infeasibleZValue", false),
+                    table.get(p + "infeasiblePitchValue", false),
+                    table.get(p + "infeasibleRollValue", false));
+        }
+
+        public boolean isFaulty() {
+            return outOfBounds || outOfRange || tooAmbiguous || extremeJitter || noTags || infeasibleZValue
+                    || infeasiblePitchValue || infeasibleRollValue;
         }
     }
 }

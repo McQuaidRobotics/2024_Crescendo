@@ -18,7 +18,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-// import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.Timer;
 
 /**
  * An abstraction for a photon camera.
@@ -31,8 +31,8 @@ public class CameraReal implements Camera {
 
     private final CameraInput cameraInput;
 
-    // private final Timer lastValueTimer = new Timer();
-    // private Optional<VisionPoseEstimate> lastValue = Optional.empty();
+    private VisionPoseEstimate lastPoseEst;
+    private Timer lastPoseTimer;
 
     /**
      * Creates an abstraction for a photon camera.
@@ -94,30 +94,23 @@ public class CameraReal implements Camera {
                 .map(Translation2d::getNorm)
                 .reduce(0.0, Math::max);
 
-        var result = Optional.of(new VisionPoseEstimate(
+        return Optional.of(new VisionPoseEstimate(
                 this.id,
                 estRoboPose.estimatedPose,
                 estRoboPose.timestampSeconds,
                 targetIds,
                 avgAmbiguity,
                 maxDistance));
-
-        // if (lastValue.isPresent()) {
-        //     if (lastValueTimer.hasElapsed(0.5)) {
-        //         lastValueTimer.restart();
-        //         lastValue = result;
-        //         return result;
-        //     } else {
-        //         if (result.get().pose.getTranslation().toTranslation2d())
-        //     }
-        // }
-
-        return result;
     }
 
     @Override
     public Optional<VisionPoseEstimate> evalPose() {
         return cameraInput.getLatestPoseEst();
+    }
+
+    @Override
+    public VisionEstimateFault getFaults() {
+        return cameraInput.getLatestFault();
     }
 
     @Override
@@ -135,9 +128,17 @@ public class CameraReal implements Camera {
         return camera.getName();
     }
 
+    private void resetLastPoseInfo(VisionPoseEstimate poseEst) {
+        lastPoseEst = poseEst;
+        lastPoseTimer.restart();
+    }
+
     @Override
     public void periodic() {
-        cameraInput.update(realEvaluatePose());
+
+
+        cameraInput.update(realEvaluatePose()
+            .map(est -> est.withFault(lastPoseEst, lastPoseTimer, this::resetLastPoseInfo)));
 
         Logger.processInputs("Vision/Camera[" + getName() + "]", cameraInput);
     }

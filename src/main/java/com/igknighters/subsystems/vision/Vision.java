@@ -12,8 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -26,7 +24,7 @@ public class Vision extends SubsystemBase {
 
     private final List<Camera> cameras;
 
-    private final BooleanEntry visionFieldVisualizer;
+    private final BooleanEntry cameraPositionFieldVisualizer;
 
     public Vision() {
         this.cameras = List.of(kVision.CAMERA_CONFIGS)
@@ -38,12 +36,12 @@ public class Vision extends SubsystemBase {
                 new VisionOnlyPoseEstimator(),
                 LocalizerType.Vision);
 
-        visionFieldVisualizer = NetworkTableInstance.getDefault()
+        cameraPositionFieldVisualizer = NetworkTableInstance.getDefault()
                 .getTable("Visualizers")
                 .getBooleanTopic("CamerasOnField")
                 .getEntry(false);
 
-        visionFieldVisualizer.accept(false);
+        cameraPositionFieldVisualizer.accept(false);
     }
 
     @Override
@@ -55,7 +53,7 @@ public class Vision extends SubsystemBase {
             Tracer.startTrace(camera.getName() + "Periodic");
             camera.periodic();
 
-            if (visionFieldVisualizer.get(false)) {
+            if (cameraPositionFieldVisualizer.get(false)) {
                 GlobalState.modifyField2d(field -> {
                     Transform2d tf = new Transform2d(
                             camera.getRobotToCameraTransform3d().getTranslation().toTranslation2d(),
@@ -67,34 +65,22 @@ public class Vision extends SubsystemBase {
 
             Optional<VisionPoseEstimate> optEval = camera.evalPose();
 
-            if (!optEval.isPresent()) {
+            if (!optEval.isPresent() || camera.getFaults().isFaulty()) {
                 Tracer.endTrace();
                 continue;
             }
 
             VisionPoseEstimate eval = optEval.get();
 
-            double ambiguity = eval.ambiguity;
+            double ambiguity = eval.ambiguity();
 
-            if (eval.apriltags.isEmpty() || ambiguity > 0.2 || eval.maxDistance > 4.5) {
-                Tracer.endTrace();
-                continue;
-            }
-
-            if (eval.apriltags.size() < 2) {
-                ambiguity *= 2.0;
-            }
-
-            if (Math.abs(eval.pose.getTranslation().getZ()) > kVision.MAX_Z_DELTA) {
-                // The cameras height does not change typically, so if it does, it is likely a
-                // false positive
-                Logger.recordOutput("/Vision/" + camera.getName() + "/WeirdZ", true);
+            if (eval.apriltags().size() < 2) {
                 ambiguity *= 2.0;
             }
 
             GlobalState.submitVisionData(eval, ambiguity);
 
-            seenTags.addAll(eval.apriltags);
+            seenTags.addAll(eval.apriltags());
 
             Tracer.endTrace();
         }

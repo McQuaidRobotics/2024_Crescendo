@@ -97,9 +97,10 @@ public final class ConstValues {
     }
 
     public static final class kVision {
-        public static final double AMBIGUITY_CUTOFF = 0.5;
+        public static final double AMBIGUITY_CUTOFF = 0.15;
 
         public static final double MAX_Z_DELTA = 0.2;
+        public static final double MAX_ANGLE_DELTA = 0.5;
 
         private static enum CameraConfigs {
             CRASH(

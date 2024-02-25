@@ -35,8 +35,7 @@ public class CameraDisabled implements Camera {
                 0,
                 List.of(),
                 0.0,
-                0.0
-        ));
+                0.0));
 
         BootupLogger.bootupLog("    " + cameraName + " camera initialized (disabled)");
     }
@@ -44,6 +43,11 @@ public class CameraDisabled implements Camera {
     @Override
     public Optional<VisionPoseEstimate> evalPose() {
         return cameraInput.getLatestPoseEst();
+    }
+
+    @Override
+    public VisionEstimateFault getFaults() {
+        return new VisionEstimateFault(false, false, false, false, false, false, false, false);
     }
 
     @Override

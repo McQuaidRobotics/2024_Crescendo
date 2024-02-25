@@ -241,20 +241,20 @@ public class GlobalState {
             }
             if (localizerType == LocalizerType.Vision) {
                 ((VisionOnlyPoseEstimator) localizer.get()).addVisionMeasurement(
-                        value.pose.toPose2d(),
-                        value.timestamp,
+                        value.pose().toPose2d(),
+                        value.timestamp(),
                         VecBuilder.fill(1.0, 1.0, 1.0));
                 var pose = ((VisionOnlyPoseEstimator) localizer.get())
                         .update(
-                                value.pose.toPose2d().getRotation(),
+                                value.pose().toPose2d().getRotation(),
                                 new FakeWheelPositions());
                 field.ifPresent(field2d -> field2d.setRobotPose(pose));
             } else if (localizerType == LocalizerType.Hybrid) {
                 ((SwerveDrivePoseEstimator) localizer.get()).addVisionMeasurement(
                         new Pose2d(
-                                value.pose.getTranslation().toTranslation2d(),
+                                value.pose().getTranslation().toTranslation2d(),
                                 GlobalState.rotSupplier.get().toRotation2d()),
-                        value.timestamp,
+                        value.timestamp(),
                         VecBuilder.fill(ambiguity, ambiguity, 1.0));
             } else {
                 DriverStation.reportError("[GlobalState] Localizer does not support Vision", true);
