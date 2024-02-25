@@ -45,7 +45,7 @@ public class AutoSwerveTargetSpeaker extends Command {
                 0.0,
                 rotVelo);
 
-        if (Math.abs(rotVelo) < 0.05) {
+        if (Math.abs(rotVelo) < 0.01) {
             isDone = true;
         }
 

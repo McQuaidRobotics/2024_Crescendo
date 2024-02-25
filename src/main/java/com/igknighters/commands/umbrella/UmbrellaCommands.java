@@ -26,7 +26,8 @@ public class UmbrellaCommands {
      * @return A command to be scheduled
      */
     public static Command spinupShooter(Umbrella umbrella, double rpm) {
-        return umbrella.runOnce(() -> umbrella.spinupShooterToRPM(rpm));
+        return umbrella.runOnce(() -> umbrella.spinupShooterToRPM(rpm))
+            .withName("Spinup Shooter");
     }
 
     /**
@@ -66,8 +67,9 @@ public class UmbrellaCommands {
                 () -> {
                     umbrella.spinupShooter(umbrella.getShooterTargetSpeed());
                     umbrella.runIntakeAt(-1.0, true);
-                }).withTimeout(0.3)
-                // .until(umbrella::notHoldingGamepiece)
+                })
+                // .withTimeout(0.3)
+                .until(umbrella::notHoldingGamepiece)
                 .unless(() -> umbrella.getShooterSpeed() < 30.0)
                 .finallyDo(umbrella::stopAll)
                 .withName("Shoot");

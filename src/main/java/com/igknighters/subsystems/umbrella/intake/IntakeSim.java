@@ -11,18 +11,13 @@ import com.igknighters.util.BootupLogger;
 import com.igknighters.util.geom.AllianceFlip;
 import com.igknighters.util.geom.Rectangle2d;
 
-import edu.wpi.first.hal.SimBoolean;
-import edu.wpi.first.hal.SimDevice;
-import edu.wpi.first.hal.SimDevice.Direction;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotBase;
 
 public class IntakeSim implements Intake {
 
@@ -50,32 +45,16 @@ public class IntakeSim implements Intake {
     }
 
     private final IntakeInputs inputs = new IntakeInputs();
-    private final SimBoolean exit;
 
     private final ArrayList<Rectangle2d> autoNotes = new ArrayList<>();
     private boolean isAuto = false;
 
     public IntakeSim() {
-        if (RobotBase.isReal()) {
-            // In the event we use this to "disable" the intake on the real robot,
-            // we don't want to crash the robot by trying to create a SimDevice
-            exit = null;
-            NetworkTableInstance.getDefault()
-                    .getTable("SimDevices")
-                    .getSubTable("ExitBeamBreak")
-                    .getEntry("broken2")
-                    .setBoolean(false);
-        } else if (GlobalState.isUnitTest()) {
-            // HAL requires unique allocations for each SimDevice,
-            // in unit tests we don't care what this is actually called so just make it
-            // random
-            exit = SimDevice.create("" + Math.random() + Math.random()).createBoolean("", Direction.kInput,
-                    false);
-        } else {
-            exit = SimDevice.create("ExitBeamBreak").createBoolean("broken2", Direction.kInput, false);
-        }
-
         BootupLogger.bootupLog("    Intake initialized (sim)");
+    }
+
+    private void setExitBeam(boolean broken) {
+        inputs.exitBeamBroken = broken;
     }
 
     @Override
@@ -93,14 +72,15 @@ public class IntakeSim implements Intake {
         if (isExitBeamBroken() && !force) {
             volts = 0.0;
         }
+
+        if (force || volts > 0.0) {
+            setExitBeam(false);
+        }
+
         inputs.voltsLower = volts;
         inputs.voltsUpper = inputs.voltsLower * kIntake.UPPER_DIFF;
         inputs.radiansPerSecondLower = (volts / 12.0) * DCMotor.getFalcon500(0).freeSpeedRadPerSec;
         inputs.radiansPerSecondUpper = inputs.radiansPerSecondLower * kIntake.UPPER_DIFF;
-
-        if (force || (inputs.voltsLower > 0.5 && inputs.voltsUpper > 0.5)) {
-            exit.set(false);
-        }
     }
 
     private boolean isIntaking() {
@@ -109,16 +89,6 @@ public class IntakeSim implements Intake {
 
     @Override
     public void periodic() {
-        if (RobotBase.isReal()) {
-            var table = NetworkTableInstance.getDefault()
-                    .getTable("SimDevices");
-            inputs.exitBeamBroken = table.getSubTable("ExitBeamBreak")
-                    .getEntry("broken2")
-                    .getBoolean(false);
-        } else {
-            inputs.exitBeamBroken = exit.get();
-        }
-
         boolean nowAuto = DriverStation.isAutonomousEnabled();
 
         if (nowAuto && !isAuto) {
@@ -128,15 +98,7 @@ public class IntakeSim implements Intake {
                     AllianceFlip.isBlue() ? note : AllianceFlip.flipTranslation(note),
                     Units.inchesToMeters(7.0)));
             }
-            if (RobotBase.isReal()) {
-                NetworkTableInstance.getDefault()
-                        .getTable("SimDevices")
-                        .getSubTable("ExitBeamBreak")
-                        .getEntry("broken2")
-                        .setBoolean(true);
-            } else {
-                exit.set(true);
-            }
+            setExitBeam(true);
         }
 
         if (isAuto && nowAuto) {
@@ -146,16 +108,7 @@ public class IntakeSim implements Intake {
                 if (autoNotes.get(i).contains(intakePose) && isIntaking()) {
                     notesToRemove.add(i);
                     System.out.println("Intaked note at " + autoNotes.get(i).getCenter());
-                    if (RobotBase.isReal()) {
-                        NetworkTableInstance.getDefault()
-                                .getTable("SimDevices")
-                                .getSubTable("ExitBeamBreak")
-                                .getEntry("broken2")
-                                .setBoolean(true);
-                    } else {
-                        exit.set(true);
-                    }
-                    inputs.exitBeamBroken = true;
+                    setExitBeam(true);
                 }
             }
             for (int i : notesToRemove) {

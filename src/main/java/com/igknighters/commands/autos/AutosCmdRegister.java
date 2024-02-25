@@ -77,7 +77,7 @@ public class AutosCmdRegister {
         registerCommand(
             "Spinup",
             UmbrellaCommands
-                .spinupShooter(umbrella, kControls.SHOOTER_RPM)
+                .waitUntilSpunUp(umbrella, kControls.SHOOTER_RPM, 1.2)
                 .withName("Spinup")
         );
 
@@ -101,7 +101,6 @@ public class AutosCmdRegister {
         registerCommand(
             "FeedShooter",
             UmbrellaCommands.shoot(umbrella)
-                .withTimeout(0.5)
                 .withName("FeedShooter")
         );
 
