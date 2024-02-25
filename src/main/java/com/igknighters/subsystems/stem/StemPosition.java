@@ -99,8 +99,8 @@ public class StemPosition {
 
     public static final StemPosition STARTING = new StemPosition(
             1.114,
-            kTelescope.MIN_METERS,
-            1.93) {
+            1.93,
+            kTelescope.MIN_METERS) {
 
         @Override
         public String toString() {
