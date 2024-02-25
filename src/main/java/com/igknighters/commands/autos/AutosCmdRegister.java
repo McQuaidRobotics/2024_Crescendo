@@ -10,9 +10,29 @@ import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.pathplanner.lib.auto.NamedCommands;
+
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WrapperCommand;
 
 public class AutosCmdRegister {
+    private static void registerCommand(String name, Command command) {
+        var cmd =  new WrapperCommand(command) {
+            @Override
+            public void initialize() {
+                super.initialize();
+                System.out.println("Command " + name + " started");
+            }
+
+            @Override
+            public void end(boolean interrupted) {
+                super.end(interrupted);
+                System.out.println("Command " + name + " finished");
+            }
+        };
+        NamedCommands.registerCommand(name, cmd);
+    }
+
     public static void registerCommands(AllSubsystems allSubsystems) {
         if (!allSubsystems.hasAllSubsystems()) {
             return;
@@ -48,26 +68,26 @@ public class AutosCmdRegister {
         //                 Double.class))
         //         .withDefault(kControls.SHOOTER_RPM);
 
-        NamedCommands.registerCommand(
+        registerCommand(
             "Intake",
             HigherOrderCommands
                 .intakeGamepiece(stem, umbrella)
         );
 
-        NamedCommands.registerCommand(
+        registerCommand(
             "Spinup",
             UmbrellaCommands
                 .spinupShooter(umbrella, kControls.SHOOTER_RPM)
                 .withName("Spinup")
         );
 
-        NamedCommands.registerCommand(
+        registerCommand(
                 "Aim",
                 StemCommands.aimAtSpeaker(stem, false)
                     .withName("Aim")
         );
 
-        NamedCommands.registerCommand(
+        registerCommand(
             "AutoShoot",
             Commands.parallel(
                 new AutoSwerveTargetSpeaker(swerve),
@@ -78,7 +98,7 @@ public class AutosCmdRegister {
             ).withName("AutoShoot")
         );
 
-        NamedCommands.registerCommand(
+        registerCommand(
             "FeedShooter",
             UmbrellaCommands.shoot(umbrella)
                 .withTimeout(0.5)

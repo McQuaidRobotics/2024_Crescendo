@@ -98,7 +98,7 @@ public class IntakeSim implements Intake {
         inputs.radiansPerSecondLower = (volts / 12.0) * DCMotor.getFalcon500(0).freeSpeedRadPerSec;
         inputs.radiansPerSecondUpper = inputs.radiansPerSecondLower * kIntake.UPPER_DIFF;
 
-        if (force) {
+        if (force || (inputs.voltsLower > 0.5 && inputs.voltsUpper > 0.5)) {
             exit.set(false);
         }
     }
@@ -180,6 +180,10 @@ public class IntakeSim implements Intake {
 
         if (!nowAuto && isAuto) {
             autoNotes.clear();
+            GlobalState.modifyField2d(field -> {
+                field.getObject("AutoNotes").setPoses();
+                field.getObject("Intake").setPoses();
+            });
         }
 
         isAuto = nowAuto;

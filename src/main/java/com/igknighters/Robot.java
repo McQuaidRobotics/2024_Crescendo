@@ -64,6 +64,7 @@ public class Robot extends UnitTestableRobot {
         }
         if (autoCmd != null) {
             Logger.recordOutput("CurrentAutoCommand", autoCmd.getName());
+            System.out.println("---- Starting auto command: " + autoCmd.getName() + " ----");
             scheduler.schedule(autoCmd);
         }
     }
