@@ -6,7 +6,7 @@ import edu.wpi.first.math.MathUtil;
 
 public class WristDisabled implements Wrist {
     double targetRads = StemPosition.STARTING.wristRads;
-    final double slewRate = 4.3 / 50.0;
+    final double slewRate = (4.3 / 50.0) * 0.75;
 
     @Override
     public double getWristRadians() {

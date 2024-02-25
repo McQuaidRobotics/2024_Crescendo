@@ -7,7 +7,7 @@ import edu.wpi.first.math.MathUtil;
 
 public class TelescopeDisabled implements Telescope {
     double targetMeters = StemPosition.STARTING.telescopeMeters;
-    final double slewRate = 0.5 / 50.0;
+    final double slewRate = (0.5 / 50.0) * 0.75;
 
     @Override
     public double getTelescopeMeters() {

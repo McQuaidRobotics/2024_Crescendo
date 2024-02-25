@@ -6,7 +6,7 @@ import edu.wpi.first.math.MathUtil;
 
 public class PivotDisabled implements Pivot {
     double targetRads = StemPosition.STARTING.pivotRads;
-    final double slewRate = 2.37 / 50.0;
+    final double slewRate = (2.37 / 50.0) * 0.75;
 
     @Override
     public double getPivotRadians() {
