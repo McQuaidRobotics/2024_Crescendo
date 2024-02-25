@@ -147,4 +147,8 @@ public class Rectangle2d {
     public Polygon2d asPolygon2d() {
         return new Polygon2d(topLeft, topRight, bottomRight, bottomLeft);
     }
+
+    public Translation2d getCenter() {
+        return topLeft.plus(bottomRight).times(0.5);
+    }
 }

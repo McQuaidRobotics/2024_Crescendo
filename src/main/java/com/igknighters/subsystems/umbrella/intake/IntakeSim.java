@@ -8,11 +8,13 @@ import com.igknighters.GlobalState;
 import com.igknighters.constants.ConstValues.kRobotCollisionGeometry;
 import com.igknighters.constants.ConstValues.kUmbrella.kIntake;
 import com.igknighters.util.BootupLogger;
+import com.igknighters.util.geom.AllianceFlip;
 import com.igknighters.util.geom.Rectangle2d;
 
 import edu.wpi.first.hal.SimBoolean;
 import edu.wpi.first.hal.SimDevice;
 import edu.wpi.first.hal.SimDevice.Direction;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -83,7 +85,7 @@ public class IntakeSim implements Intake {
 
     @Override
     public boolean isExitBeamBroken() {
-        return inputs.exitBeamBroken;
+        return inputs.exitBeamBroken || (DriverStation.isAutonomousEnabled() && !isAuto);
     }
 
     @Override
@@ -99,6 +101,10 @@ public class IntakeSim implements Intake {
         if (force) {
             exit.set(false);
         }
+    }
+
+    private boolean isIntaking() {
+        return inputs.voltsLower < 0.0 && inputs.voltsUpper < 0.0;
     }
 
     @Override
@@ -119,8 +125,17 @@ public class IntakeSim implements Intake {
             autoNotes.clear();
             for (var note : AutoNotes.notes) {
                 autoNotes.add(new Rectangle2d(
-                    note,
+                    AllianceFlip.isBlue() ? note : AllianceFlip.flipTranslation(note),
                     Units.inchesToMeters(7.0)));
+            }
+            if (RobotBase.isReal()) {
+                NetworkTableInstance.getDefault()
+                        .getTable("SimDevices")
+                        .getSubTable("ExitBeamBreak")
+                        .getEntry("broken2")
+                        .setBoolean(true);
+            } else {
+                exit.set(true);
             }
         }
 
@@ -128,9 +143,9 @@ public class IntakeSim implements Intake {
             Translation2d intakePose = GlobalState.getLocalizedPose().transformBy(AutoNotes.intakeTransform).getTranslation();
             ArrayList<Integer> notesToRemove = new ArrayList<>();
             for (int i = 0; i < autoNotes.size(); i++) {
-                if (autoNotes.get(i).contains(intakePose) && inputs.voltsLower > 0.0) {
+                if (autoNotes.get(i).contains(intakePose) && isIntaking()) {
                     notesToRemove.add(i);
-                    System.out.println("Intaked note at " + autoNotes.get(i).getBottomLeft());
+                    System.out.println("Intaked note at " + autoNotes.get(i).getCenter());
                     if (RobotBase.isReal()) {
                         NetworkTableInstance.getDefault()
                                 .getTable("SimDevices")
@@ -146,6 +161,21 @@ public class IntakeSim implements Intake {
             for (int i : notesToRemove) {
                 autoNotes.remove(i);
             }
+
+            GlobalState.modifyField2d(field -> {
+                Pose2d[] notePoses = this.autoNotes.stream()
+                        .map(Rectangle2d::getCenter)
+                        .map(t2d -> new Pose2d(t2d, new Rotation2d()))
+                        .toArray(Pose2d[]::new);
+
+                field.getObject("AutoNotes").setPoses(notePoses);
+
+                if (isIntaking()) {
+                    field.getObject("Intake").setPose(new Pose2d(intakePose, new Rotation2d()));
+                } else {
+                    field.getObject("Intake").setPoses();
+                }
+            });
         }
 
         if (!nowAuto && isAuto) {

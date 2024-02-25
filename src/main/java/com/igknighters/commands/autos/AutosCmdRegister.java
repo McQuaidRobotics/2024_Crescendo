@@ -52,7 +52,6 @@ public class AutosCmdRegister {
             "Intake",
             HigherOrderCommands
                 .intakeGamepiece(stem, umbrella)
-                .withTimeout(0.1)
         );
 
         NamedCommands.registerCommand(
