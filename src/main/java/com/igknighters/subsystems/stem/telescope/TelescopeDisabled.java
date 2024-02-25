@@ -1,11 +1,12 @@
 package com.igknighters.subsystems.stem.telescope;
 
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
+import com.igknighters.subsystems.stem.StemPosition;
 
 import edu.wpi.first.math.MathUtil;
 
 public class TelescopeDisabled implements Telescope {
-    double targetMeters = kTelescope.MIN_METERS;
+    double targetMeters = StemPosition.STARTING.telescopeMeters;
     final double slewRate = 0.5 / 50.0;
 
     @Override

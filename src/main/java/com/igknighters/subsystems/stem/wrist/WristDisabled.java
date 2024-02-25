@@ -1,11 +1,11 @@
 package com.igknighters.subsystems.stem.wrist;
 
-import com.igknighters.constants.ConstValues.kStem.kWrist;
+import com.igknighters.subsystems.stem.StemPosition;
 
 import edu.wpi.first.math.MathUtil;
 
 public class WristDisabled implements Wrist {
-    double targetRads = kWrist.MIN_ANGLE;
+    double targetRads = StemPosition.STARTING.wristRads;
     final double slewRate = 4.3 / 50.0;
 
     @Override
