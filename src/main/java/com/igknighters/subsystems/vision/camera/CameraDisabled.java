@@ -1,6 +1,7 @@
 package com.igknighters.subsystems.vision.camera;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
@@ -37,6 +38,16 @@ public class CameraDisabled implements Camera {
                 0.0,
                 0.0));
 
+        cameraInput.update(
+            Optional.of(
+                Pair.of(
+                    cameraInput.getLatestPoseEst().get(),
+                    getFaults()
+                )
+            ),
+            false
+        );
+
         BootupLogger.bootupLog("    " + cameraName + " camera initialized (disabled)");
     }
 
@@ -47,7 +58,7 @@ public class CameraDisabled implements Camera {
 
     @Override
     public VisionEstimateFault getFaults() {
-        return new VisionEstimateFault(false, false, false, false, false, false, false, false);
+        return new VisionEstimateFault(false, false, false, false, false, false, false, false, true);
     }
 
     @Override

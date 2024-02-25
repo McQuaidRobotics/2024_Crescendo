@@ -138,7 +138,9 @@ public class CameraReal implements Camera {
 
 
         cameraInput.update(realEvaluatePose()
-            .map(est -> est.withFault(lastPoseEst, lastPoseTimer, this::resetLastPoseInfo)));
+            .map(est -> est.withFault(lastPoseEst, lastPoseTimer, this::resetLastPoseInfo)),
+            camera.isConnected()
+        );
 
         Logger.processInputs("Vision/Camera[" + getName() + "]", cameraInput);
     }

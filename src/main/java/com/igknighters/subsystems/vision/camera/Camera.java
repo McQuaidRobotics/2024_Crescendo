@@ -25,13 +25,13 @@ public interface Camera {
     public static class CameraInput implements LoggableInputs {
         private VisionPoseEstimate latestPoseEst;
         private VisionEstimateFault latestFault;
-        private boolean isPresent = false;
+        private boolean isPresent = false, isConnected = false;
 
         public CameraInput(VisionPoseEstimate pose) {
             this.latestPoseEst = pose;
         }
 
-        public void update(Optional<Pair<VisionPoseEstimate, VisionEstimateFault>> estimate) {
+        public void update(Optional<Pair<VisionPoseEstimate, VisionEstimateFault>> estimate, boolean isConnected) {
             if (estimate.isPresent()) {
                 latestPoseEst = estimate.get().getFirst();
                 latestFault = estimate.get().getSecond();
@@ -39,6 +39,7 @@ public interface Camera {
             } else {
                 isPresent = false;
             }
+            this.isConnected = isConnected;
         }
 
         public Optional<VisionPoseEstimate> getLatestPoseEst() {
@@ -53,12 +54,13 @@ public interface Camera {
             if (isPresent) {
                 return latestFault;
             } else {
-                return new VisionEstimateFault(false, false, false, false, false, false, false, false);
+                return new VisionEstimateFault(false, false, false, false, false, false, false, false, false);
             }
         }
 
         @Override
         public void toLog(LogTable table) {
+            table.put("isConnected", isConnected);
             table.put("isPresent", isPresent);
             if (!isPresent) {
                 return;
@@ -69,6 +71,7 @@ public interface Camera {
 
         @Override
         public void fromLog(LogTable table) {
+            isConnected = table.get("isConnected", isConnected);
             isPresent = table.get("isPresent", isPresent);
 
             if (!isPresent) {
@@ -220,7 +223,8 @@ public interface Camera {
                     apriltags.isEmpty(),
                     Math.abs(pose.getTranslation().getZ()) > kVision.MAX_Z_DELTA,
                     pose.getRotation().getY() > kVision.MAX_ANGLE_DELTA,
-                    pose.getRotation().getX() > kVision.MAX_ANGLE_DELTA);
+                    pose.getRotation().getX() > kVision.MAX_ANGLE_DELTA,
+                    false);
 
             if (!fault.extremeJitter) {
                 jitterReseter.accept(this);
@@ -238,7 +242,8 @@ public interface Camera {
             boolean noTags,
             boolean infeasibleZValue,
             boolean infeasiblePitchValue,
-            boolean infeasibleRollValue) {
+            boolean infeasibleRollValue,
+            boolean isDisabled) {
         public void toLog(LogTable table) {
             final String p = "VisionEstimateFault/";
             table.put(p + "outOfBounds", outOfBounds);
@@ -249,6 +254,7 @@ public interface Camera {
             table.put(p + "infeasibleZValue", infeasibleZValue);
             table.put(p + "infeasiblePitchValue", infeasiblePitchValue);
             table.put(p + "infeasibleRollValue", infeasibleRollValue);
+            table.put(p + "isDisabled", isDisabled);
         }
 
         public static VisionEstimateFault fromLog(LogTable table) {
@@ -261,12 +267,13 @@ public interface Camera {
                     table.get(p + "noTags", false),
                     table.get(p + "infeasibleZValue", false),
                     table.get(p + "infeasiblePitchValue", false),
-                    table.get(p + "infeasibleRollValue", false));
+                    table.get(p + "infeasibleRollValue", false),
+                    table.get(p + "isDisabled", false));
         }
 
         public boolean isFaulty() {
             return outOfBounds || outOfRange || tooAmbiguous || extremeJitter || noTags || infeasibleZValue
-                    || infeasiblePitchValue || infeasibleRollValue;
+                    || infeasiblePitchValue || infeasibleRollValue || isDisabled;
         }
     }
 }
