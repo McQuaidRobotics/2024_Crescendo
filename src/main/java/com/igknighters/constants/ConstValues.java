@@ -112,7 +112,7 @@ public final class ConstValues {
                                                     Units.inchesToMeters(8.0)),
                                             new Rotation3d(
                                                     0.0,
-                                                    Units.degreesToRadians(20.0),
+                                                    Units.degreesToRadians(-20.0),
                                                     Math.PI))),
                             Camera.createConfig(
                                     "photon__module_2",
@@ -122,7 +122,7 @@ public final class ConstValues {
                                                     Units.inchesToMeters(8.0)),
                                             new Rotation3d(
                                                     0.0,
-                                                    Units.degreesToRadians(20.0),
+                                                    Units.degreesToRadians(-20.0),
                                                     Math.PI)))
                     }),
             BURN(new CameraConfig[] {});
