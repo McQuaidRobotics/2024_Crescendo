@@ -102,46 +102,46 @@ public class SwerveModuleReal implements SwerveModule {
     }
 
     private TalonFXConfiguration driveMotorConfig() {
-        var driveConfig = new TalonFXConfiguration();
+        var cfg = new TalonFXConfiguration();
 
-        driveConfig.MotorOutput.Inverted = kSwerve.DRIVE_MOTOR_INVERT;
-        driveConfig.MotorOutput.NeutralMode = kSwerve.DRIVE_NEUTRAL_MODE;
+        cfg.MotorOutput.Inverted = kSwerve.DRIVE_MOTOR_INVERT;
+        cfg.MotorOutput.NeutralMode = kSwerve.DRIVE_NEUTRAL_MODE;
 
-        driveConfig.Slot0.kP = DriveMotorConstants.kP;
-        driveConfig.Slot0.kI = DriveMotorConstants.kI;
-        driveConfig.Slot0.kD = DriveMotorConstants.kD;
-        driveConfig.Slot0.kV = 12.0
+        cfg.Slot0.kP = DriveMotorConstants.kP;
+        cfg.Slot0.kI = DriveMotorConstants.kI;
+        cfg.Slot0.kD = DriveMotorConstants.kD;
+        cfg.Slot0.kV = 12.0
                 / (kSwerve.MAX_DRIVE_VELOCITY / (kSwerve.WHEEL_CIRCUMFERENCE / kSwerve.DRIVE_GEAR_RATIO));
-        driveConfig.Slot0.kS = DriveMotorConstants.kS;
+        cfg.Slot0.kS = DriveMotorConstants.kS;
 
-        driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-        driveConfig.CurrentLimits.StatorCurrentLimit = kSwerve.SLIP_CURRENT;
-        driveConfig.TorqueCurrent.PeakForwardTorqueCurrent = kSwerve.SLIP_CURRENT;
-        driveConfig.TorqueCurrent.PeakReverseTorqueCurrent = -kSwerve.SLIP_CURRENT;
+        cfg.CurrentLimits.StatorCurrentLimitEnable = true;
+        cfg.CurrentLimits.StatorCurrentLimit = kSwerve.SLIP_CURRENT;
+        cfg.TorqueCurrent.PeakForwardTorqueCurrent = kSwerve.SLIP_CURRENT;
+        cfg.TorqueCurrent.PeakReverseTorqueCurrent = -kSwerve.SLIP_CURRENT;
 
-        return driveConfig;
+        return cfg;
     }
 
     private TalonFXConfiguration angleMotorConfig() {
-        var angleConfig = new TalonFXConfiguration();
+        var cfg = new TalonFXConfiguration();
 
-        angleConfig.MotorOutput.Inverted = kSwerve.ANGLE_MOTOR_INVERT;
-        angleConfig.MotorOutput.NeutralMode = kSwerve.ANGLE_NEUTRAL_MODE;
+        cfg.MotorOutput.Inverted = kSwerve.ANGLE_MOTOR_INVERT;
+        cfg.MotorOutput.NeutralMode = kSwerve.ANGLE_NEUTRAL_MODE;
 
-        angleConfig.Slot0.kP = AngleMotorConstants.kP;
-        angleConfig.Slot0.kI = AngleMotorConstants.kI;
-        angleConfig.Slot0.kD = AngleMotorConstants.kD;
+        cfg.Slot0.kP = AngleMotorConstants.kP;
+        cfg.Slot0.kI = AngleMotorConstants.kI;
+        cfg.Slot0.kD = AngleMotorConstants.kD;
 
-        angleConfig.Feedback.FeedbackRemoteSensorID = angleEncoder.getDeviceID();
-        angleConfig.Feedback.RotorToSensorRatio = kSwerve.ANGLE_GEAR_RATIO;
+        cfg.Feedback.FeedbackRemoteSensorID = angleEncoder.getDeviceID();
+        cfg.Feedback.RotorToSensorRatio = kSwerve.ANGLE_GEAR_RATIO;
         if (isPro) {
-            angleConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+            cfg.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
         } else {
-            angleConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+            cfg.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
         }
-        angleConfig.ClosedLoopGeneral.ContinuousWrap = true;
+        cfg.ClosedLoopGeneral.ContinuousWrap = true;
 
-        return angleConfig;
+        return cfg;
     }
 
     private CANcoderConfiguration cancoderConfig() {

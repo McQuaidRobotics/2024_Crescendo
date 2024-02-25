@@ -226,15 +226,15 @@ public final class ConstValues {
             public static final double kP = 5.5;
             public static final double kD = 0.2;
 
-            public static final double DEADBAND = 1.0 * Conv.DEGREES_TO_RADIANS;
+            public static final double DEADBAND = 0.7 * Conv.DEGREES_TO_RADIANS;
             public static final double CONSTRAINT_SCALAR = 0.7;
         }
 
-        public static final boolean ORIENT_TELEOP_FOR_SIM = true;
+        public static final boolean ORIENT_TELEOP_FOR_SIM = false;
 
         public static final LerpTable TELEOP_TRANSLATION_AXIS_CURVE = new LerpTable(
                 new LerpTableEntry(0.0, 0.0),
-                new LerpTableEntry(0.1, 0.0), // deadzone
+                new LerpTableEntry(0.15, 0.0), // deadzone
                 new LerpTableEntry(0.7, 0.4),
                 new LerpTableEntry(1.0, 1.0));
 

@@ -57,6 +57,7 @@ public class TeleopSwerveBase extends Command {
         this.rawRotationYSup = controller.rightStickY();
     }
 
+    @SuppressWarnings("unused")
     private double invert() {
         if (RobotBase.isSimulation() && kSwerve.ORIENT_TELEOP_FOR_SIM) {
             return 1;

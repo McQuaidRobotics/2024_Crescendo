@@ -111,6 +111,7 @@ public class Robot extends UnitTestableRobot {
     public void driverStationConnected() {
     }
 
+    @SuppressWarnings("unused")
     private void setupAkit() {
         if (GlobalState.isUnitTest()) {
             return;
