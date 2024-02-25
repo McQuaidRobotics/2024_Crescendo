@@ -135,12 +135,21 @@ public class Rectangle2d {
         );
     }
 
-    public Rectangle2d mirror() {
+    public Rectangle2d flipOverYAxis() {
         return new Rectangle2d(
             new Translation2d(-topLeft.getX(), topLeft.getY()),
             new Translation2d(-topRight.getX(), topRight.getY()),
             new Translation2d(-bottomLeft.getX(), bottomLeft.getY()),
             new Translation2d(-bottomRight.getX(), bottomRight.getY())
+        );
+    }
+
+    public Rectangle2d flipOverXAxis() {
+        return new Rectangle2d(
+            new Translation2d(topLeft.getX(), -topLeft.getY()),
+            new Translation2d(topRight.getX(), -topRight.getY()),
+            new Translation2d(bottomLeft.getX(), -bottomLeft.getY()),
+            new Translation2d(bottomRight.getX(), -bottomRight.getY())
         );
     }
 
