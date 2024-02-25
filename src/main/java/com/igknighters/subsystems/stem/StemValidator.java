@@ -323,11 +323,11 @@ public class StemValidator {
                 currentState.getWristRads(),
                 targetState.getTelescopeMeters()));
 
-        Logger.recordOutput("Stem/Stem Validator/StemTowardsTargetPosition/pivotMovementValidationReason",
+        Logger.recordOutput("Stem/StemValidator/StepTowardsTargetPosition/pivotMovementValidationReason",
                 pivotMovementValidReason.name());
-        Logger.recordOutput("Stem/Stem Validator/StemTowardsTargetPosition/wristMovementValidationReason",
+        Logger.recordOutput("Stem/StemValidator/StepTowardsTargetPosition/wristMovementValidationReason",
                 wristMovementValidReason.name());
-        Logger.recordOutput("Stem/Stem Validator/StemTowardsTargetPosition/telescopeMovementValidationReason",
+        Logger.recordOutput("Stem/StemValidator/StepTowardsTargetPosition/telescopeMovementValidationReason",
                 telescopeMovementValidReason.name());
 
         double midStatePivotRads = pivotMovementValidReason.isValid()
@@ -411,9 +411,9 @@ public class StemValidator {
             }
         }
 
-        Logger.recordOutput("Stem/Stem Validator/StemTowardsTargetPosition/Mid State Stem Position", StemPosition
+        Logger.recordOutput("Stem/StemValidator/StepTowardsTargetPosition/Mid State Stem Position", StemPosition
                 .fromRadians(midStatePivotRads, midStateWristRads, midStateTelescopeMeters).toString());
-        Logger.recordOutput("Stem/Stem Validator/StemTowardsTargetPosition/Target Stem Position",
+        Logger.recordOutput("Stem/StemValidator/StepTowardsTargetPosition/Target Stem Position",
                 targetState.toString());
 
         return StemPosition.fromRadians(midStatePivotRads, midStateWristRads, midStateTelescopeMeters);

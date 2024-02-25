@@ -24,13 +24,19 @@
           }
         },
         {
-          "type": "sequential",
+          "type": "parallel",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
                   "pathName": "2 piece - 1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake"
                 }
               }
             ]

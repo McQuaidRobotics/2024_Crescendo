@@ -17,6 +17,7 @@ import com.igknighters.util.Tracer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -48,12 +49,12 @@ public class Stem extends SubsystemBase {
             new Trigger(coastSwitch::get)
                     .and(DriverStation::isDisabled)
                     .or(DriverStation::isTestEnabled)
-                    .onTrue(this.runOnce(() -> {
+                    .onTrue(Commands.runOnce(() -> {
                         pivot.setCoast(true);
                         telescope.setCoast(true);
                         wrist.setCoast(true);
                     }).ignoringDisable(true))
-                    .onFalse(this.runOnce(() -> {
+                    .onFalse(Commands.runOnce(() -> {
                         pivot.setCoast(false);
                         telescope.setCoast(false);
                         wrist.setCoast(false);

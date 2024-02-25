@@ -52,7 +52,7 @@ public class AutosCmdRegister {
             "Intake",
             HigherOrderCommands
                 .intakeGamepiece(stem, umbrella)
-                .withTimeout(9999.0)
+                .withTimeout(0.1)
         );
 
         NamedCommands.registerCommand(
@@ -86,6 +86,6 @@ public class AutosCmdRegister {
                 .withName("FeedShooter")
         );
 
-        SpecializedNamedCommands.generateSpecialized();
+        // SpecializedNamedCommands.generateSpecialized();
     }
 }
