@@ -34,14 +34,16 @@ public class HigherOrderCommands {
                         }).andThen(
                                 UmbrellaCommands.intake(umbrella))
                         .until(() -> umbrella.holdingGamepiece()))
-                .andThen(StemCommands.moveTo(stem, StemPosition.STOW));
+                .andThen(StemCommands.moveTo(stem, StemPosition.STOW))
+                .withName("Intake");
     }
 
     public static Command scoreAmp(Swerve swerve, Stem stem, Umbrella umbrella) {
         return Commands.parallel(
                 StemCommands.moveTo(stem, StemPosition.AMP),
                 SwerveCommands.driveToAmp(swerve),
-                UmbrellaCommands.spinupShooter(umbrella, 1500));
+                UmbrellaCommands.spinupShooter(umbrella, 1500)
+            ).withName("ScoreAmp");
     }
 
     public static Command aim(
@@ -51,6 +53,7 @@ public class HigherOrderCommands {
         return Commands.parallel(
                 new TeleopSwerveTargetSpeaker(swerve, controller)
                         .withSpeedMultiplier(0.5),
-                StemCommands.aimAtSpeaker(stem, false));
+                StemCommands.aimAtSpeaker(stem, false)
+            ).withName("Aim");
     }
 }
