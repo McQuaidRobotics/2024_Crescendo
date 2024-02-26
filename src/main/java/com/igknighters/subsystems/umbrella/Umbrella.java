@@ -1,10 +1,7 @@
 package com.igknighters.subsystems.umbrella;
 
-import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
-
 import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
-import com.igknighters.subsystems.stem.StemSolvers;
 import com.igknighters.subsystems.umbrella.intake.*;
 import com.igknighters.subsystems.umbrella.shooter.*;
 import com.igknighters.util.CANBusLogging;
@@ -12,20 +9,21 @@ import com.igknighters.util.Tracer;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Umbrella extends SubsystemBase {
 
+    public static enum ShooterSpinupReason {
+        None,
+        Idle,
+        AutoAimSpeaker,
+        ManualAimSpeaker,
+        Amp
+    }
+
     private final Intake intake;
     private final Shooter shooter;
-
-    double stemLength = 0.66;
-    double wristAngle = 0.97738438;
-    double noteInitialVelocity = 33.528;
-
-    private LoggedDashboardNumber speakerDistHorizontal = new LoggedDashboardNumber("speakerDistHorizontal", 0.0);
-    private LoggedDashboardNumber speakerDistVertical = new LoggedDashboardNumber("speakerDistVertical", 0.0);
+    private ShooterSpinupReason spinupReason = ShooterSpinupReason.None;
 
     public Umbrella() {
         if (RobotBase.isSimulation()) {
@@ -45,19 +43,6 @@ public class Umbrella extends SubsystemBase {
 
         Tracer.traceFunc("IntakePeriodic", intake::periodic);
         Tracer.traceFunc("ShooterPeriodic", shooter::periodic);
-
-        speakerDistHorizontal.get();
-        Tracer.traceFunc("Aiming Math", () -> {
-            double stemRads = StemSolvers.linearSolvePivotTheta(
-                stemLength,
-                wristAngle,
-                speakerDistHorizontal.get(),
-                speakerDistVertical.get()
-            );
-
-            SmartDashboard.putNumber("Stem Rads", stemRads);
-            SmartDashboard.putNumber("Stem Deg", Math.toDegrees(stemRads));
-        });
 
         Tracer.endTrace();
     }
@@ -167,5 +152,15 @@ public class Umbrella extends SubsystemBase {
     public void stopAll() {
         intake.setVoltageOut(0.0);
         shooter.setSpeed(0.0);
+    }
+
+    public void pushSpinupReason(ShooterSpinupReason reason) {
+        spinupReason = reason;
+    }
+
+    public ShooterSpinupReason popSpinupReason() {
+        var reason = spinupReason;
+        spinupReason = ShooterSpinupReason.None;
+        return reason;
     }
 }

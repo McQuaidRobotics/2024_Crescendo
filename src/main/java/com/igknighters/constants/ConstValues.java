@@ -105,7 +105,7 @@ public final class ConstValues {
         public static final double AMBIGUITY_CUTOFF = 0.15;
 
         public static final double MAX_Z_DELTA = 0.2;
-        public static final double MAX_ANGLE_DELTA = 0.5;
+        public static final double MAX_ANGLE_DELTA = 5.0 * Conv.DEGREES_TO_RADIANS;
 
         private static enum CameraConfigs {
             CRASH(
@@ -114,21 +114,25 @@ public final class ConstValues {
                                     "photon_module_1",
                                     0,
                                     new Transform3d(
-                                            new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(-8.6),
-                                                    Units.inchesToMeters(-8.0)),
+                                            new Translation3d(
+                                                    -11.3 * Conv.INCHES_TO_METERS,
+                                                    -8.6 * Conv.INCHES_TO_METERS,
+                                                    8.0 * Conv.INCHES_TO_METERS),
                                             new Rotation3d(
                                                     0.0,
-                                                    Units.degreesToRadians(-20.0),
+                                                    -20.0  * Conv.DEGREES_TO_RADIANS,
                                                     Math.PI))),
                             Camera.createConfig(
                                     "photon__module_2",
                                     1,
                                     new Transform3d(
-                                            new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(8.6),
-                                                    Units.inchesToMeters(-8.0)),
+                                            new Translation3d(
+                                                    -11.3 * Conv.INCHES_TO_METERS,
+                                                    8.6 * Conv.INCHES_TO_METERS,
+                                                    8.0 * Conv.INCHES_TO_METERS),
                                             new Rotation3d(
                                                     0.0,
-                                                    Units.degreesToRadians(-20.0),
+                                                    -20.0  * Conv.DEGREES_TO_RADIANS,
                                                     Math.PI)))
                     }),
             BURN(new CameraConfig[] {});
