@@ -68,8 +68,8 @@ public class UmbrellaCommands {
                     umbrella.spinupShooter(umbrella.getShooterTargetSpeed());
                     umbrella.runIntakeAt(-1.0, true);
                 })
-                // .withTimeout(0.3)
-                .until(umbrella::notHoldingGamepiece)
+                .withTimeout(0.5)
+                // .until(umbrella::notHoldingGamepiece)
                 .unless(() -> umbrella.getShooterSpeed() < 30.0)
                 .finallyDo(umbrella::stopAll)
                 .withName("Shoot");

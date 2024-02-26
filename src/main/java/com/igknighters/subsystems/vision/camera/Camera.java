@@ -182,21 +182,23 @@ public interface Camera {
         }
 
         public void toLog(LogTable table) {
-            table.put("cameraId", cameraId);
-            table.put("pose", pose);
-            table.put("timestamp", timestamp);
-            table.put("apriltags", apriltags.stream().mapToInt(i -> i).toArray());
-            table.put("ambiguity", ambiguity);
-            table.put("maxDistance", maxDistance);
+            final String p = "VisionPoseEstimate/";
+            table.put(p + "cameraId", cameraId);
+            table.put(p + "pose", pose);
+            table.put(p + "timestamp", timestamp);
+            table.put(p + "apriltags", apriltags.stream().mapToInt(i -> i).toArray());
+            table.put(p + "ambiguity", ambiguity);
+            table.put(p + "maxDistance", maxDistance);
         }
 
         public static VisionPoseEstimate fromLog(LogTable table) {
-            int cameraId = table.get("cameraId", 0);
-            Pose3d pose = table.get("pose", new Pose3d());
-            double timestamp = table.get("timestamp", 0.0);
-            int[] tagsPrim = table.get("apriltags", new int[0]);
-            double ambiguity = table.get("ambiguity", 0.0);
-            double maxDistance = table.get("maxDistance", 0.0);
+            final String p = "VisionPoseEstimate/";
+            int cameraId = table.get(p +"cameraId", 0);
+            Pose3d pose = table.get(p +"pose", new Pose3d());
+            double timestamp = table.get(p +"timestamp", 0.0);
+            int[] tagsPrim = table.get(p +"apriltags", new int[0]);
+            double ambiguity = table.get(p +"ambiguity", 0.0);
+            double maxDistance = table.get(p +"maxDistance", 0.0);
 
             ArrayList<Integer> tags = new ArrayList<>();
             for (int tag : tagsPrim) {
@@ -208,12 +210,12 @@ public interface Camera {
 
         public static VisionPoseEstimate empty(int id) {
             return new VisionPoseEstimate(
-                id,
-                new Pose3d(),
-                0,
-                List.of(),
-                0.0,
-                0.0);
+                    id,
+                    new Pose3d(),
+                    0,
+                    List.of(),
+                    0.0,
+                    0.0);
         }
 
         public Pair<VisionPoseEstimate, VisionEstimateFault> withFault(
@@ -279,6 +281,10 @@ public interface Camera {
                     table.get(p + "infeasiblePitchValue", false),
                     table.get(p + "infeasibleRollValue", false),
                     table.get(p + "isDisabled", false));
+        }
+
+        public static VisionEstimateFault empty() {
+            return new VisionEstimateFault(false, false, false, false, false, false, false, false, false);
         }
 
         public boolean isFaulty() {

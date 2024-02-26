@@ -52,7 +52,7 @@ public class StemPosition {
                 + telescopeMeters + ")";
     }
 
-    public static final StemPosition STOW = new StemPosition(Units.degreesToRadians(42.0),
+    public static final StemPosition STOW = new StemPosition(Units.degreesToRadians(42.5),
             Units.degreesToRadians(112.0), kTelescope.MIN_METERS) {
         @Override
         public boolean isValid() {

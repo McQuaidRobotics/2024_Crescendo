@@ -120,7 +120,7 @@ public class LED {
 
     public enum LedAnimations {
         DISABLED(
-                new LEDAnimDescriptor(190, 250, 255, 0.5, Direction.Forward),
+                new LEDAnimDescriptor(255, 0, 0, 0.5, Direction.Forward),
                 (desc, num, offset) -> {
                     return new ColorFlowAnimation(
                             desc.r, desc.g, desc.b, 0, desc.speed, num, desc.direction, offset);
@@ -443,9 +443,7 @@ public class LED {
             int green = (int) (percent * 255);
             int red = (int) ((1 - percent) * 255);
 
-            candle.animate(
-                    new ColorFlowAnimation(red, green, 0, 255, 1.0, CANDLE_LEDS, Direction.Forward),
-                    0);
+            candle.setLEDs(red, green, 0, 255, 0, CANDLE_LEDS);
         }
     }
 }

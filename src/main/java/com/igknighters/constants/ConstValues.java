@@ -5,6 +5,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.igknighters.ConstantHelper.*;
 import com.igknighters.commands.stem.StemCommands.AimStrategy;
+import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.subsystems.swerve.module.SwerveModuleConstants;
 import com.igknighters.subsystems.swerve.module.SwerveModuleConstants.ModuleId;
 import com.igknighters.subsystems.vision.camera.Camera;
@@ -91,9 +92,13 @@ public final class ConstValues {
     public static final class kControls {
         public static final double SHOOTER_RPM = 3780.0;
         public static final double INTAKE_PERCENT = 0.8;
-        public static final double V2_AIM_AT_PIVOT_RADIANS = 42.5 * Conv.DEGREES_TO_RADIANS;
-        public static final double V1_WRIST_ANGLE = Units.degreesToRadians(74.0);
-        public static final AimStrategy DEFAULT_AIM_STRATEGY = AimStrategy.SIMPLE_V1;
+
+        public static final double STATIONARY_AIM_AT_PIVOT_RADIANS = 42.5 * Conv.DEGREES_TO_RADIANS;
+        public static final double STATIONARY_WRIST_ANGLE = 71.0 * Conv.DEGREES_TO_RADIANS;
+        public static final double MAX_HEIGHT_AIM_AT_PIVOT_RADIANS = 86.0 * Conv.DEGREES_TO_RADIANS;
+        public static final double MAX_HEIGHT_AIM_AT_TELESCOPE_METERS = kTelescope.MAX_METERS;
+
+        public static final AimStrategy DEFAULT_AIM_STRATEGY = AimStrategy.STATIONARY_PIVOT;
     }
 
     public static final class kVision {
@@ -109,8 +114,8 @@ public final class ConstValues {
                                     "photon_module_1",
                                     0,
                                     new Transform3d(
-                                            new Translation3d(Units.inchesToMeters(-11.3), Units.inchesToMeters(-8.6),
-                                                    Units.inchesToMeters(8.0)),
+                                            new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(-8.6),
+                                                    Units.inchesToMeters(-8.0)),
                                             new Rotation3d(
                                                     0.0,
                                                     Units.degreesToRadians(-20.0),
@@ -119,8 +124,8 @@ public final class ConstValues {
                                     "photon__module_2",
                                     1,
                                     new Transform3d(
-                                            new Translation3d(Units.inchesToMeters(-11.3), Units.inchesToMeters(8.6),
-                                                    Units.inchesToMeters(8.0)),
+                                            new Translation3d(Units.inchesToMeters(11.3), Units.inchesToMeters(8.6),
+                                                    Units.inchesToMeters(-8.0)),
                                             new Rotation3d(
                                                     0.0,
                                                     Units.degreesToRadians(-20.0),
@@ -399,8 +404,8 @@ public final class ConstValues {
             public static final double MOTOR_kD = 0.0;
 
             public static final double MAX_VELOCITY = 1300;
-            public static final double MAX_ACCELERATION = 2600;
-            public static final double MAX_JERK = 5200;
+            public static final double MAX_ACCELERATION = 3900;
+            public static final double MAX_JERK = 10400;
 
             public static final double MIN_ANGLE = 7.0 * Conv.DEGREES_TO_RADIANS;
 
@@ -429,8 +434,8 @@ public final class ConstValues {
             public static final double MOTOR_kI = 0.0;
             public static final double MOTOR_kD = 0.0;
 
-            public static final double MAX_VELOCITY = 60;
-            public static final double MAX_ACCELERATION = 200;
+            public static final double MAX_VELOCITY = 80;
+            public static final double MAX_ACCELERATION = 500;
             public static final double MAX_JERK = 0;
 
             public static final double MOTOR_TO_MECHANISM_RATIO = 45.0;

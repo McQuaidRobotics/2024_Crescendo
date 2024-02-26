@@ -51,7 +51,7 @@ public class TestingController extends ControllerParent {
                     StemCommands.holdAt(
                             allss.stem.get(), StemPosition.fromDegrees(
                                     11.0,
-                                    kControls.V1_WRIST_ANGLE,
+                                    kControls.STATIONARY_WRIST_ANGLE,
                                     kTelescope.MIN_METERS + Units.inchesToMeters(4.7))));
         });
 

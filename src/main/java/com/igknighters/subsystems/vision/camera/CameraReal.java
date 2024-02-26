@@ -14,6 +14,7 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import com.igknighters.constants.FieldConstants;
 import com.igknighters.util.BootupLogger;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -128,11 +129,23 @@ public class CameraReal implements Camera {
     @Override
     public void periodic() {
 
-
-        cameraInput.update(realEvaluatePose()
-            .map(est -> est.withFault(lastPoseEst, lastPoseTimer, this::resetLastPoseInfo)),
+        if (lastPoseEst == null) {
+            var eval = realEvaluatePose();
+            if (eval.isPresent()) {
+                lastPoseEst = eval.get();
+                lastPoseTimer = new Timer();
+                lastPoseTimer.start();
+            }
+            cameraInput.update(
+                eval.map(est -> Pair.of(est, VisionEstimateFault.empty())),
+                camera.isConnected()
+            );
+        } else {
+            cameraInput.update(realEvaluatePose()
+                .map(est -> est.withFault(lastPoseEst, lastPoseTimer, this::resetLastPoseInfo)),
             camera.isConnected()
-        );
+            );
+        }
 
         Logger.processInputs("Vision/Camera[" + getName() + "]", cameraInput);
     }
