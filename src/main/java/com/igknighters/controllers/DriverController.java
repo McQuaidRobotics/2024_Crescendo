@@ -7,6 +7,7 @@ import com.igknighters.commands.swerve.SwerveCommands;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.subsystems.stem.StemPosition;
+import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
@@ -35,7 +36,8 @@ public class DriverController extends ControllerParent {
                             ),
                             UmbrellaCommands.spinupShooter(
                                 allss.umbrella.get(),
-                                1000
+                                1000,
+                                ShooterSpinupReason.Amp
                             )
                         ).finallyDo(
                             () -> allss.umbrella.get().stopAll()
@@ -64,7 +66,8 @@ public class DriverController extends ControllerParent {
                             ),
                             UmbrellaCommands.spinupShooter(
                                 allss.umbrella.get(),
-                                3000
+                                kControls.SHOOTER_RPM,
+                                ShooterSpinupReason.ManualAimSpeaker
                             )
                         ).finallyDo(
                             () -> allss.umbrella.get().stopAll()
@@ -104,7 +107,8 @@ public class DriverController extends ControllerParent {
                     ),
                     UmbrellaCommands.spinupShooter(
                         allss.umbrella.get(),
-                        kControls.SHOOTER_RPM
+                        kControls.SHOOTER_RPM,
+                        ShooterSpinupReason.AutoAimSpeaker
                     )
                 ).finallyDo(
                     allss.umbrella.get()::stopAll
@@ -115,43 +119,15 @@ public class DriverController extends ControllerParent {
         this.RT.binding = new Binding((trig, allss) -> {
             trig.onTrue(
                 new ProxyCommand(
-                    () -> {
-                        if (this.LT.trigger.getAsBoolean()) {
-                            return Commands.parallel(
-                                HigherOrderCommands.aim(
-                                    allss.swerve.get(),
-                                    allss.stem.get(),
-                                    this
-                                ),
-                                UmbrellaCommands.shoot(
-                                    allss.umbrella.get()
-                                )
-                            ).until(
-                                () -> !this.LT.trigger.getAsBoolean()
-                            ).finallyDo(
-                                allss.umbrella.get()::stopAll
-                            ).andThen(
-                                StemCommands.moveTo(
-                                    allss.stem.get(),
-                                    StemPosition.STOW
-                                )
-                            ).withName("Highorder Aim and Shoot");
-                        } else {
-                            return UmbrellaCommands.shoot(
-                                allss.umbrella.get()
-                            ).finallyDo(
-                                allss.umbrella.get()::stopAll
-                            ).andThen(
-                                StemCommands.moveTo(
-                                    allss.stem.get(),
-                                    StemPosition.STOW
-                                )
-                            ).withName("Shoot");
-                        }
-                    }
+                    () -> HigherOrderCommands.genericShoot(
+                        allss.swerve.get(),
+                        allss.stem.get(),
+                        allss.umbrella.get(),
+                        this
+                    )
                 ).withName("Proxy Shoot")
             );
-        }, Subsystems.Umbrella, Subsystems.Stem);
+        }, Subsystems.Umbrella, Subsystems.Stem, Subsystems.Swerve);
 
         /// DPAD
         // this.DPR.binding =

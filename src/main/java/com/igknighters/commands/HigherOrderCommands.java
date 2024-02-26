@@ -11,6 +11,7 @@ import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
+import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -42,7 +43,7 @@ public class HigherOrderCommands {
         return Commands.parallel(
                 StemCommands.moveTo(stem, StemPosition.AMP),
                 SwerveCommands.driveToAmp(swerve),
-                UmbrellaCommands.spinupShooter(umbrella, 1500)
+                UmbrellaCommands.spinupShooter(umbrella, 1500, ShooterSpinupReason.Amp)
             ).withName("ScoreAmp");
     }
 
@@ -54,6 +55,61 @@ public class HigherOrderCommands {
                 new TeleopSwerveTargetSpeaker(swerve, controller)
                         .withSpeedMultiplier(0.5),
                 StemCommands.aimAtSpeaker(stem, false)
-            ).withName("Aim");
+        ).withName("Aim");
+    }
+
+    public static Command genericShoot(
+            Swerve swerve,
+            Stem stem,
+            Umbrella umbrella,
+            ControllerParent controller) {
+        Command cmd;
+        if (umbrella.popSpinupReason().equals(ShooterSpinupReason.Amp)) {
+            cmd = Commands.sequence(
+                umbrella.run(
+                    () -> {
+                        umbrella.spinupShooter(umbrella.getShooterTargetSpeed());
+                        umbrella.runIntakeAt(-1.0, true);
+                    }
+                ).withTimeout(0.9),
+                Commands.parallel(
+                    StemCommands.moveTo(
+                        stem,
+                        StemPosition.fromRadians(
+                            StemPosition.AMP.pivotRads - Units.degreesToRadians(4.0),
+                            StemPosition.AMP.wristRads,
+                            StemPosition.AMP.telescopeMeters + Units.inchesToMeters(2.0)
+                        )
+                    ),
+                    UmbrellaCommands.spinupShooter(
+                        umbrella,
+                        1000,
+                        ShooterSpinupReason.Amp
+                    )
+                )
+            );
+        } else if (umbrella.popSpinupReason().equals(ShooterSpinupReason.AutoAimSpeaker)) {
+            cmd = Commands.parallel(
+                HigherOrderCommands.aim(
+                    swerve,
+                    stem,
+                    controller
+                ),
+                UmbrellaCommands.shoot(
+                    umbrella
+                )
+            ).until(() -> controller.leftTrigger(true).getAsDouble() < 0.5);
+        } else {
+            cmd = UmbrellaCommands.shoot(umbrella);
+        }
+
+        return cmd.finallyDo(
+            umbrella::stopAll
+        ).andThen(
+            StemCommands.moveTo(
+                stem,
+                StemPosition.STOW
+            )
+        ).withName("Shoot");
     }
 }

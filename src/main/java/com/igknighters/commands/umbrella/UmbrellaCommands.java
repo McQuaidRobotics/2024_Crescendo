@@ -1,7 +1,9 @@
 package com.igknighters.commands.umbrella;
 
+
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.umbrella.Umbrella;
+import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -25,9 +27,11 @@ public class UmbrellaCommands {
      * @param rpm      The target speed
      * @return A command to be scheduled
      */
-    public static Command spinupShooter(Umbrella umbrella, double rpm) {
-        return umbrella.runOnce(() -> umbrella.spinupShooterToRPM(rpm))
-            .withName("Spinup Shooter");
+    public static Command spinupShooter(Umbrella umbrella, double rpm, ShooterSpinupReason reason) {
+        return umbrella.runOnce(() -> {
+            umbrella.spinupShooterToRPM(rpm);
+            umbrella.pushSpinupReason(reason);
+        }).withName("Spinup Shooter");
     }
 
     /**
@@ -68,7 +72,7 @@ public class UmbrellaCommands {
                     umbrella.spinupShooter(umbrella.getShooterTargetSpeed());
                     umbrella.runIntakeAt(-1.0, true);
                 })
-                .withTimeout(0.5)
+                .withTimeout(0.75)
                 // .until(umbrella::notHoldingGamepiece)
                 .unless(() -> umbrella.getShooterSpeed() < 30.0)
                 .finallyDo(umbrella::stopAll)
