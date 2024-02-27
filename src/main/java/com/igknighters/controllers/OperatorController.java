@@ -39,7 +39,14 @@ public class OperatorController extends ControllerParent {
         // this.RS.binding =
 
         /// TRIGGERS
-        // this.LT.binding = 
+        this.LT.binding = new Binding((trig, allss) -> {
+            trig.and(this.RT.trigger).whileTrue(
+                    StemCommands.LimitedManualControl(
+                            allss.stem.get(),
+                            this.leftStickY(),
+                            this.rightStickY(),
+                            0.225));
+        });
 
         // this.RT.binding =
 

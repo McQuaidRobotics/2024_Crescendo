@@ -52,15 +52,6 @@ public class RobotContainer {
             setupAutos(swerve);
         }
 
-        if (allSubsystems.stem.isPresent()) {
-            var stem = allSubsystems.stem.get();
-            stem.setDefaultCommand(StemCommands.LimitedManualControl(
-                stem, 
-                operatorController.leftStickY(), 
-                operatorController.rightStickY(), 
-                0.225).withName("StemDefaultCommand"));
-        }
-
         // if (allSubsystems.umbrella.isPresent()) {
         //     var umbrella = allSubsystems.umbrella.get();
         //     Rectangle2d friendlyArea = new Rectangle2d(
