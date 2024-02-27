@@ -10,7 +10,7 @@ import com.igknighters.util.BootupLogger;
 import edu.wpi.first.hal.SimBoolean;
 import edu.wpi.first.hal.SimDevice;
 import edu.wpi.first.hal.SimDevice.Direction;
-import edu.wpi.first.math.controller.PIDController;
+// import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -20,20 +20,20 @@ import edu.wpi.first.wpilibj.simulation.ElevatorSim;;
 public class TelescopeSim implements Telescope {
     private final TelescopeInputs inputs;
     private final ElevatorSim sim;
-    private final PIDController pidController;
+    // private final PIDController pidController;
     private final SimBoolean fwdLimitSwitch, revLimitSwitch;
 
     public TelescopeSim() {
-        pidController = new PIDController(
-                kTelescope.MOTOR_kP,
-                kTelescope.MOTOR_kI,
-                kTelescope.MOTOR_kD);
+        // pidController = new PIDController(
+        //         kTelescope.MOTOR_kP,
+        //         kTelescope.MOTOR_kI,
+        //         kTelescope.MOTOR_kD);
 
         sim = new ElevatorSim(
                 DCMotor.getFalcon500(1),
                 kTelescope.MOTOR_TO_MECHANISM_RATIO,
                 10.0,
-                0.0,
+                0.1,
                 kTelescope.MIN_METERS,
                 kTelescope.MAX_METERS,
                 false,
@@ -79,11 +79,12 @@ public class TelescopeSim implements Telescope {
     @Override
     public void setTelescopeMeters(double meters) {
         inputs.targetMeters = meters; // set target meters to what we want
-        double telescopeVoltageFeedback = pidController.calculate(inputs.meters, meters); // makes a voltage feedback
-                                                                                          // with the new controller
-                                                                                          // output
-        sim.setInputVoltage(telescopeVoltageFeedback); // sets voltage to the feedback
-        inputs.volts = telescopeVoltageFeedback;
+        // double telescopeVoltageFeedback = pidController.calculate(inputs.meters, meters); // makes a voltage feedback
+        //                                                                                   // with the new controller
+        //                                                                                   // output
+        // sim.setInputVoltage(telescopeVoltageFeedback); // sets voltage to the feedback
+        // inputs.volts = telescopeVoltageFeedback;
+        sim.setState(meters, 0.0);
     }
 
     private void setSimStateMeters(double meters) {
@@ -105,6 +106,11 @@ public class TelescopeSim implements Telescope {
     @Override
     public boolean isRevLimitSwitchHit() {
         return revLimitSwitch.get();
+    }
+
+    @Override
+    public boolean hasHomed() {
+        return true;
     }
 
     @Override

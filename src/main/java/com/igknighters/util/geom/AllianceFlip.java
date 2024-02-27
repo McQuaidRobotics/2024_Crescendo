@@ -1,4 +1,4 @@
-package com.igknighters.util;
+package com.igknighters.util.geom;
 
 import com.igknighters.constants.FieldConstants;
 

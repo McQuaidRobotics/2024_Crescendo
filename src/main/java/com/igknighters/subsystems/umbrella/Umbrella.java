@@ -2,10 +2,12 @@ package com.igknighters.subsystems.umbrella;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
+import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.stem.StemSolvers;
 import com.igknighters.subsystems.umbrella.intake.*;
 import com.igknighters.subsystems.umbrella.shooter.*;
+import com.igknighters.util.CANBusLogging;
 import com.igknighters.util.Tracer;
 
 import edu.wpi.first.math.util.Units;
@@ -33,6 +35,8 @@ public class Umbrella extends SubsystemBase {
             intake = new IntakeReal();
             shooter = new ShooterReal();
         }
+
+        CANBusLogging.logBus(kUmbrella.CANBUS);
     }
 
     @Override

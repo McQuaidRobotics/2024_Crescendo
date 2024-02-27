@@ -20,6 +20,7 @@ public class StemCommands {
         private final double tolerance;
 
         private MoveToCommand(Stem stem, StemPosition pose, double tolerance) {
+            addRequirements(stem);
             this.stem = stem;
             this.pose = pose;
             this.tolerance = tolerance;
@@ -64,6 +65,7 @@ public class StemCommands {
      * @return A command to be scheduled
      */
     public static Command moveTo(Stem stem, StemPosition pose, double toleranceMult) {
+
         return new MoveToCommand(stem, pose, toleranceMult)
             .withName("Move Stem(" + pose + ")");
     }

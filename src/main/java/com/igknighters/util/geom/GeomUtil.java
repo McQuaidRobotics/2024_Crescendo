@@ -1,4 +1,4 @@
-package com.igknighters.util;
+package com.igknighters.util.geom;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;

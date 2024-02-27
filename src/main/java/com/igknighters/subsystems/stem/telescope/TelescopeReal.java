@@ -4,30 +4,35 @@ import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.ForwardLimitTypeValue;
 import com.ctre.phoenix6.signals.ForwardLimitValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.ReverseLimitTypeValue;
 import com.ctre.phoenix6.signals.ReverseLimitValue;
+import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.HardwareIndex.StemHW;
 import com.igknighters.util.FaultManager;
-import com.igknighters.util.SafeTalonFXConfiguration;
 
 
 public class TelescopeReal implements Telescope {
     private final TalonFX motor;
 
-    private final StatusSignal <Double> motorVolts, motorTemp, motorAmps, motorVelo, motorRots;
+    private final StatusSignal<Double> motorVolts, motorTemp, motorAmps, motorVelo, motorRots;
     private final StatusSignal<ForwardLimitValue> forwardLimitSwitch;
     private final StatusSignal<ReverseLimitValue> reverseLimitSwitch;
 
     private final TelescopeInputs inputs;
 
+    private boolean hasHomed = false, motorAutoseed = true;
+
     public TelescopeReal(){
-        motor = new TalonFX(kTelescope.MOTOR_ID);
+        motor = new TalonFX(kTelescope.MOTOR_ID, kStem.CANBUS);
         motor.getConfigurator().apply(motorConfig());
 
         motorRots = motor.getRotorPosition();
@@ -51,26 +56,36 @@ public class TelescopeReal implements Telescope {
     }
 
     private TalonFXConfiguration motorConfig() {
-        TalonFXConfiguration telescopeMotorCfg = new SafeTalonFXConfiguration();
-        telescopeMotorCfg.Slot0.kP = kTelescope.MOTOR_kP;
-        telescopeMotorCfg.Slot0.kI = kTelescope.MOTOR_kI;
-        telescopeMotorCfg.Slot0.kD = kTelescope.MOTOR_kD;
+        TalonFXConfiguration cfg = new TalonFXConfiguration();
+        cfg.Slot0.kP = kTelescope.MOTOR_kP;
+        cfg.Slot0.kI = kTelescope.MOTOR_kI;
+        cfg.Slot0.kD = kTelescope.MOTOR_kD;
 
-        telescopeMotorCfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        telescopeMotorCfg.MotorOutput.Inverted = kTelescope.INVERTED
+        cfg.MotionMagic.MotionMagicCruiseVelocity = kTelescope.MAX_VELOCITY;
+        cfg.MotionMagic.MotionMagicAcceleration = kTelescope.MAX_ACCELERATION;
+        cfg.MotionMagic.MotionMagicJerk = kTelescope.MAX_JERK;
+
+        cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        cfg.MotorOutput.Inverted = kTelescope.INVERTED
             ? InvertedValue.Clockwise_Positive
             : InvertedValue.CounterClockwise_Positive;
 
-        telescopeMotorCfg.HardwareLimitSwitch.ReverseLimitEnable = true;
-        telescopeMotorCfg.HardwareLimitSwitch.ForwardLimitEnable = true;
+        cfg.HardwareLimitSwitch.ReverseLimitEnable = true;
+        cfg.HardwareLimitSwitch.ForwardLimitEnable = true;
 
-        telescopeMotorCfg.HardwareLimitSwitch.ForwardLimitAutosetPositionEnable = true;
-        telescopeMotorCfg.HardwareLimitSwitch.ForwardLimitAutosetPositionValue = mechMetersToMotorRots(kTelescope.MIN_METERS);
+        cfg.HardwareLimitSwitch.ForwardLimitAutosetPositionEnable = true;
+        cfg.HardwareLimitSwitch.ForwardLimitAutosetPositionValue = mechMetersToMotorRots(kTelescope.MAX_METERS);
 
-        telescopeMotorCfg.HardwareLimitSwitch.ReverseLimitAutosetPositionEnable = true;
-        telescopeMotorCfg.HardwareLimitSwitch.ReverseLimitAutosetPositionValue = mechMetersToMotorRots(kTelescope.MAX_METERS);
+        cfg.HardwareLimitSwitch.ForwardLimitType = ForwardLimitTypeValue.NormallyClosed;
 
-        return telescopeMotorCfg;
+        cfg.HardwareLimitSwitch.ReverseLimitAutosetPositionEnable = true;
+        cfg.HardwareLimitSwitch.ReverseLimitAutosetPositionValue = mechMetersToMotorRots(kTelescope.MIN_METERS);
+
+        cfg.HardwareLimitSwitch.ReverseLimitType = ReverseLimitTypeValue.NormallyClosed;
+
+        cfg.TorqueCurrent.TorqueNeutralDeadband = 4.0;
+
+        return cfg;
     }
 
     private double mechMetersToMotorRots(Double mechMeters){
@@ -94,7 +109,7 @@ public class TelescopeReal implements Telescope {
     @Override
     public void setTelescopeMeters(double meters) {
         inputs.targetMeters = meters;
-        var posControlRequest = new MotionMagicVoltage(mechMetersToMotorRots(meters));
+        var posControlRequest = new MotionMagicTorqueCurrentFOC(mechMetersToMotorRots(meters));
         this.motor.setControl(posControlRequest);
     }
 
@@ -120,6 +135,20 @@ public class TelescopeReal implements Telescope {
     }
 
     @Override
+    public boolean hasHomed() {
+        return hasHomed;
+    }
+
+    @Override
+    public void setCoast(boolean shouldBeCoasting) {
+        this.motor.setNeutralMode(
+            shouldBeCoasting
+            ? NeutralModeValue.Coast
+            : NeutralModeValue.Brake
+        );
+    }
+
+    @Override
     public void periodic(){
         FaultManager.captureFault(
             StemHW.TelescopeMotor,
@@ -136,6 +165,20 @@ public class TelescopeReal implements Telescope {
         inputs.amps =  motorAmps.getValue();
         inputs.isLimitFwdSwitchHit = forwardLimitSwitch.getValue() == ForwardLimitValue.Open;
         inputs.isLimitRevSwitchHit = reverseLimitSwitch.getValue() == ReverseLimitValue.Open;
+
+        if (!hasHomed && (inputs.isLimitFwdSwitchHit || inputs.isLimitRevSwitchHit)){
+            hasHomed = true;
+        }
+
+        if (hasHomed && motorAutoseed) {
+            HardwareLimitSwitchConfigs cfg = new HardwareLimitSwitchConfigs();
+            var configurator = motor.getConfigurator();
+            configurator.refresh(cfg);
+            cfg.ForwardLimitAutosetPositionEnable = false;
+            cfg.ReverseLimitAutosetPositionEnable = false;
+            configurator.apply(cfg);
+            motorAutoseed = false;
+        }
 
         Logger.processInputs("Stem/Telescope", inputs);
     }

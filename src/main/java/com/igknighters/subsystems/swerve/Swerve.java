@@ -2,6 +2,7 @@ package com.igknighters.subsystems.swerve;
 
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -57,9 +58,8 @@ public class Swerve extends SubsystemBase {
             RotationControllerConstants.kI,
             RotationControllerConstants.kD,
             new Constraints(
-                RotationControllerConstants.CONSTRAINT_SCALAR * kSwerve.MAX_ANGULAR_VELOCITY,
-                RotationControllerConstants.CONSTRAINT_SCALAR * kSwerve.MAX_ANGULAR_ACCELERATION
-            ));
+                    RotationControllerConstants.CONSTRAINT_SCALAR * kSwerve.MAX_ANGULAR_VELOCITY,
+                    RotationControllerConstants.CONSTRAINT_SCALAR * kSwerve.MAX_ANGULAR_ACCELERATION));
 
     public Swerve() {
 
@@ -80,7 +80,7 @@ public class Swerve extends SubsystemBase {
             };
             gyro = new GyroSim(this::getChassisSpeed);
 
-            rotController.enableContinuousInput(-Math.PI, Math.PI);
+            // rotController.enableContinuousInput(-Math.PI, Math.PI);
         }
 
         GlobalState.setLocalizer(
@@ -187,19 +187,20 @@ public class Swerve extends SubsystemBase {
 
     public double rotVeloForRotation(Rotation2d wantedAngle) {
         var wantedAngleRads = wantedAngle.getRadians();
-        var currentAngleRads = getYawRads();
+        var currentAngleRads = MathUtil.angleModulus(getYawRads());
 
-        if (Math.abs(wantedAngleRads - currentAngleRads) > RotationControllerConstants.DEADBAND) {
-            return 0.0;
-        }
+        Logger.recordOutput("/Swerve/CurrentAngle", currentAngleRads);
 
         return rotController.calculate(
-                currentAngleRads,
-                wantedAngleRads);
+            currentAngleRads,
+            wantedAngleRads
+        );
     }
 
     public void resetRotController() {
-        rotController.reset(getYawRads(), getChassisSpeed().omegaRadiansPerSecond);
+        rotController.reset(MathUtil.angleModulus(getYawRads()), getChassisSpeed().omegaRadiansPerSecond);
+        rotController.enableContinuousInput(-Math.PI, Math.PI);
+        rotController.setTolerance(RotationControllerConstants.DEADBAND);
     }
 
     public Rotation2d rotationRelativeToPose(Rotation2d wantedAngleOffet, Translation2d pose) {

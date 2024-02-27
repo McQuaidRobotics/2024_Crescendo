@@ -19,7 +19,7 @@ public interface Telescope extends Component {
             this.meters = startingMeters;
             this.targetMeters = startingMeters;
         }
- 
+
         @Override
         public void toLog(LogTable table) {
             table.put("meters", meters);
@@ -31,7 +31,6 @@ public interface Telescope extends Component {
             table.put("isLimitFwdSwitchHit", isLimitFwdSwitchHit);
             table.put("isLimitRevSwitchHit", isLimitRevSwitchHit);
             table.put("TelescopeHomed", isHomed);
-
 
             // A subtable, thats only written to when in debug mode and never read from,
             // that provides some more human readable values
@@ -55,14 +54,13 @@ public interface Telescope extends Component {
         }
     }
 
-
     /**
      * @param meters The distance to set the mechanism to
      * 
      * @apiNote This is distance from pivot axel to the wrist axel,
-     * this means 0.0 is not fully retraccted but rather an unreachable
-     * position. Check {@link ConstValues.kStem.kTelescope.MIN_METERS} and
-     * {@link ConstValues.kStem.kTelescope.MAX_METERS} for the min and max.
+     *          this means 0.0 is not fully retraccted but rather an unreachable
+     *          position. Check {@link ConstValues.kStem.kTelescope.MIN_METERS} and
+     *          {@link ConstValues.kStem.kTelescope.MAX_METERS} for the min and max.
      */
     public void setTelescopeMeters(double meters);
 
@@ -71,33 +69,38 @@ public interface Telescope extends Component {
      */
     public double getTelescopeMeters();
 
-
     public boolean isFwdLimitSwitchHit();
 
     public boolean isRevLimitSwitchHit();
 
+    public boolean hasHomed();
+
     /**
      * Move the telescope to the target and returns if it has reached the target.
      * Meant to be used in a kind of polling loop to wait the mechanism to reach
      * the target.
-     * @param meters The target distance to move to
-     * @param tolerancMult The multiplier to apply to the tolerance, higher mult means more tolerance
+     * 
+     * @param meters       The target distance to move to
+     * @param tolerancMult The multiplier to apply to the tolerance, higher mult
+     *                     means more tolerance
      * @return If the mechanism has reached the target
      */
     default public boolean target(double meters, double tolerancMult) {
         this.setTelescopeMeters(meters);
-        return Math.abs(this.getTelescopeMeters() - meters) < ConstValues.kStem.kTelescope.TARGET_TOLERANCE * tolerancMult;
+        return isAt(meters, tolerancMult);
     }
 
     /**
-     * Move the telescope to the target and returns if it has reached the target.
-     * Meant to be used in a kind of polling loop to wait the mechanism to reach
-     * the target.
-     * @param meters The target distance to move to
-     * @return If the mechanism has reached the target
+     * Returns if the mechanism is within a tolerance of a certain angle.
+     * @param radians The angle to check against
+     * @param toleranceMult The multiplier to apply to the tolerance, higher mult
+     *                    means more tolerance
+     * @return If the mechanism is within the tolerance of the angle
      */
-    default public boolean target(double meters) {
-        return target(meters, 1.0);
+    default public boolean isAt(double radians, double toleranceMult) {
+        return Math.abs(this.getTelescopeMeters() - radians) < ConstValues.kStem.kTelescope.TARGET_TOLERANCE * toleranceMult;
     }
 
+    default public void setCoast(boolean shouldBeCoasting) {
+    }
 }

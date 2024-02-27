@@ -151,6 +151,18 @@ public class LED {
                     desc.r, desc.g, desc.b, 0, desc.speed, num, desc.direction, offset
                 );
             }),
+        WARNING(new LEDAnimDescriptor(252, 169, 15, 0.2, Direction.Forward),
+            (desc, num, offset) -> {
+                return new StrobeAnimation(
+                    desc.r, desc.g, desc.b, 0, desc.speed, num, offset
+                );
+            }),
+        ERROR(new LEDAnimDescriptor(255, 0, 0, 0.2, Direction.Forward),
+            (desc, num, offset) -> {
+                return new StrobeAnimation(
+                    desc.r, desc.g, desc.b, 0, desc.speed, num, offset
+                );
+            }),
         BOOTING(new LEDAnimDescriptor(255, 255, 255, 0.2, Direction.Forward),
             (desc, num, offset) -> {
                 return new StrobeAnimation(

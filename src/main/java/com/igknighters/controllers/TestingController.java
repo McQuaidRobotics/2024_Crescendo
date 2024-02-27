@@ -1,11 +1,18 @@
 package com.igknighters.controllers;
 
 import com.igknighters.constants.ConstValues;
+import com.igknighters.constants.ConstValues.kStem.kPivot;
+import com.igknighters.constants.ConstValues.kStem.kTelescope;
+import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.subsystems.stem.StemPosition;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
 import com.igknighters.SubsystemResources.Subsystems;
+import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 
 @SuppressWarnings("unused")
@@ -19,29 +26,51 @@ public class TestingController extends ControllerParent {
 
         /// FACE BUTTONS
         this.A.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
-            trig.onTrue(Commands.runOnce(() -> {
-                allss.stem.get().setStemPosition(StemPosition.fromDegrees(80.0, 0.0, 0.0));
-            }));
+            trig.onTrue(
+                    StemCommands.holdAt(
+                            allss.stem.get(), StemPosition.fromDegrees(
+                                    70.0,
+                                    80.0,
+                                    0.53)));
         });
 
         this.B.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
-            trig.onTrue(Commands.runOnce(() -> {
-                allss.stem.get().setStemPosition(StemPosition.fromDegrees(20.0, 0.0, 0.0));
-            }));
+            trig.onTrue(
+                    new ProxyCommand(() -> {
+                        return StemCommands.moveTo(allss.stem.get(), StemPosition.fromRadians(
+                                kPivot.MIN_ANGLE + (Math.random() * (kPivot.MAX_ANGLE - kPivot.MIN_ANGLE)),
+                                kWrist.MIN_ANGLE + (Math.random() * (kWrist.MAX_ANGLE - kWrist.MIN_ANGLE)),
+                                kTelescope.MIN_METERS
+                                        + (Math.random() * (kTelescope.MAX_METERS - kTelescope.MIN_METERS))));
+                    }));
         });
 
-        this.X.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
-            trig.onTrue(UmbrellaCommands.stopShooter(allss.umbrella.get()));
+        this.X.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
+            trig.onTrue(
+                    StemCommands.holdAt(
+                            allss.stem.get(), StemPosition.fromDegrees(
+                                    11.0,
+                                    72.0,
+                                    kTelescope.MIN_METERS + Units.inchesToMeters(4.7))));
         });
 
-        this.Y.binding = this.X.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
-            trig.onTrue(UmbrellaCommands.waitUntilSpunUp(allss.umbrella.get(), 3800));
+        this.Y.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
+            trig.onTrue(
+                    StemCommands.moveTo(
+                            allss.stem.get(), StemPosition.fromDegrees(
+                                    41.0,
+                                    108.0,
+                                    kTelescope.MIN_METERS)));
         });
 
         /// BUMPER
-        // this.LB.binding =
+        // this.LB.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
+        //     trig.onTrue(UmbrellaCommands.intake(allss.umbrella.get()));
+        // });
 
-        // this.RB.binding =
+        // this.RB.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
+        //     trig.onTrue(UmbrellaCommands.shoot(allss.umbrella.get()));
+        // });
 
         /// CENTER BUTTONS
         // this.Back.binding =

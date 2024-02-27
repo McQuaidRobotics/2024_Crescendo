@@ -1,5 +1,9 @@
 package com.igknighters.subsystems.stem;
 
+import com.igknighters.constants.ConstValues.kStem.kTelescope;
+
+import edu.wpi.first.math.util.Units;
+
 public class StemPosition {
     public double pivotRads, wristRads, telescopeMeters;
 
@@ -21,4 +25,61 @@ public class StemPosition {
         return new StemPosition(Math.toRadians(pivotPosRot * 360.0), Math.toRadians(wristPosRot * 360.0),
                 telescopePosMeters);
     }
+
+    public double getPivotRads() {
+        return pivotRads;
+    }
+
+    public double getWristRads() {
+        return wristRads;
+    }
+
+    public double getTelescopeMeters() {
+        return telescopeMeters;
+    }
+
+    public boolean isValid() {
+        return StemValidator.validatePosition(this).isValid();
+    }
+
+    public boolean isStow() {
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return "StemPosition(" + Units.radiansToDegrees(pivotRads) + ", " + Units.radiansToDegrees(wristRads) + ", "
+                + telescopeMeters + ")";
+    }
+
+    public static StemPosition STOW = new StemPosition(
+            Units.degreesToRadians(35.0),
+            kTelescope.MIN_METERS,
+            Units.degreesToRadians(60.0)) {
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return "Stow";
+        }
+
+        @Override
+        public boolean isStow() {
+            return true;
+        }
+    };
+
+    public static StemPosition INTAKE = new StemPosition(
+            Units.degreesToRadians(7.5),
+            0.493,
+            1.2){
+
+        @Override
+        public String toString() {
+            return "Intake";
+        }
+    };
 }
