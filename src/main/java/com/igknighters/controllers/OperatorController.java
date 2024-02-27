@@ -48,7 +48,7 @@ public class OperatorController extends ControllerParent {
                             0.225));
         });
 
-        // this.RT.binding =
+        // this.RT.binding = DON'T USE!!! OTHER TRIGGERS COMMANDS USES BOTH TRIGGERS!!!
 
         /// DPAD
         // this.DPR.binding =
