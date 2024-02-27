@@ -175,6 +175,21 @@ public class StemCommands {
                     kTelescope.MIN_METERS);
         }
 
+        private StemPosition stationaryPivotSolveGravity(double distance) {
+            double wristRads = StemSolvers.gravitySolveWristTheta(
+                    kTelescope.MIN_METERS,
+                    kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
+                    distance,
+                    FieldConstants.SPEAKER.getZ(),
+                    kUmbrella.NOTE_VELO);
+
+            return StemPosition.fromRadians(
+                    kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
+                    MathUtil.clamp(wristRads + kControls.STATIONARY_AIM_AT_PIVOT_RADIANS, kWrist.MIN_ANGLE,
+                            kWrist.MAX_ANGLE),
+                    kTelescope.MIN_METERS);
+        }
+
         private StemPosition stationaryPivotSolve(double distance) {
             double wristRads = StemSolvers.linearSolveWristTheta(
                     kTelescope.MIN_METERS,
@@ -225,9 +240,9 @@ public class StemCommands {
             if (aimStrategy.equals(AimStrategy.STATIONARY_WRIST)) {
                 hasFinished = stem.setStemPosition(stationaryWristSolve(distance));
             } else if (aimStrategy.equals(AimStrategy.STATIONARY_PIVOT)) {
-                var pose = stationaryPivotSolveWithError(distance);
-                SmartDashboard.putNumber("Aim/Current", Units.radiansToDegrees(pose.getWristRads()));
-                SmartDashboard.putNumber("Aim/Fixed", Units.radiansToDegrees(stationaryPivotSolve(distance).getWristRads()));
+                var pose = stationaryPivotSolve(distance);
+                SmartDashboard.putNumber("Aim/Linear", Units.radiansToDegrees(pose.getWristRads()));
+                SmartDashboard.putNumber("Aim/Gravity", Units.radiansToDegrees(stationaryPivotSolveGravity(distance).getWristRads()));
                 hasFinished = stem.setStemPosition(pose);
             } else if (aimStrategy.equals(AimStrategy.MAX_HEIGHT)) {
                 hasFinished = stem.setStemPosition(maxHeightSolve(distance));
