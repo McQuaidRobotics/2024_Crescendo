@@ -7,12 +7,10 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.ForwardLimitSourceValue;
 import com.ctre.phoenix6.signals.ForwardLimitTypeValue;
 import com.ctre.phoenix6.signals.ForwardLimitValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.signals.ReverseLimitSourceValue;
 import com.ctre.phoenix6.signals.ReverseLimitTypeValue;
 import com.ctre.phoenix6.signals.ReverseLimitValue;
 
@@ -60,8 +58,8 @@ public class PivotReal implements Pivot {
 
         gyro.optimizeBusUtilization();
 
-        leaderMotor = new TalonFX(kPivot.LEFT_MOTOR_ID, kStem.CANBUS);
-        followerMotor = new TalonFX(kPivot.RIGHT_MOTOR_ID, kStem.CANBUS);
+        leaderMotor = new TalonFX(kPivot.RIGHT_MOTOR_ID, kStem.CANBUS);
+        followerMotor = new TalonFX(kPivot.LEFT_MOTOR_ID, kStem.CANBUS);
 
         FaultManager.captureFault(
                 StemHW.LeaderMotor,
@@ -73,7 +71,7 @@ public class PivotReal implements Pivot {
         FaultManager.captureFault(
                 StemHW.FollowerMotor,
                 followerMotor.setControl(
-                        new Follower(kPivot.LEFT_MOTOR_ID, true)));
+                        new Follower(leaderMotor.getDeviceID(), true)));
 
         inputs = new PivotInputs(Units.degreesToRadians(gyroMeasurement.getValue()));
 
@@ -103,9 +101,6 @@ public class PivotReal implements Pivot {
 
         leaderMotor.optimizeBusUtilization();
         followerMotor.optimizeBusUtilization();
-
-        followerMotor.setControl(
-                new Follower(kPivot.LEFT_MOTOR_ID, true));
 
         seedPivot();
 
@@ -137,18 +132,23 @@ public class PivotReal implements Pivot {
         cfg.Voltage.PeakForwardVoltage = kPivot.VOLTAGE_COMP;
         cfg.Voltage.PeakReverseVoltage = -kPivot.VOLTAGE_COMP;
 
-        cfg.HardwareLimitSwitch.ForwardLimitEnable = true;
-        cfg.HardwareLimitSwitch.ReverseLimitEnable = true;
+        if (leader) {
+            cfg.HardwareLimitSwitch.ForwardLimitEnable = true;
+            cfg.HardwareLimitSwitch.ReverseLimitEnable = true;
+        } else {
+            cfg.HardwareLimitSwitch.ForwardLimitEnable = false;
+            cfg.HardwareLimitSwitch.ReverseLimitEnable = false;
+        }
 
         cfg.HardwareLimitSwitch.ForwardLimitType = ForwardLimitTypeValue.NormallyClosed;
         cfg.HardwareLimitSwitch.ReverseLimitType = ReverseLimitTypeValue.NormallyClosed;
 
-        if (leader) {
-            cfg.HardwareLimitSwitch.ForwardLimitSource = ForwardLimitSourceValue.RemoteTalonFX;
-            cfg.HardwareLimitSwitch.ReverseLimitSource = ReverseLimitSourceValue.RemoteTalonFX;
-            cfg.HardwareLimitSwitch.ForwardLimitRemoteSensorID = kPivot.RIGHT_MOTOR_ID;
-            cfg.HardwareLimitSwitch.ReverseLimitRemoteSensorID = kPivot.RIGHT_MOTOR_ID;
-        }
+        // if (leader) {
+        //     cfg.HardwareLimitSwitch.ForwardLimitSource = ForwardLimitSourceValue.RemoteTalonFX;
+        //     cfg.HardwareLimitSwitch.ReverseLimitSource = ReverseLimitSourceValue.RemoteTalonFX;
+        //     cfg.HardwareLimitSwitch.ForwardLimitRemoteSensorID = kPivot.RIGHT_MOTOR_ID;
+        //     cfg.HardwareLimitSwitch.ReverseLimitRemoteSensorID = kPivot.RIGHT_MOTOR_ID;
+        // }
 
         return cfg;
     }
@@ -225,7 +225,7 @@ public class PivotReal implements Pivot {
         inputs.gyroRadians = Units.degreesToRadians(gyroMeasurement.getValue() + 90);
 
         if (Math.abs(inputs.radiansPerSecond) < 0.1
-                && Math.abs(inputs.radians - getPivotRadiansPigeon()) > 0.1) {
+                && Math.abs(inputs.radians - getPivotRadiansPigeon()) > 0.02) {
             seedPivot();
             Logger.recordOutput("Stem/Pivot/SeededPivot", true);
         } else {
