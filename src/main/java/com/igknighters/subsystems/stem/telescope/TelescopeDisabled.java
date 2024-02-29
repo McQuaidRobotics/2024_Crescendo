@@ -6,31 +6,35 @@ import com.igknighters.subsystems.stem.StemPosition;
 import edu.wpi.first.math.MathUtil;
 
 public class TelescopeDisabled implements Telescope {
-    double targetMeters = StemPosition.STARTING.telescopeMeters;
+    double currentMeters = StemPosition.STARTING.telescopeMeters;
     final double slewRate = (0.5 / 50.0) * 0.75;
 
     @Override
     public double getTelescopeMeters() {
-        return targetMeters;
+        return currentMeters;
     }
 
     @Override
     public void setTelescopeMeters(double meters) {
         // var clampedTarget = MathUtil.clamp(meters, kTelescope.MIN_METERS, kTelescope.MAX_METERS);
-        targetMeters = targetMeters + MathUtil.clamp(meters - targetMeters, -slewRate, slewRate);
+        currentMeters = currentMeters + MathUtil.clamp(meters - currentMeters, -slewRate, slewRate);
     }
 
     @Override
-    public void setVoltageOut(double volts) {}
+    public void setVoltageOut(double volts) {
+        double percentOut = volts / 12.0;
+        double metersPerSecond = slewRate * percentOut;
+        currentMeters += metersPerSecond;
+    }
 
     @Override
     public boolean isFwdLimitSwitchHit() {
-        return targetMeters >= kTelescope.MAX_METERS * 0.98;
+        return currentMeters >= kTelescope.MAX_METERS * 0.98;
     }
 
     @Override
     public boolean isRevLimitSwitchHit() {
-        return targetMeters <= kTelescope.MIN_METERS * 0.98;
+        return currentMeters <= kTelescope.MIN_METERS * 0.98;
     }
 
     @Override
