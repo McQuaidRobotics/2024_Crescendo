@@ -1,3 +1,4 @@
+
 package com.igknighters.subsystems.stem;
 
 import org.littletonrobotics.junction.Logger;
@@ -16,6 +17,7 @@ import com.igknighters.util.Tracer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -47,12 +49,12 @@ public class Stem extends SubsystemBase {
             new Trigger(coastSwitch::get)
                     .and(DriverStation::isDisabled)
                     .or(DriverStation::isTestEnabled)
-                    .onTrue(this.runOnce(() -> {
+                    .onTrue(Commands.runOnce(() -> {
                         pivot.setCoast(true);
                         telescope.setCoast(true);
                         wrist.setCoast(true);
                     }).ignoringDisable(true))
-                    .onFalse(this.runOnce(() -> {
+                    .onFalse(Commands.runOnce(() -> {
                         pivot.setCoast(false);
                         telescope.setCoast(false);
                         wrist.setCoast(false);
@@ -76,26 +78,32 @@ public class Stem extends SubsystemBase {
      */
     public boolean setStemPosition(StemPosition position, double toleranceMult) {
         ValidationResponse validity = StemValidator.validatePosition(position);
-        if (!validity.isValid()) {
-            DriverStation.reportError(
-                    "Invalid stem position(" + validity.name() + "): " + position.toString(),
-                    true);
-            // LED
-            return true;
-        }
 
         visualizer.updateSetpoint(position);
+
+        if (!validity.isValid()) {
+            DriverStation.reportError(
+                    "Invalid TARGET stem position(" + validity.name() + "): " + position.toString(),
+                    true);
+        }
+
         if (!telescope.hasHomed()) {
             if (!position.isStow()) {
                 DriverStation.reportWarning("Stem Telescope has not been homed, run stow to home", false);
-                LED.getInstance().sendAnimation(
+                LED.sendAnimation(
                         LedAnimations.WARNING).withDuration(1.0);
                 return false;
             }
-            return pivot.target(position.pivotRads, 1.0)
-                    && wrist.target(position.wristRads, 1.0)
-                    && telescope.target(position.telescopeMeters, 1.0);
+            boolean wristAndPivot = pivot.target(position.pivotRads, 1.0)
+                    && wrist.target(position.wristRads, 1.0);
+
+            if (wristAndPivot) {
+                telescope.setVoltageOut(-4.0);
+            }
+
+            return telescope.hasHomed();
         }
+
         StemPosition validated = StemValidator.stepTowardsTargetPosition(getStemPosition(), position, 1.0);
         pivot.setPivotRadians(validated.pivotRads);
         telescope.setTelescopeMeters(validated.telescopeMeters);
@@ -164,6 +172,8 @@ public class Stem extends SubsystemBase {
         Tracer.traceFunc("PivotPeriodic", pivot::periodic);
         Tracer.traceFunc("TelescopePeriodic", telescope::periodic);
         Tracer.traceFunc("WristPeriodic", wrist::periodic);
+
+        Logger.recordOutput("Stem/StemValidator/CurrentStateValidation", StemValidator.validatePosition(getStemPosition()).toString());
 
         visualizer.updateCurrent(getStemPosition());
 

@@ -15,8 +15,7 @@ import edu.wpi.first.wpilibj.RobotController;
 public class RobotSetup {
 
     public enum RobotID {
-        CRASH(Subsystems.list(Subsystems.Stem, Subsystems.Umbrella,
-                Subsystems.Swerve, Subsystems.Vision),
+        CRASH(Subsystems.all(),
                 RobotConstID.CRASH),
 
         BURN(Subsystems.list(Subsystems.Swerve),
@@ -45,7 +44,9 @@ public class RobotSetup {
             this.constID = constants;
         }
     }
-
+    /**
+     * If there are duplicate serial entries the tests will fail!!!!
+     */
     private static final Map<String, RobotID> serialToID = Map.of(
             "0306adcf", RobotID.TestBoard,
             "0306adf3", RobotID.TestBoard,

@@ -1,6 +1,8 @@
 package com.igknighters.controllers;
 
 import com.igknighters.constants.ConstValues;
+import com.igknighters.constants.FieldConstants;
+import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
@@ -11,8 +13,13 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
+import com.igknighters.GlobalState;
+import com.igknighters.LED;
+import com.igknighters.LED.LedAnimations;
 import com.igknighters.SubsystemResources.Subsystems;
+import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.commands.stem.StemCommands;
+import com.igknighters.commands.stem.StemCommands.AimStrategy;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 
 @SuppressWarnings("unused")
@@ -25,7 +32,7 @@ public class TestingController extends ControllerParent {
         // disregard null safety as it is checked on assignment
 
         /// FACE BUTTONS
-        this.A.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
+        this.A.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
             trig.onTrue(
                     StemCommands.holdAt(
                             allss.stem.get(), StemPosition.fromDegrees(
@@ -34,27 +41,21 @@ public class TestingController extends ControllerParent {
                                     0.53)));
         });
 
-        this.B.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
+        this.B.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
             trig.onTrue(
-                    new ProxyCommand(() -> {
-                        return StemCommands.moveTo(allss.stem.get(), StemPosition.fromRadians(
-                                kPivot.MIN_ANGLE + (Math.random() * (kPivot.MAX_ANGLE - kPivot.MIN_ANGLE)),
-                                kWrist.MIN_ANGLE + (Math.random() * (kWrist.MAX_ANGLE - kWrist.MIN_ANGLE)),
-                                kTelescope.MIN_METERS
-                                        + (Math.random() * (kTelescope.MAX_METERS - kTelescope.MIN_METERS))));
-                    }));
+                    StemCommands.aimAtSpeaker(allss.stem.get(), false));
         });
 
-        this.X.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
+        this.X.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
             trig.onTrue(
                     StemCommands.holdAt(
                             allss.stem.get(), StemPosition.fromDegrees(
                                     11.0,
-                                    72.0,
+                                    kControls.STATIONARY_WRIST_ANGLE,
                                     kTelescope.MIN_METERS + Units.inchesToMeters(4.7))));
         });
 
-        this.Y.binding = new SingleDepBinding(Subsystems.Stem, (trig, allss) -> {
+        this.Y.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
             trig.onTrue(
                     StemCommands.moveTo(
                             allss.stem.get(), StemPosition.fromDegrees(
@@ -64,13 +65,9 @@ public class TestingController extends ControllerParent {
         });
 
         /// BUMPER
-        // this.LB.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
-        //     trig.onTrue(UmbrellaCommands.intake(allss.umbrella.get()));
-        // });
+        // this.LB.binding = 
 
-        // this.RB.binding = new SingleDepBinding(Subsystems.Umbrella, (trig, allss) -> {
-        //     trig.onTrue(UmbrellaCommands.shoot(allss.umbrella.get()));
-        // });
+        // this.RB.binding = 
 
         /// CENTER BUTTONS
         // this.Back.binding =
@@ -83,17 +80,33 @@ public class TestingController extends ControllerParent {
         // this.RS.binding =
 
         /// TRIGGERS
-        // this.LT.binding =
+        // this.LT.binding = new Binding((trig, allss) -> {
+        // trig.whileTrue(
+        // UmbrellaCommands.intake(
+        // allss.umbrella.get()));
+        // }, Subsystems.Umbrella);
 
-        // this.RT.binding =
+        // this.RT.binding = new Binding((trig, allss) -> {
+        // trig.onTrue(
+        // UmbrellaCommands.shoot(
+        // allss.umbrella.get()));
+        // }, Subsystems.Umbrella);
 
         /// DPAD
-        // this.DPR.binding =
+        this.DPR.binding = new Binding((trig, allss) -> {
+            trig.onTrue(Commands.runOnce(() -> LED.sendAnimation(LedAnimations.TELEOP)).ignoringDisable(true));
+        });
 
-        // this.DPD.binding =
+        this.DPD.binding = new Binding((trig, allss) -> {
+            trig.onTrue(Commands.runOnce(() -> LED.sendAnimation(LedAnimations.ERROR)).ignoringDisable(true));
+        });
 
-        // this.DPL.binding =
+        this.DPL.binding = new Binding((trig, allss) -> {
+            trig.onTrue(Commands.runOnce(() -> LED.sendAnimation(LedAnimations.SHOOTING)).ignoringDisable(true));
+        });
 
-        // this.DPU.binding =
+        this.DPU.binding = new Binding((trig, allss) -> {
+            trig.onTrue(Commands.runOnce(() -> LED.sendAnimation(LedAnimations.BOOTING)).ignoringDisable(true));
+        });
     }
 }

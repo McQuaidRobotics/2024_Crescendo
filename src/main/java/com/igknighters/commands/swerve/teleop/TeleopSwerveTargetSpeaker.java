@@ -7,8 +7,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -20,13 +18,16 @@ import com.igknighters.controllers.ControllerParent;
 
 public class TeleopSwerveTargetSpeaker extends TeleopSwerveBase {
 
-    private final Translation2d targetTranslation;
+    private double speedMult = 0.4;
 
     public TeleopSwerveTargetSpeaker(Swerve swerve, ControllerParent controller) {
         super(swerve, controller);
-        boolean blueAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue).equals(Alliance.Blue);
-        var speaker = FieldConstants.Speaker.CENTER_SPEAKER_OPENING.getTranslation();
-        targetTranslation = blueAlliance ? speaker : AllianceFlip.flipTranslation(speaker);
+        addRequirements(swerve);
+    }
+
+    public TeleopSwerveTargetSpeaker withSpeedMultiplier(double speedMult) {
+        this.speedMult = speedMult;
+        return this;
     }
 
     @Override
@@ -36,13 +37,16 @@ public class TeleopSwerveTargetSpeaker extends TeleopSwerveBase {
 
     @Override
     public void execute() {
+        Translation2d speaker = FieldConstants.SPEAKER.toTranslation2d();
+        Translation2d targetTranslation = AllianceFlip.isBlue() ? speaker : AllianceFlip.flipTranslation(speaker);
+
         GlobalState.modifyField2d(field -> {
             field.getObject("target").setPose(new Pose2d(targetTranslation, new Rotation2d()));
         });
 
         Translation2d vt = orientForUser(new Translation2d(
-                getTranslationX() * kSwerve.MAX_DRIVE_VELOCITY * 0.4,
-                getTranslationY() * kSwerve.MAX_DRIVE_VELOCITY * 0.4));
+                getTranslationX() * kSwerve.MAX_DRIVE_VELOCITY * speedMult,
+                getTranslationY() * kSwerve.MAX_DRIVE_VELOCITY * speedMult));
 
         ChassisSpeeds desiredChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 vt.getX(),

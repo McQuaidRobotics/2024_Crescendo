@@ -2,7 +2,7 @@ package com.igknighters.subsystems.stem;
 
 import java.util.HashMap;
 
-import com.igknighters.constants.ConstValues.kRobotGeometry;
+import com.igknighters.constants.ConstValues.kRobotCollisionGeometry;
 import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.util.Channels.Receiver;
@@ -46,7 +46,8 @@ public class StemVisualizer {
                 telescopeCurrent = rootCurrent
                                 .append(new MechanismLigament2d("Telescope Current", kTelescope.MIN_METERS, 0.0));
                 wristCurrent = telescopeCurrent
-                                .append(new MechanismLigament2d("Wrist Lower Current", kRobotGeometry.UMBRELLA_OFFSET,
+                                .append(new MechanismLigament2d("Wrist Lower Current",
+                                                kRobotCollisionGeometry.UMBRELLA_OFFSET,
                                                 -54.0 + wristOffset));
 
                 wristCurrent.setColor(backgroundColor);
@@ -55,7 +56,8 @@ public class StemVisualizer {
                 telescopeSetpoint = rootSetpoint
                                 .append(new MechanismLigament2d("Telescope Setpoint", kTelescope.MIN_METERS, 0.0));
                 wristSetpoint = telescopeSetpoint
-                                .append(new MechanismLigament2d("Wrist Lower Setpoint", kRobotGeometry.UMBRELLA_OFFSET,
+                                .append(new MechanismLigament2d("Wrist Lower Setpoint",
+                                                kRobotCollisionGeometry.UMBRELLA_OFFSET,
                                                 -54.0 + wristOffset));
 
                 telescopeSetpoint.setColor(debugColor);
@@ -86,22 +88,22 @@ public class StemVisualizer {
                 MechanismLigament2d leftSide = wristRoot.append(
                                 new MechanismLigament2d(
                                                 "Umbrella Left Side",
-                                                kRobotGeometry.UMBRELLA_HEIGHT,
+                                                kRobotCollisionGeometry.UMBRELLA_HEIGHT,
                                                 0.0));
                 MechanismLigament2d topSide = leftSide.append(
                                 new MechanismLigament2d(
                                                 "Umbrella Top Side",
-                                                kRobotGeometry.UMBRELLA_LENGTH,
+                                                kRobotCollisionGeometry.UMBRELLA_LENGTH,
                                                 -90.0));
                 MechanismLigament2d rightSide = topSide.append(
                                 new MechanismLigament2d(
                                                 "Umbrella Right Side",
-                                                kRobotGeometry.UMBRELLA_HEIGHT,
+                                                kRobotCollisionGeometry.UMBRELLA_HEIGHT,
                                                 -90.0));
                 MechanismLigament2d bottomSide = rightSide.append(
                                 new MechanismLigament2d(
                                                 "Umbrella Bottom Side",
-                                                kRobotGeometry.UMBRELLA_LENGTH,
+                                                kRobotCollisionGeometry.UMBRELLA_LENGTH,
                                                 -90.0));
 
                 if (isSetpoint) {
@@ -129,29 +131,29 @@ public class StemVisualizer {
         }
 
         private void drawDriveBase() {
-                Translation2d drivebaseOrigin = pivotOrigin.minus(kRobotGeometry.PIVOT_LOCATION);
+                Translation2d drivebaseOrigin = pivotOrigin.minus(kRobotCollisionGeometry.PIVOT_LOCATION);
 
                 MechanismRoot2d drivebaseRoot = mechanism.getRoot("Drivebase", drivebaseOrigin.getX(),
                                 drivebaseOrigin.getY());
                 MechanismLigament2d leftSide = drivebaseRoot.append(
                                 new MechanismLigament2d(
                                                 "DriveBase Left Side",
-                                                kRobotGeometry.DRIVE_BASE.getHeight(),
+                                                kRobotCollisionGeometry.DRIVE_BASE.getHeight(),
                                                 90.0));
                 MechanismLigament2d topSide = leftSide.append(
                                 new MechanismLigament2d(
                                                 "DriveBase Top Side",
-                                                kRobotGeometry.DRIVE_BASE.getWidth(),
+                                                kRobotCollisionGeometry.DRIVE_BASE.getWidth(),
                                                 -90.0));
                 MechanismLigament2d rightSide = topSide.append(
                                 new MechanismLigament2d(
                                                 "DriveBase Right Side",
-                                                kRobotGeometry.DRIVE_BASE.getHeight(),
+                                                kRobotCollisionGeometry.DRIVE_BASE.getHeight(),
                                                 -90.0));
                 MechanismLigament2d bottomSide = rightSide.append(
                                 new MechanismLigament2d(
                                                 "DriveBase Bottom Side",
-                                                kRobotGeometry.DRIVE_BASE.getWidth(),
+                                                kRobotCollisionGeometry.DRIVE_BASE.getWidth(),
                                                 -90.0));
 
                 leftSide.setColor(new Color8Bit(100, 100, 100));
@@ -166,7 +168,7 @@ public class StemVisualizer {
         }
 
         private void drawMaxBounds() {
-                Translation2d drivebaseOrigin = pivotOrigin.minus(kRobotGeometry.PIVOT_LOCATION);
+                Translation2d drivebaseOrigin = pivotOrigin.minus(kRobotCollisionGeometry.PIVOT_LOCATION);
 
                 MechanismRoot2d boundsRoot = mechanism.getRoot("MaxBounds", drivebaseOrigin.getX(),
                                 drivebaseOrigin.getY());
@@ -174,7 +176,7 @@ public class StemVisualizer {
                                 new MechanismLigament2d(
                                                 "MaxBounds Left Bottom Side",
                                                 Units.inchesToMeters(12.0)
-                                                                - ((kRobotGeometry.DRIVE_BASE.getWidth()
+                                                                - ((kRobotCollisionGeometry.DRIVE_BASE.getWidth()
                                                                                 - Units.inchesToMeters(26.0)) / 2.0),
                                                 180.0));
                 MechanismLigament2d leftSide = leftBottomSide.append(
@@ -196,7 +198,7 @@ public class StemVisualizer {
                                 new MechanismLigament2d(
                                                 "MaxBounds Right Bottom Side",
                                                 Units.inchesToMeters(12.0)
-                                                                - ((kRobotGeometry.DRIVE_BASE.getWidth()
+                                                                - ((kRobotCollisionGeometry.DRIVE_BASE.getWidth()
                                                                                 - Units.inchesToMeters(26.0)) / 2.0),
                                                 -90.0));
 
@@ -214,7 +216,7 @@ public class StemVisualizer {
         }
 
         public void addDot(StemVisualizerDot dot) {
-                Translation2d drivebaseOrigin = pivotOrigin.minus(kRobotGeometry.PIVOT_LOCATION);
+                Translation2d drivebaseOrigin = pivotOrigin.minus(kRobotCollisionGeometry.PIVOT_LOCATION);
                 Translation2d pose = dot.position.plus(drivebaseOrigin);
                 if (dots.containsKey(dot.name)) {
                         dots.get(dot.name).setPosition(pose.getX() - 0.01, pose.getY());

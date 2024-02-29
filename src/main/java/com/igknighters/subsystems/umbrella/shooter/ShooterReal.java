@@ -68,7 +68,10 @@ public class ShooterReal implements Shooter {
         cfg.CurrentLimits.StatorCurrentLimit = kShooter.PEAK_CURRENT;
         cfg.CurrentLimits.StatorCurrentLimitEnable = true;
 
-        // cfg.MotorOutput.PeakReverseDutyCycle = 0.0;
+        cfg.MotorOutput.PeakReverseDutyCycle = 0.0;
+        cfg.Voltage.PeakReverseVoltage = 0.0;
+        cfg.TorqueCurrent.PeakReverseTorqueCurrent = 0.0;
+
 
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
@@ -88,7 +91,9 @@ public class ShooterReal implements Shooter {
 
         cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
-        // cfg.MotorOutput.PeakReverseDutyCycle = 0.0;
+        cfg.MotorOutput.PeakReverseDutyCycle = 0.0;
+        cfg.Voltage.PeakReverseVoltage = 0.0;
+        cfg.TorqueCurrent.PeakReverseTorqueCurrent = 0.0;
 
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
@@ -108,10 +113,9 @@ public class ShooterReal implements Shooter {
     @Override
     public void setSpeed(double speedRadPerSec) {
         inputs.targetRadiansPerSecondRight = speedRadPerSec;
-        inputs.targetRadiansPerSecondLeft = speedRadPerSec;
-        var req = new VelocityVoltage(Units.radiansToRotations(speedRadPerSec));
-        rightMotor.setControl(req);
-        leftMotor.setControl(req);
+        inputs.targetRadiansPerSecondLeft = speedRadPerSec * kShooter.LEFT_MOTOR_DIFF;
+        rightMotor.setControl(new VelocityVoltage(Units.radiansToRotations(inputs.targetRadiansPerSecondRight)));
+        leftMotor.setControl(new VelocityVoltage(Units.radiansToRotations(inputs.targetRadiansPerSecondLeft)));
     }
 
     @Override

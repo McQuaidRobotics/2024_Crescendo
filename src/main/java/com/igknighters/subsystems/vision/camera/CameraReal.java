@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.littletonrobotics.junction.Logger;
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -13,8 +14,11 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import com.igknighters.constants.FieldConstants;
 import com.igknighters.util.BootupLogger;
 
-import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.wpilibj.Timer;
 
 /**
  * An abstraction for a photon camera.
@@ -27,6 +31,9 @@ public class CameraReal implements Camera {
 
     private final CameraInput cameraInput;
 
+    private VisionPoseEstimate lastPoseEst;
+    private Timer lastPoseTimer;
+
     /**
      * Creates an abstraction for a photon camera.
      * 
@@ -34,10 +41,10 @@ public class CameraReal implements Camera {
      * @param id         The ID of the camera
      * @param cameraPose The pose of the camera relative to the robot
      */
-    public CameraReal(String cameraName, Integer id, Pose3d cameraPose) {
+    public CameraReal(String cameraName, Integer id, Transform3d cameraPose) {
         this.camera = new PhotonCamera(cameraName);
         this.id = id;
-        this.cameraPose = new Transform3d(cameraPose.getTranslation(), cameraPose.getRotation());
+        this.cameraPose = cameraPose;
 
         poseEstimator = new PhotonPoseEstimator(
                 FieldConstants.APRIL_TAG_FIELD,
@@ -47,36 +54,56 @@ public class CameraReal implements Camera {
         poseEstimator.setTagModel(TargetModel.kAprilTag36h11);
         poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_CAMERA_HEIGHT);
 
-        cameraInput = new CameraInput(new VisionPoseEst(
-                id,
-                new Pose3d(),
-                0,
-                List.of(),
-                0.0));
+        cameraInput = new CameraInput(VisionPoseEstimate.empty(id));
 
         BootupLogger.bootupLog("    " + cameraName + " camera initialized (real)");
     }
 
-    private Optional<VisionPoseEst> realEvaluatePose() {
-        return poseEstimator.update()
-                .map(estRoboPose -> new VisionPoseEst(
-                        this.id,
-                        estRoboPose.estimatedPose,
-                        estRoboPose.timestampSeconds,
-                        estRoboPose.targetsUsed
-                                .stream()
-                                .map(PhotonTrackedTarget::getFiducialId)
-                                .toList(),
-                        estRoboPose.targetsUsed
-                                .stream()
-                                .map(PhotonTrackedTarget::getPoseAmbiguity)
-                                .reduce(0.0, Double::sum)
-                                / estRoboPose.targetsUsed.size()));
+    private Optional<VisionPoseEstimate> realEvaluatePose() {
+        Optional<EstimatedRobotPose> opt = poseEstimator.update();
+
+        if (!opt.isPresent()) {
+            return Optional.empty();
+        }
+
+        EstimatedRobotPose estRoboPose = opt.get();
+
+        List<Integer> targetIds = estRoboPose.targetsUsed
+                .stream()
+                .map(PhotonTrackedTarget::getFiducialId)
+                .toList();
+
+        double avgAmbiguity = estRoboPose.targetsUsed
+                .stream()
+                .map(PhotonTrackedTarget::getPoseAmbiguity)
+                .reduce(0.0, Double::sum)
+                / estRoboPose.targetsUsed.size();
+
+        double maxDistance = estRoboPose.targetsUsed
+                .stream()
+                .map(PhotonTrackedTarget::getBestCameraToTarget)
+                .map(Transform3d::getTranslation)
+                .map(Translation3d::toTranslation2d)
+                .map(Translation2d::getNorm)
+                .reduce(0.0, Math::max);
+
+        return Optional.of(new VisionPoseEstimate(
+                this.id,
+                estRoboPose.estimatedPose,
+                estRoboPose.timestampSeconds,
+                targetIds,
+                avgAmbiguity,
+                maxDistance));
     }
 
     @Override
-    public Optional<VisionPoseEst> evalPose() {
+    public Optional<VisionPoseEstimate> evalPose() {
         return cameraInput.getLatestPoseEst();
+    }
+
+    @Override
+    public VisionEstimateFault getFaults() {
+        return cameraInput.getLatestFault();
     }
 
     @Override
@@ -94,9 +121,31 @@ public class CameraReal implements Camera {
         return camera.getName();
     }
 
+    private void resetLastPoseInfo(VisionPoseEstimate poseEst) {
+        lastPoseEst = poseEst;
+        lastPoseTimer.restart();
+    }
+
     @Override
     public void periodic() {
-        cameraInput.update(realEvaluatePose());
+
+        if (lastPoseEst == null) {
+            var eval = realEvaluatePose();
+            if (eval.isPresent()) {
+                lastPoseEst = eval.get();
+                lastPoseTimer = new Timer();
+                lastPoseTimer.start();
+            }
+            cameraInput.update(
+                eval.map(est -> Pair.of(est, VisionEstimateFault.empty())),
+                camera.isConnected()
+            );
+        } else {
+            cameraInput.update(realEvaluatePose()
+                .map(est -> est.withFault(lastPoseEst, lastPoseTimer, this::resetLastPoseInfo)),
+            camera.isConnected()
+            );
+        }
 
         Logger.processInputs("Vision/Camera[" + getName() + "]", cameraInput);
     }

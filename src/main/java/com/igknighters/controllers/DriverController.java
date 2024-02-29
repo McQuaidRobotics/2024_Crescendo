@@ -1,7 +1,16 @@
 package com.igknighters.controllers;
 
 import com.igknighters.SubsystemResources.Subsystems;
+import com.igknighters.commands.HigherOrderCommands;
+import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.SwerveCommands;
+import com.igknighters.commands.umbrella.UmbrellaCommands;
+import com.igknighters.constants.ConstValues.kControls;
+import com.igknighters.subsystems.stem.StemPosition;
+import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
+
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
 public class DriverController extends ControllerParent {
 
@@ -10,35 +19,115 @@ public class DriverController extends ControllerParent {
         // disregard null safety for subsystems as it is checked on assignment
 
         /// FACE BUTTONS
-        // this.A.binding = 
+        this.A.binding = new Binding((trig, allss) -> {
+            trig.onTrue(
+                    HigherOrderCommands.intakeGamepiece(
+                            allss.stem.get(),
+                            allss.umbrella.get()));
+        }, Subsystems.Stem, Subsystems.Umbrella);
 
-        // this.B.binding =
+        this.B.binding = new Binding(
+                (trig, allss) -> {
+                    trig.onTrue(
+                        Commands.parallel(
+                            StemCommands.holdAt(
+                                allss.stem.get(),
+                                StemPosition.AMP
+                            ),
+                            UmbrellaCommands.spinupShooter(
+                                allss.umbrella.get(),
+                                1000,
+                                ShooterSpinupReason.Amp
+                            )
+                        ).finallyDo(
+                            () -> allss.umbrella.get().stopAll()
+                        )
+                    );
+                },
+                Subsystems.Stem,
+                Subsystems.Umbrella);
 
-        // this.X.binding =
+        this.X.binding = new Binding((trig, allss) -> {
+            trig.onTrue(
+                StemCommands.holdAt(
+                    allss.stem.get(),
+                    StemPosition.STOW
+                )
+            );
+        }, Subsystems.Stem);
 
-        // this.Y.binding =
+        this.Y.binding = new Binding(
+                (trig, allss) -> {
+                    trig.onTrue(
+                        Commands.parallel(
+                            StemCommands.holdAt(
+                                allss.stem.get(),
+                                StemPosition.STARTING
+                            ),
+                            UmbrellaCommands.spinupShooter(
+                                allss.umbrella.get(),
+                                kControls.SHOOTER_RPM,
+                                ShooterSpinupReason.ManualAimSpeaker
+                            )
+                        ).finallyDo(
+                            () -> allss.umbrella.get().stopAll()
+                        )
+                    );
+                },
+                Subsystems.Stem,
+                Subsystems.Umbrella);
 
         /// BUMPER
-        // this.LB.binding =
+        // # Our main driver doesn't use bumpers
+        // this.LB.binding = # Dont use
 
-        // this.RB.binding =
+        // this.RB.binding = # Dont use
 
         /// CENTER BUTTONS
         // this.Back.binding =
 
-        this.Start.binding = new SingleDepBinding(Subsystems.Swerve, (trig, allss) -> {
+        this.Start.binding = new Binding(Subsystems.Swerve, (trig, allss) -> {
             trig.onTrue(SwerveCommands.orientGyro(allss.swerve.get()));
         });
 
         /// STICKS
-        // this.LS.binding =
+        // # Our main driver doesn't use sticks
+        // this.LS.binding = # Dont use
 
-        // this.RS.binding =
+        // this.RS.binding = # Dont use
 
         /// TRIGGERS
-        // this.LT.binding = 
+        this.LT.binding = new Binding((trig, allss) -> {
+            trig.whileTrue(
+                Commands.parallel(
+                    HigherOrderCommands.aim(
+                        allss.swerve.get(),
+                        allss.stem.get(),
+                        this
+                    ),
+                    UmbrellaCommands.spinupShooter(
+                        allss.umbrella.get(),
+                        kControls.SHOOTER_RPM,
+                        ShooterSpinupReason.AutoAimSpeaker
+                    )
+                ).finallyDo(
+                    allss.umbrella.get()::stopAll
+                ).withName("Highorder Aim")
+            );
+        }, Subsystems.Swerve, Subsystems.Stem, Subsystems.Umbrella);
 
-        // this.RT.binding =
+        this.RT.binding = new Binding((trig, allss) -> {
+            trig.onTrue(
+                new ProxyCommand(
+                    () -> HigherOrderCommands.genericShoot(
+                        allss.swerve.get(),
+                        allss.stem.get(),
+                        allss.umbrella.get(),
+                        this
+                    )
+                ).withName("Proxy Shoot")
+            );
+        }, Subsystems.Umbrella, Subsystems.Stem, Subsystems.Swerve);
 
         /// DPAD
         // this.DPR.binding =

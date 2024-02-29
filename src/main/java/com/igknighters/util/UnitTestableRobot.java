@@ -9,6 +9,7 @@ import org.littletonrobotics.junction.Logger;
 
 import com.igknighters.GlobalState;
 import com.igknighters.SubsystemResources.AllSubsystems;
+import com.igknighters.constants.ConstValues;
 
 import edu.wpi.first.hal.DriverStationJNI;
 import edu.wpi.first.hal.HAL;
@@ -44,7 +45,7 @@ public class UnitTestableRobot extends LoggedRobot {
     }
 
     public UnitTestableRobot() {
-        super();
+        super(ConstValues.PERIODIC_TIME);
         isUnitTest = GlobalState.isUnitTest();
 
         if (isUnitTest) {

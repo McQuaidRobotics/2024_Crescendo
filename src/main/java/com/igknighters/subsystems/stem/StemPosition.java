@@ -52,10 +52,8 @@ public class StemPosition {
                 + telescopeMeters + ")";
     }
 
-    public static StemPosition STOW = new StemPosition(
-            Units.degreesToRadians(35.0),
-            kTelescope.MIN_METERS,
-            Units.degreesToRadians(60.0)) {
+    public static final StemPosition STOW = new StemPosition(Units.degreesToRadians(42.5),
+            Units.degreesToRadians(112.0), kTelescope.MIN_METERS) {
         @Override
         public boolean isValid() {
             return true;
@@ -72,14 +70,41 @@ public class StemPosition {
         }
     };
 
-    public static StemPosition INTAKE = new StemPosition(
-            Units.degreesToRadians(7.5),
-            0.493,
-            1.2){
+    public static final StemPosition INTAKE = new StemPosition(Units.degreesToRadians(10.3),
+            kTelescope.MIN_METERS + Units.inchesToMeters(4.7), Units.degreesToRadians(71.0)) {
 
         @Override
         public String toString() {
             return "Intake";
+        }
+    };
+
+    public static final StemPosition AMP = new StemPosition(Units.degreesToRadians(90.0), Units.degreesToRadians(43.0),
+            kTelescope.MIN_METERS + Units.inchesToMeters(5.5)) {
+
+        @Override
+        public String toString() {
+            return "Amp";
+        }
+
+    };
+
+    public static final StemPosition CLIMB = new StemPosition(1.245, 0.783, 0.626) {
+
+        @Override
+        public String toString() {
+            return "Climb";
+        }
+    };
+
+    public static final StemPosition STARTING = new StemPosition(
+            1.114,
+            1.93,
+            kTelescope.MIN_METERS) {
+
+        @Override
+        public String toString() {
+            return "Starting";
         }
     };
 }

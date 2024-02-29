@@ -12,15 +12,18 @@ import com.igknighters.commands.autos.Autos;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.vision.VisionOnlyPoseEstimator;
 import com.igknighters.subsystems.vision.VisionOnlyPoseEstimator.FakeWheelPositions;
-import com.igknighters.subsystems.vision.camera.Camera.VisionPoseEst;
+import com.igknighters.subsystems.vision.camera.Camera.VisionPoseEstimate;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -41,6 +44,8 @@ public class GlobalState {
             this.priority = priority;
         }
     }
+
+    private static AtomicBoolean climbing = new AtomicBoolean(false); 
 
     private static final ReentrantLock globalLock = new ReentrantLock();
 
@@ -169,6 +174,27 @@ public class GlobalState {
         }
     }
 
+    public static Pose3d getLocalizedPose3d() {
+        globalLock.lock();
+        try {
+            if (!localizer.isPresent() || localizerType == LocalizerType.None) {
+                DriverStation.reportError("[GlobalState] Odometry not present", true);
+                return new Pose3d();
+            }
+            if (Robot.isSimulation()) {
+                return new Pose3d(getLocalizedPose());
+            } else {
+                Translation2d translation = getLocalizedPose().getTranslation();
+                return new Pose3d(
+                    new Translation3d(translation.getX(), translation.getY(), 0),
+                    rotSupplier.get()
+                );
+            }
+        } finally {
+            globalLock.unlock();
+        }
+    }
+
     /**
      * Reset the odometry system to the given pose.
      * 
@@ -232,7 +258,7 @@ public class GlobalState {
      * @param value           The vision data
      * @param trustworthyness The trustworthyness of the vision data
      */
-    public static void submitVisionData(VisionPoseEst value, double ambiguity) {
+    public static void submitVisionData(VisionPoseEstimate value, double ambiguity) {
         globalLock.lock();
         try {
             if (!localizer.isPresent() || localizerType == LocalizerType.None) {
@@ -241,21 +267,20 @@ public class GlobalState {
             }
             if (localizerType == LocalizerType.Vision) {
                 ((VisionOnlyPoseEstimator) localizer.get()).addVisionMeasurement(
-                        value.pose.toPose2d(),
-                        value.timestamp,
+                        value.pose().toPose2d(),
+                        value.timestamp(),
                         VecBuilder.fill(1.0, 1.0, 1.0));
                 var pose = ((VisionOnlyPoseEstimator) localizer.get())
                         .update(
-                                value.pose.toPose2d().getRotation(),
+                                value.pose().toPose2d().getRotation(),
                                 new FakeWheelPositions());
                 field.ifPresent(field2d -> field2d.setRobotPose(pose));
             } else if (localizerType == LocalizerType.Hybrid) {
                 ((SwerveDrivePoseEstimator) localizer.get()).addVisionMeasurement(
                         new Pose2d(
-                            value.pose.getTranslation().toTranslation2d(),
-                            GlobalState.rotSupplier.get().toRotation2d()
-                        ),
-                        value.timestamp,
+                                value.pose().getTranslation().toTranslation2d(),
+                                GlobalState.rotSupplier.get().toRotation2d()),
+                        value.timestamp(),
                         VecBuilder.fill(ambiguity, ambiguity, 1.0));
             } else {
                 DriverStation.reportError("[GlobalState] Localizer does not support Vision", true);
@@ -367,5 +392,21 @@ public class GlobalState {
      */
     public static void setUnitTest(boolean isTest) {
         GlobalState.isUnitTest.set(isTest);
+    }
+
+    /**
+     * @return If the robot is currently in a climbing mode
+     */
+    public static boolean isClimbing() {
+        return GlobalState.climbing.get();
+    }
+
+    /**
+     * Declare if the robot is in a climbing mode
+     * 
+     * @param isClimbing Whether the robot is climbing or not
+     */
+    public static void setClimbing(boolean isClimbing) {
+        GlobalState.climbing.set(isClimbing);
     }
 }

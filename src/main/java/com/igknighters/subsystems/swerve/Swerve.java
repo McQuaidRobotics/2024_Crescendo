@@ -3,7 +3,6 @@ package com.igknighters.subsystems.swerve;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -12,7 +11,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -20,7 +18,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.igknighters.GlobalState;
 import com.igknighters.constants.ConstValues.kSwerve;
-import com.igknighters.constants.ConstValues.kSwerve.RotationControllerConstants;
 import com.igknighters.subsystems.swerve.gyro.Gyro;
 import com.igknighters.subsystems.swerve.gyro.GyroReal;
 import com.igknighters.subsystems.swerve.gyro.GyroSim;
@@ -53,13 +50,7 @@ public class Swerve extends SubsystemBase {
     private final SwerveVisualizer visualizer;
     private final SwerveSetpointProcessor setpointProcessor = new SwerveSetpointProcessor();
 
-    private ProfiledPIDController rotController = new ProfiledPIDController(
-            RotationControllerConstants.kP,
-            RotationControllerConstants.kI,
-            RotationControllerConstants.kD,
-            new Constraints(
-                    RotationControllerConstants.CONSTRAINT_SCALAR * kSwerve.MAX_ANGULAR_VELOCITY,
-                    RotationControllerConstants.CONSTRAINT_SCALAR * kSwerve.MAX_ANGULAR_ACCELERATION));
+    private RotationalController rotController = new RotationalController();
 
     public Swerve() {
 
@@ -186,26 +177,22 @@ public class Swerve extends SubsystemBase {
     }
 
     public double rotVeloForRotation(Rotation2d wantedAngle) {
-        var wantedAngleRads = wantedAngle.getRadians();
-        var currentAngleRads = MathUtil.angleModulus(getYawRads());
+        double targetAngleRads = wantedAngle.getRadians();
+        double currentAngleRads = getYawRads();
 
+        Logger.recordOutput("/Swerve/WantedAngle", targetAngleRads);
         Logger.recordOutput("/Swerve/CurrentAngle", currentAngleRads);
 
-        return rotController.calculate(
-            currentAngleRads,
-            wantedAngleRads
-        );
+        return rotController.calculate(currentAngleRads, targetAngleRads);
     }
 
     public void resetRotController() {
         rotController.reset(MathUtil.angleModulus(getYawRads()), getChassisSpeed().omegaRadiansPerSecond);
-        rotController.enableContinuousInput(-Math.PI, Math.PI);
-        rotController.setTolerance(RotationControllerConstants.DEADBAND);
     }
 
     public Rotation2d rotationRelativeToPose(Rotation2d wantedAngleOffet, Translation2d pose) {
-        var currentTrans = getPose().getTranslation();
-        var angleBetween = Math.atan2(
+        Translation2d currentTrans = getPose().getTranslation();
+        double angleBetween = Math.atan2(
                 pose.getY() - currentTrans.getY(),
                 pose.getX() - currentTrans.getX());
         return Rotation2d.fromRadians(angleBetween)

@@ -1,12 +1,12 @@
 package com.igknighters.subsystems.stem.pivot;
 
-import com.igknighters.constants.ConstValues.kStem.kPivot;
+import com.igknighters.subsystems.stem.StemPosition;
 
 import edu.wpi.first.math.MathUtil;
 
 public class PivotDisabled implements Pivot {
-    double targetRads = kPivot.MIN_ANGLE;
-    final double slewRate = 2.37 / 50.0;
+    double targetRads = StemPosition.STARTING.pivotRads;
+    final double slewRate = (2.37 / 50.0) * 0.75;
 
     @Override
     public double getPivotRadians() {

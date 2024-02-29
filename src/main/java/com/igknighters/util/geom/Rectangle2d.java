@@ -44,6 +44,15 @@ public class Rectangle2d {
         );
     }
 
+    public Rectangle2d(Translation2d center, double radius) {
+        this(
+            center.plus(new Translation2d(-radius, radius)),
+            center.plus(new Translation2d(radius, radius)),
+            center.plus(new Translation2d(-radius, -radius)),
+            center.plus(new Translation2d(radius, -radius)
+        ));
+    }
+
     public Translation2d getTopLeft() {
         return topLeft;
     }
@@ -126,7 +135,7 @@ public class Rectangle2d {
         );
     }
 
-    public Rectangle2d mirror() {
+    public Rectangle2d flipOverYAxis() {
         return new Rectangle2d(
             new Translation2d(-topLeft.getX(), topLeft.getY()),
             new Translation2d(-topRight.getX(), topRight.getY()),
@@ -135,4 +144,20 @@ public class Rectangle2d {
         );
     }
 
+    public Rectangle2d flipOverXAxis() {
+        return new Rectangle2d(
+            new Translation2d(topLeft.getX(), -topLeft.getY()),
+            new Translation2d(topRight.getX(), -topRight.getY()),
+            new Translation2d(bottomLeft.getX(), -bottomLeft.getY()),
+            new Translation2d(bottomRight.getX(), -bottomRight.getY())
+        );
+    }
+
+    public Polygon2d asPolygon2d() {
+        return new Polygon2d(topLeft, topRight, bottomRight, bottomLeft);
+    }
+
+    public Translation2d getCenter() {
+        return topLeft.plus(bottomRight).times(0.5);
+    }
 }

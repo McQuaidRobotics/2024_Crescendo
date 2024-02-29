@@ -8,17 +8,16 @@ import com.igknighters.controllers.DriverController;
 import com.igknighters.controllers.OperatorController;
 import com.igknighters.controllers.TestingController;
 import com.igknighters.subsystems.swerve.Swerve;
+import com.igknighters.util.geom.AllianceFlip;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 
+
 import com.igknighters.SubsystemResources.AllSubsystems;
-import com.igknighters.commands.autos.Autos;
 import com.igknighters.commands.autos.AutosCmdRegister;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class RobotContainer {
 
@@ -47,21 +46,35 @@ public class RobotContainer {
             swerve.setDefaultCommand(new TeleopSwerveBase.TeleopSwerveOmni(swerve, driverController));
 
             setupAutos(swerve);
-
-            Autos.createSendableChooser(swerve);
         }
 
-        if (allSubsystems.stem.isPresent()) {
-            var stem = allSubsystems.stem.get();
-            stem.setDefaultCommand(stem.run(() -> {
-                stem.setStemVolts(
-                    testingController.leftStickY(0.1).getAsDouble() * RobotController.getBatteryVoltage(),
-                    (testingController.rightTrigger(true).getAsDouble()
-                    - testingController.leftTrigger(true).getAsDouble()) * 6.0,
-                    testingController.rightStickY(0.1).getAsDouble() * RobotController.getBatteryVoltage()
-                );
-            }));
-        }
+        // if (allSubsystems.umbrella.isPresent()) {
+        //     var umbrella = allSubsystems.umbrella.get();
+        //     Rectangle2d friendlyArea = new Rectangle2d(
+        //             0, 0,
+        //             FieldConstants.FIELD_LENGTH * 0.65,
+        //             FieldConstants.FIELD_WIDTH);
+        //     PolyTrigger trigger = new PolyTrigger(
+        //         (AllianceFlip.isBlue()
+        //             ? friendlyArea
+        //             : AllianceFlip.flipRectangle(friendlyArea)
+        //         ).asPolygon2d()
+        //     );
+        //     umbrella.setDefaultCommand(umbrella.run(() -> {
+        //         if (trigger.getAsBoolean()) {
+        //             umbrella.spinupShooterToRPM(400);
+        //             umbrella.runIntakeAt(0);
+        //         }
+        //     }).withName("UmbrellaDefaultCommand"));
+        // }
+
+        // if (allSubsystems.umbrella.isPresent()) {
+        //     var umbrella = allSubsystems.umbrella.get();
+        //     umbrella.setDefaultCommand(
+        //         UmbrellaCommands.spinUmbrellaBoth(umbrella)
+        //             .withName("UmbrellaDefaultCommand")
+        //     );
+        // }
     }
 
     private void setupAutos(Swerve swerve) {
@@ -86,16 +99,7 @@ public class RobotContainer {
                         kSwerve.MAX_DRIVE_VELOCITY,
                         kSwerve.DRIVEBASE_RADIUS,
                         kAuto.DYNAMIC_REPLANNING_CONFIG),
-                () -> {
-                    if (DriverStation.getAlliance().isPresent()
-                            && DriverStation.getAlliance().get() == Alliance.Blue) {
-                        return false;
-                    } else if (DriverStation.getAlliance().isPresent()
-                            && DriverStation.getAlliance().get() == Alliance.Red) {
-                        return true;
-                    } else
-                        return false; // Default path for blue alliance side
-                },
+                AllianceFlip::isRed,
                 swerve);
 
         GlobalState.onceInitAutoChooser(swerve);

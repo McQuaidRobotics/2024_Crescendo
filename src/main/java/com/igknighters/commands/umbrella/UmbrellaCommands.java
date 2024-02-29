@@ -1,7 +1,9 @@
 package com.igknighters.commands.umbrella;
 
+
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.umbrella.Umbrella;
+import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,7 +17,21 @@ public class UmbrellaCommands {
      */
     public static Command stopShooter(Umbrella umbrella) {
         return umbrella.runOnce(() -> umbrella.spinupShooterToRPM(0))
-            .withName("Stop Shooter");
+                .withName("Stop Shooter");
+    }
+
+    /**
+     * Spins up the shooter to a certain speed
+     * 
+     * @param umbrella The umbrella subsystem
+     * @param rpm      The target speed
+     * @return A command to be scheduled
+     */
+    public static Command spinupShooter(Umbrella umbrella, double rpm, ShooterSpinupReason reason) {
+        return umbrella.runOnce(() -> {
+            umbrella.spinupShooterToRPM(rpm);
+            umbrella.pushSpinupReason(reason);
+        }).withName("Spinup Shooter");
     }
 
     /**
@@ -29,8 +45,8 @@ public class UmbrellaCommands {
     public static Command waitUntilSpunUp(Umbrella umbrella, double rpm, double tolerance) {
         return umbrella.run(
                 () -> umbrella.spinupShooterToRPM(rpm)).until(
-                () -> umbrella.isShooterAtSpeed(tolerance))
-            .withName("Wait Until Spun Up");
+                        () -> umbrella.isShooterAtSpeed(tolerance))
+                .withName("Wait Until Spun Up");
     }
 
     /**
@@ -51,14 +67,17 @@ public class UmbrellaCommands {
      * @return A command to be scheduled
      */
     public static Command shoot(Umbrella umbrella) {
-            return umbrella.run(
+        return umbrella.run(
                 () -> {
                     umbrella.spinupShooter(umbrella.getShooterTargetSpeed());
-                    umbrella.runIntakeAt(-1.0, true);;
-                }).until(umbrella::notHoldingGamepiece)
-                .andThen(umbrella::stopAll)
+                    umbrella.runIntakeAt(-1.0, true);
+                })
+                .withTimeout(0.75)
+                // .until(umbrella::notHoldingGamepiece)
+                .unless(() -> umbrella.getShooterSpeed() < 30.0)
+                .finallyDo(umbrella::stopAll)
                 .withName("Shoot");
-        }
+    }
 
     /**
      * Will spin the intake inwards until a game piece is held
@@ -68,10 +87,9 @@ public class UmbrellaCommands {
      */
     public static Command intake(Umbrella umbrella) {
         return umbrella.runEnd(
-                () -> umbrella.runIntakeAt(-0.7, false),
-                umbrella::stopAll
-        ).until(umbrella::holdingGamepiece)
-        .withName("Intake");
+                () -> umbrella.runIntakeAt(-0.9, false),
+                umbrella::stopAll).until(umbrella::holdingGamepiece)
+                .withName("Intake");
     }
 
     /**
@@ -84,7 +102,7 @@ public class UmbrellaCommands {
         return umbrella.runEnd(
                 () -> umbrella.runIntakeAt(1.0, true),
                 umbrella::stopAll)
-            .withName("Expell");
+                .withName("Expell");
     }
 
     /**

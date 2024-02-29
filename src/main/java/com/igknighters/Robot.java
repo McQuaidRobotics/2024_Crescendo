@@ -42,7 +42,7 @@ public class Robot extends UnitTestableRobot {
     public void robotPeriodic() {
         Tracer.traceFunc("Shuffleboard", ShuffleboardApi::run);
         Tracer.traceFunc("CommandScheduler", scheduler::run);
-        Tracer.traceFunc("LEDUpdate", LED.getInstance()::run);
+        Tracer.traceFunc("LEDUpdate", LED::run);
         Tracer.traceFunc("CANBusLoggung", CANBusLogging::run);
         GlobalState.log();
     }
@@ -64,6 +64,7 @@ public class Robot extends UnitTestableRobot {
         }
         if (autoCmd != null) {
             Logger.recordOutput("CurrentAutoCommand", autoCmd.getName());
+            System.out.println("---- Starting auto command: " + autoCmd.getName() + " ----");
             scheduler.schedule(autoCmd);
         }
     }
@@ -110,6 +111,7 @@ public class Robot extends UnitTestableRobot {
     public void driverStationConnected() {
     }
 
+    @SuppressWarnings("unused")
     private void setupAkit() {
         if (GlobalState.isUnitTest()) {
             return;

@@ -5,6 +5,7 @@ import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kAuto;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.subsystems.swerve.Swerve;
+import com.igknighters.util.geom.AllianceFlip;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.controllers.PathFollowingController;
 import com.pathplanner.lib.path.*;
@@ -99,6 +100,16 @@ public class SimplePathfindingCommand extends Command {
         this(targetPose, 0.0, 0.05, kAuto.DYNAMIC_PATH_CONSTRAINTS, Optional.empty(), swerve);
     }
 
+    public SimplePathfindingCommand flipForAlliance() {
+        return new SimplePathfindingCommand(
+                AllianceFlip.flipPose(targetPose),
+                goalEndState.getVelocity(),
+                rotationDelayDistance,
+                constraints,
+                rotationOverrideSupplier,
+                swerve);
+    }
+
     public SimplePathfindingCommand withEndVelo(double velo) {
         return new SimplePathfindingCommand(
                 targetPose,
@@ -125,6 +136,21 @@ public class SimplePathfindingCommand extends Command {
                 goalEndState.getVelocity(),
                 rotationDelayDistance,
                 constraints,
+                rotationOverrideSupplier,
+                swerve);
+    }
+
+    public SimplePathfindingCommand withConstraints(double constraintsMult) {
+        return new SimplePathfindingCommand(
+                targetPose,
+                goalEndState.getVelocity(),
+                rotationDelayDistance,
+                new PathConstraints(
+                    constraints.getMaxVelocityMps() * constraintsMult,
+                    constraints.getMaxAccelerationMpsSq() * constraintsMult,
+                    constraints.getMaxAngularVelocityRps() * constraintsMult,
+                    constraints.getMaxAngularAccelerationRpsSq() * constraintsMult
+                ),
                 rotationOverrideSupplier,
                 swerve);
     }
@@ -246,9 +272,9 @@ public class SimplePathfindingCommand extends Command {
                     // This can prevent an issue where the robot will remain stationary if new paths
                     // come in
                     // every loop
-                    if (timeOffset <= 0.02
+                    if (timeOffset <= ConstValues.PERIODIC_TIME
                             && Math.hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond) < 0.1) {
-                        timeOffset = 0.02;
+                        timeOffset = ConstValues.PERIODIC_TIME;
                     }
                 } else {
                     currentPathOpt = Optional.ofNullable(currentPath.replan(currentPose, currentSpeeds));

@@ -5,9 +5,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-{%for package in subsystemPackages%}
-import {{package}};
-{%endfor%}
+import com.igknighters.subsystems.stem.Stem;
+
+import com.igknighters.subsystems.swerve.Swerve;
+
+import com.igknighters.subsystems.umbrella.Umbrella;
+
+import com.igknighters.subsystems.vision.Vision;
 
 import com.igknighters.util.BootupLogger;
 
@@ -19,9 +23,15 @@ public class SubsystemResources {
      * a way to pass around data about enabled subsystems
      */
     public enum Subsystems {
-{%for ss in subsystems%}
-        {{ss}}("{{ss}}"),
-{%endfor%}
+
+        Stem("Stem"),
+
+        Swerve("Swerve"),
+
+        Umbrella("Umbrella"),
+
+        Vision("Vision"),
+
         ;
 
         public final String name;
@@ -32,6 +42,7 @@ public class SubsystemResources {
 
         /**
          * a prettier way to make an array of subsystems
+         * 
          * @param subsystems
          * @return an array of subsystems
          */
@@ -41,6 +52,7 @@ public class SubsystemResources {
 
         /**
          * a prettier way to make an array of subsystems
+         * 
          * @param subsystems
          * @return an array of subsystems
          */
@@ -79,19 +91,35 @@ public class SubsystemResources {
         private Subsystems[] subsystems;
         private List<Subsystem> subsystemsList = new ArrayList<>();
 
-{%for ss in subsystems%}
-        public Optional<{{ss}}> {{ss|lower}} = Optional.empty();
-{%endfor%}
+        public Optional<Stem> stem = Optional.empty();
+
+        public Optional<Swerve> swerve = Optional.empty();
+
+        public Optional<Umbrella> umbrella = Optional.empty();
+
+        public Optional<Vision> vision = Optional.empty();
 
         public AllSubsystems(Subsystems... subsystems) {
             this.subsystems = subsystems;
             for (Subsystems subsystem : subsystems) {
                 switch (subsystem) {
-{%for ss in subsystems%}
-                    case {{ss}}:
-                        {{ss|lower}} = createSubsystem({{ss}}::new);
+
+                    case Stem:
+                        stem = createSubsystem(Stem::new);
                         break;
-{%endfor%}
+
+                    case Swerve:
+                        swerve = createSubsystem(Swerve::new);
+                        break;
+
+                    case Umbrella:
+                        umbrella = createSubsystem(Umbrella::new);
+                        break;
+
+                    case Vision:
+                        vision = createSubsystem(Vision::new);
+                        break;
+
                     default:
                         break;
                 }
@@ -114,11 +142,23 @@ public class SubsystemResources {
         }
 
         public boolean hasAllSubsystems() {
-{%for ss in subsystems%}
-            if (!{{ss|lower}}.isPresent()) {
+
+            if (!stem.isPresent()) {
                 return false;
             }
-{%endfor%}
+
+            if (!swerve.isPresent()) {
+                return false;
+            }
+
+            if (!umbrella.isPresent()) {
+                return false;
+            }
+
+            if (!vision.isPresent()) {
+                return false;
+            }
+
             return true;
         }
     }
