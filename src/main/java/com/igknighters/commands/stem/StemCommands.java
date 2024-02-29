@@ -6,6 +6,7 @@ import com.igknighters.GlobalState;
 import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kUmbrella;
+import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.subsystems.stem.Stem;
@@ -91,18 +92,13 @@ public class StemCommands {
         @Override
         public void execute() {
             double leftY = MathUtil.applyDeadband(leftStickYSup.getAsDouble(), deadband);
-            double rightY = MathUtil.applyDeadband(rightStickYSup.getAsDouble(), deadband);
+            double rightY = -1.0 * MathUtil.applyDeadband(rightStickYSup.getAsDouble(), deadband);
 
-            if (MathUtil.clamp(
-                stem.getStemPosition().getPivotRads(), 
-                minPivotRads, 
-                maxPivotRads) != stem.getStemPosition().getPivotRads()) 
-                    leftY = 0.0;
-            if (MathUtil.clamp(
-                stem.getStemPosition().getTelescopeMeters(), 
-                minTelescopeMeters, 
-                maxTelescopeMeters) != stem.getStemPosition().getTelescopeMeters())
-                    rightY = 0.0;
+            if (stem.getStemPosition().getPivotRads() <= minPivotRads) leftY = MathUtil.clamp(leftY, 0.0, 1.0);
+            else if (stem.getStemPosition().getPivotRads() >= maxPivotRads) leftY = MathUtil.clamp(leftY, -1.0, 0.0);
+
+            if (stem.getStemPosition().getTelescopeMeters() <= minTelescopeMeters) rightY = MathUtil.clamp(rightY, 0.0, 1.0);
+            else if (stem.getStemPosition().getTelescopeMeters() >= maxTelescopeMeters) rightY = MathUtil.clamp(rightY, -1.0, 0.0);
 
             stem.setStemVolts(
                 leftY * RobotController.getBatteryVoltage(), 
