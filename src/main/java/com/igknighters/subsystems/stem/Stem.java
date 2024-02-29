@@ -85,6 +85,7 @@ public class Stem extends SubsystemBase {
             DriverStation.reportError(
                     "Invalid TARGET stem position(" + validity.name() + "): " + position.toString(),
                     true);
+            return true;
         }
 
         if (!telescope.hasHomed()) {

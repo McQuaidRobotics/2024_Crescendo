@@ -5,29 +5,24 @@ import com.igknighters.constants.RobotSetup;
 import com.igknighters.constants.ConstValues.kAuto;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.controllers.DriverController;
+import com.igknighters.controllers.InspectorController;
 import com.igknighters.controllers.OperatorController;
 import com.igknighters.controllers.TestingController;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.util.geom.AllianceFlip;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-
-import java.util.function.DoubleSupplier;
-
 import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.commands.autos.AutosCmdRegister;
-import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
-// import com.igknighters.commands.umbrella.UmbrellaCommands;
-
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotController;
 
 public class RobotContainer {
 
     private final DriverController driverController;
     private final OperatorController operatorController;
     private final TestingController testingController;
+    private final InspectorController inspectorController;
 
     private final AllSubsystems allSubsystems;
 
@@ -37,12 +32,14 @@ public class RobotContainer {
         driverController = new DriverController(0);
         operatorController = new OperatorController(1);
         testingController = new TestingController(3);
+        inspectorController = new InspectorController(4);
 
         allSubsystems = new AllSubsystems(RobotSetup.getRobotID().subsystems);
 
         driverController.assignButtons(allSubsystems);
         operatorController.assignButtons(allSubsystems);
         testingController.assignButtons(allSubsystems);
+        inspectorController.assignButtons(allSubsystems);
 
         if (allSubsystems.swerve.isPresent()) {
             var swerve = allSubsystems.swerve.get();

@@ -380,10 +380,9 @@ public class StemValidator {
                 // and adds or subtracts the differences so that rectangle is now within the
                 // drive base's allowed bounds. Then gets the distance from the pivot axel to
                 // the bottem left corner of the umbrella and turns it into a new mid state for
-                // the
-                // telescope. After this, the new telescope mid state is used to derive a new
-                // pivot rads mid state that when applies to the new telescope mid state results
-                // in the umbrella beingat the desired x and y coordinates from (0,0).
+                // the telescope. After this, the new telescope mid state is used to derive a new
+                // pivot rads mid state that when applied to the new telescope mid state results
+                // in the umbrella being at the desired x and y coordinates from (0,0).
 
                 Rectangle2d bounds = kRobotCollisionGeometry.BOUNDS;
 

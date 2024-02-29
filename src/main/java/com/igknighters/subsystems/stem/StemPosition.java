@@ -71,7 +71,7 @@ public class StemPosition {
     };
 
     public static final StemPosition INTAKE = new StemPosition(Units.degreesToRadians(10.8),
-            kTelescope.MIN_METERS + Units.inchesToMeters(4.7), Units.degreesToRadians(72.0)) {
+            Units.degreesToRadians(72.0), kTelescope.MIN_METERS + Units.inchesToMeters(4.7)) {
 
         @Override
         public String toString() {
