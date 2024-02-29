@@ -49,16 +49,16 @@ public class RobotContainer {
             setupAutos(swerve);
         }
         
-        if (allSubsystems.stem.isPresent()) {
-            var stem = allSubsystems.stem.get();
-            stem.setDefaultCommand(stem.run(() -> {
-                stem.setStemVolts(
-                        testingController.leftStickY(0.1).getAsDouble() * 12.0,
-                        (testingController.rightTrigger(true).getAsDouble()
-                                - testingController.leftTrigger(true).getAsDouble()) * 6.0,
-                        testingController.rightStickY(0.1).getAsDouble() * 12.0);
-            }).withName("StemDefaultCommand"));
-        }
+        // if (allSubsystems.stem.isPresent()) {
+        //     var stem = allSubsystems.stem.get();
+        //     stem.setDefaultCommand(stem.run(() -> {
+        //         stem.setStemVolts(
+        //                 testingController.leftStickY(0.1).getAsDouble() * 12.0,
+        //                 (testingController.rightTrigger(true).getAsDouble()
+        //                         - testingController.leftTrigger(true).getAsDouble()) * 6.0,
+        //                 testingController.rightStickY(0.1).getAsDouble() * 12.0);
+        //     }).withName("StemDefaultCommand"));
+        // }
 
         // if (allSubsystems.umbrella.isPresent()) {
         //     var umbrella = allSubsystems.umbrella.get();
