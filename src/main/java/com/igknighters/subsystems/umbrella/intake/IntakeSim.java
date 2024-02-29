@@ -89,6 +89,8 @@ public class IntakeSim implements Intake {
 
     @Override
     public void periodic() {
+        if (DriverStation.isDisabled()) setVoltageOut(0.0);
+
         boolean nowAuto = DriverStation.isAutonomousEnabled();
 
         if (nowAuto && !isAuto) {

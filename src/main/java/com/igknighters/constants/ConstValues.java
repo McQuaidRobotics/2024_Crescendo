@@ -477,7 +477,7 @@ public final class ConstValues {
 
             public static final boolean INVERTED = false;
 
-            public static final double CANCODER_OFFSET = -0.0769;
+            public static final double CANCODER_OFFSET = -0.644267421875;
 
             public static final double MIN_ANGLE = 29.0 * Conv.DEGREES_TO_RADIANS;
             public static final double MAX_ANGLE = 115.0 * Conv.DEGREES_TO_RADIANS;

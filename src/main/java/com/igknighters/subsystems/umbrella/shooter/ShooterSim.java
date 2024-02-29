@@ -9,6 +9,7 @@ import com.igknighters.util.BootupLogger;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
@@ -66,6 +67,8 @@ public class ShooterSim implements Shooter {
 
     @Override
     public void periodic() {
+        if (DriverStation.isDisabled()) setVoltageOut(0.0);
+
         flywheelSim.update(ConstValues.PERIODIC_TIME);
 
         inputs.ampsRight = flywheelSim.getCurrentDrawAmps();
