@@ -23,7 +23,7 @@ public class CANRetrier {
      * 
      * @param statusCodeSup The status code.
      * @param retryLimit The retry limit.
-     * @return 
+     * @return Whether the status code is ok.
      */
     public static boolean retryStatusCode(Supplier<StatusCode> statusCodeSup, int retryLimit) {
         for (int i = 0; i < retryLimit; i++) {
@@ -34,11 +34,11 @@ public class CANRetrier {
     }
 
     /**
-     * Given a CTRE Status Code will retry a given amount of times and return true if the code ever returns ok
+     * Given a CTRE Status Code will retry a given amount of times and return true if the code ever returns ok, else will crash the code with an error.
      * 
      * @param statusCodeSup The status code.
      * @param retryLimit The retry limit.
-     * @return 
+     * @return Whether the status code is ok.
      */
     public static boolean retryStatusCodeFatal(Supplier<StatusCode> statusCodeSup, int retryLimit) {
         for (int i = 0; i < retryLimit; i++) {
