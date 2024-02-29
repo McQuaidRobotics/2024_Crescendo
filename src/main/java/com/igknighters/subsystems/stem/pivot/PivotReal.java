@@ -23,6 +23,7 @@ import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.constants.HardwareIndex.StemHW;
 import com.igknighters.util.BootupLogger;
+import com.igknighters.util.CANRetrier;
 import com.igknighters.util.FaultManager;
 
 public class PivotReal implements Pivot {
@@ -62,17 +63,21 @@ public class PivotReal implements Pivot {
         leaderMotor = new TalonFX(kPivot.RIGHT_MOTOR_ID, kStem.CANBUS);
         followerMotor = new TalonFX(kPivot.LEFT_MOTOR_ID, kStem.CANBUS);
 
-        FaultManager.captureFault(
-                StemHW.LeaderMotor,
-                leaderMotor.getConfigurator().apply(getMotorConfig(true)));
-        FaultManager.captureFault(
-                StemHW.FollowerMotor,
-                followerMotor.getConfigurator().apply(getMotorConfig(false)));
+        CANRetrier.retryStatusCodeFatal(() -> leaderMotor.getConfigurator().apply(getMotorConfig(true)), 10);
+        CANRetrier.retryStatusCodeFatal(() -> followerMotor.getConfigurator().apply(getMotorConfig(false)), 10);
+        CANRetrier.retryStatusCodeFatal(() -> followerMotor.setControl(new Follower(leaderMotor.getDeviceID(), true)), 10);
 
-        FaultManager.captureFault(
-                StemHW.FollowerMotor,
-                followerMotor.setControl(
-                        new Follower(leaderMotor.getDeviceID(), true)));
+        // FaultManager.captureFault(
+        //     StemHW.LeaderMotor,
+        //     leaderMotor.getConfigurator().apply(getMotorConfig(true)));
+        //     FaultManager.captureFault(
+        //         StemHW.FollowerMotor,
+        //         followerMotor.getConfigurator().apply(getMotorConfig(false)));
+                
+        // FaultManager.captureFault(
+        //     StemHW.FollowerMotor,
+        //     followerMotor.setControl(
+        //         new Follower(leaderMotor.getDeviceID(), true)));
 
         inputs = new PivotInputs(Units.degreesToRadians(gyroMeasurement.getValue()));
 
