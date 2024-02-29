@@ -136,7 +136,7 @@ public class Robot extends UnitTestableRobot {
         }
 
         if (Robot.isReal()) {
-            var path = "/media/sda1/robotlogs/";
+            var path = "/media/sda1/";
             if (!new java.io.File(path).exists() && ConstValues.DEBUG) {
                 DriverStation.reportWarning("DATALOGS USB NOT PLUGGED IN!!!", false);
             } else {
