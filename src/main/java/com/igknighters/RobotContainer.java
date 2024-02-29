@@ -5,7 +5,7 @@ import com.igknighters.constants.RobotSetup;
 import com.igknighters.constants.ConstValues.kAuto;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.controllers.DriverController;
-import com.igknighters.controllers.InspectorController;
+// import com.igknighters.controllers.InspectorController;
 import com.igknighters.controllers.OperatorController;
 import com.igknighters.controllers.TestingController;
 import com.igknighters.subsystems.swerve.Swerve;
@@ -22,7 +22,7 @@ public class RobotContainer {
     private final DriverController driverController;
     private final OperatorController operatorController;
     private final TestingController testingController;
-    private final InspectorController inspectorController;
+    // private final InspectorController inspectorController;
 
     private final AllSubsystems allSubsystems;
 
@@ -32,14 +32,14 @@ public class RobotContainer {
         driverController = new DriverController(0);
         operatorController = new OperatorController(1);
         testingController = new TestingController(3);
-        inspectorController = new InspectorController(4);
+        // inspectorController = new InspectorController(4);
 
         allSubsystems = new AllSubsystems(RobotSetup.getRobotID().subsystems);
 
         driverController.assignButtons(allSubsystems);
         operatorController.assignButtons(allSubsystems);
         testingController.assignButtons(allSubsystems);
-        inspectorController.assignButtons(allSubsystems);
+        // inspectorController.assignButtons(allSubsystems);
 
         if (allSubsystems.swerve.isPresent()) {
             var swerve = allSubsystems.swerve.get();

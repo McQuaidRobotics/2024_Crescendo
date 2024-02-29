@@ -421,7 +421,7 @@ public final class ConstValues {
             // motor -> gbx(100:1) -> (15 -> 42) -> mechanism
             public static final double MOTOR_TO_MECHANISM_RATIO = 100.0 * (42.0 / 15.0);
 
-            public static final boolean INVERTED = true;
+            public static final boolean INVERTED = false;
 
             /**
              * The max voltage of the motors to behave more predictably
@@ -469,11 +469,11 @@ public final class ConstValues {
             public static final int MOTOR_ID = 16;
             public static final int CANCODER_ID = 26;
 
-            public static final double MOTOR_kP = 120.0;
+            public static final double MOTOR_kP = 500.0;
             public static final double MOTOR_kI = 0.0;
-            public static final double MOTOR_kD = 4.0;
+            public static final double MOTOR_kD = 5.0;
             public static final double MOTOR_kS = 0.2;
-            public static final double MOTOR_kV = 3.0;
+            public static final double MOTOR_kV = 4.5;
 
             public static final boolean INVERTED = false;
 

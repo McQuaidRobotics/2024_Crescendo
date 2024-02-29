@@ -1,9 +1,6 @@
 package com.igknighters.commands.stem;
 
 import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
-
-import javax.swing.plaf.basic.BasicBorders.FieldBorder;
 
 import com.igknighters.GlobalState;
 import com.igknighters.constants.FieldConstants;
@@ -161,20 +158,6 @@ public class StemCommands {
                     kTelescope.MIN_METERS);
         }
 
-        private StemPosition stationaryPivotSolveWithError(double distance) {
-            double wristRads = StemSolvers.linearSolveWristTheta(
-                    kTelescope.MAX_METERS, //AHHHHHHHHHHHHHHHHHH
-                    kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
-                    distance,
-                    FieldConstants.SPEAKER.getZ());
-
-            return StemPosition.fromRadians(
-                    kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
-                    MathUtil.clamp(wristRads + kControls.STATIONARY_AIM_AT_PIVOT_RADIANS, kWrist.MIN_ANGLE,
-                            kWrist.MAX_ANGLE),
-                    kTelescope.MIN_METERS);
-        }
-
         private StemPosition stationaryPivotSolveGravity(double distance) {
             double wristRads = StemSolvers.gravitySolveWristTheta(
                     kTelescope.MIN_METERS,
@@ -206,16 +189,35 @@ public class StemCommands {
 
         private StemPosition maxHeightSolve(double distance) {
             double wristRads = StemSolvers.linearSolveWristTheta(
-                kControls.MAX_HEIGHT_AIM_AT_TELESCOPE_METERS,
-                kControls.MAX_HEIGHT_AIM_AT_PIVOT_RADIANS,
-                distance,
-                FieldConstants.SPEAKER.getZ()
-            );
+                    kControls.MAX_HEIGHT_AIM_AT_TELESCOPE_METERS,
+                    kControls.MAX_HEIGHT_AIM_AT_PIVOT_RADIANS,
+                    distance,
+                    FieldConstants.SPEAKER.getZ());
 
             return StemPosition.fromRadians(
                     kControls.MAX_HEIGHT_AIM_AT_PIVOT_RADIANS,
                     wristRads,
                     kControls.MAX_HEIGHT_AIM_AT_TELESCOPE_METERS);
+        }
+
+        private StemPosition movingBothSolve(double distance) {
+            final double max = 45.0;
+            final double min = 20.0;
+
+            double t = MathUtil.clamp((distance - 2.5), 0.0, 6.0) / 6.0;
+            double pivotRads = ((max - min) * t) + min;
+
+            double wristRads = StemSolvers.linearSolveWristTheta(
+                    kTelescope.MIN_METERS,
+                    pivotRads,
+                    distance,
+                    FieldConstants.SPEAKER.getZ());
+
+            return StemPosition.fromRadians(
+                    pivotRads,
+                    MathUtil.clamp(wristRads + pivotRads, kWrist.MIN_ANGLE,
+                            kWrist.MAX_ANGLE),
+                    kTelescope.MIN_METERS);
         }
 
         @Override
@@ -247,7 +249,7 @@ public class StemCommands {
             } else if (aimStrategy.equals(AimStrategy.MAX_HEIGHT)) {
                 hasFinished = stem.setStemPosition(maxHeightSolve(distance));
             } else if (aimStrategy.equals(AimStrategy.LOWEST_HEIGHT)) {
-                //TODO
+                hasFinished = stem.setStemPosition(movingBothSolve(distance));
             }
         }
 

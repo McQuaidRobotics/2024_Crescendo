@@ -4,8 +4,6 @@ import com.igknighters.SubsystemResources.Subsystems;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.subsystems.stem.StemPosition;
 
-@SuppressWarnings("unused")
-
 public class OperatorController extends ControllerParent {
 
     public OperatorController(int port) {
@@ -15,7 +13,7 @@ public class OperatorController extends ControllerParent {
         /// FACE BUTTONS
         this.A.binding = new Binding((trig, allss) -> {
             trig.onTrue(StemCommands.holdAt(allss.stem.get(), StemPosition.CLIMB));
-        });
+        }, Subsystems.Stem);
 
         // this.B.binding =
 
@@ -46,7 +44,7 @@ public class OperatorController extends ControllerParent {
                             this.leftStickY(),
                             this.rightStickY(),
                             0.225));
-        });
+        }, Subsystems.Stem);
 
         // this.RT.binding = DON'T USE!!! OTHER TRIGGERS COMMANDS USES BOTH TRIGGERS!!!
 

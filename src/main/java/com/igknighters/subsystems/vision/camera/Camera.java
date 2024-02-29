@@ -288,8 +288,8 @@ public interface Camera {
         }
 
         public boolean isFaulty() {
-            return outOfBounds || outOfRange || tooAmbiguous || extremeJitter || noTags || infeasibleZValue
-                    || infeasiblePitchValue || infeasibleRollValue || isDisabled;
+            return outOfBounds || outOfRange || tooAmbiguous || extremeJitter || noTags || isDisabled;
+                // || infeasibleZValue || infeasiblePitchValue || infeasibleRollValue ;
         }
     }
 }
