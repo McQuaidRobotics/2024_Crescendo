@@ -45,6 +45,8 @@ public class GlobalState {
         }
     }
 
+    private static AtomicBoolean climbing = new AtomicBoolean(false); 
+
     private static final ReentrantLock globalLock = new ReentrantLock();
 
     private static LocalizerType localizerType = LocalizerType.None;
@@ -390,5 +392,21 @@ public class GlobalState {
      */
     public static void setUnitTest(boolean isTest) {
         GlobalState.isUnitTest.set(isTest);
+    }
+
+    /**
+     * @return If the robot is currently in a climbing mode
+     */
+    public static boolean isClimbing() {
+        return GlobalState.climbing.get();
+    }
+
+    /**
+     * Declare if the robot is in a climbing mode
+     * 
+     * @param isClimbing Whether the robot is climbing or not
+     */
+    public static void setClimbing(boolean isClimbing) {
+        GlobalState.climbing.set(isClimbing);
     }
 }

@@ -12,8 +12,11 @@ import com.igknighters.util.geom.AllianceFlip;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 
+import java.util.function.DoubleSupplier;
+
 import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.commands.autos.AutosCmdRegister;
+import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
 // import com.igknighters.commands.umbrella.UmbrellaCommands;
 
@@ -47,17 +50,6 @@ public class RobotContainer {
             swerve.setDefaultCommand(new TeleopSwerveBase.TeleopSwerveOmni(swerve, driverController));
 
             setupAutos(swerve);
-        }
-
-        if (allSubsystems.stem.isPresent()) {
-            var stem = allSubsystems.stem.get();
-            stem.setDefaultCommand(stem.run(() -> {
-                stem.setStemVolts(
-                        testingController.leftStickY(0.1).getAsDouble() * RobotController.getBatteryVoltage(),
-                        (testingController.rightTrigger(true).getAsDouble()
-                                - testingController.leftTrigger(true).getAsDouble()) * 6.0,
-                        testingController.rightStickY(0.1).getAsDouble() * RobotController.getBatteryVoltage());
-            }).withName("StemDefaultCommand"));
         }
 
         // if (allSubsystems.umbrella.isPresent()) {

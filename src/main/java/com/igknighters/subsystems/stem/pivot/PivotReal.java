@@ -18,6 +18,7 @@ import edu.wpi.first.math.util.Units;
 
 import org.littletonrobotics.junction.Logger;
 
+import com.igknighters.GlobalState;
 import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.constants.HardwareIndex.StemHW;
@@ -225,7 +226,7 @@ public class PivotReal implements Pivot {
         inputs.gyroRadians = Units.degreesToRadians(gyroMeasurement.getValue() + 90);
 
         if (Math.abs(inputs.radiansPerSecond) < 0.1
-                && Math.abs(inputs.radians - getPivotRadiansPigeon()) > 0.02) {
+                && Math.abs(inputs.radians - getPivotRadiansPigeon()) > 0.1 && !GlobalState.isClimbing()) {
             seedPivot();
             Logger.recordOutput("Stem/Pivot/SeededPivot", true);
         } else {

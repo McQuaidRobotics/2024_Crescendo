@@ -7,6 +7,25 @@ import edu.wpi.first.math.geometry.Translation3d;
 
 public class StemSolvers {
 
+    public static double gravitySolveWristTheta(
+        double stemLength, 
+        double pivotRads, 
+        double horizDist, 
+        double vertDist,
+        double initialNoteVelo) {
+        
+        Translation2d wristLocation = solveWristLocationSimple2d(stemLength, pivotRads);
+        horizDist += wristLocation.getX();
+        vertDist -= wristLocation.getY();
+
+        double linearWristRads = linearSolveWristTheta(stemLength, pivotRads, horizDist, vertDist);
+        double vertcialDistanceError = linearSolveVerticalDistError(linearWristRads, horizDist, vertDist, initialNoteVelo);
+
+        double newVerticalDist = vertDist + vertcialDistanceError;
+
+        return linearSolveWristTheta(stemLength, pivotRads, horizDist, newVerticalDist);
+    }
+
     /**
      * Returns the theta of the wrist given the input parameters in radians.
      * 
@@ -75,15 +94,15 @@ public class StemSolvers {
      */
     public static double linearSolveVerticalDistError(
             double wristRads,
-            double noteInitialVelocity,
             double horizontalDist,
-            double verticalDist) {
-        // double initialVerticalVelo = noteInitialVelocity *
-        // Math.sin(endEffectorTheta);
-        double initialHorizontalVelo = noteInitialVelocity * Math.cos(wristRads);
-        double time = (horizontalDist / initialHorizontalVelo);
-        double distanceBelowTarget = (noteInitialVelocity * time) + (0.5 * -9.8 * (time * time));
-        return verticalDist - distanceBelowTarget;
+            double verticalDist,
+            double noteInitialVelocity) {
+
+            double horizontalVi = noteInitialVelocity * Math.cos(wristRads);
+            double verticalVi = noteInitialVelocity * Math.sin(wristRads);
+            double time = horizontalDist / horizontalVi;
+            double newVerticalDist = (verticalVi * time) + (0.5 * -9.8 * Math.pow(time, 2));
+            return Math.abs(verticalDist - newVerticalDist);
     }
 
     /**
@@ -137,9 +156,9 @@ public class StemSolvers {
                 Translation2d wristLocation = solveWristLocationSimple2d(stemLength, lastPivotTheta);
                 double verticalDistError = linearSolveVerticalDistError(
                         lastPivotTheta,
-                        noteInitialVelocity,
                         horizDist + wristLocation.getX(),
-                        vertDist - wristLocation.getY());
+                        vertDist - wristLocation.getY(),
+                        noteInitialVelocity);
                 lastPivotTheta = linearSolvePivotTheta(stemLength, wristRads, horizDist, vertDist + verticalDistError);
             }
 

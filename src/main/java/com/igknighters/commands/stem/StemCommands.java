@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -56,6 +57,71 @@ public class StemCommands {
         }
     }
 
+    /**
+     * Allows for limited manual control of the pivot and telescope.
+     */
+    private static class LimitedManualControlCommand extends Command {
+        private final double minPivotRads = Math.toRadians(10.0);
+        private final double maxPivotRads = Math.toRadians(94.0);
+        private final double minTelescopeMeters = kTelescope.MIN_METERS;
+        private final double maxTelescopeMeters = kTelescope.MAX_METERS;
+        
+        private Stem stem;
+        private DoubleSupplier leftStickYSup, rightStickYSup;
+        private double deadband;
+
+        private LimitedManualControlCommand(
+            Stem stem, 
+            DoubleSupplier leftStickYSup, 
+            DoubleSupplier rightStickYSup,
+            double deadband) {
+
+            addRequirements(stem);
+            this.stem = stem;
+            this.leftStickYSup = leftStickYSup;
+            this.rightStickYSup = rightStickYSup;
+            this.deadband = deadband;
+        }
+
+        @Override
+        public void initialize() {
+            GlobalState.setClimbing(true);
+        }
+
+        @Override
+        public void execute() {
+            double leftY = MathUtil.applyDeadband(leftStickYSup.getAsDouble(), deadband);
+            double rightY = MathUtil.applyDeadband(rightStickYSup.getAsDouble(), deadband);
+
+            if (MathUtil.clamp(
+                stem.getStemPosition().getPivotRads(), 
+                minPivotRads, 
+                maxPivotRads) != stem.getStemPosition().getPivotRads()) 
+                    leftY = 0.0;
+            if (MathUtil.clamp(
+                stem.getStemPosition().getTelescopeMeters(), 
+                minTelescopeMeters, 
+                maxTelescopeMeters) != stem.getStemPosition().getTelescopeMeters())
+                    rightY = 0.0;
+
+            stem.setStemVolts(
+                leftY * RobotController.getBatteryVoltage(), 
+                0.0, 
+                rightY * RobotController.getBatteryVoltage());
+        }
+
+        @Override
+        public boolean isFinished() {
+            return false;
+        }
+
+        @Override
+        public void end(boolean interupted) {
+            stem.stopMechanisms();
+            GlobalState.setClimbing(false);
+        }
+    } 
+
     public enum AimStrategy {
         STATIONARY_WRIST,
         STATIONARY_PIVOT,
@@ -64,8 +130,7 @@ public class StemCommands {
     }
 
     /**
-     * A command class that continually calculates the wrist radians needed to aim
-     * at a target
+     * A command class that continually calculates the wrist radians needed to aim at the speaker
      */
     private static class AimAtSpeakerCommand extends Command {
         private Stem stem;
@@ -90,6 +155,21 @@ public class StemCommands {
             return StemPosition.fromRadians(
                     pivotRads,
                     kControls.STATIONARY_WRIST_ANGLE,
+                    kTelescope.MIN_METERS);
+        }
+
+        private StemPosition stationaryPivotSolveGravity(double distance) {
+            double wristRads = StemSolvers.gravitySolveWristTheta(
+                    kTelescope.MIN_METERS,
+                    kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
+                    distance,
+                    FieldConstants.SPEAKER.getZ(),
+                    kUmbrella.NOTE_VELO);
+
+            return StemPosition.fromRadians(
+                    kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
+                    MathUtil.clamp(wristRads + kControls.STATIONARY_AIM_AT_PIVOT_RADIANS, kWrist.MIN_ANGLE,
+                            kWrist.MAX_ANGLE),
                     kTelescope.MIN_METERS);
         }
 
@@ -163,9 +243,8 @@ public class StemCommands {
                 hasFinished = stem.setStemPosition(stationaryWristSolve(distance));
             } else if (aimStrategy.equals(AimStrategy.STATIONARY_PIVOT)) {
                 var pose = stationaryPivotSolve(distance);
-                SmartDashboard.putNumber("Aim/Current", Units.radiansToDegrees(pose.getWristRads()));
-                SmartDashboard.putNumber("Aim/Fixed",
-                        Units.radiansToDegrees(stationaryPivotSolve(distance).getWristRads()));
+                SmartDashboard.putNumber("Aim/Linear", Units.radiansToDegrees(pose.getWristRads()));
+                SmartDashboard.putNumber("Aim/Gravity", Units.radiansToDegrees(stationaryPivotSolveGravity(distance).getWristRads()));
                 hasFinished = stem.setStemPosition(pose);
             } else if (aimStrategy.equals(AimStrategy.MAX_HEIGHT)) {
                 hasFinished = stem.setStemPosition(maxHeightSolve(distance));
@@ -262,5 +341,23 @@ public class StemCommands {
                     wristPercentOut.getAsDouble() * 12.0,
                     telescopePercentOut.getAsDouble() * 12.0);
         }).withName("Test Stem");
+    }
+
+    /**
+     * 
+     * Allows for limited manual control of the pivot and telescope on the stem.
+     * 
+     * @param stem              The stem subsystem.
+     * @param leftStickYSup     A supplier for the pivot motor output
+     * @param rightStickYSup    A supplier for the telescope motor output
+     * @param deadband          A deadband to apply to the motor outputs
+     * @return                  A command to be scheduled
+     */
+    public static Command LimitedManualControl(Stem stem, DoubleSupplier leftStickYSup, DoubleSupplier rightStickYSup, double deadband) {
+        return new LimitedManualControlCommand(
+            stem, 
+            leftStickYSup, 
+            rightStickYSup, 
+            deadband).withName("LimitedManualControl");
     }
 }
