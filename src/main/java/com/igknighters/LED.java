@@ -234,7 +234,7 @@ public class LED {
     public LED(boolean makeLed) {
         timer.start();
         if (makeLed) {
-            candle = new CANdle(52, kSwerve.CANBUS);
+            candle = new CANdle(52);
             var config = new CANdleConfiguration();
             config.v5Enabled = true;
             config.stripType = LEDStripType.RGB;
