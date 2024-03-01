@@ -20,6 +20,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Vision extends SubsystemBase {
@@ -48,6 +49,8 @@ public class Vision extends SubsystemBase {
 
     @Override
     public void periodic() {
+        if (DriverStation.isAutonomousEnabled()) return;
+
         Tracer.startTrace("VisionPeriodic");
         HashSet<Integer> seenTags = new HashSet<>();
 
