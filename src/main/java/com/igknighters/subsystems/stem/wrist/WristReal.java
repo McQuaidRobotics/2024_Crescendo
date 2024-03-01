@@ -16,7 +16,9 @@ import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.constants.HardwareIndex.StemHW;
+import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.util.BootupLogger;
+import com.igknighters.util.CANRetrier;
 import com.igknighters.util.FaultManager;
 
 import edu.wpi.first.math.util.Units;
@@ -82,8 +84,8 @@ public class WristReal implements Wrist {
         cfg.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
         cfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
-        cfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Wrist.mechanismRadsToMotorRots(kWrist.MAX_ANGLE);
-        cfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Wrist.mechanismRadsToMotorRots(kWrist.MIN_ANGLE);
+        cfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Wrist.mechanismRadsToMotorRots(StemPosition.STARTING.wristRads);
+        cfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Wrist.mechanismRadsToMotorRots(Units.degreesToRadians(72.2));
 
         return cfg;
     }
@@ -97,7 +99,7 @@ public class WristReal implements Wrist {
     }
 
     private void seedWrist() {
-        motor.setPosition(Wrist.mechanismRadsToMotorRots(inputs.radians));
+        CANRetrier.retryStatusCodeFatal(() ->motor.setPosition(Wrist.mechanismRadsToMotorRots(inputs.radians)), 10);
     }
 
     public double getAmps() {
@@ -152,13 +154,13 @@ public class WristReal implements Wrist {
         inputs.volts = motorVolts.getValue();
         inputs.temp = motorTemp.getValue();
 
-        if (Math.abs(inputs.radiansPerSecond) < 0.1
-                && Math.abs(inputs.radians - Wrist.motorRotsToMechanismRads(motorRots.getValue())) > 0.1) {
-            seedWrist();
-            Logger.recordOutput("Stem/Wrist/SeededWrist", true);
-        } else {
-            Logger.recordOutput("Stem/Wrist/SeededWrist", false);
-        }
+        // if (Math.abs(inputs.radiansPerSecond) < 0.1
+        //         && Math.abs(inputs.radians - Wrist.motorRotsToMechanismRads(motorRots.getValue())) > 0.1) {
+        //     seedWrist();
+        //     Logger.recordOutput("Stem/Wrist/SeededWrist", true);
+        // } else {
+        //     Logger.recordOutput("Stem/Wrist/SeededWrist", false);
+        // }
 
         Logger.processInputs("Stem/Wrist", inputs);
     }

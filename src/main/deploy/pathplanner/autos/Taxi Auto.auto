@@ -18,9 +18,22 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "Taxi"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Taxi"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "AimSub"
+                }
+              }
+            ]
           }
         }
       ]
