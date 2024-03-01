@@ -118,6 +118,11 @@ public class StemPosition {
         public String toString() {
             return "Stationary Wrist Stow";
         }
+
+        @Override
+        public boolean isStow() {
+            return true;
+        }
     };
 
     public static final StemPosition SUBWOOFER = new StemPosition(

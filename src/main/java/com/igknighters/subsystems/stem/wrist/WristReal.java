@@ -84,8 +84,8 @@ public class WristReal implements Wrist {
         cfg.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
         cfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
-        cfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Wrist.mechanismRadsToMotorRots(StemPosition.STARTING.wristRads);
-        cfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Wrist.mechanismRadsToMotorRots(Units.degreesToRadians(72.2));
+        cfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Wrist.mechanismRadsToMotorRots(StemPosition.STARTING.wristRads - 0.3);
+        cfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Wrist.mechanismRadsToMotorRots(kWrist.FROZEN_WRIST_ANGLE - Units.degreesToRadians(0.3));
 
         return cfg;
     }
@@ -135,12 +135,12 @@ public class WristReal implements Wrist {
 
     @Override
     public void periodic() {
-        // FaultManager.captureFault(
-        //         StemHW.WristMotor,
-        //         BaseStatusSignal.refreshAll(
-        //                 motorRots, motorVelo,
-        //                 motorVolts, motorAmps
-        //                 /*, motorTemp */));
+        FaultManager.captureFault(
+                StemHW.WristMotor,
+                BaseStatusSignal.refreshAll(
+                        motorRots, motorVelo,
+                        motorVolts, motorAmps,
+                        motorTemp));
 
         FaultManager.captureFault(
                 StemHW.WristEncoder,

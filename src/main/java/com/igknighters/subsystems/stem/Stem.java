@@ -124,6 +124,10 @@ public class Stem extends SubsystemBase {
         wrist.stopMechanism();
     }
 
+    public void setWristVolts(double volts) {
+        wrist.setVoltageOut(volts);
+    }
+
     /**
      * Meant as the main api for controlling the stem,
      * this method takes in a {@link StemPosition} and sets the

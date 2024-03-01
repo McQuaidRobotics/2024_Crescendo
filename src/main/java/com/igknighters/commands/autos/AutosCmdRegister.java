@@ -4,9 +4,12 @@ import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.teleop.AutoSwerveTargetSpeaker;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
+import com.igknighters.constants.ConstValues.kAuto;
 import com.igknighters.constants.ConstValues.kControls;
+import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
+import com.igknighters.subsystems.stem.wrist.WristRealSuicidal;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -81,7 +84,7 @@ public class AutosCmdRegister {
         registerCommand(
             "Spinup",
             UmbrellaCommands
-                .waitUntilSpunUp(umbrella, kControls.SHOOTER_RPM, 0.9)
+                .waitUntilSpunUp(umbrella, kAuto.AUTO_SHOOTER_RPM, 0.9)
                 .withName("Spinup")
         );
 
@@ -93,8 +96,15 @@ public class AutosCmdRegister {
 
         registerCommand(
                 "AimSub",
-                StemCommands.moveTo(stem, StemPosition.SUBWOOFER)
+                StemCommands.moveTo(stem, StemPosition.SUBWOOFER).withTimeout(1.0)
                     .withName("AimSub")
+        );
+
+        registerCommand(
+            "MoveWrist",
+            Commands.run(() -> stem.setWristVolts(-4.5))
+                .until(() -> kWrist.FROZEN_WRIST_ANGLE - stem.getStemPosition().wristRads > 0.0)
+                .finallyDo(() -> WristRealSuicidal.sweetReleaseOfDeath = true)
         );
 
         registerCommand(

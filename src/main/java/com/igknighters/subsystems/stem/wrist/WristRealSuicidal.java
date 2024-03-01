@@ -1,6 +1,7 @@
 package com.igknighters.subsystems.stem.wrist;
 
 import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class WristRealSuicidal extends WristReal {
 
@@ -37,5 +38,6 @@ public class WristRealSuicidal extends WristReal {
     public void periodic() {
         super.periodic();
         if (ampsLinearFilter.calculate(super.getAmps()) > 60.0) sweetReleaseOfDeath = true;
+        SmartDashboard.putBoolean("SweetReleaseOfDeath", sweetReleaseOfDeath);
     }
 }
