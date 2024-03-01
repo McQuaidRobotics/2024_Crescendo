@@ -101,7 +101,7 @@ public class WristReal implements Wrist {
     }
 
     @Override
-    public void setWristRadians(Double radians) {
+    public void setWristRadians(double radians) {
         inputs.targetRadians = radians;
         var posControlRequest = new PositionTorqueCurrentFOC(
                 Wrist.mechanismRadsToMotorRots(radians));

@@ -33,7 +33,7 @@ public class WristSim implements Wrist {
     }
 
     @Override
-    public void setWristRadians(Double radians) {
+    public void setWristRadians(double radians) {
         setRadians = MathUtil.clamp(radians, kWrist.MIN_ANGLE, kWrist.MAX_ANGLE);
         double desiredMotorRads = Wrist.mechanismRadsToMotorRads(setRadians);
         double volts = pidController.calculate(motorRads, desiredMotorRads);

@@ -14,7 +14,7 @@ public class WristDisabled implements Wrist {
     }
 
     @Override
-    public void setWristRadians(Double radians) {
+    public void setWristRadians(double radians) {
         // var clampedTarget = MathUtil.clamp(radians, kWrist.MIN_ANGLE, kWrist.MAX_ANGLE);
         currentRads = currentRads + MathUtil.clamp(radians - currentRads, -slewRate, slewRate);
     }

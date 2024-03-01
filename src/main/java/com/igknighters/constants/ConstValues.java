@@ -409,7 +409,7 @@ public final class ConstValues {
 
             public static final double MAX_VELOCITY = 1300;
             public static final double MAX_ACCELERATION = 3900;
-            public static final double MAX_JERK = 10400;
+            public static final double MAX_JERK = 7800;
 
             public static final double MIN_ANGLE = 7.0 * Conv.DEGREES_TO_RADIANS;
 
