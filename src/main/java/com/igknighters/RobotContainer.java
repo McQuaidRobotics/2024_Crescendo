@@ -26,8 +26,9 @@ public class RobotContainer {
 
     private final AllSubsystems allSubsystems;
 
+    @SuppressWarnings("unused")
     public RobotContainer() {
-        DriverStation.silenceJoystickConnectionWarning(ConstValues.DEBUG);
+        DriverStation.silenceJoystickConnectionWarning(ConstValues.DEBUG || Robot.isSimulation());
 
         driverController = new DriverController(0);
         operatorController = new OperatorController(1);
@@ -49,7 +50,7 @@ public class RobotContainer {
             setupAutos(swerve);
         }
 
-        if (allSubsystems.stem.isPresent()) {
+        if (allSubsystems.stem.isPresent() && ConstValues.DEBUG) {
             var stem = allSubsystems.stem.get();
             stem.setDefaultCommand(stem.run(() -> {
                 stem.setStemVolts(
