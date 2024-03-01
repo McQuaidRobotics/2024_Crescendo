@@ -2,8 +2,6 @@ package com.igknighters.util;
 
 import java.util.function.Supplier;
 
-import javax.management.RuntimeErrorException;
-
 import com.ctre.phoenix6.StatusCode;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -15,7 +13,6 @@ public class CANRetrier {
         public CANRetryError() {
             super("Can retry limit exceded, marked fatal!!!!");
         }
-        
     } 
 
     /**

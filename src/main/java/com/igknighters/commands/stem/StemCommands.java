@@ -6,7 +6,6 @@ import com.igknighters.GlobalState;
 import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kUmbrella;
-import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.subsystems.stem.Stem;

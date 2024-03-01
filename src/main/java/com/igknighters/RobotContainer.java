@@ -48,45 +48,17 @@ public class RobotContainer {
 
             setupAutos(swerve);
         }
-        
-        // if (allSubsystems.stem.isPresent()) {
-        //     var stem = allSubsystems.stem.get();
-        //     stem.setDefaultCommand(stem.run(() -> {
-        //         stem.setStemVolts(
-        //                 testingController.leftStickY(0.1).getAsDouble() * 12.0,
-        //                 (testingController.rightTrigger(true).getAsDouble()
-        //                         - testingController.leftTrigger(true).getAsDouble()) * 6.0,
-        //                 testingController.rightStickY(0.1).getAsDouble() * 12.0);
-        //     }).withName("StemDefaultCommand"));
-        // }
 
-        // if (allSubsystems.umbrella.isPresent()) {
-        //     var umbrella = allSubsystems.umbrella.get();
-        //     Rectangle2d friendlyArea = new Rectangle2d(
-        //             0, 0,
-        //             FieldConstants.FIELD_LENGTH * 0.65,
-        //             FieldConstants.FIELD_WIDTH);
-        //     PolyTrigger trigger = new PolyTrigger(
-        //         (AllianceFlip.isBlue()
-        //             ? friendlyArea
-        //             : AllianceFlip.flipRectangle(friendlyArea)
-        //         ).asPolygon2d()
-        //     );
-        //     umbrella.setDefaultCommand(umbrella.run(() -> {
-        //         if (trigger.getAsBoolean()) {
-        //             umbrella.spinupShooterToRPM(400);
-        //             umbrella.runIntakeAt(0);
-        //         }
-        //     }).withName("UmbrellaDefaultCommand"));
-        // }
-
-        // if (allSubsystems.umbrella.isPresent()) {
-        //     var umbrella = allSubsystems.umbrella.get();
-        //     umbrella.setDefaultCommand(
-        //         UmbrellaCommands.spinUmbrellaBoth(umbrella)
-        //             .withName("UmbrellaDefaultCommand")
-        //     );
-        // }
+        if (allSubsystems.stem.isPresent()) {
+            var stem = allSubsystems.stem.get();
+            stem.setDefaultCommand(stem.run(() -> {
+                stem.setStemVolts(
+                        testingController.leftStickY(0.1).getAsDouble() * 12.0,
+                        (testingController.rightTrigger(true).getAsDouble()
+                                - testingController.leftTrigger(true).getAsDouble()) * 6.0,
+                        testingController.rightStickY(0.1).getAsDouble() * 12.0);
+            }).withName("StemDefaultCommand"));
+        }
     }
 
     private void setupAutos(Swerve swerve) {
