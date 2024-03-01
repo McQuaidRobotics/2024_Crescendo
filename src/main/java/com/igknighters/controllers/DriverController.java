@@ -62,7 +62,7 @@ public class DriverController extends ControllerParent {
                         Commands.parallel(
                             StemCommands.holdAt(
                                 allss.stem.get(),
-                                StemPosition.STARTING
+                                StemPosition.SUBWOOFER
                             ),
                             UmbrellaCommands.spinupShooter(
                                 allss.umbrella.get(),
@@ -134,7 +134,7 @@ public class DriverController extends ControllerParent {
 
         // this.DPD.binding =
 
-        // this.DPL.binding =
+        // this.DPL.binding = 
 
         this.DPU.binding = new Binding((trig, allss) -> {
             trig.onTrue(

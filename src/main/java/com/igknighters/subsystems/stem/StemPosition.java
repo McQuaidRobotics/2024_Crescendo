@@ -109,7 +109,7 @@ public class StemPosition {
 
     public static final StemPosition STAGE_STOW = new StemPosition(
         Units.degreesToRadians(32.1), 
-        Units.degreesToRadians(71.0), 
+        Units.degreesToRadians(71.5), 
         0.40982736) {
 
         @Override
@@ -117,4 +117,15 @@ public class StemPosition {
             return "Stage Stow";
         }
     };
+
+    public static final StemPosition SUBWOOFER = new StemPosition(
+        0.3750953350652253 + Units.degreesToRadians(0.5),
+        Units.degreesToRadians(71.5), 
+        kTelescope.MIN_METERS + 0.05) {
+
+            @Override
+            public String toString() {
+                return "Subwoofer";
+            }
+        };
 }
