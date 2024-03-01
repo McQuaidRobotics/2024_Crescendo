@@ -28,7 +28,7 @@ public class Umbrella extends SubsystemBase {
     public Umbrella() {
         if (RobotBase.isSimulation()) {
             intake = new IntakeSim();
-            shooter = new ShooterSim();
+            shooter = new ShooterDisabled();
         } else {
             intake = new IntakeReal();
             shooter = new ShooterReal();

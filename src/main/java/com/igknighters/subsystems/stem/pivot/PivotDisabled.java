@@ -19,7 +19,6 @@ public class PivotDisabled implements Pivot {
 
     @Override
     public void setPivotRadians(double radians) {
-        // var clampedTarget = MathUtil.clamp(radians, kPivot.MIN_ANGLE, kPivot.MAX_ANGLE);
         inputs.radians = inputs.radians + MathUtil.clamp(radians - inputs.radians, -slewRate, slewRate);
     }
 
