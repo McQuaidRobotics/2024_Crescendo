@@ -3,6 +3,9 @@ package com.igknighters.controllers;
 import com.igknighters.SubsystemResources.Subsystems;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.subsystems.stem.StemPosition;
+import com.igknighters.subsystems.stem.wrist.WristRealSuicidal;
+
+import edu.wpi.first.wpilibj2.command.Commands;
 
 public class OperatorController extends ControllerParent {
 
@@ -12,7 +15,14 @@ public class OperatorController extends ControllerParent {
 
         /// FACE BUTTONS
         this.A.binding = new Binding((trig, allss) -> {
-            trig.onTrue(StemCommands.holdAt(allss.stem.get(), StemPosition.CLIMB));
+            trig.onTrue(
+                Commands.sequence(
+                    Commands.runOnce(
+                        () -> WristRealSuicidal.sweetReleaseOfDeath = false
+                    ),
+                    StemCommands.holdAt(allss.stem.get(), StemPosition.CLIMB)
+                )
+            );
         }, Subsystems.Stem);
 
         // this.B.binding =

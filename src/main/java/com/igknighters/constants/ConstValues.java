@@ -480,7 +480,7 @@ public final class ConstValues {
 
             public static final double MIN_ANGLE = 29.0 * Conv.DEGREES_TO_RADIANS;
             public static final double MAX_ANGLE = 115.0 * Conv.DEGREES_TO_RADIANS;
-            public static final double FROZEN_WRIST_ANGLE = Units.degreesToRadians(72.0);
+            public static final double FROZEN_WRIST_ANGLE = Units.degreesToRadians(55.0);
 
             public static final double MAX_VELOCITY = 1200;
             public static final double MAX_ACCELERATION = 1800;
