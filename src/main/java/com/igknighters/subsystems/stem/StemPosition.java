@@ -1,6 +1,8 @@
 package com.igknighters.subsystems.stem;
 
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
+import com.igknighters.constants.ConstValues.kStem.kWrist;
+
 import edu.wpi.first.math.util.Units;
 
 public class StemPosition {
@@ -70,7 +72,7 @@ public class StemPosition {
     };
 
     public static final StemPosition INTAKE = new StemPosition(Units.degreesToRadians(10.8),
-            Units.degreesToRadians(72.0), kTelescope.MIN_METERS + Units.inchesToMeters(4.7)) {
+            kWrist.FROZEN_WRIST_ANGLE, kTelescope.MIN_METERS + Units.inchesToMeters(4.7)) {
 
         @Override
         public String toString() {
@@ -97,8 +99,8 @@ public class StemPosition {
     };
 
     public static final StemPosition STARTING = new StemPosition(
-            1.114, //63.8
-            1.93, //110.58
+            1.114, // 63.8
+            1.93, // 110.58
             kTelescope.MIN_METERS) {
 
         @Override
@@ -107,10 +109,10 @@ public class StemPosition {
         }
     };
 
-    public static final StemPosition STATIONARY_WRIST_STOW = new StemPosition(
-        Units.degreesToRadians(45.0), 
-        Units.degreesToRadians(72.0), 
-        kTelescope.MIN_METERS) {
+    public static final StemPosition FROZEN_WRIST_STOW = new StemPosition(
+            Units.degreesToRadians(45.0),
+            kWrist.FROZEN_WRIST_ANGLE,
+            kTelescope.MIN_METERS) {
 
         @Override
         public String toString() {
@@ -119,13 +121,13 @@ public class StemPosition {
     };
 
     public static final StemPosition SUBWOOFER = new StemPosition(
-        0.3750953350652253 + Units.degreesToRadians(0.5),
-        Units.degreesToRadians(72.0), 
-        kTelescope.MIN_METERS + 0.05) {
+            0.3750953350652253 + Units.degreesToRadians(0.5),
+            kWrist.FROZEN_WRIST_ANGLE,
+            kTelescope.MIN_METERS + 0.05) {
 
-            @Override
-            public String toString() {
-                return "Subwoofer";
-            }
-        };
+        @Override
+        public String toString() {
+            return "Subwoofer";
+        }
+    };
 }
