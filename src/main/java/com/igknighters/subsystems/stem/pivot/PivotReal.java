@@ -202,15 +202,15 @@ public class PivotReal implements Pivot {
         FaultManager.captureFault(
                 StemHW.LeaderMotor,
                 BaseStatusSignal.refreshAll(
-                        motorRots, motorVelo,
-                        leaderMotorVolts, leaderMotorAmps,
-                        leaderMotorTemp, reverseLimitSwitch,
-                        forwardLimitSwitch));
+                        motorRots /*, motorVelo, */
+                        /* leaderMotorVolts, leaderMotorAmps, */
+                        /* leaderMotorTemp,  reverseLimitSwitch, */
+                        /* forwardLimitSwitch */));
 
-        FaultManager.captureFault(
-                StemHW.FollowerMotor,
-                BaseStatusSignal.refreshAll(
-                        followerMotorAmps, followerMotorTemp, followerMotorVolts));
+        // FaultManager.captureFault(
+        //         StemHW.FollowerMotor,
+        //         BaseStatusSignal.refreshAll(
+        //                 followerMotorAmps, followerMotorTemp, followerMotorVolts));
 
         FaultManager.captureFault(
                 StemHW.Pigeon2,

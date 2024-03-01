@@ -154,8 +154,8 @@ public class TelescopeReal implements Telescope {
             StemHW.TelescopeMotor,
             BaseStatusSignal.refreshAll(
                 motorRots, motorVelo,
-                motorVolts, motorAmps,
-                motorTemp, forwardLimitSwitch,
+                /* motorVolts, motorAmps ,*/
+                /* motorTemp, */ forwardLimitSwitch,
                 reverseLimitSwitch));
 
         inputs.meters = motorRotsToMechMeters(motorRots.getValue());

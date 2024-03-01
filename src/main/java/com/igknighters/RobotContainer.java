@@ -61,7 +61,8 @@ public class RobotContainer {
             }).withName("StemDefaultCommand"));
         }
 
-        double staticSubShotRads = StemSolvers.linearSolvePivotTheta(kTelescope.MIN_METERS, Units.degreesToRadians(71.5), Units.inchesToMeters(46.088 + 2.8), FieldConstants.SPEAKER.getZ());
+        double staticSubShotRads = StemSolvers.linearSolvePivotTheta(kTelescope.MIN_METERS,
+                Units.degreesToRadians(71.5), Units.inchesToMeters(46.088 + 2.8), FieldConstants.SPEAKER.getZ());
         System.out.println(staticSubShotRads);
     }
 
@@ -94,9 +95,10 @@ public class RobotContainer {
     }
 
     AllSubsystems getAllSubsystemsForTest() {
-        if (!GlobalState.isUnitTest()) {
-            throw new RuntimeException("This method should only be called in unit tests");
-        }
+        // if (!GlobalState.isUnitTest()) {
+        // throw new RuntimeException("This method should only be called in unit
+        // tests");
+        // }
         return allSubsystems;
     }
 }

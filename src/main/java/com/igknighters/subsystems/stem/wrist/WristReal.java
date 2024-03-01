@@ -100,6 +100,10 @@ public class WristReal implements Wrist {
         motor.setPosition(Wrist.mechanismRadsToMotorRots(inputs.radians));
     }
 
+    public double getAmps() {
+        return inputs.amps;
+    }
+
     @Override
     public void setWristRadians(double radians) {
         inputs.targetRadians = radians;
@@ -129,17 +133,17 @@ public class WristReal implements Wrist {
 
     @Override
     public void periodic() {
-        FaultManager.captureFault(
-                StemHW.WristMotor,
-                BaseStatusSignal.refreshAll(
-                        motorRots, motorVelo,
-                        motorVolts, motorAmps,
-                        motorTemp));
+        // FaultManager.captureFault(
+        //         StemHW.WristMotor,
+        //         BaseStatusSignal.refreshAll(
+        //                 motorRots, motorVelo,
+        //                 motorVolts, motorAmps
+        //                 /*, motorTemp */));
 
         FaultManager.captureFault(
                 StemHW.WristEncoder,
                 BaseStatusSignal.refreshAll(
-                        cancoderRots, cancoderVelo));
+                        cancoderRots));
 
         inputs.radians = Units.rotationsToRadians(cancoderRots.getValue());
         inputs.radiansPerSecond = Units.rotationsToRadians(cancoderVelo.getValue());

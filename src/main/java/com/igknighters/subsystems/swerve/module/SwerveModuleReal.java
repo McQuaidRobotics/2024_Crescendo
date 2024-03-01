@@ -214,10 +214,10 @@ public class SwerveModuleReal implements SwerveModule {
     public void periodic() {
         BaseStatusSignal.refreshAll(
                 drivePositionSignal, driveVelocitySignal,
-                driveVoltSignal, driveAmpSignal,
+                /* driveVoltSignal, driveAmpSignal, */
                 anglePositionSignal, angleVelocitySignal,
-                angleVoltSignal, angleAmpSignal,
-                angleAbsoluteSignal, angleAbsoluteVeloSignal);
+                /* angleVoltSignal, angleAmpSignal ,*/
+                angleAbsoluteSignal /*, angleAbsoluteVeloSignal */);
 
         inputs.angleAbsoluteRads = Units.rotationsToRadians(angleAbsoluteSignal.getValue());
         inputs.angleVeloRadPS = Units.rotationsToRadians(angleAbsoluteVeloSignal.getValue());

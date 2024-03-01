@@ -93,10 +93,10 @@ public class GyroReal implements Gyro {
     @Override
     public void periodic() {
         BaseStatusSignal.refreshAll(
-                pitchSignal, pitchVeloSignal,
-                rollSignal, rollVeloSignal,
-                yawSignal, yawVeloSignal,
-                xAccel, yAccel);
+                // pitchSignal, pitchVeloSignal,
+                // rollSignal, rollVeloSignal,
+                yawSignal /* , yawVeloSignal, */
+                /* xAccel, yAccel */);
 
         inputs.pitchRads = Units.degreesToRadians(pitchSignal.getValue());
         inputs.pitchVelRadsPerSec = Units.degreesToRadians(pitchVeloSignal.getValue());

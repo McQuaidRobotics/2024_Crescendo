@@ -4,18 +4,14 @@ import java.util.HashMap;
 import java.util.function.BiConsumer;
 
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.NT4Publisher;
+// import org.littletonrobotics.junction.networktables.NT4Publisher;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
 
 import com.igknighters.SubsystemResources.AllSubsystems;
-import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.constants.ConstValues;
-import com.igknighters.subsystems.stem.StemPosition;
-import com.igknighters.subsystems.stem.wrist.WristRealSuicidal;
 import com.igknighters.util.CANBusLogging;
 import com.igknighters.util.ShuffleboardApi;
 import com.igknighters.util.Tracer;
@@ -69,17 +65,7 @@ public class Robot extends UnitTestableRobot {
         if (autoCmd != null) {
             Logger.recordOutput("CurrentAutoCommand", autoCmd.getName());
             System.out.println("---- Starting auto command: " + autoCmd.getName() + " ----");
-            if (getAllSubsystemsForTest().stem.isPresent()) {
-                scheduler.schedule(Commands.sequence(
-                    StemCommands.moveTo(
-                        getAllSubsystemsForTest().stem.get(),
-                        StemPosition.SUBWOOFER
-                    ).andThen(
-                        Commands.runOnce(() -> WristRealSuicidal.sweetReleaseOfDeath = true)
-                    ),
-                    autoCmd
-                ).withName(autoCmd.getName()));
-            }
+            scheduler.schedule(autoCmd);
         }
     }
 
@@ -155,13 +141,12 @@ public class Robot extends UnitTestableRobot {
                 DriverStation.reportWarning("DATALOGS USB NOT PLUGGED IN!!!", false);
             } else {
                 Logger.addDataReceiver(
-                    new ExtensibleWPILOGWriter(path)
-                        .withNTPrefixListener("/Visualizers")
-                        .withNTPrefixListener("/PathPlanner")
-                );
+                        new ExtensibleWPILOGWriter(path)
+                                .withNTPrefixListener("/Visualizers")
+                                .withNTPrefixListener("/PathPlanner"));
             }
         }
-        Logger.addDataReceiver(new NT4Publisher());
+        // Logger.addDataReceiver(new NT4Publisher());
         Logger.start();
 
         HashMap<String, Integer> commandCounts = new HashMap<>();
@@ -192,9 +177,10 @@ public class Robot extends UnitTestableRobot {
 
     @Override
     public AllSubsystems getAllSubsystemsForTest() {
-        if (!GlobalState.isUnitTest()) {
-            throw new RuntimeException("This method should only be called in unit tests");
-        }
+        // if (!GlobalState.isUnitTest()) {
+        // throw new RuntimeException("This method should only be called in unit
+        // tests");
+        // }
         return roboContainer.getAllSubsystemsForTest();
     }
 }
