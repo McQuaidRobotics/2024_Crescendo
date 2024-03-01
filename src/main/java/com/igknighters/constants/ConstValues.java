@@ -97,7 +97,7 @@ public final class ConstValues {
         public static final double MAX_HEIGHT_AIM_AT_PIVOT_RADIANS = 86.0 * Conv.DEGREES_TO_RADIANS;
         public static final double MAX_HEIGHT_AIM_AT_TELESCOPE_METERS = kTelescope.MAX_METERS;
 
-        public static final AimStrategy DEFAULT_AIM_STRATEGY = AimStrategy.STATIONARY_PIVOT;
+        public static final AimStrategy DEFAULT_AIM_STRATEGY = AimStrategy.STATIONARY_WRIST;
     }
 
     public static final class kVision {

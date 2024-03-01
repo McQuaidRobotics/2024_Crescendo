@@ -7,6 +7,7 @@ import com.igknighters.commands.swerve.teleop.AutoSwerveTargetSpeaker;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.subsystems.stem.Stem;
+import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -85,6 +86,12 @@ public class AutosCmdRegister {
                 "Aim",
                 StemCommands.aimAtSpeaker(stem, false)
                     .withName("Aim")
+        );
+
+        registerCommand(
+                "AimSub",
+                StemCommands.holdAt(stem, StemPosition.SUBWOOFER)
+                    .withName("AimSub")
         );
 
         registerCommand(

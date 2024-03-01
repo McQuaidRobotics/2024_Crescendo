@@ -49,9 +49,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "Spinup"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Spinup"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "AimSub"
+                }
+              }
+            ]
           }
         },
         {
@@ -86,9 +99,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "Spinup"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Spinup"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "AimSub"
+                }
+              }
+            ]
           }
         },
         {
@@ -123,9 +149,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "Spinup"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Spinup"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "AimSub"
+                }
+              }
+            ]
           }
         },
         {
@@ -160,9 +199,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "Spinup"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Spinup"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "AimSub"
+                }
+              }
+            ]
           }
         },
         {
