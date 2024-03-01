@@ -80,7 +80,7 @@ public class StemPosition {
         }
     };
 
-    public static final StemPosition AMP = new StemPosition(Units.degreesToRadians(90.0), Units.degreesToRadians(43.0),
+    public static final StemPosition AMP = new StemPosition(Units.degreesToRadians(90.0), kWrist.FROZEN_WRIST_ANGLE,
             kTelescope.MIN_METERS + Units.inchesToMeters(5.5)) {
 
         @Override

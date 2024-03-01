@@ -133,7 +133,10 @@ public class DriverController extends ControllerParent {
 
         this.DPU.binding = new Binding((trig, allss) -> {
             trig.onTrue(
-                    StemCommands.holdAt(allss.stem.get(), StemPosition.STARTING));
+                Commands.sequence(
+                    Commands.runOnce(() -> WristRealSuicidal.sweetReleaseOfDeath = false),
+                    StemCommands.holdAt(allss.stem.get(), StemPosition.STARTING))
+                );
         }, Subsystems.Stem);
     }
 }

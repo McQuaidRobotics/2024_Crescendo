@@ -28,7 +28,7 @@ public class HigherOrderCommands {
                 //         }).andThen()
                 UmbrellaCommands.intake(umbrella)
                 .until(() -> umbrella.holdingGamepiece()))
-                .andThen(StemCommands.moveTo(stem, StemPosition.STOW))
+                .andThen(StemCommands.moveTo(stem, StemPosition.FROZEN_WRIST_STOW))
                 .withName("Intake");
     }
 
@@ -101,7 +101,7 @@ public class HigherOrderCommands {
         ).andThen(
             StemCommands.moveTo(
                 stem,
-                StemPosition.STOW
+                StemPosition.FROZEN_WRIST_STOW
             )
         ).withName("Shoot");
     }
