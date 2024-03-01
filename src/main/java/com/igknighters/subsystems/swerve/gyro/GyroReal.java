@@ -11,6 +11,7 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import com.igknighters.GlobalState;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.util.BootupLogger;
+import com.igknighters.util.CANRetrier;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
@@ -27,7 +28,7 @@ public class GyroReal implements Gyro {
 
     public GyroReal() {
         gyro = new Pigeon2(ConstValues.kSwerve.PIGEON_ID, ConstValues.kSwerve.CANBUS);
-        gyro.getConfigurator().apply(new Pigeon2Configuration());
+        CANRetrier.retryStatusCode(() -> gyro.getConfigurator().apply(new Pigeon2Configuration()), 5);
 
         rollSignal = gyro.getRoll();
         pitchSignal = gyro.getPitch();

@@ -24,6 +24,7 @@ import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kSwerve.AngleMotorConstants;
 import com.igknighters.constants.ConstValues.kSwerve.DriveMotorConstants;
 import com.igknighters.util.BootupLogger;
+import com.igknighters.util.CANRetrier;
 
 public class SwerveModuleReal implements SwerveModule {
     private final TalonFX driveMotor;
@@ -55,9 +56,9 @@ public class SwerveModuleReal implements SwerveModule {
         angleMotor = new TalonFX(moduleConstants.getAngleMotorID(), kSwerve.CANBUS);
         angleEncoder = new CANcoder(moduleConstants.getCancoderID(), kSwerve.CANBUS);
 
-        driveMotor.getConfigurator().apply(driveMotorConfig());
-        angleMotor.getConfigurator().apply(angleMotorConfig());
-        angleEncoder.getConfigurator().apply(cancoderConfig());
+        CANRetrier.retryStatusCode(() -> driveMotor.getConfigurator().apply(driveMotorConfig()), 5);
+        CANRetrier.retryStatusCode(() -> angleMotor.getConfigurator().apply(angleMotorConfig()), 5);
+        CANRetrier.retryStatusCode(() -> angleEncoder.getConfigurator().apply(cancoderConfig()), 5);
 
         drivePositionSignal = driveMotor.getPosition();
         driveVelocitySignal = driveMotor.getVelocity();
