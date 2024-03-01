@@ -5,6 +5,7 @@ import java.util.function.BiConsumer;
 
 import org.littletonrobotics.junction.Logger;
 // import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -146,7 +147,7 @@ public class Robot extends UnitTestableRobot {
                                 .withNTPrefixListener("/PathPlanner"));
             }
         }
-        // Logger.addDataReceiver(new NT4Publisher());
+        Logger.addDataReceiver(new NT4Publisher());
         Logger.start();
 
         HashMap<String, Integer> commandCounts = new HashMap<>();

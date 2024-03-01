@@ -61,7 +61,7 @@ public final class ConstValues {
         }
     }
 
-    public static final boolean DEBUG = false; // this should be false for competition
+    public static final boolean DEBUG = true; // this should be false for competition
     public static final double PERIODIC_TIME = 0.02; // 20ms
 
     public static final class kRobotCollisionGeometry {
@@ -194,7 +194,7 @@ public final class ConstValues {
         /** User defined acceleration time in seconds */
         public static final double ACCELERATION_TIME = 0.9;
 
-        public static final double SLIP_CURRENT = 75.0;
+        public static final double SLIP_CURRENT = 50.0;
 
         public static final double MAX_DRIVE_VELOCITY = ((Motors.Falcon500Foc.FREE_SPEED / TAU) / DRIVE_GEAR_RATIO)
                 * WHEEL_CIRCUMFERENCE * MOTOR_CLOSED_LOOP_OUTPUT_SCALAR;
