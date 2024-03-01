@@ -38,7 +38,7 @@ public class Stem extends SubsystemBase {
         } else {
             pivot = new PivotReal();
             telescope = new TelescopeReal();
-            wrist = new WristReal();
+            wrist = new WristRealSuicidal();
         }
 
         visualizer = new StemVisualizer();

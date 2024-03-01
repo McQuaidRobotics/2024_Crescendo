@@ -7,6 +7,7 @@ import com.igknighters.commands.swerve.SwerveCommands;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.subsystems.stem.StemPosition;
+import com.igknighters.subsystems.stem.wrist.WristRealSuicidal;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
@@ -61,7 +62,10 @@ public class DriverController extends ControllerParent {
                                             kControls.SHOOTER_RPM,
                                             ShooterSpinupReason.ManualAimSpeaker))
                                     .finallyDo(
-                                            () -> allss.umbrella.get().stopAll()));
+                                            () -> {
+                                                allss.umbrella.get().stopAll();
+                                                WristRealSuicidal.sweetReleaseOfDeath = true;
+                                            }));
                 },
                 Subsystems.Stem,
                 Subsystems.Umbrella);
