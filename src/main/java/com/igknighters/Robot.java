@@ -9,6 +9,7 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 
 import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.constants.ConstValues;
@@ -65,7 +66,10 @@ public class Robot extends UnitTestableRobot {
         if (autoCmd != null) {
             Logger.recordOutput("CurrentAutoCommand", autoCmd.getName());
             System.out.println("---- Starting auto command: " + autoCmd.getName() + " ----");
-            scheduler.schedule(autoCmd);
+            scheduler.schedule(Commands.sequence(
+                Commands.none(),
+                autoCmd
+            ).withName(autoCmd.getName()));
         }
     }
 

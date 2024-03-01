@@ -18,7 +18,7 @@ public class WristDisabled implements Wrist {
     }
 
     @Override
-    public void setWristRadians(Double radians) {
+    public void setWristRadians(double radians) {
         inputs.targetRadians = radians;
         inputs.radians = inputs.radians + MathUtil.clamp(radians - inputs.radians, -slewRate, slewRate);
     }
