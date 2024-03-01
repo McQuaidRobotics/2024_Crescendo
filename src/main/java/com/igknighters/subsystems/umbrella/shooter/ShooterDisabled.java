@@ -1,5 +1,7 @@
 package com.igknighters.subsystems.umbrella.shooter;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.igknighters.constants.ConstValues;
 
 import edu.wpi.first.math.MathUtil;
@@ -54,5 +56,7 @@ public class ShooterDisabled implements Shooter {
 
         inputs.targetRadiansPerSecondLeft = targetRadPerSec;
         inputs.targetRadiansPerSecondRight = targetRadPerSec;
+
+        Logger.processInputs("/Umbrella/Shooter", inputs);
     }
 }
