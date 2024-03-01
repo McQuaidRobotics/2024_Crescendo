@@ -120,6 +120,10 @@ public class Stem extends SubsystemBase {
         return pivotSuccess && telescopeSuccess && wristSuccess;
     }
 
+    public void stopWrist() {
+        wrist.stopMechanism();
+    }
+
     /**
      * Meant as the main api for controlling the stem,
      * this method takes in a {@link StemPosition} and sets the

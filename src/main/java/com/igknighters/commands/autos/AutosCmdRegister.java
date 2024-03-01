@@ -81,7 +81,7 @@ public class AutosCmdRegister {
         registerCommand(
             "Spinup",
             UmbrellaCommands
-                .waitUntilSpunUp(umbrella, kControls.SHOOTER_RPM, 1.2)
+                .waitUntilSpunUp(umbrella, kControls.SHOOTER_RPM, 0.9)
                 .withName("Spinup")
         );
 
@@ -93,7 +93,7 @@ public class AutosCmdRegister {
 
         registerCommand(
                 "AimSub",
-                StemCommands.holdAt(stem, StemPosition.SUBWOOFER)
+                StemCommands.moveTo(stem, StemPosition.SUBWOOFER)
                     .withName("AimSub")
         );
 

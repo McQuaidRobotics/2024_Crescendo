@@ -13,7 +13,6 @@ import com.ctre.phoenix.led.StrobeAnimation;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.ColorFlowAnimation.Direction;
 import com.igknighters.constants.ConstValues;
-import com.igknighters.constants.ConstValues.kSwerve;
 import com.pathplanner.lib.auto.AutoBuilder.TriFunction;
 
 import edu.wpi.first.math.MathUtil;

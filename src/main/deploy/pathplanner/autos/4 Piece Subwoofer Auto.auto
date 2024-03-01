@@ -12,9 +12,22 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "Spinup"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Spinup"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "AimSub"
+                }
+              }
+            ]
           }
         },
         {
@@ -43,12 +56,6 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "4p sub - 2"
-          }
-        },
-        {
           "type": "parallel",
           "data": {
             "commands": [
@@ -62,6 +69,12 @@
                 "type": "named",
                 "data": {
                   "name": "AimSub"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "4p sub - 2"
                 }
               }
             ]
@@ -93,12 +106,6 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "4p sub - 4"
-          }
-        },
-        {
           "type": "parallel",
           "data": {
             "commands": [
@@ -112,6 +119,12 @@
                 "type": "named",
                 "data": {
                   "name": "AimSub"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "4p sub - 4"
                 }
               }
             ]
@@ -143,12 +156,6 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "4p sub - 6"
-          }
-        },
-        {
           "type": "parallel",
           "data": {
             "commands": [
@@ -162,6 +169,12 @@
                 "type": "named",
                 "data": {
                   "name": "AimSub"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "4p sub - 6"
                 }
               }
             ]

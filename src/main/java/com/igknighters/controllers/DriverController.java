@@ -9,6 +9,7 @@ import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.stem.wrist.WristRealSuicidal;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
+
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
@@ -129,7 +130,9 @@ public class DriverController extends ControllerParent {
 
         // this.DPD.binding =
 
-        // this.DPL.binding =
+        this.DPL.binding = new Binding((trig, allss) -> {
+            trig.onTrue(Commands.runOnce(() -> allss.stem.get().stopWrist(), allss.stem.get()));
+        }, Subsystems.Stem);
 
         this.DPU.binding = new Binding((trig, allss) -> {
             trig.onTrue(

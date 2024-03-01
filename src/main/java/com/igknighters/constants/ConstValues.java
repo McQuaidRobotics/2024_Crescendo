@@ -72,15 +72,18 @@ public final class ConstValues {
         public static final double UMBRELLA_LENGTH = 13.25 * Conv.INCHES_TO_METERS;
         public static final double UMBRELLA_HEIGHT = 5.0 * Conv.INCHES_TO_METERS;
         public static final double UMBRELLA_OFFSET = 2.45 * Conv.INCHES_TO_METERS;
+
+        public static final double EXTENSION_MAX = 16.0;
+
         public static final Rectangle2d DRIVE_BASE = new Rectangle2d(
                 0.0,
                 0.0,
                 FRAME_WIDTH + (BUMPER_THICKNESS * 2),
                 BUMPER_HEIGHT);
         public static final Rectangle2d BOUNDS = new Rectangle2d(
-                (-12.0 * Conv.INCHES_TO_METERS) + BUMPER_THICKNESS,
+                (-EXTENSION_MAX * Conv.INCHES_TO_METERS) + BUMPER_THICKNESS,
                 0.0,
-                FRAME_WIDTH + (24.0 * Conv.INCHES_TO_METERS),
+                FRAME_WIDTH + ((EXTENSION_MAX * 2) * Conv.INCHES_TO_METERS),
                 48.0 * Conv.INCHES_TO_METERS);
 
         public static final Translation2d PIVOT_LOCATION = new Translation2d(
