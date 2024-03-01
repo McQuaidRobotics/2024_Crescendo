@@ -107,20 +107,20 @@ public class StemPosition {
         }
     };
 
-    public static final StemPosition STAGE_STOW = new StemPosition(
-        Units.degreesToRadians(32.1), 
-        Units.degreesToRadians(71.5), 
-        0.40982736) {
+    public static final StemPosition STATIONARY_WRIST_STOW = new StemPosition(
+        Units.degreesToRadians(45.0), 
+        Units.degreesToRadians(72.0), 
+        kTelescope.MIN_METERS) {
 
         @Override
         public String toString() {
-            return "Stage Stow";
+            return "Stationary Wrist Stow";
         }
     };
 
     public static final StemPosition SUBWOOFER = new StemPosition(
         0.3750953350652253 + Units.degreesToRadians(0.5),
-        Units.degreesToRadians(71.5), 
+        Units.degreesToRadians(72.0), 
         kTelescope.MIN_METERS + 0.05) {
 
             @Override
