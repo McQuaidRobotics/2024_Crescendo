@@ -73,15 +73,6 @@ public class SwerveVisualizer {
     private final BooleanEntry modulesOnField;
 
     public SwerveVisualizer(Swerve swerve, SwerveModule... modules) {
-        if (!ConstValues.DEBUG) {
-            this.swerve = null;
-            this.modules = null;
-            moduleVisual = null;
-            table = null;
-            modulesOnField = null;
-            return;
-        }
-
         this.swerve = swerve;
         this.modules = modules;
 
@@ -113,9 +104,6 @@ public class SwerveVisualizer {
     }
 
     public void update(Pose2d pose) {
-        if (!ConstValues.DEBUG)
-            return;
-
         for (int i = 0; i < modules.length; i++) {
             moduleVisual[i].update(
                     modules[i].getCurrentState());
