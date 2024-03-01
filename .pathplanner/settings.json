@@ -4,12 +4,13 @@
   "holonomicMode": true,
   "pathFolders": [
     "2 piece",
+    "2 piece subwoofer",
     "4 piece",
     "4 piece subwoofer",
     "5 piece subwoofer",
     "5.5 piece",
     "Auto Testing Paths",
-    "2 piece subwoofer"
+    "3 piece subwoofer"
   ],
   "autoFolders": [],
   "defaultMaxVel": 5.0,
