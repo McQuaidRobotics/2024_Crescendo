@@ -79,9 +79,16 @@ public class DriverController extends ControllerParent {
 
         /// BUMPER
         // # Our main driver doesn't use bumpers
-        // this.LB.binding = # Dont use
+        this.LB.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
+            trig.or(RB.trigger).onTrue(
+                StemCommands.holdAt(
+                    allss.stem.get(),
+                    StemPosition.STAGE_STOW
+                )
+            );
+        });
 
-        // this.RB.binding = # Dont use
+        // this.RB.binding = # Is used as an or with LB
 
         /// CENTER BUTTONS
         // this.Back.binding =
