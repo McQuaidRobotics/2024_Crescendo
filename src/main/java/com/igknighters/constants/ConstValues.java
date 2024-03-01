@@ -16,7 +16,6 @@ import com.igknighters.util.geom.Rectangle2d;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
-
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -62,7 +61,7 @@ public final class ConstValues {
         }
     }
 
-    public static final boolean DEBUG = false; // this should be false for competition
+    public static final boolean DEBUG = true; // this should be false for competition
     public static final double PERIODIC_TIME = 0.02; // 20ms
 
     public static final class kRobotCollisionGeometry {

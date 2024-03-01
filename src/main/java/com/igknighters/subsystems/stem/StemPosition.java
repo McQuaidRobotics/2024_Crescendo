@@ -1,7 +1,6 @@
 package com.igknighters.subsystems.stem;
 
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
-
 import edu.wpi.first.math.util.Units;
 
 public class StemPosition {
@@ -105,6 +104,17 @@ public class StemPosition {
         @Override
         public String toString() {
             return "Starting";
+        }
+    };
+
+    public static final StemPosition STAGE_STOW = new StemPosition(
+        Units.degreesToRadians(32.1), 
+        Units.degreesToRadians(71.0), 
+        0.40982736) {
+
+        @Override
+        public String toString() {
+            return "Stage Stow";
         }
     };
 }

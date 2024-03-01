@@ -1,28 +1,38 @@
 package com.igknighters.subsystems.stem.wrist;
 
+import org.littletonrobotics.junction.Logger;
 import com.igknighters.subsystems.stem.StemPosition;
-
 import edu.wpi.first.math.MathUtil;
 
 public class WristDisabled implements Wrist {
-    double currentRads = StemPosition.STARTING.wristRads;
+    private final WristInputs inputs;
     final double slewRate = (4.3 / 50.0) * 0.75;
+
+    public WristDisabled() {
+        inputs = new WristInputs(StemPosition.STARTING.wristRads);
+    }
 
     @Override
     public double getWristRadians() {
-        return currentRads;
+        return inputs.radians;
     }
 
     @Override
     public void setWristRadians(double radians) {
-        // var clampedTarget = MathUtil.clamp(radians, kWrist.MIN_ANGLE, kWrist.MAX_ANGLE);
-        currentRads = currentRads + MathUtil.clamp(radians - currentRads, -slewRate, slewRate);
+        inputs.targetRadians = radians;
+        inputs.radians = inputs.radians + MathUtil.clamp(radians - inputs.radians, -slewRate, slewRate);
     }
 
     @Override
     public void setVoltageOut(double volts) {
+        inputs.volts = volts;
         double percentOut = volts / 12.0;
-        double radiansPerSecond = slewRate * percentOut;
-        currentRads += radiansPerSecond;
+        inputs.radiansPerSecond = slewRate * percentOut;
+        inputs.radians += inputs.radiansPerSecond;
+    }
+
+    @Override
+    public void periodic() {
+        Logger.processInputs("Stem/Wrist", inputs);
     }
 }

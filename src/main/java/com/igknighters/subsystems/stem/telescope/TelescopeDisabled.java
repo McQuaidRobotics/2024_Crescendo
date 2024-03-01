@@ -1,44 +1,57 @@
 package com.igknighters.subsystems.stem.telescope;
 
+import org.littletonrobotics.junction.Logger;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.subsystems.stem.StemPosition;
-
 import edu.wpi.first.math.MathUtil;
 
 public class TelescopeDisabled implements Telescope {
-    double currentMeters = StemPosition.STARTING.telescopeMeters;
+    private final TelescopeInputs inputs;
     final double slewRate = (0.5 / 50.0) * 0.75;
+
+    public TelescopeDisabled() {
+        inputs = new TelescopeInputs(StemPosition.STARTING.telescopeMeters);
+    }
 
     @Override
     public double getTelescopeMeters() {
-        return currentMeters;
+        return inputs.meters;
     }
 
     @Override
     public void setTelescopeMeters(double meters) {
-        // var clampedTarget = MathUtil.clamp(meters, kTelescope.MIN_METERS, kTelescope.MAX_METERS);
-        currentMeters = currentMeters + MathUtil.clamp(meters - currentMeters, -slewRate, slewRate);
+        inputs.targetMeters = meters;
+        inputs.meters = inputs.meters + MathUtil.clamp(meters - inputs.meters, -slewRate, slewRate);
     }
 
     @Override
     public void setVoltageOut(double volts) {
+        inputs.volts = volts;
         double percentOut = volts / 12.0;
-        double metersPerSecond = slewRate * percentOut;
-        currentMeters += metersPerSecond;
+        inputs.metersPerSecond = slewRate * percentOut;
+        inputs.meters += inputs.metersPerSecond;
     }
 
     @Override
     public boolean isFwdLimitSwitchHit() {
-        return currentMeters >= kTelescope.MAX_METERS * 0.98;
+        inputs.isLimitFwdSwitchHit = inputs.meters >= kTelescope.MAX_METERS * 0.98;
+        return inputs.isLimitFwdSwitchHit;
     }
 
     @Override
     public boolean isRevLimitSwitchHit() {
-        return currentMeters <= kTelescope.MIN_METERS * 0.98;
+        inputs.isLimitRevSwitchHit = inputs.meters <= kTelescope.MIN_METERS * 0.98;
+        return inputs.isLimitRevSwitchHit;
     }
 
     @Override
     public boolean hasHomed() {
-        return true;
+        inputs.isHomed = true;
+        return inputs.isHomed;
+    }
+
+    @Override
+    public void periodic() {
+        Logger.processInputs("Stem/Telescope", inputs);
     }
 }
