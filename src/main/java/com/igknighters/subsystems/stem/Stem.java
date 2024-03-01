@@ -13,7 +13,6 @@ import com.igknighters.subsystems.stem.telescope.*;
 import com.igknighters.subsystems.stem.wrist.*;
 import com.igknighters.util.CANBusLogging;
 import com.igknighters.util.Tracer;
-
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -174,6 +173,7 @@ public class Stem extends SubsystemBase {
         Tracer.traceFunc("TelescopePeriodic", telescope::periodic);
         Tracer.traceFunc("WristPeriodic", wrist::periodic);
 
+        Logger.recordOutput("Stem/CurrentPosition", getStemPosition().toString());
         Logger.recordOutput("Stem/StemValidator/CurrentStateValidation", StemValidator.validatePosition(getStemPosition()).toString());
 
         visualizer.updateCurrent(getStemPosition());
