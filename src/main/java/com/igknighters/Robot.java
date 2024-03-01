@@ -15,6 +15,7 @@ import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.subsystems.stem.StemPosition;
+import com.igknighters.subsystems.stem.wrist.WristRealSuicidal;
 import com.igknighters.util.CANBusLogging;
 import com.igknighters.util.ShuffleboardApi;
 import com.igknighters.util.Tracer;
@@ -73,6 +74,8 @@ public class Robot extends UnitTestableRobot {
                     StemCommands.moveTo(
                         getAllSubsystemsForTest().stem.get(),
                         StemPosition.SUBWOOFER
+                    ).andThen(
+                        Commands.runOnce(() -> WristRealSuicidal.sweetReleaseOfDeath = true)
                     ),
                     autoCmd
                 ).withName(autoCmd.getName()));

@@ -1,7 +1,6 @@
 package com.igknighters.commands.autos;
 
 import com.igknighters.SubsystemResources.AllSubsystems;
-import com.igknighters.commands.HigherOrderCommands;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.teleop.AutoSwerveTargetSpeaker;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
@@ -71,8 +70,12 @@ public class AutosCmdRegister {
 
         registerCommand(
             "Intake",
-            HigherOrderCommands
-                .intakeGamepiece(stem, umbrella)
+            Commands.race(
+                StemCommands.holdAt(stem, StemPosition.INTAKE),
+                UmbrellaCommands.intake(umbrella)
+                .until(() -> umbrella.holdingGamepiece()))
+                .andThen(StemCommands.moveTo(stem, StemPosition.SUBWOOFER))
+                .withName("Intake")
         );
 
         registerCommand(

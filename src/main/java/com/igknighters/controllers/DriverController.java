@@ -83,7 +83,7 @@ public class DriverController extends ControllerParent {
             trig.or(RB.trigger).onTrue(
                 StemCommands.holdAt(
                     allss.stem.get(),
-                    StemPosition.STAGE_STOW
+                    StemPosition.SUBWOOFER
                 )
             );
         });

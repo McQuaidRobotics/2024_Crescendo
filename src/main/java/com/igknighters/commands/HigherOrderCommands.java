@@ -4,8 +4,6 @@ import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.SwerveCommands;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveTargetSpeaker;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
-import com.igknighters.constants.ConstValues.kStem.kTelescope;
-import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.controllers.ControllerParent;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
