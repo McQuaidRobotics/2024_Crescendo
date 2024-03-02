@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.290597959227301,
-        "y": 5.539225686154654
-      },
-      "prevControl": null,
-      "nextControl": {
-        "x": 2.496814123442796,
-        "y": 4.309587848847595
-      },
-      "isLocked": false,
-      "linkedName": "4p sub - 4 end"
-    },
-    {
-      "anchor": {
         "x": 2.5085249599885775,
         "y": 4.321298685393376
       },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.5085249599885775,
+        "y": 4.309587848847595
+      },
+      "isLocked": false,
+      "linkedName": "4p - 5 optimized end"
+    },
+    {
+      "anchor": {
+        "x": 2.2977299021645106,
+        "y": 4.532093743217444
+      },
       "prevControl": {
-        "x": 2.496814123442796,
-        "y": 4.321298685393376
+        "x": 2.286019065618729,
+        "y": 4.543804579763226
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "4p - 5 optimized end"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -39,13 +39,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -38.65980825409009,
+    "rotation": -45.0,
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "4 piece subwoofer optimized",
+  "folder": null,
   "previewStartingState": {
-    "rotation": 0,
+    "rotation": -45.0,
     "velocity": 0
   },
   "useDefaultConstraints": true

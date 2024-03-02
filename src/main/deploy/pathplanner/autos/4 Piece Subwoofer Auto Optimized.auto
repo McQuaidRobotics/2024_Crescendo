@@ -195,22 +195,15 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "AimSub"
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "4p sub - 6 optimized"
-                }
-              }
-            ]
+            "pathName": "4p autoshoot safe position"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoShoot"
           }
         }
       ]
