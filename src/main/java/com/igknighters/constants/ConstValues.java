@@ -391,7 +391,7 @@ public final class ConstValues {
 
         public static final double MECHANICALLY_VIABLE_BUFFER = 0.03;
 
-        public static final double VERTICAL_DISTANCE_OFFSET = Units.inchesToMeters(-6.0);
+        public static final double VERTICAL_DISTANCE_OFFSET = -6.0 * Conv.INCHES_TO_METERS;
 
         public static final class kPivot {
 
@@ -400,8 +400,8 @@ public final class ConstValues {
                  * From the center of the robot
                  */
                 public static final Translation2d PIVOT_AXEL_LOCATION = new Translation2d(
-                        Units.inchesToMeters(-9),
-                        Units.inchesToMeters(7.25));
+                        -9.0 * Conv.INCHES_TO_METERS,
+                        7.25 * Conv.INCHES_TO_METERS);
             }
 
             public static final int LEFT_MOTOR_ID = 11;
