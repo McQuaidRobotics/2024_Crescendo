@@ -391,6 +391,8 @@ public final class ConstValues {
 
         public static final double MECHANICALLY_VIABLE_BUFFER = 0.03;
 
+        public static final double VERTICAL_DISTANCE_OFFSET = Units.inchesToMeters(-6.0);
+
         public static final class kPivot {
 
             public static final class kDimensions {
