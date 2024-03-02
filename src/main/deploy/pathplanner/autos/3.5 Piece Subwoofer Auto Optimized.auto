@@ -201,12 +201,6 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Spinup"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
                   "name": "AimSub"
                 }
               },
@@ -217,12 +211,6 @@
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "FeedShooter"
           }
         }
       ]

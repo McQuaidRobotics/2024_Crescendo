@@ -86,7 +86,7 @@ public class AutosCmdRegister {
             Commands.race(
                 StemCommands.holdAt(stem, StemPosition.INTAKE),
                 UmbrellaCommands.intake(umbrella)
-                .until(() -> umbrella.holdingGamepiece()))
+                .until(() -> umbrella.holdingGamepiece())).withTimeout(4.0)
                 .withName("IntakeNoStow")
         );
 

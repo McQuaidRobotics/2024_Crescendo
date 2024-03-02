@@ -12,9 +12,9 @@
     "4 piece subwoofer optimized"
   ],
   "autoFolders": [],
-  "defaultMaxVel": 5.0,
-  "defaultMaxAccel": 5.0,
-  "defaultMaxAngVel": 720.0,
-  "defaultMaxAngAccel": 720.0,
+  "defaultMaxVel": 4.0,
+  "defaultMaxAccel": 2.0,
+  "defaultMaxAngVel": 100.0,
+  "defaultMaxAngAccel": 300.0,
   "maxModuleSpeed": 5.0
 }
