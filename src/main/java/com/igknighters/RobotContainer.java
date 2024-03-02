@@ -14,6 +14,9 @@ import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.util.geom.AllianceFlip;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+
+import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
+
 import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.commands.autos.AutosCmdRegister;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
@@ -27,6 +30,8 @@ public class RobotContainer {
     private final TestingController testingController;
 
     private final AllSubsystems allSubsystems;
+
+    public static LoggedDashboardNumber vertDistOffset;
 
     @SuppressWarnings("unused")
     public RobotContainer() {
@@ -64,6 +69,8 @@ public class RobotContainer {
         double staticSubShotRads = StemSolvers.linearSolvePivotTheta(kTelescope.MIN_METERS,
                 Units.degreesToRadians(71.5), Units.inchesToMeters(46.088 + 2.8), FieldConstants.SPEAKER.getZ());
         System.out.println(staticSubShotRads);
+
+        vertDistOffset = new LoggedDashboardNumber("Vertical Distance Offset", 0.0);
     }
 
     private void setupAutos(Swerve swerve) {

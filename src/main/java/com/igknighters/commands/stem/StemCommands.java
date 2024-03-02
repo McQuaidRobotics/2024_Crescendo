@@ -5,7 +5,6 @@ import java.util.function.DoubleSupplier;
 import com.igknighters.GlobalState;
 import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kControls;
-import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
@@ -13,7 +12,6 @@ import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.stem.StemSolvers;
 import com.igknighters.util.geom.AllianceFlip;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -139,6 +137,7 @@ public class StemCommands {
             this.stem = stem;
             this.aimStrategy = aimStrategy;
             this.canFinish = canFinish;
+            SmartDashboard.putNumber("Vert Dist Offset Inches", 0.0);
         }
 
         private StemPosition stationaryWristSolve(double distance) {
@@ -146,7 +145,7 @@ public class StemCommands {
                     kTelescope.MIN_METERS,
                     kControls.STATIONARY_WRIST_ANGLE,
                     distance,
-                    FieldConstants.SPEAKER.getZ() + kStem.VERTICAL_DISTANCE_OFFSET);
+                    FieldConstants.SPEAKER.getZ() + Units.inchesToMeters(SmartDashboard.getNumber("Vert Dist Offset Inches", 1000.0)));
 
             return StemPosition.fromRadians(
                     pivotRads,
