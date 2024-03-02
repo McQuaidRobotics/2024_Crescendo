@@ -1,7 +1,5 @@
 package com.igknighters.constants;
 
-import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
-
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
@@ -94,6 +92,7 @@ public final class ConstValues {
 
     public static final class kControls {
         public static final double SHOOTER_RPM = 3780.0;
+        public static final double AUTO_AIM_SHOOTER_RPM = 4400.0;
         public static final double INTAKE_PERCENT = 0.8;
 
         public static final double STATIONARY_AIM_AT_PIVOT_RADIANS = 42.5 * Conv.DEGREES_TO_RADIANS;

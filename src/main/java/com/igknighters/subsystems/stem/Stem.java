@@ -128,6 +128,10 @@ public class Stem extends SubsystemBase {
         wrist.setVoltageOut(volts);
     }
 
+    public void seedWrist() {
+        wrist.seedWrist();
+    }
+
     /**
      * Meant as the main api for controlling the stem,
      * this method takes in a {@link StemPosition} and sets the

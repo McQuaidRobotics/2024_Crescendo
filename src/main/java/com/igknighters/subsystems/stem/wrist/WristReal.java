@@ -98,8 +98,8 @@ public class WristReal implements Wrist {
         return cfg;
     }
 
-    private void seedWrist() {
-        CANRetrier.retryStatusCodeFatal(() ->motor.setPosition(Wrist.mechanismRadsToMotorRots(inputs.radians)), 10);
+    public void seedWrist() {
+        CANRetrier.retryStatusCode(() ->motor.setPosition(Wrist.mechanismRadsToMotorRots(inputs.radians)), 10);
     }
 
     public double getAmps() {
@@ -147,9 +147,9 @@ public class WristReal implements Wrist {
                 BaseStatusSignal.refreshAll(
                         cancoderRots));
 
-        inputs.radians = Units.rotationsToRadians(cancoderRots.getValue());
+        inputs.radians = Wrist.motorRotsToMechanismRads(motorRots.getValue());
         inputs.radiansPerSecond = Units.rotationsToRadians(cancoderVelo.getValue());
-        Logger.recordOutput("Stem/Wrist/MotorRads", Wrist.motorRotsToMechanismRads(motorRots.getValue()));
+        Logger.recordOutput("Stem/Wrist/EncoderRads", Units.rotationsToRadians(cancoderRots.getValue()));
         inputs.amps = motorAmps.getValue();
         inputs.volts = motorVolts.getValue();
         inputs.temp = motorTemp.getValue();

@@ -140,10 +140,10 @@ public class StemCommands {
             this.canFinish = canFinish;
         }
 
-        private StemPosition stationaryWristSolve(double distance) {
+        private StemPosition stationaryWristSolve(double distance, double wristRads) {
             double pivotRads = StemSolvers.linearSolvePivotTheta(
                     kTelescope.MIN_METERS,
-                    kControls.STATIONARY_WRIST_ANGLE,
+                    wristRads,
                     distance,
                     FieldConstants.SPEAKER.getZ() + kStem.VERTICAL_DISTANCE_OFFSET);
 
@@ -235,7 +235,7 @@ public class StemCommands {
             double distance = currentPose.getTranslation().getDistance(adjustedTarget);
 
             if (aimStrategy.equals(AimStrategy.STATIONARY_WRIST)) {
-                hasFinished = stem.setStemPosition(stationaryWristSolve(distance));
+                hasFinished = stem.setStemPosition(stationaryWristSolve(distance, stem.getStemPosition().wristRads));
             } else if (aimStrategy.equals(AimStrategy.STATIONARY_PIVOT)) {
                 var pose = stationaryPivotSolve(distance);
                 SmartDashboard.putNumber("Aim/Linear", Units.radiansToDegrees(pose.getWristRads()));

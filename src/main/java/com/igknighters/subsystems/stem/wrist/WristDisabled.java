@@ -35,4 +35,10 @@ public class WristDisabled implements Wrist {
     public void periodic() {
         Logger.processInputs("Stem/Wrist", inputs);
     }
+
+    @Override
+    public void seedWrist() {
+        // TODO Auto-generated method stub
+        // throw new UnsupportedOperationException("Unimplemented method 'seedWrist'");
+    }
 }

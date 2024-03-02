@@ -9,7 +9,6 @@ import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.stem.wrist.WristRealSuicidal;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
-
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
@@ -107,7 +106,7 @@ public class DriverController extends ControllerParent {
                                     this),
                             UmbrellaCommands.spinupShooter(
                                     allss.umbrella.get(),
-                                    kControls.SHOOTER_RPM,
+                                    kControls.AUTO_AIM_SHOOTER_RPM,
                                     ShooterSpinupReason.AutoAimSpeaker))
                             .finallyDo(
                                     allss.umbrella.get()::stopAll)
@@ -137,6 +136,7 @@ public class DriverController extends ControllerParent {
         this.DPU.binding = new Binding((trig, allss) -> {
             trig.onTrue(
                 Commands.sequence(
+                //     Commands.runOnce(() -> allss.stem.get().seedWrist()),
                     Commands.runOnce(() -> WristRealSuicidal.sweetReleaseOfDeath = false),
                     StemCommands.holdAt(allss.stem.get(), StemPosition.STARTING))
                 );

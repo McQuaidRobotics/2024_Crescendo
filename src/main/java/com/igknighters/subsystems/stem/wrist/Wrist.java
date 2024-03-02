@@ -44,6 +44,8 @@ public interface Wrist extends Component {
 
     public double getWristRadians();
 
+    public void seedWrist();
+
     /**
      * Moves the wrist to the target and returns if it has reached the target.
      * Meant to be used in a kind of polling loop to wait the mechanism to reach

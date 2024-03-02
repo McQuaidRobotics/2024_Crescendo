@@ -75,4 +75,10 @@ public class WristSim implements Wrist {
         Logger.processInputs("Stem/Wrist", inputs);
     }
 
+    @Override
+    public void seedWrist() {
+        // TODO Auto-generated method stub
+        // throw new UnsupportedOperationException("Unimplemented method 'seedWrist'");
+    }
+
 }
