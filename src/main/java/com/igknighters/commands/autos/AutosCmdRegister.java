@@ -82,6 +82,15 @@ public class AutosCmdRegister {
         );
 
         registerCommand(
+            "IntakeNoStow",
+            Commands.race(
+                StemCommands.holdAt(stem, StemPosition.INTAKE),
+                UmbrellaCommands.intake(umbrella)
+                .until(() -> umbrella.holdingGamepiece()))
+                .withName("IntakeNoStow")
+        );
+
+        registerCommand(
             "Spinup",
             UmbrellaCommands
                 .waitUntilSpunUp(umbrella, kAuto.AUTO_SHOOTER_RPM, 0.9)
@@ -96,7 +105,7 @@ public class AutosCmdRegister {
 
         registerCommand(
                 "AimSub",
-                StemCommands.moveTo(stem, StemPosition.SUBWOOFER).withTimeout(1.0)
+                StemCommands.moveTo(stem, StemPosition.SUBWOOFER)
                     .withName("AimSub")
         );
 

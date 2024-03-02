@@ -145,7 +145,7 @@ public class StemCommands {
                     kTelescope.MIN_METERS,
                     kControls.STATIONARY_WRIST_ANGLE,
                     distance,
-                    FieldConstants.SPEAKER.getZ() + Units.inchesToMeters(SmartDashboard.getNumber("Vert Dist Offset Inches", 1000.0)));
+                    FieldConstants.SPEAKER.getZ() + Units.inchesToMeters(SmartDashboard.getNumber("Vert Dist Offset Inches", 0.0)));
 
             return StemPosition.fromRadians(
                     pivotRads,

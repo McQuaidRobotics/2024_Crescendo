@@ -69,8 +69,6 @@ public class RobotContainer {
         double staticSubShotRads = StemSolvers.linearSolvePivotTheta(kTelescope.MIN_METERS,
                 Units.degreesToRadians(71.5), Units.inchesToMeters(46.088 + 2.8), FieldConstants.SPEAKER.getZ());
         System.out.println(staticSubShotRads);
-
-        vertDistOffset = new LoggedDashboardNumber("Vertical Distance Offset", 0.0);
     }
 
     private void setupAutos(Swerve swerve) {
