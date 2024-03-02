@@ -112,7 +112,7 @@ public class AutosCmdRegister {
         registerCommand(
             "MoveWrist",
             Commands.run(() -> stem.setWristVolts(-4.5))
-                .until(() -> kWrist.FROZEN_WRIST_ANGLE - stem.getStemPosition().wristRads > 0.0)
+                .until(() -> kWrist.FROZEN_WRIST_ANGLE - stem.getStemPosition().wristRads >= 0.0)
                 .finallyDo(() -> WristRealSuicidal.sweetReleaseOfDeath = true)
         );
 
