@@ -64,26 +64,10 @@ public class OperatorController extends ControllerParent {
         /// DPAD
         // this.DPR.binding =
 
-        // this.DPD.binding = new Binding((trig, allss) -> {
-        //     trig.onTrue(Commands.runOnce(() -> {
-        //         this.frozenWristRadsOffset -= Units.degreesToRadians(0.5);
-        //         this.frozenWristRadsOffset = MathUtil.clamp(this.frozenWristRadsOffset, Units.degreesToRadians(-3.0), Units.degreesToRadians(3.0));
-        //         kWrist.FROZEN_WRIST_ANGLE_WITH_OFFSET = kWrist.FROZEN_WRIST_ANGLE + frozenWristRadsOffset;
-        //         WristRealSuicidal.sweetReleaseOfDeath = false;
+        // this.DPD.binding =
 
-        //     }).withName("Decrease Frozen Wrist Rads"));
-        // }, Subsystems.none());
+        // this.DPL.binding =
 
-        // // this.DPL.binding =
-
-        // this.DPU.binding = new Binding((trig, allss) -> {
-        //     trig.onTrue(Commands.runOnce(() -> {
-        //         this.frozenWristRadsOffset += Units.degreesToRadians(0.5);
-        //         this.frozenWristRadsOffset = MathUtil.clamp(this.frozenWristRadsOffset, Units.degreesToRadians(-3.0), Units.degreesToRadians(3.0));
-        //         kWrist.FROZEN_WRIST_ANGLE_WITH_OFFSET = kWrist.FROZEN_WRIST_ANGLE + frozenWristRadsOffset;
-        //         WristRealSuicidal.sweetReleaseOfDeath = false;
-
-        //     }).withName("Increase Frozen Wrist Rads"));
-        // }, Subsystems.none());
+        // this.DPU.binding = 
     }
 }

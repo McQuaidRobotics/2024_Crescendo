@@ -96,7 +96,7 @@ public class IntakeSim implements Intake {
         if (nowAuto && !isAuto) {
             autoNotes.clear();
             for (var note : AutoNotes.notes) {
-                autoNotes.add(new Rectangle2d(
+            autoNotes.add(new Rectangle2d(
                     AllianceFlip.isBlue() ? note : AllianceFlip.flipTranslation(note),
                     Units.inchesToMeters(7.0)));
             }
