@@ -74,11 +74,9 @@ public class DriverController extends ControllerParent {
         // # Our main driver doesn't use bumpers
         this.LB.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
             trig.or(RB.trigger).onTrue(
-                StemCommands.holdAt(
-                    allss.stem.get(),
-                    StemPosition.SUBWOOFER
-                )
-            );
+                    StemCommands.holdAt(
+                            allss.stem.get(),
+                            StemPosition.SUBWOOFER));
         });
 
         // this.RB.binding = # Is used as an or with LB
@@ -129,17 +127,10 @@ public class DriverController extends ControllerParent {
 
         // this.DPD.binding =
 
-        this.DPL.binding = new Binding((trig, allss) -> {
-            trig.onTrue(Commands.runOnce(() -> allss.stem.get().stopWrist(), allss.stem.get()));
-        }, Subsystems.Stem);
+        // this.DPL.binding = 
 
         this.DPU.binding = new Binding((trig, allss) -> {
-            trig.onTrue(
-                Commands.sequence(
-                //     Commands.runOnce(() -> allss.stem.get().seedWrist()),
-                    Commands.runOnce(() -> WristRealSuicidal.sweetReleaseOfDeath = false),
-                    StemCommands.holdAt(allss.stem.get(), StemPosition.STARTING))
-                );
+            trig.onTrue(StemCommands.holdAt(allss.stem.get(), StemPosition.STARTING));
         }, Subsystems.Stem);
     }
 }

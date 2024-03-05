@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -21,6 +22,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Vision extends SubsystemBase {
@@ -28,6 +30,9 @@ public class Vision extends SubsystemBase {
     private final List<Camera> cameras;
 
     private final BooleanEntry cameraPositionFieldVisualizer;
+
+    private Optional<VisionPoseEstimate> latestEval = Optional.empty();
+    private Timer lastEvalTime = new Timer();
 
     public Vision() {
         this.cameras = List.of(kVision.CAMERA_CONFIGS)
@@ -45,6 +50,16 @@ public class Vision extends SubsystemBase {
                 .getEntry(false);
 
         cameraPositionFieldVisualizer.accept(false);
+    }
+
+    public Optional<VisionPoseEstimate> getLatestEval() {
+        return latestEval;
+    }
+
+    public Pose2d getLatestPoseWithFallback() {
+        return latestEval.map(VisionPoseEstimate::pose)
+                .map(Pose3d::toPose2d)
+                .orElse(GlobalState.getLocalizedPose());
     }
 
     @Override
@@ -82,6 +97,11 @@ public class Vision extends SubsystemBase {
             }
 
             VisionPoseEstimate eval = optEval.get();
+
+            if (latestEval.isEmpty() || eval.timestamp() > latestEval.get().timestamp()) {
+                latestEval = Optional.of(eval);
+                lastEvalTime.restart();
+            }
 
             double ambiguity = eval.ambiguity();
 

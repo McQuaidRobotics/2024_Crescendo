@@ -2,26 +2,23 @@ package com.igknighters.subsystems.swerve;
 
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kSwerve;
-import com.igknighters.constants.ConstValues.kSwerve.RotationControllerConstants;
+import com.igknighters.constants.ConstValues.kSwerve.kRotationController;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-
 
 public class RotationalController {
     private double positionError = 0, prevError = 0, velocityError = 0;
 
     private TrapezoidProfile profile = new TrapezoidProfile(
-        new TrapezoidProfile.Constraints(
-            kSwerve.MAX_ANGULAR_VELOCITY * RotationControllerConstants.CONSTRAINT_SCALAR,
-            kSwerve.MAX_ANGULAR_ACCELERATION * RotationControllerConstants.CONSTRAINT_SCALAR
-        )
-    );
+            new TrapezoidProfile.Constraints(
+                    kSwerve.MAX_ANGULAR_VELOCITY * kRotationController.CONSTRAINT_SCALAR,
+                    kSwerve.MAX_ANGULAR_ACCELERATION * kRotationController.CONSTRAINT_SCALAR));
     private TrapezoidProfile.State goalState = new TrapezoidProfile.State();
     private TrapezoidProfile.State setpointState = new TrapezoidProfile.State();
 
     public double calculate(double measurement, double target) {
-        if (Math.abs(measurement - target) < RotationControllerConstants.DEADBAND) {
+        if (Math.abs(measurement - target) < kRotationController.DEADBAND) {
             return 0.0;
         }
 
@@ -41,8 +38,8 @@ public class RotationalController {
 
         velocityError = (positionError - prevError) / ConstValues.PERIODIC_TIME;
 
-        return (RotationControllerConstants.kP * positionError)
-            + (RotationControllerConstants.kD * velocityError);
+        return (kRotationController.kP * positionError)
+                + (kRotationController.kD * velocityError);
     }
 
     public void reset(double measuredPosition, double measuredVelocity) {

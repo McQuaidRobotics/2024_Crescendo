@@ -15,8 +15,8 @@ import org.littletonrobotics.junction.Logger;
 
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kSwerve;
-import com.igknighters.constants.ConstValues.kSwerve.AngleMotorConstants;
-import com.igknighters.constants.ConstValues.kSwerve.DriveMotorConstants;
+import com.igknighters.constants.ConstValues.kSwerve.kAngleMotor;
+import com.igknighters.constants.ConstValues.kSwerve.kDriveMotor;
 import com.igknighters.util.BootupLogger;
 
 public class SwerveModuleSim implements SwerveModule {
@@ -24,14 +24,14 @@ public class SwerveModuleSim implements SwerveModule {
     private FlywheelSim angleSim = new FlywheelSim(DCMotor.getFalcon500(1), kSwerve.ANGLE_GEAR_RATIO, 0.004);
 
     private final PIDController driveFeedback = new PIDController(
-            DriveMotorConstants.kP,
-            DriveMotorConstants.kI,
-            DriveMotorConstants.kD,
+            kDriveMotor.kP,
+            kDriveMotor.kI,
+            kDriveMotor.kD,
             ConstValues.PERIODIC_TIME);
     private final PIDController angleFeedback = new PIDController(
-            AngleMotorConstants.kP,
-            AngleMotorConstants.kI,
-            AngleMotorConstants.kD,
+            kAngleMotor.kP,
+            kAngleMotor.kI,
+            kAngleMotor.kD,
             ConstValues.PERIODIC_TIME);
 
     public final int moduleNumber;
@@ -41,7 +41,7 @@ public class SwerveModuleSim implements SwerveModule {
     public SwerveModuleSim(final SwerveModuleConstants moduleConstants) {
         this.moduleNumber = moduleConstants.getModuleId().num;
 
-        //just to test the consts
+        // just to test the consts
         moduleConstants.getDriveMotorID();
         moduleConstants.getAngleMotorID();
         moduleConstants.getCancoderID();

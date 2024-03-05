@@ -72,13 +72,14 @@ public final class ConstValues {
         public static final double UMBRELLA_HEIGHT = 5.0 * Conv.INCHES_TO_METERS;
         public static final double UMBRELLA_OFFSET = 2.45 * Conv.INCHES_TO_METERS;
 
-        public static final double EXTENSION_MAX = 16.0;
+        public static final double EXTENSION_MAX = 12.5;
 
         public static final Rectangle2d DRIVE_BASE = new Rectangle2d(
                 0.0,
                 0.0,
                 FRAME_WIDTH + (BUMPER_THICKNESS * 2),
                 BUMPER_HEIGHT);
+
         public static final Rectangle2d BOUNDS = new Rectangle2d(
                 (-EXTENSION_MAX * Conv.INCHES_TO_METERS) + BUMPER_THICKNESS,
                 0.0,
@@ -122,7 +123,7 @@ public final class ConstValues {
                                                     8.0 * Conv.INCHES_TO_METERS),
                                             new Rotation3d(
                                                     0.0,
-                                                    -20.0  * Conv.DEGREES_TO_RADIANS,
+                                                    -20.0 * Conv.DEGREES_TO_RADIANS,
                                                     Math.PI))),
                             Camera.createConfig(
                                     "photon__module_2",
@@ -134,7 +135,7 @@ public final class ConstValues {
                                                     8.0 * Conv.INCHES_TO_METERS),
                                             new Rotation3d(
                                                     0.0,
-                                                    -20.0  * Conv.DEGREES_TO_RADIANS,
+                                                    -20.0 * Conv.DEGREES_TO_RADIANS,
                                                     Math.PI)))
                     }),
             BURN(new CameraConfig[] {});
@@ -177,7 +178,7 @@ public final class ConstValues {
 
         /* Drivetrain Constants */
         public static final double TRACK_WIDTH = 0.551942;
-        public static final double WHEEL_DIAMETER = 0.1016;
+        public static final double WHEEL_DIAMETER = 4.0 * Conv.INCHES_TO_METERS;
         public static final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
         // public static final double DRIVEBASE_RADIUS = Math.sqrt(Math.pow(TRACK_WIDTH
         // / 2.0, 2) + Math.pow(WHEEL_BASE / 2.0, 2));
@@ -218,7 +219,7 @@ public final class ConstValues {
         public static final NeutralModeValue ANGLE_NEUTRAL_MODE = NeutralModeValue.Coast;
         public static final NeutralModeValue DRIVE_NEUTRAL_MODE = NeutralModeValue.Brake;
 
-        public static final class DriveMotorConstants {
+        public static final class kDriveMotor {
             public static final double kP = 0.27;
             public static final double kI = 0.0;
             public static final double kD = 0.0;
@@ -227,13 +228,13 @@ public final class ConstValues {
             public static final double kV = 0.0;
         }
 
-        public static final class AngleMotorConstants {
+        public static final class kAngleMotor {
             public static final double kP = 11.0;
             public static final double kI = 0.0;
             public static final double kD = 0.0;
         }
 
-        public static final class RotationControllerConstants {
+        public static final class kRotationController {
             public static final double kP = 5.5;
             public static final double kD = 0.2;
 
@@ -255,7 +256,7 @@ public final class ConstValues {
                 new LerpTableEntry(0.7, 0.4),
                 new LerpTableEntry(1.0, 1.0));
 
-        public static final class Mod0 {
+        public static final class kMod0 {
             public static final ModuleId MODULE = ModuleId.m0;
             public static final int DRIVE_MOTOR_ID = 1;
             public static final int ANGLE_MOTOR_ID = 2;
@@ -265,10 +266,10 @@ public final class ConstValues {
             public static double ROTATION_OFFSET;
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0, -TRACK_WIDTH / 2.0);
-            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(Mod0.class);
+            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(kMod0.class);
         }
 
-        public static final class Mod1 {
+        public static final class kMod1 {
             public static final ModuleId MODULE = ModuleId.m1;
             public static final int DRIVE_MOTOR_ID = 3;
             public static final int ANGLE_MOTOR_ID = 4;
@@ -279,10 +280,10 @@ public final class ConstValues {
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0,
                     -TRACK_WIDTH / 2.0);
-            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(Mod1.class);
+            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(kMod1.class);
         }
 
-        public static final class Mod2 {
+        public static final class kMod2 {
             public static final ModuleId MODULE = ModuleId.m2;
             public static final int DRIVE_MOTOR_ID = 5;
             public static final int ANGLE_MOTOR_ID = 6;
@@ -292,10 +293,10 @@ public final class ConstValues {
             public static double ROTATION_OFFSET;
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0, TRACK_WIDTH / 2.0);
-            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(Mod2.class);
+            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(kMod2.class);
         }
 
-        public static final class Mod3 {
+        public static final class kMod3 {
             public static final ModuleId MODULE = ModuleId.m3;
             public static final int DRIVE_MOTOR_ID = 7;
             public static final int ANGLE_MOTOR_ID = 8;
@@ -306,14 +307,14 @@ public final class ConstValues {
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0,
                     TRACK_WIDTH / 2.0);
-            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(Mod3.class);
+            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(kMod3.class);
         }
 
         public static final Translation2d[] MODULE_CHASSIS_OFFSETS = new Translation2d[] {
-                Mod0.CHASSIS_OFFSET,
-                Mod1.CHASSIS_OFFSET,
-                Mod2.CHASSIS_OFFSET,
-                Mod3.CHASSIS_OFFSET
+                kMod0.CHASSIS_OFFSET,
+                kMod1.CHASSIS_OFFSET,
+                kMod2.CHASSIS_OFFSET,
+                kMod3.CHASSIS_OFFSET
         };
 
         public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(
@@ -482,7 +483,7 @@ public final class ConstValues {
 
             public static final boolean INVERTED = false;
 
-            public static final double CANCODER_OFFSET = -0.5760078125; //offset for zero to be flat
+            public static final double CANCODER_OFFSET = -0.5760078125; // offset for zero to be flat
 
             public static final double MIN_ANGLE = 29.0 * Conv.DEGREES_TO_RADIANS;
             public static final double MAX_ANGLE = 115.0 * Conv.DEGREES_TO_RADIANS;

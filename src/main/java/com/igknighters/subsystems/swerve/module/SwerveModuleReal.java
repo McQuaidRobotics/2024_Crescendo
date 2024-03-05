@@ -21,8 +21,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 
 import com.igknighters.constants.ConstValues.kSwerve;
-import com.igknighters.constants.ConstValues.kSwerve.AngleMotorConstants;
-import com.igknighters.constants.ConstValues.kSwerve.DriveMotorConstants;
+import com.igknighters.constants.ConstValues.kSwerve.kAngleMotor;
+import com.igknighters.constants.ConstValues.kSwerve.kDriveMotor;
 import com.igknighters.util.BootupLogger;
 import com.igknighters.util.CANRetrier;
 
@@ -108,12 +108,12 @@ public class SwerveModuleReal implements SwerveModule {
         cfg.MotorOutput.Inverted = kSwerve.DRIVE_MOTOR_INVERT;
         cfg.MotorOutput.NeutralMode = kSwerve.DRIVE_NEUTRAL_MODE;
 
-        cfg.Slot0.kP = DriveMotorConstants.kP;
-        cfg.Slot0.kI = DriveMotorConstants.kI;
-        cfg.Slot0.kD = DriveMotorConstants.kD;
+        cfg.Slot0.kP = kDriveMotor.kP;
+        cfg.Slot0.kI = kDriveMotor.kI;
+        cfg.Slot0.kD = kDriveMotor.kD;
         cfg.Slot0.kV = 12.0
                 / (kSwerve.MAX_DRIVE_VELOCITY / (kSwerve.WHEEL_CIRCUMFERENCE / kSwerve.DRIVE_GEAR_RATIO));
-        cfg.Slot0.kS = DriveMotorConstants.kS;
+        cfg.Slot0.kS = kDriveMotor.kS;
 
         cfg.CurrentLimits.StatorCurrentLimitEnable = true;
         cfg.CurrentLimits.StatorCurrentLimit = kSwerve.SLIP_CURRENT;
@@ -129,9 +129,9 @@ public class SwerveModuleReal implements SwerveModule {
         cfg.MotorOutput.Inverted = kSwerve.ANGLE_MOTOR_INVERT;
         cfg.MotorOutput.NeutralMode = kSwerve.ANGLE_NEUTRAL_MODE;
 
-        cfg.Slot0.kP = AngleMotorConstants.kP;
-        cfg.Slot0.kI = AngleMotorConstants.kI;
-        cfg.Slot0.kD = AngleMotorConstants.kD;
+        cfg.Slot0.kP = kAngleMotor.kP;
+        cfg.Slot0.kI = kAngleMotor.kI;
+        cfg.Slot0.kD = kAngleMotor.kD;
 
         cfg.Feedback.FeedbackRemoteSensorID = angleEncoder.getDeviceID();
         cfg.Feedback.RotorToSensorRatio = kSwerve.ANGLE_GEAR_RATIO;
@@ -216,8 +216,8 @@ public class SwerveModuleReal implements SwerveModule {
                 drivePositionSignal, driveVelocitySignal,
                 /* driveVoltSignal, driveAmpSignal, */
                 anglePositionSignal, angleVelocitySignal,
-                /* angleVoltSignal, angleAmpSignal ,*/
-                angleAbsoluteSignal /*, angleAbsoluteVeloSignal */);
+                /* angleVoltSignal, angleAmpSignal , */
+                angleAbsoluteSignal /* , angleAbsoluteVeloSignal */);
 
         inputs.angleAbsoluteRads = Units.rotationsToRadians(angleAbsoluteSignal.getValue());
         inputs.angleVeloRadPS = Units.rotationsToRadians(angleAbsoluteVeloSignal.getValue());

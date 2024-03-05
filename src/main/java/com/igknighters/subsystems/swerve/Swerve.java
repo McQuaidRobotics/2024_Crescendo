@@ -56,22 +56,20 @@ public class Swerve extends SubsystemBase {
 
         if (RobotBase.isReal()) {
             swerveMods = new SwerveModule[] {
-                    new SwerveModuleReal(ConstValues.kSwerve.Mod0.CONSTANTS, false),
-                    new SwerveModuleReal(ConstValues.kSwerve.Mod1.CONSTANTS, false),
-                    new SwerveModuleReal(ConstValues.kSwerve.Mod2.CONSTANTS, false),
-                    new SwerveModuleReal(ConstValues.kSwerve.Mod3.CONSTANTS, false)
+                    new SwerveModuleReal(ConstValues.kSwerve.kMod0.CONSTANTS, false),
+                    new SwerveModuleReal(ConstValues.kSwerve.kMod1.CONSTANTS, false),
+                    new SwerveModuleReal(ConstValues.kSwerve.kMod2.CONSTANTS, false),
+                    new SwerveModuleReal(ConstValues.kSwerve.kMod3.CONSTANTS, false)
             };
             gyro = new GyroReal();
         } else {
             swerveMods = new SwerveModule[] {
-                    new SwerveModuleSim(ConstValues.kSwerve.Mod0.CONSTANTS),
-                    new SwerveModuleSim(ConstValues.kSwerve.Mod1.CONSTANTS),
-                    new SwerveModuleSim(ConstValues.kSwerve.Mod2.CONSTANTS),
-                    new SwerveModuleSim(ConstValues.kSwerve.Mod3.CONSTANTS)
+                    new SwerveModuleSim(ConstValues.kSwerve.kMod0.CONSTANTS),
+                    new SwerveModuleSim(ConstValues.kSwerve.kMod1.CONSTANTS),
+                    new SwerveModuleSim(ConstValues.kSwerve.kMod2.CONSTANTS),
+                    new SwerveModuleSim(ConstValues.kSwerve.kMod3.CONSTANTS)
             };
             gyro = new GyroSim(this::getChassisSpeed);
-
-            // rotController.enableContinuousInput(-Math.PI, Math.PI);
         }
 
         GlobalState.setLocalizer(
