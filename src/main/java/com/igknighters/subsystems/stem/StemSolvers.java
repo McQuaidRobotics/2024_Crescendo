@@ -1,5 +1,6 @@
 package com.igknighters.subsystems.stem;
 
+import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kPivot;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -70,6 +71,10 @@ public class StemSolvers {
             double wristRads,
             double horizDist,
             double vertDist) {
+
+        horizDist += kPivot.kDimensions.PIVOT_AXEL_LOCATION.getX();
+        vertDist -= kPivot.kDimensions.PIVOT_AXEL_LOCATION.getY();
+
         double kHyp = Math.sqrt(horizDist * horizDist + vertDist * vertDist);
         double aK = Math.asin(vertDist / kHyp);
         double aS = Math.asin((stemLength * Math.sin(wristRads)) / kHyp);

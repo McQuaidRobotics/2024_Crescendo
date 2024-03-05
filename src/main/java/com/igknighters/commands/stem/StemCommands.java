@@ -145,7 +145,7 @@ public class StemCommands {
                     kTelescope.MIN_METERS,
                     wristRads,
                     distance,
-                    FieldConstants.SPEAKER.getZ() + kStem.VERTICAL_DISTANCE_OFFSET);
+                    FieldConstants.SPEAKER.getZ());
 
             return StemPosition.fromRadians(
                     pivotRads,
