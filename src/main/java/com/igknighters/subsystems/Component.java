@@ -1,22 +1,24 @@
 package com.igknighters.subsystems;
 
-public interface Component {
+import monologue.Logged;
+
+public abstract class Component implements Logged {
 
     /**
      * Should be called every cycle in the parent subsystems periodic method
      */
-    default public void periodic() {};
+    public void periodic() {};
 
     /**
      * Runs the mechanism in open loop at the specified voltage
      * @param volts The specified volts: [-12.0 .. 12.0]
      */
-    public void setVoltageOut(double volts);
+    public abstract void setVoltageOut(double volts);
 
     /**
      * Stops the mechanism
      */
-    public default void stopMechanism() {
+    public void stopMechanism() {
         setVoltageOut(0.0);
     }
 }

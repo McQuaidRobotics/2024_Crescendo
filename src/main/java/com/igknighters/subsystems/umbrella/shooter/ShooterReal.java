@@ -1,7 +1,5 @@
 package com.igknighters.subsystems.umbrella.shooter;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -17,11 +15,10 @@ import com.igknighters.constants.HardwareIndex.UmbrellaHW;
 
 import edu.wpi.first.math.util.Units;
 
-public class ShooterReal implements Shooter {
+public class ShooterReal extends Shooter {
 
     private final TalonFX rightMotor = new TalonFX(kShooter.RIGHT_MOTOR_ID, kUmbrella.CANBUS);
     private final TalonFX leftMotor = new TalonFX(kShooter.LEFT_MOTOR_ID, kUmbrella.CANBUS);
-    private final ShooterInputs inputs = new ShooterInputs();
     private final StatusSignal<Double> veloSignalRight, voltSignalRight, currentSignalRight, tempSignalRight;
     private final StatusSignal<Double> veloSignalLeft, voltSignalLeft, currentSignalLeft, tempSignalLeft;
 
@@ -102,28 +99,28 @@ public class ShooterReal implements Shooter {
 
     @Override
     public double getSpeed() {
-        return (inputs.radiansPerSecondRight + inputs.radiansPerSecondLeft) / 2.0;
+        return (super.radiansPerSecondRight + super.radiansPerSecondLeft) / 2.0;
     }
 
     @Override
     public double getTargetSpeed() {
-        return (inputs.targetRadiansPerSecondRight + inputs.targetRadiansPerSecondLeft) / 2.0;
+        return (super.targetRadiansPerSecondRight + super.targetRadiansPerSecondLeft) / 2.0;
     }
 
     @Override
     public void setSpeed(double speedRadPerSec) {
-        inputs.targetRadiansPerSecondRight = speedRadPerSec;
-        inputs.targetRadiansPerSecondLeft = speedRadPerSec * kShooter.LEFT_MOTOR_DIFF;
-        rightMotor.setControl(new VelocityVoltage(Units.radiansToRotations(inputs.targetRadiansPerSecondRight)));
-        leftMotor.setControl(new VelocityVoltage(Units.radiansToRotations(inputs.targetRadiansPerSecondLeft)));
+        super.targetRadiansPerSecondRight = speedRadPerSec;
+        super.targetRadiansPerSecondLeft = speedRadPerSec * kShooter.LEFT_MOTOR_DIFF;
+        rightMotor.setControl(new VelocityVoltage(Units.radiansToRotations(super.targetRadiansPerSecondRight)));
+        leftMotor.setControl(new VelocityVoltage(Units.radiansToRotations(super.targetRadiansPerSecondLeft)));
     }
 
     @Override
     public void setVoltageOut(double volts) {
-        inputs.targetRadiansPerSecondRight = 0.0;
-        inputs.targetRadiansPerSecondLeft = 0.0;
-        inputs.voltsRight = volts;
-        inputs.voltsLeft = volts;
+        super.targetRadiansPerSecondRight = 0.0;
+        super.targetRadiansPerSecondLeft = 0.0;
+        super.voltsRight = volts;
+        super.voltsLeft = volts;
         rightMotor.setVoltage(volts);
         leftMotor.setVoltage(volts);
     }
@@ -146,16 +143,14 @@ public class ShooterReal implements Shooter {
                         currentSignalLeft,
                         tempSignalLeft));
 
-        inputs.radiansPerSecondRight = Units.rotationsToRadians(veloSignalRight.getValue());
-        inputs.voltsRight = voltSignalRight.getValue();
-        inputs.ampsRight = currentSignalRight.getValue();
-        inputs.tempRight = tempSignalRight.getValue();
+        super.radiansPerSecondRight = Units.rotationsToRadians(veloSignalRight.getValue());
+        super.voltsRight = voltSignalRight.getValue();
+        super.ampsRight = currentSignalRight.getValue();
+        super.tempRight = tempSignalRight.getValue();
 
-        inputs.radiansPerSecondLeft = Units.rotationsToRadians(veloSignalLeft.getValue());
-        inputs.voltsLeft = voltSignalLeft.getValue();
-        inputs.ampsLeft = currentSignalLeft.getValue();
-        inputs.tempLeft = tempSignalLeft.getValue();
-
-        Logger.processInputs("/Umbrella/Shooter", inputs);
+        super.radiansPerSecondLeft = Units.rotationsToRadians(veloSignalLeft.getValue());
+        super.voltsLeft = voltSignalLeft.getValue();
+        super.ampsLeft = currentSignalLeft.getValue();
+        super.tempLeft = tempSignalLeft.getValue();
     }
 }

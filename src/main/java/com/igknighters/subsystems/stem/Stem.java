@@ -1,8 +1,6 @@
 
 package com.igknighters.subsystems.stem;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.igknighters.GlobalState;
 import com.igknighters.LED;
 import com.igknighters.LED.LedAnimations;
@@ -19,8 +17,9 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import monologue.Logged;
 
-public class Stem extends SubsystemBase {
+public class Stem extends SubsystemBase implements Logged {
 
     private final Pivot pivot;
     private final Telescope telescope;
@@ -38,7 +37,7 @@ public class Stem extends SubsystemBase {
         } else {
             pivot = new PivotReal();
             telescope = new TelescopeReal();
-            wrist = new WristRealSuicidal();
+            wrist = new WristReal();
         }
 
         visualizer = new StemVisualizer();
@@ -113,9 +112,9 @@ public class Stem extends SubsystemBase {
         boolean telescopeSuccess = telescope.isAt(position.telescopeMeters, toleranceMult);
         boolean wristSuccess = wrist.isAt(position.wristRads, toleranceMult);
 
-        Logger.recordOutput("/Stem/PivotReached", pivotSuccess);
-        Logger.recordOutput("/Stem/TelescopeReached", telescopeSuccess);
-        Logger.recordOutput("/Stem/WristReached", wristSuccess);
+        log("/PivotReached", pivotSuccess);
+        log("/TelescopeReached", telescopeSuccess);
+        log("/WristReached", wristSuccess);
 
         return pivotSuccess && telescopeSuccess && wristSuccess;
     }
@@ -173,8 +172,9 @@ public class Stem extends SubsystemBase {
         Tracer.traceFunc("TelescopePeriodic", telescope::periodic);
         Tracer.traceFunc("WristPeriodic", wrist::periodic);
 
-        Logger.recordOutput("Stem/CurrentPosition", getStemPosition().toString());
-        Logger.recordOutput("Stem/StemValidator/CurrentStateValidation", StemValidator.validatePosition(getStemPosition()).toString());
+        log("CurrentPosition", getStemPosition().toString());
+        log("StemValidator/CurrentStateValidation",
+                StemValidator.validatePosition(getStemPosition()).toString());
 
         visualizer.updateCurrent(getStemPosition());
 

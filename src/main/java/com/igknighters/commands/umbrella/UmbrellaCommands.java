@@ -1,6 +1,5 @@
 package com.igknighters.commands.umbrella;
 
-
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
@@ -113,13 +112,13 @@ public class UmbrellaCommands {
      * @return A command to be scheduled
      */
     public static Command spinUmbrellaBoth(Umbrella umbrella) {
-        // SmartDashboard.putNumber("IntakePercent", 0.0);
-        // SmartDashboard.putNumber("RPMumbrella", 0.0);
+        // MonologueDashboard.put("IntakePercent", 0.0);
+        // MonologueDashboard.put("RPMumbrella", 0.0);
         // return umbrella.run(() -> {
-        //     umbrella.runIntakeAt(
-        //             SmartDashboard.getNumber("IntakePercent", 0));
-        //     umbrella.spinupShooterToRPM(
-        //             SmartDashboard.getNumber("RPMumbrella", 0));
+        // umbrella.runIntakeAt(
+        // SmartDashboard.getNumber("IntakePercent", 0));
+        // umbrella.spinupShooterToRPM(
+        // SmartDashboard.getNumber("RPMumbrella", 0));
         // }).withName("Spin Umbrella Both");
         return Commands.none().withName("Spin Umbrella Both");
     }

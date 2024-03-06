@@ -15,23 +15,20 @@ import com.igknighters.util.geom.AllianceFlip;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 
-import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
-
 import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.commands.autos.AutosCmdRegister;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import monologue.Logged;
 
-public class RobotContainer {
+public class RobotContainer implements Logged {
 
     private final DriverController driverController;
     private final OperatorController operatorController;
     private final TestingController testingController;
 
     private final AllSubsystems allSubsystems;
-
-    public static LoggedDashboardNumber vertDistOffset;
 
     @SuppressWarnings("unused")
     public RobotContainer() {

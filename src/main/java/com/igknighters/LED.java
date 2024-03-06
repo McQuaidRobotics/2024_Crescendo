@@ -2,8 +2,6 @@ package com.igknighters;
 
 import java.util.ArrayList;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.ctre.phoenix.led.Animation;
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdleConfiguration;
@@ -19,6 +17,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
+import monologue.MonologueDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -244,7 +243,7 @@ public class LED {
             new Trigger(DriverStation::isFMSAttached)
                     .and(() -> Math.abs(DriverStation.getMatchTime() - 20.0) < 0.2)
                     .onTrue(new InstantCommand(() -> LED.sendAnimation(LedAnimations._20S_LEFT)
-                        .withDuration(2.0)).withName("20sLeftLED"));
+                            .withDuration(2.0)).withName("20sLeftLED"));
         } else {
             candle = null;
         }
@@ -431,7 +430,7 @@ public class LED {
             log += partial.toString() + ",";
             lastMode = robotMode;
         }
-        Logger.recordOutput("LED", log + "]");
+        MonologueDashboard.put("LED", log + "]");
 
         double batteryVolts = RobotController.getBatteryVoltage();
         if (batteryVolts < RobotController.getBrownoutVoltage() || RobotController.isBrownedOut()) {

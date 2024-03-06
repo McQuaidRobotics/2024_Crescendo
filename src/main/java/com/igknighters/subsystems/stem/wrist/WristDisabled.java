@@ -1,44 +1,34 @@
 package com.igknighters.subsystems.stem.wrist;
 
-import org.littletonrobotics.junction.Logger;
 import com.igknighters.subsystems.stem.StemPosition;
 import edu.wpi.first.math.MathUtil;
 
-public class WristDisabled implements Wrist {
-    private final WristInputs inputs;
+public class WristDisabled extends Wrist {
     final double slewRate = (4.3 / 50.0) * 0.75;
 
     public WristDisabled() {
-        inputs = new WristInputs(StemPosition.STARTING.wristRads);
+        super(StemPosition.STARTING.wristRads);
     }
 
     @Override
     public double getWristRadians() {
-        return inputs.radians;
+        return super.radians;
     }
 
     @Override
     public void setWristRadians(double radians) {
-        inputs.targetRadians = radians;
-        inputs.radians = inputs.radians + MathUtil.clamp(radians - inputs.radians, -slewRate, slewRate);
+        super.targetRadians = radians;
+        super.radians = super.radians + MathUtil.clamp(radians - super.radians, -slewRate, slewRate);
     }
 
     @Override
     public void setVoltageOut(double volts) {
-        inputs.volts = volts;
+        super.volts = volts;
         double percentOut = volts / 12.0;
-        inputs.radiansPerSecond = slewRate * percentOut;
-        inputs.radians += inputs.radiansPerSecond;
+        super.radiansPerSecond = slewRate * percentOut;
+        super.radians += super.radiansPerSecond;
     }
 
     @Override
-    public void periodic() {
-        Logger.processInputs("Stem/Wrist", inputs);
-    }
-
-    @Override
-    public void seedWrist() {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'seedWrist'");
-    }
+    public void periodic() {}
 }

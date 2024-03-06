@@ -6,8 +6,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.igknighters.commands.autos.Autos;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.vision.VisionOnlyPoseEstimator;
@@ -29,6 +27,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
+import monologue.MonologueDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
@@ -45,7 +44,7 @@ public class GlobalState {
         }
     }
 
-    private static AtomicBoolean climbing = new AtomicBoolean(false); 
+    private static AtomicBoolean climbing = new AtomicBoolean(false);
 
     private static final ReentrantLock globalLock = new ReentrantLock();
 
@@ -186,9 +185,8 @@ public class GlobalState {
             } else {
                 Translation2d translation = getLocalizedPose().getTranslation();
                 return new Pose3d(
-                    new Translation3d(translation.getX(), translation.getY(), 0),
-                    rotSupplier.get()
-                );
+                        new Translation3d(translation.getX(), translation.getY(), 0),
+                        rotSupplier.get());
             }
         } finally {
             globalLock.unlock();
@@ -371,8 +369,9 @@ public class GlobalState {
     public static void log() {
         globalLock.lock();
         try {
-            localizer.ifPresent(l -> Logger.recordOutput("Global/LocalizedPose", l.getEstimatedPosition()));
-            Logger.recordOutput("Global/AutoCommand", GlobalState.getAutoCommand().getName());
+            localizer.ifPresent(
+                    l -> MonologueDashboard.put("Global/LocalizedPose", l.getEstimatedPosition().toString()));
+            MonologueDashboard.put("Global/AutoCommand", GlobalState.getAutoCommand().getName());
         } finally {
             globalLock.unlock();
         }

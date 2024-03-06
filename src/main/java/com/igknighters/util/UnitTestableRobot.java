@@ -4,9 +4,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-import org.littletonrobotics.junction.LoggedRobot;
-import org.littletonrobotics.junction.Logger;
-
 import com.igknighters.GlobalState;
 import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.constants.ConstValues;
@@ -15,11 +12,13 @@ import edu.wpi.first.hal.DriverStationJNI;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import monologue.MonologueDashboard;
 
-public class UnitTestableRobot extends LoggedRobot {
+public class UnitTestableRobot extends TimedRobot {
     public static class UnitTestableRobotExited extends RuntimeException {
         private static final long serialVersionUID = 1L;
 
@@ -118,7 +117,7 @@ public class UnitTestableRobot extends LoggedRobot {
             mode = Mode.kTest;
         }
 
-        Logger.recordOutput("RobotMode", mode.toString());
+        MonologueDashboard.put("RobotMode", mode.toString());
 
         if ((!calledDsConnected && DriverStation.isDSAttached()) || isUnitTest) {
             calledDsConnected = true;

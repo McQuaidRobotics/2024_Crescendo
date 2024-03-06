@@ -3,84 +3,50 @@ package com.igknighters.subsystems.vision.camera;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
+import monologue.Annotations.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.ArrayList;
+import java.nio.ByteBuffer;
 
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.util.struct.StructSerializable;
 
-import org.littletonrobotics.junction.LogTable;
-import org.littletonrobotics.junction.inputs.LoggableInputs;
-
+import com.igknighters.constants.AprilTags;
 import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kVision;
 
-public interface Camera {
-    public static class CameraInput implements LoggableInputs {
-        private VisionPoseEstimate latestPoseEst;
-        private VisionEstimateFault latestFault;
-        private boolean isPresent = false, isConnected = false;
+public abstract class Camera {
+    @Log.NT
+    protected VisionPoseEstimate latestPoseEst;
+    @Log.NT
+    protected VisionEstimateFault latestFault;
+    @Log.NT
+    protected boolean isPresent = false;
+    @Log.NT
+    protected boolean isConnected = false;
 
-        public CameraInput(VisionPoseEstimate pose) {
-            this.latestPoseEst = pose;
+    protected Camera(int id) {
+        this.latestPoseEst = VisionPoseEstimate.empty(id);
+        this.latestFault = VisionEstimateFault.empty();
+    }
+
+    protected void update(Optional<Pair<VisionPoseEstimate, VisionEstimateFault>> estimate, boolean isConnected) {
+        if (estimate.isPresent()) {
+            latestPoseEst = estimate.get().getFirst();
+            latestFault = estimate.get().getSecond();
+            isPresent = true;
+        } else {
+            isPresent = false;
         }
-
-        public void update(Optional<Pair<VisionPoseEstimate, VisionEstimateFault>> estimate, boolean isConnected) {
-            if (estimate.isPresent()) {
-                latestPoseEst = estimate.get().getFirst();
-                latestFault = estimate.get().getSecond();
-                isPresent = true;
-            } else {
-                isPresent = false;
-            }
-            this.isConnected = isConnected;
-        }
-
-        public Optional<VisionPoseEstimate> getLatestPoseEst() {
-            if (isPresent) {
-                return Optional.of(latestPoseEst);
-            } else {
-                return Optional.empty();
-            }
-        }
-
-        public VisionEstimateFault getLatestFault() {
-            if (isPresent) {
-                return latestFault;
-            } else {
-                return new VisionEstimateFault(false, false, false, false, false, false, false, false, false);
-            }
-        }
-
-        @Override
-        public void toLog(LogTable table) {
-            table.put("isConnected", isConnected);
-            table.put("isPresent", isPresent);
-            if (!isPresent) {
-                return;
-            }
-            latestPoseEst.toLog(table);
-            latestFault.toLog(table);
-        }
-
-        @Override
-        public void fromLog(LogTable table) {
-            isConnected = table.get("isConnected", isConnected);
-            isPresent = table.get("isPresent", isPresent);
-
-            if (!isPresent) {
-                return;
-            }
-
-            latestPoseEst = VisionPoseEstimate.fromLog(table);
-            latestFault = VisionEstimateFault.fromLog(table);
-        }
+        this.isConnected = isConnected;
     }
 
     /**
@@ -135,14 +101,26 @@ public interface Camera {
      * 
      * @return An optional containing the pose estimation if it was successful
      */
-    public Optional<VisionPoseEstimate> evalPose();
+    public Optional<VisionPoseEstimate> evalPose() {
+        if (isPresent) {
+            return Optional.of(latestPoseEst);
+        } else {
+            return Optional.empty();
+        }
+    }
 
     /**
      * Gets the faults of the last pose estimation.
      * 
      * @return The faults
      */
-    public VisionEstimateFault getFaults();
+    public VisionEstimateFault getFaults() {
+        if (isPresent) {
+            return latestFault;
+        } else {
+            return new VisionEstimateFault(false, false, false, false, false, false, false, false, false);
+        }
+    }
 
     /**
      * Gets the transform from the robot to the camera.
@@ -152,23 +130,23 @@ public interface Camera {
      * @apiNote This has to be very accurate, otherwise multi-camera pose estimation
      *          will suffer a lot.
      */
-    public Transform3d getRobotToCameraTransform3d();
+    public abstract Transform3d getRobotToCameraTransform3d();
 
     /**
      * Gets the ID of the camera.
      * 
      * @return The ID of the camera
      */
-    public Integer getId();
+    public abstract Integer getId();
 
     /**
      * Gets the name of the camera.
      * 
      * @return The name of the camera
      */
-    public String getName();
+    public abstract String getName();
 
-    public void periodic();
+    public abstract void periodic();
 
     public record VisionPoseEstimate(
             int cameraId,
@@ -176,36 +154,10 @@ public interface Camera {
             double timestamp,
             List<Integer> apriltags,
             double ambiguity,
-            double maxDistance) {
+            double maxDistance) implements StructSerializable {
+
         public double distanceFrom(VisionPoseEstimate other) {
             return pose.getTranslation().getDistance(other.pose.getTranslation());
-        }
-
-        public void toLog(LogTable table) {
-            final String p = "VisionPoseEstimate/";
-            table.put(p + "cameraId", cameraId);
-            table.put(p + "pose", pose);
-            table.put(p + "timestamp", timestamp);
-            table.put(p + "apriltags", apriltags.stream().mapToInt(i -> i).toArray());
-            table.put(p + "ambiguity", ambiguity);
-            table.put(p + "maxDistance", maxDistance);
-        }
-
-        public static VisionPoseEstimate fromLog(LogTable table) {
-            final String p = "VisionPoseEstimate/";
-            int cameraId = table.get(p +"cameraId", 0);
-            Pose3d pose = table.get(p +"pose", new Pose3d());
-            double timestamp = table.get(p +"timestamp", 0.0);
-            int[] tagsPrim = table.get(p +"apriltags", new int[0]);
-            double ambiguity = table.get(p +"ambiguity", 0.0);
-            double maxDistance = table.get(p +"maxDistance", 0.0);
-
-            ArrayList<Integer> tags = new ArrayList<>();
-            for (int tag : tagsPrim) {
-                tags.add(tag);
-            }
-
-            return new VisionPoseEstimate(cameraId, pose, timestamp, tags, ambiguity, maxDistance);
         }
 
         public static VisionPoseEstimate empty(int id) {
@@ -232,7 +184,7 @@ public interface Camera {
                     maxDistance > 4.5,
                     ambiguity > kVision.AMBIGUITY_CUTOFF,
                     this.distanceFrom(last) > jitterTimer.get() * kSwerve.MAX_DRIVE_VELOCITY,
-                    apriltags.isEmpty(),
+                    this.apriltags.isEmpty(),
                     Math.abs(pose.getTranslation().getZ()) > kVision.MAX_Z_DELTA,
                     pose.getRotation().getY() > kVision.MAX_ANGLE_DELTA,
                     pose.getRotation().getX() > kVision.MAX_ANGLE_DELTA,
@@ -244,6 +196,57 @@ public interface Camera {
 
             return new Pair<>(this, fault);
         }
+
+        public static class VisionPoseEstimateStruct implements Struct<VisionPoseEstimate> {
+            @Override
+            public Class<VisionPoseEstimate> getTypeClass() {
+                return VisionPoseEstimate.class;
+            }
+
+            @Override
+            public int getSize() {
+                return Integer.BYTES + Pose3d.struct.getSize() + Double.BYTES + 16 + (Double.BYTES * 2);
+            }
+
+            @Override
+            public String getSchema() {
+                return "int32 poseId; Pose3d pose; double timestamp; boolean[16] apriltags; double ambiguity; double maxDistance;";
+            }
+
+            @Override
+            public String getTypeString() {
+                return "struct:VisionPoseEstimate";
+            }
+
+            @Override
+            public void pack(ByteBuffer bb, VisionPoseEstimate value) {
+                bb.putInt(value.cameraId);
+                Pose3d.struct.pack(bb, value.pose);
+                bb.putDouble(value.timestamp);
+                for (int i = 0; i < AprilTags.APRILTAGS.length; i++) {
+                    bb.put(value.apriltags.contains(i) ? (byte) 1 : (byte) 0);
+                }
+                bb.putDouble(value.ambiguity);
+                bb.putDouble(value.maxDistance);
+            }
+
+            @Override
+            public VisionPoseEstimate unpack(ByteBuffer bb) {
+                int cameraId = bb.getInt();
+                Pose3d pose = Pose3d.struct.unpack(bb);
+                double timestamp = bb.getDouble();
+                ArrayList<Integer> apriltags = new ArrayList<>();
+                for (int i = 0; i < 16; i++) {
+                    if (bb.get() == 1)
+                        apriltags.add(i);
+                }
+                double ambiguity = bb.getDouble();
+                double maxDistance = bb.getDouble();
+                return new VisionPoseEstimate(cameraId, pose, timestamp, apriltags, ambiguity, maxDistance);
+            }
+        }
+
+        public static final VisionPoseEstimateStruct struct = new VisionPoseEstimateStruct();
     }
 
     public record VisionEstimateFault(
@@ -256,32 +259,6 @@ public interface Camera {
             boolean infeasiblePitchValue,
             boolean infeasibleRollValue,
             boolean isDisabled) {
-        public void toLog(LogTable table) {
-            final String p = "VisionEstimateFault/";
-            table.put(p + "outOfBounds", outOfBounds);
-            table.put(p + "outOfRange", outOfRange);
-            table.put(p + "tooAmbiguous", tooAmbiguous);
-            table.put(p + "extremeJitter", extremeJitter);
-            table.put(p + "noTags", noTags);
-            table.put(p + "infeasibleZValue", infeasibleZValue);
-            table.put(p + "infeasiblePitchValue", infeasiblePitchValue);
-            table.put(p + "infeasibleRollValue", infeasibleRollValue);
-            table.put(p + "isDisabled", isDisabled);
-        }
-
-        public static VisionEstimateFault fromLog(LogTable table) {
-            final String p = "VisionEstimateFault/";
-            return new VisionEstimateFault(
-                    table.get(p + "outOfBounds", false),
-                    table.get(p + "outOfRange", false),
-                    table.get(p + "tooAmbiguous", false),
-                    table.get(p + "extremeJitter", false),
-                    table.get(p + "noTags", false),
-                    table.get(p + "infeasibleZValue", false),
-                    table.get(p + "infeasiblePitchValue", false),
-                    table.get(p + "infeasibleRollValue", false),
-                    table.get(p + "isDisabled", false));
-        }
 
         public static VisionEstimateFault empty() {
             return new VisionEstimateFault(false, false, false, false, false, false, false, false, false);
@@ -289,7 +266,58 @@ public interface Camera {
 
         public boolean isFaulty() {
             return outOfBounds || outOfRange || tooAmbiguous || extremeJitter || noTags || isDisabled;
-                // || infeasibleZValue || infeasiblePitchValue || infeasibleRollValue ;
+            // || infeasibleZValue || infeasiblePitchValue || infeasibleRollValue ;
         }
+
+        public static class VisionEstimateFaultStruct implements Struct<VisionEstimateFault> {
+            @Override
+            public Class<VisionEstimateFault> getTypeClass() {
+                return VisionEstimateFault.class;
+            }
+
+            @Override
+            public int getSize() {
+                return 9;
+            }
+
+            @Override
+            public String getSchema() {
+                return "boolean outOfBounds; boolean outOfRange; boolean tooAmbiguous; boolean extremeJitter; boolean noTags; boolean infeasibleZValue; boolean infeasiblePitchValue; boolean infeasibleRollValue; boolean isDisabled;";
+            }
+
+            @Override
+            public String getTypeString() {
+                return "struct:VisionEstimateFault";
+            }
+
+            @Override
+            public void pack(ByteBuffer bb, VisionEstimateFault value) {
+                bb.put(value.outOfBounds ? (byte) 1 : (byte) 0);
+                bb.put(value.outOfRange ? (byte) 1 : (byte) 0);
+                bb.put(value.tooAmbiguous ? (byte) 1 : (byte) 0);
+                bb.put(value.extremeJitter ? (byte) 1 : (byte) 0);
+                bb.put(value.noTags ? (byte) 1 : (byte) 0);
+                bb.put(value.infeasibleZValue ? (byte) 1 : (byte) 0);
+                bb.put(value.infeasiblePitchValue ? (byte) 1 : (byte) 0);
+                bb.put(value.infeasibleRollValue ? (byte) 1 : (byte) 0);
+                bb.put(value.isDisabled ? (byte) 1 : (byte) 0);
+            }
+
+            @Override
+            public VisionEstimateFault unpack(ByteBuffer bb) {
+                return new VisionEstimateFault(
+                        bb.get() == 1,
+                        bb.get() == 1,
+                        bb.get() == 1,
+                        bb.get() == 1,
+                        bb.get() == 1,
+                        bb.get() == 1,
+                        bb.get() == 1,
+                        bb.get() == 1,
+                        bb.get() == 1);
+            }
+        }
+
+        public static final VisionEstimateFaultStruct struct = new VisionEstimateFaultStruct();
     }
 }

@@ -12,8 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -24,8 +22,9 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import monologue.Logged;
 
-public class Vision extends SubsystemBase {
+public class Vision extends SubsystemBase implements Logged {
 
     private final List<Camera> cameras;
 
@@ -64,7 +63,6 @@ public class Vision extends SubsystemBase {
 
     @Override
     public void periodic() {
-        if (DriverStation.isAutonomousEnabled()) return;
 
         Tracer.startTrace("VisionPeriodic");
         HashSet<Integer> seenTags = new HashSet<>();
@@ -74,12 +72,10 @@ public class Vision extends SubsystemBase {
             camera.periodic();
 
             if (cameraPositionFieldVisualizer.get(false)) {
-                Logger.recordOutput(
-                    "/Vision/" + camera.getName() + "/3d",
-                    GlobalState.getLocalizedPose3d().plus(
-                        camera.getRobotToCameraTransform3d()
-                    )
-                );
+                log(
+                        camera.getName() + "/3d",
+                        GlobalState.getLocalizedPose3d().plus(
+                                camera.getRobotToCameraTransform3d()));
                 GlobalState.modifyField2d(field -> {
                     Transform2d tf = new Transform2d(
                             camera.getRobotToCameraTransform3d().getTranslation().toTranslation2d(),
@@ -109,7 +105,8 @@ public class Vision extends SubsystemBase {
                 ambiguity *= 2.0;
             }
 
-            GlobalState.submitVisionData(eval, ambiguity);
+            if (!DriverStation.isAutonomousEnabled())
+                GlobalState.submitVisionData(eval, ambiguity);
 
             seenTags.addAll(eval.apriltags());
 
