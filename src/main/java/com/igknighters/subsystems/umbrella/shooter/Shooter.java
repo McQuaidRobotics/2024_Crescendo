@@ -17,6 +17,11 @@ public abstract class Shooter extends Component {
     @Log.NT protected double tempRight = 0.0;
     @Log.NT protected double tempLeft = 0.0;
 
+    @Override
+    public String getPath() {
+        return "Shooter";
+    }
+
     /**
      * @return The rotational speed of the {@code Shooter} flywheel in Rad/S
      */

@@ -4,18 +4,24 @@ import com.igknighters.constants.ConstValues;
 import com.igknighters.subsystems.Component;
 
 import edu.wpi.first.math.util.Units;
+import monologue.Annotations.Log;
 
 public abstract class Wrist extends Component {
-    public double radians;
-    public double targetRadians;
-    public double radiansPerSecond = 0.0;
-    public double volts = 0.0;
-    public double amps = 0.0;
-    public double temp = 0.0;
+    @Log.NT protected double radians;
+    @Log.NT protected double targetRadians;
+    @Log.NT protected double radiansPerSecond = 0.0;
+    @Log.NT protected double volts = 0.0;
+    @Log.NT protected double amps = 0.0;
+    @Log.NT protected double temp = 0.0;
 
     public Wrist(double startingRadians) {
         this.radians = startingRadians;
         this.targetRadians = startingRadians;
+    }
+
+    @Override
+    public String getPath() {
+        return "Wrist";
     }
 
     public abstract void setWristRadians(double radians);

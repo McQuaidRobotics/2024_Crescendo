@@ -7,12 +7,11 @@ import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.controllers.DriverController;
 import com.igknighters.controllers.OperatorController;
 import com.igknighters.controllers.TestingController;
+import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.util.geom.AllianceFlip;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-
-import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.commands.autos.AutosCmdRegister;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
 import edu.wpi.first.wpilibj.DriverStation;

@@ -3,9 +3,9 @@ package com.igknighters.constants;
 import java.util.List;
 import java.util.Map;
 
-import com.igknighters.SubsystemResources.Subsystems;
+import com.igknighters.constants.ConstantHelper.RobotConstID;
+import com.igknighters.subsystems.SubsystemResources.Subsystems;
 import com.igknighters.util.BootupLogger;
-import com.igknighters.ConstantHelper.RobotConstID;
 
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;

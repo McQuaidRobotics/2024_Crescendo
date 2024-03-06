@@ -15,6 +15,11 @@ public abstract class Intake extends Component {
     @Log.NT protected double ampsLower = 0.0;
     @Log.NT protected double tempLower = 0.0;
 
+    @Override
+    public String getPath() {
+        return "Intake";
+    }
+
     /**
      * @return If the exit beam is broken
      */

@@ -10,6 +10,11 @@ public abstract class Gyro extends Component {
     public double rollVelRadsPerSec = 0.0;
     public double yawVelRadsPerSec = 0.0;
 
+    @Override
+    public String getPath() {
+        return "Gyro";
+    }
+
     public double getPitchRads() {
         return pitchRads;
     }

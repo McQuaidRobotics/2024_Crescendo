@@ -1,11 +1,11 @@
 package com.igknighters.controllers;
 
-import com.igknighters.SubsystemResources.Subsystems;
 import com.igknighters.commands.HigherOrderCommands;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.SwerveCommands;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.ConstValues.kControls;
+import com.igknighters.subsystems.SubsystemResources.Subsystems;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.ProxyCommand;
 public class DriverController extends ControllerParent {
 
     public DriverController(int port) {
-        super(port, true, ControllerType.Driver);
+        super(port, true);
         // disregard null safety for subsystems as it is checked on assignment
 
         /// FACE BUTTONS
@@ -125,7 +125,7 @@ public class DriverController extends ControllerParent {
 
         // this.DPD.binding =
 
-        // this.DPL.binding = 
+        // this.DPL.binding =
 
         this.DPU.binding = new Binding((trig, allss) -> {
             trig.onTrue(StemCommands.holdAt(allss.stem.get(), StemPosition.STARTING));

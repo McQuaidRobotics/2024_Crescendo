@@ -21,6 +21,11 @@ public abstract class Telescope extends Component {
         this.targetMeters = startingMeters;
     }
 
+    @Override
+    public String getPath() {
+        return "Telescope";
+    }
+
     /**
      * @param meters The distance to set the mechanism to
      * 

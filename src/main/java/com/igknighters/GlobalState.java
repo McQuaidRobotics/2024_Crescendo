@@ -370,7 +370,7 @@ public class GlobalState {
         globalLock.lock();
         try {
             localizer.ifPresent(
-                    l -> MonoDashboard.put("Global/LocalizedPose", l.getEstimatedPosition().toString()));
+                    l -> MonoDashboard.put("Global/LocalizedPose", l.getEstimatedPosition()));
             MonoDashboard.put("Global/AutoCommand", GlobalState.getAutoCommand().getName());
         } finally {
             globalLock.unlock();

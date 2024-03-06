@@ -171,7 +171,7 @@ public class Stem extends SubsystemBase implements Logged {
         Tracer.traceFunc("TelescopePeriodic", telescope::periodic);
         Tracer.traceFunc("WristPeriodic", wrist::periodic);
 
-        log("CurrentPosition", getStemPosition().toString());
+        log("CurrentPosition", getStemPosition());
         log("StemValidator/CurrentStateValidation",
                 StemValidator.validatePosition(getStemPosition()).toString());
 

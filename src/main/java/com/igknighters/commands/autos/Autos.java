@@ -21,7 +21,7 @@ public class Autos {
      * @param swerve The swerve subsystem to be used in dynamic autos
      */
     public static void createSendableChooser(Swerve swerve) {
-        autoChooser = AutoBuilder.buildAutoChooser();
+        autoChooser = AutoBuilder.buildAutoChooser("No Auto");
         for (Command dynamicAutoCmd : DynamicRoutines.choosableDynamicRoutines(swerve)) {
             autoChooser.addOption("(Dynamic) " + dynamicAutoCmd.getName(), dynamicAutoCmd);
         }

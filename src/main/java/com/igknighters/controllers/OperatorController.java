@@ -1,14 +1,14 @@
 package com.igknighters.controllers;
 
-import com.igknighters.SubsystemResources.Subsystems;
 import com.igknighters.commands.stem.StemCommands;
+import com.igknighters.subsystems.SubsystemResources.Subsystems;
 import com.igknighters.subsystems.stem.StemPosition;
 
 public class OperatorController extends ControllerParent {
     public double frozenWristRadsOffset = 0.0;
 
     public OperatorController(int port) {
-        super(port, true, ControllerType.Operator);
+        super(port, true);
         // disregard null safety as it is checked on assignment
 
         /// FACE BUTTONS

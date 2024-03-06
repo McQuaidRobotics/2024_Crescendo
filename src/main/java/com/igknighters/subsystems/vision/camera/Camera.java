@@ -215,8 +215,13 @@ public abstract class Camera implements Logged{
             }
 
             @Override
+            public Struct<?>[] getNested() {
+                return new Struct<?>[] {Pose3d.struct};
+            }
+
+            @Override
             public String getSchema() {
-                return "int32 poseId; Pose3d pose; double timestamp; boolean[16] apriltags; double ambiguity; double maxDistance;";
+                return "int32 poseId; Pose3d pose; double timestamp; bool apriltags[16]; double ambiguity; double maxDistance;";
             }
 
             @Override
@@ -226,6 +231,7 @@ public abstract class Camera implements Logged{
 
             @Override
             public void pack(ByteBuffer bb, VisionPoseEstimate value) {
+                // MonoDashboard.put("idk" + value.cameraId(), value.pose);
                 bb.putInt(value.cameraId);
                 Pose3d.struct.pack(bb, value.pose);
                 bb.putDouble(value.timestamp);
@@ -288,7 +294,15 @@ public abstract class Camera implements Logged{
 
             @Override
             public String getSchema() {
-                return "boolean outOfBounds; boolean outOfRange; boolean tooAmbiguous; boolean extremeJitter; boolean noTags; boolean infeasibleZValue; boolean infeasiblePitchValue; boolean infeasibleRollValue; boolean isDisabled;";
+                return "bool outOfBounds; "
+                + "bool outOfRange; "
+                + "bool tooAmbiguous; "
+                + "bool extremeJitter; "
+                + "bool noTags; "
+                + "bool infeasibleZValue; "
+                + "bool infeasiblePitchValue; "
+                + "bool infeasibleRollValue; "
+                + "bool isDisabled; ";
             }
 
             @Override

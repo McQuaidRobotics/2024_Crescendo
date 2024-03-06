@@ -1,11 +1,15 @@
 package com.igknighters.subsystems.stem;
 
+import java.nio.ByteBuffer;
+
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.util.struct.StructSerializable;
 
-public class StemPosition {
+public class StemPosition implements StructSerializable {
     public double pivotRads, wristRads, telescopeMeters;
 
     private StemPosition(double pivotPosRads, double wristPosRads, double telescopePosMeters) {
@@ -52,6 +56,42 @@ public class StemPosition {
         return "StemPosition(" + Units.radiansToDegrees(pivotRads) + ", " + Units.radiansToDegrees(wristRads) + ", "
                 + telescopeMeters + ")";
     }
+
+    public static class StemPositionStruct implements Struct<StemPosition> {
+
+        @Override
+        public Class<StemPosition> getTypeClass() {
+            return StemPosition.class;
+        }
+
+        @Override
+        public String getTypeString() {
+            return "struct:StemPosition";
+        }
+
+        @Override
+        public String getSchema() {
+            return "double pivotRads; double wristRads; double telescopeMeters;";
+        }
+
+        @Override
+        public int getSize() {
+            return kSizeDouble * 3;
+        }
+
+        @Override
+        public void pack(ByteBuffer bb, StemPosition value) {
+            bb.putDouble(value.pivotRads);
+            bb.putDouble(value.wristRads);
+            bb.putDouble(value.telescopeMeters);
+        }
+
+        @Override
+        public StemPosition unpack(ByteBuffer bb) {
+            return new StemPosition(bb.getDouble(), bb.getDouble(), bb.getDouble());
+        }
+    }
+    public static final StemPositionStruct struct = new StemPositionStruct();
 
     public static final StemPosition STOW = new StemPosition(Units.degreesToRadians(43.5),
             Units.degreesToRadians(112.0), kTelescope.MIN_METERS) {

@@ -23,6 +23,11 @@ public abstract class Pivot extends Component {
         this.targetRadians = startingRadians;
     }
 
+    @Override
+    public String getPath() {
+        return "Pivot";
+    }
+
     /**
      * @param radians the angle to set the mechanism to
      */

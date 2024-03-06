@@ -29,6 +29,11 @@ public abstract class SwerveModule extends Component {
     @Log.NT
     public double angleAmps = 0.0;
 
+    @Override
+    public String getPath() {
+        return "SwerveModule";
+    }
+
     /**
      * @param desiredState The state that the module should assume, angle and
      *                     velocity.

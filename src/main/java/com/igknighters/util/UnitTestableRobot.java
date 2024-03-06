@@ -5,8 +5,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import com.igknighters.GlobalState;
-import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.constants.ConstValues;
+import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 
 import edu.wpi.first.hal.DriverStationJNI;
 import edu.wpi.first.hal.HAL;

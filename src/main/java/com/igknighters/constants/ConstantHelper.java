@@ -1,4 +1,4 @@
-package com.igknighters;
+package com.igknighters.constants;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -12,18 +12,13 @@ import edu.wpi.first.wpilibj.DriverStation;
 
 public class ConstantHelper {
 
-
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ ElementType.FIELD })
     public @interface BoolConst {
 
-
         public boolean crash(); // default false;
 
-
-
         public boolean burn(); // default false;
-
 
     }
 
@@ -31,13 +26,9 @@ public class ConstantHelper {
     @Target({ ElementType.FIELD })
     public @interface IntConst {
 
-
         public int crash(); // default 0;
 
-
-
         public int burn(); // default 0;
-
 
     }
 
@@ -45,13 +36,9 @@ public class ConstantHelper {
     @Target({ ElementType.FIELD })
     public @interface LongConst {
 
-
         public long crash(); // default 0;
 
-
-
         public long burn(); // default 0;
-
 
     }
 
@@ -59,13 +46,9 @@ public class ConstantHelper {
     @Target({ ElementType.FIELD })
     public @interface FloatConst {
 
-
         public float crash(); // default 0f;
 
-
-
         public float burn(); // default 0f;
-
 
     }
 
@@ -73,13 +56,9 @@ public class ConstantHelper {
     @Target({ ElementType.FIELD })
     public @interface DoubleConst {
 
-
         public double crash(); // default 0d;
 
-
-
         public double burn(); // default 0d;
-
 
     }
 
@@ -87,13 +66,9 @@ public class ConstantHelper {
     @Target({ ElementType.FIELD })
     public @interface StrConst {
 
-
         public String crash(); // default "";
 
-
-
         public String burn(); // default "";
-
 
     }
 
@@ -101,13 +76,9 @@ public class ConstantHelper {
     @Target({ ElementType.FIELD })
     public @interface BoolArrConst {
 
-
         public boolean[] crash(); // default {};
 
-
-
         public boolean[] burn(); // default {};
-
 
     }
 
@@ -115,13 +86,9 @@ public class ConstantHelper {
     @Target({ ElementType.FIELD })
     public @interface IntArrConst {
 
-
         public int[] crash(); // default {};
 
-
-
         public int[] burn(); // default {};
-
 
     }
 
@@ -129,13 +96,9 @@ public class ConstantHelper {
     @Target({ ElementType.FIELD })
     public @interface LongArrConst {
 
-
         public long[] crash(); // default {};
 
-
-
         public long[] burn(); // default {};
-
 
     }
 
@@ -143,13 +106,9 @@ public class ConstantHelper {
     @Target({ ElementType.FIELD })
     public @interface FloatArrConst {
 
-
         public float[] crash(); // default {};
 
-
-
         public float[] burn(); // default {};
-
 
     }
 
@@ -157,13 +116,9 @@ public class ConstantHelper {
     @Target({ ElementType.FIELD })
     public @interface DoubleArrConst {
 
-
         public double[] crash(); // default {};
 
-
-
         public double[] burn(); // default {};
-
 
     }
 
@@ -171,17 +126,11 @@ public class ConstantHelper {
     @Target({ ElementType.FIELD })
     public @interface StrArrConst {
 
-
         public String[] crash(); // default {};
-
-
 
         public String[] burn(); // default {};
 
-
     }
-
-
 
     public static void handleConstField(Field field, Class<?> obj) {
         if (field.getAnnotations().length == 0) {
@@ -189,7 +138,7 @@ public class ConstantHelper {
         }
         RobotConstID constID = com.igknighters.constants.RobotSetup.getRobotID().constID;
 
-        //handle robot dependent constants
+        // handle robot dependent constants
 
         if (field.isAnnotationPresent(BoolConst.class)) {
             try {
@@ -395,8 +344,7 @@ public class ConstantHelper {
             }
         }
 
-
-        //makes sure its an NT supported type
+        // makes sure its an NT supported type
         var type = field.getType();
         if (type.isArray()) {
             type = type.getComponentType();
@@ -414,14 +362,14 @@ public class ConstantHelper {
             return;
         }
         for (Field field : cls.getDeclaredFields()) {
-            if (!Modifier.isStatic(field.getModifiers())) {
+            if (!Modifier.isStatic(field.getModifiers()) && !cls.isEnum()) {
                 DriverStation.reportError("Non-static field " + cls.getSimpleName() + "." + field.getName()
                         + " in constants", false);
                 continue;
             }
-                handleConstField(field, cls);
-            }
+            handleConstField(field, cls);
         }
+    }
 
     public static void applyRoboConst(Class<com.igknighters.constants.ConstValues> consts) {
         for (Class<?> clazz : consts.getDeclaredClasses()) {

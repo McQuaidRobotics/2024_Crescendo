@@ -9,8 +9,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import monologue.Monologue;
 
-import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.constants.ConstValues;
+import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.util.CANBusLogging;
 import com.igknighters.util.ShuffleboardApi;
 import com.igknighters.util.Tracer;
@@ -29,7 +29,7 @@ public class Robot extends UnitTestableRobot {
         Pathfinding.setPathfinder(new LocalADStar());
         setupLogging();
 
-        com.igknighters.ConstantHelper.applyRoboConst(ConstValues.class);
+        com.igknighters.constants.ConstantHelper.applyRoboConst(ConstValues.class);
 
         GlobalState.publishField2d();
 
