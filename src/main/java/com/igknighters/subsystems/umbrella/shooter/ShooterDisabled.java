@@ -3,6 +3,7 @@ package com.igknighters.subsystems.umbrella.shooter;
 import com.igknighters.constants.ConstValues;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.RobotController;
 
 public class ShooterDisabled extends Shooter {
     double currentRadPerSec = 0.0;
@@ -29,7 +30,7 @@ public class ShooterDisabled extends Shooter {
 
     @Override
     public void setVoltageOut(double volts) {
-        setSpeed(MathUtil.clamp(volts / 12.0, -12.0, 12.0));
+        setSpeed(MathUtil.clamp(volts / RobotController.getBatteryVoltage(), -RobotController.getBatteryVoltage(), RobotController.getBatteryVoltage()));
     }
 
     @Override

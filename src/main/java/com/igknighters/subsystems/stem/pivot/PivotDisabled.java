@@ -2,6 +2,7 @@ package com.igknighters.subsystems.stem.pivot;
 
 import com.igknighters.subsystems.stem.StemPosition;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.RobotController;
 
 public class PivotDisabled extends Pivot {
     final double slewRate = (2.37 / 50.0) * 0.75;
@@ -22,7 +23,7 @@ public class PivotDisabled extends Pivot {
 
     @Override
     public void setVoltageOut(double volts) {
-        double percentOut = volts / 12.0;
+        double percentOut = volts / RobotController.getBatteryVoltage();
         super.radiansPerSecond = slewRate * percentOut;
         super.radians += super.radiansPerSecond;
     }
