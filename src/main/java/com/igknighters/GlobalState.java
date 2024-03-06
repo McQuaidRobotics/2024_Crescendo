@@ -27,7 +27,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
-import monologue.MonologueDashboard;
+import monologue.MonoDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
@@ -370,8 +370,8 @@ public class GlobalState {
         globalLock.lock();
         try {
             localizer.ifPresent(
-                    l -> MonologueDashboard.put("Global/LocalizedPose", l.getEstimatedPosition().toString()));
-            MonologueDashboard.put("Global/AutoCommand", GlobalState.getAutoCommand().getName());
+                    l -> MonoDashboard.put("Global/LocalizedPose", l.getEstimatedPosition().toString()));
+            MonoDashboard.put("Global/AutoCommand", GlobalState.getAutoCommand().getName());
         } finally {
             globalLock.unlock();
         }

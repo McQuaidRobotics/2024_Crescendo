@@ -10,7 +10,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import monologue.MonologueDashboard;
+import monologue.MonoDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.controllers.ControllerParent;
@@ -71,17 +71,17 @@ public class TeleopSwerveBase extends Command {
         // inverted because left is positive for field due to Y being increased but left
         // is negative for controller
         final double raw = rawTranslationXSup.getAsDouble();
-        MonologueDashboard.put("Swerve/TeleopCommand/RawTranslationX", raw);
+        MonoDashboard.put("Swerve/TeleopCommand/RawTranslationX", raw);
         var processed = -kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(raw) * invert();
-        MonologueDashboard.put("Swerve/TeleopCommand/TranslationX", processed);
+        MonoDashboard.put("Swerve/TeleopCommand/TranslationX", processed);
         return processed;
     }
 
     protected double getTranslationY() {
         final double raw = rawTranslationYSup.getAsDouble();
-        MonologueDashboard.put("Swerve/TeleopCommand/RawTranslationY", raw);
+        MonoDashboard.put("Swerve/TeleopCommand/RawTranslationY", raw);
         var processed = kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(raw) * invert();
-        MonologueDashboard.put("Swerve/TeleopCommand/TranslationY", processed);
+        MonoDashboard.put("Swerve/TeleopCommand/TranslationY", processed);
         return processed;
     }
 
@@ -89,17 +89,17 @@ public class TeleopSwerveBase extends Command {
         // inverted because left is positive for field due to Y being increased but left
         // is negative for controller
         final double raw = rawRotationXSup.getAsDouble();
-        MonologueDashboard.put("Swerve/TeleopCommand/RawRotationX", raw);
+        MonoDashboard.put("Swerve/TeleopCommand/RawRotationX", raw);
         var processed = -kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(raw);
-        MonologueDashboard.put("Swerve/TeleopCommand/RotationX", processed);
+        MonoDashboard.put("Swerve/TeleopCommand/RotationX", processed);
         return processed;
     }
 
     protected double getRotationY() {
         final double raw = rawRotationYSup.getAsDouble();
-        MonologueDashboard.put("Swerve/TeleopCommand/RawRotationY", raw);
+        MonoDashboard.put("Swerve/TeleopCommand/RawRotationY", raw);
         var processed = kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(raw);
-        MonologueDashboard.put("Swerve/TeleopCommand/RotationY", processed);
+        MonoDashboard.put("Swerve/TeleopCommand/RotationY", processed);
         return processed;
     }
 

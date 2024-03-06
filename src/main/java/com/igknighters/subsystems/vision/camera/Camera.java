@@ -3,6 +3,7 @@ package com.igknighters.subsystems.vision.camera;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
+import monologue.Logged;
 import monologue.Annotations.Log;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kVision;
 
-public abstract class Camera {
+public abstract class Camera implements Logged{
     @Log.NT
     protected VisionPoseEstimate latestPoseEst;
     @Log.NT
@@ -146,6 +147,11 @@ public abstract class Camera {
      */
     public abstract String getName();
 
+    @Override
+    public String getPath() {
+        return getName();
+    }
+
     public abstract void periodic();
 
     public record VisionPoseEstimate(
@@ -258,7 +264,7 @@ public abstract class Camera {
             boolean infeasibleZValue,
             boolean infeasiblePitchValue,
             boolean infeasibleRollValue,
-            boolean isDisabled) {
+            boolean isDisabled) implements StructSerializable {
 
         public static VisionEstimateFault empty() {
             return new VisionEstimateFault(false, false, false, false, false, false, false, false, false);

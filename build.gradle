@@ -24,7 +24,7 @@ java {
 }
 
 repositories {
-    maven { url 'https://jitpack.io' }
+    // maven { url 'https://jitpack.io' }
     mavenLocal()
 }
 
@@ -92,7 +92,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
-    implementation 'com.github.shueja:Monologue:v1.0.0-beta5'
+    // implementation 'com.github.shueja:Monologue:v1.0.0-beta5'
 }
 
 test {

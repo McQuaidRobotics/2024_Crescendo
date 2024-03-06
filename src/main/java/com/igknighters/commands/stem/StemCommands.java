@@ -19,7 +19,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
-import monologue.MonologueDashboard;
+import monologue.MonoDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class StemCommands {
@@ -243,8 +243,8 @@ public class StemCommands {
                 hasFinished = stem.setStemPosition(stationaryWristSolve(distance, stem.getStemPosition().wristRads));
             } else if (aimStrategy.equals(AimStrategy.STATIONARY_PIVOT)) {
                 var pose = stationaryPivotSolve(distance);
-                MonologueDashboard.put("Aim/Linear", Units.radiansToDegrees(pose.getWristRads()));
-                MonologueDashboard.put("Aim/Gravity",
+                MonoDashboard.put("Aim/Linear", Units.radiansToDegrees(pose.getWristRads()));
+                MonoDashboard.put("Aim/Gravity",
                         Units.radiansToDegrees(stationaryPivotSolveGravity(distance).getWristRads()));
                 hasFinished = stem.setStemPosition(pose);
             } else if (aimStrategy.equals(AimStrategy.MAX_HEIGHT)) {

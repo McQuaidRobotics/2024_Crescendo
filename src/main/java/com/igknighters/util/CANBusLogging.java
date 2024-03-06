@@ -6,7 +6,7 @@ import com.ctre.phoenix6.CANBus;
 import com.igknighters.Robot;
 
 import edu.wpi.first.wpilibj.Timer;
-import monologue.MonologueDashboard;
+import monologue.MonoDashboard;
 
 public class CANBusLogging {
     private static final ArrayList<String> loggedBuses = new ArrayList<>();
@@ -19,7 +19,7 @@ public class CANBusLogging {
             return;
         }
 
-        MonologueDashboard.put(
+        MonoDashboard.put(
                 path + "/" + busName + "/" + "isFd",
                 CANBus.isNetworkFD(busName));
 
@@ -45,12 +45,12 @@ public class CANBusLogging {
 
         String prefix = path + "/" + busName + "/";
 
-        MonologueDashboard.put(prefix + "status", status.Status.name());
-        MonologueDashboard.put(prefix + "percentBusUtilization", status.BusUtilization);
-        MonologueDashboard.put(prefix + "busOffCount", status.BusOffCount);
-        MonologueDashboard.put(prefix + "txFullCount", status.TxFullCount);
-        MonologueDashboard.put(prefix + "receiveErrorCount", status.REC);
-        MonologueDashboard.put(prefix + "transmitErrorCount", status.TEC);
+        MonoDashboard.put(prefix + "status", status.Status.name());
+        MonoDashboard.put(prefix + "percentBusUtilization", status.BusUtilization);
+        MonoDashboard.put(prefix + "busOffCount", status.BusOffCount);
+        MonoDashboard.put(prefix + "txFullCount", status.TxFullCount);
+        MonoDashboard.put(prefix + "receiveErrorCount", status.REC);
+        MonoDashboard.put(prefix + "transmitErrorCount", status.TEC);
 
         index++;
 

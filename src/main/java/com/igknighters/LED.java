@@ -17,7 +17,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
-import monologue.MonologueDashboard;
+import monologue.MonoDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -430,7 +430,7 @@ public class LED {
             log += partial.toString() + ",";
             lastMode = robotMode;
         }
-        MonologueDashboard.put("LED", log + "]");
+        MonoDashboard.put("LED", log + "]");
 
         double batteryVolts = RobotController.getBatteryVoltage();
         if (batteryVolts < RobotController.getBrownoutVoltage() || RobotController.isBrownedOut()) {

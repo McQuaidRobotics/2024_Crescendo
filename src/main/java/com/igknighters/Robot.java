@@ -3,7 +3,8 @@ package com.igknighters;
 import java.util.HashMap;
 import java.util.function.BiConsumer;
 
-import monologue.MonologueDashboard;
+import monologue.MonoDashboard;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import monologue.Monologue;
@@ -35,7 +36,10 @@ public class Robot extends UnitTestableRobot {
         roboContainer = new RobotContainer();
 
         if (!GlobalState.isUnitTest()) {
-            Monologue.setupMonologue(roboContainer, null, isAutonomousEnabled(), isAutonomous());
+            Monologue.setupMonologue(roboContainer, "/Robot", false, true);
+            roboContainer.initMonologue();
+        } else {
+            Monologue.setupMonologueForUnitTest();
         }
     }
 
@@ -45,7 +49,11 @@ public class Robot extends UnitTestableRobot {
         Tracer.traceFunc("LEDUpdate", LED::run);
         Tracer.traceFunc("CANBusLoggung", CANBusLogging::run);
         Tracer.traceFunc("Shuffleboard", ShuffleboardApi::run);
-        Tracer.traceFunc("Monologue", Monologue::updateAll);
+        Tracer.traceFunc("Monologue", () -> {
+            Monologue.updateAll(
+                DriverStation.isFMSAttached()
+            );
+        });
         GlobalState.log();
     }
 
@@ -56,7 +64,7 @@ public class Robot extends UnitTestableRobot {
     @Override
     public void disabledPeriodic() {
         autoCmd = GlobalState.getAutoCommand();
-        MonologueDashboard.put("Commands/SelectedAutoCommand", autoCmd.getName());
+        MonoDashboard.put("Commands/SelectedAutoCommand", autoCmd.getName());
     }
 
     @Override
@@ -65,7 +73,7 @@ public class Robot extends UnitTestableRobot {
             autoCmd = GlobalState.getAutoCommand();
         }
         if (autoCmd != null) {
-            MonologueDashboard.put("Commands/CurrentAutoCommand", autoCmd.getName());
+            MonoDashboard.put("Commands/CurrentAutoCommand", autoCmd.getName());
             System.out.println("---- Starting auto command: " + autoCmd.getName() + " ----");
             scheduler.schedule(autoCmd);
         }
@@ -78,7 +86,7 @@ public class Robot extends UnitTestableRobot {
     @Override
     public void autonomousExit() {
         if (autoCmd != null) {
-            MonologueDashboard.put("Commands/CurrentAutoCommand", "");
+            MonoDashboard.put("Commands/CurrentAutoCommand", "");
             autoCmd.cancel();
         }
     }
@@ -111,6 +119,9 @@ public class Robot extends UnitTestableRobot {
 
     @Override
     public void driverStationConnected() {
+        if (DriverStation.isFMSAttached() && !GlobalState.isUnitTest()) {
+            Monologue.setFileOnly(true);
+        }
     }
 
     private void setupLogging() {
@@ -119,21 +130,21 @@ public class Robot extends UnitTestableRobot {
         }
 
         final String meta = "Metadata/";
-        MonologueDashboard.put(meta + "RuntimeType", getRuntimeType().toString());
-        MonologueDashboard.put(meta + "ProjectName", BuildConstants.MAVEN_NAME);
-        MonologueDashboard.put(meta + "BuildDate", BuildConstants.BUILD_DATE);
-        MonologueDashboard.put(meta + "GitSHA", BuildConstants.GIT_SHA);
-        MonologueDashboard.put(meta + "GitDate", BuildConstants.GIT_DATE);
-        MonologueDashboard.put(meta + "GitBranch", BuildConstants.GIT_BRANCH);
+        MonoDashboard.put(meta + "RuntimeType", getRuntimeType().toString());
+        MonoDashboard.put(meta + "ProjectName", BuildConstants.MAVEN_NAME);
+        MonoDashboard.put(meta + "BuildDate", BuildConstants.BUILD_DATE);
+        MonoDashboard.put(meta + "GitSHA", BuildConstants.GIT_SHA);
+        MonoDashboard.put(meta + "GitDate", BuildConstants.GIT_DATE);
+        MonoDashboard.put(meta + "GitBranch", BuildConstants.GIT_BRANCH);
         switch (BuildConstants.DIRTY) {
             case 0:
-                MonologueDashboard.put(meta + "GitDirty", "All changes committed");
+                MonoDashboard.put(meta + "GitDirty", "All changes committed");
                 break;
             case 1:
-                MonologueDashboard.put(meta + "GitDirty", "Uncomitted changes");
+                MonoDashboard.put(meta + "GitDirty", "Uncomitted changes");
                 break;
             default:
-                MonologueDashboard.put(meta + "GitDirty", "Unknown");
+                MonoDashboard.put(meta + "GitDirty", "Unknown");
                 break;
         }
 
@@ -156,9 +167,10 @@ public class Robot extends UnitTestableRobot {
             String name = command.getName();
             int count = commandCounts.getOrDefault(name, 0) + (active ? 1 : -1);
             commandCounts.put(name, count);
-            MonologueDashboard.put(
-                    "Commands/CommandsUnique/" + name + "_" + Integer.toHexString(command.hashCode()), active.booleanValue());
-            MonologueDashboard.put("Commands/CommandsAll/" + name, count > 0);
+            MonoDashboard.put(
+                    "Commands/CommandsUnique/" + name + "_" + Integer.toHexString(command.hashCode()),
+                    active.booleanValue());
+            MonoDashboard.put("Commands/CommandsAll/" + name, count > 0);
         };
         CommandScheduler.getInstance()
                 .onCommandInitialize(

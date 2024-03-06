@@ -11,7 +11,7 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
-import monologue.MonologueDashboard;
+import monologue.MonoDashboard;
 
 /**
  * A Utility class for tracing code execution time.
@@ -147,7 +147,7 @@ public class Tracer {
                 entry = entryHeap.get(trace.getKey());
             }
             entry.setDouble(trace.getValue());
-            MonologueDashboard.put("Tracer/" + trace.getKey(), trace.getValue().doubleValue());
+            MonoDashboard.put("Tracer/" + trace.getKey(), trace.getValue().doubleValue());
         }
         traceTimes.clear();
     }

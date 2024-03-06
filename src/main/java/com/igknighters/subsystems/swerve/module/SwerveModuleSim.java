@@ -9,7 +9,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
-import monologue.MonologueDashboard;
+import monologue.MonoDashboard;
 
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kSwerve;
@@ -41,7 +41,7 @@ public class SwerveModuleSim extends SwerveModule {
         moduleConstants.getDriveMotorID();
         moduleConstants.getAngleMotorID();
         moduleConstants.getCancoderID();
-        MonologueDashboard.put("SwerveModuleOffset[" + moduleNumber + "]", moduleConstants.getRotationOffset());
+        MonoDashboard.put("SwerveModuleOffset[" + moduleNumber + "]", moduleConstants.getRotationOffset());
         moduleConstants.getModuleChassisPose();
 
         angleFeedback.enableContinuousInput(-Math.PI, Math.PI);
@@ -146,5 +146,6 @@ public class SwerveModuleSim extends SwerveModule {
     }
 
     @Override
-    public void setVoltageOut(double volts) {}
+    public void setVoltageOut(double volts) {
+    }
 }

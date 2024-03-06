@@ -26,7 +26,7 @@ import monologue.Logged;
 
 public class Vision extends SubsystemBase implements Logged {
 
-    private final List<Camera> cameras;
+    private final Camera[] cameras;
 
     private final BooleanEntry cameraPositionFieldVisualizer;
 
@@ -37,7 +37,7 @@ public class Vision extends SubsystemBase implements Logged {
         this.cameras = List.of(kVision.CAMERA_CONFIGS)
                 .stream()
                 .map(Camera::create)
-                .toList();
+                .toArray(Camera[]::new);
 
         GlobalState.setLocalizer(
                 new VisionOnlyPoseEstimator(),
@@ -112,6 +112,11 @@ public class Vision extends SubsystemBase implements Logged {
 
             Tracer.endTrace();
         }
+
+        log(
+            "SeenTags",
+            seenTags.stream().toList().toString()
+        );
 
         GlobalState.modifyField2d(field -> {
             field.getObject("seen_apriltags").setPoses(

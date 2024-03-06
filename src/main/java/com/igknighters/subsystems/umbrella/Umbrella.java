@@ -10,8 +10,9 @@ import com.igknighters.util.Tracer;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import monologue.Logged;
 
-public class Umbrella extends SubsystemBase {
+public class Umbrella extends SubsystemBase implements Logged {
 
     public static enum ShooterSpinupReason {
         None,

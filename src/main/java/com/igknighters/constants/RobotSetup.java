@@ -9,7 +9,7 @@ import com.igknighters.ConstantHelper.RobotConstID;
 
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
-import monologue.MonologueDashboard;
+import monologue.MonoDashboard;
 
 public class RobotSetup {
 
@@ -77,14 +77,14 @@ public class RobotSetup {
                 throw new RuntimeException("Robot ID not found, " + currentSerialNum + " not in serialToID map");
             }
             BootupLogger.bootupLog("Robot Name: " + currentID.name);
-            MonologueDashboard.put("RobotSetup/RobotId", currentID.name());
-            MonologueDashboard.put(
+            MonoDashboard.put("RobotSetup/RobotId", currentID.name());
+            MonoDashboard.put(
                     "RobotSetup/EnabledSubsystems",
                     List.of(currentID.subsystems)
                             .stream()
                             .map(sub -> sub.name())
                             .reduce("", (acc, sub) -> acc + sub + ", "));
-            MonologueDashboard.put("RobotSetup/ConstantsID", currentID.constID.name());
+            MonoDashboard.put("RobotSetup/ConstantsID", currentID.constID.name());
         }
         return currentID;
     }

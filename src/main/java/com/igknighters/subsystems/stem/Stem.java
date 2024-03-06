@@ -75,9 +75,9 @@ public class Stem extends SubsystemBase implements Logged {
      * @return True if all mechanisms have reached their target position
      */
     public boolean setStemPosition(StemPosition position, double toleranceMult) {
-        ValidationResponse validity = StemValidator.validatePosition(position);
-
         visualizer.updateSetpoint(position);
+
+        ValidationResponse validity = StemValidator.validatePosition(position);
 
         if (!validity.isValid()) {
             DriverStation.reportError(
@@ -89,8 +89,7 @@ public class Stem extends SubsystemBase implements Logged {
         if (!telescope.hasHomed()) {
             if (!position.isStow()) {
                 DriverStation.reportWarning("Stem Telescope has not been homed, run stow to home", false);
-                LED.sendAnimation(
-                        LedAnimations.WARNING).withDuration(1.0);
+                LED.sendAnimation(LedAnimations.WARNING).withDuration(1.0);
                 return false;
             }
             boolean wristAndPivot = pivot.target(position.pivotRads, 1.0)

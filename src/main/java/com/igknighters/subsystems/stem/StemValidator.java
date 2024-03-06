@@ -2,7 +2,7 @@ package com.igknighters.subsystems.stem;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
-import monologue.MonologueDashboard;
+import monologue.MonoDashboard;
 
 import com.igknighters.constants.ConstValues.kRobotCollisionGeometry;
 import com.igknighters.constants.ConstValues.kStem;
@@ -322,11 +322,11 @@ public class StemValidator {
                                 currentState.getWristRads(),
                                 targetState.getTelescopeMeters()));
 
-                MonologueDashboard.put("StemValidator/StepTowardsTargetPosition/pivotMovementValidationReason",
+                MonoDashboard.put("StemValidator/StepTowardsTargetPosition/pivotMovementValidationReason",
                                 pivotMovementValidReason.name());
-                MonologueDashboard.put("StemValidator/StepTowardsTargetPosition/wristMovementValidationReason",
+                MonoDashboard.put("StemValidator/StepTowardsTargetPosition/wristMovementValidationReason",
                                 wristMovementValidReason.name());
-                MonologueDashboard.put("StemValidator/StepTowardsTargetPosition/telescopeMovementValidationReason",
+                MonoDashboard.put("StemValidator/StepTowardsTargetPosition/telescopeMovementValidationReason",
                                 telescopeMovementValidReason.name());
 
                 double midStatePivotRads = pivotMovementValidReason.isValid()
@@ -410,12 +410,12 @@ public class StemValidator {
                         }
                 }
 
-                MonologueDashboard.put("Stem/StemValidator/StepTowardsTargetPosition/Mid State Stem Position",
+                MonoDashboard.put("Stem/StemValidator/StepTowardsTargetPosition/Mid State Stem Position",
                                 StemPosition
                                                 .fromRadians(midStatePivotRads, midStateWristRads,
                                                                 midStateTelescopeMeters)
                                                 .toString());
-                MonologueDashboard.put("Stem/StemValidator/StepTowardsTargetPosition/Target Stem Position",
+                MonoDashboard.put("Stem/StemValidator/StepTowardsTargetPosition/Target Stem Position",
                                 targetState.toString());
 
                 return StemPosition.fromRadians(midStatePivotRads, midStateWristRads, midStateTelescopeMeters);

@@ -112,8 +112,8 @@ public class UmbrellaCommands {
      * @return A command to be scheduled
      */
     public static Command spinUmbrellaBoth(Umbrella umbrella) {
-        // MonologueDashboard.put("IntakePercent", 0.0);
-        // MonologueDashboard.put("RPMumbrella", 0.0);
+        // MonoDashboard.put("IntakePercent", 0.0);
+        // MonoDashboard.put("RPMumbrella", 0.0);
         // return umbrella.run(() -> {
         // umbrella.runIntakeAt(
         // SmartDashboard.getNumber("IntakePercent", 0));

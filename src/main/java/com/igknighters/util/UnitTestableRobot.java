@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import monologue.MonologueDashboard;
+import monologue.MonoDashboard;
 
 public class UnitTestableRobot extends TimedRobot {
     public static class UnitTestableRobotExited extends RuntimeException {
@@ -117,7 +117,7 @@ public class UnitTestableRobot extends TimedRobot {
             mode = Mode.kTest;
         }
 
-        MonologueDashboard.put("RobotMode", mode.toString());
+        MonoDashboard.put("RobotMode", mode.toString());
 
         if ((!calledDsConnected && DriverStation.isDSAttached()) || isUnitTest) {
             calledDsConnected = true;
