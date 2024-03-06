@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 
 public class IntakeSim extends Intake {
 
@@ -75,7 +76,7 @@ public class IntakeSim extends Intake {
 
         super.voltsLower = volts;
         super.voltsUpper = super.voltsLower * kIntake.UPPER_DIFF;
-        super.radiansPerSecondLower = (volts / 12.0) * DCMotor.getFalcon500(0).freeSpeedRadPerSec;
+        super.radiansPerSecondLower = (volts / RobotController.getBatteryVoltage()) * DCMotor.getFalcon500(0).freeSpeedRadPerSec;
         super.radiansPerSecondUpper = super.radiansPerSecondLower * kIntake.UPPER_DIFF;
     }
 
