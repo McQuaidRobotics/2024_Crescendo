@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import monologue.Monologue;
 
 import com.igknighters.constants.ConstValues;
+import com.igknighters.constants.ConstantHelper;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.util.CANBusLogging;
 import com.igknighters.util.ShuffleboardApi;
@@ -29,7 +30,7 @@ public class Robot extends UnitTestableRobot {
         Pathfinding.setPathfinder(new LocalADStar());
         setupLogging();
 
-        com.igknighters.constants.ConstantHelper.applyRoboConst(ConstValues.class);
+        ConstantHelper.applyRoboConst(ConstValues.class);
 
         GlobalState.publishField2d();
 
@@ -147,20 +148,6 @@ public class Robot extends UnitTestableRobot {
                 MonoDashboard.put(meta + "GitDirty", "Unknown");
                 break;
         }
-
-        // if (Robot.isReal()) {
-        // var path = "/media/sda1/";
-        // if (!new java.io.File(path).exists() && ConstValues.DEBUG) {
-        // DriverStation.reportError("DATALOGS USB NOT PLUGGED IN!!!", false);
-        // } else {
-        // Logger.addDataReceiver(
-        // new ExtensibleWPILOGWriter(path)
-        // .withNTPrefixListener("/Visualizers")
-        // .withNTPrefixListener("/PathPlanner"));
-        // }
-        // }
-        // Logger.addDataReceiver(new NT4Publisher());
-        // Logger.start();
 
         HashMap<String, Integer> commandCounts = new HashMap<>();
         BiConsumer<Command, Boolean> logCommandFunction = (Command command, Boolean active) -> {

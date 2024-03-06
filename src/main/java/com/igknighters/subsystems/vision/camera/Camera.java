@@ -19,12 +19,12 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
 
-import com.igknighters.constants.AprilTags;
+// import com.igknighters.constants.AprilTags;
 import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kVision;
 
-public abstract class Camera implements Logged{
+public abstract class Camera implements Logged {
     @Log.NT
     protected VisionPoseEstimate latestPoseEst;
     @Log.NT
@@ -211,17 +211,17 @@ public abstract class Camera implements Logged{
 
             @Override
             public int getSize() {
-                return Integer.BYTES + Pose3d.struct.getSize() + Double.BYTES + 16 + (Double.BYTES * 2);
+                return Integer.BYTES + Pose3d.struct.getSize() + Double.BYTES + /* 16 + */(Double.BYTES * 2);
             }
 
             @Override
             public Struct<?>[] getNested() {
-                return new Struct<?>[] {Pose3d.struct};
+                return new Struct<?>[] { Pose3d.struct };
             }
 
             @Override
             public String getSchema() {
-                return "int32 poseId; Pose3d pose; double timestamp; bool apriltags[16]; double ambiguity; double maxDistance;";
+                return "int32 poseId; Pose3d pose; double timestamp; double ambiguity; double maxDistance;";
             }
 
             @Override
@@ -235,9 +235,9 @@ public abstract class Camera implements Logged{
                 bb.putInt(value.cameraId);
                 Pose3d.struct.pack(bb, value.pose);
                 bb.putDouble(value.timestamp);
-                for (int i = 0; i < AprilTags.APRILTAGS.length; i++) {
-                    bb.put(value.apriltags.contains(i) ? (byte) 1 : (byte) 0);
-                }
+                // for (int i = 0; i < AprilTags.APRILTAGS.length; i++) {
+                // bb.put(value.apriltags.contains(i) ? (byte) 1 : (byte) 0);
+                // }
                 bb.putDouble(value.ambiguity);
                 bb.putDouble(value.maxDistance);
             }
@@ -247,14 +247,15 @@ public abstract class Camera implements Logged{
                 int cameraId = bb.getInt();
                 Pose3d pose = Pose3d.struct.unpack(bb);
                 double timestamp = bb.getDouble();
-                ArrayList<Integer> apriltags = new ArrayList<>();
-                for (int i = 0; i < 16; i++) {
-                    if (bb.get() == 1)
-                        apriltags.add(i);
-                }
+                // ArrayList<Integer> apriltags = new ArrayList<>();
+                // for (int i = 0; i < 16; i++) {
+                // if (bb.get() == 1)
+                // apriltags.add(i);
+                // }
                 double ambiguity = bb.getDouble();
                 double maxDistance = bb.getDouble();
-                return new VisionPoseEstimate(cameraId, pose, timestamp, apriltags, ambiguity, maxDistance);
+                return new VisionPoseEstimate(cameraId, pose, timestamp, new ArrayList<Integer>(), ambiguity,
+                        maxDistance);
             }
         }
 
@@ -295,14 +296,14 @@ public abstract class Camera implements Logged{
             @Override
             public String getSchema() {
                 return "bool outOfBounds; "
-                + "bool outOfRange; "
-                + "bool tooAmbiguous; "
-                + "bool extremeJitter; "
-                + "bool noTags; "
-                + "bool infeasibleZValue; "
-                + "bool infeasiblePitchValue; "
-                + "bool infeasibleRollValue; "
-                + "bool isDisabled; ";
+                        + "bool outOfRange; "
+                        + "bool tooAmbiguous; "
+                        + "bool extremeJitter; "
+                        + "bool noTags; "
+                        + "bool infeasibleZValue; "
+                        + "bool infeasiblePitchValue; "
+                        + "bool infeasibleRollValue; "
+                        + "bool isDisabled; ";
             }
 
             @Override
