@@ -1,8 +1,8 @@
 package com.igknighters.util;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.igknighters.GlobalState;
+
+import monologue.MonoDashboard;
 
 public class BootupLogger {
     private static final String println_prefix = "[Bootup] ";
@@ -15,7 +15,7 @@ public class BootupLogger {
      * @param message The message to log
      */
     public static synchronized void bootupLog(String message) {
-        Logger.recordOutput("/Bootup", message);
+        MonoDashboard.put("/Bootup", message);
 
         if (!GlobalState.isUnitTest()) {
             System.out.println(println_prefix + message);

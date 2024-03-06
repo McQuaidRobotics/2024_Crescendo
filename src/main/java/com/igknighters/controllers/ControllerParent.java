@@ -1,31 +1,19 @@
 package com.igknighters.controllers;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.DoubleSupplier;
 
-import com.igknighters.SubsystemResources.AllSubsystems;
-import com.igknighters.SubsystemResources.Subsystems;
+import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
+import com.igknighters.subsystems.SubsystemResources.Subsystems;
 import com.igknighters.util.BootupLogger;
 
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class ControllerParent {
-    private static final Map<ControllerType, ControllerParent> controllers = new HashMap<>();
-
-    public enum ControllerType {
-        Driver, Operator, Testing
-    }
-
-    public static Optional<ControllerParent> getController(ControllerType type) {
-        return Optional.ofNullable(controllers.get(type));
-    }
 
     private final CommandXboxController controller;
     private boolean madeController;
@@ -113,7 +101,7 @@ public class ControllerParent {
      * for button idx (nice for sim)
      * {@link edu.wpi.first.wpilibj.XboxController.Button}
      */
-    protected ControllerParent(int port, boolean makeController, ControllerType type) {
+    protected ControllerParent(int port, boolean makeController) {
         this.madeController = makeController;
         if (madeController) {
             controller = new CommandXboxController(port);
@@ -139,7 +127,6 @@ public class ControllerParent {
             DPU = new TriggerBindingTuple(null, Binding.empty());
             return;
         }
-        controllers.put(type, this);
         A = new TriggerBindingTuple(controller.a(), Binding.empty());
         B = new TriggerBindingTuple(controller.b(), Binding.empty());
         X = new TriggerBindingTuple(controller.x(), Binding.empty());

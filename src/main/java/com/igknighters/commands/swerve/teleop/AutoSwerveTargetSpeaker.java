@@ -8,8 +8,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.igknighters.constants.FieldConstants;
 
 public class AutoSwerveTargetSpeaker extends Command {
@@ -33,12 +31,10 @@ public class AutoSwerveTargetSpeaker extends Command {
         Translation2d speaker = FieldConstants.SPEAKER.toTranslation2d();
         Translation2d targetTranslation = AllianceFlip.isBlue() ? speaker : AllianceFlip.flipTranslation(speaker);
 
-        var targetAngle = swerve.rotationRelativeToPose(
+        Rotation2d targetAngle = swerve.rotationRelativeToPose(
                 Rotation2d.fromDegrees(180),
                 targetTranslation);
-        var rotVelo = swerve.rotVeloForRotation(targetAngle);
-
-        Logger.recordOutput("/Swerve/rotvelo", rotVelo);
+        double rotVelo = swerve.rotVeloForRotation(targetAngle);
 
         ChassisSpeeds desiredChassisSpeeds = new ChassisSpeeds(
                 0.0,

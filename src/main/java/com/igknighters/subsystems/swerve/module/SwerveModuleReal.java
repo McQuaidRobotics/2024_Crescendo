@@ -7,8 +7,6 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -19,6 +17,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import monologue.Annotations.Log;
 
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kSwerve.kAngleMotor;
@@ -26,7 +25,7 @@ import com.igknighters.constants.ConstValues.kSwerve.kDriveMotor;
 import com.igknighters.util.BootupLogger;
 import com.igknighters.util.CANRetrier;
 
-public class SwerveModuleReal implements SwerveModule {
+public class SwerveModuleReal extends SwerveModule {
     private final TalonFX driveMotor;
     private final StatusSignal<Double> drivePositionSignal, driveVelocitySignal;
     private final StatusSignal<Double> driveVoltSignal, driveAmpSignal;
@@ -43,8 +42,7 @@ public class SwerveModuleReal implements SwerveModule {
     @SuppressWarnings("unused")
     private final Translation2d moduleChassisPose;
     private Rotation2d lastAngle = new Rotation2d();
-    private final SwerveModuleInputs inputs;
-    private final boolean isPro;
+    @Log.NT.Once private final boolean isPro;
 
     public SwerveModuleReal(final SwerveModuleConstants moduleConstants, boolean isPro) {
         this.isPro = isPro;
@@ -93,8 +91,6 @@ public class SwerveModuleReal implements SwerveModule {
         angleEncoder.optimizeBusUtilization();
 
         driveMotor.setPosition(0.0);
-
-        inputs = new SwerveModuleInputs();
 
         BootupLogger.bootupLog(
                 "    SwerveModule[" + this.moduleNumber + "] initialized ("
@@ -167,7 +163,7 @@ public class SwerveModuleReal implements SwerveModule {
         Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (kSwerve.MAX_DRIVE_VELOCITY * 0.01))
                 ? lastAngle
                 : desiredState.angle;
-        inputs.targetAngleAbsoluteRads = angle.getRadians();
+        super.targetAngleAbsoluteRads = angle.getRadians();
 
         angleMotor.setControl(
                 new PositionDutyCycle(angle.getRotations())
@@ -176,7 +172,7 @@ public class SwerveModuleReal implements SwerveModule {
     }
 
     private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop) {
-        inputs.targetDriveVeloMPS = desiredState.speedMetersPerSecond;
+        super.targetDriveVeloMPS = desiredState.speedMetersPerSecond;
         if (isOpenLoop) {
             double percentOutput = desiredState.speedMetersPerSecond / kSwerve.MAX_DRIVE_VELOCITY;
             var controlRequest = new DutyCycleOut(percentOutput).withEnableFOC(isPro);
@@ -184,26 +180,26 @@ public class SwerveModuleReal implements SwerveModule {
         } else {
             double rps = (desiredState.speedMetersPerSecond / kSwerve.WHEEL_CIRCUMFERENCE) * kSwerve.DRIVE_GEAR_RATIO;
             var veloRequest = new VelocityVoltage(rps).withEnableFOC(isPro);
-            Logger.recordOutput("Swerve/SwerveModule[" + this.moduleNumber + "]/DriveRPS", rps);
+            log("DriveRPS", rps);
             driveMotor.setControl(veloRequest);
         }
     }
 
     public SwerveModuleState getCurrentState() {
         return new SwerveModuleState(
-                inputs.driveVeloMPS,
+                super.driveVeloMPS,
                 getAngle());
     }
 
     @Override
     public SwerveModulePosition getCurrentPosition() {
         return new SwerveModulePosition(
-                inputs.drivePositionMeters,
+                super.drivePositionMeters,
                 getAngle());
     }
 
     private Rotation2d getAngle() {
-        return Rotation2d.fromRadians(inputs.angleAbsoluteRads);
+        return Rotation2d.fromRadians(super.angleAbsoluteRads);
     }
 
     private double driveRotationsToMeters(double rotations) {
@@ -219,17 +215,15 @@ public class SwerveModuleReal implements SwerveModule {
                 /* angleVoltSignal, angleAmpSignal , */
                 angleAbsoluteSignal /* , angleAbsoluteVeloSignal */);
 
-        inputs.angleAbsoluteRads = Units.rotationsToRadians(angleAbsoluteSignal.getValue());
-        inputs.angleVeloRadPS = Units.rotationsToRadians(angleAbsoluteVeloSignal.getValue());
-        inputs.angleVolts = angleVoltSignal.getValue();
-        inputs.angleAmps = angleAmpSignal.getValue();
+        super.angleAbsoluteRads = Units.rotationsToRadians(angleAbsoluteSignal.getValue());
+        super.angleVeloRadPS = Units.rotationsToRadians(angleAbsoluteVeloSignal.getValue());
+        super.angleVolts = angleVoltSignal.getValue();
+        super.angleAmps = angleAmpSignal.getValue();
 
-        inputs.drivePositionMeters = driveRotationsToMeters(drivePositionSignal.getValue());
-        inputs.driveVeloMPS = driveRotationsToMeters(driveVelocitySignal.getValue());
-        inputs.driveVolts = driveVoltSignal.getValue();
-        inputs.driveAmps = driveAmpSignal.getValue();
-
-        Logger.processInputs("Swerve/SwerveModule[" + this.moduleNumber + "]", inputs);
+        super.drivePositionMeters = driveRotationsToMeters(drivePositionSignal.getValue());
+        super.driveVeloMPS = driveRotationsToMeters(driveVelocitySignal.getValue());
+        super.driveVolts = driveVoltSignal.getValue();
+        super.driveAmps = driveAmpSignal.getValue();
     }
 
     @Override

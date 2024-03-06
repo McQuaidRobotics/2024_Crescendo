@@ -3,7 +3,6 @@ package com.igknighters.subsystems.vision.camera;
 import java.util.List;
 import java.util.Optional;
 
-import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -23,16 +22,14 @@ import edu.wpi.first.wpilibj.Timer;
 /**
  * An abstraction for a photon camera.
  */
-public class CameraReal implements Camera {
+public class CameraReal extends Camera {
     private final PhotonCamera camera;
     private final Integer id;
     private final Transform3d cameraPose;
     private final PhotonPoseEstimator poseEstimator;
 
-    private final CameraInput cameraInput;
-
-    private VisionPoseEstimate lastPoseEst;
-    private Timer lastPoseTimer;
+    private VisionPoseEstimate previousPoseEst;
+    private Timer previousPoseTimer;
 
     /**
      * Creates an abstraction for a photon camera.
@@ -42,6 +39,7 @@ public class CameraReal implements Camera {
      * @param cameraPose The pose of the camera relative to the robot
      */
     public CameraReal(String cameraName, Integer id, Transform3d cameraPose) {
+        super(id);
         this.camera = new PhotonCamera(cameraName);
         this.id = id;
         this.cameraPose = cameraPose;
@@ -53,8 +51,6 @@ public class CameraReal implements Camera {
                 this.cameraPose);
         poseEstimator.setTagModel(TargetModel.kAprilTag36h11);
         poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_CAMERA_HEIGHT);
-
-        cameraInput = new CameraInput(VisionPoseEstimate.empty(id));
 
         BootupLogger.bootupLog("    " + cameraName + " camera initialized (real)");
     }
@@ -97,16 +93,6 @@ public class CameraReal implements Camera {
     }
 
     @Override
-    public Optional<VisionPoseEstimate> evalPose() {
-        return cameraInput.getLatestPoseEst();
-    }
-
-    @Override
-    public VisionEstimateFault getFaults() {
-        return cameraInput.getLatestFault();
-    }
-
-    @Override
     public Transform3d getRobotToCameraTransform3d() {
         return cameraPose;
     }
@@ -122,31 +108,29 @@ public class CameraReal implements Camera {
     }
 
     private void resetLastPoseInfo(VisionPoseEstimate poseEst) {
-        lastPoseEst = poseEst;
-        lastPoseTimer.restart();
+        previousPoseEst = poseEst;
+        previousPoseTimer.restart();
     }
 
     @Override
     public void periodic() {
 
-        if (lastPoseEst == null) {
+        if (previousPoseEst == null) {
             var eval = realEvaluatePose();
             if (eval.isPresent()) {
-                lastPoseEst = eval.get();
-                lastPoseTimer = new Timer();
-                lastPoseTimer.start();
+                previousPoseEst = eval.get();
+                previousPoseTimer = new Timer();
+                previousPoseTimer.start();
             }
-            cameraInput.update(
+            this.update(
                 eval.map(est -> Pair.of(est, VisionEstimateFault.empty())),
                 camera.isConnected()
             );
         } else {
-            cameraInput.update(realEvaluatePose()
-                .map(est -> est.withFault(lastPoseEst, lastPoseTimer, this::resetLastPoseInfo)),
+            this.update(realEvaluatePose()
+                .map(est -> est.withFault(previousPoseEst, previousPoseTimer, this::resetLastPoseInfo)),
             camera.isConnected()
             );
         }
-
-        Logger.processInputs("Vision/Camera[" + getName() + "]", cameraInput);
     }
 }

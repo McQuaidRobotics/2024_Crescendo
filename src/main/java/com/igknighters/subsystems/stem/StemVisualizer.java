@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import monologue.MonoDashboard;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 
 public class StemVisualizer {
@@ -246,7 +246,7 @@ public class StemVisualizer {
 
                 wristCurrent.setAngle(-Units.radiansToDegrees(currentPose.wristRads) + wristOffset);
 
-                SmartDashboard.putString("Stem Position Valid", StemValidator.validatePosition(currentPose).name());
+                MonoDashboard.put("Robot/Stem/Stem Position Valid", StemValidator.validatePosition(currentPose).name());
         }
 
         public void updateSetpoint(StemPosition desiredPose) {

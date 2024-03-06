@@ -1,28 +1,20 @@
 package com.igknighters.controllers;
 
-import com.igknighters.SubsystemResources.Subsystems;
 import com.igknighters.commands.stem.StemCommands;
+import com.igknighters.subsystems.SubsystemResources.Subsystems;
 import com.igknighters.subsystems.stem.StemPosition;
-import com.igknighters.subsystems.stem.wrist.WristRealSuicidal;
-
-import edu.wpi.first.wpilibj2.command.Commands;
 
 public class OperatorController extends ControllerParent {
     public double frozenWristRadsOffset = 0.0;
 
     public OperatorController(int port) {
-        super(port, true, ControllerType.Operator);
+        super(port, true);
         // disregard null safety as it is checked on assignment
 
         /// FACE BUTTONS
         this.A.binding = new Binding((trig, allss) -> {
             trig.onTrue(
-                Commands.sequence(
-                    Commands.runOnce(
-                        () -> WristRealSuicidal.sweetReleaseOfDeath = false
-                    ),
-                    StemCommands.holdAt(allss.stem.get(), StemPosition.CLIMB)
-                )
+                StemCommands.holdAt(allss.stem.get(), StemPosition.CLIMB)
             );
         }, Subsystems.Stem);
 
