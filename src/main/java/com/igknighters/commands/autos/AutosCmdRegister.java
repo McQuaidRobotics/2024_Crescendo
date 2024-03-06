@@ -112,7 +112,7 @@ public class AutosCmdRegister {
             Commands.parallel(
                 new AutoSwerveTargetSpeaker(swerve),
                 StemCommands.aimAtSpeaker(stem, true),
-                UmbrellaCommands.waitUntilSpunUp(umbrella, kControls.SHOOTER_RPM, 1.2)
+                UmbrellaCommands.waitUntilSpunUp(umbrella, kControls.SHOOTER_RPM, 0.9)
             ).andThen(
                 UmbrellaCommands.shoot(umbrella)
             ).withName("AutoShoot")
