@@ -2,6 +2,8 @@ package monologue;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -58,6 +60,8 @@ public class Monologue {
     ntLogger.setLazy(lazyLogging);
     dataLogger.setLazy(lazyLogging);
     NetworkTableInstance.getDefault().startEntryDataLog(DataLogManager.getLog(), "", "");
+    DriverStation.startDataLog(DataLogManager.getLog(), true);
+
     logObj(loggable, rootpath);
 
     MonologueLog.RuntimeLog("Monologue.setupMonologue() finished");

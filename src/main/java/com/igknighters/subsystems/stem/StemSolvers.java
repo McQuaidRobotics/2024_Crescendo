@@ -1,6 +1,5 @@
 package com.igknighters.subsystems.stem;
 
-import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kPivot;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -14,7 +13,7 @@ public class StemSolvers {
         double horizDist, 
         double vertDist,
         double initialNoteVelo) {
-        
+
         Translation2d wristLocation = solveWristLocationSimple2d(stemLength, pivotRads);
         horizDist += wristLocation.getX();
         vertDist -= wristLocation.getY();

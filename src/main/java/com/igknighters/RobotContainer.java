@@ -14,6 +14,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.igknighters.commands.autos.AutosCmdRegister;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import monologue.Logged;
 import monologue.Monologue;
@@ -97,10 +98,6 @@ public class RobotContainer implements Logged {
     }
 
     AllSubsystems getAllSubsystemsForTest() {
-        // if (!GlobalState.isUnitTest()) {
-        // throw new RuntimeException("This method should only be called in unit
-        // tests");
-        // }
         return allSubsystems;
     }
 }
