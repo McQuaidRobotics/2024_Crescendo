@@ -2,6 +2,7 @@ package com.igknighters.subsystems.stem.wrist;
 
 import com.igknighters.subsystems.stem.StemPosition;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.RobotController;
 
 public class WristDisabled extends Wrist {
     final double slewRate = (4.3 / 50.0) * 0.75;
@@ -24,7 +25,7 @@ public class WristDisabled extends Wrist {
     @Override
     public void setVoltageOut(double volts) {
         super.volts = volts;
-        double percentOut = volts / 12.0;
+        double percentOut = volts / RobotController.getBatteryVoltage();
         super.radiansPerSecond = slewRate * percentOut;
         super.radians += super.radiansPerSecond;
     }
