@@ -31,10 +31,10 @@ public class DriverController extends ControllerParent {
                             Commands.parallel(
                                     StemCommands.holdAt(
                                             allss.stem.get(),
-                                            StemPosition.AMP),
+                                            StemPosition.AMP_SAFE),
                                     UmbrellaCommands.spinupShooter(
                                             allss.umbrella.get(),
-                                            1000,
+                                            2000,
                                             ShooterSpinupReason.Amp))
                                     .finallyDo(
                                             () -> allss.umbrella.get().stopAll()));

@@ -37,7 +37,7 @@ public class InspectorController extends ControllerParent {
 
         this.B.binding = new Binding((trig, allss) -> {
             trig.onTrue(
-                    StemCommands.holdAt(allss.stem.get(), StemPosition.AMP));
+                    StemCommands.holdAt(allss.stem.get(), StemPosition.AMP_SAFE));
         }, Subsystems.Stem);
 
         this.X.binding = new Binding((trig, allss) -> {
