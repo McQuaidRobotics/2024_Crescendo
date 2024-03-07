@@ -2,6 +2,7 @@ package com.igknighters.util;
 
 import java.util.HashMap;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 
 import edu.wpi.first.networktables.NetworkTable;
@@ -81,5 +82,15 @@ public class FaultManager {
             return;
         }
         captureFault(component.name(), code.toString());
+    }
+
+    public static void captureFault(Enum<?> component, BaseStatusSignal... signals) {
+        for (BaseStatusSignal signal : signals) {
+            StatusCode code = signal.getStatus();
+            if (code == StatusCode.OK) {
+                return;
+            }
+            captureFault(component.name() + ":" + signal.getName(), code.toString());
+        }
     }
 }

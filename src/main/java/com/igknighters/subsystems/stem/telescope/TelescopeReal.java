@@ -1,6 +1,5 @@
 package com.igknighters.subsystems.stem.telescope;
 
-import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -16,42 +15,43 @@ import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.HardwareIndex.StemHW;
 import com.igknighters.util.FaultManager;
+import com.igknighters.util.can.CANRetrier;
+import com.igknighters.util.can.CANSignalManager;
 
 import monologue.Annotations.Log;
-
 
 public class TelescopeReal extends Telescope {
     private final TalonFX motor;
 
-    private final StatusSignal<Double> motorVolts, motorTemp, motorAmps, motorVelo, motorRots;
+    private final StatusSignal<Double> motorVolts, motorAmps, motorVelo, motorRots;
     private final StatusSignal<ForwardLimitValue> forwardLimitSwitch;
     private final StatusSignal<ReverseLimitValue> reverseLimitSwitch;
 
-    @Log.NT private boolean hasHomed = false;
-    @Log.NT private boolean motorAutoseed = true;
+    @Log.NT
+    private boolean hasHomed = false;
+    @Log.NT
+    private boolean motorAutoseed = true;
 
-    public TelescopeReal(){
+    public TelescopeReal() {
         super(kTelescope.MIN_METERS);
 
         motor = new TalonFX(kTelescope.MOTOR_ID, kStem.CANBUS);
-        motor.getConfigurator().apply(motorConfig());
+        CANRetrier.retryStatusCode(() -> motor.getConfigurator().apply(motorConfig(), 1.0), 5);
 
         motorRots = motor.getRotorPosition();
         motorVelo = motor.getRotorVelocity();
         motorAmps = motor.getTorqueCurrent();
         motorVolts = motor.getMotorVoltage();
-        motorTemp = motor.getDeviceTemp();
-
-        motorRots.setUpdateFrequency(100);
-        motorVelo.setUpdateFrequency(100);
-        motorAmps.setUpdateFrequency(100);
-        motorVolts.setUpdateFrequency(100);
-        motorTemp.setUpdateFrequency(4);
 
         forwardLimitSwitch = motor.getForwardLimit();
         reverseLimitSwitch = motor.getReverseLimit();
 
-        motor.optimizeBusUtilization();
+        CANSignalManager.registerSignals(
+                kStem.CANBUS,
+                motorRots, motorVelo, motorVolts, motorAmps,
+                forwardLimitSwitch, reverseLimitSwitch);
+
+        motor.optimizeBusUtilization(1.0);
     }
 
     private TalonFXConfiguration motorConfig() {
@@ -66,8 +66,8 @@ public class TelescopeReal extends Telescope {
 
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         cfg.MotorOutput.Inverted = kTelescope.INVERTED
-            ? InvertedValue.Clockwise_Positive
-            : InvertedValue.CounterClockwise_Positive;
+                ? InvertedValue.Clockwise_Positive
+                : InvertedValue.CounterClockwise_Positive;
 
         cfg.HardwareLimitSwitch.ReverseLimitEnable = true;
         cfg.HardwareLimitSwitch.ForwardLimitEnable = true;
@@ -87,13 +87,13 @@ public class TelescopeReal extends Telescope {
         return cfg;
     }
 
-    private double mechMetersToMotorRots(Double mechMeters){
+    private double mechMetersToMotorRots(Double mechMeters) {
         return ((mechMeters - kTelescope.MIN_METERS)
                 / kTelescope.SPROCKET_CIRCUMFERENCE)
                 * kTelescope.MOTOR_TO_MECHANISM_RATIO;
     }
 
-    private double motorRotsToMechMeters(Double motorRots){
+    private double motorRotsToMechMeters(Double motorRots) {
         return ((motorRots / kTelescope.MOTOR_TO_MECHANISM_RATIO)
                 * kTelescope.SPROCKET_CIRCUMFERENCE)
                 + kTelescope.MIN_METERS;
@@ -118,7 +118,7 @@ public class TelescopeReal extends Telescope {
     }
 
     @Override
-    public void stopMechanism(){
+    public void stopMechanism() {
         super.volts = 0.0;
         this.motor.setVoltage(0);
     }
@@ -141,31 +141,28 @@ public class TelescopeReal extends Telescope {
     @Override
     public void setCoast(boolean shouldBeCoasting) {
         this.motor.setNeutralMode(
-            shouldBeCoasting
-            ? NeutralModeValue.Coast
-            : NeutralModeValue.Brake
-        );
+                shouldBeCoasting
+                        ? NeutralModeValue.Coast
+                        : NeutralModeValue.Brake);
     }
 
     @Override
-    public void periodic(){
+    public void periodic() {
         FaultManager.captureFault(
-            StemHW.TelescopeMotor,
-            BaseStatusSignal.refreshAll(
+                StemHW.TelescopeMotor,
                 motorRots, motorVelo,
-                /* motorVolts, motorAmps ,*/
-                /* motorTemp, */ forwardLimitSwitch,
-                reverseLimitSwitch));
+                motorVolts, motorAmps,
+                forwardLimitSwitch,
+                reverseLimitSwitch);
 
         super.meters = motorRotsToMechMeters(motorRots.getValue());
         super.metersPerSecond = motorRotsToMechMeters(motorVelo.getValue());
         super.volts = motorVolts.getValue();
-        super.temp = motorTemp.getValue();
-        super.amps =  motorAmps.getValue();
+        super.amps = motorAmps.getValue();
         super.isLimitFwdSwitchHit = forwardLimitSwitch.getValue() == ForwardLimitValue.Open;
         super.isLimitRevSwitchHit = reverseLimitSwitch.getValue() == ReverseLimitValue.Open;
 
-        if (!hasHomed && (super.isLimitFwdSwitchHit || super.isLimitRevSwitchHit)){
+        if (!hasHomed && (super.isLimitFwdSwitchHit || super.isLimitRevSwitchHit)) {
             hasHomed = true;
         }
 

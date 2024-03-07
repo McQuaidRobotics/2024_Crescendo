@@ -1,8 +1,10 @@
 package com.igknighters.subsystems.swerve.module;
 
-import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.controls.ControlRequest;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
@@ -13,84 +15,90 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import monologue.Annotations.Log;
+import edu.wpi.first.wpilibj.RobotController;
 
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kSwerve.kAngleMotor;
 import com.igknighters.constants.ConstValues.kSwerve.kDriveMotor;
 import com.igknighters.util.BootupLogger;
-import com.igknighters.util.CANRetrier;
+import com.igknighters.util.can.CANRetrier;
 
 public class SwerveModuleReal extends SwerveModule {
     private final TalonFX driveMotor;
     private final StatusSignal<Double> drivePositionSignal, driveVelocitySignal;
     private final StatusSignal<Double> driveVoltSignal, driveAmpSignal;
+    private final ControlRequest driveMotorClosedReq;
+    private final ControlRequest driveMotorOpenReq;
 
     private final TalonFX angleMotor;
     private final StatusSignal<Double> anglePositionSignal, angleVelocitySignal;
     private final StatusSignal<Double> angleVoltSignal, angleAmpSignal;
+    private final PositionVoltage angleMotorReq = new PositionVoltage(0)
+            .withUpdateFreqHz(0);
 
     private final CANcoder angleEncoder;
     private final StatusSignal<Double> angleAbsoluteSignal, angleAbsoluteVeloSignal;
 
     public final int moduleNumber;
     private final double rotationOffset;
-    @SuppressWarnings("unused")
-    private final Translation2d moduleChassisPose;
+    private final boolean isPro;
+
     private Rotation2d lastAngle = new Rotation2d();
-    @Log.NT.Once private final boolean isPro;
 
     public SwerveModuleReal(final SwerveModuleConstants moduleConstants, boolean isPro) {
         this.isPro = isPro;
         this.moduleNumber = moduleConstants.getModuleId().num;
         this.rotationOffset = moduleConstants.getRotationOffset();
-        this.moduleChassisPose = moduleConstants.getModuleChassisPose();
 
         driveMotor = new TalonFX(moduleConstants.getDriveMotorID(), kSwerve.CANBUS);
         angleMotor = new TalonFX(moduleConstants.getAngleMotorID(), kSwerve.CANBUS);
         angleEncoder = new CANcoder(moduleConstants.getCancoderID(), kSwerve.CANBUS);
 
-        CANRetrier.retryStatusCode(() -> driveMotor.getConfigurator().apply(driveMotorConfig()), 5);
-        CANRetrier.retryStatusCode(() -> angleMotor.getConfigurator().apply(angleMotorConfig()), 5);
-        CANRetrier.retryStatusCode(() -> angleEncoder.getConfigurator().apply(cancoderConfig()), 5);
+        CANRetrier.retryStatusCode(() -> driveMotor.getConfigurator().apply(driveMotorConfig(), 1.0), 5);
+        CANRetrier.retryStatusCode(() -> angleMotor.getConfigurator().apply(angleMotorConfig(), 1.0), 5);
+        CANRetrier.retryStatusCode(() -> angleEncoder.getConfigurator().apply(cancoderConfig(), 1.0), 5);
 
         drivePositionSignal = driveMotor.getPosition();
         driveVelocitySignal = driveMotor.getVelocity();
         driveVoltSignal = driveMotor.getMotorVoltage();
         driveAmpSignal = driveMotor.getTorqueCurrent();
 
-        drivePositionSignal.setUpdateFrequency(100);
-        driveVelocitySignal.setUpdateFrequency(100);
-        driveVoltSignal.setUpdateFrequency(100);
-        driveAmpSignal.setUpdateFrequency(100);
-
-        driveMotor.optimizeBusUtilization();
-
         anglePositionSignal = angleMotor.getPosition();
         angleVelocitySignal = angleMotor.getVelocity();
         angleVoltSignal = angleMotor.getMotorVoltage();
         angleAmpSignal = angleMotor.getTorqueCurrent();
 
-        anglePositionSignal.setUpdateFrequency(100);
-        angleVelocitySignal.setUpdateFrequency(100);
-        angleVoltSignal.setUpdateFrequency(100);
-        angleAmpSignal.setUpdateFrequency(100);
-
-        angleMotor.optimizeBusUtilization();
-
         angleAbsoluteSignal = angleEncoder.getAbsolutePosition();
         angleAbsoluteVeloSignal = angleEncoder.getVelocity();
 
-        angleAbsoluteSignal.setUpdateFrequency(100);
-        angleAbsoluteVeloSignal.setUpdateFrequency(100);
+        BaseStatusSignal.setUpdateFrequencyForAll(
+            100,
+            drivePositionSignal, driveVelocitySignal,
+            driveVoltSignal, driveAmpSignal,
+            anglePositionSignal, angleVelocitySignal,
+            angleVoltSignal, angleAmpSignal,
+            angleAbsoluteSignal, angleAbsoluteVeloSignal
+        );
 
-        angleEncoder.optimizeBusUtilization();
+        driveAmpSignal.getName();
 
-        driveMotor.setPosition(0.0);
+        driveMotor.optimizeBusUtilization(1.0);
+        angleMotor.optimizeBusUtilization(1.0);
+        angleEncoder.optimizeBusUtilization(1.0);
+
+        CANRetrier.retryStatusCode(() -> driveMotor.setPosition(0.0, 0.1), 3);
+
+        log("isPro", isPro);
+
+        driveMotorOpenReq = new VoltageOut(0).withEnableFOC(isPro).withUpdateFreqHz(0);
+        if (isPro) {
+            driveMotorClosedReq = new VelocityTorqueCurrentFOC(0).withUpdateFreqHz(0);
+        } else {
+            driveMotorClosedReq = new VelocityVoltage(0).withUpdateFreqHz(0);
+        }
 
         BootupLogger.bootupLog(
                 "    SwerveModule[" + this.moduleNumber + "] initialized ("
@@ -165,9 +173,7 @@ public class SwerveModuleReal extends SwerveModule {
                 : desiredState.angle;
         super.targetAngleAbsoluteRads = angle.getRadians();
 
-        angleMotor.setControl(
-                new PositionDutyCycle(angle.getRotations())
-                        .withUpdateFreqHz(250));
+        angleMotor.setControl(angleMotorReq.withPosition(angle.getRotations()));
         lastAngle = angle;
     }
 
@@ -175,13 +181,15 @@ public class SwerveModuleReal extends SwerveModule {
         super.targetDriveVeloMPS = desiredState.speedMetersPerSecond;
         if (isOpenLoop) {
             double percentOutput = desiredState.speedMetersPerSecond / kSwerve.MAX_DRIVE_VELOCITY;
-            var controlRequest = new DutyCycleOut(percentOutput).withEnableFOC(isPro);
-            driveMotor.setControl(controlRequest);
+            driveMotor.setControl(((VoltageOut) driveMotorOpenReq).withOutput(percentOutput * RobotController.getBatteryVoltage()));
         } else {
             double rps = (desiredState.speedMetersPerSecond / kSwerve.WHEEL_CIRCUMFERENCE) * kSwerve.DRIVE_GEAR_RATIO;
-            var veloRequest = new VelocityVoltage(rps).withEnableFOC(isPro);
             log("DriveRPS", rps);
-            driveMotor.setControl(veloRequest);
+            if (isPro) {
+                driveMotor.setControl(((VelocityTorqueCurrentFOC) driveMotorClosedReq).withVelocity(rps));
+            } else {
+                driveMotor.setControl(((VelocityVoltage) driveMotorClosedReq).withVelocity(rps));
+            }
         }
     }
 
@@ -210,10 +218,10 @@ public class SwerveModuleReal extends SwerveModule {
     public void periodic() {
         BaseStatusSignal.refreshAll(
                 drivePositionSignal, driveVelocitySignal,
-                /* driveVoltSignal, driveAmpSignal, */
+                driveVoltSignal, driveAmpSignal,
                 anglePositionSignal, angleVelocitySignal,
-                /* angleVoltSignal, angleAmpSignal , */
-                angleAbsoluteSignal /* , angleAbsoluteVeloSignal */);
+                angleVoltSignal, angleAmpSignal ,
+                angleAbsoluteSignal, angleAbsoluteVeloSignal);
 
         super.angleAbsoluteRads = Units.rotationsToRadians(angleAbsoluteSignal.getValue());
         super.angleVeloRadPS = Units.rotationsToRadians(angleAbsoluteVeloSignal.getValue());
@@ -228,5 +236,12 @@ public class SwerveModuleReal extends SwerveModule {
 
     @Override
     public void setVoltageOut(double volts) {
+        driveMotor.setVoltage(volts);
+    }
+
+    @Override
+    public void setVoltageOut(double volts, Rotation2d angle) {
+        setAngle(new SwerveModuleState(0.0, angle));
+        driveMotor.setVoltage(volts);
     }
 }

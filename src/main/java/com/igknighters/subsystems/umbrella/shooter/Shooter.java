@@ -14,8 +14,6 @@ public abstract class Shooter extends Component {
     @Log.NT protected double voltsLeft = 0.0;
     @Log.NT protected double ampsRight = 0.0;
     @Log.NT protected double ampsLeft = 0.0;
-    @Log.NT protected double tempRight = 0.0;
-    @Log.NT protected double tempLeft = 0.0;
 
     @Override
     public String getPath() {

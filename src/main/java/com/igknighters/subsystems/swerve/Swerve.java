@@ -23,8 +23,8 @@ import com.igknighters.subsystems.swerve.gyro.GyroSim;
 import com.igknighters.subsystems.swerve.module.SwerveModule;
 import com.igknighters.subsystems.swerve.module.SwerveModuleReal;
 import com.igknighters.subsystems.swerve.module.SwerveModuleSim;
-import com.igknighters.util.CANBusLogging;
 import com.igknighters.util.Tracer;
+import com.igknighters.util.can.CANBusLogging;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.FieldConstants;
 

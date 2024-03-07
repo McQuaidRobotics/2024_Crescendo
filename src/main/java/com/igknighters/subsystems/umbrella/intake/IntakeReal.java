@@ -21,11 +21,12 @@ public class IntakeReal extends Intake {
 
     private final TalonFX upperMotor = new TalonFX(kIntake.UPPER_MOTOR_ID, kUmbrella.CANBUS);
     private final TalonFX lowerMotor = new TalonFX(kIntake.LOWER_MOTOR_ID, kUmbrella.CANBUS);
-    private final StatusSignal<Double> veloSignalUpper, voltSignalUpper, currentSignalUpper, tempSignalUpper;
-    private final StatusSignal<Double> veloSignalLower, voltSignalLower, currentSignalLower, tempSignalLower;
+    private final StatusSignal<Double> veloSignalUpper, voltSignalUpper, currentSignalUpper;
+    private final StatusSignal<Double> veloSignalLower, voltSignalLower, currentSignalLower;
     private final StatusSignal<ReverseLimitValue> revLimitSignal;
     private final HardwareLimitSwitchConfigs lowerLimitCfg, upperLimitCfg;
-    @Log.NT private boolean wasBeamBroken = false;
+    @Log.NT
+    private boolean wasBeamBroken = false;
 
     public IntakeReal() {
         FaultManager.captureFault(
@@ -48,22 +49,18 @@ public class IntakeReal extends Intake {
         veloSignalUpper = upperMotor.getVelocity();
         voltSignalUpper = upperMotor.getMotorVoltage();
         currentSignalUpper = upperMotor.getTorqueCurrent();
-        tempSignalUpper = upperMotor.getDeviceTemp();
 
         veloSignalUpper.setUpdateFrequency(100);
         voltSignalUpper.setUpdateFrequency(100);
         currentSignalUpper.setUpdateFrequency(100);
-        tempSignalUpper.setUpdateFrequency(100);
 
         veloSignalLower = lowerMotor.getVelocity();
         voltSignalLower = lowerMotor.getMotorVoltage();
         currentSignalLower = lowerMotor.getTorqueCurrent();
-        tempSignalLower = lowerMotor.getDeviceTemp();
 
         veloSignalLower.setUpdateFrequency(100);
         voltSignalLower.setUpdateFrequency(100);
         currentSignalLower.setUpdateFrequency(100);
-        tempSignalLower.setUpdateFrequency(100);
 
         if (kIntake.BEAM_IS_UPPER) {
             revLimitSignal = upperMotor.getReverseLimit();
@@ -73,8 +70,8 @@ public class IntakeReal extends Intake {
 
         revLimitSignal.setUpdateFrequency(250);
 
-        upperMotor.optimizeBusUtilization();
-        lowerMotor.optimizeBusUtilization();
+        upperMotor.optimizeBusUtilization(1.0);
+        lowerMotor.optimizeBusUtilization(1.0);
 
         BootupLogger.bootupLog("    Intake initialized (real)");
     }
@@ -155,18 +152,15 @@ public class IntakeReal extends Intake {
                 UmbrellaHW.IntakeMotor,
                 BaseStatusSignal.refreshAll(
                         veloSignalUpper, voltSignalUpper,
-                        currentSignalUpper, tempSignalUpper,
-                        revLimitSignal));
+                        currentSignalUpper, revLimitSignal));
 
         super.exitBeamBroken = revLimitSignal.getValue().equals(ReverseLimitValue.ClosedToGround);
         super.radiansPerSecondUpper = Units.rotationsToRadians(veloSignalUpper.getValue());
         super.voltsUpper = voltSignalUpper.getValue();
         super.ampsUpper = currentSignalUpper.getValue();
-        super.tempUpper = tempSignalUpper.getValue();
         super.radiansPerSecondLower = Units.rotationsToRadians(veloSignalLower.getValue());
         super.voltsLower = voltSignalLower.getValue();
         super.ampsLower = currentSignalLower.getValue();
-        super.tempLower = tempSignalLower.getValue();
 
         if (super.exitBeamBroken && !wasBeamBroken) {
             this.setVoltageOut(0.0);

@@ -4,8 +4,8 @@ import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.umbrella.intake.*;
 import com.igknighters.subsystems.umbrella.shooter.*;
-import com.igknighters.util.CANBusLogging;
 import com.igknighters.util.Tracer;
+import com.igknighters.util.can.CANBusLogging;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;

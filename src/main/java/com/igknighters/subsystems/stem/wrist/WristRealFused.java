@@ -16,8 +16,8 @@ import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.constants.HardwareIndex.StemHW;
 import com.igknighters.util.BootupLogger;
-import com.igknighters.util.CANRetrier;
 import com.igknighters.util.FaultManager;
+import com.igknighters.util.can.CANRetrier;
 
 import edu.wpi.first.math.util.Units;
 
@@ -45,7 +45,7 @@ public class WristRealFused extends Wrist {
         motorVolts.setUpdateFrequency(100);
         motorTemp.setUpdateFrequency(4);
 
-        motor.optimizeBusUtilization();
+        motor.optimizeBusUtilization(1.0);
 
         cancoder = new CANcoder(kWrist.CANCODER_ID, kStem.CANBUS);
         CANRetrier.retryStatusCodeFatal(() -> cancoder.getConfigurator().apply(cancoderConfig()), 10);
@@ -56,7 +56,7 @@ public class WristRealFused extends Wrist {
         cancoderRots.setUpdateFrequency(100);
         cancoderVelo.setUpdateFrequency(100);
 
-        cancoder.optimizeBusUtilization();
+        cancoder.optimizeBusUtilization(1.0);
 
         super.encoderRadians = Units.rotationsToRadians(cancoderRots.getValue());
         super.radians = encoderRadians;
@@ -87,9 +87,10 @@ public class WristRealFused extends Wrist {
         cfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = false;
 
         // cfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Wrist
-        //         .mechanismRadsToMotorRots(StemPosition.STARTING.wristRads - 0.3);
+        // .mechanismRadsToMotorRots(StemPosition.STARTING.wristRads - 0.3);
         // cfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Wrist
-        //         .mechanismRadsToMotorRots(kWrist.FROZEN_WRIST_ANGLE - Units.degreesToRadians(0.3));
+        // .mechanismRadsToMotorRots(kWrist.FROZEN_WRIST_ANGLE -
+        // Units.degreesToRadians(0.3));
 
         return cfg;
     }
@@ -148,6 +149,5 @@ public class WristRealFused extends Wrist {
         super.encoderRadians = Units.rotationsToRadians(cancoderRots.getValue());
         super.amps = motorAmps.getValue();
         super.volts = motorVolts.getValue();
-        super.temp = motorTemp.getValue();
     }
 }

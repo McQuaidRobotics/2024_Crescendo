@@ -19,8 +19,8 @@ public class ShooterReal extends Shooter {
 
     private final TalonFX rightMotor = new TalonFX(kShooter.RIGHT_MOTOR_ID, kUmbrella.CANBUS);
     private final TalonFX leftMotor = new TalonFX(kShooter.LEFT_MOTOR_ID, kUmbrella.CANBUS);
-    private final StatusSignal<Double> veloSignalRight, voltSignalRight, currentSignalRight, tempSignalRight;
-    private final StatusSignal<Double> veloSignalLeft, voltSignalLeft, currentSignalLeft, tempSignalLeft;
+    private final StatusSignal<Double> veloSignalRight, voltSignalRight, currentSignalRight;
+    private final StatusSignal<Double> veloSignalLeft, voltSignalLeft, currentSignalLeft;
 
     public ShooterReal() {
         rightMotor.getConfigurator().apply(motorRightConfig());
@@ -28,28 +28,24 @@ public class ShooterReal extends Shooter {
         veloSignalRight = rightMotor.getVelocity();
         voltSignalRight = rightMotor.getMotorVoltage();
         currentSignalRight = rightMotor.getTorqueCurrent();
-        tempSignalRight = rightMotor.getDeviceTemp();
 
         veloSignalRight.setUpdateFrequency(100);
         voltSignalRight.setUpdateFrequency(100);
         currentSignalRight.setUpdateFrequency(100);
-        tempSignalRight.setUpdateFrequency(4);
 
-        rightMotor.optimizeBusUtilization();
+        rightMotor.optimizeBusUtilization(1.0);
 
         leftMotor.getConfigurator().apply(motorLeftConfig());
 
         veloSignalLeft = leftMotor.getVelocity();
         voltSignalLeft = leftMotor.getMotorVoltage();
         currentSignalLeft = leftMotor.getTorqueCurrent();
-        tempSignalLeft = leftMotor.getDeviceTemp();
 
         veloSignalLeft.setUpdateFrequency(100);
         voltSignalLeft.setUpdateFrequency(100);
         currentSignalLeft.setUpdateFrequency(100);
-        tempSignalLeft.setUpdateFrequency(4);
 
-        leftMotor.optimizeBusUtilization();
+        leftMotor.optimizeBusUtilization(1.0);
 
         BootupLogger.bootupLog("    Shooter initialized (real)");
     }
@@ -68,7 +64,6 @@ public class ShooterReal extends Shooter {
         cfg.MotorOutput.PeakReverseDutyCycle = 0.0;
         cfg.Voltage.PeakReverseVoltage = 0.0;
         cfg.TorqueCurrent.PeakReverseTorqueCurrent = 0.0;
-
 
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
@@ -132,25 +127,21 @@ public class ShooterReal extends Shooter {
                 BaseStatusSignal.refreshAll(
                         veloSignalRight,
                         voltSignalRight,
-                        currentSignalRight,
-                        tempSignalRight));
+                        currentSignalRight));
 
         FaultManager.captureFault(
                 UmbrellaHW.LeftShooterMotor,
                 BaseStatusSignal.refreshAll(
                         veloSignalLeft,
                         voltSignalLeft,
-                        currentSignalLeft,
-                        tempSignalLeft));
+                        currentSignalLeft));
 
         super.radiansPerSecondRight = Units.rotationsToRadians(veloSignalRight.getValue());
         super.voltsRight = voltSignalRight.getValue();
         super.ampsRight = currentSignalRight.getValue();
-        super.tempRight = tempSignalRight.getValue();
 
         super.radiansPerSecondLeft = Units.rotationsToRadians(veloSignalLeft.getValue());
         super.voltsLeft = voltSignalLeft.getValue();
         super.ampsLeft = currentSignalLeft.getValue();
-        super.tempLeft = tempSignalLeft.getValue();
     }
 }

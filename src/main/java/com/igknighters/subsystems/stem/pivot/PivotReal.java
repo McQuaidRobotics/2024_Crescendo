@@ -1,6 +1,5 @@
 package com.igknighters.subsystems.stem.pivot;
 
-import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
@@ -21,8 +20,9 @@ import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.constants.HardwareIndex.StemHW;
 import com.igknighters.util.BootupLogger;
-import com.igknighters.util.CANRetrier;
 import com.igknighters.util.FaultManager;
+import com.igknighters.util.can.CANRetrier;
+import com.igknighters.util.can.CANSignalManager;
 
 public class PivotReal extends Pivot {
 
@@ -34,7 +34,7 @@ public class PivotReal extends Pivot {
     private final Pigeon2 gyro;
 
     private final StatusSignal<Double> motorRots, motorVelo, leaderMotorVolts, followerMotorVolts;
-    private final StatusSignal<Double> leaderMotorAmps, followerMotorAmps, leaderMotorTemp, followerMotorTemp;
+    private final StatusSignal<Double> leaderMotorAmps, followerMotorAmps;
     /** Could be pitch or roll */
     private final StatusSignal<Double> gyroMeasurement;
     private final StatusSignal<ForwardLimitValue> forwardLimitSwitch;
@@ -53,10 +53,6 @@ public class PivotReal extends Pivot {
         gyro = new Pigeon2(kPivot.PIGEON_ID, kStem.CANBUS);
         gyroMeasurement = gyro.getPitch();
 
-        gyroMeasurement.setUpdateFrequency(100);
-
-        gyro.optimizeBusUtilization();
-
         leaderMotor = new TalonFX(kPivot.RIGHT_MOTOR_ID, kStem.CANBUS);
         followerMotor = new TalonFX(kPivot.LEFT_MOTOR_ID, kStem.CANBUS);
 
@@ -70,7 +66,7 @@ public class PivotReal extends Pivot {
         super.radians = startingRads;
         super.targetRadians = startingRads;
 
-        leaderMotor.setPosition(mechRadiansToMotorRots(getPivotRadiansPigeon()));
+        seedPivot();
 
         motorRots = leaderMotor.getRotorPosition();
         motorVelo = leaderMotor.getRotorVelocity();
@@ -78,26 +74,19 @@ public class PivotReal extends Pivot {
         leaderMotorAmps = followerMotor.getTorqueCurrent();
         leaderMotorVolts = leaderMotor.getMotorVoltage();
         followerMotorVolts = followerMotor.getMotorVoltage();
-        followerMotorTemp = leaderMotor.getDeviceTemp();
-        leaderMotorTemp = followerMotor.getDeviceTemp();
         forwardLimitSwitch = leaderMotor.getForwardLimit();
         reverseLimitSwitch = leaderMotor.getReverseLimit();
 
-        motorRots.setUpdateFrequency(100);
-        motorVelo.setUpdateFrequency(100);
-        followerMotorAmps.setUpdateFrequency(100);
-        leaderMotorAmps.setUpdateFrequency(100);
-        leaderMotorVolts.setUpdateFrequency(100);
-        followerMotorVolts.setUpdateFrequency(100);
-        followerMotorTemp.setUpdateFrequency(4);
-        leaderMotorTemp.setUpdateFrequency(4);
-        forwardLimitSwitch.setUpdateFrequency(100);
-        reverseLimitSwitch.setUpdateFrequency(100);
+        CANSignalManager.registerSignals(
+            kStem.CANBUS,
+            motorRots, motorVelo, leaderMotorVolts, followerMotorVolts,
+            leaderMotorAmps, followerMotorAmps, forwardLimitSwitch,
+            reverseLimitSwitch, gyroMeasurement
+        );
 
-        leaderMotor.optimizeBusUtilization();
-        followerMotor.optimizeBusUtilization();
-
-        seedPivot();
+        gyro.optimizeBusUtilization(1.0);
+        leaderMotor.optimizeBusUtilization(1.0);
+        followerMotor.optimizeBusUtilization(1.0);
 
         BootupLogger.bootupLog("    Pivot initialized (real)");
     }
@@ -174,21 +163,21 @@ public class PivotReal extends Pivot {
     @Override
     public void periodic() {
         FaultManager.captureFault(
-                StemHW.LeaderMotor,
-                BaseStatusSignal.refreshAll(
-                        motorRots /* , motorVelo, */
-                /* leaderMotorVolts, leaderMotorAmps, */
-                /* leaderMotorTemp, reverseLimitSwitch, */
-                /* forwardLimitSwitch */));
-
-        // FaultManager.captureFault(
-        // StemHW.FollowerMotor,
-        // BaseStatusSignal.refreshAll(
-        // followerMotorAmps, followerMotorTemp, followerMotorVolts));
+            StemHW.LeaderMotor,
+            motorRots, motorVelo,
+            leaderMotorVolts, leaderMotorAmps,
+            forwardLimitSwitch, reverseLimitSwitch
+        );
 
         FaultManager.captureFault(
-                StemHW.Pigeon2,
-                gyroMeasurement.refresh().getStatus());
+            StemHW.FollowerMotor,
+            followerMotorAmps, followerMotorVolts
+        );
+
+        FaultManager.captureFault(
+            StemHW.Pigeon2,
+            gyroMeasurement
+        );
 
         super.radians = motorRotsToMechRadians(motorRots.getValue());
         super.radiansPerSecond = -Units.rotationsToRadians(motorVelo.getValue()) / kPivot.MOTOR_TO_MECHANISM_RATIO;
@@ -196,8 +185,6 @@ public class PivotReal extends Pivot {
         super.rightVolts = followerMotorVolts.getValue();
         super.leftAmps = leaderMotorAmps.getValue();
         super.rightAmps = followerMotorAmps.getValue();
-        super.leftTemp = leaderMotorTemp.getValue();
-        super.rightTemp = followerMotorTemp.getValue();
 
         super.isLimitFwdSwitchHit = forwardLimitSwitch.getValue() == ForwardLimitValue.Open;
         super.isLimitRevSwitchHit = reverseLimitSwitch.getValue() == ReverseLimitValue.Open;
@@ -211,8 +198,6 @@ public class PivotReal extends Pivot {
         } else {
             log("SeededPivot", false);
         }
-
-        log("GyroSeed", mechRadiansToMotorRots(getPivotRadiansPigeon()));
     }
 
 }

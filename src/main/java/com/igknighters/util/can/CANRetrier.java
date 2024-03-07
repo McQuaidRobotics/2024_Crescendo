@@ -1,4 +1,4 @@
-package com.igknighters.util;
+package com.igknighters.util.can;
 
 import java.util.function.Supplier;
 
