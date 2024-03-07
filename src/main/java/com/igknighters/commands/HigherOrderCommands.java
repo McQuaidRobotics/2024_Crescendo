@@ -20,15 +20,15 @@ public class HigherOrderCommands {
         return Commands.race(
                 StemCommands.holdAt(stem, StemPosition.INTAKE),
                 // Commands.idle().until(
-                //         () -> {
-                //             var pose = stem.getStemPosition();
-                //             return pose.wristRads > (StemPosition.INTAKE.wristRads
-                //                     + kWrist.MIN_ANGLE) / 2.0
-                //                     && pose.telescopeMeters > kTelescope.MIN_METERS;
-                //         }).andThen()
+                // () -> {
+                // var pose = stem.getStemPosition();
+                // return pose.wristRads > (StemPosition.INTAKE.wristRads
+                // + kWrist.MIN_ANGLE) / 2.0
+                // && pose.telescopeMeters > kTelescope.MIN_METERS;
+                // }).andThen()
                 UmbrellaCommands.intake(umbrella)
-                .until(() -> umbrella.holdingGamepiece()))
-                .andThen(StemCommands.moveTo(stem, StemPosition.FROZEN_WRIST_STOW))
+                        .until(() -> umbrella.holdingGamepiece()))
+                .andThen(StemCommands.moveTo(stem, StemPosition.STOW_HIGH))
                 .withName("Intake");
     }
 
@@ -36,8 +36,7 @@ public class HigherOrderCommands {
         return Commands.parallel(
                 StemCommands.moveTo(stem, StemPosition.AMP),
                 SwerveCommands.driveToAmp(swerve),
-                UmbrellaCommands.spinupShooter(umbrella, 1500, ShooterSpinupReason.Amp)
-            ).withName("ScoreAmp");
+                UmbrellaCommands.spinupShooter(umbrella, 1500, ShooterSpinupReason.Amp)).withName("ScoreAmp");
     }
 
     public static Command aim(
@@ -47,8 +46,7 @@ public class HigherOrderCommands {
         return Commands.parallel(
                 new TeleopSwerveTargetSpeaker(swerve, controller)
                         .withSpeedMultiplier(0.5),
-                StemCommands.aimAtSpeaker(stem, false)
-        ).withName("Aim");
+                StemCommands.aimAtSpeaker(stem, false)).withName("Aim");
     }
 
     public static Command genericShoot(
@@ -59,50 +57,40 @@ public class HigherOrderCommands {
         Command cmd;
         if (umbrella.popSpinupReason().equals(ShooterSpinupReason.Amp)) {
             cmd = Commands.sequence(
-                umbrella.run(
-                    () -> {
-                        umbrella.spinupShooter(umbrella.getShooterTargetSpeed());
-                        umbrella.runIntakeAt(-1.0, true);
-                    }
-                ).withTimeout(0.9),
-                Commands.parallel(
-                    StemCommands.moveTo(
-                        stem,
-                        StemPosition.fromRadians(
-                            StemPosition.AMP.pivotRads - Units.degreesToRadians(4.0),
-                            StemPosition.AMP.wristRads,
-                            StemPosition.AMP.telescopeMeters + Units.inchesToMeters(2.0)
-                        )
-                    ),
-                    UmbrellaCommands.spinupShooter(
-                        umbrella,
-                        1000,
-                        ShooterSpinupReason.Amp
-                    )
-                )
-            );
+                    umbrella.run(
+                            () -> {
+                                umbrella.spinupShooter(umbrella.getShooterTargetSpeed());
+                                umbrella.runIntakeAt(-1.0, true);
+                            }).withTimeout(0.9),
+                    Commands.parallel(
+                            StemCommands.moveTo(
+                                    stem,
+                                    StemPosition.fromRadians(
+                                            StemPosition.AMP.pivotRads - Units.degreesToRadians(4.0),
+                                            StemPosition.AMP.wristRads,
+                                            StemPosition.AMP.telescopeMeters + Units.inchesToMeters(2.0))),
+                            UmbrellaCommands.spinupShooter(
+                                    umbrella,
+                                    1000,
+                                    ShooterSpinupReason.Amp)));
         } else if (umbrella.popSpinupReason().equals(ShooterSpinupReason.AutoAimSpeaker)) {
             cmd = Commands.parallel(
-                HigherOrderCommands.aim(
-                    swerve,
-                    stem,
-                    controller
-                ),
-                UmbrellaCommands.shoot(
-                    umbrella
-                )
-            ).until(() -> controller.leftTrigger(true).getAsDouble() < 0.5);
+                    HigherOrderCommands.aim(
+                            swerve,
+                            stem,
+                            controller),
+                    UmbrellaCommands.shoot(
+                            umbrella))
+                    .until(() -> controller.leftTrigger(true).getAsDouble() < 0.5);
         } else {
             cmd = UmbrellaCommands.shoot(umbrella);
         }
 
         return cmd.finallyDo(
-            umbrella::stopAll
-        ).andThen(
-            StemCommands.moveTo(
-                stem,
-                StemPosition.FROZEN_WRIST_STOW
-            )
-        ).withName("Shoot");
+                umbrella::stopAll).andThen(
+                        StemCommands.moveTo(
+                                stem,
+                                StemPosition.STOW_HIGH))
+                .withName("Shoot");
     }
 }

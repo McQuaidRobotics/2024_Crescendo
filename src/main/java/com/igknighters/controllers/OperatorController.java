@@ -1,6 +1,7 @@
 package com.igknighters.controllers;
 
 import com.igknighters.commands.stem.StemCommands;
+import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.subsystems.SubsystemResources.Subsystems;
 import com.igknighters.subsystems.stem.StemPosition;
 
@@ -14,15 +15,22 @@ public class OperatorController extends ControllerParent {
         /// FACE BUTTONS
         this.A.binding = new Binding((trig, allss) -> {
             trig.onTrue(
-                StemCommands.holdAt(allss.stem.get(), StemPosition.CLIMB)
-            );
+                    StemCommands.holdAt(allss.stem.get(), StemPosition.CLIMB));
         }, Subsystems.Stem);
 
         // this.B.binding =
 
         // this.X.binding =
 
-        // this.Y.binding =
+        this.Y.binding = new Binding((trig, allss) -> {
+            trig.onTrue(
+                StemCommands.moveTo(allss.stem.get(), StemPosition.STOW_HIGH)
+                .andThen(
+                    UmbrellaCommands.expell(allss.umbrella.get())
+                        .withTimeout(1.0)
+                )
+            );
+        }, Subsystems.Stem, Subsystems.Umbrella);
 
         /// BUMPER
         // this.LB.binding =
@@ -58,6 +66,6 @@ public class OperatorController extends ControllerParent {
 
         // this.DPL.binding =
 
-        // this.DPU.binding = 
+        // this.DPU.binding =
     }
 }

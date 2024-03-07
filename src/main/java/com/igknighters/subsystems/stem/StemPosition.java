@@ -91,6 +91,7 @@ public class StemPosition implements StructSerializable {
             return new StemPosition(bb.getDouble(), bb.getDouble(), bb.getDouble());
         }
     }
+
     public static final StemPositionStruct struct = new StemPositionStruct();
 
     public static final StemPosition STOW = new StemPosition(Units.degreesToRadians(43.5),
@@ -149,7 +150,7 @@ public class StemPosition implements StructSerializable {
         }
     };
 
-    public static final StemPosition FROZEN_WRIST_STOW = new StemPosition(
+    public static final StemPosition STOW_HIGH = new StemPosition(
             Units.degreesToRadians(45.0),
             kWrist.FROZEN_WRIST_ANGLE,
             kTelescope.MIN_METERS) {
