@@ -8,6 +8,7 @@ import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
@@ -20,17 +21,17 @@ import com.igknighters.util.FaultManager;
 
 import edu.wpi.first.math.util.Units;
 
-public class WristReal extends Wrist {
+public class WristRealFused extends Wrist {
     private final TalonFX motor;
     private final CANcoder cancoder;
 
     private final StatusSignal<Double> motorRots, motorVelo, motorAmps, motorVolts, motorTemp;
     private final StatusSignal<Double> cancoderRots, cancoderVelo;
 
-    public WristReal() {
+    public WristRealFused() {
         super(0.0);
         motor = new TalonFX(kWrist.MOTOR_ID, kStem.CANBUS);
-        motor.getConfigurator().apply(motorConfig());
+        CANRetrier.retryStatusCodeFatal(() -> motor.getConfigurator().apply(motorConfig()), 10);
 
         motorRots = motor.getRotorPosition();
         motorVelo = motor.getRotorVelocity();
@@ -47,7 +48,7 @@ public class WristReal extends Wrist {
         motor.optimizeBusUtilization();
 
         cancoder = new CANcoder(kWrist.CANCODER_ID, kStem.CANBUS);
-        cancoder.getConfigurator().apply(cancoderConfig());
+        CANRetrier.retryStatusCodeFatal(() -> cancoder.getConfigurator().apply(cancoderConfig()), 10);
 
         cancoderRots = cancoder.getAbsolutePosition();
         cancoderVelo = cancoder.getVelocity();
@@ -57,9 +58,9 @@ public class WristReal extends Wrist {
 
         cancoder.optimizeBusUtilization();
 
-        super.radians = cancoderRots.getValue();
-
-        seedWrist();
+        super.encoderRadians = Units.rotationsToRadians(cancoderRots.getValue());
+        super.radians = encoderRadians;
+        super.targetRadians = encoderRadians;
 
         BootupLogger.bootupLog("    Wrist initialized (real)");
     }
@@ -78,6 +79,10 @@ public class WristReal extends Wrist {
                 ? InvertedValue.Clockwise_Positive
                 : InvertedValue.CounterClockwise_Positive;
 
+        cfg.Feedback.FeedbackRemoteSensorID = cancoder.getDeviceID();
+        cfg.Feedback.RotorToSensorRatio = (1.0 / slope);
+        cfg.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+
         cfg.SoftwareLimitSwitch.ForwardSoftLimitEnable = false;
         cfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = false;
 
@@ -95,14 +100,6 @@ public class WristReal extends Wrist {
         cfg.MagnetSensor.MagnetOffset = kWrist.CANCODER_OFFSET;
 
         return cfg;
-    }
-
-    public void seedWrist() {
-        CANRetrier.retryStatusCodeFatal(() -> motor.setPosition(Wrist.mechanismRadsToMotorRots(super.encoderRadians)), 10);
-    }
-
-    public double getAmps() {
-        return super.amps;
     }
 
     @Override
@@ -146,20 +143,11 @@ public class WristReal extends Wrist {
                 BaseStatusSignal.refreshAll(
                         cancoderRots));
 
-        super.radians = Wrist.motorRotsToMechanismRads(motorRots.getValue());
+        super.radians = Units.rotationsToRadians(motorRots.getValue());
         super.radiansPerSecond = Units.rotationsToRadians(cancoderVelo.getValue());
         super.encoderRadians = Units.rotationsToRadians(cancoderRots.getValue());
         super.amps = motorAmps.getValue();
         super.volts = motorVolts.getValue();
         super.temp = motorTemp.getValue();
-
-        if (Math.abs(super.radiansPerSecond) < 0.1
-            && Math.abs(super.radians - super.encoderRadians) > 0.1) {
-            seedWrist();
-            log("SeededWrist", true);
-        } else {
-            log("SeededWrist", false);
-        }
     }
-
 }

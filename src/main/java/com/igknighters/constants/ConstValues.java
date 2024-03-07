@@ -101,7 +101,7 @@ public final class ConstValues {
         public static final double MAX_HEIGHT_AIM_AT_PIVOT_RADIANS = 86.0 * Conv.DEGREES_TO_RADIANS;
         public static final double MAX_HEIGHT_AIM_AT_TELESCOPE_METERS = kTelescope.MAX_METERS;
 
-        public static final AimStrategy DEFAULT_AIM_STRATEGY = AimStrategy.STATIONARY_WRIST;
+        public static final AimStrategy DEFAULT_AIM_STRATEGY = AimStrategy.STATIONARY_PIVOT;
     }
 
     public static final class kVision {
@@ -165,8 +165,8 @@ public final class ConstValues {
         @SuppressWarnings("unused")
         private static final class SwerveGearRatios {
             static final double L1_DRIVE = 8.14;
-            static final double L2_DRIVE = 6.75;
-            static final double L3_DRIVE = 6.12;
+            static final double L2_DRIVE = (50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0);
+            static final double L3_DRIVE = (50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0);
             static final double L4_DRIVE = 5.14;
 
             static final double ANGLE = 150.0 / 7.0;
@@ -198,9 +198,9 @@ public final class ConstValues {
         /** User defined acceleration time in seconds */
         public static final double ACCELERATION_TIME = 0.9;
 
-        public static final double SLIP_CURRENT = 50.0;
+        public static final double SLIP_CURRENT = 75.0;
 
-        public static final double MAX_DRIVE_VELOCITY = ((Motors.Falcon500Foc.FREE_SPEED / TAU) / DRIVE_GEAR_RATIO)
+        public static final double MAX_DRIVE_VELOCITY = ((Motors.KrakenX60Foc.FREE_SPEED / TAU) / DRIVE_GEAR_RATIO)
                 * WHEEL_CIRCUMFERENCE * MOTOR_CLOSED_LOOP_OUTPUT_SCALAR;
         public static final double MAX_DRIVE_ACCELERATION = MAX_DRIVE_VELOCITY / ACCELERATION_TIME;
 
@@ -442,8 +442,8 @@ public final class ConstValues {
             public static final double MOTOR_kI = 0.0;
             public static final double MOTOR_kD = 0.0;
 
-            public static final double MAX_VELOCITY = 80;
-            public static final double MAX_ACCELERATION = 500;
+            public static final double MAX_VELOCITY = 95;
+            public static final double MAX_ACCELERATION = 750;
             public static final double MAX_JERK = 0;
 
             public static final double MOTOR_TO_MECHANISM_RATIO = 45.0;

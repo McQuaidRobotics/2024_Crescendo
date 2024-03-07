@@ -25,23 +25,22 @@ public class DriverController extends ControllerParent {
                                                         allss.umbrella.get()));
                 }, Subsystems.Stem, Subsystems.Umbrella);
 
-                this.B.binding = new Binding(
-                                (trig, allss) -> {
-                                        trig.onTrue(
-                                                        Commands.parallel(
-                                                                        StemCommands.holdAt(
-                                                                                        allss.stem.get(),
-                                                                                        StemPosition.AMP),
-                                                                        UmbrellaCommands.spinupShooter(
-                                                                                        allss.umbrella.get(),
-                                                                                        1000,
-                                                                                        ShooterSpinupReason.Amp))
-                                                                        .finallyDo(
-                                                                                        () -> allss.umbrella.get()
-                                                                                                        .stopAll()));
-                                },
-                                Subsystems.Stem,
-                                Subsystems.Umbrella);
+        this.B.binding = new Binding(
+                (trig, allss) -> {
+                    trig.onTrue(
+                            Commands.parallel(
+                                    StemCommands.holdAt(
+                                            allss.stem.get(),
+                                            StemPosition.AMP_SAFE),
+                                    UmbrellaCommands.spinupShooter(
+                                            allss.umbrella.get(),
+                                            2000,
+                                            ShooterSpinupReason.Amp))
+                                    .finallyDo(
+                                            () -> allss.umbrella.get().stopAll()));
+                },
+                Subsystems.Stem,
+                Subsystems.Umbrella);
 
                 this.X.binding = new Binding((trig, allss) -> {
                         trig.onTrue(

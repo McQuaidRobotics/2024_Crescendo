@@ -4,7 +4,6 @@ import edu.wpi.first.util.struct.StructSerializable;
 
 public class MonoDashboard {
 
-
     public static void put(String entryName, boolean value) {
         put(entryName, value, LogLevel.DEFAULT);
     }
@@ -108,7 +107,6 @@ public class MonoDashboard {
         if (Monologue.isUnitTest()) return;
         Monologue.ntLogger.put(entryName, value, level);
     }
-
 
     public static <R extends StructSerializable> void put(String entryName, R value) {
         put(entryName, value, LogLevel.DEFAULT);

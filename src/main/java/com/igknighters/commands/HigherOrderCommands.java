@@ -1,7 +1,6 @@
 package com.igknighters.commands;
 
 import com.igknighters.commands.stem.StemCommands;
-import com.igknighters.commands.swerve.SwerveCommands;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveTargetSpeaker;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.controllers.ControllerParent;
@@ -10,7 +9,6 @@ import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
@@ -32,12 +30,13 @@ public class HigherOrderCommands {
                 .withName("Intake");
     }
 
-    public static Command scoreAmp(Swerve swerve, Stem stem, Umbrella umbrella) {
-        return Commands.parallel(
-                StemCommands.moveTo(stem, StemPosition.AMP),
-                SwerveCommands.driveToAmp(swerve),
-                UmbrellaCommands.spinupShooter(umbrella, 1500, ShooterSpinupReason.Amp)).withName("ScoreAmp");
-    }
+    // public static Command scoreAmp(Swerve swerve, Stem stem, Umbrella umbrella) {
+    //     return Commands.parallel(
+    //             StemCommands.moveTo(stem, StemPosition.AMP),
+    //             SwerveCommands.driveToAmp(swerve),
+    //             UmbrellaCommands.spinupShooter(umbrella, 1500, ShooterSpinupReason.Amp)
+    //         ).withName("ScoreAmp");
+    // }
 
     public static Command aim(
             Swerve swerve,
@@ -57,22 +56,15 @@ public class HigherOrderCommands {
         Command cmd;
         if (umbrella.popSpinupReason().equals(ShooterSpinupReason.Amp)) {
             cmd = Commands.sequence(
-                    umbrella.run(
-                            () -> {
-                                umbrella.spinupShooter(umbrella.getShooterTargetSpeed());
-                                umbrella.runIntakeAt(-1.0, true);
-                            }).withTimeout(0.9),
-                    Commands.parallel(
-                            StemCommands.moveTo(
-                                    stem,
-                                    StemPosition.fromRadians(
-                                            StemPosition.AMP.pivotRads - Units.degreesToRadians(4.0),
-                                            StemPosition.AMP.wristRads,
-                                            StemPosition.AMP.telescopeMeters + Units.inchesToMeters(2.0))),
-                            UmbrellaCommands.spinupShooter(
-                                    umbrella,
-                                    1000,
-                                    ShooterSpinupReason.Amp)));
+                StemCommands.moveTo(stem, StemPosition.AMP_SCORE, 1.05),
+                umbrella.run(
+                    () -> {
+                        umbrella.spinupShooter(umbrella.getShooterTargetSpeed());
+                        umbrella.runIntakeAt(-1.0, true);
+                    }
+                ).withTimeout(0.5),
+                StemCommands.moveTo(stem, StemPosition.AMP_SAFE, 1.2)
+            );
         } else if (umbrella.popSpinupReason().equals(ShooterSpinupReason.AutoAimSpeaker)) {
             cmd = Commands.parallel(
                     HigherOrderCommands.aim(
@@ -87,10 +79,12 @@ public class HigherOrderCommands {
         }
 
         return cmd.finallyDo(
-                umbrella::stopAll).andThen(
-                        StemCommands.moveTo(
-                                stem,
-                                StemPosition.STOW_HIGH))
-                .withName("Shoot");
+            umbrella::stopAll
+        ).andThen(
+            StemCommands.holdAt(
+                stem,
+                StemPosition.STOW
+            )
+        ).withName("Shoot");
     }
 }
