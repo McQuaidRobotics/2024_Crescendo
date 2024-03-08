@@ -124,7 +124,7 @@ public class StemPosition implements StructSerializable {
     public static final StemPosition AMP_SAFE = new StemPosition(
             Units.degreesToRadians(90.0),
             Units.degreesToRadians(43.0),
-            kTelescope.MIN_METERS) {
+            kTelescope.MIN_METERS + Units.inchesToMeters(2.0)) {
 
         @Override
         public String toString() {
@@ -136,7 +136,7 @@ public class StemPosition implements StructSerializable {
     public static final StemPosition AMP_SCORE = new StemPosition(
             Units.degreesToRadians(88.0),
             Units.degreesToRadians(43.0),
-            kTelescope.MIN_METERS + Units.inchesToMeters(8.0)) {
+            kTelescope.MIN_METERS + Units.inchesToMeters(7.0)) {
 
         @Override
         public String toString() {
