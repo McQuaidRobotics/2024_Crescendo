@@ -438,9 +438,9 @@ public final class ConstValues {
         public static final class kTelescope {
             public static final int MOTOR_ID = 15;
 
-            public static final double MOTOR_kP = 3.5;
+            public static final double MOTOR_kP = 5.0;
             public static final double MOTOR_kI = 0.0;
-            public static final double MOTOR_kD = 0.0;
+            public static final double MOTOR_kD = 0.1;
 
             public static final double MAX_VELOCITY = 95;
             public static final double MAX_ACCELERATION = 750;
