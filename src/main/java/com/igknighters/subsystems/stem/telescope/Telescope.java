@@ -1,57 +1,29 @@
 package com.igknighters.subsystems.stem.telescope;
 
-import org.littletonrobotics.junction.LogTable;
-import org.littletonrobotics.junction.inputs.LoggableInputs;
-
 import com.igknighters.constants.ConstValues;
 import com.igknighters.subsystems.Component;
 
-public interface Telescope extends Component {
+import monologue.Annotations.Log;
 
-    public static class TelescopeInputs implements LoggableInputs {
-        public double meters, targetMeters, metersPerSecond = 0.0;
-        public double volts = 0.0;
-        public double temp = 0.0, amps = 0.0;
-        public boolean isLimitFwdSwitchHit = false, isLimitRevSwitchHit = false;
-        public boolean isHomed = false;
+public abstract class Telescope extends Component {
+    @Log.NT protected double meters;
+    @Log.NT protected double targetMeters;
+    @Log.NT protected double metersPerSecond = 0.0;
+    @Log.NT protected double volts = 0.0;
+    @Log.NT protected double temp = 0.0;
+    @Log.NT protected double amps = 0.0;
+    @Log.NT protected boolean isLimitFwdSwitchHit = false;
+    @Log.NT protected boolean isLimitRevSwitchHit = false;
+    @Log.NT protected boolean isHomed = false;
 
-        public TelescopeInputs(double startingMeters) {
-            this.meters = startingMeters;
-            this.targetMeters = startingMeters;
-        }
+    protected Telescope(double startingMeters) {
+        this.meters = startingMeters;
+        this.targetMeters = startingMeters;
+    }
 
-        @Override
-        public void toLog(LogTable table) {
-            table.put("meters", meters);
-            table.put("targetMeters", targetMeters);
-            table.put("metersPerSecond", metersPerSecond);
-            table.put("volts", volts);
-            table.put("temp", temp);
-            table.put("amps", amps);
-            table.put("isLimitFwdSwitchHit", isLimitFwdSwitchHit);
-            table.put("isLimitRevSwitchHit", isLimitRevSwitchHit);
-            table.put("TelescopeHomed", isHomed);
-
-            // A subtable, thats only written to when in debug mode and never read from,
-            // that provides some more human readable values
-            if (ConstValues.DEBUG) {
-                table.put("#Human/watts", volts * amps);
-            }
-        }
-
-        @Override
-        public void fromLog(LogTable table) {
-            meters = table.get("meters", meters);
-            targetMeters = table.get("targetMeters", targetMeters);
-            metersPerSecond = table.get("metersPerSecond", metersPerSecond);
-            volts = table.get("volts", volts);
-            temp = table.get("temp", temp);
-            amps = table.get("amps", amps);
-            isLimitFwdSwitchHit = table.get("isLimitFwdSwitchHit", isLimitFwdSwitchHit);
-            isLimitRevSwitchHit = table.get("isLimitRevSwitchHit", isLimitRevSwitchHit);
-            isHomed = table.get("TelescopeHomed", isHomed);
-
-        }
+    @Override
+    public String getPath() {
+        return "Telescope";
     }
 
     /**
@@ -62,18 +34,18 @@ public interface Telescope extends Component {
      *          position. Check {@link ConstValues.kStem.kTelescope.MIN_METERS} and
      *          {@link ConstValues.kStem.kTelescope.MAX_METERS} for the min and max.
      */
-    public void setTelescopeMeters(double meters);
+    public abstract void setTelescopeMeters(double meters);
 
     /**
      * @return The current distance from the pivot axel to the wrist axel
      */
-    public double getTelescopeMeters();
+    public abstract double getTelescopeMeters();
 
-    public boolean isFwdLimitSwitchHit();
+    public abstract boolean isFwdLimitSwitchHit();
 
-    public boolean isRevLimitSwitchHit();
+    public abstract boolean isRevLimitSwitchHit();
 
-    public boolean hasHomed();
+    public abstract boolean hasHomed();
 
     /**
      * Move the telescope to the target and returns if it has reached the target.
@@ -85,7 +57,7 @@ public interface Telescope extends Component {
      *                     means more tolerance
      * @return If the mechanism has reached the target
      */
-    default public boolean target(double meters, double tolerancMult) {
+    public boolean target(double meters, double tolerancMult) {
         this.setTelescopeMeters(meters);
         return isAt(meters, tolerancMult);
     }
@@ -97,10 +69,10 @@ public interface Telescope extends Component {
      *                    means more tolerance
      * @return If the mechanism is within the tolerance of the angle
      */
-    default public boolean isAt(double radians, double toleranceMult) {
+    public boolean isAt(double radians, double toleranceMult) {
         return Math.abs(this.getTelescopeMeters() - radians) < ConstValues.kStem.kTelescope.TARGET_TOLERANCE * toleranceMult;
     }
 
-    default public void setCoast(boolean shouldBeCoasting) {
+    public void setCoast(boolean shouldBeCoasting) {
     }
 }

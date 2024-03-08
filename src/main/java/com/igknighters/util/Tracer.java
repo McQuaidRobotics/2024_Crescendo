@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.Supplier;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.igknighters.constants.ConstValues;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
+import monologue.MonoDashboard;
 
 /**
  * A Utility class for tracing code execution time.
@@ -46,7 +46,8 @@ public class Tracer {
 
     /**
      * Starts a trace,
-     * should be called at the beginning of a function thats not being called by user code.
+     * should be called at the beginning of a function thats not being called by
+     * user code.
      * Should be paired with {@link Tracer#endTrace()} at the end of the function.
      * 
      * Best used in periodic functions in Subsystems and Robot.java.
@@ -56,22 +57,26 @@ public class Tracer {
      * @param name the name of the trace, should be unique to the function.
      */
     public static void startTrace(String name) {
-        if (!ConstValues.DEBUG) return;
+        if (!ConstValues.DEBUG)
+            return;
         trace.add(name);
-        traceStartTimes.put(traceStack(), Logger.getRealTimestamp() / 1_000.0);
+        traceStartTimes.put(traceStack(), Timer.getFPGATimestamp() / 1_000.0);
     }
 
     /**
-     * Ends a trace, should only be called at the end of a function thats not being called by user code.
-     * If a {@link Tracer#startTrace(String)} is not paired with a {@link Tracer#endTrace()} there could be a crash.
+     * Ends a trace, should only be called at the end of a function thats not being
+     * called by user code.
+     * If a {@link Tracer#startTrace(String)} is not paired with a
+     * {@link Tracer#endTrace()} there could be a crash.
      * 
      * This is a no-op if {@link ConstValues#DEBUG} is false.
      */
     public static void endTrace() {
-        if (!ConstValues.DEBUG) return;
+        if (!ConstValues.DEBUG)
+            return;
         try {
             var startTime = traceStartTimes.get(traceStack());
-            traceTimes.put(traceStack(),  Logger.getRealTimestamp() / 1_000.0 - startTime);
+            traceTimes.put(traceStack(), Timer.getFPGATimestamp() / 1_000.0 - startTime);
             trace.remove(trace.size() - 1);
             if (trace.size() == 0) {
                 endCycle();
@@ -82,14 +87,19 @@ public class Tracer {
     }
 
     /**
-     * Traces a function, should be used in place of {@link Tracer#startTrace(String)} and {@link Tracer#endTrace()}
-     * for functions called by user code like {@code CommandScheduler.run()} and other expensive functions.
-     * @param name the name of the trace, should be unique to the function.
+     * Traces a function, should be used in place of
+     * {@link Tracer#startTrace(String)} and {@link Tracer#endTrace()}
+     * for functions called by user code like {@code CommandScheduler.run()} and
+     * other expensive functions.
+     * 
+     * @param name     the name of the trace, should be unique to the function.
      * @param runnable the function to trace.
      * 
-     * This just calls the runnable with minimal overhead if {@link ConstValues#DEBUG} is false.
+     *                 This just calls the runnable with minimal overhead if
+     *                 {@link ConstValues#DEBUG} is false.
      * 
-     * @apiNote If you want to return a value then use {@link Tracer#traceFunc(String, Supplier)}.
+     * @apiNote If you want to return a value then use
+     *          {@link Tracer#traceFunc(String, Supplier)}.
      */
     public static void traceFunc(String name, Runnable runnable) {
         startTrace(name);
@@ -98,12 +108,15 @@ public class Tracer {
     }
 
     /**
-     * Traces a function, should be used in place of {@link Tracer#startTrace(String)} and {@link Tracer#endTrace()}
-     * for functions called by user code like {@code CommandScheduler.run()} and other expensive functions.
+     * Traces a function, should be used in place of
+     * {@link Tracer#startTrace(String)} and {@link Tracer#endTrace()}
+     * for functions called by user code like {@code CommandScheduler.run()} and
+     * other expensive functions.
      * 
-     * This just calls the supplier with minimal overhead if {@link ConstValues#DEBUG} is false.
+     * This just calls the supplier with minimal overhead if
+     * {@link ConstValues#DEBUG} is false.
      * 
-     * @param name the name of the trace, should be unique to the function.
+     * @param name     the name of the trace, should be unique to the function.
      * @param supplier the function to trace.
      */
     public static <T> T traceFunc(String name, Supplier<T> supplier) {
@@ -116,13 +129,13 @@ public class Tracer {
     private static void endCycle() {
         var keys = new ArrayList<String>();
         entryHeap
-            .entrySet()
-            .stream()
-            .filter(mapEntry -> !traceTimes.containsKey(mapEntry.getKey()))
-            .forEach(mapEntry -> {
-                keys.add(mapEntry.getKey());
-                mapEntry.getValue().unpublish();
-            });
+                .entrySet()
+                .stream()
+                .filter(mapEntry -> !traceTimes.containsKey(mapEntry.getKey()))
+                .forEach(mapEntry -> {
+                    keys.add(mapEntry.getKey());
+                    mapEntry.getValue().unpublish();
+                });
         keys.forEach(key -> entryHeap.remove(key));
 
         for (var trace : traceTimes.entrySet()) {
@@ -134,7 +147,7 @@ public class Tracer {
                 entry = entryHeap.get(trace.getKey());
             }
             entry.setDouble(trace.getValue());
-            Logger.recordOutput("Tracer/" + trace.getKey(), trace.getValue().doubleValue());
+            MonoDashboard.put("Tracer/" + trace.getKey(), trace.getValue().doubleValue());
         }
         traceTimes.clear();
     }

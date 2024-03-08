@@ -2,12 +2,11 @@ package com.igknighters.util;
 
 import java.util.HashMap;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.ctre.phoenix6.StatusCode;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Timer;
 
 public class FaultManager {
 
@@ -40,7 +39,7 @@ public class FaultManager {
         var sub = table.getSubTable(e.name);
         sub.getEntry("message").setString(e.getMessage());
         sub.getEntry("stacktrace").setString(e.getStackTrace().toString());
-        sub.getEntry("timestamp").setDouble(Logger.getRealTimestamp());
+        sub.getEntry("timestamp").setDouble(Timer.getFPGATimestamp());
         sub.getEntry("cause").setString(e.getCause() == null ? "" : e.getCause().toString());
         sub.getEntry("count").setNumber(faultCounts.getOrDefault(e.name, 0) + 1);
         faultCounts.put(e.name, faultCounts.getOrDefault(e.name, 0) + 1);

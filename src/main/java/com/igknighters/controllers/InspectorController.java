@@ -6,6 +6,7 @@ import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
+import com.igknighters.subsystems.SubsystemResources.Subsystems;
 import com.igknighters.subsystems.stem.StemPosition;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
@@ -15,18 +16,16 @@ import javax.security.auth.kerberos.KeyTab;
 import com.igknighters.GlobalState;
 import com.igknighters.LED;
 import com.igknighters.LED.LedAnimations;
-import com.igknighters.SubsystemResources.Subsystems;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.stem.StemCommands.AimStrategy;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
-import com.igknighters.SubsystemResources.Subsystems;
 
 @SuppressWarnings("unused")
 
 public class InspectorController extends ControllerParent {
     public InspectorController(int port) {
-        super(port, true, ControllerType.Testing);
+        super(port, true);
 
         // disregard null safety as it is checked on assignment
 

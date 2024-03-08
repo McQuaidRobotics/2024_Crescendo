@@ -1,19 +1,17 @@
 package com.igknighters.subsystems.umbrella.shooter;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.igknighters.constants.ConstValues;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.RobotController;
 
-public class ShooterDisabled implements Shooter {
+public class ShooterDisabled extends Shooter {
     double currentRadPerSec = 0.0;
     double targetRadPerSec = 0.0;
     final double slewRateRate = 6380 / 1.2;
 
-    final ShooterInputs inputs = new ShooterInputs();
-
-    public ShooterDisabled() {}
+    public ShooterDisabled() {
+    }
 
     @Override
     public void setSpeed(double speedRadPerSec) {
@@ -32,7 +30,7 @@ public class ShooterDisabled implements Shooter {
 
     @Override
     public void setVoltageOut(double volts) {
-        setSpeed(MathUtil.clamp(volts / 12.0, -12.0, 12.0));
+        setSpeed(MathUtil.clamp(volts / RobotController.getBatteryVoltage(), -RobotController.getBatteryVoltage(), RobotController.getBatteryVoltage()));
     }
 
     @Override
@@ -45,18 +43,15 @@ public class ShooterDisabled implements Shooter {
     public void periodic() {
         double maxDiff = slewRateRate * ConstValues.PERIODIC_TIME;
         double diff = MathUtil.clamp(
-            targetRadPerSec - currentRadPerSec,
-            -maxDiff,
-            maxDiff
-        );
+                targetRadPerSec - currentRadPerSec,
+                -maxDiff,
+                maxDiff);
         currentRadPerSec += diff;
 
-        inputs.radiansPerSecondLeft = currentRadPerSec;
-        inputs.radiansPerSecondRight = currentRadPerSec;
+        this.radiansPerSecondLeft = currentRadPerSec;
+        this.radiansPerSecondRight = currentRadPerSec;
 
-        inputs.targetRadiansPerSecondLeft = targetRadPerSec;
-        inputs.targetRadiansPerSecondRight = targetRadPerSec;
-
-        Logger.processInputs("/Umbrella/Shooter", inputs);
+        this.targetRadiansPerSecondLeft = targetRadPerSec;
+        this.targetRadiansPerSecondRight = targetRadPerSec;
     }
 }

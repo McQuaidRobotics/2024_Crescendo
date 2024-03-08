@@ -16,8 +16,6 @@ import com.ctre.phoenix6.signals.ReverseLimitValue;
 
 import edu.wpi.first.math.util.Units;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.igknighters.GlobalState;
 import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kPivot;
@@ -26,7 +24,7 @@ import com.igknighters.util.BootupLogger;
 import com.igknighters.util.CANRetrier;
 import com.igknighters.util.FaultManager;
 
-public class PivotReal implements Pivot {
+public class PivotReal extends Pivot {
 
     /** Left */
     private final TalonFX leaderMotor;
@@ -42,8 +40,6 @@ public class PivotReal implements Pivot {
     private final StatusSignal<ForwardLimitValue> forwardLimitSwitch;
     private final StatusSignal<ReverseLimitValue> reverseLimitSwitch;
 
-    private final PivotInputs inputs;
-
     private double mechRadiansToMotorRots(Double mechRads) {
         return Units.radiansToRotations(Math.PI - mechRads) * kPivot.MOTOR_TO_MECHANISM_RATIO;
     }
@@ -53,6 +49,7 @@ public class PivotReal implements Pivot {
     }
 
     public PivotReal() {
+        super(0.0);
         gyro = new Pigeon2(kPivot.PIGEON_ID, kStem.CANBUS);
         gyroMeasurement = gyro.getPitch();
 
@@ -65,21 +62,13 @@ public class PivotReal implements Pivot {
 
         CANRetrier.retryStatusCodeFatal(() -> leaderMotor.getConfigurator().apply(getMotorConfig(true)), 10);
         CANRetrier.retryStatusCodeFatal(() -> followerMotor.getConfigurator().apply(getMotorConfig(false)), 10);
-        CANRetrier.retryStatusCodeFatal(() -> followerMotor.setControl(new Follower(leaderMotor.getDeviceID(), true)), 10);
+        CANRetrier.retryStatusCodeFatal(() -> followerMotor.setControl(new Follower(leaderMotor.getDeviceID(), true)),
+                10);
 
-        // FaultManager.captureFault(
-        //     StemHW.LeaderMotor,
-        //     leaderMotor.getConfigurator().apply(getMotorConfig(true)));
-        //     FaultManager.captureFault(
-        //         StemHW.FollowerMotor,
-        //         followerMotor.getConfigurator().apply(getMotorConfig(false)));
-                
-        // FaultManager.captureFault(
-        //     StemHW.FollowerMotor,
-        //     followerMotor.setControl(
-        //         new Follower(leaderMotor.getDeviceID(), true)));
-
-        inputs = new PivotInputs(Units.degreesToRadians(gyroMeasurement.getValue()));
+        double startingRads = Units.degreesToRadians(gyroMeasurement.getValue());
+        super.gyroRadians = startingRads;
+        super.radians = startingRads;
+        super.targetRadians = startingRads;
 
         leaderMotor.setPosition(mechRadiansToMotorRots(getPivotRadiansPigeon()));
 
@@ -127,14 +116,6 @@ public class PivotReal implements Pivot {
         cfg.MotorOutput.Inverted = kPivot.INVERTED ? InvertedValue.Clockwise_Positive
                 : InvertedValue.CounterClockwise_Positive;
 
-        // cfg.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-        // cfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-
-        // cfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
-        // mechRadiansToMotorRots(kPivot.PIVOT_MAX_RADIANS);
-        // cfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
-        // mechRadiansToMotorRots(kPivot.PIVOT_MIN_RADIANS);
-
         cfg.Voltage.PeakForwardVoltage = kPivot.VOLTAGE_COMP;
         cfg.Voltage.PeakReverseVoltage = -kPivot.VOLTAGE_COMP;
 
@@ -149,40 +130,33 @@ public class PivotReal implements Pivot {
         cfg.HardwareLimitSwitch.ForwardLimitType = ForwardLimitTypeValue.NormallyClosed;
         cfg.HardwareLimitSwitch.ReverseLimitType = ReverseLimitTypeValue.NormallyClosed;
 
-        // if (leader) {
-        //     cfg.HardwareLimitSwitch.ForwardLimitSource = ForwardLimitSourceValue.RemoteTalonFX;
-        //     cfg.HardwareLimitSwitch.ReverseLimitSource = ReverseLimitSourceValue.RemoteTalonFX;
-        //     cfg.HardwareLimitSwitch.ForwardLimitRemoteSensorID = kPivot.RIGHT_MOTOR_ID;
-        //     cfg.HardwareLimitSwitch.ReverseLimitRemoteSensorID = kPivot.RIGHT_MOTOR_ID;
-        // }
-
         return cfg;
     }
 
     @Override
     public void setPivotRadians(double radians) {
-        inputs.targetRadians = radians;
+        super.targetRadians = radians;
         this.leaderMotor.setControl(new MotionMagicVoltage(mechRadiansToMotorRots(radians)));
     }
 
     @Override
     public void setVoltageOut(double volts) {
-        inputs.targetRadians = 0.0;
+        super.targetRadians = 0.0;
         this.leaderMotor.setVoltage(volts);
     }
 
     @Override
     public double getPivotRadians() {
-        return inputs.radians;
+        return super.radians;
     }
 
     private double getPivotRadiansPigeon() {
-        return inputs.gyroRadians;
+        return super.gyroRadians;
     }
 
     private void seedPivot() {
         leaderMotor.setPosition(mechRadiansToMotorRots(getPivotRadiansPigeon()));
-        inputs.radians = getPivotRadiansPigeon();
+        super.radians = getPivotRadiansPigeon();
     }
 
     @Override
@@ -202,45 +176,43 @@ public class PivotReal implements Pivot {
         FaultManager.captureFault(
                 StemHW.LeaderMotor,
                 BaseStatusSignal.refreshAll(
-                        motorRots /*, motorVelo, */
-                        /* leaderMotorVolts, leaderMotorAmps, */
-                        /* leaderMotorTemp,  reverseLimitSwitch, */
-                        /* forwardLimitSwitch */));
+                        motorRots /* , motorVelo, */
+                /* leaderMotorVolts, leaderMotorAmps, */
+                /* leaderMotorTemp, reverseLimitSwitch, */
+                /* forwardLimitSwitch */));
 
         // FaultManager.captureFault(
-        //         StemHW.FollowerMotor,
-        //         BaseStatusSignal.refreshAll(
-        //                 followerMotorAmps, followerMotorTemp, followerMotorVolts));
+        // StemHW.FollowerMotor,
+        // BaseStatusSignal.refreshAll(
+        // followerMotorAmps, followerMotorTemp, followerMotorVolts));
 
         FaultManager.captureFault(
                 StemHW.Pigeon2,
                 gyroMeasurement.refresh().getStatus());
 
-        inputs.radians = motorRotsToMechRadians(motorRots.getValue());
-        inputs.radiansPerSecond = -Units.rotationsToRadians(motorVelo.getValue()) / kPivot.MOTOR_TO_MECHANISM_RATIO;
-        inputs.leftVolts = leaderMotorVolts.getValue();
-        inputs.rightVolts = followerMotorVolts.getValue();
-        inputs.leftAmps = leaderMotorAmps.getValue();
-        inputs.rightAmps = followerMotorAmps.getValue();
-        inputs.leftTemp = leaderMotorTemp.getValue();
-        inputs.rightTemp = followerMotorTemp.getValue();
+        super.radians = motorRotsToMechRadians(motorRots.getValue());
+        super.radiansPerSecond = -Units.rotationsToRadians(motorVelo.getValue()) / kPivot.MOTOR_TO_MECHANISM_RATIO;
+        super.leftVolts = leaderMotorVolts.getValue();
+        super.rightVolts = followerMotorVolts.getValue();
+        super.leftAmps = leaderMotorAmps.getValue();
+        super.rightAmps = followerMotorAmps.getValue();
+        super.leftTemp = leaderMotorTemp.getValue();
+        super.rightTemp = followerMotorTemp.getValue();
 
-        inputs.isLimitFwdSwitchHit = forwardLimitSwitch.getValue() == ForwardLimitValue.Open;
-        inputs.isLimitRevSwitchHit = reverseLimitSwitch.getValue() == ReverseLimitValue.Open;
+        super.isLimitFwdSwitchHit = forwardLimitSwitch.getValue() == ForwardLimitValue.Open;
+        super.isLimitRevSwitchHit = reverseLimitSwitch.getValue() == ReverseLimitValue.Open;
 
-        inputs.gyroRadians = Units.degreesToRadians(gyroMeasurement.getValue() + 90);
+        super.gyroRadians = Units.degreesToRadians(gyroMeasurement.getValue() + 90);
 
-        if (Math.abs(inputs.radiansPerSecond) < 0.1
-                && Math.abs(inputs.radians - getPivotRadiansPigeon()) > 0.1 && !GlobalState.isClimbing()) {
+        if (Math.abs(super.radiansPerSecond) < 0.1
+                && Math.abs(super.radians - getPivotRadiansPigeon()) > 0.1 && !GlobalState.isClimbing()) {
             seedPivot();
-            Logger.recordOutput("Stem/Pivot/SeededPivot", true);
+            log("SeededPivot", true);
         } else {
-            Logger.recordOutput("Stem/Pivot/SeededPivot", false);
+            log("SeededPivot", false);
         }
 
-        Logger.recordOutput("Stem/Pivot/GyroSeed", mechRadiansToMotorRots(getPivotRadiansPigeon()));
-
-        Logger.processInputs("Stem/Pivot", inputs);
+        log("GyroSeed", mechRadiansToMotorRots(getPivotRadiansPigeon()));
     }
 
 }

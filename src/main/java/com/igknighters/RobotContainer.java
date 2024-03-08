@@ -1,37 +1,31 @@
 package com.igknighters;
 
 import com.igknighters.constants.ConstValues;
-import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.RobotSetup;
 import com.igknighters.constants.ConstValues.kAuto;
 import com.igknighters.constants.ConstValues.kSwerve;
-import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.controllers.DriverController;
 import com.igknighters.controllers.OperatorController;
 import com.igknighters.controllers.TestingController;
-import com.igknighters.subsystems.stem.StemSolvers;
+import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.util.geom.AllianceFlip;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-
-import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
-
-import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.commands.autos.AutosCmdRegister;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
 
-public class RobotContainer {
+import edu.wpi.first.wpilibj.DriverStation;
+import monologue.Logged;
+import monologue.Monologue;
+
+public class RobotContainer implements Logged {
 
     private final DriverController driverController;
     private final OperatorController operatorController;
     private final TestingController testingController;
 
     private final AllSubsystems allSubsystems;
-
-    public static LoggedDashboardNumber vertDistOffset;
 
     @SuppressWarnings("unused")
     public RobotContainer() {
@@ -65,10 +59,14 @@ public class RobotContainer {
                         testingController.rightStickY(0.1).getAsDouble() * 12.0);
             }).withName("StemDefaultCommand"));
         }
+    }
 
-        double staticSubShotRads = StemSolvers.linearSolvePivotTheta(kTelescope.MIN_METERS,
-                Units.degreesToRadians(71.5), Units.inchesToMeters(46.088 + 2.8), FieldConstants.SPEAKER.getZ());
-        System.out.println(staticSubShotRads);
+    public void initMonologue() {
+        for (var subsystem : allSubsystems.getEnabledSubsystems()) {
+            if (subsystem instanceof Logged) {
+                Monologue.logObj((Logged) subsystem, this.getFullPath() + "/" + subsystem.getName());
+            }
+        }
     }
 
     private void setupAutos(Swerve swerve) {
@@ -100,10 +98,6 @@ public class RobotContainer {
     }
 
     AllSubsystems getAllSubsystemsForTest() {
-        // if (!GlobalState.isUnitTest()) {
-        // throw new RuntimeException("This method should only be called in unit
-        // tests");
-        // }
         return allSubsystems;
     }
 }

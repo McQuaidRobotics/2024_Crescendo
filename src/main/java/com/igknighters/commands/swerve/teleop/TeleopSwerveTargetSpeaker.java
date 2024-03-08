@@ -8,8 +8,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.igknighters.GlobalState;
 import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kSwerve;
@@ -70,12 +68,10 @@ public class TeleopSwerveTargetSpeaker extends TeleopSwerveBase {
             field.getObject("adjustedTarget").setPose(new Pose2d(adjustedTarget, new Rotation2d()));
         });
 
-        var targetAngle = swerve.rotationRelativeToPose(
+        Rotation2d targetAngle = swerve.rotationRelativeToPose(
                 Rotation2d.fromDegrees(180),
                 adjustedTarget);
-        var rotVelo = swerve.rotVeloForRotation(targetAngle);
-
-        Logger.recordOutput("/Swerve/rotvelo", rotVelo);
+        double rotVelo = swerve.rotVeloForRotation(targetAngle);
 
         desiredChassisSpeeds.omegaRadiansPerSecond = rotVelo;
 

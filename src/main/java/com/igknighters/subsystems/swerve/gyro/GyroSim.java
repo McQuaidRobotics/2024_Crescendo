@@ -8,11 +8,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 
 import java.util.function.Supplier;
 
-import org.littletonrobotics.junction.Logger;
-
-public class GyroSim implements Gyro {
-
-    private final GyroInputs inputs = new GyroInputs();
+public class GyroSim extends Gyro {
 
     private final Supplier<ChassisSpeeds> chassisSpeedSupplier;
 
@@ -34,12 +30,12 @@ public class GyroSim implements Gyro {
 
     @Override
     public double getYawRads() {
-        return inputs.yawRads;
+        return super.yawRads;
     }
 
     @Override
     public void setYawRads(double yawRads) {
-        inputs.yawRads = yawRads;
+        super.yawRads = yawRads;
     }
 
     @Override
@@ -49,10 +45,8 @@ public class GyroSim implements Gyro {
 
     @Override
     public void periodic() {
-        var oldYaw = inputs.yawRads;
-        inputs.yawRads += chassisSpeedSupplier.get().omegaRadiansPerSecond * ConstValues.PERIODIC_TIME;
-        inputs.yawVelRadsPerSec = (inputs.yawRads - oldYaw) / ConstValues.PERIODIC_TIME;
-
-        Logger.processInputs("Swerve/Gyro", inputs);
+        var oldYaw = super.yawRads;
+        super.yawRads += chassisSpeedSupplier.get().omegaRadiansPerSecond * ConstValues.PERIODIC_TIME;
+        super.yawVelRadsPerSec = (super.yawRads - oldYaw) / ConstValues.PERIODIC_TIME;
     }
 }
