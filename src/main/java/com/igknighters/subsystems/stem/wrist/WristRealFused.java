@@ -11,7 +11,6 @@ import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.constants.HardwareIndex.StemHW;
@@ -33,8 +32,8 @@ public class WristRealFused extends Wrist {
         motor = new TalonFX(kWrist.MOTOR_ID, kStem.CANBUS);
         CANRetrier.retryStatusCodeFatal(() -> motor.getConfigurator().apply(motorConfig()), 10);
 
-        motorRots = motor.getRotorPosition();
-        motorVelo = motor.getRotorVelocity();
+        motorRots = motor.getPosition();
+        motorVelo = motor.getVelocity();
         motorAmps = motor.getTorqueCurrent();
         motorVolts = motor.getMotorVoltage();
         motorTemp = motor.getDeviceTemp();
@@ -67,29 +66,21 @@ public class WristRealFused extends Wrist {
 
     private TalonFXConfiguration motorConfig() {
         TalonFXConfiguration cfg = new TalonFXConfiguration();
-        cfg.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
+        // cfg.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
         cfg.Slot0.kP = kWrist.MOTOR_kP;
         cfg.Slot0.kI = kWrist.MOTOR_kI;
         cfg.Slot0.kD = kWrist.MOTOR_kD;
         cfg.Slot0.kS = kWrist.MOTOR_kS;
         cfg.Slot0.kV = kWrist.MOTOR_kV;
 
-        cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         cfg.MotorOutput.Inverted = kWrist.INVERTED
                 ? InvertedValue.Clockwise_Positive
                 : InvertedValue.CounterClockwise_Positive;
 
-        cfg.Feedback.FeedbackRemoteSensorID = cancoder.getDeviceID();
+        cfg.Feedback.FeedbackRemoteSensorID = kWrist.CANCODER_ID;
         cfg.Feedback.RotorToSensorRatio = (1.0 / slope);
         cfg.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
-
-        cfg.SoftwareLimitSwitch.ForwardSoftLimitEnable = false;
-        cfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = false;
-
-        // cfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Wrist
-        //         .mechanismRadsToMotorRots(StemPosition.STARTING.wristRads - 0.3);
-        // cfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Wrist
-        //         .mechanismRadsToMotorRots(kWrist.FROZEN_WRIST_ANGLE - Units.degreesToRadians(0.3));
 
         return cfg;
     }
@@ -103,11 +94,9 @@ public class WristRealFused extends Wrist {
     }
 
     @Override
-    public void setWristRadians(double radians) {
-        super.targetRadians = radians;
-        var posControlRequest = new PositionTorqueCurrentFOC(
-                Wrist.mechanismRadsToMotorRots(radians));
-        this.motor.setControl(posControlRequest);
+    public void setWristRadians(double targetRadians) {
+        super.targetRadians = targetRadians;
+        this.motor.setControl(new PositionTorqueCurrentFOC(Units.radiansToRotations(targetRadians)));
     }
 
     @Override
