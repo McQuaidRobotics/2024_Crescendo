@@ -9,7 +9,6 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 
-import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -25,6 +24,7 @@ import com.igknighters.constants.ConstValues.kSwerve.kAngleMotor;
 import com.igknighters.constants.ConstValues.kSwerve.kDriveMotor;
 import com.igknighters.util.BootupLogger;
 import com.igknighters.util.can.CANRetrier;
+import com.igknighters.util.can.CANSignalManager;
 
 public class SwerveModuleReal extends SwerveModule {
     private final TalonFX driveMotor;
@@ -74,16 +74,14 @@ public class SwerveModuleReal extends SwerveModule {
         angleAbsoluteSignal = angleEncoder.getAbsolutePosition();
         angleAbsoluteVeloSignal = angleEncoder.getVelocity();
 
-        BaseStatusSignal.setUpdateFrequencyForAll(
-            100,
+        CANSignalManager.registerSignals(
+            kSwerve.CANBUS,
             drivePositionSignal, driveVelocitySignal,
             driveVoltSignal, driveAmpSignal,
             anglePositionSignal, angleVelocitySignal,
             angleVoltSignal, angleAmpSignal,
             angleAbsoluteSignal, angleAbsoluteVeloSignal
         );
-
-        driveAmpSignal.getName();
 
         driveMotor.optimizeBusUtilization(1.0);
         angleMotor.optimizeBusUtilization(1.0);
@@ -216,13 +214,6 @@ public class SwerveModuleReal extends SwerveModule {
 
     @Override
     public void periodic() {
-        BaseStatusSignal.refreshAll(
-                drivePositionSignal, driveVelocitySignal,
-                driveVoltSignal, driveAmpSignal,
-                anglePositionSignal, angleVelocitySignal,
-                angleVoltSignal, angleAmpSignal ,
-                angleAbsoluteSignal, angleAbsoluteVeloSignal);
-
         super.angleAbsoluteRads = Units.rotationsToRadians(angleAbsoluteSignal.getValue());
         super.angleVeloRadPS = Units.rotationsToRadians(angleAbsoluteVeloSignal.getValue());
         super.angleVolts = angleVoltSignal.getValue();

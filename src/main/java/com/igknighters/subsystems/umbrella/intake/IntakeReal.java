@@ -1,6 +1,5 @@
 package com.igknighters.subsystems.umbrella.intake;
 
-import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -12,17 +11,17 @@ import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.constants.ConstValues.kUmbrella.kIntake;
 import com.igknighters.util.BootupLogger;
 import com.igknighters.util.FaultManager;
+import com.igknighters.util.can.CANSignalManager;
 import com.igknighters.constants.HardwareIndex.UmbrellaHW;
 
-import edu.wpi.first.math.util.Units;
 import monologue.Annotations.Log;
 
 public class IntakeReal extends Intake {
 
     private final TalonFX upperMotor = new TalonFX(kIntake.UPPER_MOTOR_ID, kUmbrella.CANBUS);
     private final TalonFX lowerMotor = new TalonFX(kIntake.LOWER_MOTOR_ID, kUmbrella.CANBUS);
-    private final StatusSignal<Double> veloSignalUpper, voltSignalUpper, currentSignalUpper;
-    private final StatusSignal<Double> veloSignalLower, voltSignalLower, currentSignalLower;
+    private final StatusSignal<Double> voltUpperSignal, ampUpperSignal;
+    private final StatusSignal<Double> voltLowerSignal, ampLowerSignal;
     private final StatusSignal<ReverseLimitValue> revLimitSignal;
     private final HardwareLimitSwitchConfigs lowerLimitCfg, upperLimitCfg;
     @Log.NT
@@ -30,11 +29,11 @@ public class IntakeReal extends Intake {
 
     public IntakeReal() {
         FaultManager.captureFault(
-                UmbrellaHW.IntakeMotor,
+                UmbrellaHW.UpperIntakeMotor,
                 upperMotor.getConfigurator()
                         .apply(motorUpper()));
         FaultManager.captureFault(
-                UmbrellaHW.IntakeMotor,
+                UmbrellaHW.LowerIntakeMotor,
                 lowerMotor.getConfigurator()
                         .apply(motorLower()));
 
@@ -46,21 +45,18 @@ public class IntakeReal extends Intake {
         upperMotor.getConfigurator().refresh(upperLimitCfg);
         this.upperLimitCfg = upperLimitCfg;
 
-        veloSignalUpper = upperMotor.getVelocity();
-        voltSignalUpper = upperMotor.getMotorVoltage();
-        currentSignalUpper = upperMotor.getTorqueCurrent();
+        voltUpperSignal = upperMotor.getMotorVoltage();
+        ampUpperSignal = upperMotor.getTorqueCurrent();
 
-        veloSignalUpper.setUpdateFrequency(100);
-        voltSignalUpper.setUpdateFrequency(100);
-        currentSignalUpper.setUpdateFrequency(100);
+        voltLowerSignal = lowerMotor.getMotorVoltage();
+        ampLowerSignal = lowerMotor.getTorqueCurrent();
 
-        veloSignalLower = lowerMotor.getVelocity();
-        voltSignalLower = lowerMotor.getMotorVoltage();
-        currentSignalLower = lowerMotor.getTorqueCurrent();
+        CANSignalManager.registerSignals(
+            kUmbrella.CANBUS,
+            voltUpperSignal, ampUpperSignal,
+            voltLowerSignal, ampLowerSignal
+        );
 
-        veloSignalLower.setUpdateFrequency(100);
-        voltSignalLower.setUpdateFrequency(100);
-        currentSignalLower.setUpdateFrequency(100);
 
         if (kIntake.BEAM_IS_UPPER) {
             revLimitSignal = upperMotor.getReverseLimit();
@@ -149,18 +145,21 @@ public class IntakeReal extends Intake {
     @Override
     public void periodic() {
         FaultManager.captureFault(
-                UmbrellaHW.IntakeMotor,
-                BaseStatusSignal.refreshAll(
-                        veloSignalUpper, voltSignalUpper,
-                        currentSignalUpper, revLimitSignal));
+                UmbrellaHW.UpperIntakeMotor,
+                    voltUpperSignal,ampUpperSignal);
+
+        FaultManager.captureFault(
+                UmbrellaHW.LowerIntakeMotor,
+                    voltLowerSignal,ampLowerSignal);
+
+        //This requires as little latency as possible so refresh on its own closer to control code
+        revLimitSignal.refresh();
 
         super.exitBeamBroken = revLimitSignal.getValue().equals(ReverseLimitValue.ClosedToGround);
-        super.radiansPerSecondUpper = Units.rotationsToRadians(veloSignalUpper.getValue());
-        super.voltsUpper = voltSignalUpper.getValue();
-        super.ampsUpper = currentSignalUpper.getValue();
-        super.radiansPerSecondLower = Units.rotationsToRadians(veloSignalLower.getValue());
-        super.voltsLower = voltSignalLower.getValue();
-        super.ampsLower = currentSignalLower.getValue();
+        super.voltsUpper = voltUpperSignal.getValue();
+        super.ampsUpper = ampUpperSignal.getValue();
+        super.voltsLower = voltLowerSignal.getValue();
+        super.ampsLower = ampLowerSignal.getValue();
 
         if (super.exitBeamBroken && !wasBeamBroken) {
             this.setVoltageOut(0.0);

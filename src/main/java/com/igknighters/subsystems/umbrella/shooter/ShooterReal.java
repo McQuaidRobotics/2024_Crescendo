@@ -1,6 +1,5 @@
 package com.igknighters.subsystems.umbrella.shooter;
 
-import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -11,6 +10,7 @@ import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.util.BootupLogger;
 import com.igknighters.util.FaultManager;
+import com.igknighters.util.can.CANSignalManager;
 import com.igknighters.constants.HardwareIndex.UmbrellaHW;
 
 import edu.wpi.first.math.util.Units;
@@ -23,28 +23,23 @@ public class ShooterReal extends Shooter {
     private final StatusSignal<Double> veloSignalLeft, voltSignalLeft, currentSignalLeft;
 
     public ShooterReal() {
-        rightMotor.getConfigurator().apply(motorRightConfig());
+        rightMotor.getConfigurator().apply(motorRightConfig(), 1.0);
+        leftMotor.getConfigurator().apply(motorLeftConfig(), 1.0);
 
         veloSignalRight = rightMotor.getVelocity();
         voltSignalRight = rightMotor.getMotorVoltage();
         currentSignalRight = rightMotor.getTorqueCurrent();
 
-        veloSignalRight.setUpdateFrequency(100);
-        voltSignalRight.setUpdateFrequency(100);
-        currentSignalRight.setUpdateFrequency(100);
-
-        rightMotor.optimizeBusUtilization(1.0);
-
-        leftMotor.getConfigurator().apply(motorLeftConfig());
-
         veloSignalLeft = leftMotor.getVelocity();
         voltSignalLeft = leftMotor.getMotorVoltage();
         currentSignalLeft = leftMotor.getTorqueCurrent();
 
-        veloSignalLeft.setUpdateFrequency(100);
-        voltSignalLeft.setUpdateFrequency(100);
-        currentSignalLeft.setUpdateFrequency(100);
+        CANSignalManager.registerSignals(
+                kUmbrella.CANBUS,
+                veloSignalRight, voltSignalRight, currentSignalRight,
+                veloSignalLeft, voltSignalLeft, currentSignalLeft);
 
+        rightMotor.optimizeBusUtilization(1.0);
         leftMotor.optimizeBusUtilization(1.0);
 
         BootupLogger.bootupLog("    Shooter initialized (real)");
@@ -124,17 +119,15 @@ public class ShooterReal extends Shooter {
     public void periodic() {
         FaultManager.captureFault(
                 UmbrellaHW.RightShooterMotor,
-                BaseStatusSignal.refreshAll(
-                        veloSignalRight,
-                        voltSignalRight,
-                        currentSignalRight));
+                veloSignalRight,
+                voltSignalRight,
+                currentSignalRight);
 
         FaultManager.captureFault(
                 UmbrellaHW.LeftShooterMotor,
-                BaseStatusSignal.refreshAll(
-                        veloSignalLeft,
-                        voltSignalLeft,
-                        currentSignalLeft));
+                veloSignalLeft,
+                voltSignalLeft,
+                currentSignalLeft);
 
         super.radiansPerSecondRight = Units.rotationsToRadians(veloSignalRight.getValue());
         super.voltsRight = voltSignalRight.getValue();
