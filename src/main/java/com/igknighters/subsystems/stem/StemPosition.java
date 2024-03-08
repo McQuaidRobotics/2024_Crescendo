@@ -91,10 +91,11 @@ public class StemPosition implements StructSerializable {
             return new StemPosition(bb.getDouble(), bb.getDouble(), bb.getDouble());
         }
     }
+
     public static final StemPositionStruct struct = new StemPositionStruct();
 
-    public static final StemPosition STOW = new StemPosition(Units.degreesToRadians(50.5),
-            Units.degreesToRadians(112.0), kTelescope.MIN_METERS) {
+    public static final StemPosition STOW = new StemPosition(Units.degreesToRadians(49.5),
+            Units.degreesToRadians(104.0), kTelescope.MIN_METERS) {
         @Override
         public boolean isValid() {
             return true;
@@ -160,22 +161,6 @@ public class StemPosition implements StructSerializable {
         @Override
         public String toString() {
             return "Starting";
-        }
-    };
-
-    public static final StemPosition FROZEN_WRIST_STOW = new StemPosition(
-            Units.degreesToRadians(45.0),
-            kWrist.FROZEN_WRIST_ANGLE,
-            kTelescope.MIN_METERS) {
-
-        @Override
-        public String toString() {
-            return "Stationary Wrist Stow";
-        }
-
-        @Override
-        public boolean isStow() {
-            return true;
         }
     };
 
