@@ -1,11 +1,9 @@
 package com.igknighters.subsystems.umbrella;
 
-import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.umbrella.intake.*;
 import com.igknighters.subsystems.umbrella.shooter.*;
 import com.igknighters.util.Tracer;
-import com.igknighters.util.can.CANBusLogging;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -34,8 +32,6 @@ public class Umbrella extends SubsystemBase implements Logged {
             intake = new IntakeReal();
             shooter = new ShooterReal();
         }
-
-        CANBusLogging.logBus(kUmbrella.CANBUS);
     }
 
     @Override

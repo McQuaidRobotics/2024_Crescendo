@@ -4,6 +4,8 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ForwardLimitTypeValue;
@@ -26,19 +28,22 @@ import com.igknighters.util.can.CANSignalManager;
 
 public class PivotReal extends Pivot {
 
-    /** Left */
-    private final TalonFX leaderMotor;
     /** Right */
+    private final TalonFX leaderMotor;
+    /** Left */
     private final TalonFX followerMotor;
 
     private final Pigeon2 gyro;
 
     private final StatusSignal<Double> motorRots, motorVelo, leaderMotorVolts, followerMotorVolts;
     private final StatusSignal<Double> leaderMotorAmps, followerMotorAmps;
-    /** Could be pitch or roll */
     private final StatusSignal<Double> gyroMeasurement;
     private final StatusSignal<ForwardLimitValue> forwardLimitSwitch;
     private final StatusSignal<ReverseLimitValue> reverseLimitSwitch;
+
+    private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
+    private final NeutralOut controlReqNeutral = new NeutralOut().withUpdateFreqHz(0);
+    private final MotionMagicVoltage controlReqMotionMagic = new MotionMagicVoltage(0.0).withUpdateFreqHz(0);
 
     private double mechRadiansToMotorRots(Double mechRads) {
         return Units.radiansToRotations(Math.PI - mechRads) * kPivot.MOTOR_TO_MECHANISM_RATIO;
@@ -125,13 +130,19 @@ public class PivotReal extends Pivot {
     @Override
     public void setPivotRadians(double radians) {
         super.targetRadians = radians;
-        this.leaderMotor.setControl(new MotionMagicVoltage(mechRadiansToMotorRots(radians)));
+        this.leaderMotor.setControl(controlReqMotionMagic.withPosition(mechRadiansToMotorRots(radians)));
     }
 
     @Override
     public void setVoltageOut(double volts) {
         super.targetRadians = 0.0;
-        this.leaderMotor.setVoltage(volts);
+        this.leaderMotor.setControl(controlReqVolts.withOutput(volts));
+    }
+
+    @Override
+    public void stopMechanism() {
+        super.targetRadians = super.radians;
+        this.leaderMotor.setControl(controlReqNeutral);
     }
 
     @Override

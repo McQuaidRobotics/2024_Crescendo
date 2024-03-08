@@ -24,7 +24,6 @@ import com.igknighters.subsystems.swerve.module.SwerveModule;
 import com.igknighters.subsystems.swerve.module.SwerveModuleReal;
 import com.igknighters.subsystems.swerve.module.SwerveModuleSim;
 import com.igknighters.util.Tracer;
-import com.igknighters.util.can.CANBusLogging;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.FieldConstants;
 
@@ -86,8 +85,6 @@ public class Swerve extends SubsystemBase implements Logged {
         visualizer = new SwerveVisualizer(this, swerveMods);
 
         setpointProcessor.setDisabled(true);
-
-        CANBusLogging.logBus(ConstValues.kSwerve.CANBUS);
     }
 
     public void drive(ChassisSpeeds speeds, boolean isOpenLoop) {

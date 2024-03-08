@@ -2,7 +2,9 @@ package com.igknighters.subsystems.umbrella.shooter;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -21,6 +23,10 @@ public class ShooterReal extends Shooter {
     private final TalonFX leftMotor = new TalonFX(kShooter.LEFT_MOTOR_ID, kUmbrella.CANBUS);
     private final StatusSignal<Double> veloSignalRight, voltSignalRight, currentSignalRight;
     private final StatusSignal<Double> veloSignalLeft, voltSignalLeft, currentSignalLeft;
+
+    private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
+    private final NeutralOut controlReqNeutral = new NeutralOut().withUpdateFreqHz(0);
+    private final VelocityVoltage controlReq = new VelocityVoltage(0.0).withUpdateFreqHz(0).withEnableFOC(true);
 
     public ShooterReal() {
         rightMotor.getConfigurator().apply(motorRightConfig(), 1.0);
@@ -101,8 +107,8 @@ public class ShooterReal extends Shooter {
     public void setSpeed(double speedRadPerSec) {
         super.targetRadiansPerSecondRight = speedRadPerSec;
         super.targetRadiansPerSecondLeft = speedRadPerSec * kShooter.LEFT_MOTOR_DIFF;
-        rightMotor.setControl(new VelocityVoltage(Units.radiansToRotations(super.targetRadiansPerSecondRight)));
-        leftMotor.setControl(new VelocityVoltage(Units.radiansToRotations(super.targetRadiansPerSecondLeft)));
+        rightMotor.setControl(controlReq.withVelocity(Units.radiansToRotations(super.targetRadiansPerSecondRight)));
+        leftMotor.setControl(controlReq.withVelocity(Units.radiansToRotations(super.targetRadiansPerSecondLeft)));
     }
 
     @Override
@@ -111,8 +117,16 @@ public class ShooterReal extends Shooter {
         super.targetRadiansPerSecondLeft = 0.0;
         super.voltsRight = volts;
         super.voltsLeft = volts;
-        rightMotor.setVoltage(volts);
-        leftMotor.setVoltage(volts);
+        rightMotor.setControl(controlReqVolts.withOutput(volts));
+        leftMotor.setControl(controlReqVolts.withOutput(volts));
+    }
+
+    @Override
+    public void stopMechanism() {
+        super.targetRadiansPerSecondRight = 0.0;
+        super.targetRadiansPerSecondLeft = 0.0;
+        rightMotor.setControl(controlReqNeutral);
+        leftMotor.setControl(controlReqNeutral);
     }
 
     @Override
