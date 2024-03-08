@@ -12,27 +12,32 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
-import org.littletonrobotics.junction.Logger;
-
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import monologue.Logged;
 
-public class Vision extends SubsystemBase {
+public class Vision extends SubsystemBase implements Logged {
 
-    private final List<Camera> cameras;
+    private final Camera[] cameras;
 
     private final BooleanEntry cameraPositionFieldVisualizer;
+
+    private Optional<VisionPoseEstimate> latestEval = Optional.empty();
+    private Timer lastEvalTime = new Timer();
 
     public Vision() {
         this.cameras = List.of(kVision.CAMERA_CONFIGS)
                 .stream()
                 .map(Camera::create)
-                .toList();
+                .toArray(Camera[]::new);
 
         GlobalState.setLocalizer(
                 new VisionOnlyPoseEstimator(),
@@ -46,8 +51,19 @@ public class Vision extends SubsystemBase {
         cameraPositionFieldVisualizer.accept(false);
     }
 
+    public Optional<VisionPoseEstimate> getLatestEval() {
+        return latestEval;
+    }
+
+    public Pose2d getLatestPoseWithFallback() {
+        return latestEval.map(VisionPoseEstimate::pose)
+                .map(Pose3d::toPose2d)
+                .orElse(GlobalState.getLocalizedPose());
+    }
+
     @Override
     public void periodic() {
+
         Tracer.startTrace("VisionPeriodic");
         HashSet<Integer> seenTags = new HashSet<>();
 
@@ -56,12 +72,10 @@ public class Vision extends SubsystemBase {
             camera.periodic();
 
             if (cameraPositionFieldVisualizer.get(false)) {
-                Logger.recordOutput(
-                    "/Vision/" + camera.getName() + "/3d",
-                    GlobalState.getLocalizedPose3d().plus(
-                        camera.getRobotToCameraTransform3d()
-                    )
-                );
+                log(
+                        camera.getName() + "/3d",
+                        GlobalState.getLocalizedPose3d().plus(
+                                camera.getRobotToCameraTransform3d()));
                 GlobalState.modifyField2d(field -> {
                     Transform2d tf = new Transform2d(
                             camera.getRobotToCameraTransform3d().getTranslation().toTranslation2d(),
@@ -80,18 +94,29 @@ public class Vision extends SubsystemBase {
 
             VisionPoseEstimate eval = optEval.get();
 
+            if (latestEval.isEmpty() || eval.timestamp() > latestEval.get().timestamp()) {
+                latestEval = Optional.of(eval);
+                lastEvalTime.restart();
+            }
+
             double ambiguity = eval.ambiguity();
 
             if (eval.apriltags().size() < 2) {
                 ambiguity *= 2.0;
             }
 
-            GlobalState.submitVisionData(eval, ambiguity);
+            if (!DriverStation.isAutonomousEnabled())
+                GlobalState.submitVisionData(eval, ambiguity);
 
             seenTags.addAll(eval.apriltags());
 
             Tracer.endTrace();
         }
+
+        log(
+            "SeenTags",
+            seenTags.stream().toList().toString()
+        );
 
         GlobalState.modifyField2d(field -> {
             field.getObject("seen_apriltags").setPoses(

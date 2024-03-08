@@ -1,10 +1,15 @@
 package com.igknighters.subsystems.stem;
 
+import java.nio.ByteBuffer;
+
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
+import com.igknighters.constants.ConstValues.kStem.kWrist;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.util.struct.StructSerializable;
 
-public class StemPosition {
+public class StemPosition implements StructSerializable {
     public double pivotRads, wristRads, telescopeMeters;
 
     private StemPosition(double pivotPosRads, double wristPosRads, double telescopePosMeters) {
@@ -52,7 +57,43 @@ public class StemPosition {
                 + telescopeMeters + ")";
     }
 
-    public static final StemPosition STOW = new StemPosition(Units.degreesToRadians(42.5),
+    public static class StemPositionStruct implements Struct<StemPosition> {
+
+        @Override
+        public Class<StemPosition> getTypeClass() {
+            return StemPosition.class;
+        }
+
+        @Override
+        public String getTypeString() {
+            return "struct:StemPosition";
+        }
+
+        @Override
+        public String getSchema() {
+            return "double pivotRads; double wristRads; double telescopeMeters;";
+        }
+
+        @Override
+        public int getSize() {
+            return kSizeDouble * 3;
+        }
+
+        @Override
+        public void pack(ByteBuffer bb, StemPosition value) {
+            bb.putDouble(value.pivotRads);
+            bb.putDouble(value.wristRads);
+            bb.putDouble(value.telescopeMeters);
+        }
+
+        @Override
+        public StemPosition unpack(ByteBuffer bb) {
+            return new StemPosition(bb.getDouble(), bb.getDouble(), bb.getDouble());
+        }
+    }
+    public static final StemPositionStruct struct = new StemPositionStruct();
+
+    public static final StemPosition STOW = new StemPosition(Units.degreesToRadians(43.5),
             Units.degreesToRadians(112.0), kTelescope.MIN_METERS) {
         @Override
         public boolean isValid() {
@@ -70,8 +111,8 @@ public class StemPosition {
         }
     };
 
-    public static final StemPosition INTAKE = new StemPosition(Units.degreesToRadians(10.3),
-            kTelescope.MIN_METERS + Units.inchesToMeters(4.7), Units.degreesToRadians(71.0)) {
+    public static final StemPosition INTAKE = new StemPosition(Units.degreesToRadians(10.8),
+            kWrist.FROZEN_WRIST_ANGLE, kTelescope.MIN_METERS + Units.inchesToMeters(4.7)) {
 
         @Override
         public String toString() {
@@ -80,7 +121,7 @@ public class StemPosition {
     };
 
     public static final StemPosition AMP = new StemPosition(Units.degreesToRadians(90.0), Units.degreesToRadians(43.0),
-            kTelescope.MIN_METERS + Units.inchesToMeters(5.5)) {
+            kTelescope.MIN_METERS) {
 
         @Override
         public String toString() {
@@ -98,13 +139,40 @@ public class StemPosition {
     };
 
     public static final StemPosition STARTING = new StemPosition(
-            1.114,
-            1.93,
+            1.114, // 63.8
+            1.93, // 110.58
             kTelescope.MIN_METERS) {
 
         @Override
         public String toString() {
             return "Starting";
+        }
+    };
+
+    public static final StemPosition FROZEN_WRIST_STOW = new StemPosition(
+            Units.degreesToRadians(45.0),
+            kWrist.FROZEN_WRIST_ANGLE,
+            kTelescope.MIN_METERS) {
+
+        @Override
+        public String toString() {
+            return "Stationary Wrist Stow";
+        }
+
+        @Override
+        public boolean isStow() {
+            return true;
+        }
+    };
+
+    public static final StemPosition SUBWOOFER = new StemPosition(
+            0.3750953350652253 + Units.degreesToRadians(0.5),
+            kWrist.FROZEN_WRIST_ANGLE,
+            kTelescope.MIN_METERS + 0.05) {
+
+        @Override
+        public String toString() {
+            return "Subwoofer";
         }
     };
 }

@@ -13,7 +13,7 @@ import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.util.BootupLogger;
 
-public class WristSim implements Wrist {
+public class WristSim extends Wrist {
     private final WristInputs inputs;
     private final FlywheelSim sim;
     private final PIDController pidController = new PIDController(
@@ -33,7 +33,7 @@ public class WristSim implements Wrist {
     }
 
     @Override
-    public void setWristRadians(Double radians) {
+    public void setWristRadians(double radians) {
         setRadians = MathUtil.clamp(radians, kWrist.MIN_ANGLE, kWrist.MAX_ANGLE);
         double desiredMotorRads = Wrist.mechanismRadsToMotorRads(setRadians);
         double volts = pidController.calculate(motorRads, desiredMotorRads);
@@ -43,7 +43,7 @@ public class WristSim implements Wrist {
 
     @Override
     public double getWristRadians() {
-        return inputs.radians;
+        return super.radians;
     }
 
     @Override
@@ -64,15 +64,21 @@ public class WristSim implements Wrist {
 
         //TODO: Fix motorRadsToMechanismRads function
 
-        inputs.radiansPerSecond = (inputs.radians - setRadians)
+        super.radiansPerSecond = (super.radians - setRadians)
                 / ConstValues.PERIODIC_TIME;
-        inputs.radians = setRadians;
-        inputs.volts = AppliedVolts;
-        inputs.amps = sim.getCurrentDrawAmps();
-        inputs.temp = 0.0;
-        inputs.targetRadians = setRadians;
+        super.radians = setRadians;
+        super.volts = AppliedVolts;
+        super.amps = sim.getCurrentDrawAmps();
+        super.temp = 0.0;
+        super.targetRadians = setRadians;
 
         Logger.processInputs("Stem/Wrist", inputs);
+    }
+
+    @Override
+    public void seedWrist() {
+        // TODO Auto-generated method stub
+        // throw new UnsupportedOperationException("Unimplemented method 'seedWrist'");
     }
 
 }

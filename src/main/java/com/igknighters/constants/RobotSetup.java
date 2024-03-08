@@ -3,14 +3,13 @@ package com.igknighters.constants;
 import java.util.List;
 import java.util.Map;
 
-import org.littletonrobotics.junction.Logger;
-
-import com.igknighters.SubsystemResources.Subsystems;
+import com.igknighters.constants.ConstantHelper.RobotConstID;
+import com.igknighters.subsystems.SubsystemResources.Subsystems;
 import com.igknighters.util.BootupLogger;
-import com.igknighters.ConstantHelper.RobotConstID;
 
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
+import monologue.MonoDashboard;
 
 public class RobotSetup {
 
@@ -44,6 +43,7 @@ public class RobotSetup {
             this.constID = constants;
         }
     }
+
     /**
      * If there are duplicate serial entries the tests will fail!!!!
      */
@@ -77,14 +77,14 @@ public class RobotSetup {
                 throw new RuntimeException("Robot ID not found, " + currentSerialNum + " not in serialToID map");
             }
             BootupLogger.bootupLog("Robot Name: " + currentID.name);
-            Logger.recordOutput("RobotSetup/RobotId", currentID.name());
-            Logger.recordOutput(
+            MonoDashboard.put("RobotSetup/RobotId", currentID.name());
+            MonoDashboard.put(
                     "RobotSetup/EnabledSubsystems",
                     List.of(currentID.subsystems)
                             .stream()
                             .map(sub -> sub.name())
                             .reduce("", (acc, sub) -> acc + sub + ", "));
-            Logger.recordOutput("RobotSetup/ConstantsID", currentID.constID.name());
+            MonoDashboard.put("RobotSetup/ConstantsID", currentID.constID.name());
         }
         return currentID;
     }

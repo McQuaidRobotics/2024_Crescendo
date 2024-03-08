@@ -51,7 +51,7 @@ public class RobotTest {
 
             RobotSetup.testOverrideRobotID(id);
 
-            com.igknighters.ConstantHelper.applyRoboConst(ConstValues.class);
+            com.igknighters.constants.ConstantHelper.applyRoboConst(ConstValues.class);
 
             new RobotContainer();
 

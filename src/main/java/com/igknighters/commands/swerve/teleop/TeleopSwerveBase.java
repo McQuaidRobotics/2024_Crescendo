@@ -5,13 +5,12 @@ import com.igknighters.util.geom.AllianceFlip;
 
 import java.util.function.DoubleSupplier;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import monologue.MonoDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.controllers.ControllerParent;
@@ -72,17 +71,17 @@ public class TeleopSwerveBase extends Command {
         // inverted because left is positive for field due to Y being increased but left
         // is negative for controller
         final double raw = rawTranslationXSup.getAsDouble();
-        Logger.recordOutput("Swerve/TeleopCommand/RawTranslationX", raw);
+        MonoDashboard.put("Swerve/TeleopCommand/RawTranslationX", raw);
         var processed = -kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(raw) * invert();
-        Logger.recordOutput("Swerve/TeleopCommand/TranslationX", processed);
+        MonoDashboard.put("Swerve/TeleopCommand/TranslationX", processed);
         return processed;
     }
 
     protected double getTranslationY() {
         final double raw = rawTranslationYSup.getAsDouble();
-        Logger.recordOutput("Swerve/TeleopCommand/RawTranslationY", raw);
+        MonoDashboard.put("Swerve/TeleopCommand/RawTranslationY", raw);
         var processed = kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(raw) * invert();
-        Logger.recordOutput("Swerve/TeleopCommand/TranslationY", processed);
+        MonoDashboard.put("Swerve/TeleopCommand/TranslationY", processed);
         return processed;
     }
 
@@ -90,17 +89,17 @@ public class TeleopSwerveBase extends Command {
         // inverted because left is positive for field due to Y being increased but left
         // is negative for controller
         final double raw = rawRotationXSup.getAsDouble();
-        Logger.recordOutput("Swerve/TeleopCommand/RawRotationX", raw);
+        MonoDashboard.put("Swerve/TeleopCommand/RawRotationX", raw);
         var processed = -kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(raw);
-        Logger.recordOutput("Swerve/TeleopCommand/RotationX", processed);
+        MonoDashboard.put("Swerve/TeleopCommand/RotationX", processed);
         return processed;
     }
 
     protected double getRotationY() {
         final double raw = rawRotationYSup.getAsDouble();
-        Logger.recordOutput("Swerve/TeleopCommand/RawRotationY", raw);
+        MonoDashboard.put("Swerve/TeleopCommand/RawRotationY", raw);
         var processed = kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(raw);
-        Logger.recordOutput("Swerve/TeleopCommand/RotationY", processed);
+        MonoDashboard.put("Swerve/TeleopCommand/RotationY", processed);
         return processed;
     }
 

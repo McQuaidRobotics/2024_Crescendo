@@ -1,8 +1,6 @@
 
 package com.igknighters.subsystems.stem;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.igknighters.GlobalState;
 import com.igknighters.LED;
 import com.igknighters.LED.LedAnimations;
@@ -13,15 +11,15 @@ import com.igknighters.subsystems.stem.telescope.*;
 import com.igknighters.subsystems.stem.wrist.*;
 import com.igknighters.util.CANBusLogging;
 import com.igknighters.util.Tracer;
-
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import monologue.Logged;
 
-public class Stem extends SubsystemBase {
+public class Stem extends SubsystemBase implements Logged {
 
     private final Pivot pivot;
     private final Telescope telescope;
@@ -77,21 +75,21 @@ public class Stem extends SubsystemBase {
      * @return True if all mechanisms have reached their target position
      */
     public boolean setStemPosition(StemPosition position, double toleranceMult) {
-        ValidationResponse validity = StemValidator.validatePosition(position);
-
         visualizer.updateSetpoint(position);
+
+        ValidationResponse validity = StemValidator.validatePosition(position);
 
         if (!validity.isValid()) {
             DriverStation.reportError(
                     "Invalid TARGET stem position(" + validity.name() + "): " + position.toString(),
                     true);
+            return true;
         }
 
         if (!telescope.hasHomed()) {
             if (!position.isStow()) {
                 DriverStation.reportWarning("Stem Telescope has not been homed, run stow to home", false);
-                LED.sendAnimation(
-                        LedAnimations.WARNING).withDuration(1.0);
+                LED.sendAnimation(LedAnimations.WARNING).withDuration(1.0);
                 return false;
             }
             boolean wristAndPivot = pivot.target(position.pivotRads, 1.0)
@@ -113,9 +111,9 @@ public class Stem extends SubsystemBase {
         boolean telescopeSuccess = telescope.isAt(position.telescopeMeters, toleranceMult);
         boolean wristSuccess = wrist.isAt(position.wristRads, toleranceMult);
 
-        Logger.recordOutput("/Stem/PivotReached", pivotSuccess);
-        Logger.recordOutput("/Stem/TelescopeReached", telescopeSuccess);
-        Logger.recordOutput("/Stem/WristReached", wristSuccess);
+        log("/PivotReached", pivotSuccess);
+        log("/TelescopeReached", telescopeSuccess);
+        log("/WristReached", wristSuccess);
 
         return pivotSuccess && telescopeSuccess && wristSuccess;
     }
@@ -173,7 +171,9 @@ public class Stem extends SubsystemBase {
         Tracer.traceFunc("TelescopePeriodic", telescope::periodic);
         Tracer.traceFunc("WristPeriodic", wrist::periodic);
 
-        Logger.recordOutput("Stem/StemValidator/CurrentStateValidation", StemValidator.validatePosition(getStemPosition()).toString());
+        log("CurrentPosition", getStemPosition());
+        log("StemValidator/CurrentStateValidation",
+                StemValidator.validatePosition(getStemPosition()).toString());
 
         visualizer.updateCurrent(getStemPosition());
 

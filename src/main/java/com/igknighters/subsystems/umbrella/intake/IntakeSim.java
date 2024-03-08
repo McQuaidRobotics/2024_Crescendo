@@ -2,8 +2,6 @@ package com.igknighters.subsystems.umbrella.intake;
 
 import java.util.ArrayList;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.igknighters.GlobalState;
 import com.igknighters.constants.ConstValues.kRobotCollisionGeometry;
 import com.igknighters.constants.ConstValues.kUmbrella.kIntake;
@@ -18,8 +16,9 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 
-public class IntakeSim implements Intake {
+public class IntakeSim extends Intake {
 
     private static final class AutoNotes {
         private static final Translation2d[] notes = {
@@ -44,8 +43,6 @@ public class IntakeSim implements Intake {
         );
     }
 
-    private final IntakeInputs inputs = new IntakeInputs();
-
     private final ArrayList<Rectangle2d> autoNotes = new ArrayList<>();
     private boolean isAuto = false;
 
@@ -54,7 +51,7 @@ public class IntakeSim implements Intake {
     }
 
     private void setExitBeam(boolean broken) {
-        inputs.exitBeamBroken = broken;
+        super.exitBeamBroken = broken;
     }
 
     @Override
@@ -64,7 +61,7 @@ public class IntakeSim implements Intake {
 
     @Override
     public boolean isExitBeamBroken() {
-        return inputs.exitBeamBroken || (DriverStation.isAutonomousEnabled() && !isAuto);
+        return super.exitBeamBroken || (DriverStation.isAutonomousEnabled() && !isAuto);
     }
 
     @Override
@@ -77,24 +74,26 @@ public class IntakeSim implements Intake {
             setExitBeam(false);
         }
 
-        inputs.voltsLower = volts;
-        inputs.voltsUpper = inputs.voltsLower * kIntake.UPPER_DIFF;
-        inputs.radiansPerSecondLower = (volts / 12.0) * DCMotor.getFalcon500(0).freeSpeedRadPerSec;
-        inputs.radiansPerSecondUpper = inputs.radiansPerSecondLower * kIntake.UPPER_DIFF;
+        super.voltsLower = volts;
+        super.voltsUpper = super.voltsLower * kIntake.UPPER_DIFF;
+        super.radiansPerSecondLower = (volts / RobotController.getBatteryVoltage()) * DCMotor.getFalcon500(0).freeSpeedRadPerSec;
+        super.radiansPerSecondUpper = super.radiansPerSecondLower * kIntake.UPPER_DIFF;
     }
 
     private boolean isIntaking() {
-        return inputs.voltsLower < 0.0 && inputs.voltsUpper < 0.0;
+        return super.voltsLower < 0.0 && super.voltsUpper < 0.0;
     }
 
     @Override
     public void periodic() {
+        if (DriverStation.isDisabled()) setVoltageOut(0.0);
+
         boolean nowAuto = DriverStation.isAutonomousEnabled();
 
         if (nowAuto && !isAuto) {
             autoNotes.clear();
             for (var note : AutoNotes.notes) {
-                autoNotes.add(new Rectangle2d(
+            autoNotes.add(new Rectangle2d(
                     AllianceFlip.isBlue() ? note : AllianceFlip.flipTranslation(note),
                     Units.inchesToMeters(7.0)));
             }
@@ -140,7 +139,5 @@ public class IntakeSim implements Intake {
         }
 
         isAuto = nowAuto;
-
-        Logger.processInputs("/Umbrella/Intake", inputs);
     }
 }

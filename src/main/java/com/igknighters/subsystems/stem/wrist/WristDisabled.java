@@ -1,24 +1,35 @@
 package com.igknighters.subsystems.stem.wrist;
 
 import com.igknighters.subsystems.stem.StemPosition;
-
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.RobotController;
 
-public class WristDisabled implements Wrist {
-    double targetRads = StemPosition.STARTING.wristRads;
+public class WristDisabled extends Wrist {
     final double slewRate = (4.3 / 50.0) * 0.75;
+
+    public WristDisabled() {
+        super(StemPosition.STARTING.wristRads);
+    }
 
     @Override
     public double getWristRadians() {
-        return targetRads;
+        return super.radians;
     }
 
     @Override
-    public void setWristRadians(Double radians) {
-        // var clampedTarget = MathUtil.clamp(radians, kWrist.MIN_ANGLE, kWrist.MAX_ANGLE);
-        targetRads = targetRads + MathUtil.clamp(radians - targetRads, -slewRate, slewRate);
+    public void setWristRadians(double radians) {
+        super.targetRadians = radians;
+        super.radians = super.radians + MathUtil.clamp(radians - super.radians, -slewRate, slewRate);
     }
 
     @Override
-    public void setVoltageOut(double volts) {}
+    public void setVoltageOut(double volts) {
+        super.volts = volts;
+        double percentOut = volts / RobotController.getBatteryVoltage();
+        super.radiansPerSecond = slewRate * percentOut;
+        super.radians += super.radiansPerSecond;
+    }
+
+    @Override
+    public void periodic() {}
 }

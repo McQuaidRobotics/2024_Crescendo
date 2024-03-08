@@ -13,7 +13,7 @@ public class StemSolvers {
         double horizDist, 
         double vertDist,
         double initialNoteVelo) {
-        
+
         Translation2d wristLocation = solveWristLocationSimple2d(stemLength, pivotRads);
         horizDist += wristLocation.getX();
         vertDist -= wristLocation.getY();
@@ -70,6 +70,10 @@ public class StemSolvers {
             double wristRads,
             double horizDist,
             double vertDist) {
+
+        horizDist += kPivot.kDimensions.PIVOT_AXEL_LOCATION.getX();
+        vertDist -= kPivot.kDimensions.PIVOT_AXEL_LOCATION.getY();
+
         double kHyp = Math.sqrt(horizDist * horizDist + vertDist * vertDist);
         double aK = Math.asin(vertDist / kHyp);
         double aS = Math.asin((stemLength * Math.sin(wristRads)) / kHyp);

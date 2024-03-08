@@ -1,7 +1,5 @@
 package com.igknighters.subsystems.stem.telescope;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
@@ -19,19 +17,22 @@ import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.HardwareIndex.StemHW;
 import com.igknighters.util.FaultManager;
 
+import monologue.Annotations.Log;
 
-public class TelescopeReal implements Telescope {
+
+public class TelescopeReal extends Telescope {
     private final TalonFX motor;
 
     private final StatusSignal<Double> motorVolts, motorTemp, motorAmps, motorVelo, motorRots;
     private final StatusSignal<ForwardLimitValue> forwardLimitSwitch;
     private final StatusSignal<ReverseLimitValue> reverseLimitSwitch;
 
-    private final TelescopeInputs inputs;
-
-    private boolean hasHomed = false, motorAutoseed = true;
+    @Log.NT private boolean hasHomed = false;
+    @Log.NT private boolean motorAutoseed = true;
 
     public TelescopeReal(){
+        super(kTelescope.MIN_METERS);
+
         motor = new TalonFX(kTelescope.MOTOR_ID, kStem.CANBUS);
         motor.getConfigurator().apply(motorConfig());
 
@@ -51,8 +52,6 @@ public class TelescopeReal implements Telescope {
         reverseLimitSwitch = motor.getReverseLimit();
 
         motor.optimizeBusUtilization();
-
-        inputs = new TelescopeInputs(kTelescope.MIN_METERS);
     }
 
     private TalonFXConfiguration motorConfig() {
@@ -102,36 +101,36 @@ public class TelescopeReal implements Telescope {
 
     @Override
     public void setVoltageOut(double volts) {
-        inputs.targetMeters = 0.0;
+        super.targetMeters = 0.0;
         this.motor.setVoltage(volts);
     }
 
     @Override
     public void setTelescopeMeters(double meters) {
-        inputs.targetMeters = meters;
+        super.targetMeters = meters;
         var posControlRequest = new MotionMagicTorqueCurrentFOC(mechMetersToMotorRots(meters));
         this.motor.setControl(posControlRequest);
     }
 
     @Override
     public double getTelescopeMeters() {
-        return inputs.meters;
+        return super.meters;
     }
 
     @Override
     public void stopMechanism(){
-        inputs.volts = 0.0;
+        super.volts = 0.0;
         this.motor.setVoltage(0);
     }
 
     @Override
     public boolean isFwdLimitSwitchHit() {
-        return inputs.isLimitFwdSwitchHit;
+        return super.isLimitFwdSwitchHit;
     }
 
     @Override
     public boolean isRevLimitSwitchHit() {
-        return inputs.isLimitRevSwitchHit;
+        return super.isLimitRevSwitchHit;
     }
 
     @Override
@@ -154,19 +153,19 @@ public class TelescopeReal implements Telescope {
             StemHW.TelescopeMotor,
             BaseStatusSignal.refreshAll(
                 motorRots, motorVelo,
-                motorVolts, motorAmps,
-                motorTemp, forwardLimitSwitch,
+                /* motorVolts, motorAmps ,*/
+                /* motorTemp, */ forwardLimitSwitch,
                 reverseLimitSwitch));
 
-        inputs.meters = motorRotsToMechMeters(motorRots.getValue());
-        inputs.metersPerSecond = motorRotsToMechMeters(motorVelo.getValue());
-        inputs.volts = motorVolts.getValue();
-        inputs.temp = motorTemp.getValue();
-        inputs.amps =  motorAmps.getValue();
-        inputs.isLimitFwdSwitchHit = forwardLimitSwitch.getValue() == ForwardLimitValue.Open;
-        inputs.isLimitRevSwitchHit = reverseLimitSwitch.getValue() == ReverseLimitValue.Open;
+        super.meters = motorRotsToMechMeters(motorRots.getValue());
+        super.metersPerSecond = motorRotsToMechMeters(motorVelo.getValue());
+        super.volts = motorVolts.getValue();
+        super.temp = motorTemp.getValue();
+        super.amps =  motorAmps.getValue();
+        super.isLimitFwdSwitchHit = forwardLimitSwitch.getValue() == ForwardLimitValue.Open;
+        super.isLimitRevSwitchHit = reverseLimitSwitch.getValue() == ReverseLimitValue.Open;
 
-        if (!hasHomed && (inputs.isLimitFwdSwitchHit || inputs.isLimitRevSwitchHit)){
+        if (!hasHomed && (super.isLimitFwdSwitchHit || super.isLimitRevSwitchHit)){
             hasHomed = true;
         }
 
@@ -179,8 +178,6 @@ public class TelescopeReal implements Telescope {
             configurator.apply(cfg);
             motorAutoseed = false;
         }
-
-        Logger.processInputs("Stem/Telescope", inputs);
     }
 
 }

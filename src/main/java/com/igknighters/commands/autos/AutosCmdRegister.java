@@ -1,12 +1,13 @@
 package com.igknighters.commands.autos;
 
-import com.igknighters.SubsystemResources.AllSubsystems;
-import com.igknighters.commands.HigherOrderCommands;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.teleop.AutoSwerveTargetSpeaker;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
+import com.igknighters.constants.ConstValues.kAuto;
 import com.igknighters.constants.ConstValues.kControls;
+import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.stem.Stem;
+import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -70,14 +71,27 @@ public class AutosCmdRegister {
 
         registerCommand(
             "Intake",
-            HigherOrderCommands
-                .intakeGamepiece(stem, umbrella)
+            Commands.race(
+                StemCommands.holdAt(stem, StemPosition.INTAKE),
+                UmbrellaCommands.intake(umbrella)
+                .until(() -> umbrella.holdingGamepiece()))
+                .andThen(StemCommands.moveTo(stem, StemPosition.SUBWOOFER))
+                .withName("Intake")
+        );
+
+        registerCommand(
+            "IntakeNoStow",
+            Commands.race(
+                StemCommands.holdAt(stem, StemPosition.INTAKE),
+                UmbrellaCommands.intake(umbrella)
+                .until(() -> umbrella.holdingGamepiece())).withTimeout(4.0)
+                .withName("IntakeNoStow")
         );
 
         registerCommand(
             "Spinup",
             UmbrellaCommands
-                .waitUntilSpunUp(umbrella, kControls.SHOOTER_RPM, 1.2)
+                .waitUntilSpunUp(umbrella, kAuto.AUTO_SHOOTER_RPM, 0.9)
                 .withName("Spinup")
         );
 
@@ -88,11 +102,17 @@ public class AutosCmdRegister {
         );
 
         registerCommand(
+                "AimSub",
+                StemCommands.moveTo(stem, StemPosition.SUBWOOFER)
+                    .withName("AimSub")
+        );
+
+        registerCommand(
             "AutoShoot",
             Commands.parallel(
                 new AutoSwerveTargetSpeaker(swerve),
                 StemCommands.aimAtSpeaker(stem, true),
-                UmbrellaCommands.waitUntilSpunUp(umbrella, kControls.SHOOTER_RPM, 1.2)
+                UmbrellaCommands.waitUntilSpunUp(umbrella, kControls.SHOOTER_RPM, 0.9)
             ).andThen(
                 UmbrellaCommands.shoot(umbrella)
             ).withName("AutoShoot")

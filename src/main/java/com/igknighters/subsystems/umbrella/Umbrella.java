@@ -10,8 +10,9 @@ import com.igknighters.util.Tracer;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import monologue.Logged;
 
-public class Umbrella extends SubsystemBase {
+public class Umbrella extends SubsystemBase implements Logged {
 
     public static enum ShooterSpinupReason {
         None,
@@ -28,7 +29,7 @@ public class Umbrella extends SubsystemBase {
     public Umbrella() {
         if (RobotBase.isSimulation()) {
             intake = new IntakeSim();
-            shooter = new ShooterSim();
+            shooter = new ShooterDisabled();
         } else {
             intake = new IntakeReal();
             shooter = new ShooterReal();
@@ -66,7 +67,7 @@ public class Umbrella extends SubsystemBase {
      *          so a tolerance of 0.1 would allow for a 10% error
      */
     public boolean isShooterAtSpeed(double tolerance) {
-        return (Math.abs(shooter.getSpeed() - shooter.getTargetSpeed()) / shooter.getTargetSpeed()) < tolerance;
+        return (Math.abs(shooter.getSpeed() - shooter.getTargetSpeed()) / shooter.getTargetSpeed()) > tolerance;
     }
 
     /**

@@ -1,7 +1,5 @@
 package com.igknighters.subsystems.swerve;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -15,6 +13,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import monologue.Logged;
 
 import com.igknighters.GlobalState;
 import com.igknighters.constants.ConstValues.kSwerve;
@@ -44,7 +43,7 @@ import com.igknighters.constants.FieldConstants;
  * 
  * The coordinate system used in this code is the field coordinate system.
  */
-public class Swerve extends SubsystemBase {
+public class Swerve extends SubsystemBase implements Logged {
     private final Gyro gyro;
     private final SwerveModule[] swerveMods;
     private final SwerveVisualizer visualizer;
@@ -56,22 +55,20 @@ public class Swerve extends SubsystemBase {
 
         if (RobotBase.isReal()) {
             swerveMods = new SwerveModule[] {
-                    new SwerveModuleReal(ConstValues.kSwerve.Mod0.CONSTANTS, false),
-                    new SwerveModuleReal(ConstValues.kSwerve.Mod1.CONSTANTS, false),
-                    new SwerveModuleReal(ConstValues.kSwerve.Mod2.CONSTANTS, false),
-                    new SwerveModuleReal(ConstValues.kSwerve.Mod3.CONSTANTS, false)
+                    new SwerveModuleReal(ConstValues.kSwerve.kMod0.CONSTANTS, false),
+                    new SwerveModuleReal(ConstValues.kSwerve.kMod1.CONSTANTS, false),
+                    new SwerveModuleReal(ConstValues.kSwerve.kMod2.CONSTANTS, false),
+                    new SwerveModuleReal(ConstValues.kSwerve.kMod3.CONSTANTS, false)
             };
             gyro = new GyroReal();
         } else {
             swerveMods = new SwerveModule[] {
-                    new SwerveModuleSim(ConstValues.kSwerve.Mod0.CONSTANTS),
-                    new SwerveModuleSim(ConstValues.kSwerve.Mod1.CONSTANTS),
-                    new SwerveModuleSim(ConstValues.kSwerve.Mod2.CONSTANTS),
-                    new SwerveModuleSim(ConstValues.kSwerve.Mod3.CONSTANTS)
+                    new SwerveModuleSim(ConstValues.kSwerve.kMod0.CONSTANTS),
+                    new SwerveModuleSim(ConstValues.kSwerve.kMod1.CONSTANTS),
+                    new SwerveModuleSim(ConstValues.kSwerve.kMod2.CONSTANTS),
+                    new SwerveModuleSim(ConstValues.kSwerve.kMod3.CONSTANTS)
             };
             gyro = new GyroSim(this::getChassisSpeed);
-
-            // rotController.enableContinuousInput(-Math.PI, Math.PI);
         }
 
         GlobalState.setLocalizer(
@@ -94,7 +91,7 @@ public class Swerve extends SubsystemBase {
     }
 
     public void drive(ChassisSpeeds speeds, boolean isOpenLoop) {
-        Logger.recordOutput("Swerve/targetChassisSpeed", speeds);
+        log("targetChassisSpeed", speeds);
 
         setModuleStates(
                 kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(speeds),
@@ -180,8 +177,8 @@ public class Swerve extends SubsystemBase {
         double targetAngleRads = wantedAngle.getRadians();
         double currentAngleRads = getYawRads();
 
-        Logger.recordOutput("/Swerve/WantedAngle", targetAngleRads);
-        Logger.recordOutput("/Swerve/CurrentAngle", currentAngleRads);
+        log("WantedAngle", targetAngleRads);
+        log("CurrentAngle", currentAngleRads);
 
         return rotController.calculate(currentAngleRads, targetAngleRads);
     }
@@ -212,7 +209,7 @@ public class Swerve extends SubsystemBase {
         visualizer.update(GlobalState.submitSwerveData(getYawWrappedRot(), getModulePositions()));
 
         if (DriverStation.isDisabled()) {
-            Logger.recordOutput("Swerve/targetChassisSpeed", new ChassisSpeeds());
+            log("targetChassisSpeed", new ChassisSpeeds());
         }
 
         GlobalState.setVelocity(getChassisSpeed());

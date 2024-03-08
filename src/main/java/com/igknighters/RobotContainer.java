@@ -7,19 +7,19 @@ import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.controllers.DriverController;
 import com.igknighters.controllers.OperatorController;
 import com.igknighters.controllers.TestingController;
+import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.util.geom.AllianceFlip;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-
-
-import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.commands.autos.AutosCmdRegister;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import monologue.Logged;
+import monologue.Monologue;
 
-public class RobotContainer {
+public class RobotContainer implements Logged {
 
     private final DriverController driverController;
     private final OperatorController operatorController;
@@ -27,8 +27,9 @@ public class RobotContainer {
 
     private final AllSubsystems allSubsystems;
 
+    @SuppressWarnings("unused")
     public RobotContainer() {
-        DriverStation.silenceJoystickConnectionWarning(ConstValues.DEBUG);
+        DriverStation.silenceJoystickConnectionWarning(ConstValues.DEBUG || Robot.isSimulation());
 
         driverController = new DriverController(0);
         operatorController = new OperatorController(1);
@@ -48,33 +49,24 @@ public class RobotContainer {
             setupAutos(swerve);
         }
 
-        // if (allSubsystems.umbrella.isPresent()) {
-        //     var umbrella = allSubsystems.umbrella.get();
-        //     Rectangle2d friendlyArea = new Rectangle2d(
-        //             0, 0,
-        //             FieldConstants.FIELD_LENGTH * 0.65,
-        //             FieldConstants.FIELD_WIDTH);
-        //     PolyTrigger trigger = new PolyTrigger(
-        //         (AllianceFlip.isBlue()
-        //             ? friendlyArea
-        //             : AllianceFlip.flipRectangle(friendlyArea)
-        //         ).asPolygon2d()
-        //     );
-        //     umbrella.setDefaultCommand(umbrella.run(() -> {
-        //         if (trigger.getAsBoolean()) {
-        //             umbrella.spinupShooterToRPM(400);
-        //             umbrella.runIntakeAt(0);
-        //         }
-        //     }).withName("UmbrellaDefaultCommand"));
-        // }
+        if (allSubsystems.stem.isPresent() && ConstValues.DEBUG) {
+            var stem = allSubsystems.stem.get();
+            stem.setDefaultCommand(stem.run(() -> {
+                stem.setStemVolts(
+                        testingController.leftStickY(0.1).getAsDouble() * 12.0,
+                        (testingController.rightTrigger(true).getAsDouble()
+                                - testingController.leftTrigger(true).getAsDouble()) * 6.0,
+                        testingController.rightStickY(0.1).getAsDouble() * 12.0);
+            }).withName("StemDefaultCommand"));
+        }
+    }
 
-        // if (allSubsystems.umbrella.isPresent()) {
-        //     var umbrella = allSubsystems.umbrella.get();
-        //     umbrella.setDefaultCommand(
-        //         UmbrellaCommands.spinUmbrellaBoth(umbrella)
-        //             .withName("UmbrellaDefaultCommand")
-        //     );
-        // }
+    public void initMonologue() {
+        for (var subsystem : allSubsystems.getEnabledSubsystems()) {
+            if (subsystem instanceof Logged) {
+                Monologue.logObj((Logged) subsystem, this.getFullPath() + "/" + subsystem.getName());
+            }
+        }
     }
 
     private void setupAutos(Swerve swerve) {
@@ -106,9 +98,6 @@ public class RobotContainer {
     }
 
     AllSubsystems getAllSubsystemsForTest() {
-        if (!GlobalState.isUnitTest()) {
-            throw new RuntimeException("This method should only be called in unit tests");
-        }
         return allSubsystems;
     }
 }

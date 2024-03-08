@@ -3,21 +3,20 @@ package com.igknighters;
 import java.util.HashMap;
 import java.util.function.BiConsumer;
 
-import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.NT4Publisher;
-
+import monologue.MonoDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import monologue.Monologue;
 
-import com.igknighters.SubsystemResources.AllSubsystems;
 import com.igknighters.constants.ConstValues;
+import com.igknighters.constants.ConstantHelper;
+import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.util.CANBusLogging;
 import com.igknighters.util.ShuffleboardApi;
 import com.igknighters.util.Tracer;
 import com.igknighters.util.UnitTestableRobot;
-import com.igknighters.util.akit.ExtensibleWPILOGWriter;
-import com.igknighters.util.pathplanner.LocalADStarAK;
+import com.pathplanner.lib.pathfinding.LocalADStar;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 
 public class Robot extends UnitTestableRobot {
@@ -28,22 +27,34 @@ public class Robot extends UnitTestableRobot {
 
     @Override
     public void robotInit() {
-        Pathfinding.setPathfinder(new LocalADStarAK());
-        setupAkit();
+        Pathfinding.setPathfinder(new LocalADStar());
+        setupLogging();
 
-        com.igknighters.ConstantHelper.applyRoboConst(ConstValues.class);
+        ConstantHelper.applyRoboConst(ConstValues.class);
 
         GlobalState.publishField2d();
 
         roboContainer = new RobotContainer();
+
+        if (!GlobalState.isUnitTest()) {
+            Monologue.setupMonologue(roboContainer, "/Robot", false, true);
+            roboContainer.initMonologue();
+        } else {
+            Monologue.setupMonologueForUnitTest();
+        }
     }
 
     @Override
     public void robotPeriodic() {
-        Tracer.traceFunc("Shuffleboard", ShuffleboardApi::run);
         Tracer.traceFunc("CommandScheduler", scheduler::run);
         Tracer.traceFunc("LEDUpdate", LED::run);
         Tracer.traceFunc("CANBusLoggung", CANBusLogging::run);
+        Tracer.traceFunc("Shuffleboard", ShuffleboardApi::run);
+        Tracer.traceFunc("Monologue", () -> {
+            Monologue.updateAll(
+                DriverStation.isFMSAttached()
+            );
+        });
         GlobalState.log();
     }
 
@@ -54,7 +65,7 @@ public class Robot extends UnitTestableRobot {
     @Override
     public void disabledPeriodic() {
         autoCmd = GlobalState.getAutoCommand();
-        Logger.recordOutput("SelectedAutoCommand", autoCmd.getName());
+        MonoDashboard.put("Commands/SelectedAutoCommand", autoCmd.getName());
     }
 
     @Override
@@ -63,7 +74,7 @@ public class Robot extends UnitTestableRobot {
             autoCmd = GlobalState.getAutoCommand();
         }
         if (autoCmd != null) {
-            Logger.recordOutput("CurrentAutoCommand", autoCmd.getName());
+            MonoDashboard.put("Commands/CurrentAutoCommand", autoCmd.getName());
             System.out.println("---- Starting auto command: " + autoCmd.getName() + " ----");
             scheduler.schedule(autoCmd);
         }
@@ -76,7 +87,7 @@ public class Robot extends UnitTestableRobot {
     @Override
     public void autonomousExit() {
         if (autoCmd != null) {
-            Logger.recordOutput("CurrentAutoCommand", "");
+            MonoDashboard.put("Commands/CurrentAutoCommand", "");
             autoCmd.cancel();
         }
     }
@@ -109,55 +120,44 @@ public class Robot extends UnitTestableRobot {
 
     @Override
     public void driverStationConnected() {
+        if (DriverStation.isFMSAttached() && !GlobalState.isUnitTest()) {
+            Monologue.setFileOnly(true);
+        }
     }
 
-    @SuppressWarnings("unused")
-    private void setupAkit() {
+    private void setupLogging() {
         if (GlobalState.isUnitTest()) {
             return;
         }
 
-        Logger.recordMetadata("RuntimeType", getRuntimeType().toString());
-        Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
-        Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
-        Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
-        Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
-        Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
+        final String meta = "Metadata/";
+        MonoDashboard.put(meta + "RuntimeType", getRuntimeType().toString());
+        MonoDashboard.put(meta + "ProjectName", BuildConstants.MAVEN_NAME);
+        MonoDashboard.put(meta + "BuildDate", BuildConstants.BUILD_DATE);
+        MonoDashboard.put(meta + "GitSHA", BuildConstants.GIT_SHA);
+        MonoDashboard.put(meta + "GitDate", BuildConstants.GIT_DATE);
+        MonoDashboard.put(meta + "GitBranch", BuildConstants.GIT_BRANCH);
         switch (BuildConstants.DIRTY) {
             case 0:
-                Logger.recordMetadata("GitDirty", "All changes committed");
+                MonoDashboard.put(meta + "GitDirty", "All changes committed");
                 break;
             case 1:
-                Logger.recordMetadata("GitDirty", "Uncomitted changes");
+                MonoDashboard.put(meta + "GitDirty", "Uncomitted changes");
                 break;
             default:
-                Logger.recordMetadata("GitDirty", "Unknown");
+                MonoDashboard.put(meta + "GitDirty", "Unknown");
                 break;
         }
-
-        if (Robot.isReal()) {
-            var path = "/media/sda1/robotlogs/";
-            if (!new java.io.File(path).exists() && ConstValues.DEBUG) {
-                DriverStation.reportWarning("DATALOGS USB NOT PLUGGED IN!!!", false);
-            } else {
-                Logger.addDataReceiver(
-                    new ExtensibleWPILOGWriter(path)
-                        .withNTPrefixListener("/Visualizers")
-                        .withNTPrefixListener("/PathPlanner")
-                );
-            }
-        }
-        Logger.addDataReceiver(new NT4Publisher());
-        Logger.start();
 
         HashMap<String, Integer> commandCounts = new HashMap<>();
         BiConsumer<Command, Boolean> logCommandFunction = (Command command, Boolean active) -> {
             String name = command.getName();
             int count = commandCounts.getOrDefault(name, 0) + (active ? 1 : -1);
             commandCounts.put(name, count);
-            Logger.recordOutput(
-                    "CommandsUnique/" + name + "_" + Integer.toHexString(command.hashCode()), active.booleanValue());
-            Logger.recordOutput("CommandsAll/" + name, count > 0);
+            MonoDashboard.put(
+                    "Commands/CommandsUnique/" + name + "_" + Integer.toHexString(command.hashCode()),
+                    active.booleanValue());
+            MonoDashboard.put("Commands/CommandsAll/" + name, count > 0);
         };
         CommandScheduler.getInstance()
                 .onCommandInitialize(

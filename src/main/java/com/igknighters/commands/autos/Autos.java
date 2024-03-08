@@ -17,10 +17,11 @@ public class Autos {
 
     /**
      * Creates the sendable chooser to be used for path planner autos
+     * 
      * @param swerve The swerve subsystem to be used in dynamic autos
      */
     public static void createSendableChooser(Swerve swerve) {
-        autoChooser = AutoBuilder.buildAutoChooser();
+        autoChooser = AutoBuilder.buildAutoChooser("No Auto");
         for (Command dynamicAutoCmd : DynamicRoutines.choosableDynamicRoutines(swerve)) {
             autoChooser.addOption("(Dynamic) " + dynamicAutoCmd.getName(), dynamicAutoCmd);
         }
@@ -28,8 +29,10 @@ public class Autos {
     }
 
     public static Command getAutonomousCommand() {
-        if (autoCmdOverride.isPresent() && GlobalState.isUnitTest()) return autoCmdOverride.get();
-        if (autoChooser == null) return new InstantCommand().withName("Nothing");
+        if (autoCmdOverride.isPresent() && GlobalState.isUnitTest())
+            return autoCmdOverride.get();
+        if (autoChooser == null)
+            return new InstantCommand().withName("Nothing");
         return autoChooser.getSelected();
     }
 
@@ -38,11 +41,14 @@ public class Autos {
     }
 
     /**
-     * Only to be used in unit tests, will force {@link Autos#getAutonomousCommand()}
+     * Only to be used in unit tests, will force
+     * {@link Autos#getAutonomousCommand()}
      * to return a specific command.
-     * Supplying null as a command to this function will return 
+     * Supplying null as a command to this function will return
      * {@link Autos#getAutonomousCommand()} to default behavior;
-     * @param cmd The command to force {@link Autos#getAutonomousCommand()} to return
+     * 
+     * @param cmd The command to force {@link Autos#getAutonomousCommand()} to
+     *            return
      */
     public static void setAutoOverrideTest(Command cmd) {
         autoCmdOverride = Optional.ofNullable(cmd);

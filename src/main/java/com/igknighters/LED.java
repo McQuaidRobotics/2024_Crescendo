@@ -2,8 +2,6 @@ package com.igknighters;
 
 import java.util.ArrayList;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.ctre.phoenix.led.Animation;
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdleConfiguration;
@@ -13,13 +11,13 @@ import com.ctre.phoenix.led.StrobeAnimation;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.ColorFlowAnimation.Direction;
 import com.igknighters.constants.ConstValues;
-import com.igknighters.constants.ConstValues.kSwerve;
 import com.pathplanner.lib.auto.AutoBuilder.TriFunction;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
+import monologue.MonoDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -234,7 +232,7 @@ public class LED {
     public LED(boolean makeLed) {
         timer.start();
         if (makeLed) {
-            candle = new CANdle(52, kSwerve.CANBUS);
+            candle = new CANdle(52);
             var config = new CANdleConfiguration();
             config.v5Enabled = true;
             config.stripType = LEDStripType.RGB;
@@ -245,7 +243,7 @@ public class LED {
             new Trigger(DriverStation::isFMSAttached)
                     .and(() -> Math.abs(DriverStation.getMatchTime() - 20.0) < 0.2)
                     .onTrue(new InstantCommand(() -> LED.sendAnimation(LedAnimations._20S_LEFT)
-                        .withDuration(2.0)).withName("20sLeftLED"));
+                            .withDuration(2.0)).withName("20sLeftLED"));
         } else {
             candle = null;
         }
@@ -432,7 +430,7 @@ public class LED {
             log += partial.toString() + ",";
             lastMode = robotMode;
         }
-        Logger.recordOutput("LED", log + "]");
+        MonoDashboard.put("LED", log + "]");
 
         double batteryVolts = RobotController.getBatteryVoltage();
         if (batteryVolts < RobotController.getBrownoutVoltage() || RobotController.isBrownedOut()) {

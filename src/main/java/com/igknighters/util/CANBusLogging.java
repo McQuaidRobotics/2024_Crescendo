@@ -2,12 +2,11 @@ package com.igknighters.util;
 
 import java.util.ArrayList;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.ctre.phoenix6.CANBus;
 import com.igknighters.Robot;
 
 import edu.wpi.first.wpilibj.Timer;
+import monologue.MonoDashboard;
 
 public class CANBusLogging {
     private static final ArrayList<String> loggedBuses = new ArrayList<>();
@@ -20,10 +19,9 @@ public class CANBusLogging {
             return;
         }
 
-        Logger.recordOutput(
-            path + "/" + busName + "/" + "isFd",
-            CANBus.isNetworkFD(busName)
-        );
+        MonoDashboard.put(
+                path + "/" + busName + "/" + "isFd",
+                CANBus.isNetworkFD(busName));
 
         timer.start();
 
@@ -47,12 +45,12 @@ public class CANBusLogging {
 
         String prefix = path + "/" + busName + "/";
 
-        Logger.recordOutput(prefix + "status", status.Status.name());
-        Logger.recordOutput(prefix + "percentBusUtilization", status.BusUtilization);
-        Logger.recordOutput(prefix + "busOffCount", status.BusOffCount);
-        Logger.recordOutput(prefix + "txFullCount", status.TxFullCount);
-        Logger.recordOutput(prefix + "receiveErrorCount", status.REC);
-        Logger.recordOutput(prefix + "transmitErrorCount", status.TEC);
+        MonoDashboard.put(prefix + "status", status.Status.name());
+        MonoDashboard.put(prefix + "percentBusUtilization", status.BusUtilization);
+        MonoDashboard.put(prefix + "busOffCount", status.BusOffCount);
+        MonoDashboard.put(prefix + "txFullCount", status.TxFullCount);
+        MonoDashboard.put(prefix + "receiveErrorCount", status.REC);
+        MonoDashboard.put(prefix + "transmitErrorCount", status.TEC);
 
         index++;
 

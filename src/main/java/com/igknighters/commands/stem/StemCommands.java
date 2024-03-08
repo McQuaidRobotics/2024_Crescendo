@@ -12,14 +12,13 @@ import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.stem.StemSolvers;
 import com.igknighters.util.geom.AllianceFlip;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import monologue.MonoDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class StemCommands {
@@ -65,16 +64,16 @@ public class StemCommands {
         private final double maxPivotRads = Math.toRadians(94.0);
         private final double minTelescopeMeters = kTelescope.MIN_METERS;
         private final double maxTelescopeMeters = kTelescope.MAX_METERS;
-        
+
         private Stem stem;
         private DoubleSupplier leftStickYSup, rightStickYSup;
         private double deadband;
 
         private LimitedManualControlCommand(
-            Stem stem, 
-            DoubleSupplier leftStickYSup, 
-            DoubleSupplier rightStickYSup,
-            double deadband) {
+                Stem stem,
+                DoubleSupplier leftStickYSup,
+                DoubleSupplier rightStickYSup,
+                double deadband) {
 
             addRequirements(stem);
             this.stem = stem;
@@ -91,23 +90,22 @@ public class StemCommands {
         @Override
         public void execute() {
             double leftY = MathUtil.applyDeadband(leftStickYSup.getAsDouble(), deadband);
-            double rightY = MathUtil.applyDeadband(rightStickYSup.getAsDouble(), deadband);
+            double rightY = -1.0 * MathUtil.applyDeadband(rightStickYSup.getAsDouble(), deadband);
 
-            if (MathUtil.clamp(
-                stem.getStemPosition().getPivotRads(), 
-                minPivotRads, 
-                maxPivotRads) != stem.getStemPosition().getPivotRads()) 
-                    leftY = 0.0;
-            if (MathUtil.clamp(
-                stem.getStemPosition().getTelescopeMeters(), 
-                minTelescopeMeters, 
-                maxTelescopeMeters) != stem.getStemPosition().getTelescopeMeters())
-                    rightY = 0.0;
+            if (stem.getStemPosition().getPivotRads() <= minPivotRads)
+                leftY = MathUtil.clamp(leftY, 0.0, 1.0);
+            else if (stem.getStemPosition().getPivotRads() >= maxPivotRads)
+                leftY = MathUtil.clamp(leftY, -1.0, 0.0);
+
+            if (stem.getStemPosition().getTelescopeMeters() <= minTelescopeMeters)
+                rightY = MathUtil.clamp(rightY, 0.0, 1.0);
+            else if (stem.getStemPosition().getTelescopeMeters() >= maxTelescopeMeters)
+                rightY = MathUtil.clamp(rightY, -1.0, 0.0);
 
             stem.setStemVolts(
-                leftY * RobotController.getBatteryVoltage(), 
-                0.0, 
-                rightY * RobotController.getBatteryVoltage());
+                    leftY * RobotController.getBatteryVoltage(),
+                    0.0,
+                    rightY * RobotController.getBatteryVoltage());
         }
 
         @Override
@@ -120,7 +118,7 @@ public class StemCommands {
             stem.stopMechanisms();
             GlobalState.setClimbing(false);
         }
-    } 
+    }
 
     public enum AimStrategy {
         STATIONARY_WRIST,
@@ -130,7 +128,8 @@ public class StemCommands {
     }
 
     /**
-     * A command class that continually calculates the wrist radians needed to aim at the speaker
+     * A command class that continually calculates the wrist radians needed to aim
+     * at the speaker
      */
     private static class AimAtSpeakerCommand extends Command {
         private Stem stem;
@@ -145,10 +144,10 @@ public class StemCommands {
             this.canFinish = canFinish;
         }
 
-        private StemPosition stationaryWristSolve(double distance) {
+        private StemPosition stationaryWristSolve(double distance, double wristRads) {
             double pivotRads = StemSolvers.linearSolvePivotTheta(
                     kTelescope.MIN_METERS,
-                    kControls.STATIONARY_WRIST_ANGLE,
+                    wristRads,
                     distance,
                     FieldConstants.SPEAKER.getZ());
 
@@ -240,11 +239,12 @@ public class StemCommands {
             double distance = currentPose.getTranslation().getDistance(adjustedTarget);
 
             if (aimStrategy.equals(AimStrategy.STATIONARY_WRIST)) {
-                hasFinished = stem.setStemPosition(stationaryWristSolve(distance));
+                hasFinished = stem.setStemPosition(stationaryWristSolve(distance, stem.getStemPosition().wristRads));
             } else if (aimStrategy.equals(AimStrategy.STATIONARY_PIVOT)) {
                 var pose = stationaryPivotSolve(distance);
-                SmartDashboard.putNumber("Aim/Linear", Units.radiansToDegrees(pose.getWristRads()));
-                SmartDashboard.putNumber("Aim/Gravity", Units.radiansToDegrees(stationaryPivotSolveGravity(distance).getWristRads()));
+                MonoDashboard.put("Aim/Linear", Units.radiansToDegrees(pose.getWristRads()));
+                MonoDashboard.put("Aim/Gravity",
+                        Units.radiansToDegrees(stationaryPivotSolveGravity(distance).getWristRads()));
                 hasFinished = stem.setStemPosition(pose);
             } else if (aimStrategy.equals(AimStrategy.MAX_HEIGHT)) {
                 hasFinished = stem.setStemPosition(maxHeightSolve(distance));
@@ -347,17 +347,18 @@ public class StemCommands {
      * 
      * Allows for limited manual control of the pivot and telescope on the stem.
      * 
-     * @param stem              The stem subsystem.
-     * @param leftStickYSup     A supplier for the pivot motor output
-     * @param rightStickYSup    A supplier for the telescope motor output
-     * @param deadband          A deadband to apply to the motor outputs
-     * @return                  A command to be scheduled
+     * @param stem           The stem subsystem.
+     * @param leftStickYSup  A supplier for the pivot motor output
+     * @param rightStickYSup A supplier for the telescope motor output
+     * @param deadband       A deadband to apply to the motor outputs
+     * @return A command to be scheduled
      */
-    public static Command LimitedManualControl(Stem stem, DoubleSupplier leftStickYSup, DoubleSupplier rightStickYSup, double deadband) {
+    public static Command LimitedManualControl(Stem stem, DoubleSupplier leftStickYSup, DoubleSupplier rightStickYSup,
+            double deadband) {
         return new LimitedManualControlCommand(
-            stem, 
-            leftStickYSup, 
-            rightStickYSup, 
-            deadband).withName("LimitedManualControl");
+                stem,
+                leftStickYSup,
+                rightStickYSup,
+                deadband).withName("LimitedManualControl");
     }
 }

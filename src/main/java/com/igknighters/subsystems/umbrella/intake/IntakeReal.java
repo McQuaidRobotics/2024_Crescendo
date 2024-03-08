@@ -1,7 +1,5 @@
 package com.igknighters.subsystems.umbrella.intake;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
@@ -17,17 +15,17 @@ import com.igknighters.util.FaultManager;
 import com.igknighters.constants.HardwareIndex.UmbrellaHW;
 
 import edu.wpi.first.math.util.Units;
+import monologue.Annotations.Log;
 
-public class IntakeReal implements Intake {
+public class IntakeReal extends Intake {
 
     private final TalonFX upperMotor = new TalonFX(kIntake.UPPER_MOTOR_ID, kUmbrella.CANBUS);
     private final TalonFX lowerMotor = new TalonFX(kIntake.LOWER_MOTOR_ID, kUmbrella.CANBUS);
     private final StatusSignal<Double> veloSignalUpper, voltSignalUpper, currentSignalUpper, tempSignalUpper;
     private final StatusSignal<Double> veloSignalLower, voltSignalLower, currentSignalLower, tempSignalLower;
     private final StatusSignal<ReverseLimitValue> revLimitSignal;
-    private final IntakeInputs inputs = new IntakeInputs();
     private final HardwareLimitSwitchConfigs lowerLimitCfg, upperLimitCfg;
-    private boolean wasBeamBroken = false;
+    @Log.NT private boolean wasBeamBroken = false;
 
     public IntakeReal() {
         FaultManager.captureFault(
@@ -123,9 +121,9 @@ public class IntakeReal implements Intake {
 
     @Override
     public void setVoltageOut(double volts) {
-        inputs.voltsLower = volts;
-        inputs.voltsUpper = volts * kIntake.UPPER_DIFF;
-        if (inputs.exitBeamBroken) {
+        super.voltsLower = volts;
+        super.voltsUpper = volts * kIntake.UPPER_DIFF;
+        if (super.exitBeamBroken) {
             lowerMotor.setVoltage(0.0);
             upperMotor.setVoltage(0.0);
         } else {
@@ -140,15 +138,15 @@ public class IntakeReal implements Intake {
             setVoltageOut(volts);
             return;
         }
-        inputs.voltsLower = volts;
-        inputs.voltsUpper = volts * kIntake.UPPER_DIFF;
+        super.voltsLower = volts;
+        super.voltsUpper = volts * kIntake.UPPER_DIFF;
         lowerMotor.setVoltage(volts);
         upperMotor.setVoltage(volts * kIntake.UPPER_DIFF);
     }
 
     @Override
     public boolean isExitBeamBroken() {
-        return inputs.exitBeamBroken;
+        return super.exitBeamBroken;
     }
 
     @Override
@@ -160,29 +158,25 @@ public class IntakeReal implements Intake {
                         currentSignalUpper, tempSignalUpper,
                         revLimitSignal));
 
-        inputs.exitBeamBroken = revLimitSignal.getValue().equals(ReverseLimitValue.ClosedToGround);
-        inputs.radiansPerSecondUpper = Units.rotationsToRadians(veloSignalUpper.getValue());
-        inputs.voltsUpper = voltSignalUpper.getValue();
-        inputs.ampsUpper = currentSignalUpper.getValue();
-        inputs.tempUpper = tempSignalUpper.getValue();
-        inputs.radiansPerSecondLower = Units.rotationsToRadians(veloSignalLower.getValue());
-        inputs.voltsLower = voltSignalLower.getValue();
-        inputs.ampsLower = currentSignalLower.getValue();
-        inputs.tempLower = tempSignalLower.getValue();
+        super.exitBeamBroken = revLimitSignal.getValue().equals(ReverseLimitValue.ClosedToGround);
+        super.radiansPerSecondUpper = Units.rotationsToRadians(veloSignalUpper.getValue());
+        super.voltsUpper = voltSignalUpper.getValue();
+        super.ampsUpper = currentSignalUpper.getValue();
+        super.tempUpper = tempSignalUpper.getValue();
+        super.radiansPerSecondLower = Units.rotationsToRadians(veloSignalLower.getValue());
+        super.voltsLower = voltSignalLower.getValue();
+        super.ampsLower = currentSignalLower.getValue();
+        super.tempLower = tempSignalLower.getValue();
 
-        if (inputs.exitBeamBroken && !wasBeamBroken) {
+        if (super.exitBeamBroken && !wasBeamBroken) {
             this.setVoltageOut(0.0);
             lowerMotor.getConfigurator().apply(lowerLimitCfg.withReverseLimitEnable(false));
             upperMotor.getConfigurator().apply(upperLimitCfg.withReverseLimitEnable(false));
             wasBeamBroken = true;
-        } else if (!inputs.exitBeamBroken && wasBeamBroken) {
+        } else if (!super.exitBeamBroken && wasBeamBroken) {
             lowerMotor.getConfigurator().apply(lowerLimitCfg.withReverseLimitEnable(true));
             upperMotor.getConfigurator().apply(upperLimitCfg.withReverseLimitEnable(true));
             wasBeamBroken = false;
         }
-
-        Logger.recordOutput("/Umbrella/Intake/WasBeamBroken", wasBeamBroken);
-
-        Logger.processInputs("/Umbrella/Intake", inputs);
     }
 }

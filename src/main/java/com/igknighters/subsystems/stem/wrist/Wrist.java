@@ -1,48 +1,32 @@
 package com.igknighters.subsystems.stem.wrist;
 
-import org.littletonrobotics.junction.LogTable;
-import org.littletonrobotics.junction.inputs.LoggableInputs;
-
 import com.igknighters.constants.ConstValues;
 import com.igknighters.subsystems.Component;
 
 import edu.wpi.first.math.util.Units;
+import monologue.Annotations.Log;
 
-public interface Wrist extends Component {
+public abstract class Wrist extends Component {
+    @Log.NT protected double radians;
+    @Log.NT protected double targetRadians;
+    @Log.NT protected double radiansPerSecond = 0.0;
+    @Log.NT protected double volts = 0.0;
+    @Log.NT protected double amps = 0.0;
+    @Log.NT protected double temp = 0.0;
 
-    public static class WristInputs implements LoggableInputs {
-        public double radians, targetRadians, radiansPerSecond = 0.0;
-        public double volts = 0.0, amps = 0.0, temp = 0.0;
-
-        public WristInputs(double startingRadians) {
-            this.radians = startingRadians;
-            this.targetRadians = startingRadians;
-        }
-
-        @Override
-        public void toLog(LogTable table) {
-            table.put("radians", radians);
-            table.put("targetRadians", targetRadians);
-            table.put("radiansPerSecond", radiansPerSecond);
-            table.put("volts", volts);
-            table.put("amps", amps);
-            table.put("temp", temp);
-        }
-
-        @Override
-        public void fromLog(LogTable table) {
-            radians = table.get("radians", radians);
-            targetRadians = table.get("targetRadians", targetRadians);
-            radiansPerSecond = table.get("radiansPerSecond", radiansPerSecond);
-            volts = table.get("volts", volts);
-            amps = table.get("amps", amps);
-            temp = table.get("temp", temp);
-        }
+    public Wrist(double startingRadians) {
+        this.radians = startingRadians;
+        this.targetRadians = startingRadians;
     }
 
-    public void setWristRadians(Double radians);
+    @Override
+    public String getPath() {
+        return "Wrist";
+    }
 
-    public double getWristRadians();
+    public abstract void setWristRadians(double radians);
+
+    public abstract double getWristRadians();
 
     /**
      * Moves the wrist to the target and returns if it has reached the target.
@@ -54,7 +38,7 @@ public interface Wrist extends Component {
      *                     means more tolerance
      * @return If the mechanism has reached the target
      */
-    default public boolean target(double radians, double tolerancMult) {
+    public boolean target(double radians, double tolerancMult) {
         this.setWristRadians(radians);
         return isAt(radians, tolerancMult);
     }
@@ -66,7 +50,7 @@ public interface Wrist extends Component {
      *                    means more tolerance
      * @return If the mechanism is within the tolerance of the angle
      */
-    default public boolean isAt(double radians, double toleranceMult) {
+    public boolean isAt(double radians, double toleranceMult) {
         return Math.abs(this.getWristRadians() - radians) < ConstValues.kStem.kWrist.TARGET_TOLERANCE * toleranceMult;
     }
 
@@ -86,6 +70,6 @@ public interface Wrist extends Component {
         return motorRotsToMechanismRads(Units.radiansToRotations(motorRads));
     }
 
-    default public void setCoast(boolean shouldBeCoasting) {
+    public void setCoast(boolean shouldBeCoasting) {
     }
 }

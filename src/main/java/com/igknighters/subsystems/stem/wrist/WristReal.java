@@ -1,7 +1,5 @@
 package com.igknighters.subsystems.stem.wrist;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -16,21 +14,22 @@ import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.constants.HardwareIndex.StemHW;
+import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.util.BootupLogger;
+import com.igknighters.util.CANRetrier;
 import com.igknighters.util.FaultManager;
 
 import edu.wpi.first.math.util.Units;
 
-public class WristReal implements Wrist {
+public class WristReal extends Wrist {
     private final TalonFX motor;
     private final CANcoder cancoder;
 
     private final StatusSignal<Double> motorRots, motorVelo, motorAmps, motorVolts, motorTemp;
     private final StatusSignal<Double> cancoderRots, cancoderVelo;
 
-    private final WristInputs inputs;
-
     public WristReal() {
+        super(0.0);
         motor = new TalonFX(kWrist.MOTOR_ID, kStem.CANBUS);
         motor.getConfigurator().apply(motorConfig());
 
@@ -59,7 +58,8 @@ public class WristReal implements Wrist {
 
         cancoder.optimizeBusUtilization();
 
-        inputs = new WristInputs(Units.rotationsToRadians(cancoderRots.getValue()));
+        super.radians = cancoderRots.getValue();
+
         seedWrist();
 
         BootupLogger.bootupLog("    Wrist initialized (real)");
@@ -82,8 +82,10 @@ public class WristReal implements Wrist {
         cfg.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
         cfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
-        cfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Wrist.mechanismRadsToMotorRots(kWrist.MAX_ANGLE);
-        cfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Wrist.mechanismRadsToMotorRots(kWrist.MIN_ANGLE);
+        cfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Wrist
+                .mechanismRadsToMotorRots(StemPosition.STARTING.wristRads - 0.3);
+        cfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Wrist
+                .mechanismRadsToMotorRots(kWrist.FROZEN_WRIST_ANGLE - Units.degreesToRadians(0.3));
 
         return cfg;
     }
@@ -96,13 +98,17 @@ public class WristReal implements Wrist {
         return cfg;
     }
 
-    private void seedWrist() {
-        motor.setPosition(Wrist.mechanismRadsToMotorRots(inputs.radians));
+    public void seedWrist() {
+        CANRetrier.retryStatusCode(() -> motor.setPosition(Wrist.mechanismRadsToMotorRots(super.radians)), 10);
+    }
+
+    public double getAmps() {
+        return super.amps;
     }
 
     @Override
-    public void setWristRadians(Double radians) {
-        inputs.targetRadians = radians;
+    public void setWristRadians(double radians) {
+        super.targetRadians = radians;
         var posControlRequest = new PositionTorqueCurrentFOC(
                 Wrist.mechanismRadsToMotorRots(radians));
         this.motor.setControl(posControlRequest);
@@ -110,12 +116,12 @@ public class WristReal implements Wrist {
 
     @Override
     public double getWristRadians() {
-        return inputs.radians;
+        return super.radians;
     }
 
     @Override
     public void setVoltageOut(double volts) {
-        inputs.targetRadians = 0.0;
+        super.targetRadians = 0.0;
         motor.setVoltage(volts);
     }
 
@@ -139,24 +145,22 @@ public class WristReal implements Wrist {
         FaultManager.captureFault(
                 StemHW.WristEncoder,
                 BaseStatusSignal.refreshAll(
-                        cancoderRots, cancoderVelo));
+                        cancoderRots));
 
-        inputs.radians = Units.rotationsToRadians(cancoderRots.getValue());
-        inputs.radiansPerSecond = Units.rotationsToRadians(cancoderVelo.getValue());
-        Logger.recordOutput("Stem/Wrist/MotorRads", Wrist.motorRotsToMechanismRads(motorRots.getValue()));
-        inputs.amps = motorAmps.getValue();
-        inputs.volts = motorVolts.getValue();
-        inputs.temp = motorTemp.getValue();
+        super.radians = Wrist.motorRotsToMechanismRads(motorRots.getValue());
+        super.radiansPerSecond = Units.rotationsToRadians(cancoderVelo.getValue());
+        log("EncoderRads", Units.rotationsToRadians(cancoderRots.getValue()));
+        super.amps = motorAmps.getValue();
+        super.volts = motorVolts.getValue();
+        super.temp = motorTemp.getValue();
 
-        if (Math.abs(inputs.radiansPerSecond) < 0.1
-                && Math.abs(inputs.radians - Wrist.motorRotsToMechanismRads(motorRots.getValue())) > 0.1) {
+        if (Math.abs(super.radiansPerSecond) < 0.1
+            && Math.abs(super.radians - Wrist.motorRotsToMechanismRads(motorRots.getValue())) > 0.1) {
             seedWrist();
-            Logger.recordOutput("Stem/Wrist/SeededWrist", true);
+            log("SeededWrist", true);
         } else {
-            Logger.recordOutput("Stem/Wrist/SeededWrist", false);
+            log("SeededWrist", false);
         }
-
-        Logger.processInputs("Stem/Wrist", inputs);
     }
 
 }
