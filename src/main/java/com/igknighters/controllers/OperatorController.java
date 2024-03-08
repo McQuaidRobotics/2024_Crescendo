@@ -24,10 +24,9 @@ public class OperatorController extends ControllerParent {
 
         this.Y.binding = new Binding((trig, allss) -> {
             trig.onTrue(
-                StemCommands.moveTo(allss.stem.get(), StemPosition.STOW_HIGH)
+                StemCommands.moveTo(allss.stem.get(), StemPosition.STOW_HIGH, 2.0)
                 .andThen(
                     UmbrellaCommands.expell(allss.umbrella.get())
-                        .withTimeout(1.0)
                 )
             );
         }, Subsystems.Stem, Subsystems.Umbrella);
