@@ -23,8 +23,10 @@ public class MotionMagicProfileSim {
         this.targetJerk = targetJerk;
     }
 
-    private double sigmoid(double degree1, double degree2, double startingPos, double time) {
-        return (time * (Math.pow((degree1 / degree2) + (time * time), -0.5)) * (degree1 - startingPos)) + startingPos; 
+    private double sigmoid(double startPosition, double endPosition, double rateOfChange, double time) {
+        double limit = 0.001;
+        double horizontalOffset = (1.0 / -rateOfChange) * Math.log(((endPosition * rateOfChange) - (2.0 * limit) - Math.sqrt(Math.pow((2.0 * limit) - (endPosition * rateOfChange), 2) - (4 * Math.pow(limit, 2)))) / (2.0 * limit));
+        return ((endPosition - startPosition) / (1.0 + Math.pow(Math.E, -rateOfChange * (time - horizontalOffset)))) + startPosition;
     }
 
     public double calculatePosition() {
