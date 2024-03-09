@@ -5,6 +5,7 @@ import java.util.function.BiConsumer;
 
 import monologue.MonoDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import monologue.Monologue;
@@ -42,6 +43,9 @@ public class Robot extends UnitTestableRobot {
         } else {
             Monologue.setupMonologueForUnitTest();
         }
+
+        SmartDashboard.putNumber("Auto Aim Shooter RPM", 0.0);
+        
     }
 
     @Override

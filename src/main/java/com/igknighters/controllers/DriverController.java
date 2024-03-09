@@ -8,6 +8,8 @@ import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.subsystems.SubsystemResources.Subsystems;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
@@ -104,7 +106,7 @@ public class DriverController extends ControllerParent {
                                     this),
                             UmbrellaCommands.spinupShooter(
                                     allss.umbrella.get(),
-                                    kControls.AUTO_AIM_SHOOTER_RPM,
+                                    SmartDashboard.getNumber("Auto Aim Shooter RPM", 0.0),
                                     ShooterSpinupReason.AutoAimSpeaker))
                             .finallyDo(allss.umbrella.get()::stopAll)
                             .withName("Highorder Aim"));
