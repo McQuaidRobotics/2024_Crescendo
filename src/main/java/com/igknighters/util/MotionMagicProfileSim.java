@@ -1,57 +1,55 @@
 package com.igknighters.util;
 
+import edu.wpi.first.wpilibj.Timer;
+
 public class MotionMagicProfileSim {
-    final double allowedErrorPercent = 0.05;
-
     double cruiseVelo, targetAccel, targetJerk;
-    double startingPosition, endingPosition, currentPosition;
-    double velo, accel;
+    double startingVelo, startingAccel;
+    double startingPos, endingPos;
+    Timer timer;
 
-    public MotionMagicProfileSim(double cruiseVelo, double targetAccel, double targetJerk) {
+    public MotionMagicProfileSim(double cruiseVelo, double targetAccel, double targetJerk, double gearRation) {
+        setMotionProfile(cruiseVelo / gearRation, targetAccel / gearRation, targetJerk / gearRation);
+        startingPos = 0.0;
+        endingPos = 0.0;
+        startingVelo = 0.0;
+        startingAccel = 0.0;
+        timer = new Timer();
+    }
+
+    public void setMotionProfile(double cruiseVelo, double targetAccel, double targetJerk) {
         this.cruiseVelo = cruiseVelo;
         this.targetAccel = targetAccel;
         this.targetJerk = targetJerk;
-        velo = 0.0;
-        accel = 0.0;
-        startingPosition = 0.0;
-        endingPosition = 0.0;
     }
 
-    public void setState(double velo, double currentPosition, double targetPosition) {
-        this.velo = velo;
-        startingPosition = currentPosition;
-        this.currentPosition = currentPosition;
-        endingPosition = targetPosition;
+    private double sigmoid(double degree1, double degree2, double startingPos, double time) {
+        return (time * (Math.pow((degree1 / degree2) + (time * time), -0.5)) * (degree1 - startingPos)) + startingPos; 
     }
 
-    public double calculate() {
-        return 0.0;
+    public double calculatePosition() {
+        double time = timer.get();
+        double accel = Math.abs(sigmoid(targetAccel, targetJerk, startingAccel, time));
+        double velo = Math.abs(sigmoid(cruiseVelo, accel, startingVelo, time));
+        return sigmoid(Math.abs(endingPos), velo, startingPos, time) * Math.signum(endingPos);
     }
 
-    private boolean isAt(double value, double target, double allowedPercentError) {
-        return Math.abs((value - target)) / target >= allowedPercentError;
+    public double calculateVelocity() {
+        double time = timer.get();
+        double accel = Math.abs(sigmoid(targetAccel, targetJerk, startingAccel, time));
+        return sigmoid(cruiseVelo, accel, startingVelo, time);
     }
 
-    private void moveAccelTowards(double targetAccel) {
-        if (isAt(accel, targetAccel, allowedErrorPercent)) accel = targetAccel;
-        else if (!isAt(accel, targetAccel, allowedErrorPercent) && accel < targetAccel) accel += targetJerk;
-        else if (!isAt(accel, targetAccel, allowedErrorPercent) && accel > targetAccel) accel -= targetJerk;
+    public double calculateAcceleration() {
+        double time = timer.get();
+        return sigmoid(targetAccel, targetJerk, startingAccel, time);
     }
 
-    private void moveVeloTowards(double targetVelo) {
-        if (isAt(velo, targetVelo, allowedErrorPercent)) velo = cruiseVelo;
-        else if (!isAt(velo, targetVelo, allowedErrorPercent) && velo < cruiseVelo) velo += accel;
-        else if (!isAt(velo, targetVelo, allowedErrorPercent) && velo > cruiseVelo) velo -= accel;
-    }
-
-    public void update(double currentPosition) {
-        double percentThroughMotion = (Math.abs(currentPosition) - Math.abs(startingPosition)) / (Math.abs(endingPosition) - Math.abs(startingPosition));
-        
-        //cruiseVelo = (jerk * x) * x 
-        //cruiseVelo = jerk(x) + x^2 
-        //cruiseVelo = 
-
-        moveAccelTowards(targetAccel);
-        moveVeloTowards(cruiseVelo);
+    public void setState(double currentPosition, double targetPosition, double startingVelo, double startingAccel) {
+        startingPos = currentPosition;
+        endingPos = targetPosition;
+        this.startingVelo = startingVelo;
+        this.startingAccel = startingAccel;
+        timer.restart();
     }
 }

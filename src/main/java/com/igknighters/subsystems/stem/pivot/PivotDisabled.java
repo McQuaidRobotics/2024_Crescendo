@@ -1,20 +1,23 @@
 package com.igknighters.subsystems.stem.pivot;
 
+import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.subsystems.stem.StemPosition;
-import edu.wpi.first.math.MathUtil;
+import com.igknighters.util.MotionMagicProfileSim;
+
 import edu.wpi.first.wpilibj.RobotController;
 
 public class PivotDisabled extends Pivot {
     final double maxVelo = (2.37 / 50.0) * 0.75;
     final double maxAcc = 0.0001;
     final double maxJerk = 0.0001;
-    double velo;
-    double acc;
+
+    MotionMagicProfileSim motionMagicProfileSim;
+    double accelRadsPerSecond;
 
     public PivotDisabled() {
         super(StemPosition.STARTING.pivotRads);
-        this.velo = 0.0;
-        this.acc = 0.0;
+        motionMagicProfileSim = new MotionMagicProfileSim(maxVelo, maxAcc, maxJerk, kPivot.MOTOR_TO_MECHANISM_RATIO);
+        accelRadsPerSecond = 0.0;
     }
 
     @Override
@@ -24,15 +27,13 @@ public class PivotDisabled extends Pivot {
 
     @Override
     public void setPivotRadians(double radians) {
-        // double velo = MathUtil.clamp(radians - super.radians, -maxVelo, maxVelo);
-
-        if (super.targetRadians != radians) velo = 0.0;
+        if (super.targetRadians != radians) 
+            motionMagicProfileSim.setState(super.radians, radians, super.radiansPerSecond, accelRadsPerSecond);
         super.targetRadians = radians;
 
-        acc += maxJerk;
-        acc = MathUtil.clamp(acc, -maxAcc, maxAcc);
-        velo += acc;
-        super.radians += MathUtil.clamp(velo, -maxVelo, maxVelo) * Math.signum(radians - super.radians);
+        super.radians = motionMagicProfileSim.calculatePosition();
+        super.radiansPerSecond = motionMagicProfileSim.calculateVelocity();
+        accelRadsPerSecond = motionMagicProfileSim.calculateAcceleration();
     }
 
     @Override
