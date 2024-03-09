@@ -4,7 +4,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
@@ -66,7 +66,6 @@ public class WristRealFused extends Wrist {
 
     private TalonFXConfiguration motorConfig() {
         TalonFXConfiguration cfg = new TalonFXConfiguration();
-        // cfg.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
         cfg.Slot0.kP = kWrist.MOTOR_kP;
         cfg.Slot0.kI = kWrist.MOTOR_kI;
         cfg.Slot0.kD = kWrist.MOTOR_kD;
@@ -78,8 +77,12 @@ public class WristRealFused extends Wrist {
                 ? InvertedValue.Clockwise_Positive
                 : InvertedValue.CounterClockwise_Positive;
 
+        cfg.MotionMagic.MotionMagicCruiseVelocity = kWrist.MAX_VELOCITY;
+        cfg.MotionMagic.MotionMagicAcceleration = kWrist.MAX_ACCELERATION;
+        cfg.MotionMagic.MotionMagicJerk = kWrist.MAX_JERK;
+
         cfg.Feedback.FeedbackRemoteSensorID = kWrist.CANCODER_ID;
-        cfg.Feedback.RotorToSensorRatio = (1.0 / slope);
+        cfg.Feedback.RotorToSensorRatio = kWrist.MOTOR_TO_MECHANISM_RATIO;
         cfg.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
 
         return cfg;
@@ -96,7 +99,7 @@ public class WristRealFused extends Wrist {
     @Override
     public void setWristRadians(double targetRadians) {
         super.targetRadians = targetRadians;
-        this.motor.setControl(new PositionTorqueCurrentFOC(Units.radiansToRotations(targetRadians)));
+        this.motor.setControl(new MotionMagicVoltage(Units.radiansToRotations(targetRadians)));
     }
 
     @Override

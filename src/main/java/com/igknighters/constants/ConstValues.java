@@ -167,6 +167,7 @@ public final class ConstValues {
             static final double L1_DRIVE = 8.14;
             static final double L2_DRIVE = (50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0);
             static final double L3_DRIVE = (50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0);
+            static final double L3_DRIVE_KRAKEN = (50.0 / 16.0) * (16.0 / 28.0) * (45.0 / 15.0);
             static final double L4_DRIVE = 5.14;
 
             static final double ANGLE = 150.0 / 7.0;
@@ -187,7 +188,7 @@ public final class ConstValues {
 
         public static final double ANGLE_GEAR_RATIO = SwerveGearRatios.ANGLE;
 
-        public static final double DRIVE_GEAR_RATIO = SwerveGearRatios.L3_DRIVE;
+        public static final double DRIVE_GEAR_RATIO = SwerveGearRatios.L3_DRIVE_KRAKEN;
 
         /**
          * Not every motor can output the max speed at all times, add a buffer to make
@@ -411,7 +412,7 @@ public final class ConstValues {
             public static final double MOTOR_kI = 0.0;
             public static final double MOTOR_kD = 0.0;
 
-            public static final double MAX_VELOCITY = 1300;
+            public static final double MAX_VELOCITY = 100;
             public static final double MAX_ACCELERATION = 3900;
             public static final double MAX_JERK = 7800;
 
@@ -442,17 +443,17 @@ public final class ConstValues {
             public static final double MOTOR_kI = 0.0;
             public static final double MOTOR_kD = 0.1;
 
-            public static final double MAX_VELOCITY = 95;
-            public static final double MAX_ACCELERATION = 750;
-            public static final double MAX_JERK = 0;
+            public static final double MAX_VELOCITY = 50;
+            public static final double MAX_ACCELERATION = 400;
+            public static final double MAX_JERK = 2000;
 
-            public static final double MOTOR_TO_MECHANISM_RATIO = 45.0;
+            public static final double MOTOR_TO_MECHANISM_RATIO = 20.0;
 
             public static final double SPROCKET_CIRCUMFERENCE = 0.895 * TAU * Conv.INCHES_TO_METERS;
 
             public static final double MIN_METERS = 16.0 * Conv.INCHES_TO_METERS;
             public static final double MAX_METERS = MIN_METERS
-                    + ((91.9 / MOTOR_TO_MECHANISM_RATIO) * SPROCKET_CIRCUMFERENCE);
+                    + ((40.427 / MOTOR_TO_MECHANISM_RATIO) * SPROCKET_CIRCUMFERENCE);
 
             public static final boolean INVERTED = false;
 
@@ -473,23 +474,25 @@ public final class ConstValues {
             public static final int MOTOR_ID = 16;
             public static final int CANCODER_ID = 26;
 
-            public static final double MOTOR_kP = 50.0;
+            public static final double MOTOR_kP = 210.0;
             public static final double MOTOR_kI = 0.0;
-            public static final double MOTOR_kD = 1.0;
-            public static final double MOTOR_kS = 0.1;
-            public static final double MOTOR_kV = 2.0;
+            public static final double MOTOR_kD = 0.0;
+            public static final double MOTOR_kS = 0.12;
+            public static final double MOTOR_kV = 0.0;
 
             public static final boolean INVERTED = false;
 
-            public static final double CANCODER_OFFSET = -0.5760078125; // offset for zero to be flat
+            public static final double CANCODER_OFFSET = -0.5158691;
 
-            public static final double MIN_ANGLE = 29.0 * Conv.DEGREES_TO_RADIANS;
-            public static final double MAX_ANGLE = 115.0 * Conv.DEGREES_TO_RADIANS;
+            public static final double MIN_ANGLE = 8.0 * Conv.DEGREES_TO_RADIANS;
+            public static final double MAX_ANGLE = 117.0 * Conv.DEGREES_TO_RADIANS;
             public static final double FROZEN_WRIST_ANGLE = 72.0 * Conv.DEGREES_TO_RADIANS;
 
-            public static final double MAX_VELOCITY = 1200;
-            public static final double MAX_ACCELERATION = 1800;
-            public static final double MAX_JERK = 1800;
+            public static final double MOTOR_TO_MECHANISM_RATIO = 5.0 * 5.0 * (84.0 / 22.0);
+
+            public static final double MAX_VELOCITY = 20;
+            public static final double MAX_ACCELERATION = 80;
+            public static final double MAX_JERK = 320;
 
             /**
              * Tolerance in radians

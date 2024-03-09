@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import monologue.MonoDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -142,6 +143,7 @@ public class StemCommands {
             this.stem = stem;
             this.aimStrategy = aimStrategy;
             this.canFinish = canFinish;
+            SmartDashboard.putNumber("Note Initial Velo", 0.0);
         }
 
         private StemPosition stationaryWristSolve(double distance, double wristRads) {
@@ -163,7 +165,7 @@ public class StemCommands {
                     kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
                     distance,
                     FieldConstants.SPEAKER.getZ(),
-                    kUmbrella.NOTE_VELO);
+                    SmartDashboard.getNumber("Note Initial Velo", 0.0));
 
             return StemPosition.fromRadians(
                     kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
@@ -241,10 +243,10 @@ public class StemCommands {
             if (aimStrategy.equals(AimStrategy.STATIONARY_WRIST)) {
                 hasFinished = stem.setStemPosition(stationaryWristSolve(distance, stem.getStemPosition().wristRads));
             } else if (aimStrategy.equals(AimStrategy.STATIONARY_PIVOT)) {
-                var pose = stationaryPivotSolve(distance);
-                MonoDashboard.put("Aim/Linear", Units.radiansToDegrees(pose.getWristRads()));
-                MonoDashboard.put("Aim/Gravity",
-                        Units.radiansToDegrees(stationaryPivotSolveGravity(distance).getWristRads()));
+                var pose = stationaryPivotSolveGravity(distance);
+                MonoDashboard.put("Aim/Gravity", Units.radiansToDegrees(pose.getWristRads()));
+                MonoDashboard.put("Aim/Linear",
+                        Units.radiansToDegrees(stationaryPivotSolve(distance).getWristRads()));
                 hasFinished = stem.setStemPosition(pose);
             } else if (aimStrategy.equals(AimStrategy.MAX_HEIGHT)) {
                 hasFinished = stem.setStemPosition(maxHeightSolve(distance));

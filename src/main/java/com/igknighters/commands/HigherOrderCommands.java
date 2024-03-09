@@ -25,13 +25,11 @@ public class HigherOrderCommands {
                         return pose.wristRads > (StemPosition.INTAKE.wristRads
                                 + kWrist.MIN_ANGLE) / 2.0
                                 && pose.telescopeMeters > kTelescope.MIN_METERS;
-                    })
-                .andThen(
+                }).andThen(
                     UmbrellaCommands.intake(umbrella)
-                        .until(() -> umbrella.holdingGamepiece())),
-                    StemCommands.holdAt(stem, StemPosition.STOW)
-                )
-                .withName("Intake");
+                        .until(() -> umbrella.holdingGamepiece()))
+                ).withName("Intake")
+            .andThen(StemCommands.holdAt(stem, StemPosition.STOW));
     }
 
     public static Command aim(

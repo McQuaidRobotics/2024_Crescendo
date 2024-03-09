@@ -153,7 +153,7 @@ public class TelescopeReal extends Telescope {
             StemHW.TelescopeMotor,
             BaseStatusSignal.refreshAll(
                 motorRots, motorVelo,
-                /* motorVolts, motorAmps ,*/
+                /* motorVolts, */ motorAmps,
                 /* motorTemp, */ forwardLimitSwitch,
                 reverseLimitSwitch));
 
