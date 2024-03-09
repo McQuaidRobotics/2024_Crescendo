@@ -205,7 +205,7 @@ public class PivotReal extends Pivot {
         super.gyroRadians = Units.degreesToRadians(gyroMeasurement.getValue() + 90);
 
         if (Math.abs(super.radiansPerSecond) < 0.1
-                && Math.abs(super.radians - getPivotRadiansPigeon()) > 0.1 && !GlobalState.isClimbing()) {
+                && Math.abs(super.radians - getPivotRadiansPigeon()) > Units.degreesToRadians(1.0) && !GlobalState.isClimbing()) {
             seedPivot();
             log("SeededPivot", true);
         } else {
