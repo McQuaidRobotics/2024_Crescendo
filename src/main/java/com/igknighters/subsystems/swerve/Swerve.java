@@ -188,7 +188,10 @@ public class Swerve extends SubsystemBase implements Logged {
     }
 
     public Rotation2d rotationRelativeToPose(Rotation2d wantedAngleOffet, Translation2d pose) {
-        Translation2d currentTrans = getPose().getTranslation();
+        return rotationRelativeToPose(getPose().getTranslation(), wantedAngleOffet, pose);
+    }
+
+    public Rotation2d rotationRelativeToPose(Translation2d currentTrans, Rotation2d wantedAngleOffet, Translation2d pose) {
         double angleBetween = Math.atan2(
                 pose.getY() - currentTrans.getY(),
                 pose.getX() - currentTrans.getX());

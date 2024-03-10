@@ -16,7 +16,9 @@ public abstract class Pivot extends Component {
     @Log.NT protected double leftTemp = 0.0;
     @Log.NT protected double rightTemp = 0.0;
     @Log.NT protected double gyroRadians = 0.0;
-    @Log.NT protected boolean isLimitFwdSwitchHit = false, isLimitRevSwitchHit = false;
+    @Log.NT protected double gyroRadiansPerSecondAbs = 0.0;
+    @Log.NT protected boolean isLimitFwdSwitchHit = false;
+    @Log.NT protected boolean isLimitRevSwitchHit = false;
 
     protected Pivot(double startingRadians) {
         this.radians = startingRadians;

@@ -12,6 +12,7 @@ import monologue.Monologue;
 
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstantHelper;
+import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.util.CANBusLogging;
 import com.igknighters.util.ShuffleboardApi;
@@ -44,8 +45,7 @@ public class Robot extends UnitTestableRobot {
             Monologue.setupMonologueForUnitTest();
         }
 
-        SmartDashboard.putNumber("Auto Aim Shooter RPM", 0.0);
-        
+        SmartDashboard.putNumber("Auto Aim Shooter RPM", kControls.AUTO_AIM_SHOOTER_RPM);
     }
 
     @Override

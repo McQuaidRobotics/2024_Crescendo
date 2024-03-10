@@ -112,7 +112,7 @@ public class StemPosition implements StructSerializable {
         }
     };
 
-    public static final StemPosition INTAKE = new StemPosition(Units.degreesToRadians(10.5),
+    public static final StemPosition INTAKE = new StemPosition(Units.degreesToRadians(10.9),
             Units.degreesToRadians(74.0), kTelescope.MIN_METERS + Units.inchesToMeters(4.5)) {
 
         @Override
@@ -143,14 +143,6 @@ public class StemPosition implements StructSerializable {
             return "AmpScore";
         }
 
-    };
-
-    public static final StemPosition CLIMB = new StemPosition(1.245, 0.783, 0.626) {
-
-        @Override
-        public String toString() {
-            return "Climb";
-        }
     };
 
     public static final StemPosition STARTING = new StemPosition(

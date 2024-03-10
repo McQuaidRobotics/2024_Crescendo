@@ -342,17 +342,17 @@ public final class ConstValues {
         public static final String CANBUS = "SuperStructureBus";
 
         public static final class kShooter {
-            public static final double MOTOR_UPPER_kP = 0.08;
-            public static final double MOTOR_UPPER_kI = 0.0;
-            public static final double MOTOR_UPPER_kD = 0.00;
-            public static final double MOTOR_UPPER_kS = 0.1;
-            public static final double MOTOR_UPPER_kV = 0.124;
+            public static final double MOTOR_RIGHT_kP = 0.06;
+            public static final double MOTOR_RIGHT_kI = 0.0;
+            public static final double MOTOR_RIGHT_kD = 0.00;
+            public static final double MOTOR_RIGHT_kS = 0.125;
+            public static final double MOTOR_RIGHT_kV = 0.06;
 
-            public static final double MOTOR_LOWER_kP = 0.08;
-            public static final double MOTOR_LOWER_kI = 0.0;
-            public static final double MOTOR_LOWER_kD = 0.00;
-            public static final double MOTOR_LOWER_kS = 0.1;
-            public static final double MOTOR_LOWER_kV = 0.124;
+            public static final double MOTOR_LEFT_kP = 0.06;
+            public static final double MOTOR_LEFT_kI = 0.0;
+            public static final double MOTOR_LEFT_kD = 0.00;
+            public static final double MOTOR_LEFT_kS = 0.115;
+            public static final double MOTOR_LEFT_kV = 0.061;
 
             public static final int LEFT_MOTOR_ID = 17;
             public static final int RIGHT_MOTOR_ID = 18;
@@ -363,7 +363,7 @@ public final class ConstValues {
             public static final double DEFAULT_TOLERANCE = 0.03;
 
             public static final double PEAK_CURRENT = 80.0;
-            public static final double MIN_SHOOT_SPEED = 1000.0 * Conv.RPM_TO_RADIANS_PER_SECOND;
+            public static final double MAX_SHOOT_SPEED = 8000.0 * Conv.RPM_TO_RADIANS_PER_SECOND;
 
             public static final double LEFT_MOTOR_DIFF = 0.9;
         }
