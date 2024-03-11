@@ -16,8 +16,9 @@ import com.ctre.phoenix6.signals.ReverseLimitTypeValue;
 import com.ctre.phoenix6.signals.ReverseLimitValue;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 
-import com.igknighters.GlobalState;
+import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.constants.HardwareIndex.StemHW;
@@ -101,6 +102,8 @@ public class PivotReal extends Pivot {
         cfg.Slot0.kP = kPivot.MOTOR_kP;
         cfg.Slot0.kI = kPivot.MOTOR_kI;
         cfg.Slot0.kD = kPivot.MOTOR_kD;
+        cfg.Slot0.kS = kPivot.MOTOR_kS;
+        cfg.Slot0.kV = kPivot.MOTOR_kV;
 
         cfg.MotionMagic.MotionMagicCruiseVelocity = kPivot.MAX_VELOCITY;
         cfg.MotionMagic.MotionMagicAcceleration = kPivot.MAX_ACCELERATION;
@@ -200,10 +203,14 @@ public class PivotReal extends Pivot {
         super.isLimitFwdSwitchHit = forwardLimitSwitch.getValue() == ForwardLimitValue.Open;
         super.isLimitRevSwitchHit = reverseLimitSwitch.getValue() == ReverseLimitValue.Open;
 
-        super.gyroRadians = Units.degreesToRadians(gyroMeasurement.getValue() + 90);
+        double newGyroRadians = Units.degreesToRadians(gyroMeasurement.getValue() + 90);
+        super.gyroRadiansPerSecondAbs = Math.abs(super.gyroRadians - newGyroRadians) / ConstValues.PERIODIC_TIME;
+        super.gyroRadians = newGyroRadians;
 
-        if (Math.abs(super.radiansPerSecond) < 0.1
-                && Math.abs(super.radians - getPivotRadiansPigeon()) > 0.1 && !GlobalState.isClimbing()) {
+        if (Math.abs(super.radiansPerSecond) < 0.01
+                && Math.abs(super.gyroRadiansPerSecondAbs) < 0.01
+                && Math.abs(super.radians - getPivotRadiansPigeon()) > Units.degreesToRadians(1.0)
+                && DriverStation.isDisabled()) {
             seedPivot();
             log("SeededPivot", true);
         } else {

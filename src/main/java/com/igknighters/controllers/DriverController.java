@@ -8,6 +8,7 @@ import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.subsystems.SubsystemResources.Subsystems;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
+
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
@@ -37,7 +38,8 @@ public class DriverController extends ControllerParent {
                                             2000,
                                             ShooterSpinupReason.Amp))
                                     .finallyDo(
-                                            () -> allss.umbrella.get().stopAll()));
+                                            () -> allss.umbrella.get()
+                                                    .stopAll()));
                 },
                 Subsystems.Stem,
                 Subsystems.Umbrella);
@@ -46,35 +48,46 @@ public class DriverController extends ControllerParent {
             trig.onTrue(
                     StemCommands.holdAt(
                             allss.stem.get(),
-                            StemPosition.FROZEN_WRIST_STOW));
+                            StemPosition.STOW));
         }, Subsystems.Stem);
 
-        this.Y.binding = new Binding(
-                (trig, allss) -> {
-                    trig.onTrue(
-                            Commands.parallel(
-                                    StemCommands.holdAt(
-                                            allss.stem.get(),
-                                            StemPosition.SUBWOOFER),
-                                    UmbrellaCommands.spinupShooter(
-                                            allss.umbrella.get(),
-                                            kControls.SHOOTER_RPM,
-                                            ShooterSpinupReason.ManualAimSpeaker))
-                                    .finallyDo(
-                                            () -> {
-                                                allss.umbrella.get().stopAll();
-                                            }));
-                },
-                Subsystems.Stem,
-                Subsystems.Umbrella);
+        // this.Y.binding = new Binding(
+        //         (trig, allss) -> {
+        //             trig.onTrue(
+        //                     Commands.parallel(
+        //                             StemCommands.holdAt(
+        //                                     allss.stem.get(),
+        //                                     StemPosition.SUBWOOFER),
+        //                             UmbrellaCommands.spinupShooter(
+        //                                     allss.umbrella.get(),
+        //                                     kControls.SHOOTER_RPM,
+        //                                     ShooterSpinupReason.ManualAimSpeaker))
+        //                             .finallyDo(
+        //                                     () -> {
+        //                                         allss.umbrella.get()
+        //                                                 .stopAll();
+        //                                     }));
+        //         },
+        //         Subsystems.Stem,
+        //         Subsystems.Umbrella);
+
+        this.Y.binding = new Binding((trig, allss) -> {
+                trig.onTrue(
+                        StemCommands.holdAt(
+                                allss.stem.get(),
+                                StemPosition.STARTING));
+            }, Subsystems.Stem);
 
         /// BUMPER
         // # Our main driver doesn't use bumpers
         this.LB.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
             trig.or(RB.trigger).onTrue(
-                    StemCommands.holdAt(
+                    Commands.parallel(
+                        StemCommands.holdAt(
                             allss.stem.get(),
-                            StemPosition.SUBWOOFER));
+                            StemPosition.STOW),
+                            UmbrellaCommands.spinupShooter(allss.umbrella.get(), kControls.SHOOTER_RPM, ShooterSpinupReason.ManualAimSpeaker)
+                    ));
         });
 
         // this.RB.binding = # Is used as an or with LB
@@ -102,10 +115,9 @@ public class DriverController extends ControllerParent {
                                     this),
                             UmbrellaCommands.spinupShooter(
                                     allss.umbrella.get(),
-                                    kControls.AUTO_AIM_SHOOTER_RPM,
+                                    kControls.SHOOTER_RPM,
                                     ShooterSpinupReason.AutoAimSpeaker))
-                            .finallyDo(
-                                    allss.umbrella.get()::stopAll)
+                            .finallyDo(allss.umbrella.get()::stopAll)
                             .withName("Highorder Aim"));
         }, Subsystems.Swerve, Subsystems.Stem, Subsystems.Umbrella);
 
@@ -125,7 +137,12 @@ public class DriverController extends ControllerParent {
 
         // this.DPD.binding =
 
-        // this.DPL.binding =
+        this.DPL.binding = new Binding((trig, allss) -> {
+                trig.onTrue(Commands.runOnce(() -> {
+                        allss.stem.get().stopMechanisms();
+                        allss.umbrella.get().stopAll();
+                }));
+        }, Subsystems.Stem, Subsystems.Umbrella); 
 
         this.DPU.binding = new Binding((trig, allss) -> {
             trig.onTrue(StemCommands.holdAt(allss.stem.get(), StemPosition.STARTING));

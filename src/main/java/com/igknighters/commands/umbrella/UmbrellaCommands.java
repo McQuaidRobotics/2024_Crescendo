@@ -33,6 +33,13 @@ public class UmbrellaCommands {
         }).withName("Spinup Shooter");
     }
 
+    // public static Command spinupShooterCustom(Umbrella umbrella, ShooterSpinupReason reason) {
+    //     return umbrella.run(() -> {
+    //         umbrella.spinupShooterToRPM(SmartDashboard.getNumber("Auto Aim Shooter RPM", kControls.AUTO_AIM_SHOOTER_RPM));
+    //         umbrella.pushSpinupReason(reason);
+    //     }).withName("Spinup Shooter");
+    // }
+
     /**
      * A command that waits until the shooter is spun up to a certain speed
      * 

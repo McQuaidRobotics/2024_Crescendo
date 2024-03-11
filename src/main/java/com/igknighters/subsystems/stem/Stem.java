@@ -37,7 +37,7 @@ public class Stem extends SubsystemBase implements Logged {
         } else {
             pivot = new PivotReal();
             telescope = new TelescopeReal();
-            wrist = new WristReal();
+            wrist = new WristRealFused();
         }
 
         visualizer = new StemVisualizer();

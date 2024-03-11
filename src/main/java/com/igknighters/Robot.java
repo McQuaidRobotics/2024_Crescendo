@@ -5,12 +5,14 @@ import java.util.function.BiConsumer;
 
 import monologue.MonoDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import monologue.Monologue;
 
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstantHelper;
+import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.util.ShuffleboardApi;
 import com.igknighters.util.Tracer;
@@ -43,6 +45,8 @@ public class Robot extends UnitTestableRobot {
         } else {
             Monologue.setupMonologueForUnitTest();
         }
+
+        SmartDashboard.putNumber("Auto Aim Shooter RPM", kControls.AUTO_AIM_SHOOTER_RPM);
     }
 
     @Override

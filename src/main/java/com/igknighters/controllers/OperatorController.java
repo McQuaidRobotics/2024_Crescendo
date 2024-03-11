@@ -1,8 +1,8 @@
 package com.igknighters.controllers;
 
-import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.subsystems.SubsystemResources.Subsystems;
-import com.igknighters.subsystems.stem.StemPosition;
+
+import edu.wpi.first.wpilibj2.command.Commands;
 
 public class OperatorController extends ControllerParent {
     public double frozenWristRadsOffset = 0.0;
@@ -12,11 +12,7 @@ public class OperatorController extends ControllerParent {
         // disregard null safety as it is checked on assignment
 
         /// FACE BUTTONS
-        this.A.binding = new Binding((trig, allss) -> {
-            trig.onTrue(
-                StemCommands.holdAt(allss.stem.get(), StemPosition.CLIMB)
-            );
-        }, Subsystems.Stem);
+        // this.A.binding = 
 
         // this.B.binding =
 
@@ -40,14 +36,7 @@ public class OperatorController extends ControllerParent {
         // this.RS.binding =
 
         /// TRIGGERS
-        this.LT.binding = new Binding((trig, allss) -> {
-            trig.and(this.RT.trigger).whileTrue(
-                    StemCommands.LimitedManualControl(
-                            allss.stem.get(),
-                            this.leftStickY(),
-                            this.rightStickY(),
-                            0.225));
-        }, Subsystems.Stem);
+        // this.LT.binding = 
 
         // this.RT.binding = DON'T USE!!! OTHER TRIGGERS COMMANDS USES BOTH TRIGGERS!!!
 
@@ -56,7 +45,12 @@ public class OperatorController extends ControllerParent {
 
         // this.DPD.binding =
 
-        // this.DPL.binding =
+        this.DPL.binding = new Binding((trig, allss) -> {
+            trig.onTrue(Commands.runOnce(() -> {
+                    allss.stem.get().stopMechanisms();
+                    allss.umbrella.get().stopAll();
+            }));
+    }, Subsystems.Stem, Subsystems.Umbrella);
 
         // this.DPU.binding = 
     }

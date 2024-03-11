@@ -53,11 +53,11 @@ public class ShooterReal extends Shooter {
 
     private TalonFXConfiguration motorRightConfig() {
         var cfg = new TalonFXConfiguration();
-        cfg.Slot0.kP = kShooter.MOTOR_UPPER_kP;
-        cfg.Slot0.kI = kShooter.MOTOR_UPPER_kI;
-        cfg.Slot0.kD = kShooter.MOTOR_UPPER_kD;
-        cfg.Slot0.kS = kShooter.MOTOR_UPPER_kS;
-        cfg.Slot0.kV = kShooter.MOTOR_UPPER_kV;
+        cfg.Slot0.kP = kShooter.MOTOR_RIGHT_kP;
+        cfg.Slot0.kI = kShooter.MOTOR_RIGHT_kI;
+        cfg.Slot0.kD = kShooter.MOTOR_RIGHT_kD;
+        cfg.Slot0.kS = kShooter.MOTOR_RIGHT_kS;
+        cfg.Slot0.kV = kShooter.MOTOR_RIGHT_kV;
 
         cfg.CurrentLimits.StatorCurrentLimit = kShooter.PEAK_CURRENT;
         cfg.CurrentLimits.StatorCurrentLimitEnable = true;
@@ -73,11 +73,11 @@ public class ShooterReal extends Shooter {
 
     private TalonFXConfiguration motorLeftConfig() {
         var cfg = new TalonFXConfiguration();
-        cfg.Slot0.kP = kShooter.MOTOR_LOWER_kP;
-        cfg.Slot0.kI = kShooter.MOTOR_LOWER_kI;
-        cfg.Slot0.kD = kShooter.MOTOR_LOWER_kD;
-        cfg.Slot0.kS = kShooter.MOTOR_LOWER_kS;
-        cfg.Slot0.kV = kShooter.MOTOR_LOWER_kV;
+        cfg.Slot0.kP = kShooter.MOTOR_LEFT_kP;
+        cfg.Slot0.kI = kShooter.MOTOR_LEFT_kI;
+        cfg.Slot0.kD = kShooter.MOTOR_LEFT_kD;
+        cfg.Slot0.kS = kShooter.MOTOR_LEFT_kS;
+        cfg.Slot0.kV = kShooter.MOTOR_LEFT_kV;
 
         cfg.CurrentLimits.StatorCurrentLimit = kShooter.PEAK_CURRENT;
         cfg.CurrentLimits.StatorCurrentLimitEnable = true;
@@ -107,8 +107,8 @@ public class ShooterReal extends Shooter {
     public void setSpeed(double speedRadPerSec) {
         super.targetRadiansPerSecondRight = speedRadPerSec;
         super.targetRadiansPerSecondLeft = speedRadPerSec * kShooter.LEFT_MOTOR_DIFF;
-        rightMotor.setControl(controlReq.withVelocity(Units.radiansToRotations(super.targetRadiansPerSecondRight)));
-        leftMotor.setControl(controlReq.withVelocity(Units.radiansToRotations(super.targetRadiansPerSecondLeft)));
+        rightMotor.setControl(new VelocityVoltage(Units.radiansToRotations(super.targetRadiansPerSecondRight)));
+        leftMotor.setControl(new VelocityVoltage(Units.radiansToRotations(super.targetRadiansPerSecondLeft)));
     }
 
     @Override
@@ -143,12 +143,13 @@ public class ShooterReal extends Shooter {
                 voltSignalLeft,
                 currentSignalLeft);
 
-        super.radiansPerSecondRight = Units.rotationsToRadians(veloSignalRight.getValue());
+        super.radiansPerSecondRight = Units.rotationsToRadians(veloSignalRight.getValue()) * kShooter.MECHANISM_RATIO;
         super.voltsRight = voltSignalRight.getValue();
         super.ampsRight = currentSignalRight.getValue();
 
-        super.radiansPerSecondLeft = Units.rotationsToRadians(veloSignalLeft.getValue());
+        super.radiansPerSecondLeft = Units.rotationsToRadians(veloSignalLeft.getValue()) * kShooter.MECHANISM_RATIO;
         super.voltsLeft = voltSignalLeft.getValue();
         super.ampsLeft = currentSignalLeft.getValue();
+        super.tempLeft = tempSignalLeft.getValue();
     }
 }
