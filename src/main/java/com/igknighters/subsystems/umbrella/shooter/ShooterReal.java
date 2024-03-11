@@ -105,10 +105,12 @@ public class ShooterReal extends Shooter {
 
     @Override
     public void setSpeed(double speedRadPerSec) {
-        super.targetRadiansPerSecondRight = speedRadPerSec;
-        super.targetRadiansPerSecondLeft = speedRadPerSec * kShooter.LEFT_MOTOR_DIFF;
-        rightMotor.setControl(new VelocityVoltage(Units.radiansToRotations(super.targetRadiansPerSecondRight)));
-        leftMotor.setControl(new VelocityVoltage(Units.radiansToRotations(super.targetRadiansPerSecondLeft)));
+        speedRadPerSec = Math.min(speedRadPerSec, kShooter.MAX_SHOOT_SPEED);
+
+        super.targetRadiansPerSecondRight = speedRadPerSec / kShooter.MECHANISM_RATIO;
+        super.targetRadiansPerSecondLeft = (speedRadPerSec * kShooter.LEFT_MOTOR_DIFF);
+        rightMotor.setControl(controlReq.withVelocity(Units.radiansToRotations(super.targetRadiansPerSecondRight)));
+        leftMotor.setControl(controlReq.withVelocity(Units.radiansToRotations(super.targetRadiansPerSecondLeft)));
     }
 
     @Override
@@ -150,6 +152,8 @@ public class ShooterReal extends Shooter {
         super.radiansPerSecondLeft = Units.rotationsToRadians(veloSignalLeft.getValue()) * kShooter.MECHANISM_RATIO;
         super.voltsLeft = voltSignalLeft.getValue();
         super.ampsLeft = currentSignalLeft.getValue();
-        super.tempLeft = tempSignalLeft.getValue();
+
+        super.shooterRightRPM = Units.radiansPerSecondToRotationsPerMinute(radiansPerSecondRight);
+        super.shooterLeftRPM = Units.radiansPerSecondToRotationsPerMinute(radiansPerSecondLeft);
     }
 }
