@@ -60,7 +60,7 @@ public class Tracer {
         if (!ConstValues.DEBUG)
             return;
         trace.add(name);
-        traceStartTimes.put(traceStack(), Timer.getFPGATimestamp() / 1_000.0);
+        traceStartTimes.put(traceStack(), Timer.getFPGATimestamp() * 1_000.0);
     }
 
     /**
@@ -76,7 +76,7 @@ public class Tracer {
             return;
         try {
             var startTime = traceStartTimes.get(traceStack());
-            traceTimes.put(traceStack(), Timer.getFPGATimestamp() / 1_000.0 - startTime);
+            traceTimes.put(traceStack(), Timer.getFPGATimestamp() * 1_000.0 - startTime);
             trace.remove(trace.size() - 1);
             if (trace.size() == 0) {
                 endCycle();
