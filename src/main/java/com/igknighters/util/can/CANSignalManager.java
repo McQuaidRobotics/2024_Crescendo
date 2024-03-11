@@ -3,7 +3,6 @@ package com.igknighters.util.can;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -19,12 +18,12 @@ public class CANSignalManager {
         CONTROL, VOLT, AMP
     }
 
-    private static final Map<String, Map<SignalType, ArrayList<BaseStatusSignal>>> signalsDatabase = new HashMap<>(64);
+    private static final HashMap<String, HashMap<SignalType, ArrayList<BaseStatusSignal>>> signalsDatabase = new HashMap<>(64);
     private static SignalType TYPE_THIS_CYCLE = SignalType.VOLT;
 
     public static void registerSignals(String canbus, BaseStatusSignal... signals) {
         CANBusLogging.logBus(canbus);
-        Map<SignalType, ArrayList<BaseStatusSignal>> map;
+        HashMap<SignalType, ArrayList<BaseStatusSignal>> map;
         if (signalsDatabase.containsKey(canbus)) {
             map = signalsDatabase.get(canbus);
         } else {
@@ -35,13 +34,16 @@ public class CANSignalManager {
             String name = signal.getName();
             List<BaseStatusSignal> list;
             if (name.contains(VOLT_NAME)) {
-                list = map.containsKey(SignalType.VOLT) ? map.get(SignalType.VOLT) : new ArrayList<>();
+                if (!map.containsKey(SignalType.VOLT)) map.put(SignalType.VOLT, new ArrayList<>());
+                list = map.get(SignalType.VOLT);
                 signal.setUpdateFrequency(50);
             } else if (name.contains(AMP_NAME)) {
-                list = map.containsKey(SignalType.AMP) ? map.get(SignalType.AMP) : new ArrayList<>();
+                if (!map.containsKey(SignalType.AMP)) map.put(SignalType.AMP, new ArrayList<>());
+                list = map.get(SignalType.AMP);
                 signal.setUpdateFrequency(50);
             } else {
-                list = map.containsKey(SignalType.CONTROL) ? map.get(SignalType.CONTROL) : new ArrayList<>();
+                if (!map.containsKey(SignalType.CONTROL)) map.put(SignalType.CONTROL, new ArrayList<>());
+                list = map.get(SignalType.CONTROL);
                 signal.setUpdateFrequency(100);
             }
             list.add(signal);
@@ -49,17 +51,15 @@ public class CANSignalManager {
     }
 
     public static void refreshSignals() {
-        ArrayList<String> busses = new ArrayList<>();
-        for (Entry<String, Map<SignalType, ArrayList<BaseStatusSignal>>> entry : signalsDatabase.entrySet()) {
+        for (Entry<String, HashMap<SignalType, ArrayList<BaseStatusSignal>>> entry : signalsDatabase.entrySet()) {
             Tracer.startTrace(entry.getKey());
-            Map<SignalType, ArrayList<BaseStatusSignal>> map = entry.getValue();
+            HashMap<SignalType, ArrayList<BaseStatusSignal>> map = entry.getValue();
             ArrayList<BaseStatusSignal> list = new ArrayList<>(64);
             if (map.containsKey(SignalType.CONTROL))
                 list.addAll(map.get(SignalType.CONTROL));
             if (map.containsKey(TYPE_THIS_CYCLE))
                 list.addAll(map.get(TYPE_THIS_CYCLE));
-            
-            MonoDashboard.put("cansignals", list.stream().map(BaseStatusSignal::getName).toArray());
+            logSignals(entry.getKey(), list);
             if (list.size() == 0)
                 BaseStatusSignal.refreshAll(list.toArray(new BaseStatusSignal[list.size()]));
             Tracer.endTrace();
@@ -70,6 +70,9 @@ public class CANSignalManager {
 
     private static void logSignals(String canbus, ArrayList<BaseStatusSignal> signals) {
         String[] array = new String[signals.size()];
-        for ()
+        for (int i = 0; i < signals.size(); i++) {
+            array[i] = signals.get(i).getName();
+        }
+        MonoDashboard.put("CANSignalManager/" + canbus, array);
     }
 }
