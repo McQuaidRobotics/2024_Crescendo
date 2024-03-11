@@ -14,7 +14,9 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.ReverseLimitTypeValue;
 import com.ctre.phoenix6.signals.ReverseLimitValue;
 
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kStem;
@@ -32,6 +34,8 @@ public class PivotReal extends Pivot {
     private final TalonFX followerMotor;
 
     private final Pigeon2 gyro;
+
+    private final ArmFeedforward armFF;
 
     private final StatusSignal<Double> motorRots, motorVelo, leaderMotorVolts, followerMotorVolts;
     private final StatusSignal<Double> leaderMotorAmps, followerMotorAmps, leaderMotorTemp, followerMotorTemp;
@@ -56,6 +60,8 @@ public class PivotReal extends Pivot {
         gyroMeasurement.setUpdateFrequency(100);
 
         gyro.optimizeBusUtilization();
+
+        armFF = new ArmFeedforward(0.15, 0.1, 0.0);
 
         leaderMotor = new TalonFX(kPivot.RIGHT_MOTOR_ID, kStem.CANBUS);
         followerMotor = new TalonFX(kPivot.LEFT_MOTOR_ID, kStem.CANBUS);
@@ -208,7 +214,8 @@ public class PivotReal extends Pivot {
 
         if (Math.abs(super.radiansPerSecond) < 0.01
                 && Math.abs(super.gyroRadiansPerSecondAbs) < 0.01
-                && Math.abs(super.radians - getPivotRadiansPigeon()) > Units.degreesToRadians(1.0)) {
+                && Math.abs(super.radians - getPivotRadiansPigeon()) > Units.degreesToRadians(1.0)
+                && DriverStation.isDisabled()) {
             seedPivot();
             log("SeededPivot", true);
         } else {
