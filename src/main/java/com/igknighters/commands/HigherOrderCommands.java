@@ -5,6 +5,7 @@ import com.igknighters.commands.swerve.teleop.TeleopSwerveTargetSpeaker;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
+import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.controllers.ControllerParent;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
@@ -48,27 +49,31 @@ public class HigherOrderCommands {
             Umbrella umbrella,
             ControllerParent controller) {
         Command cmd;
+        String name;
         if (umbrella.popSpinupReason().equals(ShooterSpinupReason.Amp)) {
+            name = "Amp Shoot";
             cmd = Commands.sequence(
                     StemCommands.moveTo(stem, StemPosition.AMP_SCORE, 1.1),
                     umbrella.run(
                             () -> {
                                 // Spinup while shooting to ensure the needed power is provided
-                                umbrella.spinupShooterToRPM(6000);
+                                umbrella.spinupShooterToRPM(kShooter.MAX_SHOOT_SPEED);
                                 umbrella.runIntakeAt(-1.0, true);
                             }).withTimeout(0.3),
                     StemCommands.moveTo(stem, StemPosition.AMP_SAFE, 1.5));
         } else if (umbrella.popSpinupReason().equals(ShooterSpinupReason.AutoAimSpeaker)) {
             System.out.println("Shot cuz this");
+            name = "Auto Aim Shoot";
             cmd = Commands.parallel(
                     HigherOrderCommands.aim(
                             swerve,
                             stem,
                             controller),
                     UmbrellaCommands.shoot(
-                            umbrella))
-                    .until(() -> controller.leftTrigger(true).getAsDouble() < 0.5);
+                            umbrella)
+                ).until(() -> controller.leftTrigger(true).getAsDouble() < 0.5);
         } else {
+            name = "Traditional Shoot";
             cmd = UmbrellaCommands.shoot(umbrella);
         }
 
@@ -77,6 +82,6 @@ public class HigherOrderCommands {
                         StemCommands.holdAt(
                                 stem,
                                 StemPosition.STOW))
-                .withName("Shoot");
+                .withName(name);
     }
 }

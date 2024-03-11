@@ -60,7 +60,7 @@ public class CANSignalManager {
             if (map.containsKey(TYPE_THIS_CYCLE))
                 list.addAll(map.get(TYPE_THIS_CYCLE));
             logSignals(entry.getKey(), list);
-            if (list.size() == 0)
+            if (list.size() != 0)
                 BaseStatusSignal.refreshAll(list.toArray(new BaseStatusSignal[list.size()]));
             Tracer.endTrace();
         }
