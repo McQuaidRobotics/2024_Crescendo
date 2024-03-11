@@ -14,7 +14,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.ReverseLimitTypeValue;
 import com.ctre.phoenix6.signals.ReverseLimitValue;
 
-import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 
@@ -34,8 +33,6 @@ public class PivotReal extends Pivot {
     private final TalonFX followerMotor;
 
     private final Pigeon2 gyro;
-
-    private final ArmFeedforward armFF;
 
     private final StatusSignal<Double> motorRots, motorVelo, leaderMotorVolts, followerMotorVolts;
     private final StatusSignal<Double> leaderMotorAmps, followerMotorAmps, leaderMotorTemp, followerMotorTemp;
@@ -60,8 +57,6 @@ public class PivotReal extends Pivot {
         gyroMeasurement.setUpdateFrequency(100);
 
         gyro.optimizeBusUtilization();
-
-        armFF = new ArmFeedforward(0.15, 0.1, 0.0);
 
         leaderMotor = new TalonFX(kPivot.RIGHT_MOTOR_ID, kStem.CANBUS);
         followerMotor = new TalonFX(kPivot.LEFT_MOTOR_ID, kStem.CANBUS);
@@ -113,6 +108,8 @@ public class PivotReal extends Pivot {
         cfg.Slot0.kP = kPivot.MOTOR_kP;
         cfg.Slot0.kI = kPivot.MOTOR_kI;
         cfg.Slot0.kD = kPivot.MOTOR_kD;
+        cfg.Slot0.kS = kPivot.MOTOR_kS;
+        cfg.Slot0.kV = kPivot.MOTOR_kV;
 
         cfg.MotionMagic.MotionMagicCruiseVelocity = kPivot.MAX_VELOCITY;
         cfg.MotionMagic.MotionMagicAcceleration = kPivot.MAX_ACCELERATION;

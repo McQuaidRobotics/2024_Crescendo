@@ -100,7 +100,7 @@ public class StemCommands {
                     kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
                     distance,
                     FieldConstants.SPEAKER.getZ(),
-                    SmartDashboard.getNumber("Note Initial Velo", 40.0));
+                    kUmbrella.NOTE_VELO);
 
             return StemPosition.fromRadians(
                     kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,

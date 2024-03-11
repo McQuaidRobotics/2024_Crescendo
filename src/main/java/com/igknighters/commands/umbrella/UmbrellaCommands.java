@@ -1,11 +1,9 @@
 package com.igknighters.commands.umbrella;
 
-import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
@@ -35,12 +33,12 @@ public class UmbrellaCommands {
         }).withName("Spinup Shooter");
     }
 
-    public static Command spinupShooterCustom(Umbrella umbrella, ShooterSpinupReason reason) {
-        return umbrella.run(() -> {
-            umbrella.spinupShooterToRPM(SmartDashboard.getNumber("Auto Aim Shooter RPM", kControls.AUTO_AIM_SHOOTER_RPM));
-            umbrella.pushSpinupReason(reason);
-        }).withName("Spinup Shooter");
-    }
+    // public static Command spinupShooterCustom(Umbrella umbrella, ShooterSpinupReason reason) {
+    //     return umbrella.run(() -> {
+    //         umbrella.spinupShooterToRPM(SmartDashboard.getNumber("Auto Aim Shooter RPM", kControls.AUTO_AIM_SHOOTER_RPM));
+    //         umbrella.pushSpinupReason(reason);
+    //     }).withName("Spinup Shooter");
+    // }
 
     /**
      * A command that waits until the shooter is spun up to a certain speed

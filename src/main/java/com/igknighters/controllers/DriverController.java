@@ -4,7 +4,7 @@ import com.igknighters.commands.HigherOrderCommands;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.SwerveCommands;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
-import com.igknighters.constants.ConstValues.kStem.kTelescope;
+import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.subsystems.SubsystemResources.Subsystems;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
@@ -75,16 +75,19 @@ public class DriverController extends ControllerParent {
                 trig.onTrue(
                         StemCommands.holdAt(
                                 allss.stem.get(),
-                                StemPosition.fromDegrees(90.0, 90.0, kTelescope.MIN_METERS)));
+                                StemPosition.STARTING));
             }, Subsystems.Stem);
 
         /// BUMPER
         // # Our main driver doesn't use bumpers
         this.LB.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
             trig.or(RB.trigger).onTrue(
-                    StemCommands.holdAt(
+                    Commands.parallel(
+                        StemCommands.holdAt(
                             allss.stem.get(),
-                            StemPosition.SUBWOOFER));
+                            StemPosition.STOW),
+                            UmbrellaCommands.spinupShooter(allss.umbrella.get(), kControls.SHOOTER_RPM, ShooterSpinupReason.ManualAimSpeaker)
+                    ));
         });
 
         // this.RB.binding = # Is used as an or with LB
@@ -110,8 +113,9 @@ public class DriverController extends ControllerParent {
                                     allss.swerve.get(),
                                     allss.stem.get(),
                                     this),
-                            UmbrellaCommands.spinupShooterCustom(
+                            UmbrellaCommands.spinupShooter(
                                     allss.umbrella.get(),
+                                    kControls.SHOOTER_RPM,
                                     ShooterSpinupReason.AutoAimSpeaker))
                             .finallyDo(allss.umbrella.get()::stopAll)
                             .withName("Highorder Aim"));

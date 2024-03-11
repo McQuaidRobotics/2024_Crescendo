@@ -67,7 +67,7 @@ public class Umbrella extends SubsystemBase implements Logged {
      *          so a tolerance of 0.1 would allow for a 10% error
      */
     public boolean isShooterAtSpeed(double tolerance) {
-        return (Math.abs(shooter.getSpeed() - shooter.getTargetSpeed()) / shooter.getTargetSpeed()) > tolerance;
+        return (Math.abs(shooter.getSpeed() - shooter.getTargetSpeed()) / shooter.getTargetSpeed()) < tolerance;
     }
 
     /**

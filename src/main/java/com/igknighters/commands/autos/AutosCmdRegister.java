@@ -10,6 +10,7 @@ import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
+import com.igknighters.subsystems.vision.Vision;
 import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -42,6 +43,7 @@ public class AutosCmdRegister {
         Umbrella umbrella = allSubsystems.umbrella.get();
         Stem stem = allSubsystems.stem.get();
         Swerve swerve = allSubsystems.swerve.get();
+        Vision vision = allSubsystems.vision.get();
 
         // SpecializedNamedCommands.registerCommand(
         //         "Intake",
@@ -75,7 +77,7 @@ public class AutosCmdRegister {
                 StemCommands.holdAt(stem, StemPosition.INTAKE),
                 UmbrellaCommands.intake(umbrella)
                 .until(() -> umbrella.holdingGamepiece()))
-                .andThen(StemCommands.moveTo(stem, StemPosition.SUBWOOFER))
+                .andThen(StemCommands.moveTo(stem, StemPosition.STOW))
                 .withName("Intake")
         );
 
@@ -103,16 +105,16 @@ public class AutosCmdRegister {
 
         registerCommand(
                 "AimSub",
-                StemCommands.moveTo(stem, StemPosition.SUBWOOFER)
+                StemCommands.moveTo(stem, StemPosition.STARTING)
                     .withName("AimSub")
         );
 
         registerCommand(
             "AutoShoot",
             Commands.parallel(
-                new AutoSwerveTargetSpeaker(swerve),
+                new AutoSwerveTargetSpeaker(swerve, vision::getLatestPoseWithFallback),
                 StemCommands.aimAtSpeaker(stem, true),
-                UmbrellaCommands.waitUntilSpunUp(umbrella, kControls.SHOOTER_RPM, 0.9)
+                UmbrellaCommands.waitUntilSpunUp(umbrella, kControls.AUTO_AIM_SHOOTER_RPM, 0.03)
             ).andThen(
                 UmbrellaCommands.shoot(umbrella)
             ).withName("AutoShoot")

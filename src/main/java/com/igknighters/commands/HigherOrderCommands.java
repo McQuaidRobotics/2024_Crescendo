@@ -59,6 +59,7 @@ public class HigherOrderCommands {
                             }).withTimeout(0.3),
                     StemCommands.moveTo(stem, StemPosition.AMP_SAFE, 1.5));
         } else if (umbrella.popSpinupReason().equals(ShooterSpinupReason.AutoAimSpeaker)) {
+            System.out.println("Shot cuz this");
             cmd = Commands.parallel(
                     HigherOrderCommands.aim(
                             swerve,

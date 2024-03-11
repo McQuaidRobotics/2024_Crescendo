@@ -3,7 +3,6 @@ package com.igknighters.subsystems.stem;
 import java.nio.ByteBuffer;
 
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
-import com.igknighters.constants.ConstValues.kStem.kWrist;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.struct.Struct;
@@ -153,17 +152,6 @@ public class StemPosition implements StructSerializable {
         @Override
         public String toString() {
             return "Starting";
-        }
-    };
-
-    public static final StemPosition SUBWOOFER = new StemPosition(
-            0.3750953350652253 + Units.degreesToRadians(0.5),
-            kWrist.FROZEN_WRIST_ANGLE,
-            kTelescope.MIN_METERS + 0.05) {
-
-        @Override
-        public String toString() {
-            return "Subwoofer";
         }
     };
 }

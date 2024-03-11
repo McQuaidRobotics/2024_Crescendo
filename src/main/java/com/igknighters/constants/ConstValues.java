@@ -92,8 +92,8 @@ public final class ConstValues {
     }
 
     public static final class kControls {
-        public static final double SHOOTER_RPM = 3780.0;
-        public static final double AUTO_AIM_SHOOTER_RPM = 4400.0;
+        public static final double SHOOTER_RPM = 8000.0;
+        public static final double AUTO_AIM_SHOOTER_RPM = 6000.0;
         public static final double INTAKE_PERCENT = 0.8;
 
         public static final double STATIONARY_AIM_AT_PIVOT_RADIANS = 42.5 * Conv.DEGREES_TO_RADIANS;
@@ -199,7 +199,7 @@ public final class ConstValues {
         /** User defined acceleration time in seconds */
         public static final double ACCELERATION_TIME = 0.9;
 
-        public static final double SLIP_CURRENT = 75.0;
+        public static final double SLIP_CURRENT = 50.0;
 
         public static final double MAX_DRIVE_VELOCITY = ((Motors.KrakenX60Foc.FREE_SPEED / TAU) / DRIVE_GEAR_RATIO)
                 * WHEEL_CIRCUMFERENCE * MOTOR_CLOSED_LOOP_OUTPUT_SCALAR;
@@ -239,7 +239,7 @@ public final class ConstValues {
             public static final double kP = 5.5;
             public static final double kD = 0.2;
 
-            public static final double DEADBAND = 0.7 * Conv.DEGREES_TO_RADIANS;
+            public static final double DEADBAND = 0.5 * Conv.DEGREES_TO_RADIANS;
             public static final double CONSTRAINT_SCALAR = 0.7;
         }
 
@@ -333,12 +333,11 @@ public final class ConstValues {
         public static final ReplanningConfig DYNAMIC_REPLANNING_CONFIG = new ReplanningConfig(
                 true,
                 false);
-        public static final double AUTO_SHOOTER_RPM = 2500.0;
+        public static final double AUTO_SHOOTER_RPM = 5000.0;
     }
 
     public static final class kUmbrella {
-        public static final double NOTE_VELO = 35.0;
-        public static final double NOTE_VELO_AUTO = 35.0;
+        public static final double NOTE_VELO = 65.0;
         public static final String CANBUS = "SuperStructureBus";
 
         public static final class kShooter {
@@ -411,6 +410,8 @@ public final class ConstValues {
             public static final double MOTOR_kP = 1.0;
             public static final double MOTOR_kI = 0.0;
             public static final double MOTOR_kD = 0.0;
+            public static final double MOTOR_kS = 0.0;
+            public static final double MOTOR_kV = 0.0;
 
             public static final double MAX_VELOCITY = 100;
             public static final double MAX_ACCELERATION = 3900;
@@ -424,7 +425,7 @@ public final class ConstValues {
 
             /** For every {@value} rotations of the motor the mechanism moves 1 rotation */
             // motor -> gbx(100:1) -> (15 -> 42) -> mechanism
-            public static final double MOTOR_TO_MECHANISM_RATIO = 100.0 * (42.0 / 15.0);
+            public static final double MOTOR_TO_MECHANISM_RATIO = (5.0 * 5.0 * 5.0) * (42.0 / 15.0);
 
             public static final boolean INVERTED = false;
 
