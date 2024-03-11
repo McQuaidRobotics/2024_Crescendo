@@ -1,7 +1,7 @@
 package com.igknighters.subsystems.swerve.module;
 
 import com.ctre.phoenix6.controls.ControlRequest;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -36,7 +36,7 @@ public class SwerveModuleReal extends SwerveModule {
     private final TalonFX angleMotor;
     private final StatusSignal<Double> anglePositionSignal, angleVelocitySignal;
     private final StatusSignal<Double> angleVoltSignal, angleAmpSignal;
-    private final PositionVoltage angleMotorReq = new PositionVoltage(0)
+    private final PositionDutyCycle angleMotorReq = new PositionDutyCycle(0)
             .withUpdateFreqHz(0);
 
     private final CANcoder angleEncoder;
@@ -92,11 +92,12 @@ public class SwerveModuleReal extends SwerveModule {
         log("isPro", isPro);
 
         driveMotorOpenReq = new VoltageOut(0).withEnableFOC(isPro).withUpdateFreqHz(0);
-        if (isPro) {
-            driveMotorClosedReq = new VelocityTorqueCurrentFOC(0).withUpdateFreqHz(0);
-        } else {
-            driveMotorClosedReq = new VelocityVoltage(0).withUpdateFreqHz(0);
-        }
+        // if (isPro) {
+        //     driveMotorClosedReq = new VelocityTorqueCurrentFOC(0).withUpdateFreqHz(0);
+        // } else {
+        //     driveMotorClosedReq = new VelocityVoltage(0).withUpdateFreqHz(0);
+        // }
+        driveMotorClosedReq = new VelocityVoltage(0).withUpdateFreqHz(0);
 
         BootupLogger.bootupLog(
                 "    SwerveModule[" + this.moduleNumber + "] initialized ("
