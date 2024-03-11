@@ -9,6 +9,8 @@ import java.util.Map.Entry;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.igknighters.util.Tracer;
 
+import monologue.MonoDashboard;
+
 public class CANSignalManager {
     private static final String VOLT_NAME = "Voltage";
     private static final String AMP_NAME = "Current";
@@ -47,16 +49,27 @@ public class CANSignalManager {
     }
 
     public static void refreshSignals() {
+        ArrayList<String> busses = new ArrayList<>();
         for (Entry<String, Map<SignalType, ArrayList<BaseStatusSignal>>> entry : signalsDatabase.entrySet()) {
             Tracer.startTrace(entry.getKey());
             Map<SignalType, ArrayList<BaseStatusSignal>> map = entry.getValue();
             ArrayList<BaseStatusSignal> list = new ArrayList<>(64);
-            list.addAll(map.get(SignalType.CONTROL));
-            list.addAll(map.get(TYPE_THIS_CYCLE));
-            BaseStatusSignal.refreshAll(list.toArray(new BaseStatusSignal[0]));
+            if (map.containsKey(SignalType.CONTROL))
+                list.addAll(map.get(SignalType.CONTROL));
+            if (map.containsKey(TYPE_THIS_CYCLE))
+                list.addAll(map.get(TYPE_THIS_CYCLE));
+            
+            MonoDashboard.put("cansignals", list.stream().map(BaseStatusSignal::getName).toArray());
+            if (list.size() == 0)
+                BaseStatusSignal.refreshAll(list.toArray(new BaseStatusSignal[list.size()]));
             Tracer.endTrace();
         }
 
         TYPE_THIS_CYCLE = (TYPE_THIS_CYCLE == SignalType.VOLT) ? SignalType.AMP : SignalType.VOLT;
+    }
+
+    private static void logSignals(String canbus, ArrayList<BaseStatusSignal> signals) {
+        String[] array = new String[signals.size()];
+        for ()
     }
 }

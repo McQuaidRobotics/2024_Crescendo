@@ -1,6 +1,5 @@
 package com.igknighters.subsystems.stem.wrist;
 
-import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -17,6 +16,7 @@ import com.igknighters.constants.HardwareIndex.StemHW;
 import com.igknighters.util.BootupLogger;
 import com.igknighters.util.FaultManager;
 import com.igknighters.util.can.CANRetrier;
+import com.igknighters.util.can.CANSignalManager;
 
 import edu.wpi.first.math.util.Units;
 
@@ -24,7 +24,7 @@ public class WristRealFused extends Wrist {
     private final TalonFX motor;
     private final CANcoder cancoder;
 
-    private final StatusSignal<Double> motorRots, motorVelo, motorAmps, motorVolts, motorTemp;
+    private final StatusSignal<Double> motorRots, motorVelo, motorAmps, motorVolts;
     private final StatusSignal<Double> cancoderRots, cancoderVelo;
 
     public WristRealFused() {
@@ -36,15 +36,6 @@ public class WristRealFused extends Wrist {
         motorVelo = motor.getVelocity();
         motorAmps = motor.getTorqueCurrent();
         motorVolts = motor.getMotorVoltage();
-        motorTemp = motor.getDeviceTemp();
-
-        motorRots.setUpdateFrequency(100);
-        motorVelo.setUpdateFrequency(100);
-        motorAmps.setUpdateFrequency(100);
-        motorVolts.setUpdateFrequency(100);
-        motorTemp.setUpdateFrequency(4);
-
-        motor.optimizeBusUtilization(1.0);
 
         cancoder = new CANcoder(kWrist.CANCODER_ID, kStem.CANBUS);
         CANRetrier.retryStatusCodeFatal(() -> cancoder.getConfigurator().apply(cancoderConfig()), 10);
@@ -52,10 +43,15 @@ public class WristRealFused extends Wrist {
         cancoderRots = cancoder.getAbsolutePosition();
         cancoderVelo = cancoder.getVelocity();
 
-        cancoderRots.setUpdateFrequency(100);
-        cancoderVelo.setUpdateFrequency(100);
+        CANSignalManager.registerSignals(
+            kStem.CANBUS,
+            motorVelo, motorRots,
+            motorAmps, motorVolts,
+            cancoderRots, cancoderVelo
+        );
 
         cancoder.optimizeBusUtilization(1.0);
+        motor.optimizeBusUtilization(1.0);
 
         super.encoderRadians = Units.rotationsToRadians(cancoderRots.getValue());
         super.radians = encoderRadians;
@@ -125,15 +121,12 @@ public class WristRealFused extends Wrist {
     public void periodic() {
         FaultManager.captureFault(
                 StemHW.WristMotor,
-                BaseStatusSignal.refreshAll(
-                        motorRots, motorVelo,
-                        motorVolts, motorAmps,
-                        motorTemp));
+                motorRots, motorVelo,
+                motorVolts, motorAmps);
 
         FaultManager.captureFault(
                 StemHW.WristEncoder,
-                BaseStatusSignal.refreshAll(
-                        cancoderRots));
+                cancoderRots);
 
         super.radians = Units.rotationsToRadians(motorRots.getValue());
         super.radiansPerSecond = Units.rotationsToRadians(cancoderVelo.getValue());
