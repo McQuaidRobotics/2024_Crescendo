@@ -128,7 +128,7 @@ public class GlobalState {
     public static ChassisSpeeds getFieldRelativeVelocity() {
         globalLock.lock();
         try {
-            return ChassisSpeeds.fromFieldRelativeSpeeds(
+            return ChassisSpeeds.fromRobotRelativeSpeeds(
                     velocity,
                     getGyroRot().toRotation2d());
         } finally {
