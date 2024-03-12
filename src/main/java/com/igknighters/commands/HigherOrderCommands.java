@@ -71,7 +71,8 @@ public class HigherOrderCommands {
                             controller),
                     UmbrellaCommands.shoot(
                             umbrella)
-                ).until(() -> controller.leftTrigger(true).getAsDouble() < 0.5);
+                ).until(() -> controller.leftTrigger(true).getAsDouble() < 0.5)
+                .asProxy();
         } else {
             name = "Traditional Shoot";
             cmd = UmbrellaCommands.shoot(umbrella);
