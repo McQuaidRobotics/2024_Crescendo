@@ -67,6 +67,10 @@ public class Vision extends SubsystemBase implements Logged {
         Tracer.startTrace("VisionPeriodic");
         HashSet<Integer> seenTags = new HashSet<>();
 
+        if (lastEvalTime.hasElapsed(0.2)) {
+            latestEval = Optional.empty();
+        }
+
         for (Camera camera : cameras) {
             Tracer.startTrace(camera.getName() + "Periodic");
             camera.periodic();

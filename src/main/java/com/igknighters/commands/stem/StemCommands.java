@@ -8,6 +8,7 @@ import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
+import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.stem.StemSolvers;
@@ -94,12 +95,18 @@ public class StemCommands {
         }
 
         private StemPosition stationaryPivotSolveGravity(double distance) {
+            // double wristRads = StemSolvers.gravitySolveWristTheta(
+            //         kTelescope.MIN_METERS,
+            //         kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
+            //         distance,
+            //         FieldConstants.SPEAKER.getZ(),
+            //         TunableValues.getDouble("Note Average Velo", kUmbrella.NOTE_VELO).get());
             double wristRads = StemSolvers.gravitySolveWristTheta(
                     kTelescope.MIN_METERS,
                     kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
                     distance,
                     FieldConstants.SPEAKER.getZ(),
-                    TunableValues.getDouble("Note Average Velo", kUmbrella.NOTE_VELO).get());
+                    kShooter.RPM_TO_INITIAL_NOTE_VELO_CURVE.lerp(kShooter.DISTANCE_TO_RPM_CURVE.lerp(distance)));
 
             return StemPosition.fromRadians(
                     kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,

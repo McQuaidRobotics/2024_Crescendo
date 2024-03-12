@@ -95,7 +95,7 @@ public final class ConstValues {
         public static final double SHOOTER_RPM = 8000.0;
         public static final double INTAKE_PERCENT = 0.8;
 
-        public static final double STATIONARY_AIM_AT_PIVOT_RADIANS = 42.5 * Conv.DEGREES_TO_RADIANS;
+        public static final double STATIONARY_AIM_AT_PIVOT_RADIANS = 35.0 * Conv.DEGREES_TO_RADIANS;
         public static final double STATIONARY_WRIST_ANGLE = 71.0 * Conv.DEGREES_TO_RADIANS;
         public static final double MAX_HEIGHT_AIM_AT_PIVOT_RADIANS = 86.0 * Conv.DEGREES_TO_RADIANS;
         public static final double MAX_HEIGHT_AIM_AT_TELESCOPE_METERS = kTelescope.MAX_METERS;
@@ -364,6 +364,18 @@ public final class ConstValues {
             public static final double MAX_SHOOT_SPEED = 8000.0 * Conv.RPM_TO_RADIANS_PER_SECOND;
 
             public static final double LEFT_MOTOR_DIFF = 0.9;
+
+            public static final LerpTable DISTANCE_TO_RPM_CURVE = new LerpTable(
+                new LerpTableEntry(2.0, 5000),
+                new LerpTableEntry(4.0, 7000),
+                new LerpTableEntry(4.5, 8100)
+            );
+
+            public static final LerpTable RPM_TO_INITIAL_NOTE_VELO_CURVE = new LerpTable(
+                new LerpTableEntry(5000, 16.0),
+                new LerpTableEntry(7000, 18.0),
+                new LerpTableEntry(8100, 22.0)
+            );
         }
 
         public static final class kIntake {

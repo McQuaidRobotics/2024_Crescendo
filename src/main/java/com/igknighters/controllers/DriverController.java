@@ -8,6 +8,7 @@ import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.subsystems.SubsystemResources.Subsystems;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
+import com.igknighters.util.Channels;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
@@ -133,7 +134,12 @@ public class DriverController extends ControllerParent {
         }, Subsystems.Umbrella, Subsystems.Stem, Subsystems.Swerve);
 
         /// DPAD
-        // this.DPR.binding =
+        this.DPR.binding = this.DPL.binding = new Binding((trig, allss) -> {
+                trig.onTrue(Commands.runOnce(() -> {
+                        Channels.Sender.broadcast("HomePivot", Boolean.class)
+                                .send(true);
+                }));
+        }, Subsystems.Stem); 
 
         // this.DPD.binding =
 

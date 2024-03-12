@@ -127,16 +127,6 @@ public class Umbrella extends SubsystemBase implements Logged {
     /**
      * Spins up the {@code Shooter} to a certain speed
      * 
-     * @param surfaceMPS The speed to spin up to in meters per second
-     */
-    public void spinupShooterToSurfaceSpeed(double surfaceMPS) {
-        var wheelCircum = kShooter.WHEEL_DIAMETER * Math.PI;
-        shooter.setSpeed(Units.rotationsToRadians(surfaceMPS / wheelCircum));
-    }
-
-    /**
-     * Spins up the {@code Shooter} to a certain speed
-     * 
      * @param RPM The speed to spin up to in rotations per minute
      */
     public void spinupShooterToRPM(double RPM) {
