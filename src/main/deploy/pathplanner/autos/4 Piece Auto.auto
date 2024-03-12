@@ -12,9 +12,22 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "Spinup"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Spinup"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "AimSub"
+                }
+              }
+            ]
           }
         },
         {
@@ -28,15 +41,28 @@
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "Intake"
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.7
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "4p - 1"
+                      }
+                    }
+                  ]
                 }
               },
               {
-                "type": "path",
+                "type": "named",
                 "data": {
-                  "pathName": "4p - 1"
+                  "name": "Intake"
                 }
               }
             ]
@@ -53,15 +79,28 @@
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "Intake"
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.7
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "4p - 2"
+                      }
+                    }
+                  ]
                 }
               },
               {
-                "type": "path",
+                "type": "named",
                 "data": {
-                  "pathName": "4p - 2"
+                  "name": "Intake"
                 }
               }
             ]
@@ -78,15 +117,28 @@
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "Intake"
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.7
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "4p - 3"
+                      }
+                    }
+                  ]
                 }
               },
               {
-                "type": "path",
+                "type": "named",
                 "data": {
-                  "pathName": "4p - 3"
+                  "name": "Intake"
                 }
               }
             ]

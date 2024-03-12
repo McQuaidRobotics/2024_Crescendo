@@ -3,13 +3,10 @@
   "robotLength": 0.75,
   "holonomicMode": true,
   "pathFolders": [
-    "2 piece",
-    "2 piece subwoofer",
     "3 piece subwoofer",
     "4 piece",
     "4 piece subwoofer",
-    "Auto Testing Paths",
-    "4 piece subwoofer optimized"
+    "Auto Testing Paths"
   ],
   "autoFolders": [],
   "defaultMaxVel": 4.0,
