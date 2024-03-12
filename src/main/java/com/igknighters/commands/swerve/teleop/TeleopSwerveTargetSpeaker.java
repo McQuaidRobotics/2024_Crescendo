@@ -16,7 +16,7 @@ import com.igknighters.controllers.ControllerParent;
 
 public class TeleopSwerveTargetSpeaker extends TeleopSwerveBase {
 
-    private final double lookaheadTime = 0.8;
+    private final double lookaheadTime = 0.2;
     private double speedMult = 0.4;
 
     public TeleopSwerveTargetSpeaker(Swerve swerve, ControllerParent controller) {
@@ -69,15 +69,11 @@ public class TeleopSwerveTargetSpeaker extends TeleopSwerveBase {
             field.getObject("adjustedTarget").setPose(new Pose2d(adjustedTarget, new Rotation2d()));
         });
 
-        
-
         Translation2d currentTranslation = swerve.getPose().getTranslation()
-            .plus(
-                new Translation2d(
-                    avgChassisSpeeds.vxMetersPerSecond * lookaheadTime,
-                    avgChassisSpeeds.vyMetersPerSecond * lookaheadTime
-                )
-            );
+                .minus(
+                        new Translation2d(
+                                avgChassisSpeeds.vxMetersPerSecond * lookaheadTime,
+                                avgChassisSpeeds.vyMetersPerSecond * lookaheadTime));
 
         Rotation2d targetAngle = swerve.rotationRelativeToPose(
                 currentTranslation,
