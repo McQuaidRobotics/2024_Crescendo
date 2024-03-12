@@ -170,6 +170,16 @@ public class Swerve extends SubsystemBase implements Logged {
         GlobalState.resetSwerveLocalization(getYawWrappedRot(), pose, getModulePositions());
     }
 
+    public double rotVeloForRotation(Rotation2d wantedAngle, double deadband) {
+        double targetAngleRads = wantedAngle.getRadians();
+        double currentAngleRads = getYawRads();
+
+        log("WantedAngle", targetAngleRads);
+        log("CurrentAngle", currentAngleRads);
+
+        return rotController.calculate(currentAngleRads, targetAngleRads, deadband);
+    }
+
     public double rotVeloForRotation(Rotation2d wantedAngle) {
         double targetAngleRads = wantedAngle.getRadians();
         double currentAngleRads = getYawRads();
