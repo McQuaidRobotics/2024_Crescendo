@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
@@ -48,7 +49,7 @@ public class SwerveModuleSim extends SwerveModule {
 
         angleFeedback.enableContinuousInput(-Math.PI, Math.PI);
 
-        super.angleAbsoluteRads = Math.random() * 2.0 * Math.PI;
+        super.angleAbsoluteRads = Units.rotationsToRadians(Math.random());
 
         BootupLogger.bootupLog("    SwerveModule[" + this.moduleNumber + "] initialized (sim)");
     }

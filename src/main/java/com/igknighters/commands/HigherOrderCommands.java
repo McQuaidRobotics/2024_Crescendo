@@ -38,8 +38,7 @@ public class HigherOrderCommands {
             Stem stem,
             ControllerParent controller) {
         return Commands.parallel(
-                new TeleopSwerveTargetSpeaker(swerve, controller)
-                        .withSpeedMultiplier(0.5),
+                new TeleopSwerveTargetSpeaker(swerve, controller),
                 StemCommands.aimAtSpeaker(stem, false)).withName("Aim");
     }
 
