@@ -414,8 +414,8 @@ public final class ConstValues {
             public static final double MOTOR_kV = 0.0;
 
             public static final double MAX_VELOCITY = 100;
-            public static final double MAX_ACCELERATION = 3900;
-            public static final double MAX_JERK = 7800;
+            public static final double MAX_ACCELERATION = 4500;
+            public static final double MAX_JERK = 0;
 
             public static final double MIN_ANGLE = 7.0 * Conv.DEGREES_TO_RADIANS;
 
