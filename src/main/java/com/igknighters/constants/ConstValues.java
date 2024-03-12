@@ -93,7 +93,6 @@ public final class ConstValues {
 
     public static final class kControls {
         public static final double SHOOTER_RPM = 8000.0;
-        public static final double AUTO_AIM_SHOOTER_RPM = 6000.0;
         public static final double INTAKE_PERCENT = 0.8;
 
         public static final double STATIONARY_AIM_AT_PIVOT_RADIANS = 42.5 * Conv.DEGREES_TO_RADIANS;
@@ -333,7 +332,7 @@ public final class ConstValues {
         public static final ReplanningConfig DYNAMIC_REPLANNING_CONFIG = new ReplanningConfig(
                 true,
                 false);
-        public static final double AUTO_SHOOTER_RPM = 5000.0;
+        public static final double AUTO_SHOOTER_RPM = 6000.0;
     }
 
     public static final class kUmbrella {

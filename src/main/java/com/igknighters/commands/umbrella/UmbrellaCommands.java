@@ -1,5 +1,6 @@
 package com.igknighters.commands.umbrella;
 
+import com.igknighters.constants.ConstValues.kAuto;
 import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.umbrella.Umbrella;
@@ -84,10 +85,10 @@ public class UmbrellaCommands {
      * @param umbrella The umbrella subsystem
      * @return A command to be scheduled
      */
-    public static Command shootAuto(Umbrella umbrella) {
+    public static Command shootAuto(Umbrella umbrella, double rpm) {
         return umbrella.run(
                 () -> {
-                    umbrella.spinupShooterToRPM(kControls.AUTO_AIM_SHOOTER_RPM);
+                    umbrella.spinupShooterToRPM(rpm);
                     umbrella.runIntakeAt(-1.0, true);
                 })
                 .withTimeout(0.75)
