@@ -1,6 +1,7 @@
 package com.igknighters.commands.swerve.teleop;
 
 import com.igknighters.subsystems.swerve.Swerve;
+import com.igknighters.util.TunableValues;
 import com.igknighters.util.geom.AllianceFlip;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -16,7 +17,7 @@ import com.igknighters.controllers.ControllerParent;
 
 public class TeleopSwerveTargetSpeaker extends TeleopSwerveBase {
 
-    private final double lookaheadTime = 0.2;
+    private final double lookaheadTimeDefault = 0.2;
     private double speedMult = 0.4;
 
     public TeleopSwerveTargetSpeaker(Swerve swerve, ControllerParent controller) {
@@ -68,6 +69,8 @@ public class TeleopSwerveTargetSpeaker extends TeleopSwerveBase {
         GlobalState.modifyField2d(field -> {
             field.getObject("adjustedTarget").setPose(new Pose2d(adjustedTarget, new Rotation2d()));
         });
+
+        double lookaheadTime = TunableValues.getDouble("AutoAimLookaheadTime", lookaheadTimeDefault).get();
 
         Translation2d lookaheadTranslation = swerve.getPose().getTranslation()
                 .minus(

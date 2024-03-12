@@ -1,5 +1,7 @@
 package monologue;
 
+import edu.wpi.first.networktables.NTSendable;
+import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.struct.StructSerializable;
 
 public class MonoDashboard {
@@ -124,5 +126,15 @@ public class MonoDashboard {
     public static <R extends StructSerializable> void put(String entryName, R[] value, LogLevel level) {
         if (Monologue.isUnitTest()) return;
         Monologue.ntLogger.put(entryName, value, level);
+    }
+
+    public static void publishSendable(String entryName, Sendable value) {
+        if (Monologue.isUnitTest()) return;
+        Monologue.ntLogger.addSendable(entryName, value);
+    }
+
+    public static void publishSendable(String entryName, NTSendable value) {
+        if (Monologue.isUnitTest()) return;
+        Monologue.ntLogger.addSendable(entryName, value);
     }
 }
