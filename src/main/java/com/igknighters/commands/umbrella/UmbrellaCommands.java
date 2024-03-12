@@ -6,7 +6,6 @@ import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 
 public class UmbrellaCommands {
     /**
@@ -33,13 +32,6 @@ public class UmbrellaCommands {
             umbrella.pushSpinupReason(reason);
         }).withName("Spinup Shooter");
     }
-
-    // public static Command spinupShooterCustom(Umbrella umbrella, ShooterSpinupReason reason) {
-    //     return umbrella.run(() -> {
-    //         umbrella.spinupShooterToRPM(SmartDashboard.getNumber("Auto Aim Shooter RPM", kControls.AUTO_AIM_SHOOTER_RPM));
-    //         umbrella.pushSpinupReason(reason);
-    //     }).withName("Spinup Shooter");
-    // }
 
     /**
      * A command that waits until the shooter is spun up to a certain speed
@@ -127,24 +119,5 @@ public class UmbrellaCommands {
                 () -> umbrella.runIntakeAt(1.0, true),
                 umbrella::stopAll)
                 .withName("Expell");
-    }
-
-    /**
-     * A command primarily for testing, will run the intake and shooter at the
-     * provided values in SmartDashboard
-     * 
-     * @param umbrella The umbrella subsystem
-     * @return A command to be scheduled
-     */
-    public static Command spinUmbrellaBoth(Umbrella umbrella) {
-        // MonoDashboard.put("IntakePercent", 0.0);
-        // MonoDashboard.put("RPMumbrella", 0.0);
-        // return umbrella.run(() -> {
-        // umbrella.runIntakeAt(
-        // SmartDashboard.getNumber("IntakePercent", 0));
-        // umbrella.spinupShooterToRPM(
-        // SmartDashboard.getNumber("RPMumbrella", 0));
-        // }).withName("Spin Umbrella Both");
-        return Commands.none().withName("Spin Umbrella Both");
     }
 }

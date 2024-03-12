@@ -57,7 +57,7 @@ public class TeleopSwerveTargetSpeaker extends TeleopSwerveBase {
         ChassisSpeeds avgChassisSpeeds = new ChassisSpeeds(
                 (desiredChassisSpeeds.vxMetersPerSecond + currentChassisSpeeds.vxMetersPerSecond) / 2.0,
                 (desiredChassisSpeeds.vyMetersPerSecond + currentChassisSpeeds.vyMetersPerSecond) / 2.0,
-                (desiredChassisSpeeds.omegaRadiansPerSecond + currentChassisSpeeds.omegaRadiansPerSecond) / 2.0);
+                0.0);
 
         double distance = GlobalState.getLocalizedPose().getTranslation().getDistance(targetTranslation);
 
@@ -69,20 +69,33 @@ public class TeleopSwerveTargetSpeaker extends TeleopSwerveBase {
             field.getObject("adjustedTarget").setPose(new Pose2d(adjustedTarget, new Rotation2d()));
         });
 
-        Translation2d currentTranslation = swerve.getPose().getTranslation()
+        Translation2d lookaheadTranslation = swerve.getPose().getTranslation()
                 .minus(
                         new Translation2d(
                                 avgChassisSpeeds.vxMetersPerSecond * lookaheadTime,
                                 avgChassisSpeeds.vyMetersPerSecond * lookaheadTime));
 
         Rotation2d targetAngle = swerve.rotationRelativeToPose(
-                currentTranslation,
+                lookaheadTranslation,
                 Rotation2d.fromDegrees(180),
                 adjustedTarget);
         double rotVelo = swerve.rotVeloForRotation(targetAngle);
 
+        GlobalState.modifyField2d(field -> {
+            field.getObject("lookaheadRobot").setPose(new Pose2d(lookaheadTranslation, targetAngle));
+        });
+
         desiredChassisSpeeds.omegaRadiansPerSecond = rotVelo;
 
         swerve.drive(desiredChassisSpeeds, false);
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        GlobalState.modifyField2d(field -> {
+            field.getObject("lookaheadRobot").setPoses();
+            field.getObject("target").setPoses();
+            field.getObject("adjustedTarget").setPoses();
+        });
     }
 }
