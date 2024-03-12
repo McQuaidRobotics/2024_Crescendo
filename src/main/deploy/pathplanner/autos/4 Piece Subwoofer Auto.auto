@@ -47,13 +47,13 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 1.5
+                        "waitTime": 0.7
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "4p sub - 1"
+                        "pathName": "4p sub - 1 optimized"
                       }
                     }
                   ]
@@ -62,7 +62,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Intake"
+                  "name": "IntakeNoStow"
                 }
               }
             ]
@@ -87,7 +87,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "4p sub - 2"
+                  "pathName": "4p sub - 2 optimized"
                 }
               }
             ]
@@ -110,13 +110,13 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 1.5
+                        "waitTime": 0.7
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "4p sub - 3"
+                        "pathName": "4p sub - 3 optimized"
                       }
                     }
                   ]
@@ -125,7 +125,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Intake"
+                  "name": "IntakeNoStow"
                 }
               }
             ]
@@ -150,7 +150,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "4p sub - 4"
+                  "pathName": "4p sub - 4 optimized"
                 }
               }
             ]
@@ -173,13 +173,13 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 1.5
+                        "waitTime": 0.7
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "4p sub - 5"
+                        "pathName": "4p sub - 5 optimized"
                       }
                     }
                   ]
@@ -188,41 +188,22 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Intake"
+                  "name": "IntakeNoStow"
                 }
               }
             ]
           }
         },
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "Spinup"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "AimSub"
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "4p sub - 6"
-                }
-              }
-            ]
+            "pathName": "4p autoshoot safe position"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "FeedShooter"
+            "name": "AutoShoot"
           }
         }
       ]
