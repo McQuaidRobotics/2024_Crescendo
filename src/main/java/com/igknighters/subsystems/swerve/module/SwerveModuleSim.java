@@ -21,6 +21,8 @@ public class SwerveModuleSim extends SwerveModule {
     private FlywheelSim driveSim = new FlywheelSim(DCMotor.getFalcon500(1), kSwerve.DRIVE_GEAR_RATIO, 0.025);
     private FlywheelSim angleSim = new FlywheelSim(DCMotor.getFalcon500(1), kSwerve.ANGLE_GEAR_RATIO, 0.004);
 
+    private boolean gotDirectionsLastCycle = false;
+
     private final PIDController driveFeedback = new PIDController(
             kDriveMotor.kP,
             kDriveMotor.kI,
@@ -60,6 +62,7 @@ public class SwerveModuleSim extends SwerveModule {
     }
 
     public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop) {
+        gotDirectionsLastCycle = true;
         desiredState = SwerveModuleState.optimize(desiredState, getAngle());
         setAngle(desiredState);
         setSpeed(desiredState, isOpenLoop);
@@ -118,10 +121,13 @@ public class SwerveModuleSim extends SwerveModule {
 
     @Override
     public void periodic() {
-        if (DriverStation.isDisabled()) {
+        if (DriverStation.isDisabled() || !gotDirectionsLastCycle) {
             this.driveSim.setInputVoltage(0.0);
             this.angleSim.setInputVoltage(0.0);
         }
+        log("gotDirectionsLastCycle", gotDirectionsLastCycle);
+        gotDirectionsLastCycle = false;
+
         driveSim.update(ConstValues.PERIODIC_TIME);
         angleSim.update(ConstValues.PERIODIC_TIME);
 
