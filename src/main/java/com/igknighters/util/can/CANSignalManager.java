@@ -8,8 +8,6 @@ import java.util.Map.Entry;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.igknighters.util.Tracer;
 
-import monologue.MonoDashboard;
-
 public class CANSignalManager {
     private static final String VOLT_NAME = "Voltage";
     private static final String AMP_NAME = "Current";
@@ -59,20 +57,11 @@ public class CANSignalManager {
                 list.addAll(map.get(SignalType.CONTROL));
             if (map.containsKey(TYPE_THIS_CYCLE))
                 list.addAll(map.get(TYPE_THIS_CYCLE));
-            logSignals(entry.getKey(), list);
             if (list.size() != 0)
                 BaseStatusSignal.refreshAll(list.toArray(new BaseStatusSignal[list.size()]));
             Tracer.endTrace();
         }
 
         TYPE_THIS_CYCLE = (TYPE_THIS_CYCLE == SignalType.VOLT) ? SignalType.AMP : SignalType.VOLT;
-    }
-
-    private static void logSignals(String canbus, ArrayList<BaseStatusSignal> signals) {
-        String[] array = new String[signals.size()];
-        for (int i = 0; i < signals.size(); i++) {
-            array[i] = signals.get(i).getName();
-        }
-        MonoDashboard.put("CANSignalManager/" + canbus, array);
     }
 }

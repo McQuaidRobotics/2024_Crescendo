@@ -99,7 +99,7 @@ public class StemCommands {
                     kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
                     distance,
                     FieldConstants.SPEAKER.getZ(),
-                    TunableValues.getDouble("Note Initial Velo", 25.0).get());
+                    TunableValues.getDouble("Note Average Velo", kUmbrella.NOTE_VELO).get());
 
             return StemPosition.fromRadians(
                     kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
