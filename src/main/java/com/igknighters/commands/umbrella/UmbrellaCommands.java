@@ -1,5 +1,6 @@
 package com.igknighters.commands.umbrella;
 
+import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
@@ -27,7 +28,7 @@ public class UmbrellaCommands {
      * @return A command to be scheduled
      */
     public static Command spinupShooter(Umbrella umbrella, double rpm, ShooterSpinupReason reason) {
-        return umbrella.runOnce(() -> {
+        return umbrella.run(() -> {
             umbrella.spinupShooterToRPM(rpm);
             umbrella.pushSpinupReason(reason);
         }).withName("Spinup Shooter");
@@ -75,12 +76,29 @@ public class UmbrellaCommands {
     public static Command shoot(Umbrella umbrella) {
         return umbrella.run(
                 () -> {
-                    umbrella.spinupShooter(umbrella.getShooterTargetSpeed());
+                    umbrella.spinupShooterToRPM(6000);
                     umbrella.runIntakeAt(-1.0, true);
                 })
                 .withTimeout(0.75)
                 // .until(umbrella::notHoldingGamepiece)
                 .unless(() -> umbrella.getShooterSpeed() < 30.0)
+                .finallyDo(umbrella::stopAll)
+                .withName("Shoot");
+    }
+
+    /**
+     * Will shoot any held game piece, otherwise will do nothing
+     * 
+     * @param umbrella The umbrella subsystem
+     * @return A command to be scheduled
+     */
+    public static Command shootAuto(Umbrella umbrella) {
+        return umbrella.run(
+                () -> {
+                    umbrella.spinupShooterToRPM(kControls.AUTO_AIM_SHOOTER_RPM);
+                    umbrella.runIntakeAt(-1.0, true);
+                })
+                .withTimeout(0.75)
                 .finallyDo(umbrella::stopAll)
                 .withName("Shoot");
     }

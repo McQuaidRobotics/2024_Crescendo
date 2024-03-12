@@ -47,6 +47,7 @@ public class Robot extends UnitTestableRobot {
         }
 
         SmartDashboard.putNumber("Auto Aim Shooter RPM", kControls.AUTO_AIM_SHOOTER_RPM);
+        SmartDashboard.putNumber("Note Initial Velo", 40.0);
     }
 
     @Override

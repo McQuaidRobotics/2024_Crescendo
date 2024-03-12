@@ -114,9 +114,9 @@ public class AutosCmdRegister {
             Commands.parallel(
                 new AutoSwerveTargetSpeaker(swerve, vision::getLatestPoseWithFallback),
                 StemCommands.aimAtSpeaker(stem, true),
-                UmbrellaCommands.waitUntilSpunUp(umbrella, kControls.AUTO_AIM_SHOOTER_RPM, 0.03)
+                UmbrellaCommands.waitUntilSpunUp(umbrella, kControls.AUTO_AIM_SHOOTER_RPM, 0.01)
             ).andThen(
-                UmbrellaCommands.shoot(umbrella)
+                UmbrellaCommands.shootAuto(umbrella)
             ).withName("AutoShoot")
         );
 

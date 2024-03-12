@@ -50,7 +50,8 @@ public class HigherOrderCommands {
             ControllerParent controller) {
         Command cmd;
         String name;
-        if (umbrella.popSpinupReason().equals(ShooterSpinupReason.Amp)) {
+        var reason = umbrella.popSpinupReason();
+        if (reason.equals(ShooterSpinupReason.Amp)) {
             name = "Amp Shoot";
             cmd = Commands.sequence(
                     StemCommands.moveTo(stem, StemPosition.AMP_SCORE, 1.1),
@@ -61,8 +62,7 @@ public class HigherOrderCommands {
                                 umbrella.runIntakeAt(-1.0, true);
                             }).withTimeout(0.3),
                     StemCommands.moveTo(stem, StemPosition.AMP_SAFE, 1.5));
-        } else if (umbrella.popSpinupReason().equals(ShooterSpinupReason.AutoAimSpeaker)) {
-            System.out.println("Shot cuz this");
+        } else if (reason.equals(ShooterSpinupReason.AutoAimSpeaker)) {
             name = "Auto Aim Shoot";
             cmd = Commands.parallel(
                     HigherOrderCommands.aim(

@@ -78,7 +78,6 @@ public class StemCommands {
             this.stem = stem;
             this.aimStrategy = aimStrategy;
             this.canFinish = canFinish;
-            SmartDashboard.putNumber("Note Initial Velo", 40.0);
         }
 
         private StemPosition stationaryWristSolve(double distance, double wristRads) {
@@ -100,7 +99,7 @@ public class StemCommands {
                     kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
                     distance,
                     FieldConstants.SPEAKER.getZ(),
-                    kUmbrella.NOTE_VELO);
+                    SmartDashboard.getNumber("Note Initial Velo", 40.0));
 
             return StemPosition.fromRadians(
                     kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,

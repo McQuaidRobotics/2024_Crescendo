@@ -16,7 +16,7 @@ import com.igknighters.controllers.ControllerParent;
 
 public class TeleopSwerveTargetSpeaker extends TeleopSwerveBase {
 
-    private final double lookaheadTime = 0.3;
+    private final double lookaheadTime = 0.8;
     private double speedMult = 0.4;
 
     public TeleopSwerveTargetSpeaker(Swerve swerve, ControllerParent controller) {
