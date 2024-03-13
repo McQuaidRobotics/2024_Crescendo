@@ -7,18 +7,15 @@ import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
-import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
-import com.igknighters.subsystems.stem.StemSolvers;
+import com.igknighters.subsystems.stem.StemSolvers.AimSolveStrategy;
+import com.igknighters.subsystems.stem.StemSolvers.StemSolveInput;
 import com.igknighters.util.geom.AllianceFlip;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
 import monologue.MonoDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -57,116 +54,102 @@ public class StemCommands {
         }
     }
 
-    public enum AimStrategy {
-        STATIONARY_WRIST,
-        STATIONARY_PIVOT,
-        MAX_HEIGHT,
-        LOWEST_HEIGHT
-    }
-
     /**
      * A command class that continually calculates the wrist radians needed to aim
      * at the speaker
      */
     private static class AimAtSpeakerCommand extends Command {
         private Stem stem;
-        private AimStrategy aimStrategy;
+        private AimSolveStrategy aimStrategy;
 
         private boolean hasFinished = false, canFinish = false;
 
-        private AimAtSpeakerCommand(Stem stem, AimStrategy aimStrategy, boolean canFinish) {
+        private AimAtSpeakerCommand(Stem stem, AimSolveStrategy aimStrategy, boolean canFinish) {
             addRequirements(stem);
             this.stem = stem;
             this.aimStrategy = aimStrategy;
             this.canFinish = canFinish;
         }
 
-        private StemPosition stationaryWristSolve(double distance, double wristRads) {
-            double telescopeMeters = stem.getStemPosition().getTelescopeMeters();
-            double pivotRads = StemSolvers.linearSolvePivotTheta(
-                    telescopeMeters,
-                    wristRads,
-                    distance,
-                    FieldConstants.SPEAKER.getZ());
+        // private StemPosition stationaryWristSolve(double distance, double wristRads) {
+        //     double telescopeMeters = stem.getStemPosition().getTelescopeMeters();
+        //     double pivotRads = StemSolvers.linearSolvePivotTheta(
+        //             telescopeMeters,
+        //             wristRads,
+        //             distance,
+        //             FieldConstants.SPEAKER.getZ());
 
-            return StemPosition.fromRadians(
-                    pivotRads,
-                    kControls.STATIONARY_WRIST_ANGLE,
-                    telescopeMeters);
-        }
+        //     return StemPosition.fromRadians(
+        //             pivotRads,
+        //             kControls.STATIONARY_WRIST_ANGLE,
+        //             telescopeMeters);
+        // }
 
-        private StemPosition stationaryPivotSolveGravity(double distance) {
-            // double wristRads = StemSolvers.gravitySolveWristTheta(
-            //         kTelescope.MIN_METERS,
-            //         kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
-            //         distance,
-            //         FieldConstants.SPEAKER.getZ(),
-            //         TunableValues.getDouble("Note Average Velo", kUmbrella.NOTE_VELO).get());
+        // private StemPosition stationaryPivotSolveGravity(double distance) {
+        //     double telescopeMeters = DriverStation.isAutonomous()
+        //         ? stem.getStemPosition().getTelescopeMeters()
+        //         : kTelescope.MIN_METERS;
+        //     double wristRads = StemSolvers.gravitySolveWristTheta(
+        //             telescopeMeters,
+        //             kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
+        //             distance,
+        //             FieldConstants.SPEAKER.getZ(),
+        //             kShooter.RPM_TO_INITIAL_NOTE_VELO_CURVE.lerp(kShooter.DISTANCE_TO_RPM_CURVE.lerp(distance)));
 
-            double telescopeMeters = DriverStation.isAutonomous()
-                ? stem.getStemPosition().getTelescopeMeters()
-                : kTelescope.MIN_METERS;
-            double wristRads = StemSolvers.gravitySolveWristTheta(
-                    telescopeMeters,
-                    kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
-                    distance,
-                    FieldConstants.SPEAKER.getZ(),
-                    kShooter.RPM_TO_INITIAL_NOTE_VELO_CURVE.lerp(kShooter.DISTANCE_TO_RPM_CURVE.lerp(distance)));
+        //     return StemPosition.fromRadians(
+        //             kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
+        //             MathUtil.clamp(wristRads + kControls.STATIONARY_AIM_AT_PIVOT_RADIANS, kWrist.MIN_ANGLE,
+        //                     kWrist.MAX_ANGLE),
+        //             telescopeMeters);
+        // }
 
-            return StemPosition.fromRadians(
-                    kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
-                    MathUtil.clamp(wristRads + kControls.STATIONARY_AIM_AT_PIVOT_RADIANS, kWrist.MIN_ANGLE,
-                            kWrist.MAX_ANGLE),
-                    telescopeMeters);
-        }
+        // private StemPosition stationaryPivotSolve(double distance) {
+        //     double telescopeMeters = stem.getStemPosition().getTelescopeMeters();
+        //     double wristRads = StemSolvers.linearSolveWristTheta(
+        //             telescopeMeters,
+        //             kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
+        //             distance,
+        //             FieldConstants.SPEAKER.getZ());
 
-        private StemPosition stationaryPivotSolve(double distance) {
-            double telescopeMeters = stem.getStemPosition().getTelescopeMeters();
-            double wristRads = StemSolvers.linearSolveWristTheta(
-                    telescopeMeters,
-                    kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
-                    distance,
-                    FieldConstants.SPEAKER.getZ());
+        //     return StemPosition.fromRadians(
+        //             kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
+        //             MathUtil.clamp(wristRads + kControls.STATIONARY_AIM_AT_PIVOT_RADIANS, kWrist.MIN_ANGLE,
+        //                     kWrist.MAX_ANGLE),
+        //             telescopeMeters);
+        // }
 
-            return StemPosition.fromRadians(
-                    kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
-                    MathUtil.clamp(wristRads + kControls.STATIONARY_AIM_AT_PIVOT_RADIANS, kWrist.MIN_ANGLE,
-                            kWrist.MAX_ANGLE),
-                    telescopeMeters);
-        }
+        // private StemPosition maxHeightSolve(double distance) {
+        //     double wristRads = StemSolvers.linearSolveWristTheta(
+        //             kControls.MAX_HEIGHT_AIM_AT_TELESCOPE_METERS,
+        //             kControls.MAX_HEIGHT_AIM_AT_PIVOT_RADIANS,
+        //             distance,
+        //             FieldConstants.SPEAKER.getZ());
 
-        private StemPosition maxHeightSolve(double distance) {
-            double wristRads = StemSolvers.linearSolveWristTheta(
-                    kControls.MAX_HEIGHT_AIM_AT_TELESCOPE_METERS,
-                    kControls.MAX_HEIGHT_AIM_AT_PIVOT_RADIANS,
-                    distance,
-                    FieldConstants.SPEAKER.getZ());
+        //     return StemPosition.fromRadians(
+        //             kControls.MAX_HEIGHT_AIM_AT_PIVOT_RADIANS,
+        //             wristRads,
+        //             kControls.MAX_HEIGHT_AIM_AT_TELESCOPE_METERS);
+        // }
 
-            return StemPosition.fromRadians(
-                    kControls.MAX_HEIGHT_AIM_AT_PIVOT_RADIANS,
-                    wristRads,
-                    kControls.MAX_HEIGHT_AIM_AT_TELESCOPE_METERS);
-        }
+        // private StemPosition movingBothSolve(double distance) {
+        //     final double max = 45.0;
+        //     final double min = 20.0;
 
-        private StemPosition movingBothSolve(double distance) {
-            final double max = 45.0;
-            final double min = 20.0;
+        //     double t = MathUtil.clamp((distance - 2.5), 0.0, 6.0) / 6.0;
+        //     double pivotRads = ((max - min) * t) + min;
 
-            double t = MathUtil.clamp((distance - 2.5), 0.0, 6.0) / 6.0;
-            double pivotRads = ((max - min) * t) + min;
+        //     double wristRads = StemSolvers.linearSolveWristTheta(
+        //             kTelescope.MIN_METERS,
+        //             pivotRads,
+        //             distance,
+        //             FieldConstants.SPEAKER.getZ());
 
-            double wristRads = StemSolvers.linearSolveWristTheta(
-                    kTelescope.MIN_METERS,
-                    pivotRads,
-                    distance,
-                    FieldConstants.SPEAKER.getZ());
-
-            return StemPosition.fromRadians(
-                    pivotRads,
-                    MathUtil.clamp(wristRads + pivotRads, kWrist.MIN_ANGLE,
-                            kWrist.MAX_ANGLE),
-                    kTelescope.MIN_METERS);
-        }
+        //     return StemPosition.fromRadians(
+        //             pivotRads,
+        //             MathUtil.clamp(wristRads + pivotRads, kWrist.MIN_ANGLE,
+        //                     kWrist.MAX_ANGLE),
+        //             kTelescope.MIN_METERS);
+        // }
 
         @Override
         public void execute() {
@@ -186,21 +169,23 @@ public class StemCommands {
                             - (currentChassisSpeed.vyMetersPerSecond * (targetDistance / kUmbrella.NOTE_VELO)));
 
             double distance = currentPose.getTranslation().getDistance(adjustedTarget);
-            MonoDashboard.put("distance", distance);
+            MonoDashboard.put("Aim/distance", distance);
 
-            if (aimStrategy.equals(AimStrategy.STATIONARY_WRIST)) {
-                hasFinished = stem.setStemPosition(stationaryWristSolve(distance, stem.getStemPosition().wristRads));
-            } else if (aimStrategy.equals(AimStrategy.STATIONARY_PIVOT)) {
-                var pose = stationaryPivotSolveGravity(distance);
-                MonoDashboard.put("Aim/Gravity", Units.radiansToDegrees(pose.getWristRads()));
-                MonoDashboard.put("Aim/Linear",
-                        Units.radiansToDegrees(stationaryPivotSolve(distance).getWristRads()));
-                hasFinished = stem.setStemPosition(pose);
-            } else if (aimStrategy.equals(AimStrategy.MAX_HEIGHT)) {
-                hasFinished = stem.setStemPosition(maxHeightSolve(distance));
-            } else if (aimStrategy.equals(AimStrategy.LOWEST_HEIGHT)) {
-                hasFinished = stem.setStemPosition(movingBothSolve(distance));
-            }
+            StemSolveInput solveInput = new StemSolveInput(
+                stem.getStemPosition(),
+                StemPosition.fromRadians(
+                    kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
+                    kControls.STATIONARY_WRIST_ANGLE,
+                    kTelescope.MIN_METERS
+                ),
+                distance,
+                FieldConstants.SPEAKER.getZ(),
+                kShooter.RPM_TO_INITIAL_NOTE_VELO_CURVE.lerp((kShooter.DISTANCE_TO_RPM_CURVE.lerp(distance)))
+            );
+
+            hasFinished = stem.setStemPosition(
+                aimStrategy.solve(solveInput)
+            );
         }
 
         @Override
@@ -268,7 +253,7 @@ public class StemCommands {
      * @param aimStrategy The aiming strategy to use when targeting the speaker
      * @return A command to be scheduled
      */
-    public static Command aimAtSpeaker(Stem stem, AimStrategy aimStrategy, boolean canFinish) {
+    public static Command aimAtSpeaker(Stem stem, AimSolveStrategy aimStrategy, boolean canFinish) {
         return new AimAtSpeakerCommand(stem, aimStrategy, canFinish)
                 .withName("Aim At SPEAKER");
     }

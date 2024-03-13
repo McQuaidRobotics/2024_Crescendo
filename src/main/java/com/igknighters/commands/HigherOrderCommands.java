@@ -57,7 +57,7 @@ public class HigherOrderCommands {
                     umbrella.run(
                             () -> {
                                 // Spinup while shooting to ensure the needed power is provided
-                                umbrella.spinupShooterToRPM(kShooter.MAX_SHOOT_SPEED);
+                                umbrella.spinupShooter(kShooter.MAX_SHOOT_SPEED);
                                 umbrella.runIntakeAt(-1.0, true);
                             }).withTimeout(0.3),
                     StemCommands.moveTo(stem, StemPosition.AMP_SAFE, 1.5));

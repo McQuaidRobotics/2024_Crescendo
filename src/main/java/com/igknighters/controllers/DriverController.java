@@ -41,7 +41,7 @@ public class DriverController extends ControllerParent {
                                             StemPosition.AMP_SAFE),
                                     UmbrellaCommands.spinupShooter(
                                             allss.umbrella.get(),
-                                            2000,
+                                            4000,
                                             ShooterSpinupReason.Amp))
                                     .finallyDo(
                                             () -> allss.umbrella.get()

@@ -3,9 +3,9 @@ package com.igknighters.constants;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-import com.igknighters.commands.stem.StemCommands.AimStrategy;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.ConstantHelper.*;
+import com.igknighters.subsystems.stem.StemSolvers.AimSolveStrategy;
 import com.igknighters.subsystems.swerve.module.SwerveModuleConstants;
 import com.igknighters.subsystems.swerve.module.SwerveModuleConstants.ModuleId;
 import com.igknighters.subsystems.vision.camera.Camera;
@@ -95,12 +95,12 @@ public final class ConstValues {
         public static final double SHOOTER_RPM = 8000.0;
         public static final double INTAKE_PERCENT = 0.8;
 
-        public static final double STATIONARY_AIM_AT_PIVOT_RADIANS = 35.0 * Conv.DEGREES_TO_RADIANS;
+        public static final double STATIONARY_AIM_AT_PIVOT_RADIANS = 40.0 * Conv.DEGREES_TO_RADIANS;
         public static final double STATIONARY_WRIST_ANGLE = 71.0 * Conv.DEGREES_TO_RADIANS;
         public static final double MAX_HEIGHT_AIM_AT_PIVOT_RADIANS = 86.0 * Conv.DEGREES_TO_RADIANS;
         public static final double MAX_HEIGHT_AIM_AT_TELESCOPE_METERS = kTelescope.MAX_METERS;
 
-        public static final AimStrategy DEFAULT_AIM_STRATEGY = AimStrategy.STATIONARY_PIVOT;
+        public static final AimSolveStrategy DEFAULT_AIM_STRATEGY = AimSolveStrategy.STATIONARY_PIVOT_GRAVITY;
     }
 
     public static final class kVision {
@@ -366,13 +366,13 @@ public final class ConstValues {
             public static final double LEFT_MOTOR_DIFF = 0.9;
 
             public static final LerpTable DISTANCE_TO_RPM_CURVE = new LerpTable(
-                new LerpTableEntry(2.0, 8000),
-                new LerpTableEntry(4.0, 8000),
-                new LerpTableEntry(4.5, 8000)
+                new LerpTableEntry(0.0, 8000),
+                new LerpTableEntry(20.0, 8000)
             );
 
             public static final LerpTable RPM_TO_INITIAL_NOTE_VELO_CURVE = new LerpTable(
-                new LerpTableEntry(8000, 25.0)
+                new LerpTableEntry(0, 25.0),
+                new LerpTableEntry(100000, 25.0)
             );
         }
 

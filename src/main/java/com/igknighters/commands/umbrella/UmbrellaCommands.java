@@ -24,12 +24,12 @@ public class UmbrellaCommands {
      * Spins up the shooter to a certain speed
      * 
      * @param umbrella The umbrella subsystem
-     * @param rpm      The target speed
+     * @param rpm      A supplier for the target speed in rotations per minute
      * @return A command to be scheduled
      */
-    public static Command spinupShooter(Umbrella umbrella, double rpm, ShooterSpinupReason reason) {
+    public static Command spinupShooter(Umbrella umbrella, DoubleSupplier rpmSup, ShooterSpinupReason reason) {
         return umbrella.run(() -> {
-            umbrella.spinupShooterToRPM(rpm);
+            umbrella.spinupShooterToRPM(rpmSup.getAsDouble());
             umbrella.pushSpinupReason(reason);
         }).withName("Spinup Shooter");
     }
@@ -38,14 +38,11 @@ public class UmbrellaCommands {
      * Spins up the shooter to a certain speed
      * 
      * @param umbrella The umbrella subsystem
-     * @param rpm      A supplier for the target speed
+     * @param rpm      The target speed in rotations per minute
      * @return A command to be scheduled
      */
-    public static Command spinupShooter(Umbrella umbrella, DoubleSupplier rpmSup, ShooterSpinupReason reason) {
-        return umbrella.run(() -> {
-            umbrella.spinupShooterToRPM(rpmSup.getAsDouble());
-            umbrella.pushSpinupReason(reason);
-        }).withName("Spinup Shooter");
+    public static Command spinupShooter(Umbrella umbrella, double rpm, ShooterSpinupReason reason) {
+        return spinupShooter(umbrella, () -> rpm, reason);
     }
 
     /**
