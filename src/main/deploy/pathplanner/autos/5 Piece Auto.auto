@@ -76,7 +76,7 @@
                       }
                     },
                     {
-                      "type": "parallel",
+                      "type": "deadline",
                       "data": {
                         "commands": [
                           {
@@ -98,7 +98,13 @@
                                 {
                                   "type": "named",
                                   "data": {
-                                    "name": "Intake"
+                                    "name": "IntakeNoStow"
+                                  }
+                                },
+                                {
+                                  "type": "named",
+                                  "data": {
+                                    "name": "Aim"
                                   }
                                 }
                               ]
