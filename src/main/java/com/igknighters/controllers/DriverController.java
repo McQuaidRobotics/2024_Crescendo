@@ -57,32 +57,24 @@ public class DriverController extends ControllerParent {
                             StemPosition.STOW));
         }, Subsystems.Stem);
 
-        // this.Y.binding = new Binding(
-        //         (trig, allss) -> {
-        //             trig.onTrue(
-        //                     Commands.parallel(
-        //                             StemCommands.holdAt(
-        //                                     allss.stem.get(),
-        //                                     StemPosition.SUBWOOFER),
-        //                             UmbrellaCommands.spinupShooter(
-        //                                     allss.umbrella.get(),
-        //                                     kControls.SHOOTER_RPM,
-        //                                     ShooterSpinupReason.ManualAimSpeaker))
-        //                             .finallyDo(
-        //                                     () -> {
-        //                                         allss.umbrella.get()
-        //                                                 .stopAll();
-        //                                     }));
-        //         },
-        //         Subsystems.Stem,
-        //         Subsystems.Umbrella);
-
-        this.Y.binding = new Binding((trig, allss) -> {
-                trig.onTrue(
-                        StemCommands.holdAt(
-                                allss.stem.get(),
-                                StemPosition.STARTING));
-            }, Subsystems.Stem);
+        this.Y.binding = new Binding(
+                (trig, allss) -> {
+                    trig.onTrue(
+                            Commands.parallel(
+                                    StemCommands.holdAt(
+                                            allss.stem.get(),
+                                            StemPosition.STARTING),
+                                    UmbrellaCommands.spinupShooter(
+                                            allss.umbrella.get(),
+                                            kControls.SHOOTER_RPM,
+                                            ShooterSpinupReason.ManualAimSpeaker))
+                                    .finallyDo(
+                                            () -> {
+                                                allss.umbrella.get()
+                                                        .stopAll();
+                                            }));
+                },
+                Subsystems.Stem, Subsystems.Umbrella);
 
         /// BUMPER
         // # Our main driver doesn't use bumpers
