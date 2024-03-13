@@ -278,8 +278,8 @@ public abstract class Camera implements Logged {
         }
 
         public boolean isFaulty() {
-            return outOfBounds || outOfRange || tooAmbiguous || extremeJitter || noTags || isDisabled;
-            // || infeasibleZValue || infeasiblePitchValue || infeasibleRollValue ;
+            return outOfBounds || tooAmbiguous || extremeJitter || noTags || isDisabled;
+            // || outOfRange || infeasibleZValue || infeasiblePitchValue || infeasibleRollValue ;
         }
 
         public static class VisionEstimateFaultStruct implements Struct<VisionEstimateFault> {

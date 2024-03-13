@@ -28,11 +28,12 @@ public class StemSolvers {
             double stemLength,
             double pivotRads,
             double horizDist,
-            double vertDist) {
+            double vertDist,
+            boolean offsetPivot) {
 
         Translation2d wristLocation = solveWristLocationSimple2d(stemLength, pivotRads);
         double flatWristRads = Math.atan((vertDist - wristLocation.getY()) / (horizDist + wristLocation.getX()));
-        return flatWristRads + pivotRads;
+        return offsetPivot ? flatWristRads + pivotRads : flatWristRads;
     }
 
     /**
@@ -154,12 +155,12 @@ public class StemSolvers {
         horizDist += wristLocation.getX();
         vertDist -= wristLocation.getY();
 
-        double linearWristRads = linearSolveWristTheta(stemLength, pivotRads, horizDist, vertDist);
+        double linearWristRads = linearSolveWristTheta(stemLength, pivotRads, horizDist, vertDist, false);
         double vertcialDistanceError = linearSolveVerticalDistError(linearWristRads, horizDist, vertDist, initialNoteVelo);
 
         double newVerticalDist = vertDist + vertcialDistanceError;
 
-        return linearSolveWristTheta(stemLength, pivotRads, horizDist, newVerticalDist);
+        return linearSolveWristTheta(stemLength, pivotRads, horizDist, newVerticalDist, true);
     }
 
     public static StemPosition iterativeSolveLowestPivotDelta(
@@ -236,7 +237,8 @@ public class StemSolvers {
                     telescopeMeters,
                     pivotRads,
                     input.horizDist(),
-                    input.vertDist()
+                    input.vertDist(),
+                    true
                 ),
                 telescopeMeters
             );

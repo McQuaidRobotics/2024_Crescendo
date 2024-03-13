@@ -105,6 +105,10 @@ public class Vision extends SubsystemBase implements Logged {
 
             double ambiguity = eval.ambiguity();
 
+            if (camera.getFaults().outOfRange()) {
+                ambiguity *= 2.0;
+            }
+
             if (eval.apriltags().size() < 2) {
                 ambiguity *= 2.0;
             }
