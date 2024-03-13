@@ -484,10 +484,10 @@ public final class ConstValues {
             public static final int MOTOR_ID = 16;
             public static final int CANCODER_ID = 26;
 
-            public static final double MOTOR_kP = 210.0;
+            public static final double MOTOR_kP = 130.0;
             public static final double MOTOR_kI = 0.0;
             public static final double MOTOR_kD = 0.0;
-            public static final double MOTOR_kS = 0.12;
+            public static final double MOTOR_kS = 0.02;
             public static final double MOTOR_kV = 0.0;
 
             public static final boolean INVERTED = false;
