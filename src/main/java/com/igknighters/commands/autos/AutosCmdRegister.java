@@ -1,18 +1,21 @@
 package com.igknighters.commands.autos;
 
+import com.igknighters.GlobalState;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.teleop.AutoSwerveTargetSpeaker;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
-import com.igknighters.constants.ConstValues.kAuto;
-import com.igknighters.constants.ConstValues.kControls;
+import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
+import com.igknighters.constants.FieldConstants;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.subsystems.vision.Vision;
+import com.igknighters.util.geom.AllianceFlip;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WrapperCommand;
@@ -76,7 +79,7 @@ public class AutosCmdRegister {
             Commands.race(
                 StemCommands.holdAt(stem, StemPosition.INTAKE),
                 UmbrellaCommands.intake(umbrella)
-                .until(() -> umbrella.holdingGamepiece()).withTimeout(4.0))
+                .until(() -> umbrella.holdingGamepiece()).withTimeout(2.0))
                 .andThen(StemCommands.moveTo(stem, StemPosition.STOW))
                 .withName("Intake")
         );
@@ -86,14 +89,18 @@ public class AutosCmdRegister {
             Commands.race(
                 StemCommands.holdAt(stem, StemPosition.INTAKE),
                 UmbrellaCommands.intake(umbrella)
-                .until(() -> umbrella.holdingGamepiece())).withTimeout(4.0)
+                .until(() -> umbrella.holdingGamepiece())).withTimeout(2.0)
                 .withName("IntakeNoStow")
         );
 
         registerCommand(
             "Spinup",
-            UmbrellaCommands
-                .waitUntilSpunUp(umbrella, kAuto.AUTO_SHOOTER_RPM, 0.9)
+            Commands.run(() -> {
+                Translation2d speaker = FieldConstants.SPEAKER.toTranslation2d();
+                Translation2d targetTranslation = AllianceFlip.isBlue() ? speaker : AllianceFlip.flipTranslation(speaker);
+                umbrella.spinupShooterToRPM(kShooter.DISTANCE_TO_RPM_CURVE.lerp(GlobalState.getLocalizedPose().getTranslation().getDistance(targetTranslation)));
+            })
+                .finallyDo(() -> umbrella.stopAll())
                 .withName("Spinup")
         );
 
@@ -112,17 +119,18 @@ public class AutosCmdRegister {
         registerCommand(
             "AutoShoot",
             Commands.parallel(
-                new AutoSwerveTargetSpeaker(swerve, vision::getLatestPoseWithFallback),
-                StemCommands.aimAtSpeaker(stem, true),
-                UmbrellaCommands.waitUntilSpunUp(umbrella, kAuto.AUTO_SHOOTER_RPM, 0.01)
+                new AutoSwerveTargetSpeaker(swerve, vision::getLatestPoseWithFallback)
+                    .finallyDo(() -> System.out.println("   Swerve Targeting Done")),
+                StemCommands.aimAtSpeaker(stem, true)
+                    .finallyDo(() -> System.out.println("   Stem Targeting Done"))
             ).andThen(
-                UmbrellaCommands.shootAuto(umbrella, kAuto.AUTO_SHOOTER_RPM)
+                UmbrellaCommands.shootAuto(umbrella)
             ).withName("AutoShoot")
         );
 
         registerCommand(
             "FeedShooter",
-            UmbrellaCommands.shoot(umbrella)
+            UmbrellaCommands.shootAuto(umbrella)
                 .withName("FeedShooter")
         );
 

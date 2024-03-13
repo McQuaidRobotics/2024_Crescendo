@@ -187,7 +187,7 @@ public abstract class Camera implements Logged {
                     || simplePose.getY() > FieldConstants.FIELD_WIDTH;
             VisionEstimateFault fault = new VisionEstimateFault(
                     oob,
-                    maxDistance > 4.5,
+                    maxDistance > 6.0,
                     ambiguity > kVision.AMBIGUITY_CUTOFF,
                     this.distanceFrom(last) > jitterTimer.get() * kSwerve.MAX_DRIVE_VELOCITY,
                     this.apriltags.isEmpty(),

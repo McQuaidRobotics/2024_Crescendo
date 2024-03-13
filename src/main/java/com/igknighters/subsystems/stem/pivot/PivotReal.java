@@ -24,6 +24,7 @@ import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.constants.HardwareIndex.StemHW;
 import com.igknighters.util.BootupLogger;
 import com.igknighters.util.FaultManager;
+import com.igknighters.util.Channels.Receiver;
 import com.igknighters.util.can.CANRetrier;
 import com.igknighters.util.can.CANSignalManager;
 
@@ -45,6 +46,8 @@ public class PivotReal extends Pivot {
     private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
     private final NeutralOut controlReqNeutral = new NeutralOut().withUpdateFreqHz(0);
     private final MotionMagicVoltage controlReqMotionMagic = new MotionMagicVoltage(0.0).withUpdateFreqHz(0);
+
+    private final Receiver<Boolean> homeChannel = Receiver.buffered("HomePivot", 1, Boolean.class);
 
     private double mechRadiansToMotorRots(Double mechRads) {
         return Units.radiansToRotations(Math.PI - mechRads) * kPivot.MOTOR_TO_MECHANISM_RATIO;
@@ -210,7 +213,8 @@ public class PivotReal extends Pivot {
         if (Math.abs(super.radiansPerSecond) < 0.01
                 && Math.abs(super.gyroRadiansPerSecondAbs) < 0.01
                 && Math.abs(super.radians - getPivotRadiansPigeon()) > Units.degreesToRadians(1.0)
-                && DriverStation.isDisabled()) {
+                && (DriverStation.isDisabled() || homeChannel.hasData())) {
+            homeChannel.tryRecv();
             seedPivot();
             log("SeededPivot", true);
         } else {
