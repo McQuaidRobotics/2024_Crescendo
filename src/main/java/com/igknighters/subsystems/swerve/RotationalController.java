@@ -17,8 +17,8 @@ public class RotationalController {
     private TrapezoidProfile.State goalState = new TrapezoidProfile.State();
     private TrapezoidProfile.State setpointState = new TrapezoidProfile.State();
 
-    public double calculate(double measurement, double target) {
-        if (Math.abs(measurement - target) < kRotationController.DEADBAND) {
+    public double calculate(double measurement, double target, double deadband) {
+        if (Math.abs(measurement - target) < deadband) {
             return 0.0;
         }
 
@@ -40,6 +40,10 @@ public class RotationalController {
 
         return (kRotationController.kP * positionError)
                 + (kRotationController.kD * velocityError);
+    }
+
+    public double calculate(double measurement, double target) {
+        return calculate(measurement, target, kRotationController.DEADBAND);
     }
 
     public void reset(double measuredPosition, double measuredVelocity) {

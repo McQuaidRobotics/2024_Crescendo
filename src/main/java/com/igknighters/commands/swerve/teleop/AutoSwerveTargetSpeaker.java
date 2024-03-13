@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import java.util.function.Supplier;
@@ -47,7 +48,7 @@ public class AutoSwerveTargetSpeaker extends Command {
                 poseSupplier.get().getTranslation(),
                 Rotation2d.fromDegrees(180),
                 targetTranslation);
-        double rotVelo = swerve.rotVeloForRotation(targetAngle);
+        double rotVelo = swerve.rotVeloForRotation(targetAngle, Units.degreesToRadians(1.5));
 
         ChassisSpeeds desiredChassisSpeeds = new ChassisSpeeds(
                 0.0,
