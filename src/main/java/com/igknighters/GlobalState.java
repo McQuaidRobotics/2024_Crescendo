@@ -98,7 +98,7 @@ public class GlobalState {
      * 
      * @return Rotation3d containing the gyro's rotation.
      */
-    public static Rotation3d getGyroRot() {
+    public static Rotation3d getRobotRot() {
         globalLock.lock();
         try {
             return rotSupplier.get();
@@ -130,7 +130,7 @@ public class GlobalState {
         try {
             return ChassisSpeeds.fromRobotRelativeSpeeds(
                     velocity,
-                    getGyroRot().toRotation2d());
+                    getRobotRot().toRotation2d());
         } finally {
             globalLock.unlock();
         }

@@ -3,6 +3,7 @@ package com.igknighters.subsystems.vision;
 import com.igknighters.GlobalState;
 import com.igknighters.GlobalState.LocalizerType;
 import com.igknighters.constants.FieldConstants;
+import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kVision;
 import com.igknighters.subsystems.vision.camera.Camera;
 import com.igknighters.subsystems.vision.camera.Camera.VisionPoseEstimate;
@@ -12,11 +13,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -105,6 +110,8 @@ public class Vision extends SubsystemBase implements Logged {
 
             double ambiguity = eval.ambiguity();
 
+            log("cameras/" + camera.getName() + "/rawAmbiguity", ambiguity);
+
             if (camera.getFaults().outOfRange()) {
                 ambiguity *= 2.0;
             }
@@ -112,6 +119,25 @@ public class Vision extends SubsystemBase implements Logged {
             if (eval.apriltags().size() < 2) {
                 ambiguity *= 2.0;
             }
+
+            ChassisSpeeds velo = GlobalState.getVelocity();
+            if (new Translation2d(velo.vxMetersPerSecond, velo.vyMetersPerSecond).getNorm() > kSwerve.MAX_DRIVE_VELOCITY
+                    / 2.0) {
+                ambiguity *= 2.0;
+            }
+            if (velo.omegaRadiansPerSecond > kSwerve.MAX_ANGULAR_VELOCITY / 3.0) {
+                ambiguity *= 2.0;
+            }
+
+            Rotation2d rotation = GlobalState.getRobotRot().toRotation2d();
+            if (Math.abs(
+                MathUtil.angleModulus(rotation.getRadians())
+                - MathUtil.angleModulus(eval.pose().getRotation().toRotation2d().getRadians())
+                ) > Math.toRadians(30.0)) {
+                ambiguity *= 2.0;
+            }
+
+            log("cameras/" + camera.getName() + "/ambiguity", ambiguity);
 
             if (!DriverStation.isAutonomousEnabled())
                 GlobalState.submitVisionData(eval, ambiguity);
@@ -122,9 +148,8 @@ public class Vision extends SubsystemBase implements Logged {
         }
 
         log(
-            "SeenTags",
-            seenTags.stream().toList().toString()
-        );
+                "SeenTags",
+                seenTags.stream().toList().toString());
 
         GlobalState.modifyField2d(field -> {
             field.getObject("seen_apriltags").setPoses(
