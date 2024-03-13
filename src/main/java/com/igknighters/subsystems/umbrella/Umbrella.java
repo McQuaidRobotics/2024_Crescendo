@@ -127,10 +127,10 @@ public class Umbrella extends SubsystemBase implements Logged {
     /**
      * Spins up the {@code Shooter} to a certain speed
      * 
-     * @param RPM The speed to spin up to in rotations per minute
+     * @param rpm The speed to spin up to in rotations per minute
      */
-    public void spinupShooterToRPM(double RPM) {
-        shooter.setSpeed(Units.rotationsPerMinuteToRadiansPerSecond(RPM));
+    public void spinupShooterToRPM(double rpm) {
+        shooter.setSpeed(Units.rotationsPerMinuteToRadiansPerSecond(rpm));
     }
 
     /**

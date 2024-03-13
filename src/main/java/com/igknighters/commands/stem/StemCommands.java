@@ -12,13 +12,13 @@ import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.stem.StemSolvers;
-import com.igknighters.util.TunableValues;
 import com.igknighters.util.geom.AllianceFlip;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import monologue.MonoDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -82,8 +82,9 @@ public class StemCommands {
         }
 
         private StemPosition stationaryWristSolve(double distance, double wristRads) {
+            double telescopeMeters = stem.getStemPosition().getTelescopeMeters();
             double pivotRads = StemSolvers.linearSolvePivotTheta(
-                    kTelescope.MIN_METERS,
+                    telescopeMeters,
                     wristRads,
                     distance,
                     FieldConstants.SPEAKER.getZ());
@@ -91,7 +92,7 @@ public class StemCommands {
             return StemPosition.fromRadians(
                     pivotRads,
                     kControls.STATIONARY_WRIST_ANGLE,
-                    kTelescope.MIN_METERS);
+                    telescopeMeters);
         }
 
         private StemPosition stationaryPivotSolveGravity(double distance) {
@@ -101,8 +102,12 @@ public class StemCommands {
             //         distance,
             //         FieldConstants.SPEAKER.getZ(),
             //         TunableValues.getDouble("Note Average Velo", kUmbrella.NOTE_VELO).get());
+
+            double telescopeMeters = DriverStation.isAutonomous()
+                ? stem.getStemPosition().getTelescopeMeters()
+                : kTelescope.MIN_METERS;
             double wristRads = StemSolvers.gravitySolveWristTheta(
-                    kTelescope.MIN_METERS,
+                    telescopeMeters,
                     kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
                     distance,
                     FieldConstants.SPEAKER.getZ(),
@@ -112,12 +117,13 @@ public class StemCommands {
                     kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
                     MathUtil.clamp(wristRads + kControls.STATIONARY_AIM_AT_PIVOT_RADIANS, kWrist.MIN_ANGLE,
                             kWrist.MAX_ANGLE),
-                    kTelescope.MIN_METERS);
+                    telescopeMeters);
         }
 
         private StemPosition stationaryPivotSolve(double distance) {
+            double telescopeMeters = stem.getStemPosition().getTelescopeMeters();
             double wristRads = StemSolvers.linearSolveWristTheta(
-                    kTelescope.MIN_METERS,
+                    telescopeMeters,
                     kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
                     distance,
                     FieldConstants.SPEAKER.getZ());
@@ -126,7 +132,7 @@ public class StemCommands {
                     kControls.STATIONARY_AIM_AT_PIVOT_RADIANS,
                     MathUtil.clamp(wristRads + kControls.STATIONARY_AIM_AT_PIVOT_RADIANS, kWrist.MIN_ANGLE,
                             kWrist.MAX_ANGLE),
-                    kTelescope.MIN_METERS);
+                    telescopeMeters);
         }
 
         private StemPosition maxHeightSolve(double distance) {

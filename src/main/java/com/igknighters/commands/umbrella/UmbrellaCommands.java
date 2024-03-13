@@ -1,5 +1,7 @@
 package com.igknighters.commands.umbrella;
 
+import java.util.function.DoubleSupplier;
+
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
@@ -28,6 +30,20 @@ public class UmbrellaCommands {
     public static Command spinupShooter(Umbrella umbrella, double rpm, ShooterSpinupReason reason) {
         return umbrella.run(() -> {
             umbrella.spinupShooterToRPM(rpm);
+            umbrella.pushSpinupReason(reason);
+        }).withName("Spinup Shooter");
+    }
+
+    /**
+     * Spins up the shooter to a certain speed
+     * 
+     * @param umbrella The umbrella subsystem
+     * @param rpm      A supplier for the target speed
+     * @return A command to be scheduled
+     */
+    public static Command spinupShooter(Umbrella umbrella, DoubleSupplier rpmSup, ShooterSpinupReason reason) {
+        return umbrella.run(() -> {
+            umbrella.spinupShooterToRPM(rpmSup.getAsDouble());
             umbrella.pushSpinupReason(reason);
         }).withName("Spinup Shooter");
     }

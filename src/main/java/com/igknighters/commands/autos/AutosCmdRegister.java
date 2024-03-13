@@ -1,17 +1,21 @@
 package com.igknighters.commands.autos;
 
+import com.igknighters.GlobalState;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.teleop.AutoSwerveTargetSpeaker;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
-import com.igknighters.constants.ConstValues.kAuto;
+import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
+import com.igknighters.constants.FieldConstants;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.subsystems.vision.Vision;
+import com.igknighters.util.geom.AllianceFlip;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WrapperCommand;
@@ -91,9 +95,11 @@ public class AutosCmdRegister {
 
         registerCommand(
             "Spinup",
-            // UmbrellaCommands
-            //     .waitUntilSpunUp(umbrella, kAuto.AUTO_SHOOTER_RPM, 0.1)
-            Commands.run(() -> umbrella.spinupShooterToRPM(kAuto.AUTO_SHOOTER_RPM))
+            Commands.run(() -> {
+                Translation2d speaker = FieldConstants.SPEAKER.toTranslation2d();
+                Translation2d targetTranslation = AllianceFlip.isBlue() ? speaker : AllianceFlip.flipTranslation(speaker);
+                umbrella.spinupShooterToRPM(kShooter.DISTANCE_TO_RPM_CURVE.lerp(GlobalState.getLocalizedPose().getTranslation().getDistance(targetTranslation)));
+            })
                 .finallyDo(() -> umbrella.stopAll())
                 .withName("Spinup")
         );

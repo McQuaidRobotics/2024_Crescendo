@@ -366,15 +366,13 @@ public final class ConstValues {
             public static final double LEFT_MOTOR_DIFF = 0.9;
 
             public static final LerpTable DISTANCE_TO_RPM_CURVE = new LerpTable(
-                new LerpTableEntry(2.0, 5000),
-                new LerpTableEntry(4.0, 7000),
-                new LerpTableEntry(4.5, 8100)
+                new LerpTableEntry(2.0, 8000),
+                new LerpTableEntry(4.0, 8000),
+                new LerpTableEntry(4.5, 8000)
             );
 
             public static final LerpTable RPM_TO_INITIAL_NOTE_VELO_CURVE = new LerpTable(
-                new LerpTableEntry(5000, 16.0),
-                new LerpTableEntry(7000, 18.0),
-                new LerpTableEntry(8100, 22.0)
+                new LerpTableEntry(8000, 25.0)
             );
         }
 
