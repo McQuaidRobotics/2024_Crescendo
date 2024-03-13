@@ -99,7 +99,7 @@ public class UmbrellaCommands {
     public static Command shootAuto(Umbrella umbrella) {
         return umbrella.run(
                 () -> umbrella.runIntakeAt(-1.0, true))
-                .withTimeout(0.6)
+                .withTimeout(0.45)
                 .withName("Shoot");
     }
 
