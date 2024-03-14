@@ -18,7 +18,7 @@ import com.igknighters.controllers.ControllerParent;
 
 public class TeleopSwerveTargetSpeaker extends TeleopSwerveBase {
 
-    private final TunableDouble lookaheadTime = TunableValues.getDouble("AutoAimLookaheadTime", 0.2);
+    private final TunableDouble lookaheadTime = TunableValues.getDouble("AutoAimLookaheadTime", 0.0);
     private final TunableDouble speedMult = TunableValues.getDouble("AutoAimSpeedMult", 0.4);
 
     public TeleopSwerveTargetSpeaker(Swerve swerve, ControllerParent controller) {

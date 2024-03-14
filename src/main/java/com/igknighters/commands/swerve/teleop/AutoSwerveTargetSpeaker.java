@@ -47,7 +47,7 @@ public class AutoSwerveTargetSpeaker extends Command {
 
         Rotation2d targetAngle = swerve.rotationRelativeToPose(
                 poseSupplier.get().getTranslation(),
-                Rotation2d.fromDegrees(0),
+                Rotation2d.fromDegrees(180),
                 targetTranslation);
         double rotVelo = swerve.rotVeloForRotation(targetAngle, Units.degreesToRadians(1.5));
 
