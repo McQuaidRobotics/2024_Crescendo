@@ -128,6 +128,7 @@ public class AutosCmdRegister {
                     .finallyDo(() -> System.out.println("   Stem Targeting Done"))
             ).andThen(
                 UmbrellaCommands.shootAuto(umbrella)
+                    .finallyDo(() -> System.out.println("   Shooting Done"))
             ).withName("AutoShoot")
         );
 

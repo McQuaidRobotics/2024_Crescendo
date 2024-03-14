@@ -66,4 +66,9 @@ public class AutoSwerveTargetSpeaker extends Command {
     public boolean isFinished() {
         return isDone;
     }
+
+    @Override
+    public void end(boolean interrupted) {
+        swerve.drive(new ChassisSpeeds(), false);
+    }
 }
