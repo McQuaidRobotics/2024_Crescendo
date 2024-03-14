@@ -2,8 +2,10 @@ package com.igknighters.controllers;
 
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
+import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.subsystems.SubsystemResources.Subsystems;
 import com.igknighters.subsystems.stem.StemPosition;
+import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 
@@ -15,9 +17,13 @@ public class OperatorController extends ControllerParent {
         // disregard null safety as it is checked on assignment
 
         /// FACE BUTTONS
-        // this.A.binding = 
+        this.A.binding = new Binding((trig, allss) -> {
+            trig.onTrue(UmbrellaCommands.spinupShooter(allss.umbrella.get(), kControls.SHOOTER_RPM, ShooterSpinupReason.None));
+        }, Subsystems.Umbrella);
 
-        // this.B.binding =
+        this.B.binding = new Binding((trig, allss) -> {
+            trig.onTrue(UmbrellaCommands.stopShooter(allss.umbrella.get()));
+        }, Subsystems.Umbrella);
 
         // this.X.binding =
 
