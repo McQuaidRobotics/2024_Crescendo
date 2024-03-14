@@ -59,10 +59,6 @@ public class AutosCmdRegister {
         //                 Double.class))
         //         .withDefault(9999.0);
 
-        // NamedCommands.registerCommand(
-        //         "Stow",
-        //         StemCommands.holdAt(stem, StemPosition.STOW));
-
         // SpecializedNamedCommands.registerCommand(
         //         "Spinup",
         //         SpecializedNamedCommand.fromLambda(
@@ -108,6 +104,13 @@ public class AutosCmdRegister {
                 "Aim",
                 StemCommands.aimAtSpeaker(stem, false)
                     .withName("Aim")
+        );
+
+        registerCommand(
+                "Stow",
+                StemCommands.holdAt(
+                            stem,
+                            StemPosition.STOW)
         );
 
         registerCommand(
