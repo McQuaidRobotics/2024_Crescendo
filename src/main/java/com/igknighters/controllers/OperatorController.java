@@ -1,6 +1,9 @@
 package com.igknighters.controllers;
 
+import com.igknighters.commands.stem.StemCommands;
+import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.subsystems.SubsystemResources.Subsystems;
+import com.igknighters.subsystems.stem.StemPosition;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 
@@ -18,7 +21,14 @@ public class OperatorController extends ControllerParent {
 
         // this.X.binding =
 
-        // this.Y.binding =
+        this.Y.binding = new Binding((trig, allss) -> {
+            trig.onTrue(
+                StemCommands.moveTo(allss.stem.get(), StemPosition.STOW, 2.0)
+                .andThen(
+                    UmbrellaCommands.expell(allss.umbrella.get())
+                )
+            );
+        }, Subsystems.Stem, Subsystems.Umbrella);
 
         /// BUMPER
         // this.LB.binding =
@@ -52,6 +62,6 @@ public class OperatorController extends ControllerParent {
             }));
     }, Subsystems.Stem, Subsystems.Umbrella);
 
-        // this.DPU.binding = 
+        // this.DPU.binding =
     }
 }
