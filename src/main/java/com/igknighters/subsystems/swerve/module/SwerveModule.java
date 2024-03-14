@@ -3,6 +3,7 @@ package com.igknighters.subsystems.swerve.module;
 import com.igknighters.subsystems.Component;
 import com.igknighters.subsystems.swerve.Swerve;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import monologue.Annotations.Log;
@@ -54,4 +55,6 @@ public abstract class SwerveModule extends Component {
      *         array.
      */
     public abstract int getModuleNumber();
+
+    public abstract void setVoltageOut(double volts, Rotation2d angle);
 }

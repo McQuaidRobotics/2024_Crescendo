@@ -13,7 +13,6 @@ public abstract class Wrist extends Component {
     @Log.NT protected double radiansPerSecond = 0.0;
     @Log.NT protected double volts = 0.0;
     @Log.NT protected double amps = 0.0;
-    @Log.NT protected double temp = 0.0;
 
     public Wrist(double startingRadians) {
         this.radians = startingRadians;

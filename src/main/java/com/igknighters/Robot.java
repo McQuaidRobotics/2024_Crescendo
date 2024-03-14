@@ -12,10 +12,11 @@ import monologue.Monologue;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstantHelper;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
-import com.igknighters.util.CANBusLogging;
 import com.igknighters.util.ShuffleboardApi;
 import com.igknighters.util.Tracer;
 import com.igknighters.util.UnitTestableRobot;
+import com.igknighters.util.can.CANBusLogging;
+import com.igknighters.util.can.CANSignalManager;
 import com.pathplanner.lib.pathfinding.LocalADStar;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 
@@ -46,14 +47,14 @@ public class Robot extends UnitTestableRobot {
 
     @Override
     public void robotPeriodic() {
+        Tracer.traceFunc("CANSignalRefresh", CANSignalManager::refreshSignals);
         Tracer.traceFunc("CommandScheduler", scheduler::run);
         Tracer.traceFunc("LEDUpdate", LED::run);
         Tracer.traceFunc("CANBusLoggung", CANBusLogging::run);
         Tracer.traceFunc("Shuffleboard", ShuffleboardApi::run);
         Tracer.traceFunc("Monologue", () -> {
             Monologue.updateAll(
-                DriverStation.isFMSAttached()
-            );
+                    DriverStation.isFMSAttached());
         });
         GlobalState.log();
     }
@@ -130,7 +131,7 @@ public class Robot extends UnitTestableRobot {
             return;
         }
 
-        final String meta = "Metadata/";
+        final String meta = "/Metadata/";
         MonoDashboard.put(meta + "RuntimeType", getRuntimeType().toString());
         MonoDashboard.put(meta + "ProjectName", BuildConstants.MAVEN_NAME);
         MonoDashboard.put(meta + "BuildDate", BuildConstants.BUILD_DATE);

@@ -9,8 +9,8 @@ import com.igknighters.subsystems.stem.StemValidator.ValidationResponse;
 import com.igknighters.subsystems.stem.pivot.*;
 import com.igknighters.subsystems.stem.telescope.*;
 import com.igknighters.subsystems.stem.wrist.*;
-import com.igknighters.util.CANBusLogging;
 import com.igknighters.util.Tracer;
+
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -37,7 +37,7 @@ public class Stem extends SubsystemBase implements Logged {
         } else {
             pivot = new PivotReal();
             telescope = new TelescopeReal();
-            wrist = new WristReal();
+            wrist = new WristRealFused();
         }
 
         visualizer = new StemVisualizer();
@@ -60,8 +60,6 @@ public class Stem extends SubsystemBase implements Logged {
         } else {
             coastSwitch = null;
         }
-
-        CANBusLogging.logBus(kStem.CANBUS);
     }
 
     /**

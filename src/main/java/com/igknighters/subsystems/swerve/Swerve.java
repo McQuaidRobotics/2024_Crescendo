@@ -23,7 +23,6 @@ import com.igknighters.subsystems.swerve.gyro.GyroSim;
 import com.igknighters.subsystems.swerve.module.SwerveModule;
 import com.igknighters.subsystems.swerve.module.SwerveModuleReal;
 import com.igknighters.subsystems.swerve.module.SwerveModuleSim;
-import com.igknighters.util.CANBusLogging;
 import com.igknighters.util.Tracer;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.FieldConstants;
@@ -86,8 +85,6 @@ public class Swerve extends SubsystemBase implements Logged {
         visualizer = new SwerveVisualizer(this, swerveMods);
 
         setpointProcessor.setDisabled(true);
-
-        CANBusLogging.logBus(ConstValues.kSwerve.CANBUS);
     }
 
     public void drive(ChassisSpeeds speeds, boolean isOpenLoop) {
@@ -173,14 +170,12 @@ public class Swerve extends SubsystemBase implements Logged {
         GlobalState.resetSwerveLocalization(getYawWrappedRot(), pose, getModulePositions());
     }
 
+    public double rotVeloForRotation(Rotation2d wantedAngle, double deadband) {
+        return rotController.calculate(getYawRads(), wantedAngle.getRadians(), deadband);
+    }
+
     public double rotVeloForRotation(Rotation2d wantedAngle) {
-        double targetAngleRads = wantedAngle.getRadians();
-        double currentAngleRads = getYawRads();
-
-        log("WantedAngle", targetAngleRads);
-        log("CurrentAngle", currentAngleRads);
-
-        return rotController.calculate(currentAngleRads, targetAngleRads);
+        return rotController.calculate(getYawRads(), wantedAngle.getRadians());
     }
 
     public void resetRotController() {
@@ -188,7 +183,10 @@ public class Swerve extends SubsystemBase implements Logged {
     }
 
     public Rotation2d rotationRelativeToPose(Rotation2d wantedAngleOffet, Translation2d pose) {
-        Translation2d currentTrans = getPose().getTranslation();
+        return rotationRelativeToPose(getPose().getTranslation(), wantedAngleOffet, pose);
+    }
+
+    public Rotation2d rotationRelativeToPose(Translation2d currentTrans, Rotation2d wantedAngleOffet, Translation2d pose) {
         double angleBetween = Math.atan2(
                 pose.getY() - currentTrans.getY(),
                 pose.getX() - currentTrans.getX());

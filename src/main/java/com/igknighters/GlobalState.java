@@ -44,8 +44,6 @@ public class GlobalState {
         }
     }
 
-    private static AtomicBoolean climbing = new AtomicBoolean(false);
-
     private static final ReentrantLock globalLock = new ReentrantLock();
 
     private static LocalizerType localizerType = LocalizerType.None;
@@ -100,7 +98,7 @@ public class GlobalState {
      * 
      * @return Rotation3d containing the gyro's rotation.
      */
-    public static Rotation3d getGyroRot() {
+    public static Rotation3d getRobotRot() {
         globalLock.lock();
         try {
             return rotSupplier.get();
@@ -130,9 +128,9 @@ public class GlobalState {
     public static ChassisSpeeds getFieldRelativeVelocity() {
         globalLock.lock();
         try {
-            return ChassisSpeeds.fromFieldRelativeSpeeds(
+            return ChassisSpeeds.fromRobotRelativeSpeeds(
                     velocity,
-                    getGyroRot().toRotation2d());
+                    getRobotRot().toRotation2d());
         } finally {
             globalLock.unlock();
         }
@@ -391,21 +389,5 @@ public class GlobalState {
      */
     public static void setUnitTest(boolean isTest) {
         GlobalState.isUnitTest.set(isTest);
-    }
-
-    /**
-     * @return If the robot is currently in a climbing mode
-     */
-    public static boolean isClimbing() {
-        return GlobalState.climbing.get();
-    }
-
-    /**
-     * Declare if the robot is in a climbing mode
-     * 
-     * @param isClimbing Whether the robot is climbing or not
-     */
-    public static void setClimbing(boolean isClimbing) {
-        GlobalState.climbing.set(isClimbing);
     }
 }

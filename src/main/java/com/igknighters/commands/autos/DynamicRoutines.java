@@ -21,7 +21,7 @@ public class DynamicRoutines {
 
     public static Command[] choosableDynamicRoutines(Swerve swerve) {
         Command[] choosableRoutines = new Command[]{
-            testDynPath(swerve).withName("TEST")
+            // testDynPath(swerve).withName("TEST")
         };
         return choosableRoutines;
     }

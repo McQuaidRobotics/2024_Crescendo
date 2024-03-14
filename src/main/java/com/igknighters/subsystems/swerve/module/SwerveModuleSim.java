@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
@@ -20,6 +21,8 @@ import com.igknighters.util.BootupLogger;
 public class SwerveModuleSim extends SwerveModule {
     private FlywheelSim driveSim = new FlywheelSim(DCMotor.getFalcon500(1), kSwerve.DRIVE_GEAR_RATIO, 0.025);
     private FlywheelSim angleSim = new FlywheelSim(DCMotor.getFalcon500(1), kSwerve.ANGLE_GEAR_RATIO, 0.004);
+
+    private boolean gotDirectionsLastCycle = false;
 
     private final PIDController driveFeedback = new PIDController(
             kDriveMotor.kP,
@@ -46,7 +49,7 @@ public class SwerveModuleSim extends SwerveModule {
 
         angleFeedback.enableContinuousInput(-Math.PI, Math.PI);
 
-        super.angleAbsoluteRads = Math.random() * 2.0 * Math.PI;
+        super.angleAbsoluteRads = Units.rotationsToRadians(Math.random());
 
         BootupLogger.bootupLog("    SwerveModule[" + this.moduleNumber + "] initialized (sim)");
     }
@@ -60,6 +63,7 @@ public class SwerveModuleSim extends SwerveModule {
     }
 
     public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop) {
+        gotDirectionsLastCycle = true;
         desiredState = SwerveModuleState.optimize(desiredState, getAngle());
         setAngle(desiredState);
         setSpeed(desiredState, isOpenLoop);
@@ -118,10 +122,13 @@ public class SwerveModuleSim extends SwerveModule {
 
     @Override
     public void periodic() {
-        if (DriverStation.isDisabled()) {
+        if (DriverStation.isDisabled() || !gotDirectionsLastCycle) {
             this.driveSim.setInputVoltage(0.0);
             this.angleSim.setInputVoltage(0.0);
         }
+        log("gotDirectionsLastCycle", gotDirectionsLastCycle);
+        gotDirectionsLastCycle = false;
+
         driveSim.update(ConstValues.PERIODIC_TIME);
         angleSim.update(ConstValues.PERIODIC_TIME);
 
@@ -147,5 +154,9 @@ public class SwerveModuleSim extends SwerveModule {
 
     @Override
     public void setVoltageOut(double volts) {
+    }
+
+    @Override
+    public void setVoltageOut(double volts, Rotation2d angle) {
     }
 }

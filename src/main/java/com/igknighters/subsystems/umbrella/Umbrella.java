@@ -1,10 +1,8 @@
 package com.igknighters.subsystems.umbrella;
 
-import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.umbrella.intake.*;
 import com.igknighters.subsystems.umbrella.shooter.*;
-import com.igknighters.util.CANBusLogging;
 import com.igknighters.util.Tracer;
 
 import edu.wpi.first.math.util.Units;
@@ -34,8 +32,6 @@ public class Umbrella extends SubsystemBase implements Logged {
             intake = new IntakeReal();
             shooter = new ShooterReal();
         }
-
-        CANBusLogging.logBus(kUmbrella.CANBUS);
     }
 
     @Override
@@ -67,7 +63,7 @@ public class Umbrella extends SubsystemBase implements Logged {
      *          so a tolerance of 0.1 would allow for a 10% error
      */
     public boolean isShooterAtSpeed(double tolerance) {
-        return (Math.abs(shooter.getSpeed() - shooter.getTargetSpeed()) / shooter.getTargetSpeed()) > tolerance;
+        return (Math.abs(shooter.getSpeed() - shooter.getTargetSpeed()) / shooter.getTargetSpeed()) < tolerance;
     }
 
     /**
@@ -131,20 +127,10 @@ public class Umbrella extends SubsystemBase implements Logged {
     /**
      * Spins up the {@code Shooter} to a certain speed
      * 
-     * @param surfaceMPS The speed to spin up to in meters per second
+     * @param rpm The speed to spin up to in rotations per minute
      */
-    public void spinupShooterToSurfaceSpeed(double surfaceMPS) {
-        var wheelCircum = kShooter.WHEEL_DIAMETER * Math.PI;
-        shooter.setSpeed(Units.rotationsToRadians(surfaceMPS / wheelCircum));
-    }
-
-    /**
-     * Spins up the {@code Shooter} to a certain speed
-     * 
-     * @param RPM The speed to spin up to in rotations per minute
-     */
-    public void spinupShooterToRPM(double RPM) {
-        shooter.setSpeed(Units.rotationsPerMinuteToRadiansPerSecond(RPM));
+    public void spinupShooterToRPM(double rpm) {
+        shooter.setSpeed(Units.rotationsPerMinuteToRadiansPerSecond(rpm));
     }
 
     /**

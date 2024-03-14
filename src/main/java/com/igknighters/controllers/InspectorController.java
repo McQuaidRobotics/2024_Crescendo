@@ -18,7 +18,6 @@ import com.igknighters.LED;
 import com.igknighters.LED.LedAnimations;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.commands.stem.StemCommands;
-import com.igknighters.commands.stem.StemCommands.AimStrategy;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 
 @SuppressWarnings("unused")

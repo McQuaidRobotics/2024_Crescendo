@@ -2,6 +2,7 @@ package com.igknighters.subsystems.umbrella.shooter;
 
 import com.igknighters.subsystems.Component;
 
+import edu.wpi.first.math.util.Units;
 import monologue.Annotations.Log;
 
 public abstract class Shooter extends Component {
@@ -16,6 +17,8 @@ public abstract class Shooter extends Component {
     @Log.NT protected double ampsLeft = 0.0;
     @Log.NT protected double tempRight = 0.0;
     @Log.NT protected double tempLeft = 0.0;
+    @Log.NT protected double shooterRightRPM = Units.radiansPerSecondToRotationsPerMinute(radiansPerSecondRight);
+    @Log.NT protected double shooterLeftRPM = Units.radiansPerSecondToRotationsPerMinute(radiansPerSecondLeft);
 
     @Override
     public String getPath() {

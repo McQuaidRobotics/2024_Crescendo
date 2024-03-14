@@ -8,8 +8,12 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.igknighters.GlobalState;
 import com.igknighters.constants.ConstValues;
+import com.igknighters.constants.ConstValues.kSwerve;
+import com.igknighters.constants.HardwareIndex.SwerveHW;
 import com.igknighters.util.BootupLogger;
-import com.igknighters.util.CANRetrier;
+import com.igknighters.util.FaultManager;
+import com.igknighters.util.can.CANRetrier;
+import com.igknighters.util.can.CANSignalManager;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
@@ -37,17 +41,13 @@ public class GyroReal extends Gyro {
         xAccel = gyro.getAccelerationX();
         yAccel = gyro.getAccelerationY();
 
-        rollSignal.setUpdateFrequency(100);
-        pitchSignal.setUpdateFrequency(100);
-        yawSignal.setUpdateFrequency(100);
-        rollVeloSignal.setUpdateFrequency(100);
-        pitchVeloSignal.setUpdateFrequency(100);
-        yawVeloSignal.setUpdateFrequency(100);
+        CANSignalManager.registerSignals(
+                kSwerve.CANBUS,
+                rollSignal, pitchSignal, yawSignal,
+                rollVeloSignal, pitchVeloSignal, yawVeloSignal,
+                xAccel, yAccel);
 
-        xAccel.setUpdateFrequency(100);
-        yAccel.setUpdateFrequency(100);
-
-        gyro.optimizeBusUtilization();
+        gyro.optimizeBusUtilization(1.0);
 
         Supplier<Rotation3d> sup = () -> {
             return new Rotation3d(
@@ -87,15 +87,16 @@ public class GyroReal extends Gyro {
 
     @Override
     public void periodic() {
-        BaseStatusSignal.refreshAll(
-                // pitchSignal, pitchVeloSignal,
-                // rollSignal, rollVeloSignal,
-                yawSignal /* , yawVeloSignal, */
-        /* xAccel, yAccel */);
+        FaultManager.captureFault(
+                SwerveHW.Pigeon2,
+                rollSignal, pitchSignal, yawSignal,
+                rollVeloSignal, pitchVeloSignal, yawVeloSignal,
+                xAccel, yAccel);
 
         super.pitchRads = Units.degreesToRadians(pitchSignal.getValue());
         super.pitchVelRadsPerSec = Units.degreesToRadians(pitchVeloSignal.getValue());
         super.rollRads = Units.degreesToRadians(rollSignal.getValue());
+        super.rollVelRadsPerSec = Units.degreesToRadians(rollVeloSignal.getValue());
         super.yawRads = Units.degreesToRadians(yawSignal.getValue());
         super.yawVelRadsPerSec = Units.degreesToRadians(yawVeloSignal.getValue());
 
