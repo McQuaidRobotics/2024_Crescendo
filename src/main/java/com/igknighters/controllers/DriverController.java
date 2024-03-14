@@ -20,17 +20,17 @@ import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
 public class DriverController extends ControllerParent {
 
-    public DriverController(int port) {
-        super(port, true);
-        // disregard null safety for subsystems as it is checked on assignment
+        public DriverController(int port) {
+                super(port, true);
+                // disregard null safety for subsystems as it is checked on assignment
 
-        /// FACE BUTTONS
-        this.A.binding = new Binding((trig, allss) -> {
-            trig.onTrue(
-                    HigherOrderCommands.intakeGamepiece(
-                            allss.stem.get(),
-                            allss.umbrella.get()));
-        }, Subsystems.Stem, Subsystems.Umbrella);
+                /// FACE BUTTONS
+                this.A.binding = new Binding((trig, allss) -> {
+                        trig.onTrue(
+                                        HigherOrderCommands.intakeGamepiece(
+                                                        allss.stem.get(),
+                                                        allss.umbrella.get()));
+                }, Subsystems.Stem, Subsystems.Umbrella);
 
         this.B.binding = new Binding(
                 (trig, allss) -> {
@@ -88,20 +88,20 @@ public class DriverController extends ControllerParent {
                     ));
         });
 
-        // this.RB.binding = # Is used as an or with LB
+                // this.RB.binding = # Is used as an or with LB
 
-        /// CENTER BUTTONS
-        // this.Back.binding =
+                /// CENTER BUTTONS
+                // this.Back.binding =
 
-        this.Start.binding = new Binding(Subsystems.Swerve, (trig, allss) -> {
-            trig.onTrue(SwerveCommands.orientGyro(allss.swerve.get()));
-        });
+                this.Start.binding = new Binding(Subsystems.Swerve, (trig, allss) -> {
+                        trig.onTrue(SwerveCommands.orientGyro(allss.swerve.get()));
+                });
 
-        /// STICKS
-        // # Our main driver doesn't use sticks
-        // this.LS.binding = # Dont use
+                /// STICKS
+                // # Our main driver doesn't use sticks
+                // this.LS.binding = # Dont use
 
-        // this.RS.binding = # Dont use
+                // this.RS.binding = # Dont use
 
         /// TRIGGERS
         this.LT.binding = new Binding((trig, allss) -> {
@@ -124,16 +124,16 @@ public class DriverController extends ControllerParent {
                             .withName("Highorder Aim"));
         }, Subsystems.Swerve, Subsystems.Stem, Subsystems.Umbrella);
 
-        this.RT.binding = new Binding((trig, allss) -> {
-            trig.onTrue(
-                    new ProxyCommand(
-                            () -> HigherOrderCommands.genericShoot(
-                                    allss.swerve.get(),
-                                    allss.stem.get(),
-                                    allss.umbrella.get(),
-                                    this))
-                            .withName("Proxy Shoot"));
-        }, Subsystems.Umbrella, Subsystems.Stem, Subsystems.Swerve);
+                this.RT.binding = new Binding((trig, allss) -> {
+                        trig.onTrue(
+                                        new ProxyCommand(
+                                                        () -> HigherOrderCommands.genericShoot(
+                                                                        allss.swerve.get(),
+                                                                        allss.stem.get(),
+                                                                        allss.umbrella.get(),
+                                                                        this))
+                                                        .withName("Proxy Shoot"));
+                }, Subsystems.Umbrella, Subsystems.Stem, Subsystems.Swerve);
 
         /// DPAD
         this.DPR.binding = this.DPL.binding = new Binding((trig, allss) -> {
@@ -143,7 +143,7 @@ public class DriverController extends ControllerParent {
                 }));
         }, Subsystems.Stem); 
 
-        // this.DPD.binding =
+                // this.DPD.binding =
 
         this.DPL.binding = new Binding((trig, allss) -> {
                 trig.onTrue(Commands.runOnce(() -> {
@@ -152,8 +152,8 @@ public class DriverController extends ControllerParent {
                 }));
         }, Subsystems.Stem, Subsystems.Umbrella); 
 
-        this.DPU.binding = new Binding((trig, allss) -> {
-            trig.onTrue(StemCommands.holdAt(allss.stem.get(), StemPosition.STARTING));
-        }, Subsystems.Stem);
-    }
+                this.DPU.binding = new Binding((trig, allss) -> {
+                        trig.onTrue(StemCommands.holdAt(allss.stem.get(), StemPosition.STARTING));
+                }, Subsystems.Stem);
+        }
 }
