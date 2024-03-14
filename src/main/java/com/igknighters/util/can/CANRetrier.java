@@ -1,4 +1,4 @@
-package com.igknighters.util;
+package com.igknighters.util.can;
 
 import java.util.function.Supplier;
 
@@ -26,7 +26,7 @@ public class CANRetrier {
         for (int i = 0; i < retryLimit; i++) {
             if (statusCodeSup.get().isOK()) return true;
         }
-        DriverStation.reportWarning("Status Code " + statusCodeSup.get().getName() + " is NOT ok!", false);
+        DriverStation.reportWarning("Status Code " + statusCodeSup.get().getName() + " is NOT ok!", true);
         return false;
     }
 

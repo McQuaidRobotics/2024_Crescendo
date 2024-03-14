@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import monologue.MonoDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import com.igknighters.constants.ConstValues.kSwerve;
@@ -129,7 +128,7 @@ public class TeleopSwerveBase extends Command {
             chooser.addOption("Absolute Rotation", TeleopMode.ABS_ROT);
             chooser.addOption("Target", TeleopMode.TARGET);
 
-            SmartDashboard.putData("Teleop Mode", chooser);
+            MonoDashboard.publishSendable("Teleop Mode", chooser);
         }
 
         @Override

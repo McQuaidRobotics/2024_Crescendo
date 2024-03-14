@@ -1,30 +1,15 @@
 package com.igknighters.subsystems.stem;
 
+import java.util.function.Function;
+
 import com.igknighters.constants.ConstValues.kStem.kPivot;
+
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 
 public class StemSolvers {
-
-    public static double gravitySolveWristTheta(
-        double stemLength, 
-        double pivotRads, 
-        double horizDist, 
-        double vertDist,
-        double initialNoteVelo) {
-
-        Translation2d wristLocation = solveWristLocationSimple2d(stemLength, pivotRads);
-        horizDist += wristLocation.getX();
-        vertDist -= wristLocation.getY();
-
-        double linearWristRads = linearSolveWristTheta(stemLength, pivotRads, horizDist, vertDist);
-        double vertcialDistanceError = linearSolveVerticalDistError(linearWristRads, horizDist, vertDist, initialNoteVelo);
-
-        double newVerticalDist = vertDist + vertcialDistanceError;
-
-        return linearSolveWristTheta(stemLength, pivotRads, horizDist, newVerticalDist);
-    }
 
     /**
      * Returns the theta of the wrist given the input parameters in radians.
@@ -43,10 +28,12 @@ public class StemSolvers {
             double stemLength,
             double pivotRads,
             double horizDist,
-            double vertDist) {
+            double vertDist,
+            boolean offsetPivot) {
 
         Translation2d wristLocation = solveWristLocationSimple2d(stemLength, pivotRads);
-        return Math.atan((vertDist - wristLocation.getY()) / (horizDist + wristLocation.getX()));
+        double flatWristRads = Math.atan((vertDist - wristLocation.getY()) / (horizDist + wristLocation.getX()));
+        return offsetPivot ? flatWristRads + pivotRads : flatWristRads;
     }
 
     /**
@@ -147,26 +134,161 @@ public class StemSolvers {
         );
     }
 
-    public static final class Advanced {
-        public static double interativeSolveV1PivotTheta(
-                double stemLength,
-                double wristRads,
-                double horizDist,
-                double vertDist,
-                double noteInitialVelocity,
-                int iterations) {
-            double lastPivotTheta = linearSolvePivotTheta(stemLength, wristRads, horizDist, vertDist);
-            for (int i = 0; i < iterations; i++) {
-                Translation2d wristLocation = solveWristLocationSimple2d(stemLength, lastPivotTheta);
-                double verticalDistError = linearSolveVerticalDistError(
-                        lastPivotTheta,
-                        horizDist + wristLocation.getX(),
-                        vertDist - wristLocation.getY(),
-                        noteInitialVelocity);
-                lastPivotTheta = linearSolvePivotTheta(stemLength, wristRads, horizDist, vertDist + verticalDistError);
-            }
+    /**
+     * Returns the theta of the wrist with gravity compensation given the input parameters in radians.
+     * 
+     * @param stemLength The length of the stem from the pivot axel to the wrist
+     * @param pivotRads The angle of the pivot in radians
+     * @param horizDist The horizontal distance from the pivot axel to the target
+     * @param vertDist The vertical distance from the pivot axel to the target
+     * @param initialNoteVelo The initial velocity of the note
+     * @return The angle of the wrist in radians
+     */
+    public static double gravitySolveWristTheta(
+        double stemLength, 
+        double pivotRads, 
+        double horizDist, 
+        double vertDist,
+        double initialNoteVelo) {
 
-            return lastPivotTheta;
+        Translation2d wristLocation = solveWristLocationSimple2d(stemLength, pivotRads);
+        horizDist += wristLocation.getX();
+        vertDist -= wristLocation.getY();
+
+        double linearWristRads = linearSolveWristTheta(stemLength, pivotRads, horizDist, vertDist, false);
+        double vertcialDistanceError = linearSolveVerticalDistError(linearWristRads, horizDist, vertDist, initialNoteVelo);
+
+        double newVerticalDist = vertDist + vertcialDistanceError;
+
+        return linearSolveWristTheta(stemLength, pivotRads, horizDist, newVerticalDist, true);
+    }
+
+    public static StemPosition iterativeSolveLowestPivotDelta(
+        double startingPosition,
+        Function<Double, StemPosition> positionGenerator
+    ) {
+        final double stepSize = Units.degreesToRadians(1.0);
+        int tryCount = 0;
+        double pivotRads = startingPosition;
+        StemPosition lastStemPosition = positionGenerator.apply(startingPosition);
+        while (!lastStemPosition.isValid() && tryCount < 90) {
+            if (pivotRads > Math.PI / 4.0) {
+                pivotRads -= stepSize;
+            } else {
+                pivotRads += stepSize;
+            }
+            lastStemPosition = positionGenerator.apply(pivotRads);
+            tryCount++;
+        }
+        return lastStemPosition;
+    }
+
+    /**
+     * There is no gurantee any of these fields will be used by the solver
+     */
+    public static record StemSolveInput(
+        /**
+         * This will define the current position of the stem
+         * to be used in more optimized solves that desire as little
+         * movement as possible.
+         */
+        StemPosition currentStemPosition,
+        /**
+         * This will define any static components of a solve like
+         * pivot rads for a stationary pivot solve.
+         */
+        StemPosition desiredStemPosition,
+        /**
+         * The distance from the CENTER of the robot to the target
+         */
+        double horizDist,
+        /**
+         * The distance from the FLOOR to the target
+         */
+        double vertDist,
+        /**
+         * The initial velocity of the note, this will be used in
+         * gravity compensated solves.
+         */
+        double initialNoteVelo
+    ) {}
+
+    public enum AimSolveStrategy {
+        STATIONARY_WRIST(input -> {
+            double wristRads = input.desiredStemPosition.wristRads;
+            double telescopeMeters = input.desiredStemPosition.telescopeMeters;
+            return StemPosition.fromRadians(
+                linearSolvePivotTheta(
+                    telescopeMeters,
+                    wristRads,
+                    input.horizDist(),
+                    input.vertDist()
+                ),
+                wristRads,
+                telescopeMeters
+            );
+        }),
+        STATIONARY_PIVOT(input -> {
+            double pivotRads = input.desiredStemPosition.pivotRads;
+            double telescopeMeters = input.desiredStemPosition.telescopeMeters;
+            return StemPosition.fromRadians(
+                pivotRads,
+                linearSolveWristTheta(
+                    telescopeMeters,
+                    pivotRads,
+                    input.horizDist(),
+                    input.vertDist(),
+                    true
+                ),
+                telescopeMeters
+            );
+        }),
+        STATIONARY_PIVOT_GRAVITY(input -> {
+            double pivotRads = input.desiredStemPosition.pivotRads;
+            double telescopeMeters = input.desiredStemPosition.telescopeMeters;
+            return StemPosition.fromRadians(
+                pivotRads,
+                gravitySolveWristTheta(
+                    telescopeMeters,
+                    pivotRads,
+                    input.horizDist(),
+                    input.vertDist(),
+                    input.initialNoteVelo()
+                ),
+                telescopeMeters
+            );
+        }),
+        LEAST_MOVEMENT(input -> {
+            return iterativeSolveLowestPivotDelta(
+                input.currentStemPosition.pivotRads,
+                pivotRads -> {
+                    double telescopeMeters = Math.min(
+                        input.currentStemPosition.telescopeMeters,
+                        StemPosition.INTAKE.telescopeMeters
+                    );
+                    return StemPosition.fromRadians(
+                        pivotRads,
+                        gravitySolveWristTheta(
+                            telescopeMeters,
+                            pivotRads,
+                            input.horizDist(),
+                            input.vertDist(),
+                            input.initialNoteVelo()
+                        ),
+                        telescopeMeters
+                    );
+                }
+            );
+        });
+
+        private final Function<StemSolveInput, StemPosition> solver;
+
+        AimSolveStrategy(final Function<StemSolveInput, StemPosition> solver) {
+            this.solver = solver;
+        }
+
+        public StemPosition solve(StemSolveInput input) {
+            return solver.apply(input);
         }
     }
 }

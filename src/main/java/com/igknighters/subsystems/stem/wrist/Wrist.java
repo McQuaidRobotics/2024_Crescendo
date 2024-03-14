@@ -9,14 +9,15 @@ import monologue.Annotations.Log;
 public abstract class Wrist extends Component {
     @Log.NT protected double radians;
     @Log.NT protected double targetRadians;
+    @Log.NT protected double encoderRadians;
     @Log.NT protected double radiansPerSecond = 0.0;
     @Log.NT protected double volts = 0.0;
     @Log.NT protected double amps = 0.0;
-    @Log.NT protected double temp = 0.0;
 
     public Wrist(double startingRadians) {
         this.radians = startingRadians;
         this.targetRadians = startingRadians;
+        this.encoderRadians = startingRadians;
     }
 
     @Override
@@ -54,8 +55,11 @@ public abstract class Wrist extends Component {
         return Math.abs(this.getWristRadians() - radians) < ConstValues.kStem.kWrist.TARGET_TOLERANCE * toleranceMult;
     }
 
+    static final double slope = 0.0075789;
+    static final double offset = 0.32939;
+
     static double mechanismRadsToMotorRots(Double radians) {
-        return (Units.radiansToRotations(radians) - 0.328) / 0.00717;
+        return (Units.radiansToRotations(radians) - offset) / slope;
     }
 
     static double mechanismRadsToMotorRads(Double radians) {
@@ -63,7 +67,7 @@ public abstract class Wrist extends Component {
     }
 
     static double motorRotsToMechanismRads(double motorRots) {
-        return Units.rotationsToRadians((0.00717*motorRots)+0.328);
+        return Units.rotationsToRadians((slope*motorRots)+offset);
     }
 
     static double motorRadsToMechanismRads(double motorRads) {

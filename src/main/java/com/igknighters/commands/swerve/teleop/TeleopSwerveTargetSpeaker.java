@@ -1,6 +1,8 @@
 package com.igknighters.commands.swerve.teleop;
 
 import com.igknighters.subsystems.swerve.Swerve;
+import com.igknighters.util.TunableValues;
+import com.igknighters.util.TunableValues.TunableDouble;
 import com.igknighters.util.geom.AllianceFlip;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -16,16 +18,12 @@ import com.igknighters.controllers.ControllerParent;
 
 public class TeleopSwerveTargetSpeaker extends TeleopSwerveBase {
 
-    private double speedMult = 0.4;
+    private final TunableDouble lookaheadTime = TunableValues.getDouble("AutoAimLookaheadTime", 0.2);
+    private final TunableDouble speedMult = TunableValues.getDouble("AutoAimSpeedMult", 0.4);
 
     public TeleopSwerveTargetSpeaker(Swerve swerve, ControllerParent controller) {
         super(swerve, controller);
         addRequirements(swerve);
-    }
-
-    public TeleopSwerveTargetSpeaker withSpeedMultiplier(double speedMult) {
-        this.speedMult = speedMult;
-        return this;
     }
 
     @Override
@@ -43,8 +41,8 @@ public class TeleopSwerveTargetSpeaker extends TeleopSwerveBase {
         });
 
         Translation2d vt = orientForUser(new Translation2d(
-                getTranslationX() * kSwerve.MAX_DRIVE_VELOCITY * speedMult,
-                getTranslationY() * kSwerve.MAX_DRIVE_VELOCITY * speedMult));
+                getTranslationX() * kSwerve.MAX_DRIVE_VELOCITY * speedMult.get(),
+                getTranslationY() * kSwerve.MAX_DRIVE_VELOCITY * speedMult.get()));
 
         ChassisSpeeds desiredChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 vt.getX(),
@@ -56,25 +54,48 @@ public class TeleopSwerveTargetSpeaker extends TeleopSwerveBase {
         ChassisSpeeds avgChassisSpeeds = new ChassisSpeeds(
                 (desiredChassisSpeeds.vxMetersPerSecond + currentChassisSpeeds.vxMetersPerSecond) / 2.0,
                 (desiredChassisSpeeds.vyMetersPerSecond + currentChassisSpeeds.vyMetersPerSecond) / 2.0,
-                (desiredChassisSpeeds.omegaRadiansPerSecond + currentChassisSpeeds.omegaRadiansPerSecond) / 2.0);
+                0.0);
 
         double distance = GlobalState.getLocalizedPose().getTranslation().getDistance(targetTranslation);
 
+        double noteVelo = TunableValues.getDouble("Note Average Velo", kUmbrella.NOTE_VELO).get();
+
         Translation2d adjustedTarget = new Translation2d(
-                targetTranslation.getX() - (avgChassisSpeeds.vxMetersPerSecond * (distance / kUmbrella.NOTE_VELO)),
-                targetTranslation.getY() - (avgChassisSpeeds.vyMetersPerSecond * (distance / kUmbrella.NOTE_VELO)));
+                targetTranslation.getX() - (avgChassisSpeeds.vxMetersPerSecond * (distance / noteVelo)),
+                targetTranslation.getY() - (avgChassisSpeeds.vyMetersPerSecond * (distance / noteVelo)));
 
         GlobalState.modifyField2d(field -> {
             field.getObject("adjustedTarget").setPose(new Pose2d(adjustedTarget, new Rotation2d()));
         });
 
+        double lookaheadTimeValue = lookaheadTime.get();
+        Translation2d lookaheadTranslation = swerve.getPose().getTranslation()
+            .minus(new Translation2d(
+                avgChassisSpeeds.vxMetersPerSecond * lookaheadTimeValue,
+                avgChassisSpeeds.vyMetersPerSecond * lookaheadTimeValue
+            ));
+
         Rotation2d targetAngle = swerve.rotationRelativeToPose(
+                lookaheadTranslation,
                 Rotation2d.fromDegrees(180),
                 adjustedTarget);
         double rotVelo = swerve.rotVeloForRotation(targetAngle);
 
+        GlobalState.modifyField2d(field -> {
+            field.getObject("lookaheadRobot").setPose(new Pose2d(lookaheadTranslation, targetAngle));
+        });
+
         desiredChassisSpeeds.omegaRadiansPerSecond = rotVelo;
 
         swerve.drive(desiredChassisSpeeds, false);
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        GlobalState.modifyField2d(field -> {
+            field.getObject("lookaheadRobot").setPoses();
+            field.getObject("target").setPoses();
+            field.getObject("adjustedTarget").setPoses();
+        });
     }
 }

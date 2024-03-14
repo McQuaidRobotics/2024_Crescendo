@@ -137,8 +137,8 @@ public class ControllerParent {
         Start = new TriggerBindingTuple(controller.start(), Binding.empty());
         LS = new TriggerBindingTuple(controller.leftStick(), Binding.empty());
         RS = new TriggerBindingTuple(controller.rightStick(), Binding.empty());
-        LT = new TriggerBindingTuple(controller.leftTrigger(), Binding.empty());
-        RT = new TriggerBindingTuple(controller.rightTrigger(), Binding.empty());
+        LT = new TriggerBindingTuple(controller.leftTrigger(0.25), Binding.empty());
+        RT = new TriggerBindingTuple(controller.rightTrigger(0.25), Binding.empty());
         DPR = new TriggerBindingTuple(controller.povRight(), Binding.empty());
         DPD = new TriggerBindingTuple(controller.povDown(), Binding.empty());
         DPL = new TriggerBindingTuple(controller.povLeft(), Binding.empty());

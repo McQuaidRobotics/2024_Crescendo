@@ -1,11 +1,12 @@
 package com.igknighters.commands.umbrella;
 
+import java.util.function.DoubleSupplier;
+
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 
 public class UmbrellaCommands {
     /**
@@ -23,14 +24,25 @@ public class UmbrellaCommands {
      * Spins up the shooter to a certain speed
      * 
      * @param umbrella The umbrella subsystem
-     * @param rpm      The target speed
+     * @param rpm      A supplier for the target speed in rotations per minute
+     * @return A command to be scheduled
+     */
+    public static Command spinupShooter(Umbrella umbrella, DoubleSupplier rpmSup, ShooterSpinupReason reason) {
+        return umbrella.run(() -> {
+            umbrella.spinupShooterToRPM(rpmSup.getAsDouble());
+            umbrella.pushSpinupReason(reason);
+        }).withName("Spinup Shooter");
+    }
+
+    /**
+     * Spins up the shooter to a certain speed
+     * 
+     * @param umbrella The umbrella subsystem
+     * @param rpm      The target speed in rotations per minute
      * @return A command to be scheduled
      */
     public static Command spinupShooter(Umbrella umbrella, double rpm, ShooterSpinupReason reason) {
-        return umbrella.runOnce(() -> {
-            umbrella.spinupShooterToRPM(rpm);
-            umbrella.pushSpinupReason(reason);
-        }).withName("Spinup Shooter");
+        return spinupShooter(umbrella, () -> rpm, reason);
     }
 
     /**
@@ -79,6 +91,19 @@ public class UmbrellaCommands {
     }
 
     /**
+     * Will shoot any held game piece, otherwise will do nothing
+     * 
+     * @param umbrella The umbrella subsystem
+     * @return A command to be scheduled
+     */
+    public static Command shootAuto(Umbrella umbrella) {
+        return umbrella.run(
+                () -> umbrella.runIntakeAt(-1.0, true))
+                .withTimeout(0.45)
+                .withName("Shoot");
+    }
+
+    /**
      * Will spin the intake inwards until a game piece is held
      * 
      * @param umbrella The umbrella subsystem
@@ -102,24 +127,5 @@ public class UmbrellaCommands {
                 () -> umbrella.runIntakeAt(1.0, true),
                 umbrella::stopAll)
                 .withName("Expell");
-    }
-
-    /**
-     * A command primarily for testing, will run the intake and shooter at the
-     * provided values in SmartDashboard
-     * 
-     * @param umbrella The umbrella subsystem
-     * @return A command to be scheduled
-     */
-    public static Command spinUmbrellaBoth(Umbrella umbrella) {
-        // MonoDashboard.put("IntakePercent", 0.0);
-        // MonoDashboard.put("RPMumbrella", 0.0);
-        // return umbrella.run(() -> {
-        // umbrella.runIntakeAt(
-        // SmartDashboard.getNumber("IntakePercent", 0));
-        // umbrella.spinupShooterToRPM(
-        // SmartDashboard.getNumber("RPMumbrella", 0));
-        // }).withName("Spin Umbrella Both");
-        return Commands.none().withName("Spin Umbrella Both");
     }
 }

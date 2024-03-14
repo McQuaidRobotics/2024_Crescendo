@@ -53,10 +53,10 @@ public class RobotContainer implements Logged {
             var stem = allSubsystems.stem.get();
             stem.setDefaultCommand(stem.run(() -> {
                 stem.setStemVolts(
-                        testingController.leftStickY(0.1).getAsDouble() * 12.0,
+                        testingController.leftStickY(0.1).getAsDouble() * 0.5,
                         (testingController.rightTrigger(true).getAsDouble()
-                                - testingController.leftTrigger(true).getAsDouble()) * 6.0,
-                        testingController.rightStickY(0.1).getAsDouble() * 12.0);
+                                - testingController.leftTrigger(true).getAsDouble()),
+                        testingController.rightStickY(0.1).getAsDouble());
             }).withName("StemDefaultCommand"));
         }
     }

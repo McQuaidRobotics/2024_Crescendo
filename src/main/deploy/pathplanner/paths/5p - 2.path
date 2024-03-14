@@ -3,49 +3,49 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.2671762861357376,
-        "y": 5.574358195791997
+        "x": 4.323297259247127,
+        "y": 6.58297147892853
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.578789979263267,
-        "y": 5.562647359246215
+        "x": 3.738162797295636,
+        "y": 7.412959533479694
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.5905008158090483,
-        "y": 5.574358195791997
+        "x": 2.4148382676223257,
+        "y": 5.609490705429342
       },
       "prevControl": {
-        "x": 2.5905008158090483,
-        "y": 5.562647359246215
+        "x": 1.8058747672416873,
+        "y": 6.956236908194216
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "4p sub - 1 end"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.0,
-    "maxAcceleration": 2.0,
-    "maxAngularVelocity": 100.0,
-    "maxAngularAcceleration": 300.0
+    "maxVelocity": 5.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 200.0,
+    "maxAngularAcceleration": 500.0
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0,
-    "rotateFast": false
+    "rotation": -60.0,
+    "rotateFast": true
   },
   "reversed": false,
-  "folder": "4 piece subwoofer",
+  "folder": "5 piece",
   "previewStartingState": {
-    "rotation": 0,
+    "rotation": 13.32,
     "velocity": 0
   },
   "useDefaultConstraints": true

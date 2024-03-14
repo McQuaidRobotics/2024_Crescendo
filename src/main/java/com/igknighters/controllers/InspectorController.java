@@ -18,7 +18,6 @@ import com.igknighters.LED;
 import com.igknighters.LED.LedAnimations;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.commands.stem.StemCommands;
-import com.igknighters.commands.stem.StemCommands.AimStrategy;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 
 @SuppressWarnings("unused")
@@ -37,7 +36,7 @@ public class InspectorController extends ControllerParent {
 
         this.B.binding = new Binding((trig, allss) -> {
             trig.onTrue(
-                    StemCommands.holdAt(allss.stem.get(), StemPosition.AMP));
+                    StemCommands.holdAt(allss.stem.get(), StemPosition.AMP_SAFE));
         }, Subsystems.Stem);
 
         this.X.binding = new Binding((trig, allss) -> {
