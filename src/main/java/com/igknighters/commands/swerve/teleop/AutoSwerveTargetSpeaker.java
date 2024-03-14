@@ -3,6 +3,7 @@ package com.igknighters.commands.swerve.teleop;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.util.geom.AllianceFlip;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -46,7 +47,7 @@ public class AutoSwerveTargetSpeaker extends Command {
 
         Rotation2d targetAngle = swerve.rotationRelativeToPose(
                 poseSupplier.get().getTranslation(),
-                Rotation2d.fromDegrees(180),
+                Rotation2d.fromDegrees(0),
                 targetTranslation);
         double rotVelo = swerve.rotVeloForRotation(targetAngle, Units.degreesToRadians(1.5));
 
@@ -55,7 +56,11 @@ public class AutoSwerveTargetSpeaker extends Command {
                 0.0,
                 rotVelo);
 
-        if (Math.abs(rotVelo) < 0.01) {
+        if (Math.abs(rotVelo) < 0.01
+            && Math.abs(
+                MathUtil.angleModulus(targetAngle.getRadians())
+                - MathUtil.angleModulus(swerve.getYawRads())
+            ) < Units.degreesToRadians(1.5)) {
             isDone = true;
         }
 
