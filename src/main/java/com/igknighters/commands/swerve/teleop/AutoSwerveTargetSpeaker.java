@@ -45,6 +45,10 @@ public class AutoSwerveTargetSpeaker extends Command {
         Translation2d speaker = FieldConstants.SPEAKER.toTranslation2d();
         Translation2d targetTranslation = AllianceFlip.isBlue() ? speaker : AllianceFlip.flipTranslation(speaker);
 
+        GlobalState.modifyField2d(field -> {
+            field.getObject("targetTranslation").setPose(new Pose2d(targetTranslation, new Rotation2d()));
+        });
+
         Rotation2d targetAngle = swerve.rotationRelativeToPose(
                 poseSupplier.get().getTranslation(),
                 Rotation2d.fromDegrees(180),

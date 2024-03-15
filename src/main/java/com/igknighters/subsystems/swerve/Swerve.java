@@ -167,7 +167,8 @@ public class Swerve extends SubsystemBase implements Logged {
     }
 
     public void resetOdometry(Pose2d pose) {
-        GlobalState.resetSwerveLocalization(getYawWrappedRot(), pose, getModulePositions());
+        setYaw(pose.getRotation());
+        GlobalState.resetSwerveLocalization(pose.getRotation(), pose, getModulePositions());
     }
 
     public double rotVeloForRotation(Rotation2d wantedAngle, double deadband) {
