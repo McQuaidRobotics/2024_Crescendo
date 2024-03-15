@@ -9,6 +9,7 @@ import com.igknighters.controllers.OperatorController;
 import com.igknighters.controllers.TestingController;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.swerve.Swerve;
+import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
 import com.igknighters.util.geom.AllianceFlip;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
@@ -58,6 +59,16 @@ public class RobotContainer implements Logged {
                                 - testingController.leftTrigger(true).getAsDouble()),
                         testingController.rightStickY(0.1).getAsDouble());
             }).withName("StemDefaultCommand"));
+        }
+
+        if (allSubsystems.umbrella.isPresent()) {
+            var umbrella = allSubsystems.umbrella.get();
+            umbrella.setDefaultCommand(
+                umbrella.run(() -> {
+                    umbrella.spinupShooterToRPM(4000);
+                    umbrella.pushSpinupReason(ShooterSpinupReason.Idle);
+                })
+            );
         }
     }
 
