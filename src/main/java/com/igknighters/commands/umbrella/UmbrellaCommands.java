@@ -112,8 +112,9 @@ public class UmbrellaCommands {
     public static Command intake(Umbrella umbrella) {
         return umbrella.runEnd(
                 () -> umbrella.runIntakeAt(-0.7, false),
-                umbrella::stopAll).until(umbrella::holdingGamepiece)
-                .withName("Intake");
+                () -> umbrella.runIntakeAt(0.0, true)
+            ).until(umbrella::holdingGamepiece)
+            .withName("Intake");
     }
 
     /**

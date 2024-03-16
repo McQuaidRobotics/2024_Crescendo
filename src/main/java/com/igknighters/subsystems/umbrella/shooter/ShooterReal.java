@@ -105,8 +105,6 @@ public class ShooterReal extends Shooter {
 
     @Override
     public void setSpeed(double speedRadPerSec) {
-        speedRadPerSec = Math.min(speedRadPerSec, kShooter.MAX_SHOOT_SPEED);
-
         super.targetRadiansPerSecondRight = speedRadPerSec / kShooter.MECHANISM_RATIO;
         super.targetRadiansPerSecondLeft = (speedRadPerSec / kShooter.MECHANISM_RATIO) * kShooter.LEFT_MOTOR_DIFF;
         rightMotor.setControl(controlReq.withVelocity(Units.radiansToRotations(super.targetRadiansPerSecondRight)));

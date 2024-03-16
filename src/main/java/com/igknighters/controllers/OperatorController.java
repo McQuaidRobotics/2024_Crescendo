@@ -6,6 +6,7 @@ import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.subsystems.SubsystemResources.Subsystems;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
+import com.igknighters.util.Channels;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 
@@ -57,7 +58,12 @@ public class OperatorController extends ControllerParent {
         // this.RT.binding = DON'T USE!!! OTHER TRIGGERS COMMANDS USES BOTH TRIGGERS!!!
 
         /// DPAD
-        // this.DPR.binding =
+        this.DPR.binding = this.DPR.binding = this.DPL.binding = new Binding((trig, allss) -> {
+            trig.onTrue(Commands.runOnce(() -> {
+                    Channels.Sender.broadcast("HomePivot", Boolean.class)
+                            .send(true);
+            }));
+        }, Subsystems.Stem);
 
         // this.DPD.binding =
 

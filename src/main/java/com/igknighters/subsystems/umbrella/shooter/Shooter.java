@@ -19,6 +19,8 @@ public abstract class Shooter extends Component {
     @Log.NT protected double tempLeft = 0.0;
     @Log.NT protected double shooterRightRPM = Units.radiansPerSecondToRotationsPerMinute(radiansPerSecondRight);
     @Log.NT protected double shooterLeftRPM = Units.radiansPerSecondToRotationsPerMinute(radiansPerSecondLeft);
+    @Log.NT protected double targetShooterRightRPM = Units.radiansPerSecondToRotationsPerMinute(targetRadiansPerSecondRight);
+    @Log.NT protected double targetShooterLeftRPM = Units.radiansPerSecondToRotationsPerMinute(targetRadiansPerSecondLeft);
 
     @Override
     public String getPath() {
