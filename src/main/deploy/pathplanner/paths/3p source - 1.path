@@ -3,41 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.4686360116338437,
-        "y": 1.4427454382100777
+        "x": 1.9346939692452838,
+        "y": 3.5718051464633596
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.4686360116338433,
-        "y": 1.4427454382100777
+        "x": 3.503946066380006,
+        "y": 0.9719994332998654
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "3p source - 0 end"
     },
     {
       "anchor": {
-        "x": 7.958171388040889,
-        "y": 1.0205125848653473
+        "x": 8.082883155780575,
+        "y": 0.9837102698456457
       },
       "prevControl": {
-        "x": 7.903097537604618,
-        "y": 2.1128106185180195
+        "x": 8.527894944520273,
+        "y": 2.143083087878016
       },
       "nextControl": {
-        "x": 8.01693858873954,
-        "y": -0.14503689565789224
+        "x": 7.937389512230512,
+        "y": 0.6046610405967987
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.855169530538839,
-        "y": 1.433566463137366
+        "x": 5.24,
+        "y": 1.387
       },
       "prevControl": {
-        "x": 5.241194766518282,
-        "y": 1.3876715877738084
+        "x": 6.513631058645855,
+        "y": 0.8783127409336134
       },
       "nextControl": null,
       "isLocked": false,
@@ -47,12 +47,12 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 0.7,
-      "rotationDegrees": -50.0,
+      "rotationDegrees": -66.18583781222604,
       "rotateFast": false
     },
     {
-      "waypointRelativePos": 1.7,
-      "rotationDegrees": 0,
+      "waypointRelativePos": 0.3,
+      "rotationDegrees": -9.139215928886692,
       "rotateFast": false
     }
   ],
@@ -78,13 +78,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -6.009005957494442,
+    "rotation": -48.36646066342986,
     "rotateFast": false
   },
   "reversed": false,
   "folder": "3 piece source",
   "previewStartingState": {
-    "rotation": 0,
+    "rotation": -46.79000000000002,
     "velocity": 0
   },
   "useDefaultConstraints": false

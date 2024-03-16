@@ -26,9 +26,22 @@
                 "data": {
                   "commands": [
                     {
-                      "type": "wait",
+                      "type": "deadline",
                       "data": {
-                        "waitTime": 0.45
+                        "commands": [
+                          {
+                            "type": "path",
+                            "data": {
+                              "pathName": "3p source - 0"
+                            }
+                          },
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "Aim"
+                            }
+                          }
+                        ]
                       }
                     },
                     {
