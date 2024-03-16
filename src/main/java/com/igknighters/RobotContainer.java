@@ -24,7 +24,7 @@ public class RobotContainer implements Logged {
 
     private final DriverController driverController;
     private final OperatorController operatorController;
-    private final TestingController testingController;
+    // private final TestingController testingController;
 
     private final AllSubsystems allSubsystems;
 
@@ -34,13 +34,13 @@ public class RobotContainer implements Logged {
 
         driverController = new DriverController(0);
         operatorController = new OperatorController(1);
-        testingController = new TestingController(3);
+        // testingController = new TestingController(3);
 
         allSubsystems = new AllSubsystems(RobotSetup.getRobotID().subsystems);
 
         driverController.assignButtons(allSubsystems);
         operatorController.assignButtons(allSubsystems);
-        testingController.assignButtons(allSubsystems);
+        // testingController.assignButtons(allSubsystems);
 
         if (allSubsystems.swerve.isPresent()) {
             var swerve = allSubsystems.swerve.get();
@@ -50,16 +50,16 @@ public class RobotContainer implements Logged {
             setupAutos(swerve);
         }
 
-        if (allSubsystems.stem.isPresent() && ConstValues.DEBUG) {
-            var stem = allSubsystems.stem.get();
-            stem.setDefaultCommand(stem.run(() -> {
-                stem.setStemVolts(
-                        testingController.leftStickY(0.1).getAsDouble() * 0.5,
-                        (testingController.rightTrigger(true).getAsDouble()
-                                - testingController.leftTrigger(true).getAsDouble()),
-                        testingController.rightStickY(0.1).getAsDouble());
-            }).withName("StemDefaultCommand"));
-        }
+        // if (allSubsystems.stem.isPresent() && ConstValues.DEBUG) {
+        //     var stem = allSubsystems.stem.get();
+        //     stem.setDefaultCommand(stem.run(() -> {
+        //         stem.setStemVolts(
+        //                 testingController.leftStickY(0.1).getAsDouble() * 0.5,
+        //                 (testingController.rightTrigger(true).getAsDouble()
+        //                         - testingController.leftTrigger(true).getAsDouble()),
+        //                 testingController.rightStickY(0.1).getAsDouble());
+        //     }).withName("StemDefaultCommand"));
+        // }
 
         if (allSubsystems.umbrella.isPresent()) {
             var umbrella = allSubsystems.umbrella.get();
