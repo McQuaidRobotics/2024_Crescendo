@@ -101,6 +101,11 @@ public class AutosCmdRegister {
         );
 
         registerCommand(
+                "Expell",
+                UmbrellaCommands.expell(umbrella).withTimeout(0.5)
+        );
+
+        registerCommand(
                 "Aim",
                 StemCommands.aimAtSpeaker(stem, false)
                     .withName("Aim")
