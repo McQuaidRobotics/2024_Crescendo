@@ -340,17 +340,17 @@ public final class ConstValues {
         public static final String CANBUS = "SuperStructureBus";
 
         public static final class kShooter {
-            public static final double MOTOR_RIGHT_kP = 0.06;
+            public static final double MOTOR_RIGHT_kP = 0.15;
             public static final double MOTOR_RIGHT_kI = 0.0;
             public static final double MOTOR_RIGHT_kD = 0.00;
-            public static final double MOTOR_RIGHT_kS = 0.125;
-            public static final double MOTOR_RIGHT_kV = 0.06;
+            public static final double MOTOR_RIGHT_kS = 0.155;
+            public static final double MOTOR_RIGHT_kV = 0.118;
 
-            public static final double MOTOR_LEFT_kP = 0.06;
+            public static final double MOTOR_LEFT_kP = 0.15;
             public static final double MOTOR_LEFT_kI = 0.0;
             public static final double MOTOR_LEFT_kD = 0.00;
-            public static final double MOTOR_LEFT_kS = 0.115;
-            public static final double MOTOR_LEFT_kV = 0.061;
+            public static final double MOTOR_LEFT_kS = 0.15;
+            public static final double MOTOR_LEFT_kV = 0.118;
 
             public static final int LEFT_MOTOR_ID = 17;
             public static final int RIGHT_MOTOR_ID = 18;
