@@ -138,8 +138,6 @@ public class StemCommands {
             Translation2d passPoint = this.passPoint;
             Translation2d targetTranslation = AllianceFlip.isBlue() ? passPoint : AllianceFlip.flipTranslation(passPoint);
 
-            ChassisSpeeds currentChassisSpeed = GlobalState.getFieldRelativeVelocity();
-
             Pose2d currentPose = GlobalState.getLocalizedPose();
             double distance = currentPose.getTranslation().getDistance(targetTranslation);
 
@@ -155,7 +153,7 @@ public class StemCommands {
             ); 
 
             hasFinished = stem.setStemPosition(
-                StemPosition.fromRadians(pivotRads, wristRads, telescopeMeters);
+                StemPosition.fromRadians(pivotRads, wristRads, telescopeMeters)
             );
         }
 
