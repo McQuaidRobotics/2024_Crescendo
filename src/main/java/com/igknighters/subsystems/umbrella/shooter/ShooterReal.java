@@ -105,8 +105,8 @@ public class ShooterReal extends Shooter {
 
     @Override
     public void setSpeed(double speedRadPerSec) {
-        super.targetRadiansPerSecondRight = speedRadPerSec / kShooter.MECHANISM_RATIO;
-        super.targetRadiansPerSecondLeft = (speedRadPerSec / kShooter.MECHANISM_RATIO) * kShooter.LEFT_MOTOR_DIFF;
+        super.targetRadiansPerSecondRight = speedRadPerSec / Units.rotationsToRadians(kShooter.MECHANISM_RATIO);
+        super.targetRadiansPerSecondLeft = (speedRadPerSec / Units.rotationsToRadians(kShooter.MECHANISM_RATIO)) * kShooter.LEFT_MOTOR_DIFF;
         rightMotor.setControl(controlReq.withVelocity(Units.radiansToRotations(super.targetRadiansPerSecondRight)));
         leftMotor.setControl(controlReq.withVelocity(Units.radiansToRotations(super.targetRadiansPerSecondLeft)));
     }
@@ -143,11 +143,11 @@ public class ShooterReal extends Shooter {
                 voltSignalLeft,
                 currentSignalLeft);
 
-        super.radiansPerSecondRight = Units.rotationsToRadians(veloSignalRight.getValue()) * kShooter.MECHANISM_RATIO;
+        super.radiansPerSecondRight = Units.rotationsToRadians(veloSignalRight.getValue()) * Units.rotationsToRadians(kShooter.MECHANISM_RATIO);
         super.voltsRight = voltSignalRight.getValue();
         super.ampsRight = currentSignalRight.getValue();
 
-        super.radiansPerSecondLeft = Units.rotationsToRadians(veloSignalLeft.getValue()) * kShooter.MECHANISM_RATIO;
+        super.radiansPerSecondLeft = Units.rotationsToRadians(veloSignalLeft.getValue()) * Units.rotationsToRadians(kShooter.MECHANISM_RATIO);
         super.voltsLeft = voltSignalLeft.getValue();
         super.ampsLeft = currentSignalLeft.getValue();
 
