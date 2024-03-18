@@ -198,7 +198,7 @@ public class StemSolvers {
         final double stepSize = Units.degreesToRadians(1.0);
         int tryCount = 0;
         double pivotRads = startingPosition;
-        StemPosition lastStemPosition = positionGenerator.apply(startingPosition);
+        StemPosition lastStemPosition = positionGenerator.apply(pivotRads);
         while (!lastStemPosition.isValid() && tryCount < 90) {
             if (pivotRads > Math.PI / 4.0) {
                 pivotRads -= stepSize;
