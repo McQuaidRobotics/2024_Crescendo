@@ -286,6 +286,21 @@ public class StemSolvers {
                 telescopeMeters
             );
         }),
+        STATIONARY_PIVOT_GRAVITY_TELESCOPE_EXTEND(input -> {
+            double pivotRads = input.desiredStemPosition.pivotRads;
+            double telescopeMeters = StemPosition.INTAKE.telescopeMeters;
+            return StemPosition.fromRadians(
+                pivotRads,
+                gravitySolveWristTheta(
+                    telescopeMeters,
+                    pivotRads,
+                    input.horizDist(),
+                    input.vertDist(),
+                    input.deltaNoteVelo()
+                ),
+                telescopeMeters
+            );
+        }),
         LEAST_MOVEMENT(input -> {
             return iterativeSolveLowestPivotDelta(
                 input.currentStemPosition.pivotRads,
