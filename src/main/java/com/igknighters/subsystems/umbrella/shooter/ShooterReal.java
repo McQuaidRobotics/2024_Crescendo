@@ -105,10 +105,14 @@ public class ShooterReal extends Shooter {
 
     @Override
     public void setSpeed(double speedRadPerSec) {
-        super.targetRadiansPerSecondRight = speedRadPerSec / Units.rotationsToRadians(kShooter.MECHANISM_RATIO);
-        super.targetRadiansPerSecondLeft = (speedRadPerSec / Units.rotationsToRadians(kShooter.MECHANISM_RATIO)) * kShooter.LEFT_MOTOR_DIFF;
-        rightMotor.setControl(controlReq.withVelocity(Units.radiansToRotations(super.targetRadiansPerSecondRight)));
-        leftMotor.setControl(controlReq.withVelocity(Units.radiansToRotations(super.targetRadiansPerSecondLeft)));
+        super.targetRadiansPerSecondRight = speedRadPerSec;
+        super.targetRadiansPerSecondLeft = speedRadPerSec * kShooter.LEFT_MOTOR_DIFF;
+        double targetRotsRight = Units.radiansToRotations(super.targetRadiansPerSecondRight) / kShooter.MECHANISM_RATIO;
+        double targetRotsLeft = Units.radiansToRotations(super.targetRadiansPerSecondLeft) / kShooter.MECHANISM_RATIO;
+        log("targetRotsRight", targetRotsRight);
+        log("targetRotsLeft", targetRotsLeft);
+        rightMotor.setControl(controlReq.withVelocity(targetRotsRight));
+        leftMotor.setControl(controlReq.withVelocity(targetRotsLeft));
     }
 
     @Override
@@ -143,11 +147,13 @@ public class ShooterReal extends Shooter {
                 voltSignalLeft,
                 currentSignalLeft);
 
-        super.radiansPerSecondRight = Units.rotationsToRadians(veloSignalRight.getValue()) * Units.rotationsToRadians(kShooter.MECHANISM_RATIO);
+        super.radiansPerSecondRight = Units.rotationsToRadians(veloSignalRight.getValue() * kShooter.MECHANISM_RATIO);
+        log("currentRotsRight", veloSignalRight.getValue());
         super.voltsRight = voltSignalRight.getValue();
         super.ampsRight = currentSignalRight.getValue();
 
-        super.radiansPerSecondLeft = Units.rotationsToRadians(veloSignalLeft.getValue()) * Units.rotationsToRadians(kShooter.MECHANISM_RATIO);
+        super.radiansPerSecondLeft = Units.rotationsToRadians(veloSignalLeft.getValue() * kShooter.MECHANISM_RATIO);
+        log("currentRotsLeft", veloSignalLeft.getValue());
         super.voltsLeft = voltSignalLeft.getValue();
         super.ampsLeft = currentSignalLeft.getValue();
 
