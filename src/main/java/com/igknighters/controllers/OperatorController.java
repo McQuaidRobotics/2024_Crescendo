@@ -27,7 +27,7 @@ public class OperatorController extends ControllerParent {
             trig.onTrue(UmbrellaCommands.stopShooter(allss.umbrella.get()));
         }, Subsystems.Umbrella);
 
-        // this.X.binding =
+        // this.X.binding = 
 
         this.Y.binding = new Binding((trig, allss) -> {
             trig.onTrue(
@@ -49,7 +49,7 @@ public class OperatorController extends ControllerParent {
         // this.Start.binding =
 
         /// STICKS
-        // this.LS.binding =
+        // this.LS.binding = 
 
         // this.RS.binding =
 
