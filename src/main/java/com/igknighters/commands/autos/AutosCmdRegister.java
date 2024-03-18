@@ -1,38 +1,43 @@
 package com.igknighters.commands.autos;
 
-import com.igknighters.GlobalState;
+import com.igknighters.commands.HigherOrderCommands;
+import com.igknighters.commands.autos.SpecializedNamedCommands.SpecializedNamedCommand;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.teleop.AutoSwerveTargetSpeaker;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
-import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
-import com.igknighters.constants.FieldConstants;
+import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.subsystems.vision.Vision;
-import com.igknighters.util.geom.AllianceFlip;
 import com.pathplanner.lib.auto.NamedCommands;
 
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WrapperCommand;
+import monologue.MonoDashboard;
 
 public class AutosCmdRegister {
+    private static void logAutoEvent(String name, String event) {
+        String msg = "Auto Command" + name + " " + event;
+        System.out.println(msg);
+        MonoDashboard.put("AutoEvent", msg);
+    }
+
     private static void registerCommand(String name, Command command) {
         var cmd =  new WrapperCommand(command) {
             @Override
             public void initialize() {
+                logAutoEvent(name, "started");
                 super.initialize();
-                System.out.println("Command " + name + " started");
             }
 
             @Override
             public void end(boolean interrupted) {
                 super.end(interrupted);
-                System.out.println("Command " + name + " finished");
+                logAutoEvent(name, "ended");
             }
         };
         NamedCommands.registerCommand(name, cmd);
@@ -48,54 +53,33 @@ public class AutosCmdRegister {
         Swerve swerve = allSubsystems.swerve.get();
         Vision vision = allSubsystems.vision.get();
 
-        // SpecializedNamedCommands.registerCommand(
-        //         "Intake",
-        //         SpecializedNamedCommand.fromLambda(
-        //                 (Object timeout) -> {
-        //                     return HigherOrderCommands
-        //                             .intakeGamepiece(stem, umbrella)
-        //                             .withTimeout((Double) timeout);
-        //                 },
-        //                 Double.class))
-        //         .withDefault(9999.0);
+        SpecializedNamedCommands.registerCommand(
+                "Intake",
+                SpecializedNamedCommand.fromLambda(
+                        (Object timeout) -> {
+                            return HigherOrderCommands
+                                    .intakeGamepiece(stem, umbrella)
+                                    .withTimeout((Double) timeout);
+                        },
+                        Double.class))
+                .withDefault(3.0);
 
-        // SpecializedNamedCommands.registerCommand(
-        //         "Spinup",
-        //         SpecializedNamedCommand.fromLambda(
-        //                 (Object rpm) -> {
-        //                     return UmbrellaCommands
-        //                             .spinupShooter(umbrella, (Double) rpm)
-        //                                 .withName("Spinup");
-        //                 },
-        //                 Double.class))
-        //         .withDefault(kControls.SHOOTER_RPM);
-
-        registerCommand(
-            "Intake",
-            Commands.race(
-                StemCommands.holdAt(stem, StemPosition.INTAKE),
-                UmbrellaCommands.intake(umbrella)
-                .until(() -> umbrella.holdingGamepiece()).withTimeout(2.0))
-                .andThen(StemCommands.moveTo(stem, StemPosition.STOW))
-                .withName("Intake")
-        );
-
-        registerCommand(
+        SpecializedNamedCommands.registerCommand(
             "IntakeNoStow",
-            Commands.race(
-                StemCommands.holdAt(stem, StemPosition.INTAKE),
-                UmbrellaCommands.intake(umbrella)
-                .until(() -> umbrella.holdingGamepiece())).withTimeout(2.85)
-                .withName("IntakeNoStow")
-        );
+            SpecializedNamedCommand.fromLambda(
+                (Object timeout) -> {
+                    return Commands.race(
+                        StemCommands.holdAt(stem, StemPosition.INTAKE),
+                        UmbrellaCommands.intake(umbrella)
+                            .until(() -> umbrella.holdingGamepiece())
+                    ).withTimeout((Double) timeout);
+                },
+                Double.class)
+        ).withDefault(3.0);
 
         registerCommand(
             "Spinup",
-            Commands.run(() -> {
-                Translation2d speaker = FieldConstants.SPEAKER.toTranslation2d();
-                Translation2d targetTranslation = AllianceFlip.isBlue() ? speaker : AllianceFlip.flipTranslation(speaker);
-                umbrella.spinupShooterToRPM(kShooter.DISTANCE_TO_RPM_CURVE.lerp(GlobalState.getLocalizedPose().getTranslation().getDistance(targetTranslation)));
-            })
+            Commands.run(() -> umbrella.spinupShooterToRPM(kControls.SHOOTER_RPM))
                 .finallyDo(() -> umbrella.stopAll())
                 .withName("Spinup")
         );
@@ -128,12 +112,12 @@ public class AutosCmdRegister {
             "AutoShoot",
             Commands.parallel(
                 new AutoSwerveTargetSpeaker(swerve, vision::getLatestPoseWithFallback)
-                    .finallyDo(() -> System.out.println("   Swerve Targeting Done")),
+                    .finallyDo(() -> logAutoEvent("SwerveTargeting", "Done")),
                 StemCommands.aimAtSpeaker(stem, true)
-                    .finallyDo(() -> System.out.println("   Stem Targeting Done"))
+                    .finallyDo(() -> logAutoEvent("Stem Targeting", "Done"))
             ).andThen(
                 UmbrellaCommands.shootAuto(umbrella)
-                    .finallyDo(() -> System.out.println("   Shooting Done"))
+                    .finallyDo(() -> logAutoEvent("Shooting", "Done"))
             ).withName("AutoShoot")
         );
 
@@ -143,6 +127,6 @@ public class AutosCmdRegister {
                 .withName("FeedShooter")
         );
 
-        // SpecializedNamedCommands.generateSpecialized();
+        SpecializedNamedCommands.generateSpecialized();
     }
 }
