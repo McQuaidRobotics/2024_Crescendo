@@ -5,7 +5,6 @@ import java.util.function.DoubleSupplier;
 import com.igknighters.GlobalState;
 import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kControls;
-import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
@@ -138,8 +137,6 @@ public class StemCommands {
             Translation2d passPoint = this.passPoint;
             Translation2d targetTranslation = AllianceFlip.isBlue() ? passPoint : AllianceFlip.flipTranslation(passPoint);
 
-            ChassisSpeeds currentChassisSpeed = GlobalState.getFieldRelativeVelocity();
-
             Pose2d currentPose = GlobalState.getLocalizedPose();
             double distance = currentPose.getTranslation().getDistance(targetTranslation);
 
@@ -155,7 +152,7 @@ public class StemCommands {
             ); 
 
             hasFinished = stem.setStemPosition(
-                StemPosition.fromRadians(pivotRads, wristRads, telescopeMeters);
+                StemPosition.fromRadians(pivotRads, wristRads, telescopeMeters)
             );
         }
 
