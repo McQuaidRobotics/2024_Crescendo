@@ -1,14 +1,19 @@
 package com.igknighters.controllers;
 
+import com.igknighters.GlobalState;
 import com.igknighters.commands.HigherOrderCommands;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.SwerveCommands;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
+import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kControls;
+import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.SubsystemResources.Subsystems;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
+import com.igknighters.util.geom.AllianceFlip;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
@@ -107,13 +112,12 @@ public class DriverController extends ControllerParent {
                                     this),
                             UmbrellaCommands.spinupShooter(
                                     allss.umbrella.get(),
-                                //     () -> {
-                                //         Translation2d speaker = FieldConstants.SPEAKER.toTranslation2d();
-                                //         Translation2d targetTranslation = AllianceFlip.isBlue() ? speaker : AllianceFlip.flipTranslation(speaker);
-                                //         double distance = GlobalState.getLocalizedPose().getTranslation().getDistance(targetTranslation);
-                                //         return kShooter.DISTANCE_TO_RPM_CURVE.lerp(distance);
-                                //     },
-                                    kControls.SHOOTER_RPM,
+                                    () -> {
+                                        Translation2d speaker = FieldConstants.SPEAKER.toTranslation2d();
+                                        Translation2d targetTranslation = AllianceFlip.isBlue() ? speaker : AllianceFlip.flipTranslation(speaker);
+                                        double distance = GlobalState.getLocalizedPose().getTranslation().getDistance(targetTranslation);
+                                        return kShooter.DISTANCE_TO_RPM_CURVE.lerp(distance);
+                                    },
                                     ShooterSpinupReason.AutoAimSpeaker))
                             .finallyDo(allss.umbrella.get()::stopAll)
                             .withName("Highorder Aim"));
@@ -121,13 +125,13 @@ public class DriverController extends ControllerParent {
 
                 this.RT.binding = new Binding((trig, allss) -> {
                         trig.onTrue(
-                                        new ProxyCommand(
-                                                        () -> HigherOrderCommands.genericShoot(
-                                                                        allss.swerve.get(),
-                                                                        allss.stem.get(),
-                                                                        allss.umbrella.get(),
-                                                                        this))
-                                                        .withName("Proxy Shoot"));
+                            new ProxyCommand(
+                                () -> HigherOrderCommands.genericShoot(
+                                    allss.swerve.get(),
+                                    allss.stem.get(),
+                                    allss.umbrella.get(),
+                                    this))
+                        .withName("Proxy Shoot"));
                 }, Subsystems.Umbrella, Subsystems.Stem, Subsystems.Swerve);
 
         /// DPAD

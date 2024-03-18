@@ -370,7 +370,7 @@ public final class ConstValues {
                 new LerpTableEntry(20.0, 8000)
             );
 
-            public static final LerpTable RPM_TO_INITIAL_NOTE_VELO_CURVE = new LerpTable(
+            public static final LerpTable RPM_TO_AVERAGE_NOTE_VELO_CURVE = new LerpTable(
                 new LerpTableEntry(0, 25.0),
                 new LerpTableEntry(100000, 25.0)
             );

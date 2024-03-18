@@ -180,7 +180,7 @@ public class StemCommands {
                 ),
                 distance,
                 FieldConstants.SPEAKER.getZ(),
-                kShooter.RPM_TO_INITIAL_NOTE_VELO_CURVE.lerp((kShooter.DISTANCE_TO_RPM_CURVE.lerp(distance)))
+                kShooter.RPM_TO_AVERAGE_NOTE_VELO_CURVE.lerp((kShooter.DISTANCE_TO_RPM_CURVE.lerp(distance)))
             );
 
             hasFinished = stem.setStemPosition(
