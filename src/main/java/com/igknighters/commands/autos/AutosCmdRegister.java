@@ -1,6 +1,8 @@
 package com.igknighters.commands.autos;
 
 import com.igknighters.GlobalState;
+import com.igknighters.commands.HigherOrderCommands;
+import com.igknighters.commands.autos.SpecializedNamedCommands.SpecializedNamedCommand;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.teleop.AutoSwerveTargetSpeaker;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
@@ -48,46 +50,29 @@ public class AutosCmdRegister {
         Swerve swerve = allSubsystems.swerve.get();
         Vision vision = allSubsystems.vision.get();
 
-        // SpecializedNamedCommands.registerCommand(
-        //         "Intake",
-        //         SpecializedNamedCommand.fromLambda(
-        //                 (Object timeout) -> {
-        //                     return HigherOrderCommands
-        //                             .intakeGamepiece(stem, umbrella)
-        //                             .withTimeout((Double) timeout);
-        //                 },
-        //                 Double.class))
-        //         .withDefault(9999.0);
+        SpecializedNamedCommands.registerCommand(
+                "Intake",
+                SpecializedNamedCommand.fromLambda(
+                        (Object timeout) -> {
+                            return HigherOrderCommands
+                                    .intakeGamepiece(stem, umbrella)
+                                    .withTimeout((Double) timeout);
+                        },
+                        Double.class))
+                .withDefault(3.0);
 
-        // SpecializedNamedCommands.registerCommand(
-        //         "Spinup",
-        //         SpecializedNamedCommand.fromLambda(
-        //                 (Object rpm) -> {
-        //                     return UmbrellaCommands
-        //                             .spinupShooter(umbrella, (Double) rpm)
-        //                                 .withName("Spinup");
-        //                 },
-        //                 Double.class))
-        //         .withDefault(kControls.SHOOTER_RPM);
-
-        registerCommand(
-            "Intake",
-            Commands.race(
-                StemCommands.holdAt(stem, StemPosition.INTAKE),
-                UmbrellaCommands.intake(umbrella)
-                .until(() -> umbrella.holdingGamepiece()).withTimeout(2.0))
-                .andThen(StemCommands.moveTo(stem, StemPosition.STOW))
-                .withName("Intake")
-        );
-
-        registerCommand(
+        SpecializedNamedCommands.registerCommand(
             "IntakeNoStow",
-            Commands.race(
-                StemCommands.holdAt(stem, StemPosition.INTAKE),
-                UmbrellaCommands.intake(umbrella)
-                .until(() -> umbrella.holdingGamepiece())).withTimeout(2.85)
-                .withName("IntakeNoStow")
-        );
+            SpecializedNamedCommand.fromLambda(
+                (Object timeout) -> {
+                    return Commands.race(
+                        StemCommands.holdAt(stem, StemPosition.INTAKE),
+                        UmbrellaCommands.intake(umbrella)
+                            .until(() -> umbrella.holdingGamepiece())
+                    ).withTimeout((Double) timeout);
+                },
+                Double.class)
+        ).withDefault(3.0);
 
         registerCommand(
             "Spinup",
@@ -143,6 +128,6 @@ public class AutosCmdRegister {
                 .withName("FeedShooter")
         );
 
-        // SpecializedNamedCommands.generateSpecialized();
+        SpecializedNamedCommands.generateSpecialized();
     }
 }
