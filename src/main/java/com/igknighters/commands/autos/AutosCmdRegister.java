@@ -6,6 +6,7 @@ import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.teleop.AutoSwerveTargetSpeaker;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.ConstValues.kControls;
+import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
@@ -102,6 +103,17 @@ public class AutosCmdRegister {
                     .withName("AimVision")
         );
 
+        // registerCommand(
+        //         "StaticMiddleNoteAim",
+        //         StemCommands.holdAt(
+        //                     stem,
+        //                     StemPosition.fromRadians(
+        //                         0.698132, 
+        //                         1.183437, 
+        //                         StemPosition.INTAKE.telescopeMeters))
+        // );
+
+
         registerCommand(
                 "Stow",
                 StemCommands.holdAt(
@@ -126,6 +138,22 @@ public class AutosCmdRegister {
                 UmbrellaCommands.shootAuto(umbrella)
                     .finallyDo(() -> logAutoEvent("Shooting", "Done"))
             ).withName("AutoShoot")
+        );
+
+        registerCommand(
+            "StemStaticAutoShoot",
+            Commands.parallel(
+                new AutoSwerveTargetSpeaker(swerve, vision::getLatestPoseWithFallback)
+                    .finallyDo(() -> logAutoEvent("SwerveTargeting", "Done")),
+                StemCommands.moveTo(stem, StemPosition.fromRadians(
+                                0.698132, 
+                                1.183437, 
+                                StemPosition.INTAKE.telescopeMeters))
+                    .finallyDo(() -> logAutoEvent("Stem Position", "Done"))
+            ).andThen(
+                UmbrellaCommands.shootAuto(umbrella)
+                    .finallyDo(() -> logAutoEvent("Shooting", "Done"))
+            ).withName("StemStaticAutoShoot")
         );
 
         registerCommand(
