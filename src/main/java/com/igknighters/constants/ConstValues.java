@@ -100,7 +100,7 @@ public final class ConstValues {
         public static final double MAX_HEIGHT_AIM_AT_PIVOT_RADIANS = 86.0 * Conv.DEGREES_TO_RADIANS;
         public static final double MAX_HEIGHT_AIM_AT_TELESCOPE_METERS = kTelescope.MAX_METERS;
 
-        public static final AimSolveStrategy DEFAULT_AIM_STRATEGY = AimSolveStrategy.STATIONARY_PIVOT_GRAVITY;
+        public static final AimSolveStrategy DEFAULT_AIM_STRATEGY = AimSolveStrategy.STATIONARY_PIVOT_TELESCOPE_EXTEND;
     }
 
     public static final class kVision {
@@ -235,7 +235,7 @@ public final class ConstValues {
         }
 
         public static final class kRotationController {
-            public static final double kP = 6.6;
+            public static final double kP = 8.0;
             public static final double kD = 0.2;
 
             public static final double DEADBAND = 0.5 * Conv.DEGREES_TO_RADIANS;

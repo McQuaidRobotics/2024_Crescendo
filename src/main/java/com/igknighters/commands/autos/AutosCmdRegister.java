@@ -9,6 +9,7 @@ import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
+import com.igknighters.subsystems.stem.StemSolvers.AimSolveStrategy;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.subsystems.vision.Vision;
@@ -91,8 +92,14 @@ public class AutosCmdRegister {
 
         registerCommand(
                 "Aim",
-                StemCommands.aimAtSpeaker(stem, false)
+                StemCommands.aimAtSpeaker(stem, AimSolveStrategy.STATIONARY_PIVOT_GRAVITY_TELESCOPE_EXTEND, false)
                     .withName("Aim")
+        );
+
+        registerCommand(
+                "AimVision",
+                StemCommands.aimAtSpeaker(stem, AimSolveStrategy.STATIONARY_PIVOT_GRAVITY_TELESCOPE_EXTEND, false, vision::getLatestPoseWithFallback)
+                    .withName("AimVision")
         );
 
         registerCommand(
@@ -113,8 +120,25 @@ public class AutosCmdRegister {
             Commands.parallel(
                 new AutoSwerveTargetSpeaker(swerve, vision::getLatestPoseWithFallback)
                     .finallyDo(() -> logAutoEvent("SwerveTargeting", "Done")),
-                StemCommands.aimAtSpeaker(stem, true)
+                StemCommands.aimAtSpeaker(stem, AimSolveStrategy.STATIONARY_PIVOT_GRAVITY_TELESCOPE_EXTEND, true)
                     .finallyDo(() -> logAutoEvent("Stem Targeting", "Done"))
+            ).andThen(
+                UmbrellaCommands.shootAuto(umbrella)
+                    .finallyDo(() -> logAutoEvent("Shooting", "Done"))
+            ).withName("AutoShoot")
+        );
+
+        registerCommand(
+            "AutoShootVision",
+            Commands.parallel(
+                new AutoSwerveTargetSpeaker(swerve, vision::getLatestPoseWithFallback)
+                    .finallyDo(() -> logAutoEvent("SwerveTargeting", "Done")),
+                StemCommands.aimAtSpeaker(
+                    stem,
+                    AimSolveStrategy.STATIONARY_PIVOT_GRAVITY_TELESCOPE_EXTEND,
+                    true,
+                    vision::getLatestPoseWithFallback
+                ).finallyDo(() -> logAutoEvent("Stem Targeting", "Done"))
             ).andThen(
                 UmbrellaCommands.shootAuto(umbrella)
                     .finallyDo(() -> logAutoEvent("Shooting", "Done"))

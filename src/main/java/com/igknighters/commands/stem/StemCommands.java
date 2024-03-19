@@ -1,6 +1,7 @@
 package com.igknighters.commands.stem;
 
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import com.igknighters.GlobalState;
 import com.igknighters.constants.FieldConstants;
@@ -65,6 +66,16 @@ public class StemCommands {
 
         private boolean hasFinished = false, canFinish = false;
 
+        private Supplier<Pose2d> poseSupplier = GlobalState::getLocalizedPose;
+
+        private AimAtSpeakerCommand(Stem stem, AimSolveStrategy aimStrategy, boolean canFinish, Supplier<Pose2d> poseSupplier) {
+            addRequirements(stem);
+            this.stem = stem;
+            this.aimStrategy = aimStrategy;
+            this.canFinish = canFinish;
+            this.poseSupplier = poseSupplier;
+        }
+
         private AimAtSpeakerCommand(Stem stem, AimSolveStrategy aimStrategy, boolean canFinish) {
             addRequirements(stem);
             this.stem = stem;
@@ -79,7 +90,7 @@ public class StemCommands {
 
             ChassisSpeeds currentChassisSpeed = GlobalState.getFieldRelativeVelocity();
 
-            Pose2d currentPose = GlobalState.getLocalizedPose();
+            Pose2d currentPose = poseSupplier.get();
 
             double targetDistance = currentPose.getTranslation().getDistance(targetTranslation);
 
@@ -223,6 +234,21 @@ public class StemCommands {
      */
     public static Command aimAtSpeaker(Stem stem, AimSolveStrategy aimStrategy, boolean canFinish) {
         return new AimAtSpeakerCommand(stem, aimStrategy, canFinish)
+                .withName("Aim At SPEAKER");
+    }
+
+    /**
+     * Aims the pivot or wrist or both depending on the default aim
+     * strategy in constants.
+     * 
+     * @param stem         The stem subsystem
+     * @param aimStrategy  The aiming strategy to use when targeting the speaker
+     * @param canFinish    Whether or not the command can finish
+     * @param poseSupplier Localizer
+     * @return A command to be scheduled
+     */
+    public static Command aimAtSpeaker(Stem stem, AimSolveStrategy aimStrategy, boolean canFinish, Supplier<Pose2d> poseSupplier) {
+        return new AimAtSpeakerCommand(stem, aimStrategy, canFinish, poseSupplier)
                 .withName("Aim At SPEAKER");
     }
 

@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import monologue.MonoDashboard;
 
 public class StemSolvers {
 
@@ -186,9 +187,14 @@ public class StemSolvers {
         double linearWristRads = linearSolveWristTheta(stemLength, pivotRads, horizDist, vertDist, false);
         double vertcialDistanceError = linearSolveVerticalDistError(linearWristRads, horizDist, vertDist, deltaNoteVelo);
 
+        MonoDashboard.put("Aim/GravDistOffset", vertcialDistanceError);
+        MonoDashboard.put("Aim/Linear", linearSolveWristTheta(stemLength, pivotRads, horizDist, vertDist, true));
+
         double newVerticalDist = vertDist + vertcialDistanceError;
 
-        return linearSolveWristTheta(stemLength, pivotRads, horizDist, newVerticalDist, true);
+        double grav = linearSolveWristTheta(stemLength, pivotRads, horizDist, newVerticalDist, true);
+        MonoDashboard.put("Aim/Gravity", grav);
+        return grav;
     }
 
     public static StemPosition iterativeSolveLowestPivotDelta(
@@ -297,6 +303,21 @@ public class StemSolvers {
                     input.horizDist(),
                     input.vertDist(),
                     input.deltaNoteVelo()
+                ),
+                telescopeMeters
+            );
+        }),
+        STATIONARY_PIVOT_TELESCOPE_EXTEND(input -> {
+            double pivotRads = input.desiredStemPosition.pivotRads;
+            double telescopeMeters = StemPosition.INTAKE.telescopeMeters;
+            return StemPosition.fromRadians(
+                pivotRads,
+                linearSolveWristTheta(
+                    telescopeMeters,
+                    pivotRads,
+                    input.horizDist(),
+                    input.vertDist(),
+                    true
                 ),
                 telescopeMeters
             );

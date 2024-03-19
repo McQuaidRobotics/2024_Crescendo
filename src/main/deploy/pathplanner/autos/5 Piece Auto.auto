@@ -28,7 +28,7 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 0.45
+                        "waitTime": 0.38
                       }
                     },
                     {
@@ -38,9 +38,15 @@
                       }
                     },
                     {
-                      "type": "parallel",
+                      "type": "deadline",
                       "data": {
                         "commands": [
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "IntakeNoStow"
+                            }
+                          },
                           {
                             "type": "sequential",
                             "data": {
@@ -48,7 +54,7 @@
                                 {
                                   "type": "wait",
                                   "data": {
-                                    "waitTime": 0.35
+                                    "waitTime": 0.2
                                   }
                                 },
                                 {
@@ -58,12 +64,6 @@
                                   }
                                 }
                               ]
-                            }
-                          },
-                          {
-                            "type": "named",
-                            "data": {
-                              "name": "IntakeNoStow"
                             }
                           }
                         ]
@@ -92,7 +92,7 @@
                                 {
                                   "type": "wait",
                                   "data": {
-                                    "waitTime": 0.7
+                                    "waitTime": 0.4
                                   }
                                 },
                                 {
@@ -116,51 +116,19 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "AutoShoot"
+                        "name": "FeedShooter"
                       }
                     },
                     {
-                      "type": "parallel",
+                      "type": "deadline",
                       "data": {
                         "commands": [
-                          {
-                            "type": "sequential",
-                            "data": {
-                              "commands": [
-                                {
-                                  "type": "wait",
-                                  "data": {
-                                    "waitTime": 0.28
-                                  }
-                                },
-                                {
-                                  "type": "path",
-                                  "data": {
-                                    "pathName": "5p - 2"
-                                  }
-                                }
-                              ]
-                            }
-                          },
                           {
                             "type": "named",
                             "data": {
                               "name": "IntakeNoStow"
                             }
-                          }
-                        ]
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "AutoShoot"
-                      }
-                    },
-                    {
-                      "type": "parallel",
-                      "data": {
-                        "commands": [
+                          },
                           {
                             "type": "sequential",
                             "data": {
@@ -174,16 +142,48 @@
                                 {
                                   "type": "path",
                                   "data": {
-                                    "pathName": "5p - 3"
+                                    "pathName": "5p - 2"
                                   }
                                 }
                               ]
                             }
-                          },
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "AutoShoot"
+                      }
+                    },
+                    {
+                      "type": "deadline",
+                      "data": {
+                        "commands": [
                           {
                             "type": "named",
                             "data": {
                               "name": "IntakeNoStow"
+                            }
+                          },
+                          {
+                            "type": "sequential",
+                            "data": {
+                              "commands": [
+                                {
+                                  "type": "wait",
+                                  "data": {
+                                    "waitTime": 0.15
+                                  }
+                                },
+                                {
+                                  "type": "path",
+                                  "data": {
+                                    "pathName": "5p - 3"
+                                  }
+                                }
+                              ]
                             }
                           }
                         ]
