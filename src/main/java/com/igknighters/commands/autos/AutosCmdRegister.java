@@ -6,7 +6,6 @@ import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.teleop.AutoSwerveTargetSpeaker;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.ConstValues.kControls;
-import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
@@ -81,7 +80,7 @@ public class AutosCmdRegister {
 
         registerCommand(
             "Spinup",
-            Commands.run(() -> umbrella.spinupShooterToRPM(kControls.SHOOTER_RPM))
+            Commands.run(() -> umbrella.spinupShooterToRPM(kControls.AUTO_SHOOTER_RPM))
                 .finallyDo(() -> umbrella.stopAll())
                 .withName("Spinup")
         );
@@ -102,17 +101,6 @@ public class AutosCmdRegister {
                 StemCommands.aimAtSpeaker(stem, AimSolveStrategy.STATIONARY_PIVOT_GRAVITY_TELESCOPE_EXTEND, false, vision::getLatestPoseWithFallback)
                     .withName("AimVision")
         );
-
-        // registerCommand(
-        //         "StaticMiddleNoteAim",
-        //         StemCommands.holdAt(
-        //                     stem,
-        //                     StemPosition.fromRadians(
-        //                         0.698132, 
-        //                         1.183437, 
-        //                         StemPosition.INTAKE.telescopeMeters))
-        // );
-
 
         registerCommand(
                 "Stow",

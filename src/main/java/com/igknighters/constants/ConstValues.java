@@ -92,7 +92,9 @@ public final class ConstValues {
     }
 
     public static final class kControls {
-        public static final double SHOOTER_RPM = 8000.0;
+        public static final double SHOOTER_RPM = 6500.0;
+        public static final double AUTO_SHOOTER_RPM = 8000.0;
+        public static final double SHOOTER_IDLE_RPM = 4000.0;
         public static final double INTAKE_PERCENT = 0.8;
 
         public static final double STATIONARY_AIM_AT_PIVOT_RADIANS = 40.0 * Conv.DEGREES_TO_RADIANS;
@@ -365,15 +367,17 @@ public final class ConstValues {
 
             public static final double LEFT_MOTOR_DIFF = 0.9;
 
-            public static final LerpTable DISTANCE_TO_RPM_CURVE = new LerpTable(
-                new LerpTableEntry(0.0, 8000),
-                new LerpTableEntry(20.0, 8000)
-            );
+            // public static final LerpTable DISTANCE_TO_RPM_CURVE = new LerpTable(
+            //     new LerpTableEntry(0.0, 8000),
+            //     new LerpTableEntry(20.0, 8000)
+            // );
 
-            public static final LerpTable RPM_TO_AVERAGE_NOTE_VELO_CURVE = new LerpTable(
-                new LerpTableEntry(0, 25.0),
-                new LerpTableEntry(100000, 25.0)
-            );
+            // public static final LerpTable RPM_TO_AVERAGE_NOTE_VELO_CURVE = new LerpTable(
+            //     new LerpTableEntry(0, 25.0),
+            //     new LerpTableEntry(100000, 25.0)
+            // );
+
+            public static final double AVERAGE_NOTE_VELO_EST = 25.0;
         }
 
         public static final class kIntake {

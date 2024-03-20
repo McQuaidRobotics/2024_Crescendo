@@ -148,7 +148,7 @@ public class TestingController extends ControllerParent {
         });
 
         this.DPU.binding = new Binding((trig, allss) -> {
-            trig.onTrue(Commands.runOnce(() -> LED.sendAnimation(LedAnimations.BOOTING)).ignoringDisable(true));
+            trig.onTrue(Commands.runOnce(() -> LED.sendAnimation(LedAnimations.INTAKE)).ignoringDisable(true));
         });
     }
 }

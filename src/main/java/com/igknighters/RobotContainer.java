@@ -10,13 +10,12 @@ import com.igknighters.controllers.TestingController;
 // import com.igknighters.controllers.TestingController;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.swerve.Swerve;
-import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
-import com.igknighters.util.TunableValues;
 import com.igknighters.util.geom.AllianceFlip;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.igknighters.commands.autos.AutosCmdRegister;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
+import com.igknighters.commands.umbrella.UmbrellaCommands;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import monologue.Logged;
@@ -66,10 +65,7 @@ public class RobotContainer implements Logged {
         if (allSubsystems.umbrella.isPresent()) {
             var umbrella = allSubsystems.umbrella.get();
             umbrella.setDefaultCommand(
-                umbrella.run(() -> {
-                    umbrella.spinupShooterToRPM(TunableValues.getDouble("RPM", 4000).get());
-                    umbrella.pushSpinupReason(ShooterSpinupReason.Idle);
-                })
+                UmbrellaCommands.idleShooter(umbrella)
             );
         }
     }
