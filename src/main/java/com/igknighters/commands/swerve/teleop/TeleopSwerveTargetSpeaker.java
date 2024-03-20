@@ -79,6 +79,7 @@ public class TeleopSwerveTargetSpeaker extends TeleopSwerveBase {
                 lookaheadTranslation,
                 Rotation2d.fromDegrees(180),
                 adjustedTarget);
+
         double rotVelo = swerve.rotVeloForRotation(targetAngle);
 
         GlobalState.modifyField2d(field -> {

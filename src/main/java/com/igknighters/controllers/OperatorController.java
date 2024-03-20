@@ -2,8 +2,12 @@ package com.igknighters.controllers;
 
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
+
+import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.subsystems.SubsystemResources.Subsystems;
 import com.igknighters.subsystems.stem.StemPosition;
+import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
+import com.igknighters.util.Channels;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 
@@ -15,9 +19,13 @@ public class OperatorController extends ControllerParent {
         // disregard null safety as it is checked on assignment
 
         /// FACE BUTTONS
-        // this.A.binding = 
+        this.A.binding = new Binding((trig, allss) -> {
+            trig.onTrue(UmbrellaCommands.spinupShooter(allss.umbrella.get(), kControls.SHOOTER_RPM, ShooterSpinupReason.None));
+        }, Subsystems.Umbrella);
 
-        // this.B.binding =
+        this.B.binding = new Binding((trig, allss) -> {
+            trig.onTrue(UmbrellaCommands.stopShooter(allss.umbrella.get()));
+        }, Subsystems.Umbrella);
 
         // this.X.binding =
 
@@ -51,7 +59,12 @@ public class OperatorController extends ControllerParent {
         // this.RT.binding = DON'T USE!!! OTHER TRIGGERS COMMANDS USES BOTH TRIGGERS!!!
 
         /// DPAD
-        // this.DPR.binding =
+        this.DPR.binding = this.DPR.binding = this.DPL.binding = new Binding((trig, allss) -> {
+            trig.onTrue(Commands.runOnce(() -> {
+                    Channels.Sender.broadcast("HomePivot", Boolean.class)
+                            .send(true);
+            }));
+        }, Subsystems.Stem);
 
         // this.DPD.binding =
 

@@ -59,10 +59,6 @@ public class AutosCmdRegister {
         //                 Double.class))
         //         .withDefault(9999.0);
 
-        // NamedCommands.registerCommand(
-        //         "Stow",
-        //         StemCommands.holdAt(stem, StemPosition.STOW));
-
         // SpecializedNamedCommands.registerCommand(
         //         "Spinup",
         //         SpecializedNamedCommand.fromLambda(
@@ -89,7 +85,7 @@ public class AutosCmdRegister {
             Commands.race(
                 StemCommands.holdAt(stem, StemPosition.INTAKE),
                 UmbrellaCommands.intake(umbrella)
-                .until(() -> umbrella.holdingGamepiece())).withTimeout(2.3)
+                .until(() -> umbrella.holdingGamepiece())).withTimeout(2.85)
                 .withName("IntakeNoStow")
         );
 
@@ -105,9 +101,21 @@ public class AutosCmdRegister {
         );
 
         registerCommand(
+                "Expell",
+                UmbrellaCommands.expell(umbrella).withTimeout(0.5)
+        );
+
+        registerCommand(
                 "Aim",
                 StemCommands.aimAtSpeaker(stem, false)
                     .withName("Aim")
+        );
+
+        registerCommand(
+                "Stow",
+                StemCommands.holdAt(
+                            stem,
+                            StemPosition.STOW)
         );
 
         registerCommand(
@@ -125,6 +133,7 @@ public class AutosCmdRegister {
                     .finallyDo(() -> System.out.println("   Stem Targeting Done"))
             ).andThen(
                 UmbrellaCommands.shootAuto(umbrella)
+                    .finallyDo(() -> System.out.println("   Shooting Done"))
             ).withName("AutoShoot")
         );
 
