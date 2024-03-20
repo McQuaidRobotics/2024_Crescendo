@@ -116,7 +116,7 @@ public class AutosCmdRegister {
 
         registerCommand(
                 "Stow",
-                StemCommands.holdAt(
+                StemCommands.moveTo(
                             stem,
                             StemPosition.STOW)
         );
@@ -132,7 +132,7 @@ public class AutosCmdRegister {
             Commands.parallel(
                 new AutoSwerveTargetSpeaker(swerve, vision::getLatestPoseWithFallback)
                     .finallyDo(() -> logAutoEvent("SwerveTargeting", "Done")),
-                StemCommands.aimAtSpeaker(stem, AimSolveStrategy.STATIONARY_PIVOT_GRAVITY_TELESCOPE_EXTEND, true)
+                StemCommands.aimAtSpeaker(stem, AimSolveStrategy.STATIONARY_PIVOT_TELESCOPE_EXTEND, true)
                     .finallyDo(() -> logAutoEvent("Stem Targeting", "Done"))
             ).andThen(
                 UmbrellaCommands.shootAuto(umbrella)

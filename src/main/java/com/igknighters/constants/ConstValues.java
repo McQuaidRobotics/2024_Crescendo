@@ -100,7 +100,7 @@ public final class ConstValues {
         public static final double MAX_HEIGHT_AIM_AT_PIVOT_RADIANS = 86.0 * Conv.DEGREES_TO_RADIANS;
         public static final double MAX_HEIGHT_AIM_AT_TELESCOPE_METERS = kTelescope.MAX_METERS;
 
-        public static final AimSolveStrategy DEFAULT_AIM_STRATEGY = AimSolveStrategy.STATIONARY_PIVOT_TELESCOPE_EXTEND;
+        public static final AimSolveStrategy DEFAULT_AIM_STRATEGY = AimSolveStrategy.STATIONARY_PIVOT_GRAVITY;
     }
 
     public static final class kVision {
@@ -501,8 +501,8 @@ public final class ConstValues {
             public static final double MOTOR_TO_MECHANISM_RATIO = 5.0 * 5.0 * (84.0 / 22.0);
 
             public static final double MAX_VELOCITY = 20;
-            public static final double MAX_ACCELERATION = 80;
-            public static final double MAX_JERK = 320;
+            public static final double MAX_ACCELERATION = 60; //was 80, slowing down because of degradation of wrist gears
+            public static final double MAX_JERK = 250; //was 320, slowing down because of degradation of wrist gears
 
             /**
              * Tolerance in radians

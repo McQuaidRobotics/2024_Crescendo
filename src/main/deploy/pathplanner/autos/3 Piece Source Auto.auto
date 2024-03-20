@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.4896821805055864,
-      "y": 1.4170112220395616
+      "x": 1.477971343959805,
+      "y": 4.1
     },
     "rotation": 0
   },
@@ -26,25 +26,6 @@
                 "data": {
                   "commands": [
                     {
-                      "type": "deadline",
-                      "data": {
-                        "commands": [
-                          {
-                            "type": "path",
-                            "data": {
-                              "pathName": "3p source - 0"
-                            }
-                          },
-                          {
-                            "type": "named",
-                            "data": {
-                              "name": "Aim"
-                            }
-                          }
-                        ]
-                      }
-                    },
-                    {
                       "type": "named",
                       "data": {
                         "name": "AutoShoot"
@@ -65,9 +46,15 @@
                             "data": {
                               "commands": [
                                 {
+                                  "type": "named",
+                                  "data": {
+                                    "name": "Stow"
+                                  }
+                                },
+                                {
                                   "type": "wait",
                                   "data": {
-                                    "waitTime": 0.7
+                                    "waitTime": 0.9
                                   }
                                 },
                                 {
@@ -109,9 +96,15 @@
                             "data": {
                               "commands": [
                                 {
+                                  "type": "named",
+                                  "data": {
+                                    "name": "Stow"
+                                  }
+                                },
+                                {
                                   "type": "wait",
                                   "data": {
-                                    "waitTime": 0.35
+                                    "waitTime": 0.4
                                   }
                                 },
                                 {
