@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import monologue.MonoDashboard;
 
 public class StemSolvers {
 
@@ -34,6 +35,34 @@ public class StemSolvers {
         Translation2d wristLocation = solveWristLocationSimple2d(stemLength, pivotRads);
         double flatWristRads = Math.atan((vertDist - wristLocation.getY()) / (horizDist + wristLocation.getX()));
         return offsetPivot ? flatWristRads + pivotRads : flatWristRads;
+    }
+
+    /**
+     * Returns the theta of the wrist given the input parameters in radians.
+     * 
+     * @apiNote When using with the telescope enabled make sure to factor in the
+     *          current exention of the telescope in meters into your stem length
+     * 
+     * @param stemLength    The length of the stem from the pivot axel to the wrist
+     *                      axel
+     * @param pivotRads     The angle of the pivot in radians
+     * @param horizDist     The horizontal distance from the pivot axel to the target
+     * @param deltaNoteVelo The average velocity of the note
+     * @param time          The time that the entire pass should take from start to finish
+     * @return The angle of the wrist in radians
+     */
+    public static double passWristSolveTheta(
+        double stemLength, 
+        double pivotRads, 
+        double horizDist, 
+        double deltaNoteVelo,
+        double time, 
+        boolean offsetPivot) {
+
+            Translation2d wristLocation = solveWristLocationSimple2d(stemLength, pivotRads);
+            double deltaXVelo = (horizDist + wristLocation.getX()) / time;
+            double deltaYVelo = Math.sqrt(Math.pow(deltaNoteVelo, 2) - Math.pow(deltaXVelo, 2));
+            return offsetPivot ? Math.atan(deltaYVelo / deltaXVelo) + pivotRads : Math.atan(deltaYVelo / deltaXVelo);
     }
 
     /**
@@ -74,7 +103,7 @@ public class StemSolvers {
      * parameters.
      * 
      * @param wristRads           The angle of the wrist in radians
-     * @param noteInitialVelocity The initial velocity of the note
+     * @param deltaNoteVelo       The average velocity of the note
      * @param horizontalDist      The horizontal distance from the wrist axel to the
      *                            target
      * @param verticalDist        The vertical distance from the wrist axel to the
@@ -87,10 +116,10 @@ public class StemSolvers {
             double wristRads,
             double horizontalDist,
             double verticalDist,
-            double noteInitialVelocity) {
+            double deltaNoteVelo) {
 
-            double horizontalVi = noteInitialVelocity * Math.cos(wristRads);
-            double verticalVi = noteInitialVelocity * Math.sin(wristRads);
+            double horizontalVi = deltaNoteVelo * Math.cos(wristRads);
+            double verticalVi = deltaNoteVelo * Math.sin(wristRads);
             double time = horizontalDist / horizontalVi;
             double newVerticalDist = (verticalVi * time) + (0.5 * -9.8 * Math.pow(time, 2));
             return Math.abs(verticalDist - newVerticalDist);
@@ -141,7 +170,7 @@ public class StemSolvers {
      * @param pivotRads The angle of the pivot in radians
      * @param horizDist The horizontal distance from the pivot axel to the target
      * @param vertDist The vertical distance from the pivot axel to the target
-     * @param initialNoteVelo The initial velocity of the note
+     * @param deltaNoteVelo The average velocity of the note
      * @return The angle of the wrist in radians
      */
     public static double gravitySolveWristTheta(
@@ -149,18 +178,23 @@ public class StemSolvers {
         double pivotRads, 
         double horizDist, 
         double vertDist,
-        double initialNoteVelo) {
+        double deltaNoteVelo) {
 
         Translation2d wristLocation = solveWristLocationSimple2d(stemLength, pivotRads);
         horizDist += wristLocation.getX();
         vertDist -= wristLocation.getY();
 
         double linearWristRads = linearSolveWristTheta(stemLength, pivotRads, horizDist, vertDist, false);
-        double vertcialDistanceError = linearSolveVerticalDistError(linearWristRads, horizDist, vertDist, initialNoteVelo);
+        double vertcialDistanceError = linearSolveVerticalDistError(linearWristRads, horizDist, vertDist, deltaNoteVelo);
+
+        MonoDashboard.put("Aim/GravDistOffset", vertcialDistanceError);
+        MonoDashboard.put("Aim/Linear", linearSolveWristTheta(stemLength, pivotRads, horizDist, vertDist, true));
 
         double newVerticalDist = vertDist + vertcialDistanceError;
 
-        return linearSolveWristTheta(stemLength, pivotRads, horizDist, newVerticalDist, true);
+        double grav = linearSolveWristTheta(stemLength, pivotRads, horizDist, newVerticalDist, true);
+        MonoDashboard.put("Aim/Gravity", grav);
+        return grav;
     }
 
     public static StemPosition iterativeSolveLowestPivotDelta(
@@ -170,7 +204,7 @@ public class StemSolvers {
         final double stepSize = Units.degreesToRadians(1.0);
         int tryCount = 0;
         double pivotRads = startingPosition;
-        StemPosition lastStemPosition = positionGenerator.apply(startingPosition);
+        StemPosition lastStemPosition = positionGenerator.apply(pivotRads);
         while (!lastStemPosition.isValid() && tryCount < 90) {
             if (pivotRads > Math.PI / 4.0) {
                 pivotRads -= stepSize;
@@ -207,10 +241,10 @@ public class StemSolvers {
          */
         double vertDist,
         /**
-         * The initial velocity of the note, this will be used in
+         * The average velocity of the note, this will be used in
          * gravity compensated solves.
          */
-        double initialNoteVelo
+        double deltaNoteVelo
     ) {}
 
     public enum AimSolveStrategy {
@@ -253,7 +287,37 @@ public class StemSolvers {
                     pivotRads,
                     input.horizDist(),
                     input.vertDist(),
-                    input.initialNoteVelo()
+                    input.deltaNoteVelo()
+                ),
+                telescopeMeters
+            );
+        }),
+        STATIONARY_PIVOT_GRAVITY_TELESCOPE_EXTEND(input -> {
+            double pivotRads = input.desiredStemPosition.pivotRads;
+            double telescopeMeters = StemPosition.INTAKE.telescopeMeters;
+            return StemPosition.fromRadians(
+                pivotRads,
+                gravitySolveWristTheta(
+                    telescopeMeters,
+                    pivotRads,
+                    input.horizDist(),
+                    input.vertDist(),
+                    input.deltaNoteVelo()
+                ),
+                telescopeMeters
+            );
+        }),
+        STATIONARY_PIVOT_TELESCOPE_EXTEND(input -> {
+            double pivotRads = input.desiredStemPosition.pivotRads;
+            double telescopeMeters = StemPosition.INTAKE.telescopeMeters;
+            return StemPosition.fromRadians(
+                pivotRads,
+                linearSolveWristTheta(
+                    telescopeMeters,
+                    pivotRads,
+                    input.horizDist(),
+                    input.vertDist(),
+                    true
                 ),
                 telescopeMeters
             );
@@ -273,7 +337,7 @@ public class StemSolvers {
                             pivotRads,
                             input.horizDist(),
                             input.vertDist(),
-                            input.initialNoteVelo()
+                            input.deltaNoteVelo()
                         ),
                         telescopeMeters
                     );

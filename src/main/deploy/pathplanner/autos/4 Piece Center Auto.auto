@@ -2,7 +2,7 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.477971343959805,
+      "x": 1.4662605074140238,
       "y": 4.1
     },
     "rotation": 0
@@ -32,63 +32,13 @@
                       }
                     },
                     {
-                      "type": "deadline",
-                      "data": {
-                        "commands": [
-                          {
-                            "type": "path",
-                            "data": {
-                              "pathName": "3p source - 1"
-                            }
-                          },
-                          {
-                            "type": "sequential",
-                            "data": {
-                              "commands": [
-                                {
-                                  "type": "named",
-                                  "data": {
-                                    "name": "Stow"
-                                  }
-                                },
-                                {
-                                  "type": "wait",
-                                  "data": {
-                                    "waitTime": 0.9
-                                  }
-                                },
-                                {
-                                  "type": "named",
-                                  "data": {
-                                    "name": "IntakeNoStow"
-                                  }
-                                },
-                                {
-                                  "type": "named",
-                                  "data": {
-                                    "name": "Aim"
-                                  }
-                                }
-                              ]
-                            }
-                          }
-                        ]
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "AutoShoot"
-                      }
-                    },
-                    {
                       "type": "parallel",
                       "data": {
                         "commands": [
                           {
-                            "type": "path",
+                            "type": "named",
                             "data": {
-                              "pathName": "3p source - 2"
+                              "name": "IntakeNoStow"
                             }
                           },
                           {
@@ -96,21 +46,15 @@
                             "data": {
                               "commands": [
                                 {
-                                  "type": "named",
-                                  "data": {
-                                    "name": "Stow"
-                                  }
-                                },
-                                {
                                   "type": "wait",
                                   "data": {
-                                    "waitTime": 0.4
+                                    "waitTime": 0.6
                                   }
                                 },
                                 {
-                                  "type": "named",
+                                  "type": "path",
                                   "data": {
-                                    "name": "IntakeNoStow"
+                                    "pathName": "4p center - 1"
                                   }
                                 }
                               ]
@@ -126,7 +70,7 @@
                           {
                             "type": "path",
                             "data": {
-                              "pathName": "3p source - 3"
+                              "pathName": "4p center - 2"
                             }
                           },
                           {
@@ -141,6 +85,18 @@
                     {
                       "type": "named",
                       "data": {
+                        "name": "FeedShooter"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "IntakeNoStow"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
                         "name": "AutoShoot"
                       }
                     },
@@ -151,16 +107,22 @@
                           {
                             "type": "path",
                             "data": {
-                              "pathName": "3p source - 4"
+                              "pathName": "4p center - 3"
                             }
                           },
                           {
                             "type": "named",
                             "data": {
-                              "name": "Stow"
+                              "name": "IntakeNoStow"
                             }
                           }
                         ]
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "AutoShoot"
                       }
                     }
                   ]

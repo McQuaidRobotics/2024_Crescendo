@@ -235,7 +235,7 @@ public final class ConstValues {
         }
 
         public static final class kRotationController {
-            public static final double kP = 6.6;
+            public static final double kP = 8.0;
             public static final double kD = 0.2;
 
             public static final double DEADBAND = 0.5 * Conv.DEGREES_TO_RADIANS;
@@ -340,17 +340,17 @@ public final class ConstValues {
         public static final String CANBUS = "SuperStructureBus";
 
         public static final class kShooter {
-            public static final double MOTOR_RIGHT_kP = 0.06;
+            public static final double MOTOR_RIGHT_kP = 0.15;
             public static final double MOTOR_RIGHT_kI = 0.0;
             public static final double MOTOR_RIGHT_kD = 0.00;
-            public static final double MOTOR_RIGHT_kS = 0.125;
-            public static final double MOTOR_RIGHT_kV = 0.06;
+            public static final double MOTOR_RIGHT_kS = 0.155;
+            public static final double MOTOR_RIGHT_kV = 0.118;
 
-            public static final double MOTOR_LEFT_kP = 0.06;
+            public static final double MOTOR_LEFT_kP = 0.15;
             public static final double MOTOR_LEFT_kI = 0.0;
             public static final double MOTOR_LEFT_kD = 0.00;
-            public static final double MOTOR_LEFT_kS = 0.115;
-            public static final double MOTOR_LEFT_kV = 0.061;
+            public static final double MOTOR_LEFT_kS = 0.15;
+            public static final double MOTOR_LEFT_kV = 0.118;
 
             public static final int LEFT_MOTOR_ID = 17;
             public static final int RIGHT_MOTOR_ID = 18;
@@ -370,7 +370,7 @@ public final class ConstValues {
                 new LerpTableEntry(20.0, 8000)
             );
 
-            public static final LerpTable RPM_TO_INITIAL_NOTE_VELO_CURVE = new LerpTable(
+            public static final LerpTable RPM_TO_AVERAGE_NOTE_VELO_CURVE = new LerpTable(
                 new LerpTableEntry(0, 25.0),
                 new LerpTableEntry(100000, 25.0)
             );
@@ -501,8 +501,8 @@ public final class ConstValues {
             public static final double MOTOR_TO_MECHANISM_RATIO = 5.0 * 5.0 * (84.0 / 22.0);
 
             public static final double MAX_VELOCITY = 20;
-            public static final double MAX_ACCELERATION = 80;
-            public static final double MAX_JERK = 320;
+            public static final double MAX_ACCELERATION = 60; //was 80, slowing down because of degradation of wrist gears
+            public static final double MAX_JERK = 250; //was 320, slowing down because of degradation of wrist gears
 
             /**
              * Tolerance in radians

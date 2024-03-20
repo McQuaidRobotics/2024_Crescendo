@@ -5,15 +5,16 @@
   "pathFolders": [
     "3 piece source",
     "3 piece subwoofer",
-    "4 piece",
+    "4 piece amp",
+    "4 piece center",
     "4 piece subwoofer",
-    "5 piece",
+    "5 piece amp",
     "Auto Testing Paths",
     "Fudge Piece"
   ],
   "autoFolders": [],
   "defaultMaxVel": 5.0,
-  "defaultMaxAccel": 3.0,
+  "defaultMaxAccel": 3.5,
   "defaultMaxAngVel": 200.0,
   "defaultMaxAngAccel": 500.0,
   "maxModuleSpeed": 5.0

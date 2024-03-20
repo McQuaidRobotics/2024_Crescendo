@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.41,
-        "y": 5.61
+        "x": 2.461681613805452,
+        "y": 4.368142031576503
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.20862210340683,
-        "y": 5.176189753235427
+        "x": 2.262597392527166,
+        "y": 4.753392428610822
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "5p center - 1 end"
     },
     {
       "anchor": {
-        "x": 2.2977299021645106,
-        "y": 4.262744502664469
+        "x": 2.461681613805452,
+        "y": 5.269876445601678
       },
       "prevControl": {
-        "x": 1.6536338921465275,
-        "y": 4.1690578102982165
+        "x": 2.239175719435603,
+        "y": 4.859997166499325
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "5p center - 2 end"
     }
   ],
   "rotationTargets": [],
@@ -39,13 +39,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -32.47119229084859,
+    "rotation": 30.963756532073408,
     "rotateFast": true
   },
   "reversed": false,
-  "folder": "5 piece amp",
+  "folder": "4 piece center",
   "previewStartingState": {
-    "rotation": 1.0070800012870833,
+    "rotation": 0,
     "velocity": 0
   },
   "useDefaultConstraints": true

@@ -99,8 +99,24 @@ public class UmbrellaCommands {
     public static Command shootAuto(Umbrella umbrella) {
         return umbrella.run(
                 () -> umbrella.runIntakeAt(-1.0, true))
-                .withTimeout(0.45)
+                .withTimeout(0.16)
                 .withName("Shoot");
+    }
+
+    /**
+     * Runs the intake and the shooter, feeding notes through the umbrella
+     * 
+     * @param umbrella The umbrella subsystem
+     * @param rpm The rpm to spin the shooter up to
+     * @return A command to be scheduled
+     */
+    public static Command runIntakeAndShooter(Umbrella umbrella, double rpm) {
+        return umbrella.run(
+            () -> {
+                umbrella.runIntakeAt(-1.0, true);
+                umbrella.spinupShooterToRPM(rpm);
+            }
+        ).withName("Run Intake And Shooter");
     }
 
     /**

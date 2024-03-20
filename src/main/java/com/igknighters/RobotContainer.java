@@ -6,10 +6,12 @@ import com.igknighters.constants.ConstValues.kAuto;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.controllers.DriverController;
 import com.igknighters.controllers.OperatorController;
+import com.igknighters.controllers.TestingController;
 // import com.igknighters.controllers.TestingController;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
+import com.igknighters.util.TunableValues;
 import com.igknighters.util.geom.AllianceFlip;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
@@ -24,7 +26,7 @@ public class RobotContainer implements Logged {
 
     private final DriverController driverController;
     private final OperatorController operatorController;
-    // private final TestingController testingController;
+    private final TestingController testingController;
 
     private final AllSubsystems allSubsystems;
 
@@ -34,13 +36,13 @@ public class RobotContainer implements Logged {
 
         driverController = new DriverController(0);
         operatorController = new OperatorController(1);
-        // testingController = new TestingController(3);
+        testingController = new TestingController(3);
 
         allSubsystems = new AllSubsystems(RobotSetup.getRobotID().subsystems);
 
         driverController.assignButtons(allSubsystems);
         operatorController.assignButtons(allSubsystems);
-        // testingController.assignButtons(allSubsystems);
+        testingController.assignButtons(allSubsystems);
 
         if (allSubsystems.swerve.isPresent()) {
             var swerve = allSubsystems.swerve.get();
@@ -65,7 +67,7 @@ public class RobotContainer implements Logged {
             var umbrella = allSubsystems.umbrella.get();
             umbrella.setDefaultCommand(
                 umbrella.run(() -> {
-                    umbrella.spinupShooterToRPM(4000);
+                    umbrella.spinupShooterToRPM(TunableValues.getDouble("RPM", 4000).get());
                     umbrella.pushSpinupReason(ShooterSpinupReason.Idle);
                 })
             );
