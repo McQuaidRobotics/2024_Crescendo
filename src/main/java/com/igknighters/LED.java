@@ -143,7 +143,7 @@ public class LED {
                     return new StrobeAnimation(
                             desc.r, desc.g, desc.b, 0, desc.speed, num, offset);
                 }),
-        SHOOTING(new LEDAnimDescriptor(245, 174, 10, 0.2, Direction.Forward),
+        SHOOTING(new LEDAnimDescriptor(15, 165, 165, 0.2, Direction.Forward),
                 (desc, num, offset) -> {
                     return new ColorFlowAnimation(
                             desc.r, desc.g, desc.b, 0, desc.speed, num, desc.direction, offset);
@@ -158,7 +158,7 @@ public class LED {
                     return new StrobeAnimation(
                             desc.r, desc.g, desc.b, 0, desc.speed, num, offset);
                 }),
-        BOOTING(new LEDAnimDescriptor(255, 255, 255, 0.2, Direction.Forward),
+        INTAKE(new LEDAnimDescriptor(255, 255, 255, 0.2, Direction.Forward),
                 (desc, num, offset) -> {
                     return new StrobeAnimation(
                             desc.r, desc.g, desc.b, 0, desc.speed, num, offset);

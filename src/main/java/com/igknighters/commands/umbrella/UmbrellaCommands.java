@@ -2,6 +2,7 @@ package com.igknighters.commands.umbrella;
 
 import java.util.function.DoubleSupplier;
 
+import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
@@ -144,5 +145,19 @@ public class UmbrellaCommands {
                 () -> umbrella.runIntakeAt(1.0, true),
                 umbrella::stopAll)
                 .withName("Expell");
+    }
+
+    /**
+     * Will spin the shooter up to its idle speed
+     * 
+     * @param umbrella The umbrella subsystem
+     * @return A command to be scheduled
+     */
+    public static Command idleShooter(Umbrella umbrella) {
+        return umbrella.run(() -> {
+            umbrella.runIntakeAt(0.0);
+            umbrella.spinupShooterToRPM(kControls.SHOOTER_IDLE_RPM);
+            umbrella.pushSpinupReason(ShooterSpinupReason.Idle);
+        }).withName("Idle Intake");
     }
 }
