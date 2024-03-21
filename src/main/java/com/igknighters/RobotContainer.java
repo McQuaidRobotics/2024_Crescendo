@@ -25,7 +25,7 @@ public class RobotContainer implements Logged {
 
     private final DriverController driverController;
     private final OperatorController operatorController;
-    private final TestingController testingController;
+    // private final TestingController testingController;
 
     private final AllSubsystems allSubsystems;
 
@@ -35,13 +35,13 @@ public class RobotContainer implements Logged {
 
         driverController = new DriverController(0);
         operatorController = new OperatorController(1);
-        testingController = new TestingController(3);
+        // testingController = new TestingController(3);
 
         allSubsystems = new AllSubsystems(RobotSetup.getRobotID().subsystems);
 
         driverController.assignButtons(allSubsystems);
         operatorController.assignButtons(allSubsystems);
-        testingController.assignButtons(allSubsystems);
+        // testingController.assignButtons(allSubsystems);
 
         if (allSubsystems.swerve.isPresent()) {
             var swerve = allSubsystems.swerve.get();

@@ -61,6 +61,7 @@ public class Robot extends UnitTestableRobot {
 
     @Override
     public void disabledInit() {
+        CommandScheduler.getInstance().cancelAll();
     }
 
     @Override

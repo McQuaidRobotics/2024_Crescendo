@@ -94,7 +94,7 @@ public final class ConstValues {
     public static final class kControls {
         public static final double SHOOTER_RPM = 6500.0;
         public static final double AUTO_SHOOTER_RPM = 8000.0;
-        public static final double SHOOTER_IDLE_RPM = 4000.0;
+        public static final double SHOOTER_IDLE_RPM = 2000.0;
         public static final double INTAKE_PERCENT = 0.8;
 
         public static final double STATIONARY_AIM_AT_PIVOT_RADIANS = 40.0 * Conv.DEGREES_TO_RADIANS;
@@ -488,10 +488,10 @@ public final class ConstValues {
             public static final int MOTOR_ID = 16;
             public static final int CANCODER_ID = 26;
 
-            public static final double MOTOR_kP = 130.0;
-            public static final double MOTOR_kI = 0.0;
-            public static final double MOTOR_kD = 0.0;
-            public static final double MOTOR_kS = 0.02;
+            public static final double MOTOR_kP = 140.0;
+            public static final double MOTOR_kI = 1.0;
+            public static final double MOTOR_kD = 3.0;
+            public static final double MOTOR_kS = 0.06;
             public static final double MOTOR_kV = 0.0;
 
             public static final boolean INVERTED = false;

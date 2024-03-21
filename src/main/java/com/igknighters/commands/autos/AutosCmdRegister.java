@@ -92,13 +92,19 @@ public class AutosCmdRegister {
 
         registerCommand(
                 "Aim",
-                StemCommands.aimAtSpeaker(stem, AimSolveStrategy.STATIONARY_PIVOT_GRAVITY_TELESCOPE_EXTEND, false)
+                StemCommands.aimAtSpeaker(stem, AimSolveStrategy.STATIONARY_PIVOT_TELESCOPE_EXTEND, false)
                     .withName("Aim")
         );
 
         registerCommand(
+                "AimRetract",
+                StemCommands.aimAtSpeaker(stem, AimSolveStrategy.STATIONARY_PIVOT, false)
+                    .withName("AimRetract")
+        );
+
+        registerCommand(
                 "AimVision",
-                StemCommands.aimAtSpeaker(stem, AimSolveStrategy.STATIONARY_PIVOT_GRAVITY_TELESCOPE_EXTEND, false, vision::getLatestPoseWithFallback)
+                StemCommands.aimAtSpeaker(stem, AimSolveStrategy.STATIONARY_PIVOT_TELESCOPE_EXTEND, false, vision::getLatestPoseWithFallback)
                     .withName("AimVision")
         );
 
@@ -126,6 +132,19 @@ public class AutosCmdRegister {
                 UmbrellaCommands.shootAuto(umbrella)
                     .finallyDo(() -> logAutoEvent("Shooting", "Done"))
             ).withName("AutoShoot")
+        );
+
+        registerCommand(
+            "AutoShootRetract",
+            Commands.parallel(
+                new AutoSwerveTargetSpeaker(swerve, vision::getLatestPoseWithFallback)
+                    .finallyDo(() -> logAutoEvent("SwerveTargeting", "Done")),
+                StemCommands.aimAtSpeaker(stem, AimSolveStrategy.STATIONARY_PIVOT, true)
+                    .finallyDo(() -> logAutoEvent("Stem Targeting", "Done"))
+            ).andThen(
+                UmbrellaCommands.shootAuto(umbrella)
+                    .finallyDo(() -> logAutoEvent("Shooting", "Done"))
+            ).withName("AutoShootRetract")
         );
 
         registerCommand(
