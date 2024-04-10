@@ -13,7 +13,7 @@
     "Fudge Piece"
   ],
   "autoFolders": [],
-  "defaultMaxVel": 5.0,
+  "defaultMaxVel": 4.8,
   "defaultMaxAccel": 3.5,
   "defaultMaxAngVel": 200.0,
   "defaultMaxAngAccel": 500.0,

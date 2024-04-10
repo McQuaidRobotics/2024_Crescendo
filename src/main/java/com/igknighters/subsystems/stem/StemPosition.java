@@ -111,7 +111,7 @@ public class StemPosition implements StructSerializable {
         }
     };
 
-    public static final StemPosition INTAKE = new StemPosition(Units.degreesToRadians(10.0),
+    public static final StemPosition INTAKE = new StemPosition(Units.degreesToRadians(10.2),
             Units.degreesToRadians(73.0), kTelescope.MIN_METERS + Units.inchesToMeters(4.55)) {
 
         @Override

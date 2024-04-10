@@ -28,7 +28,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "AutoShoot"
+                        "name": "AutoShootRetract"
                       }
                     },
                     {
@@ -46,15 +46,9 @@
                             "data": {
                               "commands": [
                                 {
-                                  "type": "named",
-                                  "data": {
-                                    "name": "Stow"
-                                  }
-                                },
-                                {
                                   "type": "wait",
                                   "data": {
-                                    "waitTime": 0.9
+                                    "waitTime": 0.4
                                   }
                                 },
                                 {
@@ -66,7 +60,7 @@
                                 {
                                   "type": "named",
                                   "data": {
-                                    "name": "Aim"
+                                    "name": "AimRetract"
                                   }
                                 }
                               ]
@@ -78,7 +72,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "AutoShoot"
+                        "name": "AutoShootRetract"
                       }
                     },
                     {
@@ -96,15 +90,9 @@
                             "data": {
                               "commands": [
                                 {
-                                  "type": "named",
-                                  "data": {
-                                    "name": "Stow"
-                                  }
-                                },
-                                {
                                   "type": "wait",
                                   "data": {
-                                    "waitTime": 0.4
+                                    "waitTime": 0.3
                                   }
                                 },
                                 {
@@ -132,7 +120,7 @@
                           {
                             "type": "named",
                             "data": {
-                              "name": "Aim"
+                              "name": "AimRetract"
                             }
                           }
                         ]
@@ -141,7 +129,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "AutoShoot"
+                        "name": "AutoShootRetract"
                       }
                     },
                     {

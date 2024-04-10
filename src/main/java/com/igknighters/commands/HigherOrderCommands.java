@@ -68,7 +68,7 @@ public class HigherOrderCommands {
                     StemCommands.moveTo(stem, StemPosition.AMP_SAFE, 1.5));
         } else if (reason.equals(ShooterSpinupReason.AutoAimSpeaker)) {
             name = "Auto Aim Shoot";
-            cmd = Commands.deadline(
+            cmd = Commands.parallel(
                     HigherOrderCommands.aim(
                             swerve,
                             stem,

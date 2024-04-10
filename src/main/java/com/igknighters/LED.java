@@ -161,7 +161,7 @@ public class LED {
         INTAKE(new LEDAnimDescriptor(255, 255, 255, 0.2, Direction.Forward),
                 (desc, num, offset) -> {
                     return new StrobeAnimation(
-                            desc.r, desc.g, desc.b, 0, desc.speed, num, offset);
+                            desc.r, desc.g, desc.b, 255, desc.speed, num, offset);
                 }),
         OFF(new LEDAnimDescriptor(0, 0), (desc, num, offset) -> {
             return new RainbowAnimation(
