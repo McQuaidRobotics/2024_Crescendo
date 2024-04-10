@@ -206,12 +206,13 @@ public class PivotReal extends Pivot {
         super.isLimitFwdSwitchHit = forwardLimitSwitch.getValue() == ForwardLimitValue.Open;
         super.isLimitRevSwitchHit = reverseLimitSwitch.getValue() == ReverseLimitValue.Open;
 
-        double newGyroRadians = Units.degreesToRadians(gyroMeasurement.getValue() + 90);
+        double newGyroRadians = Units.degreesToRadians(gyroMeasurement.getValue() + 90.0);
         super.gyroRadiansPerSecondAbs = Math.abs(super.gyroRadians - newGyroRadians) / ConstValues.PERIODIC_TIME;
         super.gyroRadians = newGyroRadians;
 
         if ((Math.abs(super.radiansPerSecond) < 0.01
                 && Math.abs(super.gyroRadiansPerSecondAbs) < 0.01
+                && Units.radiansToDegrees(super.gyroRadians) > 20.0
                 && DriverStation.isDisabled())
                 || homeChannel.hasData()
         ) {

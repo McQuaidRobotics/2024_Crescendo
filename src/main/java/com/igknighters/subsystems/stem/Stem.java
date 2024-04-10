@@ -162,6 +162,10 @@ public class Stem extends SubsystemBase implements Logged {
 
     @Override
     public void periodic() {
+        if (DriverStation.isDisabled()) {
+            stopMechanisms();
+        }
+
         Tracer.startTrace("StemPeriodic");
 
         Tracer.traceFunc("PivotPeriodic", pivot::periodic);
