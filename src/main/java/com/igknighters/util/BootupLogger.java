@@ -1,6 +1,6 @@
 package com.igknighters.util;
 
-import com.igknighters.GlobalState;
+import com.igknighters.Robot;
 
 import monologue.MonoDashboard;
 
@@ -17,7 +17,7 @@ public class BootupLogger {
     public static synchronized void bootupLog(String message) {
         MonoDashboard.put("/Bootup", message);
 
-        if (!GlobalState.isUnitTest()) {
+        if (!Robot.isUnitTest()) {
             System.out.println(println_prefix + message);
         }
     }

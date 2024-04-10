@@ -125,6 +125,7 @@ public class Monologue {
    */
   public static void updateAll(boolean fileOnlyOverride) {
     if (isUnitTest()) return;
+    FILE_ONLY = fileOnlyOverride;
     ntLogger.update(FILE_ONLY);
     dataLogger.update(FILE_ONLY);
   }

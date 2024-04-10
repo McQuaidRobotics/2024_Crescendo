@@ -2,7 +2,7 @@ package com.igknighters.commands.autos;
 
 import java.util.Optional;
 
-import com.igknighters.GlobalState;
+import com.igknighters.Robot;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.pathplanner.lib.auto.AutoBuilder;
 
@@ -29,7 +29,7 @@ public class Autos {
     }
 
     public static Command getAutonomousCommand() {
-        if (autoCmdOverride.isPresent() && GlobalState.isUnitTest())
+        if (autoCmdOverride.isPresent() && Robot.isUnitTest())
             return autoCmdOverride.get();
         if (autoChooser == null)
             return new InstantCommand().withName("Nothing");

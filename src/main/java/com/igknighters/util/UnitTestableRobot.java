@@ -3,10 +3,7 @@ package com.igknighters.util;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-
-import com.igknighters.GlobalState;
-import com.igknighters.constants.ConstValues;
-import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
+import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.hal.DriverStationJNI;
 import edu.wpi.first.hal.HAL;
@@ -16,9 +13,18 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import monologue.MonoDashboard;
 
 public class UnitTestableRobot extends TimedRobot {
+    private static Optional<Boolean> cachedIsTest = Optional.empty();
+    public static boolean isUnitTest() {
+        if (cachedIsTest.isEmpty()) {
+            cachedIsTest = Optional.of(System.getenv("test") != null);
+        }
+        return cachedIsTest.get();
+    }
+
     public static class UnitTestableRobotExited extends RuntimeException {
         private static final long serialVersionUID = 1L;
 
@@ -43,19 +49,6 @@ public class UnitTestableRobot extends TimedRobot {
         kTest
     }
 
-    public UnitTestableRobot() {
-        super(ConstValues.PERIODIC_TIME);
-        isUnitTest = GlobalState.isUnitTest();
-
-        if (isUnitTest) {
-            DriverStationSim.setEnabled(false);
-            DriverStationSim.setAutonomous(false);
-            DriverStationSim.setTest(false);
-        }
-    }
-
-    private final boolean isUnitTest;
-
     private AtomicBoolean killswitch = new AtomicBoolean(false);
 
     private final Timer timer = new Timer();
@@ -77,6 +70,24 @@ public class UnitTestableRobot extends TimedRobot {
     private Optional<Consumer<UnitTestableRobot>> autonomousExitTest = Optional.empty();
     private Optional<Consumer<UnitTestableRobot>> teleopExitTest = Optional.empty();
 
+    public UnitTestableRobot(double period) {
+        super(
+            new DoubleSupplier() {
+                @Override
+                public double getAsDouble() {
+                    if (isUnitTest()) assert HAL.initialize(500, 0);
+                    return period;
+                }
+            }.getAsDouble()
+        );
+        if (isUnitTest()) {
+            DriverStationSim.setEnabled(false);
+            DriverStationSim.setAutonomous(false);
+            DriverStationSim.setTest(false);
+            DriverStationSim.setDsAttached(true);
+        }
+    }
+
     public void finishUnitTestRobot() {
         killswitch.set(true);
     }
@@ -91,12 +102,22 @@ public class UnitTestableRobot extends TimedRobot {
         }
         this.endCompetition();
         this.close();
+        if (isUnitTest()) {
+            HAL.exitMain();
+            HAL.shutdown();
+            var cmdScheduler = CommandScheduler.getInstance();
+            cmdScheduler.cancelAll();
+            cmdScheduler.getActiveButtonLoop().clear();
+            cmdScheduler.getDefaultButtonLoop().clear();
+            cmdScheduler.clearComposedCommands();
+            cmdScheduler.unregisterAllSubsystems();
+        }
     }
 
     @Override
     protected void loopFunc() {
         Tracer.startTrace("RobotLoop");
-        if (isUnitTest) {
+        if (isUnitTest()) {
             if (killswitch.get()) {
                 throw new UnitTestableRobotExited();
             }
@@ -117,9 +138,9 @@ public class UnitTestableRobot extends TimedRobot {
             mode = Mode.kTest;
         }
 
-        MonoDashboard.put("RobotMode", mode.toString());
+        MonoDashboard.put("/Robot/Mode", mode.toString());
 
-        if ((!calledDsConnected && DriverStation.isDSAttached()) || isUnitTest) {
+        if ((!calledDsConnected && DriverStation.isDSAttached()) || isUnitTest()) {
             calledDsConnected = true;
             driverStationConnected();
         }
@@ -195,55 +216,55 @@ public class UnitTestableRobot extends TimedRobot {
     }
 
     public UnitTestableRobot withDisableInitTest(Consumer<UnitTestableRobot> testInit) {
-        if (this.isUnitTest)
+        if (isUnitTest())
             this.disabledInitTest = Optional.of(testInit);
         return this;
     }
 
     public UnitTestableRobot withAutonomousInitTest(Consumer<UnitTestableRobot> testInit) {
-        if (this.isUnitTest)
+        if (isUnitTest())
             this.autonomousInitTest = Optional.of(testInit);
         return this;
     }
 
     public UnitTestableRobot withTeleopInitTest(Consumer<UnitTestableRobot> testInit) {
-        if (this.isUnitTest)
+        if (isUnitTest())
             this.teleopInitTest = Optional.of(testInit);
         return this;
     }
 
     public UnitTestableRobot withDisablePeriodicTest(Consumer<UnitTestableRobot> testPeriodic) {
-        if (this.isUnitTest)
+        if (isUnitTest())
             this.disabledPeriodicTest = Optional.of(testPeriodic);
         return this;
     }
 
     public UnitTestableRobot withAutonomousPeriodicTest(Consumer<UnitTestableRobot> testPeriodic) {
-        if (this.isUnitTest)
+        if (isUnitTest())
             this.autonomousPeriodicTest = Optional.of(testPeriodic);
         return this;
     }
 
     public UnitTestableRobot withTeleopPeriodicTest(Consumer<UnitTestableRobot> testPeriodic) {
-        if (this.isUnitTest)
+        if (isUnitTest())
             this.teleopPeriodicTest = Optional.of(testPeriodic);
         return this;
     }
 
     public UnitTestableRobot withDisableExitTest(Consumer<UnitTestableRobot> testExit) {
-        if (this.isUnitTest)
+        if (isUnitTest())
             this.disabledExitTest = Optional.of(testExit);
         return this;
     }
 
     public UnitTestableRobot withAutonomousExitTest(Consumer<UnitTestableRobot> testExit) {
-        if (this.isUnitTest)
+        if (isUnitTest())
             this.autonomousExitTest = Optional.of(testExit);
         return this;
     }
 
     public UnitTestableRobot withTeleopExitTest(Consumer<UnitTestableRobot> testExit) {
-        if (this.isUnitTest)
+        if (isUnitTest())
             this.teleopExitTest = Optional.of(testExit);
         return this;
     }
@@ -258,9 +279,5 @@ public class UnitTestableRobot extends TimedRobot {
 
     public double getElapsedTime() {
         return timer.get();
-    }
-
-    public AllSubsystems getAllSubsystemsForTest() {
-        return new AllSubsystems();
     }
 }

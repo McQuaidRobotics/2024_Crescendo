@@ -1,7 +1,5 @@
 package com.igknighters;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.igknighters.commands.autos.Autos;
@@ -12,7 +10,6 @@ import com.igknighters.util.RobotExtension.Robo;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.hal.AllianceStationID;
-import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -21,26 +18,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
 public class RobotTest {
-
-    @BeforeEach
-    protected void startSim() {
-        GlobalState.setUnitTest(true);
-        assert HAL.initialize(500, 0);
-        DriverStationSim.setDsAttached(true);
-    }
-
-    @AfterEach
-    protected void teardownSim() {
-        HAL.exitMain();
-        HAL.shutdown();
-        GlobalState.restoreDefaultState();
-        var cmdScheduler = CommandScheduler.getInstance();
-        cmdScheduler.cancelAll();
-        cmdScheduler.getActiveButtonLoop().clear();
-        cmdScheduler.getDefaultButtonLoop().clear();
-        cmdScheduler.clearComposedCommands();
-        cmdScheduler.unregisterAllSubsystems();
-    }
 
     @Test
     public void testRobotSetup() {

@@ -80,7 +80,7 @@ public class RobotContainer implements Logged {
 
     private void setupAutos(Swerve swerve) {
 
-        if (AutoBuilder.isConfigured() && GlobalState.isUnitTest()) {
+        if (AutoBuilder.isConfigured() && Robot.isUnitTest()) {
             // this code can be run multiple times during unit tests,
             // because of AutoBuilder once paradigm this causes a crash
             return;

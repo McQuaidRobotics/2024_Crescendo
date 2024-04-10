@@ -6,7 +6,7 @@ import com.igknighters.subsystems.umbrella.shooter.*;
 import com.igknighters.util.Tracer;
 
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.RobotBase;
+import com.igknighters.Robot;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import monologue.Logged;
 
@@ -25,7 +25,7 @@ public class Umbrella extends SubsystemBase implements Logged {
     private ShooterSpinupReason spinupReason = ShooterSpinupReason.None;
 
     public Umbrella() {
-        if (RobotBase.isSimulation()) {
+        if (Robot.isSimulation()) {
             intake = new IntakeSim();
             shooter = new ShooterDisabled();
         } else {

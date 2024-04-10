@@ -4,7 +4,6 @@ import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.igknighters.commands.autos.Autos;
 import com.igknighters.subsystems.swerve.Swerve;
@@ -54,8 +53,6 @@ public class GlobalState {
 
     private static boolean autoChooserCreated = false;
 
-    private static AtomicBoolean isUnitTest = new AtomicBoolean(false);
-
     private static Supplier<Rotation3d> rotSupplier = Rotation3d::new;
 
     private GlobalState() {
@@ -68,7 +65,6 @@ public class GlobalState {
             localizerType = LocalizerType.None;
             localizer = Optional.empty();
             field = Optional.empty();
-            isUnitTest.set(false);
             rotSupplier = Rotation3d::new;
             velocity = new ChassisSpeeds();
             // intentionally ignore as this is dependent on AutoBuilder state and that
@@ -373,21 +369,5 @@ public class GlobalState {
         } finally {
             globalLock.unlock();
         }
-    }
-
-    /**
-     * @return If the code is being run as part of a unit test
-     */
-    public static boolean isUnitTest() {
-        return isUnitTest.get();
-    }
-
-    /**
-     * Declare if the code is being run as part of a unit test
-     * 
-     * @param isTest If the code should be run as a unit test
-     */
-    public static void setUnitTest(boolean isTest) {
-        GlobalState.isUnitTest.set(isTest);
     }
 }

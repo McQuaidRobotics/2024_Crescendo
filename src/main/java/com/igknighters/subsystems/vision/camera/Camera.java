@@ -1,7 +1,7 @@
 package com.igknighters.subsystems.vision.camera;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotBase;
+import com.igknighters.Robot;
 import edu.wpi.first.wpilibj.Timer;
 import monologue.Logged;
 import monologue.Annotations.Log;
@@ -85,7 +85,7 @@ public abstract class Camera implements Logged {
      * @return The camera
      */
     public static Camera create(CameraConfig config) {
-        if (RobotBase.isSimulation()) {
+        if (Robot.isSimulation()) {
             return new CameraDisabled(config.cameraName, config.id, config.cameraPose);
         } else {
             try {

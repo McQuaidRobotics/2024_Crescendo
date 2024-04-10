@@ -1,7 +1,6 @@
 
 package com.igknighters.subsystems.stem;
 
-import com.igknighters.GlobalState;
 import com.igknighters.LED;
 import com.igknighters.LED.LedAnimations;
 import com.igknighters.constants.ConstValues.kStem;
@@ -13,7 +12,7 @@ import com.igknighters.util.Tracer;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotBase;
+import com.igknighters.Robot;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -30,7 +29,7 @@ public class Stem extends SubsystemBase implements Logged {
     private final DigitalInput coastSwitch;
 
     public Stem() {
-        if (RobotBase.isSimulation()) {
+        if (Robot.isSimulation()) {
             pivot = new PivotDisabled();
             telescope = new TelescopeDisabled();
             wrist = new WristDisabled();
@@ -42,7 +41,7 @@ public class Stem extends SubsystemBase implements Logged {
 
         visualizer = new StemVisualizer();
 
-        if (!GlobalState.isUnitTest()) {
+        if (!Robot.isUnitTest()) {
             coastSwitch = new DigitalInput(kStem.COAST_SWITCH_CHANNEL);
             new Trigger(coastSwitch::get)
                     .and(DriverStation::isDisabled)

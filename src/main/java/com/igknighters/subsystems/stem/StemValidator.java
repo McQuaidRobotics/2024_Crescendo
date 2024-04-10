@@ -322,11 +322,11 @@ public class StemValidator {
                                 currentState.getWristRads(),
                                 targetState.getTelescopeMeters()));
 
-                MonoDashboard.put("StemValidator/StepTowardsTargetPosition/pivotMovementValidationReason",
+                MonoDashboard.put("/Robot/Stem/StemValidator/StepTowardsTargetPosition/pivotMovementValidationReason",
                                 pivotMovementValidReason.name());
-                MonoDashboard.put("StemValidator/StepTowardsTargetPosition/wristMovementValidationReason",
+                MonoDashboard.put("/Robot/Stem/StemValidator/StepTowardsTargetPosition/wristMovementValidationReason",
                                 wristMovementValidReason.name());
-                MonoDashboard.put("StemValidator/StepTowardsTargetPosition/telescopeMovementValidationReason",
+                MonoDashboard.put("/Robot/Stem/StemValidator/StepTowardsTargetPosition/telescopeMovementValidationReason",
                                 telescopeMovementValidReason.name());
 
                 double midStatePivotRads = pivotMovementValidReason.isValid()
@@ -410,12 +410,12 @@ public class StemValidator {
                         }
                 }
 
-                MonoDashboard.put("Stem/StemValidator/StepTowardsTargetPosition/Mid State Stem Position",
+                MonoDashboard.put("/Robot/Stem/StemValidator/StepTowardsTargetPosition/Mid State Stem Position",
                                 StemPosition
                                                 .fromRadians(midStatePivotRads, midStateWristRads,
                                                                 midStateTelescopeMeters)
                                                 .toString());
-                MonoDashboard.put("Stem/StemValidator/StepTowardsTargetPosition/Target Stem Position",
+                MonoDashboard.put("/Robot/Stem/StemValidator/StepTowardsTargetPosition/Target Stem Position",
                                 targetState.toString());
 
                 return StemPosition.fromRadians(midStatePivotRads, midStateWristRads, midStateTelescopeMeters);

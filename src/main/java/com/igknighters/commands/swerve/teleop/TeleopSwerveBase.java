@@ -7,7 +7,7 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.RobotBase;
+import com.igknighters.Robot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import monologue.MonoDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,7 +28,7 @@ public class TeleopSwerveBase extends Command {
      */
     @SuppressWarnings("unused")
     public static Translation2d orientForUser(Translation2d input) {
-        if (RobotBase.isSimulation() && kSwerve.ORIENT_TELEOP_FOR_SIM) {
+        if (Robot.isSimulation() && kSwerve.ORIENT_TELEOP_FOR_SIM) {
             return new Translation2d(
                     input.getX(),
                     -input.getY());
@@ -57,7 +57,7 @@ public class TeleopSwerveBase extends Command {
 
     @SuppressWarnings("unused")
     private double invert() {
-        if (RobotBase.isSimulation() && kSwerve.ORIENT_TELEOP_FOR_SIM) {
+        if (Robot.isSimulation() && kSwerve.ORIENT_TELEOP_FOR_SIM) {
             return 1;
         } else if (AllianceFlip.isRed()) {
             return -1;
@@ -70,17 +70,17 @@ public class TeleopSwerveBase extends Command {
         // inverted because left is positive for field due to Y being increased but left
         // is negative for controller
         final double raw = rawTranslationXSup.getAsDouble();
-        MonoDashboard.put("Swerve/TeleopCommand/RawTranslationX", raw);
+        MonoDashboard.put("/Robot/Swerve/TeleopCommand/RawTranslationX", raw);
         var processed = -kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(raw) * invert();
-        MonoDashboard.put("Swerve/TeleopCommand/TranslationX", processed);
+        MonoDashboard.put("/Robot/Swerve/TeleopCommand/TranslationX", processed);
         return processed;
     }
 
     protected double getTranslationY() {
         final double raw = rawTranslationYSup.getAsDouble();
-        MonoDashboard.put("Swerve/TeleopCommand/RawTranslationY", raw);
+        MonoDashboard.put("/Robot/Swerve/TeleopCommand/RawTranslationY", raw);
         var processed = kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(raw) * invert();
-        MonoDashboard.put("Swerve/TeleopCommand/TranslationY", processed);
+        MonoDashboard.put("/Robot/Swerve/TeleopCommand/TranslationY", processed);
         return processed;
     }
 
@@ -88,17 +88,17 @@ public class TeleopSwerveBase extends Command {
         // inverted because left is positive for field due to Y being increased but left
         // is negative for controller
         final double raw = rawRotationXSup.getAsDouble();
-        MonoDashboard.put("Swerve/TeleopCommand/RawRotationX", raw);
+        MonoDashboard.put("/Robot/Swerve/TeleopCommand/RawRotationX", raw);
         var processed = -kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(raw);
-        MonoDashboard.put("Swerve/TeleopCommand/RotationX", processed);
+        MonoDashboard.put("/Robot/Swerve/TeleopCommand/RotationX", processed);
         return processed;
     }
 
     protected double getRotationY() {
         final double raw = rawRotationYSup.getAsDouble();
-        MonoDashboard.put("Swerve/TeleopCommand/RawRotationY", raw);
+        MonoDashboard.put("/Robot/Swerve/TeleopCommand/RawRotationY", raw);
         var processed = kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(raw);
-        MonoDashboard.put("Swerve/TeleopCommand/RotationY", processed);
+        MonoDashboard.put("/Robot/Swerve/TeleopCommand/RotationY", processed);
         return processed;
     }
 
@@ -128,7 +128,7 @@ public class TeleopSwerveBase extends Command {
             chooser.addOption("Absolute Rotation", TeleopMode.ABS_ROT);
             chooser.addOption("Target", TeleopMode.TARGET);
 
-            MonoDashboard.publishSendable("Teleop Mode", chooser);
+            MonoDashboard.publishSendable("/Robot/Swerve/TeleopMode", chooser);
         }
 
         @Override

@@ -98,6 +98,8 @@ dependencies {
 test {
     useJUnitPlatform()
     systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+    //set an environment variable to tell the test code that it is running in a test environment
+    environment 'test', 'true'
 }
 
 // Simulation configuration (e.g. environment variables).

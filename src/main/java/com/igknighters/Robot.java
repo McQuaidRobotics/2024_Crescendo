@@ -26,27 +26,27 @@ public class Robot extends UnitTestableRobot {
     private final CommandScheduler scheduler = CommandScheduler.getInstance();
     private RobotContainer roboContainer;
 
+    public Robot() {
+        super(ConstValues.PERIODIC_TIME);
+        if (isUnitTest()) GlobalState.restoreDefaultState();
+    }
+
     @Override
     public void robotInit() {
-        Pathfinding.setPathfinder(new LocalADStar());
+        System.out.println("isUnitTest: " + Robot.isUnitTest());
         setupLogging();
+        Pathfinding.setPathfinder(new LocalADStar());
 
         ConstantHelper.applyRoboConst(ConstValues.class);
 
         GlobalState.publishField2d();
 
         roboContainer = new RobotContainer();
-
-        if (!GlobalState.isUnitTest()) {
-            Monologue.setupMonologue(roboContainer, "/Robot", false, true);
-            roboContainer.initMonologue();
-        } else {
-            Monologue.setupMonologueForUnitTest();
-        }
     }
 
     @Override
     public void robotPeriodic() {
+        Tracer.startTrace("RobotPeriodic");
         Tracer.traceFunc("CANSignalRefresh", CANSignalManager::refreshSignals);
         Tracer.traceFunc("CommandScheduler", scheduler::run);
         Tracer.traceFunc("LEDUpdate", LED::run);
@@ -57,6 +57,7 @@ public class Robot extends UnitTestableRobot {
                     DriverStation.isFMSAttached());
         });
         GlobalState.log();
+        Tracer.endTrace();
     }
 
     @Override
@@ -71,7 +72,7 @@ public class Robot extends UnitTestableRobot {
 
     @Override
     public void autonomousInit() {
-        if (GlobalState.isUnitTest()) {
+        if (isUnitTest()) {
             autoCmd = GlobalState.getAutoCommand();
         }
         if (autoCmd != null) {
@@ -121,13 +122,17 @@ public class Robot extends UnitTestableRobot {
 
     @Override
     public void driverStationConnected() {
-        if (DriverStation.isFMSAttached() && !GlobalState.isUnitTest()) {
+        if (DriverStation.isFMSAttached() && !isUnitTest()) {
             Monologue.setFileOnly(true);
         }
     }
 
     private void setupLogging() {
-        if (GlobalState.isUnitTest()) {
+        if (!isUnitTest()) {
+            Monologue.setupMonologue(roboContainer, "/Robot", false, true);
+            roboContainer.initMonologue();
+        } else {
+            Monologue.setupMonologueForUnitTest();
             return;
         }
 
@@ -177,9 +182,8 @@ public class Robot extends UnitTestableRobot {
                         });
     }
 
-    @Override
-    public AllSubsystems getAllSubsystemsForTest() {
-        if (!GlobalState.isUnitTest()) {
+    public AllSubsystems getAllSubsystems() {
+        if (!isUnitTest()) {
             throw new RuntimeException("This method should only be called in unit tests");
         }
         return roboContainer.getAllSubsystemsForTest();

@@ -7,7 +7,7 @@ import com.igknighters.constants.ConstantHelper.RobotConstID;
 import com.igknighters.subsystems.SubsystemResources.Subsystems;
 import com.igknighters.util.BootupLogger;
 
-import edu.wpi.first.wpilibj.RobotBase;
+import com.igknighters.Robot;
 import edu.wpi.first.wpilibj.RobotController;
 import monologue.MonoDashboard;
 
@@ -62,7 +62,7 @@ public class RobotSetup {
     public static RobotID getRobotID() {
         if (currentID == RobotID.Unlabeled) {
             String currentSerialNum;
-            if (RobotBase.isReal()) {
+            if (Robot.isReal()) {
                 currentSerialNum = RobotController.getSerialNumber();
                 if (currentSerialNum == null) {
                     throw new RuntimeException("Tried loading robot ID before advantage-kit was ready!");
