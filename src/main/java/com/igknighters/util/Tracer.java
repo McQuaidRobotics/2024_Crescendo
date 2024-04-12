@@ -56,8 +56,6 @@ public class Tracer {
      * @param name the name of the trace, should be unique to the function.
      */
     public static void startTrace(String name) {
-        if (!ConstValues.DEBUG)
-            return;
         trace.add(name);
         traceStartTimes.put(traceStack(), Timer.getFPGATimestamp() * 1_000.0);
     }
@@ -71,8 +69,6 @@ public class Tracer {
      * This is a no-op if {@link ConstValues#DEBUG} is false.
      */
     public static void endTrace() {
-        if (!ConstValues.DEBUG)
-            return;
         try {
             var startTime = traceStartTimes.get(traceStack());
             traceTimes.put(traceStack(), Timer.getFPGATimestamp() * 1_000.0 - startTime);

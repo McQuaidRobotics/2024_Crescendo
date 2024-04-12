@@ -14,7 +14,7 @@ public abstract class Intake extends Component {
     @Log.NT protected double ampsLower = 0.0;
 
     @Override
-    public String getPath() {
+    public String getOverrideName() {
         return "Intake";
     }
 

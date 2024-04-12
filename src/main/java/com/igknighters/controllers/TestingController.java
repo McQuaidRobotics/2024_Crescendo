@@ -30,8 +30,8 @@ import com.igknighters.commands.umbrella.UmbrellaCommands;
 
 /** If debug is false this controller does not initialize */
 public class TestingController extends ControllerParent {
-    public TestingController(int port) {
-        super(port, ConstValues.DEBUG);
+    public TestingController(int port, boolean debug) {
+        super(port, debug);
 
         // disregard null safety as it is checked on assignment
 

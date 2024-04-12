@@ -1,8 +1,5 @@
 package monologue;
 
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.NTSendable;
-import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
 import edu.wpi.first.util.datalog.*;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -14,12 +11,34 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 class DataLogger extends GenericLogger {
-    private DataLog log = DataLogManager.getLog();
+    String prefix = "";
+    final DataLog log;
 
     public DataLogger() {
         super();
         DataLogManager.logNetworkTables(false);
-    };
+        log = DataLogManager.getLog();
+    }
+
+    private static class NTIntegerArrayLogEntry extends DataLogEntry {
+        public static final String kDataType = "int[]";
+
+        public NTIntegerArrayLogEntry(DataLog log, String name, String metadata, long timestamp) {
+            super(log, name, kDataType, metadata, timestamp);
+        }
+
+        public NTIntegerArrayLogEntry(DataLog log, String name) {
+            this(log, name, "", 0);
+        }
+
+        public void append(long[] value, long timestamp) {
+            m_log.appendIntegerArray(m_entry, value, timestamp);
+        }
+
+        public void append(long[] value) {
+            m_log.appendIntegerArray(m_entry, value, 0);
+        }
+    }
 
 
 
@@ -32,17 +51,18 @@ class DataLogger extends GenericLogger {
 
 
 
-        new BooleanLogEntry(log, entryName).append(value);
+        new BooleanLogEntry(log, prefix + entryName).append(value);
 
     }
 
     @Override
-    public void addBoolean(String entryName,
-    Supplier<Boolean>valueSupplier,
-    LogLevel level)
-    {   
+    public void addBoolean(
+        String entryName,
+        Supplier<Boolean>valueSupplier,
+        LogLevel level
+    ) {
 
-        var entry = new BooleanLogEntry(log, entryName);
+        var entry = new BooleanLogEntry(log, prefix + entryName);
 
         LongConsumer consumer;
 
@@ -85,17 +105,18 @@ class DataLogger extends GenericLogger {
 
 
 
-        new IntegerLogEntry(log, entryName).append(value);
+        new IntegerLogEntry(log, prefix + entryName).append(value);
 
     }
 
     @Override
-    public void addInteger(String entryName,
-    Supplier<Integer>valueSupplier,
-    LogLevel level)
-    {   
+    public void addInteger(
+        String entryName,
+        Supplier<Integer>valueSupplier,
+        LogLevel level
+    ) {
 
-        var entry = new IntegerLogEntry(log, entryName);
+        var entry = new IntegerLogEntry(log, prefix + entryName);
 
         LongConsumer consumer;
 
@@ -138,17 +159,18 @@ class DataLogger extends GenericLogger {
 
 
 
-        new IntegerLogEntry(log, entryName).append(value);
+        new IntegerLogEntry(log, prefix + entryName).append(value);
 
     }
 
     @Override
-    public void addLong(String entryName,
-    Supplier<Long>valueSupplier,
-    LogLevel level)
-    {   
+    public void addLong(
+        String entryName,
+        Supplier<Long>valueSupplier,
+        LogLevel level
+    ) {
 
-        var entry = new IntegerLogEntry(log, entryName);
+        var entry = new IntegerLogEntry(log, prefix + entryName);
 
         LongConsumer consumer;
 
@@ -191,17 +213,18 @@ class DataLogger extends GenericLogger {
 
 
 
-        new FloatLogEntry(log, entryName).append(value);
+        new FloatLogEntry(log, prefix + entryName).append(value);
 
     }
 
     @Override
-    public void addFloat(String entryName,
-    Supplier<Float>valueSupplier,
-    LogLevel level)
-    {   
+    public void addFloat(
+        String entryName,
+        Supplier<Float>valueSupplier,
+        LogLevel level
+    ) {
 
-        var entry = new FloatLogEntry(log, entryName);
+        var entry = new FloatLogEntry(log, prefix + entryName);
 
         LongConsumer consumer;
 
@@ -244,17 +267,18 @@ class DataLogger extends GenericLogger {
 
 
 
-        new DoubleLogEntry(log, entryName).append(value);
+        new DoubleLogEntry(log, prefix + entryName).append(value);
 
     }
 
     @Override
-    public void addDouble(String entryName,
-    Supplier<Double>valueSupplier,
-    LogLevel level)
-    {   
+    public void addDouble(
+        String entryName,
+        Supplier<Double>valueSupplier,
+        LogLevel level
+    ) {
 
-        var entry = new DoubleLogEntry(log, entryName);
+        var entry = new DoubleLogEntry(log, prefix + entryName);
 
         LongConsumer consumer;
 
@@ -299,17 +323,18 @@ class DataLogger extends GenericLogger {
 
 
 
-        new StringLogEntry(log, entryName).append(value);
+        new StringLogEntry(log, prefix + entryName).append(value);
 
     }
 
     @Override
-    public void addString(String entryName,
-    Supplier<String>valueSupplier,
-    LogLevel level)
-    {   
+    public void addString(
+        String entryName,
+        Supplier<String>valueSupplier,
+        LogLevel level
+    ) {
 
-        var entry = new StringLogEntry(log, entryName);
+        var entry = new StringLogEntry(log, prefix + entryName);
 
         LongConsumer consumer;
 
@@ -356,17 +381,18 @@ class DataLogger extends GenericLogger {
         if (value == null) {return;}
 
 
-        new RawLogEntry(log, entryName).append(value);
+        new RawLogEntry(log, prefix + entryName).append(value);
 
     }
 
     @Override
-    public void addRaw(String entryName,
-    Supplier<byte[]>valueSupplier,
-    LogLevel level)
-    {   
+    public void addRaw(
+        String entryName,
+        Supplier<byte[]>valueSupplier,
+        LogLevel level
+    ) {
 
-        var entry = new RawLogEntry(log, entryName);
+        var entry = new RawLogEntry(log, prefix + entryName);
 
         LongConsumer consumer;
 
@@ -416,17 +442,18 @@ class DataLogger extends GenericLogger {
         if (value == null) {return;}
 
 
-        new BooleanArrayLogEntry(log, entryName).append(value);
+        new BooleanArrayLogEntry(log, prefix + entryName).append(value);
 
     }
 
     @Override
-    public void addBooleanArray(String entryName,
-    Supplier<boolean[]>valueSupplier,
-    LogLevel level)
-    {   
+    public void addBooleanArray(
+        String entryName,
+        Supplier<boolean[]>valueSupplier,
+        LogLevel level
+    ) {
 
-        var entry = new BooleanArrayLogEntry(log, entryName);
+        var entry = new BooleanArrayLogEntry(log, prefix + entryName);
 
         LongConsumer consumer;
 
@@ -476,18 +503,19 @@ class DataLogger extends GenericLogger {
         if (value == null) {return;}
 
 
-        new NTIntegerArrayLogEntry(log, entryName)
+        new NTIntegerArrayLogEntry(log, prefix + entryName)
             .append(toLongArray(value));
 
     }
 
     @Override
-    public void addIntegerArray(String entryName,
-    Supplier<int[]>valueSupplier,
-    LogLevel level)
-    {   
+    public void addIntegerArray(
+        String entryName,
+        Supplier<int[]>valueSupplier,
+        LogLevel level
+    ) {
 
-        var entry = new NTIntegerArrayLogEntry(log, entryName);
+        var entry = new NTIntegerArrayLogEntry(log, prefix + entryName);
 
         LongConsumer consumer;
 
@@ -536,18 +564,19 @@ class DataLogger extends GenericLogger {
         if (value == null) {return;}
 
 
-        new NTIntegerArrayLogEntry(log, entryName)
+        new NTIntegerArrayLogEntry(log, prefix + entryName)
         .append(value);
 
     }
 
     @Override
-    public void addLongArray(String entryName,
-    Supplier<long[]>valueSupplier,
-    LogLevel level)
-    {   
+    public void addLongArray(
+        String entryName,
+        Supplier<long[]>valueSupplier,
+        LogLevel level
+    ) {
 
-        var entry = new NTIntegerArrayLogEntry(log, entryName);
+        var entry = new NTIntegerArrayLogEntry(log, prefix + entryName);
 
         LongConsumer consumer;
 
@@ -597,17 +626,18 @@ class DataLogger extends GenericLogger {
         if (value == null) {return;}
 
 
-        new FloatArrayLogEntry(log, entryName).append(value);
+        new FloatArrayLogEntry(log, prefix + entryName).append(value);
 
     }
 
     @Override
-    public void addFloatArray(String entryName,
-    Supplier<float[]>valueSupplier,
-    LogLevel level)
-    {   
+    public void addFloatArray(
+        String entryName,
+        Supplier<float[]>valueSupplier,
+        LogLevel level
+    ) {
 
-        var entry = new FloatArrayLogEntry(log, entryName);
+        var entry = new FloatArrayLogEntry(log, prefix + entryName);
 
         LongConsumer consumer;
 
@@ -657,17 +687,18 @@ class DataLogger extends GenericLogger {
         if (value == null) {return;}
 
 
-        new DoubleArrayLogEntry(log, entryName).append(value);
+        new DoubleArrayLogEntry(log, prefix + entryName).append(value);
 
     }
 
     @Override
-    public void addDoubleArray(String entryName,
-    Supplier<double[]>valueSupplier,
-    LogLevel level)
-    {   
+    public void addDoubleArray(
+        String entryName,
+        Supplier<double[]>valueSupplier,
+        LogLevel level
+    ) {
 
-        var entry = new DoubleArrayLogEntry(log, entryName);
+        var entry = new DoubleArrayLogEntry(log, prefix + entryName);
 
         LongConsumer consumer;
 
@@ -717,17 +748,18 @@ class DataLogger extends GenericLogger {
         if (value == null) {return;}
 
 
-        new StringArrayLogEntry(log, entryName).append(value);
+        new StringArrayLogEntry(log, prefix + entryName).append(value);
 
     }
 
     @Override
-    public void addStringArray(String entryName,
-    Supplier<String[]>valueSupplier,
-    LogLevel level)
-    {   
+    public void addStringArray(
+        String entryName,
+        Supplier<String[]>valueSupplier,
+        LogLevel level
+    ) {
 
-        var entry = new StringArrayLogEntry(log, entryName);
+        var entry = new StringArrayLogEntry(log, prefix + entryName);
 
         LongConsumer consumer;
 
@@ -777,27 +809,11 @@ class DataLogger extends GenericLogger {
     }
 
     @Override
-    public void addSendable(String path, NTSendable sendable) {
-        if (sendable == null) {
-            return;
-        }
-        var table = NetworkTableInstance.getDefault().getTable(path);
-        var builder = new SendableBuilderImpl();
-        builder.setTable(table);
-        sendable.initSendable(builder);
-        builder.startListeners();
-        table.getEntry(".controllable").setBoolean(false);
-        sendables.add(builder);
-        NetworkTableInstance.getDefault().startEntryDataLog(DataLogManager.getLog(), path, path);
-    }
-
-
-    @Override
     public <R> void addStruct(String entryName, Struct<R> struct, Supplier<? extends R> valueSupplier, LogLevel level) {
         LongConsumer consumer;
 
         if (this.isLazy()) {
-            var entryHandle = log.start(entryName, struct.getTypeString(), "", 0);
+            var entryHandle = log.start(prefix + entryName, struct.getTypeString(), "", 0);
             log.addSchema(struct, 0);
             int size = struct.getSize();
             consumer = new LongConsumer() {
@@ -825,7 +841,7 @@ class DataLogger extends GenericLogger {
                 }
             };
         } else {
-            var entry = StructLogEntry.create(log, entryName, struct);
+            var entry = StructLogEntry.create(log, prefix + entryName, struct);
             consumer = (timestamp) -> {
                 var value = valueSupplier.get();
                 if (value == null) {
@@ -846,7 +862,7 @@ class DataLogger extends GenericLogger {
         LongConsumer consumer;
 
         if (this.isLazy()) {
-            var entryHandle = log.start(entryName, struct.getTypeString()+"[]", "", 0);
+            var entryHandle = log.start(prefix + entryName, struct.getTypeString()+"[]", "", 0);
             log.addSchema(struct, 0);
             int size = struct.getSize();
             consumer = new LongConsumer() {
@@ -886,7 +902,7 @@ class DataLogger extends GenericLogger {
                 }
             };
         } else {
-            var entry = StructArrayLogEntry.create(log, entryName, struct);
+            var entry = StructArrayLogEntry.create(log, prefix + entryName, struct);
             consumer = (timestamp) -> {
                 var value = valueSupplier.get();
                 if (value == null) {
@@ -911,7 +927,7 @@ class DataLogger extends GenericLogger {
             return;
         }
 
-        StructLogEntry.create(log, entryName, struct).append(value);
+        StructLogEntry.create(log, prefix + entryName, struct).append(value);
     }
 
     @Override
@@ -922,7 +938,7 @@ class DataLogger extends GenericLogger {
         if (value == null) {
             return;
         }
-        StructArrayLogEntry.create(log, entryName, struct).append(value);
+        StructArrayLogEntry.create(log, prefix + entryName, struct).append(value);
     }
 
     @Override

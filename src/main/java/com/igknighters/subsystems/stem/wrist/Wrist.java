@@ -21,7 +21,7 @@ public abstract class Wrist extends Component {
     }
 
     @Override
-    public String getPath() {
+    public String getOverrideName() {
         return "Wrist";
     }
 

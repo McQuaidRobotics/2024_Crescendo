@@ -2,15 +2,13 @@ package com.igknighters.util;
 
 import java.util.HashMap;
 
-import com.igknighters.constants.ConstValues;
-
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.IntegerEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class TunableValues {
-    private static final String pathPrefix = "Tunables/";
+    private static final String pathPrefix = "/Tunables/";
 
     private static final HashMap<String, TunableDouble> doubleTunables = new HashMap<>();
     private static final HashMap<String, TunableInteger> intTunables = new HashMap<>();
@@ -20,7 +18,7 @@ public class TunableValues {
         private final DoubleEntry entry;
         private final double defaultValue;
 
-        public TunableDouble(String path, double defaultValue) {
+        private TunableDouble(String path, double defaultValue) {
             this.entry = NetworkTableInstance
                 .getDefault()
                 .getDoubleTopic(pathPrefix + path)
@@ -35,7 +33,7 @@ public class TunableValues {
         }
 
         public double get() {
-            return ConstValues.DEBUG ? entry.get(defaultValue) : defaultValue;
+            return entry.get(defaultValue);
         }
 
         @Override
@@ -58,7 +56,7 @@ public class TunableValues {
         private final IntegerEntry entry;
         private final int defaultValue;
 
-        public TunableInteger(String path, int defaultValue) {
+        private TunableInteger(String path, int defaultValue) {
             this.entry = NetworkTableInstance
                 .getDefault()
                 .getIntegerTopic(pathPrefix + path)
@@ -73,7 +71,7 @@ public class TunableValues {
         }
 
         public int get() {
-            return (int) (ConstValues.DEBUG ? entry.get(defaultValue) : defaultValue);
+            return (int) Math.min(Math.max(entry.get(defaultValue), Integer.MIN_VALUE), Integer.MAX_VALUE);
         }
 
         @Override
@@ -96,7 +94,7 @@ public class TunableValues {
         private final BooleanEntry entry;
         private final boolean defaultValue;
 
-        public TunableBoolean(String path, boolean defaultValue) {
+        private TunableBoolean(String path, boolean defaultValue) {
             this.entry = NetworkTableInstance
                 .getDefault()
                 .getBooleanTopic(pathPrefix + path)
@@ -111,7 +109,7 @@ public class TunableValues {
         }
 
         public boolean get() {
-            return ConstValues.DEBUG ? entry.get(defaultValue) : defaultValue;
+            return entry.get(defaultValue);
         }
 
         @Override

@@ -223,12 +223,6 @@ public class GlobalState {
     public static Pose2d submitSwerveData(Rotation2d gyroRot, SwerveModulePosition[] modulePositions) {
         globalLock.lock();
         try {
-            // if (!localizer.isPresent()) {
-            // DriverStation.reportError("[GlobalState] Odometry not present", false);
-            // return new Pose2d();
-            // }
-            // return localizer.get().update(gyroRot, modulePositions);
-
             if (!localizer.isPresent() || localizerType == LocalizerType.None) {
                 DriverStation.reportError("[GlobalState] Localizer not present", true);
                 return new Pose2d();

@@ -23,7 +23,7 @@ public abstract class Shooter extends Component {
     @Log.NT protected double targetShooterLeftRPM = Units.radiansPerSecondToRotationsPerMinute(targetRadiansPerSecondLeft);
 
     @Override
-    public String getPath() {
+    public String getOverrideName() {
         return "Shooter";
     }
 

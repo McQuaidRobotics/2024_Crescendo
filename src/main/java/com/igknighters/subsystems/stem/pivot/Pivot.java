@@ -24,7 +24,7 @@ public abstract class Pivot extends Component {
     }
 
     @Override
-    public String getPath() {
+    public String getOverrideName() {
         return "Pivot";
     }
 

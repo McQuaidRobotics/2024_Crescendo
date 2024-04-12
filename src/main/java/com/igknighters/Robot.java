@@ -3,45 +3,95 @@ package com.igknighters;
 import java.util.HashMap;
 import java.util.function.BiConsumer;
 
+import monologue.Logged;
 import monologue.MonoDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import monologue.Monologue;
+import monologue.Monologue.MonologueConfig;
 
+import com.igknighters.commands.autos.AutosCmdRegister;
+import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
+import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstantHelper;
+import com.igknighters.constants.RobotSetup;
+import com.igknighters.constants.ConstValues.kAuto;
+import com.igknighters.constants.ConstValues.kSwerve;
+import com.igknighters.controllers.DriverController;
+import com.igknighters.controllers.OperatorController;
+import com.igknighters.controllers.TestingController;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
+import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.util.ShuffleboardApi;
 import com.igknighters.util.Tracer;
-import com.igknighters.util.UnitTestableRobot;
 import com.igknighters.util.can.CANBusLogging;
 import com.igknighters.util.can.CANSignalManager;
+import com.igknighters.util.geom.AllianceFlip;
+import com.igknighters.util.robots.UnitTestableRobot;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.pathfinding.LocalADStar;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 
-public class Robot extends UnitTestableRobot {
+public class Robot extends UnitTestableRobot implements Logged {
 
     private Command autoCmd;
     private final CommandScheduler scheduler = CommandScheduler.getInstance();
-    private RobotContainer roboContainer;
+
+    private final DriverController driverController;
+    private final OperatorController operatorController;
+    private final TestingController testingController;
+    private AllSubsystems allSubsystems;
 
     public Robot() {
         super(ConstValues.PERIODIC_TIME);
         if (isUnitTest()) GlobalState.restoreDefaultState();
+
+        setupLogging();
+
+        driverController = new DriverController(0);
+        operatorController = new OperatorController(1);
+        testingController = new TestingController(3, true);
     }
 
     @Override
     public void robotInit() {
-        System.out.println("isUnitTest: " + Robot.isUnitTest());
-        setupLogging();
         Pathfinding.setPathfinder(new LocalADStar());
 
         ConstantHelper.applyRoboConst(ConstValues.class);
 
         GlobalState.publishField2d();
 
-        roboContainer = new RobotContainer();
+        allSubsystems = new AllSubsystems(RobotSetup.getRobotID().subsystems);
+
+        for (var subsystem : allSubsystems.getEnabledSubsystems()) {
+            if (subsystem instanceof Logged) {
+                Monologue.logObj((Logged) subsystem, "/Robot/" + subsystem.getName());
+            }
+        }
+
+        driverController.assignButtons(allSubsystems);
+        operatorController.assignButtons(allSubsystems);
+        testingController.assignButtons(allSubsystems);
+
+        if (allSubsystems.swerve.isPresent()) {
+            var swerve = allSubsystems.swerve.get();
+
+            swerve.setDefaultCommand(new TeleopSwerveBase.TeleopSwerveOmni(swerve, driverController));
+
+            setupAutos(swerve);
+        }
+
+        if (allSubsystems.umbrella.isPresent()) {
+            var umbrella = allSubsystems.umbrella.get();
+            umbrella.setDefaultCommand(
+                UmbrellaCommands.idleShooter(umbrella)
+            );
+        }
+
+        System.gc();
     }
 
     @Override
@@ -52,17 +102,9 @@ public class Robot extends UnitTestableRobot {
         Tracer.traceFunc("LEDUpdate", LED::run);
         Tracer.traceFunc("CANBusLoggung", CANBusLogging::run);
         Tracer.traceFunc("Shuffleboard", ShuffleboardApi::run);
-        Tracer.traceFunc("Monologue", () -> {
-            Monologue.updateAll(
-                    DriverStation.isFMSAttached());
-        });
-        GlobalState.log();
+        Tracer.traceFunc("Monologue", Monologue::updateAll);
+        Tracer.traceFunc("GlobalStateLog", GlobalState::log);
         Tracer.endTrace();
-    }
-
-    @Override
-    public void disabledInit() {
-        CommandScheduler.getInstance().cancelAll();
     }
 
     @Override
@@ -84,58 +126,32 @@ public class Robot extends UnitTestableRobot {
     }
 
     @Override
-    public void autonomousPeriodic() {
-    }
-
-    @Override
     public void autonomousExit() {
         if (autoCmd != null) {
             MonoDashboard.put("Commands/CurrentAutoCommand", "");
             autoCmd.cancel();
         }
-    }
-
-    @Override
-    public void teleopInit() {
-        CommandScheduler.getInstance().cancelAll();
-    }
-
-    @Override
-    public void teleopPeriodic() {
-    }
-
-    @Override
-    public void testInit() {
-        CommandScheduler.getInstance().cancelAll();
-    }
-
-    @Override
-    public void testPeriodic() {
-    }
-
-    @Override
-    public void simulationInit() {
-    }
-
-    @Override
-    public void simulationPeriodic() {
-    }
-
-    @Override
-    public void driverStationConnected() {
-        if (DriverStation.isFMSAttached() && !isUnitTest()) {
-            Monologue.setFileOnly(true);
-        }
+        System.gc();
     }
 
     private void setupLogging() {
         if (!isUnitTest()) {
-            Monologue.setupMonologue(roboContainer, "/Robot", false, true);
-            roboContainer.initMonologue();
+            Monologue.setupMonologue(
+                this,
+                "/Robot",
+                new MonologueConfig()
+                    .withDatalogPrefix("")
+                    .withFileOnly(DriverStation::isFMSAttached)
+                    .withLazyLogging(true)
+            );
         } else {
-            Monologue.setupMonologueForUnitTest();
-            return;
+            Monologue.setupMonologueDisabled(this, "/Robot", true);
         }
+
+        Monologue.sendNetworkToFile("/Visualizers");
+        Monologue.sendNetworkToFile("/PathPlanner");
+        Monologue.sendNetworkToFile("/Tunables");
+        Monologue.sendNetworkToFile("/Tracer");
 
         final String meta = "/Metadata/";
         MonoDashboard.put(meta + "RuntimeType", getRuntimeType().toString());
@@ -183,10 +199,38 @@ public class Robot extends UnitTestableRobot {
                         });
     }
 
+    private void setupAutos(Swerve swerve) {
+
+        if (AutoBuilder.isConfigured() && isUnitTest()) {
+            // this code can be run multiple times during unit tests,
+            // because of AutoBuilder once paradigm this causes a crash
+            return;
+        }
+
+        AutosCmdRegister.registerCommands(allSubsystems);
+
+        AutoBuilder.configureHolonomic(
+                swerve::getPose,
+                swerve::resetOdometry,
+                swerve::getChassisSpeed,
+                chassisSpeeds -> swerve.drive(
+                        chassisSpeeds, false),
+                new HolonomicPathFollowerConfig(
+                        kAuto.AUTO_TRANSLATION_PID,
+                        kAuto.AUTO_ANGULAR_PID,
+                        kSwerve.MAX_DRIVE_VELOCITY,
+                        kSwerve.DRIVEBASE_RADIUS,
+                        kAuto.DYNAMIC_REPLANNING_CONFIG),
+                AllianceFlip::isRed,
+                swerve);
+
+        GlobalState.onceInitAutoChooser(swerve);
+    }
+
     public AllSubsystems getAllSubsystems() {
         if (!isUnitTest()) {
             throw new RuntimeException("This method should only be called in unit tests");
         }
-        return roboContainer.getAllSubsystemsForTest();
+        return allSubsystems;
     }
 }

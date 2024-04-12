@@ -30,7 +30,7 @@ public class RobotTest {
 
             com.igknighters.constants.ConstantHelper.applyRoboConst(ConstValues.class);
 
-            new RobotContainer();
+            new Robot().close();
 
             CommandScheduler.getInstance().getActiveButtonLoop().clear();
             CommandScheduler.getInstance().getDefaultButtonLoop().clear();
@@ -70,6 +70,8 @@ public class RobotTest {
         });
 
         robot.runTest(3);
+
+        System.gc();
     }
 
     // @Test

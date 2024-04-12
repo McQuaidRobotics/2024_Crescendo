@@ -1,9 +1,11 @@
-package com.igknighters.util;
+package com.igknighters.util.robots;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
+
+import com.igknighters.util.Tracer;
 
 import edu.wpi.first.hal.DriverStationJNI;
 import edu.wpi.first.hal.HAL;
@@ -80,6 +82,7 @@ public class UnitTestableRobot extends TimedRobot {
                 }
             }.getAsDouble()
         );
+        System.out.println("isUnitTest: " + isUnitTest());
         if (isUnitTest()) {
             DriverStationSim.setEnabled(false);
             DriverStationSim.setAutonomous(false);

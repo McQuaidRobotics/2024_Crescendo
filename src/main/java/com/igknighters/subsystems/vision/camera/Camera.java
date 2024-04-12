@@ -148,7 +148,7 @@ public abstract class Camera implements Logged {
     public abstract String getName();
 
     @Override
-    public String getPath() {
+    public String getOverrideName() {
         return getName();
     }
 

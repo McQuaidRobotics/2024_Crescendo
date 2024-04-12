@@ -44,7 +44,7 @@ public class SwerveModuleSim extends SwerveModule {
         moduleConstants.getDriveMotorID();
         moduleConstants.getAngleMotorID();
         moduleConstants.getCancoderID();
-        MonoDashboard.put("SwerveModuleOffset[" + moduleNumber + "]", moduleConstants.getRotationOffset());
+        MonoDashboard.put("/Robot/Swerve/Offsets/SwerveModuleOffset[" + moduleNumber + "]", moduleConstants.getRotationOffset());
         moduleConstants.getModuleChassisPose();
 
         angleFeedback.enableContinuousInput(-Math.PI, Math.PI);
