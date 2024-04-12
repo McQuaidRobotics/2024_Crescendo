@@ -129,6 +129,29 @@ public class Stem extends SubsystemBase implements Logged {
     }
 
     /**
+     * Will check if all mechanisms have reached their target position
+     * within a specific tolerance.
+     * @param targetPosition The desired position
+     * @param toleranceMult A value to multiply the accepted positional tolerance by
+     * @@return True if all mechanisms have reached their target position
+     */
+    public boolean isAt(StemPosition targetPosition, double toleranceMult) {
+        return pivot.isAt(targetPosition.pivotRads, toleranceMult)
+                && telescope.isAt(targetPosition.telescopeMeters, toleranceMult)
+                && wrist.isAt(targetPosition.wristRads, toleranceMult);
+    }
+
+    /**
+     * Will check if all mechanisms have reached their target position
+     * within a specific tolerance.
+     * @param targetPosition The desired position
+     * @@return True if all mechanisms have reached their target position
+     */
+    public boolean isAt(StemPosition targetPosition) {
+        return isAt(targetPosition, 1.0);
+    }
+
+    /**
      * @return The current position of the stem
      */
     public StemPosition getStemPosition() {
