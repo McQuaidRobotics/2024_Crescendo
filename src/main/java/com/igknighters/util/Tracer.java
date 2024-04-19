@@ -23,7 +23,6 @@ public class Tracer {
     private static final NetworkTable rootTable = NetworkTableInstance.getDefault().getTable("Tracer");
     private static final HashMap<String, NetworkTableEntry> entryHeap = new HashMap<>();
 
-    @SuppressWarnings("unused")
     private static String traceStack(String name) {
         StringBuilder sb = new StringBuilder();
         for (String s : trace) {
