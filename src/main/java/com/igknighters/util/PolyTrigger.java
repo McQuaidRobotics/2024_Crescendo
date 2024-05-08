@@ -9,6 +9,9 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
+/**
+ * A trigger thats condition is based on the position of the robot
+ */
 public class PolyTrigger extends Trigger {
     private final Polygon2d polygon;
 

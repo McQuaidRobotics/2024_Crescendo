@@ -1,9 +1,12 @@
 package com.igknighters.util;
 
-import com.igknighters.GlobalState;
+import com.igknighters.Robot;
 
 import monologue.MonoDashboard;
 
+/**
+ * A utility to log stuff initializing during "bootup"
+ */
 public class BootupLogger {
     private static final String println_prefix = "[Bootup] ";
 
@@ -17,7 +20,7 @@ public class BootupLogger {
     public static synchronized void bootupLog(String message) {
         MonoDashboard.put("/Bootup", message);
 
-        if (!GlobalState.isUnitTest()) {
+        if (!Robot.isUnitTest()) {
             System.out.println(println_prefix + message);
         }
     }

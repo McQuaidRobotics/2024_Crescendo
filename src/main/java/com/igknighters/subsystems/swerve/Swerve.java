@@ -11,7 +11,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotBase;
+import com.igknighters.Robot;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import monologue.Logged;
 
@@ -52,7 +52,7 @@ public class Swerve extends SubsystemBase implements Logged {
 
     public Swerve() {
 
-        if (RobotBase.isReal()) {
+        if (Robot.isReal()) {
             swerveMods = new SwerveModule[] {
                     new SwerveModuleReal(ConstValues.kSwerve.kMod0.CONSTANTS, false),
                     new SwerveModuleReal(ConstValues.kSwerve.kMod1.CONSTANTS, false),

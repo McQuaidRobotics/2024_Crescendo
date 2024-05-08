@@ -11,7 +11,7 @@ public abstract class Gyro extends Component {
     public double yawVelRadsPerSec = 0.0;
 
     @Override
-    public String getPath() {
+    public String getOverrideName() {
         return "Gyro";
     }
 

@@ -6,7 +6,7 @@ import edu.wpi.first.hal.SimDevice.Direction;
 // import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotBase;
+import com.igknighters.Robot;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 import org.littletonrobotics.junction.Logger;
@@ -35,7 +35,7 @@ public class PivotSim implements Pivot {
         sim.setState(0.0, 0);
         inputs = new PivotInputs(0.0);
 
-        if (RobotBase.isReal()) {
+        if (Robot.isReal()) {
             // In the event we use this to "disable" the pivot on the real robot,
             // we don't want to crash the robot by trying to create a SimDevice
             fwdLimitSwitch = null;
@@ -96,7 +96,7 @@ public class PivotSim implements Pivot {
         inputs.rightAmps = sim.getCurrentDrawAmps() / 2.0;
         inputs.leftTemp = 0.0;
         inputs.rightTemp = 0.0;
-        if (RobotBase.isReal()) {
+        if (Robot.isReal()) {
             inputs.isLimitFwdSwitchHit = false;
             inputs.isLimitRevSwitchHit = false;
         } else {

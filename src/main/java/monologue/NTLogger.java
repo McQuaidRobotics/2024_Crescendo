@@ -6,7 +6,6 @@ import edu.wpi.first.networktables.*;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.WPIUtilJNI;
 import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
 
 import java.util.Arrays;
@@ -79,7 +78,6 @@ class NTLogger extends GenericLogger {
                 private boolean lastValue = false;
                 @Override
                 public void accept(long timestamp) {
-                    
                     var value = valueSupplier.get();
                     if (value == null) { return; }
                     if (value != lastValue) {
@@ -163,7 +161,6 @@ class NTLogger extends GenericLogger {
                 private int lastValue = 0;
                 @Override
                 public void accept(long timestamp) {
-                    
                     var value = valueSupplier.get();
                     if (value == null) { return; }
                     if (value != lastValue) {
@@ -247,7 +244,6 @@ class NTLogger extends GenericLogger {
                 private long lastValue = 0;
                 @Override
                 public void accept(long timestamp) {
-                    
                     var value = valueSupplier.get();
                     if (value == null) { return; }
                     if (value != lastValue) {
@@ -331,7 +327,6 @@ class NTLogger extends GenericLogger {
                 private float lastValue = 0;
                 @Override
                 public void accept(long timestamp) {
-                    
                     var value = valueSupplier.get();
                     if (value == null) { return; }
                     if (value != lastValue) {
@@ -415,7 +410,6 @@ class NTLogger extends GenericLogger {
                 private double lastValue = 0;
                 @Override
                 public void accept(long timestamp) {
-                    
                     var value = valueSupplier.get();
                     if (value == null) { return; }
                     if (value != lastValue) {
@@ -501,7 +495,6 @@ class NTLogger extends GenericLogger {
                 private String lastValue = "";
                 @Override
                 public void accept(long timestamp) {
-                    
                     var value = valueSupplier.get();
                     if (value == null) { return; }
                     if (value != lastValue) {
@@ -1193,7 +1186,7 @@ class NTLogger extends GenericLogger {
             }
             return;
         } else if (level == LogLevel.DEFAULT && Monologue.isFileOnly()) {
-            Monologue.dataLogger.putStruct(entryName, struct, value);
+            Monologue.dataLogger.putStruct(entryName, struct, value, level);
             if (published.containsKey(entryName) && topics.containsKey(entryName) && structEntrys.containsKey(entryName)) {
                 ((StructEntry<R>) structEntrys.remove(entryName)).unpublish();
                 NetworkTablesJNI.unpublish(published.remove(entryName));
@@ -1232,7 +1225,7 @@ class NTLogger extends GenericLogger {
             }
             return;
         } else if (level == LogLevel.DEFAULT && Monologue.isFileOnly()) {
-            Monologue.dataLogger.putStructArray(entryName, struct, value);
+            Monologue.dataLogger.putStructArray(entryName, struct, value, level);
             if (published.containsKey(entryName) && topics.containsKey(entryName) && structArrayEntrys.containsKey(entryName)) {
                 ((StructArrayEntry<R>) structArrayEntrys.remove(entryName)).unpublish();
                 NetworkTablesJNI.unpublish(published.remove(entryName));
@@ -1261,15 +1254,14 @@ class NTLogger extends GenericLogger {
     }
 
     @Override
-    public void addSendable(String path, Sendable sendable) {   
-        if (sendable == null) {return;}     
+    public void addSendable(String path, Sendable sendable) {
+        if (sendable == null) {return;}
         var builder = new SendableBuilderImpl();
         builder.setTable(table.getTable(path));
         sendable.initSendable(builder);
         builder.startListeners();
         table.getTable(path).getEntry(".controllable").setBoolean(false);
         sendables.add(builder);
-        NetworkTablesJNI.startEntryDataLog(NetworkTableInstance.getDefault().getHandle(), DataLogManager.getLog(), path, path);
     }
 
     @Override

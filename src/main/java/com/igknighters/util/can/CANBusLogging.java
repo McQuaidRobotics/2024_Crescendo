@@ -8,12 +8,20 @@ import com.igknighters.Robot;
 import edu.wpi.first.wpilibj.Timer;
 import monologue.MonoDashboard;
 
+/**
+ * A utility to log CAN bus status to the dashboard.
+ */
 public class CANBusLogging {
     private static final ArrayList<String> loggedBuses = new ArrayList<>();
     private static final String path = "CANBus";
     private static final Timer timer = new Timer();
     private static int index = 0;
 
+    /**
+     * Logs a CAN bus in telemetry.
+     * 
+     * @param busName The name of the bus to log
+     */
     public static void logBus(String busName) {
         if (Robot.isSimulation() || loggedBuses.contains(busName)) {
             return;
@@ -28,6 +36,9 @@ public class CANBusLogging {
         loggedBuses.add(busName);
     }
 
+    /**
+     * Runs the CAN bus logging.
+     */
     public static void run() {
         if (Robot.isSimulation() || loggedBuses.isEmpty()) {
             return;

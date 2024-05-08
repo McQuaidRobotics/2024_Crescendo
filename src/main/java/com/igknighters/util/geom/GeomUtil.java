@@ -1,3 +1,5 @@
+// inspired/copied from 6328
+
 package com.igknighters.util.geom;
 
 import edu.wpi.first.math.geometry.Pose2d;

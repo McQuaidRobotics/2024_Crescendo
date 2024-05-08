@@ -22,40 +22,6 @@ import monologue.MonoDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class StemCommands {
-
-    /**
-     * A command class to assist in storing the done state of the stem movement
-     * to be used in the finished check.
-     */
-    private static class MoveToCommand extends Command {
-        private boolean isDone = false;
-        private final StemPosition pose;
-        private final Stem stem;
-        private final double tolerance;
-
-        private MoveToCommand(Stem stem, StemPosition pose, double tolerance) {
-            addRequirements(stem);
-            this.stem = stem;
-            this.pose = pose;
-            this.tolerance = tolerance;
-        }
-
-        @Override
-        public void initialize() {
-            isDone = false;
-        }
-
-        @Override
-        public void execute() {
-            isDone = stem.setStemPosition(pose, tolerance);
-        }
-
-        @Override
-        public boolean isFinished() {
-            return isDone;
-        }
-    }
-
     /**
      * A command class that continually calculates the wrist radians needed to aim
      * at the speaker
@@ -182,8 +148,7 @@ public class StemCommands {
      * @return A command to be scheduled
      */
     public static Command moveTo(Stem stem, StemPosition pose) {
-        return new MoveToCommand(stem, pose, 1.0)
-                .withName("Move Stem(" + pose + ")");
+        return moveTo(stem, pose, 1.0);
     }
 
     /**
@@ -196,8 +161,9 @@ public class StemCommands {
      * @return A command to be scheduled
      */
     public static Command moveTo(Stem stem, StemPosition pose, double toleranceMult) {
-        return new MoveToCommand(stem, pose, toleranceMult)
-                .withName("Move Stem(" + pose + ")");
+        return stem.run(() -> stem.setStemPosition(pose))
+            .until(() -> stem.isAt(pose, toleranceMult))
+            .withName("Move Stem(" + pose + ")");
     }
 
     /**

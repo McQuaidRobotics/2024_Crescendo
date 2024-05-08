@@ -22,7 +22,7 @@ public abstract class Telescope extends Component {
     }
 
     @Override
-    public String getPath() {
+    public String getOverrideName() {
         return "Telescope";
     }
 

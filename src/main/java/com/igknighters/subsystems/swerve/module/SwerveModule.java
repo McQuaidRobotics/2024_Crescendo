@@ -31,7 +31,7 @@ public abstract class SwerveModule extends Component {
     public double angleAmps = 0.0;
 
     @Override
-    public String getPath() {
+    public String getOverrideName() {
         return "SwerveModule";
     }
 

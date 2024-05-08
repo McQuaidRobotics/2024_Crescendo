@@ -1,12 +1,11 @@
-package com.igknighters.util;
+package com.igknighters.util.robots;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.function.DoubleSupplier;
 
-import com.igknighters.GlobalState;
-import com.igknighters.constants.ConstValues;
-import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
+import com.igknighters.util.Tracer;
 
 import edu.wpi.first.hal.DriverStationJNI;
 import edu.wpi.first.hal.HAL;
@@ -16,9 +15,64 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import monologue.MonoDashboard;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
+/**
+ * A way to run your *whole* robot code in a unit test.
+ * 
+ * This allows you to hook onto to any of the robot mode functions and run your own code.
+ * 
+ * This also allows you to interupt the robot code in a way without the unit test thinking it crashed.
+ * 
+ * <pre><code>
+ * 
+ *  @Test
+ *  public void testAuto(@Robo Robot robot) {
+ *    RobotSetup.testOverrideRobotID(RobotID.SIM_CRASH);
+ *    Pose2d desiredEndPose = new Pose2d(
+ *        new Translation2d(3.0, 7.0),
+ *        new Rotation2d());
+
+ *    DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
+
+ *    // meters
+ *    final double translationTolerance = 0.2;
+
+ *    Autos.setAutoOverrideTest(new ProxyCommand(() -> new PathPlannerAuto("1 Meter Auto")));
+ *    DriverStationSim.setAutonomous(true);
+ *    DriverStationSim.setEnabled(true);
+
+ *    robot.withAutonomousPeriodicTest(robo -> {
+ *        boolean isFinished = GlobalState.getLocalizedPose()
+ *          .getTranslation()
+ *          .getDistance(desiredEndPose.getTranslation()) < translationTolerance;
+
+ *        if (isFinished) {
+ *            robo.finishUnitTestRobot();
+ *        } else if (robo.getElapsedTime() > 2.5) {
+ *            throw new RuntimeException(
+ *                "Auto took to long, ended at "
+ *                    + GlobalState.getLocalizedPose().toString());
+ *        }
+ *    });
+
+ *    robot.runTest(3);
+
+ *    System.gc();
+ *  }
+ * 
+ * </code></pre>
+ * 
+ */
 public class UnitTestableRobot extends TimedRobot {
+    private static Optional<Boolean> cachedIsTest = Optional.empty();
+    public static boolean isUnitTest() {
+        if (cachedIsTest.isEmpty()) {
+            cachedIsTest = Optional.of(System.getenv("test") != null);
+        }
+        return cachedIsTest.get();
+    }
+
     public static class UnitTestableRobotExited extends RuntimeException {
         private static final long serialVersionUID = 1L;
 
@@ -43,19 +97,6 @@ public class UnitTestableRobot extends TimedRobot {
         kTest
     }
 
-    public UnitTestableRobot() {
-        super(ConstValues.PERIODIC_TIME);
-        isUnitTest = GlobalState.isUnitTest();
-
-        if (isUnitTest) {
-            DriverStationSim.setEnabled(false);
-            DriverStationSim.setAutonomous(false);
-            DriverStationSim.setTest(false);
-        }
-    }
-
-    private final boolean isUnitTest;
-
     private AtomicBoolean killswitch = new AtomicBoolean(false);
 
     private final Timer timer = new Timer();
@@ -77,6 +118,25 @@ public class UnitTestableRobot extends TimedRobot {
     private Optional<Consumer<UnitTestableRobot>> autonomousExitTest = Optional.empty();
     private Optional<Consumer<UnitTestableRobot>> teleopExitTest = Optional.empty();
 
+    public UnitTestableRobot(double period) {
+        super(
+            new DoubleSupplier() {
+                @Override
+                public double getAsDouble() {
+                    if (isUnitTest()) assert HAL.initialize(500, 0);
+                    return period;
+                }
+            }.getAsDouble()
+        );
+        System.out.println("isUnitTest: " + isUnitTest());
+        if (isUnitTest()) {
+            DriverStationSim.setEnabled(false);
+            DriverStationSim.setAutonomous(false);
+            DriverStationSim.setTest(false);
+            DriverStationSim.setDsAttached(true);
+        }
+    }
+
     public void finishUnitTestRobot() {
         killswitch.set(true);
     }
@@ -91,12 +151,22 @@ public class UnitTestableRobot extends TimedRobot {
         }
         this.endCompetition();
         this.close();
+        if (isUnitTest()) {
+            HAL.exitMain();
+            HAL.shutdown();
+            var cmdScheduler = CommandScheduler.getInstance();
+            cmdScheduler.cancelAll();
+            cmdScheduler.getActiveButtonLoop().clear();
+            cmdScheduler.getDefaultButtonLoop().clear();
+            cmdScheduler.clearComposedCommands();
+            cmdScheduler.unregisterAllSubsystems();
+        }
     }
 
     @Override
     protected void loopFunc() {
         Tracer.startTrace("RobotLoop");
-        if (isUnitTest) {
+        if (isUnitTest()) {
             if (killswitch.get()) {
                 throw new UnitTestableRobotExited();
             }
@@ -117,9 +187,7 @@ public class UnitTestableRobot extends TimedRobot {
             mode = Mode.kTest;
         }
 
-        MonoDashboard.put("RobotMode", mode.toString());
-
-        if ((!calledDsConnected && DriverStation.isDSAttached()) || isUnitTest) {
+        if ((!calledDsConnected && DriverStation.isDSAttached()) || isUnitTest()) {
             calledDsConnected = true;
             driverStationConnected();
         }
@@ -195,55 +263,55 @@ public class UnitTestableRobot extends TimedRobot {
     }
 
     public UnitTestableRobot withDisableInitTest(Consumer<UnitTestableRobot> testInit) {
-        if (this.isUnitTest)
+        if (isUnitTest())
             this.disabledInitTest = Optional.of(testInit);
         return this;
     }
 
     public UnitTestableRobot withAutonomousInitTest(Consumer<UnitTestableRobot> testInit) {
-        if (this.isUnitTest)
+        if (isUnitTest())
             this.autonomousInitTest = Optional.of(testInit);
         return this;
     }
 
     public UnitTestableRobot withTeleopInitTest(Consumer<UnitTestableRobot> testInit) {
-        if (this.isUnitTest)
+        if (isUnitTest())
             this.teleopInitTest = Optional.of(testInit);
         return this;
     }
 
     public UnitTestableRobot withDisablePeriodicTest(Consumer<UnitTestableRobot> testPeriodic) {
-        if (this.isUnitTest)
+        if (isUnitTest())
             this.disabledPeriodicTest = Optional.of(testPeriodic);
         return this;
     }
 
     public UnitTestableRobot withAutonomousPeriodicTest(Consumer<UnitTestableRobot> testPeriodic) {
-        if (this.isUnitTest)
+        if (isUnitTest())
             this.autonomousPeriodicTest = Optional.of(testPeriodic);
         return this;
     }
 
     public UnitTestableRobot withTeleopPeriodicTest(Consumer<UnitTestableRobot> testPeriodic) {
-        if (this.isUnitTest)
+        if (isUnitTest())
             this.teleopPeriodicTest = Optional.of(testPeriodic);
         return this;
     }
 
     public UnitTestableRobot withDisableExitTest(Consumer<UnitTestableRobot> testExit) {
-        if (this.isUnitTest)
+        if (isUnitTest())
             this.disabledExitTest = Optional.of(testExit);
         return this;
     }
 
     public UnitTestableRobot withAutonomousExitTest(Consumer<UnitTestableRobot> testExit) {
-        if (this.isUnitTest)
+        if (isUnitTest())
             this.autonomousExitTest = Optional.of(testExit);
         return this;
     }
 
     public UnitTestableRobot withTeleopExitTest(Consumer<UnitTestableRobot> testExit) {
-        if (this.isUnitTest)
+        if (isUnitTest())
             this.teleopExitTest = Optional.of(testExit);
         return this;
     }
@@ -258,9 +326,5 @@ public class UnitTestableRobot extends TimedRobot {
 
     public double getElapsedTime() {
         return timer.get();
-    }
-
-    public AllSubsystems getAllSubsystemsForTest() {
-        return new AllSubsystems();
     }
 }

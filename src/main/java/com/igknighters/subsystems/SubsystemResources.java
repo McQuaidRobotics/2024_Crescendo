@@ -91,38 +91,45 @@ public class SubsystemResources {
         private Subsystems[] subsystems;
         private List<Subsystem> subsystemsList = new ArrayList<>();
 
-        public Optional<Stem> stem = Optional.empty();
+        public final Optional<Stem> stem;
 
-        public Optional<Swerve> swerve = Optional.empty();
+        public final Optional<Swerve> swerve;
 
-        public Optional<Umbrella> umbrella = Optional.empty();
+        public final Optional<Umbrella> umbrella;
 
-        public Optional<Vision> vision = Optional.empty();
+        public final Optional<Vision> vision;
 
         public AllSubsystems(Subsystems... subsystems) {
             this.subsystems = subsystems;
-            for (Subsystems subsystem : subsystems) {
-                switch (subsystem) {
 
-                    case Stem:
-                        stem = createSubsystem(Stem::new);
-                        break;
+            if (subsystems.length == 0) {
+                BootupLogger.bootupLog("No subsystems enabled");
+            }
 
-                    case Swerve:
-                        swerve = createSubsystem(Swerve::new);
-                        break;
+            List<Subsystems> enabledSubsystems = List.of(subsystems);
 
-                    case Umbrella:
-                        umbrella = createSubsystem(Umbrella::new);
-                        break;
+            if (enabledSubsystems.contains(Subsystems.Stem)) {
+                stem = createSubsystem(Stem::new);
+            } else {
+                stem = Optional.empty();
+            }
 
-                    case Vision:
-                        vision = createSubsystem(Vision::new);
-                        break;
+            if (enabledSubsystems.contains(Subsystems.Swerve)) {
+                swerve = createSubsystem(Swerve::new);
+            } else {
+                swerve = Optional.empty();
+            }
 
-                    default:
-                        break;
-                }
+            if (enabledSubsystems.contains(Subsystems.Umbrella)) {
+                umbrella = createSubsystem(Umbrella::new);
+            } else {
+                umbrella = Optional.empty();
+            }
+
+            if (enabledSubsystems.contains(Subsystems.Vision)) {
+                vision = createSubsystem(Vision::new);
+            } else {
+                vision = Optional.empty();
             }
         }
 
