@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 import java.lang.reflect.Type;
 
 /**
- * A class containing broadcast(multi-sender, multi-receiver) type-safe channels for inner and inter thread communication
+ * A utility implementing broadcast(multi-sender, multi-receiver) type-safe channels for inner and inter thread communication
  */
 public class Channels {
     private static final HashMap<String, ArrayList<Receiver<?>>> receivers = new HashMap<>();
@@ -17,9 +17,9 @@ public class Channels {
 
     /**
      * The receiving end of a channel, data can be extracted from it,
-     * specific behavior depends on the chosen channel type
+     * specific behavior depends on the chosen channel type.
      * 
-     * @param <T> the type of the channel
+     * @param <T> The type of the channel
      */
     public static abstract class Receiver<T> {
         Receiver(Class<T> clazz, String channelName) {
@@ -48,9 +48,7 @@ public class Channels {
         /**
          * @return the received value and removes it from the channel
          */
-        public T recv() {
-            return null;
-        }
+        public abstract T recv();
 
         /**
          * @return an optional containing the received value, or empty if the channel is
@@ -68,13 +66,11 @@ public class Channels {
         /**
          * @return whether the channel has any content
          */
-        public Boolean hasData() {
+        public boolean hasData() {
             return false;
         }
 
-        public String getChannelName() {
-            return null;
-        }
+        public abstract String getChannelName();
 
         /**
          * Creates a receiver that stores the latest value
@@ -132,7 +128,7 @@ public class Channels {
         private final ReadWriteLock lock = new ReentrantReadWriteLock();
         private final String channelName;
 
-        private T value;
+        private Optional<T> value;
 
         public ReceiverLatest(Class<T> clazz, final String channelName) {
             super(clazz, channelName);
@@ -143,18 +139,18 @@ public class Channels {
         public T recv() {
             lock.readLock().lock();
             try {
-                return value;
+                return value.get();
             } finally {
-                value = null;
+                value = Optional.empty();
                 lock.readLock().unlock();
             }
         }
 
         @Override
-        public Boolean hasData() {
+        public boolean hasData() {
             lock.readLock().lock();
             try {
-                return value != null;
+                return value.isPresent();
             } finally {
                 lock.readLock().unlock();
             }
@@ -164,7 +160,7 @@ public class Channels {
         protected void send(T newValue) {
             lock.writeLock().lock();
             try {
-                value = newValue;
+                value = Optional.of(newValue);
             } finally {
                 lock.writeLock().unlock();
             }
@@ -218,7 +214,7 @@ public class Channels {
         }
 
         @Override
-        public Boolean hasData() {
+        public boolean hasData() {
             lock.readLock().lock();
             try {
                 return buffer[oldIndex] != null;
@@ -267,8 +263,8 @@ public class Channels {
         }
 
         @Override
-        public Boolean hasData() {
-            throw new UnsupportedOperationException("Reactor channels do not support hasData");
+        public boolean hasData() {
+            return false;
         }
 
         @Override
@@ -313,7 +309,7 @@ public class Channels {
         @SuppressWarnings("unchecked")
         public void send(T newValue) {
             for (Receiver<?> receiver : receivers.get(channelName)) {
-                ((Receiver<T>) receiver).send((T) newValue);
+                ((Receiver<T>) receiver).send(newValue);
             }
         }
 

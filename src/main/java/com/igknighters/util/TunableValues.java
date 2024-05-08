@@ -7,6 +7,14 @@ import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.IntegerEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
+/**
+ * An api for creating NT tunable values.
+ * Bools, Ints and Doubles are supported.
+ * 
+ * @see TunableValues#getDouble(String, double) TunableValues.getDouble()
+ * @see TunableValues#getInteger(String, int) TunableValues.getInteger()
+ * @see TunableValues#getBoolean(String, boolean) TunableValues.getBoolean()
+ */
 public class TunableValues {
     private static final String pathPrefix = "/Tunables/";
 
@@ -14,6 +22,11 @@ public class TunableValues {
     private static final HashMap<String, TunableInteger> intTunables = new HashMap<>();
     private static final HashMap<String, TunableBoolean> boolTunables = new HashMap<>();
 
+    /**
+     * An object representing a tunable double value.
+     * 
+     * @see TunableValues#getDouble(String, double) Creating a tunable double
+     */
     public static class TunableDouble implements Cloneable {
         private final DoubleEntry entry;
         private final double defaultValue;
@@ -32,7 +45,12 @@ public class TunableValues {
             this.defaultValue = defaultValue;
         }
 
-        public double get() {
+        /**
+         * Get the value of the tunable, returns the default value a value is not present.
+         * 
+         * @return The value of the tunable
+         */
+        public double value() {
             return entry.get(defaultValue);
         }
 
@@ -42,6 +60,18 @@ public class TunableValues {
         }
     }
 
+    /**
+     * Get a tunable double value.
+     * 
+     * Tunable values are cached, so calling this method with the same path will return the same object
+     * and not create a new one (throwing out the new default value if it was different).
+     * 
+     * @param path The path to the tunable value (it will be prefixed with "/Tunables/")
+     * @param defaultValue The default value of the tunable
+     * @return The tunable value object
+     * 
+     * @see TunableDouble#value() How to get a value from the object
+     */
     public static TunableDouble getDouble(String path, double defaultValue) {
         if (doubleTunables.containsKey(path)) {
             return doubleTunables.get(path);
@@ -52,6 +82,11 @@ public class TunableValues {
         }
     }
 
+    /**
+     * An object representing a tunable integer value.
+     * 
+     * @see TunableValues#getInteger(String, int) Creating a tunable integer
+     */
     public static class TunableInteger implements Cloneable {
         private final IntegerEntry entry;
         private final int defaultValue;
@@ -70,7 +105,12 @@ public class TunableValues {
             this.defaultValue = defaultValue;
         }
 
-        public int get() {
+        /**
+         * Get the value of the tunable, returns the default value a value is not present.
+         * 
+         * @return The value of the tunable
+         */
+        public int value() {
             return (int) Math.min(Math.max(entry.get(defaultValue), Integer.MIN_VALUE), Integer.MAX_VALUE);
         }
 
@@ -80,6 +120,18 @@ public class TunableValues {
         }
     }
 
+    /**
+     * Get a tunable integer value.
+     * 
+     * Tunable values are cached, so calling this method with the same path will return the same object
+     * and not create a new one (throwing out the new default value if it was different).
+     * 
+     * @param path The path to the tunable value (it will be prefixed with "/Tunables/")
+     * @param defaultValue The default value of the tunable
+     * @return The tunable value object
+     * 
+     * @see TunableInteger#value() How to get a value from the object
+     */
     public static TunableInteger getInteger(String path, int defaultValue) {
         if (intTunables.containsKey(path)) {
             return intTunables.get(path);
@@ -90,6 +142,11 @@ public class TunableValues {
         }
     }
 
+    /**
+     * An object representing a tunable boolean value.
+     * 
+     * @see TunableValues#getBoolean(String, boolean) Creating a tunable boolean
+     */
     public static class TunableBoolean implements Cloneable {
         private final BooleanEntry entry;
         private final boolean defaultValue;
@@ -108,7 +165,12 @@ public class TunableValues {
             this.defaultValue = defaultValue;
         }
 
-        public boolean get() {
+        /**
+         * Get the value of the tunable, returns the default value a value is not present.
+         * 
+         * @return The value of the tunable
+         */
+        public boolean value() {
             return entry.get(defaultValue);
         }
 
@@ -118,6 +180,18 @@ public class TunableValues {
         }
     }
 
+    /**
+     * Get a tunable boolean value.
+     * 
+     * Tunable values are cached, so calling this method with the same path will return the same object
+     * and not create a new one (throwing out the new default value if it was different).
+     * 
+     * @param path The path to the tunable value (it will be prefixed with "/Tunables/")
+     * @param defaultValue The default value of the tunable
+     * @return The tunable value object
+     * 
+     * @see TunableBoolean#value() How to get a value from the object
+     */
     public static TunableBoolean getBoolean(String path, boolean defaultValue) {
         if (boolTunables.containsKey(path)) {
             return boolTunables.get(path);

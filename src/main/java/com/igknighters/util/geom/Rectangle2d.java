@@ -3,6 +3,9 @@ package com.igknighters.util.geom;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
+// THIS CLASS IS NOT FULLY COMMENTED (womp womp)
+
+
 public class Rectangle2d {
 
     private final Translation2d topLeft, topRight, bottomLeft, bottomRight;

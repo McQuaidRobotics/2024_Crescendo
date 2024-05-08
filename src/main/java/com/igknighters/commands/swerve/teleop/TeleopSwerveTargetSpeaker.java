@@ -41,8 +41,8 @@ public class TeleopSwerveTargetSpeaker extends TeleopSwerveBase {
         });
 
         Translation2d vt = orientForUser(new Translation2d(
-                getTranslationX() * kSwerve.MAX_DRIVE_VELOCITY * speedMult.get(),
-                getTranslationY() * kSwerve.MAX_DRIVE_VELOCITY * speedMult.get()));
+                getTranslationX() * kSwerve.MAX_DRIVE_VELOCITY * speedMult.value(),
+                getTranslationY() * kSwerve.MAX_DRIVE_VELOCITY * speedMult.value()));
 
         ChassisSpeeds desiredChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 vt.getX(),
@@ -58,7 +58,7 @@ public class TeleopSwerveTargetSpeaker extends TeleopSwerveBase {
 
         double distance = GlobalState.getLocalizedPose().getTranslation().getDistance(targetTranslation);
 
-        double noteVelo = TunableValues.getDouble("Note Average Velo", kUmbrella.NOTE_VELO).get();
+        double noteVelo = TunableValues.getDouble("Note Average Velo", kUmbrella.NOTE_VELO).value();
 
         Translation2d adjustedTarget = new Translation2d(
                 targetTranslation.getX() - (avgChassisSpeeds.vxMetersPerSecond * (distance / noteVelo)),
@@ -68,7 +68,7 @@ public class TeleopSwerveTargetSpeaker extends TeleopSwerveBase {
             field.getObject("adjustedTarget").setPose(new Pose2d(adjustedTarget, new Rotation2d()));
         });
 
-        double lookaheadTimeValue = lookaheadTime.get();
+        double lookaheadTimeValue = lookaheadTime.value();
         Translation2d lookaheadTranslation = swerve.getPose().getTranslation()
             .minus(new Translation2d(
                 avgChassisSpeeds.vxMetersPerSecond * lookaheadTimeValue,

@@ -3,14 +3,17 @@ package com.igknighters;
 import java.util.HashMap;
 import java.util.function.BiConsumer;
 
+import monologue.LogLevel;
 import monologue.Logged;
 import monologue.MonoDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.igknighters.commands.autos.AutosCmdRegister;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
@@ -24,6 +27,7 @@ import com.igknighters.controllers.OperatorController;
 import com.igknighters.controllers.TestingController;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.swerve.Swerve;
+import com.igknighters.util.PowerLogger;
 import com.igknighters.util.ShuffleboardApi;
 import com.igknighters.util.Tracer;
 import com.igknighters.util.can.CANBusLogging;
@@ -39,6 +43,7 @@ public class Robot extends UnitTestableRobot implements Logged {
 
     private Command autoCmd;
     private final CommandScheduler scheduler = CommandScheduler.getInstance();
+    private PowerLogger powerLogger;
 
     private final DriverController driverController;
     private final OperatorController operatorController;
@@ -49,18 +54,22 @@ public class Robot extends UnitTestableRobot implements Logged {
         super(ConstValues.PERIODIC_TIME);
         if (isUnitTest()) GlobalState.restoreDefaultState();
 
+        // logging needs to be setup asap as to not lose logging calls b4 its setup
         setupLogging();
 
+        // creates the controllers but doesnt assign the bindings
+        // controllers have to be in the constructor to all them to be final
         driverController = new DriverController(0);
         operatorController = new OperatorController(1);
         testingController = new TestingController(3, true);
+
+        // consts also should be early initialized
+        ConstantHelper.applyRoboConst(ConstValues.class);
     }
 
     @Override
     public void robotInit() {
         Pathfinding.setPathfinder(new LocalADStar());
-
-        ConstantHelper.applyRoboConst(ConstValues.class);
 
         GlobalState.publishField2d();
 
@@ -104,6 +113,7 @@ public class Robot extends UnitTestableRobot implements Logged {
         Tracer.traceFunc("Shuffleboard", ShuffleboardApi::run);
         Tracer.traceFunc("Monologue", Monologue::updateAll);
         Tracer.traceFunc("GlobalStateLog", GlobalState::log);
+        Tracer.traceFunc("PowerLogger", powerLogger::log);
         Tracer.endTrace();
     }
 
@@ -135,7 +145,12 @@ public class Robot extends UnitTestableRobot implements Logged {
     }
 
     private void setupLogging() {
+        // turn off auto logging for signal logger, doesnt get us any info we need
+        if (isReal()) SignalLogger.enableAutoLogging(false);
+
         if (!isUnitTest()) {
+            // setup monologue with lazy logging and now datalog prefix
+            // robot is the root object
             Monologue.setupMonologue(
                 this,
                 "/Robot",
@@ -145,30 +160,41 @@ public class Robot extends UnitTestableRobot implements Logged {
                     .withLazyLogging(true)
             );
         } else {
+            // used for tests and CI, does not actually log anything but asserts the logging is setup mostly correct
             Monologue.setupMonologueDisabled(this, "/Robot", true);
         }
 
+        powerLogger = new PowerLogger(
+            ConstValues.PDH_CAN_ID,
+            ModuleType.kRev,
+            "/PowerDistribution",
+            false
+        );
+
+        // send all library/utility made tables that don't use monologue to file aswell
         Monologue.sendNetworkToFile("/Visualizers");
         Monologue.sendNetworkToFile("/PathPlanner");
         Monologue.sendNetworkToFile("/Tunables");
         Monologue.sendNetworkToFile("/Tracer");
+        Monologue.sendNetworkToFile("/PowerDistribution");
 
-        final String meta = "/Metadata/";
-        MonoDashboard.put(meta + "RuntimeType", getRuntimeType().toString());
-        MonoDashboard.put(meta + "ProjectName", BuildConstants.MAVEN_NAME);
-        MonoDashboard.put(meta + "BuildDate", BuildConstants.BUILD_DATE);
-        MonoDashboard.put(meta + "GitSHA", BuildConstants.GIT_SHA);
-        MonoDashboard.put(meta + "GitDate", BuildConstants.GIT_DATE);
-        MonoDashboard.put(meta + "GitBranch", BuildConstants.GIT_BRANCH);
+        // logs build data to the datalog
+        final String meta = "/BuildData/";
+        MonoDashboard.put(meta + "RuntimeType", getRuntimeType().toString(), LogLevel.OVERRIDE_FILE_ONLY);
+        MonoDashboard.put(meta + "ProjectName", BuildConstants.MAVEN_NAME, LogLevel.OVERRIDE_FILE_ONLY);
+        MonoDashboard.put(meta + "BuildDate", BuildConstants.BUILD_DATE, LogLevel.OVERRIDE_FILE_ONLY);
+        MonoDashboard.put(meta + "GitSHA", BuildConstants.GIT_SHA, LogLevel.OVERRIDE_FILE_ONLY);
+        MonoDashboard.put(meta + "GitDate", BuildConstants.GIT_DATE, LogLevel.OVERRIDE_FILE_ONLY);
+        MonoDashboard.put(meta + "GitBranch", BuildConstants.GIT_BRANCH, LogLevel.OVERRIDE_FILE_ONLY);
         switch (BuildConstants.DIRTY) {
             case 0:
-                MonoDashboard.put(meta + "GitDirty", "All changes committed");
+                MonoDashboard.put(meta + "GitDirty", "All changes committed", LogLevel.OVERRIDE_FILE_ONLY);
                 break;
             case 1:
-                MonoDashboard.put(meta + "GitDirty", "Uncomitted changes");
+                MonoDashboard.put(meta + "GitDirty", "Uncomitted changes", LogLevel.OVERRIDE_FILE_ONLY);
                 break;
             default:
-                MonoDashboard.put(meta + "GitDirty", "Unknown");
+                MonoDashboard.put(meta + "GitDirty", "Unknown", LogLevel.OVERRIDE_FILE_ONLY);
                 break;
         }
 
@@ -227,6 +253,11 @@ public class Robot extends UnitTestableRobot implements Logged {
         GlobalState.onceInitAutoChooser(swerve);
     }
 
+    /**
+     * Should only be used for unit tests
+     * 
+     * @throws RuntimeException Ff called outside of a unit test
+     */
     public AllSubsystems getAllSubsystems() {
         if (!isUnitTest()) {
             throw new RuntimeException("This method should only be called in unit tests");

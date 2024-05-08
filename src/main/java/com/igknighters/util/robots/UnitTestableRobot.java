@@ -16,8 +16,54 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import monologue.MonoDashboard;
 
+/**
+ * A way to run your *whole* robot code in a unit test.
+ * 
+ * This allows you to hook onto to any of the robot mode functions and run your own code.
+ * 
+ * This also allows you to interupt the robot code in a way without the unit test thinking it crashed.
+ * 
+ * <pre><code>
+ * 
+ *  @Test
+ *  public void testAuto(@Robo Robot robot) {
+ *    RobotSetup.testOverrideRobotID(RobotID.SIM_CRASH);
+ *    Pose2d desiredEndPose = new Pose2d(
+ *        new Translation2d(3.0, 7.0),
+ *        new Rotation2d());
+
+ *    DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
+
+ *    // meters
+ *    final double translationTolerance = 0.2;
+
+ *    Autos.setAutoOverrideTest(new ProxyCommand(() -> new PathPlannerAuto("1 Meter Auto")));
+ *    DriverStationSim.setAutonomous(true);
+ *    DriverStationSim.setEnabled(true);
+
+ *    robot.withAutonomousPeriodicTest(robo -> {
+ *        boolean isFinished = GlobalState.getLocalizedPose()
+ *          .getTranslation()
+ *          .getDistance(desiredEndPose.getTranslation()) < translationTolerance;
+
+ *        if (isFinished) {
+ *            robo.finishUnitTestRobot();
+ *        } else if (robo.getElapsedTime() > 2.5) {
+ *            throw new RuntimeException(
+ *                "Auto took to long, ended at "
+ *                    + GlobalState.getLocalizedPose().toString());
+ *        }
+ *    });
+
+ *    robot.runTest(3);
+
+ *    System.gc();
+ *  }
+ * 
+ * </code></pre>
+ * 
+ */
 public class UnitTestableRobot extends TimedRobot {
     private static Optional<Boolean> cachedIsTest = Optional.empty();
     public static boolean isUnitTest() {
@@ -140,8 +186,6 @@ public class UnitTestableRobot extends TimedRobot {
         } else if (DriverStation.isTest()) {
             mode = Mode.kTest;
         }
-
-        MonoDashboard.put("/Robot/Mode", mode.toString());
 
         if ((!calledDsConnected && DriverStation.isDSAttached()) || isUnitTest()) {
             calledDsConnected = true;
