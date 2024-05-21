@@ -146,7 +146,7 @@ public class StemPosition implements StructSerializable {
 
     public static final StemPosition STARTING = new StemPosition(
             1.114, // 63.8
-            1.93, // 110.58
+            1.55, //83
             kTelescope.MIN_METERS) {
 
         @Override

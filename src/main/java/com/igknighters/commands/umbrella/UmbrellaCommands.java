@@ -156,7 +156,7 @@ public class UmbrellaCommands {
     public static Command idleShooter(Umbrella umbrella) {
         return umbrella.run(() -> {
             umbrella.runIntakeAt(0.0);
-            umbrella.spinupShooterToRPM(kControls.SHOOTER_IDLE_RPM);
+            //umbrella.spinupShooterToRPM(kControls.SHOOTER_IDLE_RPM);
             umbrella.pushSpinupReason(ShooterSpinupReason.Idle);
         }).withName("Idle Intake");
     }

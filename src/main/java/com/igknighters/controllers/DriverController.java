@@ -65,7 +65,7 @@ public class DriverController extends ControllerParent {
                             StemPosition.STARTING),
                         UmbrellaCommands.spinupShooter(
                             allss.umbrella.get(),
-                            kControls.SHOOTER_RPM,
+                            kControls.SHOOTER_RPM * 0.5,
                             ShooterSpinupReason.ManualAimSpeaker))
                         .finallyDo(
                             () -> allss.umbrella.get().stopAll()
@@ -122,7 +122,7 @@ public class DriverController extends ControllerParent {
                     ))
                     .finallyDo(allss.umbrella.get()::stopAll)
                     .withName("Highorder Aim"));
-        }, Subsystems.Swerve, Subsystems.Stem, Subsystems.Umbrella);
+        }, Subsystems.Swerve, Subsystems.Stem, Subsystems.Umbrella); 
 
         this.RT.binding = new Binding((trig, allss) -> {
                 trig.onTrue(
