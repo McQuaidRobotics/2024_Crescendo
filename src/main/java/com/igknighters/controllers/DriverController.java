@@ -1,6 +1,7 @@
 package com.igknighters.controllers;
 
 import com.igknighters.LED;
+import com.igknighters.Localizer;
 import com.igknighters.LED.LedAnimations;
 import com.igknighters.commands.HigherOrderCommands;
 import com.igknighters.commands.stem.StemCommands;
@@ -19,8 +20,9 @@ import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
 public class DriverController extends ControllerParent {
 
-    public DriverController(int port) {
+    public DriverController(int port, Localizer localizer) {
         super(port, true);
+
         // disregard null safety for subsystems as it is checked on assignment
 
         /// FACE BUTTONS
@@ -91,7 +93,7 @@ public class DriverController extends ControllerParent {
         // this.Back.binding =
 
         this.Start.binding = new Binding(Subsystems.Swerve, (trig, allss) -> {
-                trig.onTrue(SwerveCommands.orientGyro(allss.swerve.get()));
+                trig.onTrue(SwerveCommands.orientGyro(allss.swerve.get(), localizer));
         });
 
         /// STICKS
@@ -108,7 +110,7 @@ public class DriverController extends ControllerParent {
             trig.whileTrue(
                 Commands.parallel(
                     HigherOrderCommands.aim(
-                        swerve, stem, this),
+                        swerve, stem, this, localizer),
                     UmbrellaCommands.spinupShooter(
                         umbrella,
                         kControls.SHOOTER_RPM,
@@ -131,7 +133,8 @@ public class DriverController extends ControllerParent {
                             allss.swerve.get(),
                             allss.stem.get(),
                             allss.umbrella.get(),
-                            this))
+                            this,
+                            localizer))
                 .withName("Proxy Shoot"));
         }, Subsystems.Umbrella, Subsystems.Stem, Subsystems.Swerve);
 

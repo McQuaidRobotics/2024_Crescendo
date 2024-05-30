@@ -203,6 +203,10 @@ public abstract class Camera implements Logged {
             return new Pair<>(this, fault);
         }
 
+        public VisionPoseEstimate withAmbiguity(double newAmbiguity) {
+            return new VisionPoseEstimate(cameraId, pose, timestamp, apriltags, newAmbiguity, maxDistance);
+        }
+
         public static class VisionPoseEstimateStruct implements Struct<VisionPoseEstimate> {
             @Override
             public Class<VisionPoseEstimate> getTypeClass() {

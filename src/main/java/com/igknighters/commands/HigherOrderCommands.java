@@ -1,6 +1,7 @@
 package com.igknighters.commands;
 
 import com.igknighters.LED;
+import com.igknighters.Localizer;
 import com.igknighters.LED.LedAnimations;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveTargetSpeaker;
@@ -42,17 +43,21 @@ public class HigherOrderCommands {
     public static Command aim(
             Swerve swerve,
             Stem stem,
-            ControllerParent controller) {
+            ControllerParent controller,
+            Localizer localizer
+    ) {
         return Commands.parallel(
-                new TeleopSwerveTargetSpeaker(swerve, controller),
-                StemCommands.aimAtSpeaker(stem, false)).withName("Aim");
+                new TeleopSwerveTargetSpeaker(swerve, controller, localizer),
+                StemCommands.aimAtSpeaker(stem, false, localizer::pose, swerve::getChassisSpeed)).withName("Aim");
     }
 
     public static Command genericShoot(
             Swerve swerve,
             Stem stem,
             Umbrella umbrella,
-            ControllerParent controller) {
+            ControllerParent controller,
+            Localizer localizer
+    ) {
         Command cmd;
         String name;
         var reason = umbrella.popSpinupReason();
@@ -72,7 +77,8 @@ public class HigherOrderCommands {
                     HigherOrderCommands.aim(
                             swerve,
                             stem,
-                            controller),
+                            controller,
+                            localizer),
                     UmbrellaCommands.shoot(umbrella)
                 ).until(() -> controller.leftTrigger(true).getAsDouble() < 0.5)
                 .asProxy();

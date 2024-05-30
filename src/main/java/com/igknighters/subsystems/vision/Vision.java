@@ -1,13 +1,14 @@
 package com.igknighters.subsystems.vision;
 
-import com.igknighters.GlobalState;
-import com.igknighters.GlobalState.LocalizerType;
-import com.igknighters.constants.FieldConstants;
+import com.igknighters.constants.ConstValues.kChannels;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kVision;
 import com.igknighters.subsystems.vision.camera.Camera;
 import com.igknighters.subsystems.vision.camera.Camera.VisionPoseEstimate;
 import com.igknighters.util.Tracer;
+import com.igknighters.util.Channels.Receiver;
+import com.igknighters.util.Channels.Sender;
+import com.igknighters.util.geom.GeomUtil;
 
 import java.util.HashSet;
 import java.util.List;
@@ -17,19 +18,19 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import monologue.Logged;
 
 public class Vision extends SubsystemBase implements Logged {
+    private final Receiver<Pose2d> poseReceiver = Receiver.latest(kChannels.POSITION, Pose2d.class);
+    private final Receiver<ChassisSpeeds> velocityReceiver = Receiver.latest(kChannels.VELOCITY, ChassisSpeeds.class);
+    private final Sender<VisionPoseEstimate> visionSender = Sender.broadcast(kChannels.VISION, VisionPoseEstimate.class);
+    private final Sender<int[]> apriltagSender = Sender.broadcast(kChannels.APRILTAGS, int[].class);
 
     private final Camera[] cameras;
 
@@ -37,16 +38,13 @@ public class Vision extends SubsystemBase implements Logged {
 
     private Optional<VisionPoseEstimate> latestEval = Optional.empty();
     private Timer lastEvalTime = new Timer();
+    private HashSet<Integer> seenTags = new HashSet<>();
 
     public Vision() {
         this.cameras = List.of(kVision.CAMERA_CONFIGS)
                 .stream()
                 .map(Camera::create)
                 .toArray(Camera[]::new);
-
-        GlobalState.setLocalizer(
-                new VisionOnlyPoseEstimator(),
-                LocalizerType.Vision);
 
         cameraPositionFieldVisualizer = NetworkTableInstance.getDefault()
                 .getTable("Visualizers")
@@ -56,6 +54,10 @@ public class Vision extends SubsystemBase implements Logged {
         cameraPositionFieldVisualizer.accept(false);
     }
 
+    private Pose2d getLocalizedPose() {
+        return poseReceiver.inspectOrDefault(GeomUtil.POSE2D_CENTER);
+    }
+
     public Optional<VisionPoseEstimate> getLatestEval() {
         return latestEval;
     }
@@ -63,14 +65,12 @@ public class Vision extends SubsystemBase implements Logged {
     public Pose2d getLatestPoseWithFallback() {
         return latestEval.map(VisionPoseEstimate::pose)
                 .map(Pose3d::toPose2d)
-                .orElse(GlobalState.getLocalizedPose());
+                .orElseGet(this::getLocalizedPose);
     }
 
     @Override
     public void periodic() {
-
         Tracer.startTrace("VisionPeriodic");
-        HashSet<Integer> seenTags = new HashSet<>();
 
         if (lastEvalTime.hasElapsed(0.2)) {
             latestEval = Optional.empty();
@@ -80,19 +80,21 @@ public class Vision extends SubsystemBase implements Logged {
             Tracer.startTrace(camera.getName() + "Periodic");
             camera.periodic();
 
-            if (cameraPositionFieldVisualizer.get(false)) {
-                log(
-                        camera.getName() + "/3d",
-                        GlobalState.getLocalizedPose3d().plus(
-                                camera.getRobotToCameraTransform3d()));
-                GlobalState.modifyField2d(field -> {
-                    Transform2d tf = new Transform2d(
-                            camera.getRobotToCameraTransform3d().getTranslation().toTranslation2d(),
-                            camera.getRobotToCameraTransform3d().getRotation().toRotation2d());
-                    field.getObject(camera.getName()).setPose(
-                            field.getRobotPose().plus(tf));
-                });
-            }
+            Pose2d localPose = getLocalizedPose();
+
+            // if (cameraPositionFieldVisualizer.get(false)) {
+            //     log(
+            //             camera.getName() + "/3d",
+            //             localPose.plus(
+            //                     camera.getRobotToCameraTransform3d()));
+            //     GlobalState.modifyField2d(field -> {
+            //         Transform2d tf = new Transform2d(
+            //                 camera.getRobotToCameraTransform3d().getTranslation().toTranslation2d(),
+            //                 camera.getRobotToCameraTransform3d().getRotation().toRotation2d());
+            //         field.getObject(camera.getName()).setPose(
+            //                 field.getRobotPose().plus(tf));
+            //     });
+            // }
 
             Optional<VisionPoseEstimate> optEval = camera.evalPose();
 
@@ -120,16 +122,18 @@ public class Vision extends SubsystemBase implements Logged {
                 ambiguity *= 2.0;
             }
 
-            ChassisSpeeds velo = GlobalState.getVelocity();
-            if (new Translation2d(velo.vxMetersPerSecond, velo.vyMetersPerSecond).getNorm() > kSwerve.MAX_DRIVE_VELOCITY
-                    / 2.0) {
-                ambiguity *= 2.0;
-            }
-            if (velo.omegaRadiansPerSecond > kSwerve.MAX_ANGULAR_VELOCITY / 3.0) {
-                ambiguity *= 2.0;
+            if (velocityReceiver.hasData()) {
+                ChassisSpeeds velo = velocityReceiver.inspect();
+                if (new Translation2d(velo.vxMetersPerSecond, velo.vyMetersPerSecond).getNorm() > kSwerve.MAX_DRIVE_VELOCITY
+                        / 2.0) {
+                    ambiguity *= 2.0;
+                }
+                if (velo.omegaRadiansPerSecond > kSwerve.MAX_ANGULAR_VELOCITY / 3.0) {
+                    ambiguity *= 2.0;
+                }
             }
 
-            Rotation2d rotation = GlobalState.getRobotRot().toRotation2d();
+            Rotation2d rotation = localPose.getRotation();
             if (Math.abs(
                 MathUtil.angleModulus(rotation.getRadians())
                 - MathUtil.angleModulus(eval.pose().getRotation().toRotation2d().getRadians())
@@ -139,27 +143,18 @@ public class Vision extends SubsystemBase implements Logged {
 
             log("cameras/" + camera.getName() + "/ambiguity", ambiguity);
 
-            if (!DriverStation.isAutonomousEnabled())
-                GlobalState.submitVisionData(eval, ambiguity);
+            visionSender.send(eval.withAmbiguity(ambiguity));
 
             seenTags.addAll(eval.apriltags());
 
             Tracer.endTrace();
         }
 
-        log(
-                "SeenTags",
-                seenTags.stream().toList().toString());
+        int[] seenTagsArray = seenTags.stream().mapToInt(i -> i).toArray();
+        apriltagSender.send(seenTagsArray);
+        log("seenTags", seenTagsArray);
 
-        GlobalState.modifyField2d(field -> {
-            field.getObject("seen_apriltags").setPoses(
-                    seenTags.stream()
-                            .map(tagId -> FieldConstants.APRIL_TAG_FIELD
-                                    .getTagPose(tagId)
-                                    .orElseGet(() -> new Pose3d(new Translation3d(0.0, 0.0, 0.0), new Rotation3d()))
-                                    .toPose2d())
-                            .toList());
-        });
+        seenTags.clear();
 
         Tracer.endTrace();
     }

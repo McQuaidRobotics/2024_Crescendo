@@ -7,6 +7,8 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+
+import com.igknighters.Localizer;
 import com.igknighters.Robot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import monologue.MonoDashboard;
@@ -111,22 +113,25 @@ public class TeleopSwerveBase extends Command {
 
         private final SendableChooser<TeleopMode> chooser = new SendableChooser<>();
 
-        private final Swerve swerve;
-        private final ControllerParent controller;
-
         private TeleopMode mode = TeleopMode.TRADITIONAL;
         private TeleopSwerveBase currentCmd;
 
-        public TeleopSwerveOmni(Swerve swerve, ControllerParent controller) {
-            addRequirements(swerve);
+        private final TeleopSwerveBase traditional;
+        private final TeleopSwerveBase absRotation;
+        private final TeleopSwerveBase targeted;
 
-            this.swerve = swerve;
-            this.controller = controller;
-            currentCmd = new TeleopSwerveTraditional(swerve, controller);
+        public TeleopSwerveOmni(Swerve swerve, ControllerParent controller, Localizer localizer) {
+            addRequirements(swerve);
 
             chooser.setDefaultOption("Traditional", TeleopMode.TRADITIONAL);
             chooser.addOption("Absolute Rotation", TeleopMode.ABS_ROT);
             chooser.addOption("Target", TeleopMode.TARGET);
+
+            traditional = new TeleopSwerveTraditional(swerve, controller);
+            absRotation = new TeleopSwerveAbsRot(swerve, controller);
+            targeted = new TeleopSwerveTargetSpeaker(swerve, controller, localizer);
+
+            currentCmd = traditional;
 
             MonoDashboard.publishSendable("/Robot/Swerve/TeleopMode", chooser);
         }
@@ -135,18 +140,20 @@ public class TeleopSwerveBase extends Command {
         public void execute() {
             var newMode = chooser.getSelected();
             if (newMode != mode) {
+                currentCmd.end(true);
                 mode = newMode;
                 switch (mode) {
                     case TRADITIONAL:
-                        currentCmd = new TeleopSwerveTraditional(swerve, controller);
+                        currentCmd = traditional;
                         break;
                     case ABS_ROT:
-                        currentCmd = new TeleopSwerveAbsRot(swerve, controller);
+                        currentCmd = absRotation;
                         break;
                     case TARGET:
-                        currentCmd = new TeleopSwerveTargetSpeaker(swerve, controller);
+                        currentCmd = targeted;
                         break;
                 }
+                currentCmd.initialize();
             }
             currentCmd.execute();
         }

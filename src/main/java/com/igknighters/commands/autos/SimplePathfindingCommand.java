@@ -1,5 +1,6 @@
 package com.igknighters.commands.autos;
 
+import com.igknighters.Localizer;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kAuto;
@@ -61,6 +62,7 @@ public class SimplePathfindingCommand extends Command {
             double rotationDelayDistance,
             PathConstraints constraints,
             Optional<Supplier<Rotation2d>> rotationOverrideSupplier,
+            Supplier<Pose2d> poseSupplier,
             Swerve swerve) {
         addRequirements(swerve);
         this.swerve = swerve;
@@ -78,7 +80,7 @@ public class SimplePathfindingCommand extends Command {
                 ConstValues.PERIODIC_TIME,
                 kSwerve.MAX_DRIVE_VELOCITY,
                 kSwerve.DRIVEBASE_RADIUS);
-        this.poseSupplier = swerve::getPose;
+        this.poseSupplier = poseSupplier;
         this.speedsSupplier = swerve::getChassisSpeed;
         this.output = chassisSpeeds -> swerve.drive(
                 chassisSpeeds, false);
@@ -96,8 +98,8 @@ public class SimplePathfindingCommand extends Command {
      * @param targetPose the pose to pathfind to
      * @param swerve     The swerve subsystem to use for pathfinding
      */
-    public SimplePathfindingCommand(Pose2d targetPose, Swerve swerve) {
-        this(targetPose, 0.0, 0.05, kAuto.DYNAMIC_PATH_CONSTRAINTS, Optional.empty(), swerve);
+    public SimplePathfindingCommand(Pose2d targetPose, Swerve swerve, Localizer localizer) {
+        this(targetPose, 0.0, 0.05, kAuto.DYNAMIC_PATH_CONSTRAINTS, Optional.empty(), localizer::pose, swerve);
     }
 
     public SimplePathfindingCommand flipForAlliance() {
@@ -107,6 +109,7 @@ public class SimplePathfindingCommand extends Command {
                 rotationDelayDistance,
                 constraints,
                 rotationOverrideSupplier,
+                poseSupplier,
                 swerve);
     }
 
@@ -117,6 +120,7 @@ public class SimplePathfindingCommand extends Command {
                 rotationDelayDistance,
                 constraints,
                 rotationOverrideSupplier,
+                poseSupplier,
                 swerve);
     }
 
@@ -127,6 +131,7 @@ public class SimplePathfindingCommand extends Command {
                 rotationDelayDistance,
                 constraints,
                 rotationOverrideSupplier,
+                poseSupplier,
                 swerve);
     }
 
@@ -137,6 +142,7 @@ public class SimplePathfindingCommand extends Command {
                 rotationDelayDistance,
                 constraints,
                 rotationOverrideSupplier,
+                poseSupplier,
                 swerve);
     }
 
@@ -152,6 +158,7 @@ public class SimplePathfindingCommand extends Command {
                     constraints.getMaxAngularAccelerationRpsSq() * constraintsMult
                 ),
                 rotationOverrideSupplier,
+                poseSupplier,
                 swerve);
     }
 
@@ -162,6 +169,7 @@ public class SimplePathfindingCommand extends Command {
                 rotationDelayDistance,
                 constraints,
                 Optional.of(rotationOverrideSupplier),
+                poseSupplier,
                 swerve);
     }
 
@@ -172,6 +180,7 @@ public class SimplePathfindingCommand extends Command {
                 rotationDelayDistance,
                 constraints,
                 rotationOverrideSupplier,
+                poseSupplier,
                 swerve);
     }
 

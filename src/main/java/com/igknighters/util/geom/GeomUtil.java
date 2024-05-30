@@ -2,13 +2,17 @@
 
 package com.igknighters.util.geom;
 
+import com.igknighters.constants.FieldConstants;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.geometry.Twist3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /**
@@ -16,6 +20,23 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * poses.
  */
 public class GeomUtil {
+    public static final Translation2d TRANSLATION2D_ZERO = new Translation2d();
+    public static final Translation2d TRANSLATION2D_CENTER = new Translation2d(
+        FieldConstants.FIELD_LENGTH / 2.0,
+        FieldConstants.FIELD_WIDTH / 2.0
+    );
+    public static final Rotation2d ROTATION2D_ZERO = new Rotation2d();
+    public static final Rotation2d ROTATION2D_PI = Rotation2d.fromDegrees(180.0);
+    public static final Pose2d POSE2D_ZERO = new Pose2d();
+    public static final Pose2d POSE2D_CENTER = new Pose2d(TRANSLATION2D_CENTER, ROTATION2D_ZERO);
+    public static final Transform2d TRANSFORM2D_ZERO = new Transform2d();
+    public static final Translation3d TRANSLATION3D_ZERO = new Translation3d();
+    public static final Rotation2d ROTATION3D_ZERO = new Rotation2d();
+    public static final Transform3d TRANSFORM3D_ZERO = new Transform3d();
+    public static final Pose3d POSE3D_ZERO = new Pose3d();
+    public static final Twist2d TWIST2D_ZERO = new Twist2d();
+    public static final Twist3d TWIST3D_ZERO = new Twist3d();
+
     /**
      * Creates a pure translating transform
      *
@@ -127,5 +148,20 @@ public class GeomUtil {
     public static Twist2d toTwist2d(ChassisSpeeds speeds) {
         return new Twist2d(
                 speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond);
+    }
+
+    /**
+     * Gets the angle between two points
+     * 
+     * @param currentTrans The current translation
+     * @param pose The pose to get the angle to
+     * @param angleOffet An offset to add to the angle
+     * @return The angle between the two points
+     */
+    public static Rotation2d rotationRelativeToPose(Translation2d currentTrans, Translation2d pose) {
+        double angleBetween = Math.atan2(
+                pose.getY() - currentTrans.getY(),
+                pose.getX() - currentTrans.getX());
+        return Rotation2d.fromRadians(angleBetween);
     }
 }

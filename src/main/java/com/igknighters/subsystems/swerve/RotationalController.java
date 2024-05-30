@@ -42,10 +42,6 @@ public class RotationalController {
                 + (kRotationController.kD * velocityError);
     }
 
-    public double calculate(double measurement, double target) {
-        return calculate(measurement, target, kRotationController.DEADBAND);
-    }
-
     public void reset(double measuredPosition, double measuredVelocity) {
         positionError = 0;
         prevError = 0;

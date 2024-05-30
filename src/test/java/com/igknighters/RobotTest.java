@@ -56,7 +56,7 @@ public class RobotTest {
         DriverStationSim.setEnabled(true);
 
         robot.withAutonomousPeriodicTest(robo -> {
-            boolean isFinished = GlobalState.getLocalizedPose()
+            boolean isFinished = robo.localizer.pose()
                     .getTranslation()
                     .getDistance(desiredEndPose.getTranslation()) < translationTolerance;
 
@@ -65,7 +65,7 @@ public class RobotTest {
             } else if (robo.getElapsedTime() > 2.5) {
                 throw new RuntimeException(
                         "Auto took to long, ended at "
-                                + GlobalState.getLocalizedPose().toString());
+                                + robo.localizer.pose().toString());
             }
         });
 

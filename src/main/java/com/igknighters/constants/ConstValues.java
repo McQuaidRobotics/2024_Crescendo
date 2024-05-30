@@ -63,6 +63,17 @@ public final class ConstValues {
     public static final double PERIODIC_TIME = 0.02; // 20ms
     public static final int PDH_CAN_ID = 0;
 
+    public static final class kChannels {
+        public static final String POSITION = "POSITION";
+        public static final String POSITION_SWERVE = "POSITION_SWERVE";
+        public static final String POSITION_VISION = "POSITION_VISION";
+        public static final String VELOCITY = "VELOCITY";
+
+        public static final String SWERVE_ODO_SAMPLES = "SWERVE_ODO_SAMPLES";
+        public static final String VISION = "VISION";
+        public static final String APRILTAGS = "APRILTAGS";
+    }
+
     public static final class kRobotCollisionGeometry {
         public static final double BUMPER_THICKNESS = 2.8 * Conv.INCHES_TO_METERS;
         public static final double BUMPER_HEIGHT = 5.75 * Conv.INCHES_TO_METERS;
@@ -240,7 +251,6 @@ public final class ConstValues {
             public static final double kP = 8.0;
             public static final double kD = 0.2;
 
-            public static final double DEADBAND = 0.5 * Conv.DEGREES_TO_RADIANS;
             public static final double CONSTRAINT_SCALAR = 0.7;
         }
 

@@ -1,15 +1,9 @@
 package com.igknighters.subsystems.swerve;
 
-import com.igknighters.GlobalState;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.subsystems.swerve.module.SwerveModule;
 
-import java.util.List;
-import java.util.ArrayList;
-
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
@@ -65,22 +59,14 @@ public class SwerveVisualizer {
         }
     }
 
-    private final Swerve swerve;
     private final SwerveModule[] modules;
     private final ModuleVisualizer[] moduleVisual;
     private final NetworkTable table;
-    private final BooleanEntry modulesOnField;
 
-    public SwerveVisualizer(Swerve swerve, SwerveModule... modules) {
-        this.swerve = swerve;
+    public SwerveVisualizer(SwerveModule... modules) {
         this.modules = modules;
 
         table = NetworkTableInstance.getDefault().getTable("Visualizers");
-
-        modulesOnField = table
-                .getSubTable("SwerveModules")
-                .getBooleanTopic("OnField")
-                .getEntry(false);
 
         moduleVisual = new ModuleVisualizer[this.modules.length];
         for (int i = 0; i < modules.length; i++) {
@@ -92,8 +78,6 @@ public class SwerveVisualizer {
                                     "SwerveModules/Module[" + modules[i].getModuleNumber() + "]"));
         }
 
-        modulesOnField.set(false);
-
     }
 
     private SendableBuilderImpl getBuilder(String subtable) {
@@ -102,38 +86,10 @@ public class SwerveVisualizer {
         return builder;
     }
 
-    public void update(Pose2d pose) {
+    public void update() {
         for (int i = 0; i < modules.length; i++) {
             moduleVisual[i].update(
                     modules[i].getCurrentState());
         }
-        updateField(pose);
-    }
-
-    private void updateField(Pose2d roboPose) {
-        GlobalState.modifyField2d(field -> field.setRobotPose(roboPose));
-
-        if (!modulesOnField.get(false))
-            return;
-
-        var trans = roboPose.getTranslation();
-        ArrayList<Pose2d> modulePoses = new ArrayList<Pose2d>();
-        var moduleTranslations = List.of(kSwerve.MODULE_CHASSIS_OFFSETS);
-        var moduleRotations = List.of(swerve.getModuleStates())
-                .stream()
-                .map(state -> state.angle)
-                .toList();
-
-        for (int i = 0; i < modules.length; i++) {
-            modulePoses.add(
-                    new Pose2d(
-                            moduleTranslations.get(i).plus(trans),
-                            moduleRotations.get(i)));
-        }
-
-        GlobalState.modifyField2d(field -> {
-            field.getObject("SwerveModules").setPoses(
-                    modulePoses.toArray(new Pose2d[0]));
-        });
     }
 }

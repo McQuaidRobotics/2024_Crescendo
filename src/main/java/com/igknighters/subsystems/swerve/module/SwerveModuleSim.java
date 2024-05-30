@@ -16,6 +16,7 @@ import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kSwerve.kAngleMotor;
 import com.igknighters.constants.ConstValues.kSwerve.kDriveMotor;
+import com.igknighters.subsystems.swerve.odometryThread.SimSwerveOdometryThread;
 import com.igknighters.util.BootupLogger;
 
 public class SwerveModuleSim extends SwerveModule {
@@ -37,7 +38,7 @@ public class SwerveModuleSim extends SwerveModule {
 
     public final int moduleNumber;
 
-    public SwerveModuleSim(final SwerveModuleConstants moduleConstants) {
+    public SwerveModuleSim(final SwerveModuleConstants moduleConstants, SimSwerveOdometryThread odoThread) {
         this.moduleNumber = moduleConstants.getModuleId().num;
 
         // just to test the consts
@@ -50,6 +51,8 @@ public class SwerveModuleSim extends SwerveModule {
         angleFeedback.enableContinuousInput(-Math.PI, Math.PI);
 
         super.angleAbsoluteRads = Units.rotationsToRadians(Math.random());
+
+        odoThread.addModulePositionSupplier(moduleNumber, this::getCurrentPosition);
 
         BootupLogger.bootupLog("    SwerveModule[" + this.moduleNumber + "] initialized (sim)");
     }

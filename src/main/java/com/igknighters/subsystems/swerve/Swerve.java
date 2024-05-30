@@ -1,21 +1,19 @@
 package com.igknighters.subsystems.swerve;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+
 import com.igknighters.Robot;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import monologue.Logged;
 
-import com.igknighters.GlobalState;
+import com.igknighters.constants.ConstValues.kChannels;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.subsystems.swerve.gyro.Gyro;
 import com.igknighters.subsystems.swerve.gyro.GyroReal;
@@ -23,9 +21,12 @@ import com.igknighters.subsystems.swerve.gyro.GyroSim;
 import com.igknighters.subsystems.swerve.module.SwerveModule;
 import com.igknighters.subsystems.swerve.module.SwerveModuleReal;
 import com.igknighters.subsystems.swerve.module.SwerveModuleSim;
+import com.igknighters.subsystems.swerve.odometryThread.RealSwerveOdometryThread;
+import com.igknighters.subsystems.swerve.odometryThread.SimSwerveOdometryThread;
+import com.igknighters.subsystems.swerve.odometryThread.SwerveOdometryThread;
 import com.igknighters.util.Tracer;
+import com.igknighters.util.Channels.Sender;
 import com.igknighters.constants.ConstValues;
-import com.igknighters.constants.FieldConstants;
 
 /**
  * This is the subsystem for our swerve drivetrain.
@@ -43,48 +44,50 @@ import com.igknighters.constants.FieldConstants;
  * The coordinate system used in this code is the field coordinate system.
  */
 public class Swerve extends SubsystemBase implements Logged {
+    private static final ChassisSpeeds ZERO_SPEEDS = new ChassisSpeeds();
+
+    private final Sender<ChassisSpeeds> velocitySender = Sender.broadcast(kChannels.VELOCITY, ChassisSpeeds.class);
+
     private final Gyro gyro;
     private final SwerveModule[] swerveMods;
+    private final SwerveOdometryThread odometryThread;
+
     private final SwerveVisualizer visualizer;
     private final SwerveSetpointProcessor setpointProcessor = new SwerveSetpointProcessor();
 
-    private RotationalController rotController = new RotationalController();
+    private final RotationalController rotController = new RotationalController();
 
     public Swerve() {
-
         if (Robot.isReal()) {
+            RealSwerveOdometryThread ot = new RealSwerveOdometryThread(
+                250,
+                rots -> (rots / kSwerve.DRIVE_GEAR_RATIO) * kSwerve.WHEEL_CIRCUMFERENCE
+            );
             swerveMods = new SwerveModule[] {
-                    new SwerveModuleReal(ConstValues.kSwerve.kMod0.CONSTANTS, false),
-                    new SwerveModuleReal(ConstValues.kSwerve.kMod1.CONSTANTS, false),
-                    new SwerveModuleReal(ConstValues.kSwerve.kMod2.CONSTANTS, false),
-                    new SwerveModuleReal(ConstValues.kSwerve.kMod3.CONSTANTS, false)
+                    new SwerveModuleReal(ConstValues.kSwerve.kMod0.CONSTANTS, true, ot),
+                    new SwerveModuleReal(ConstValues.kSwerve.kMod1.CONSTANTS, true, ot),
+                    new SwerveModuleReal(ConstValues.kSwerve.kMod2.CONSTANTS, true, ot),
+                    new SwerveModuleReal(ConstValues.kSwerve.kMod3.CONSTANTS, true, ot)
             };
-            gyro = new GyroReal();
+            gyro = new GyroReal(ot);
+            odometryThread = ot;
         } else {
+            SimSwerveOdometryThread ot = new SimSwerveOdometryThread(250);
             swerveMods = new SwerveModule[] {
-                    new SwerveModuleSim(ConstValues.kSwerve.kMod0.CONSTANTS),
-                    new SwerveModuleSim(ConstValues.kSwerve.kMod1.CONSTANTS),
-                    new SwerveModuleSim(ConstValues.kSwerve.kMod2.CONSTANTS),
-                    new SwerveModuleSim(ConstValues.kSwerve.kMod3.CONSTANTS)
+                    new SwerveModuleSim(ConstValues.kSwerve.kMod0.CONSTANTS, ot),
+                    new SwerveModuleSim(ConstValues.kSwerve.kMod1.CONSTANTS, ot),
+                    new SwerveModuleSim(ConstValues.kSwerve.kMod2.CONSTANTS, ot),
+                    new SwerveModuleSim(ConstValues.kSwerve.kMod3.CONSTANTS, ot)
             };
-            gyro = new GyroSim(this::getChassisSpeed);
+            gyro = new GyroSim(this::getChassisSpeed, ot);
+            odometryThread = ot;
         }
 
-        GlobalState.setLocalizer(
-                new SwerveDrivePoseEstimator(
-                        kSwerve.SWERVE_KINEMATICS,
-                        getYawWrappedRot(),
-                        getModulePositions(),
-                        new Pose2d(
-                                new Translation2d(
-                                        FieldConstants.FIELD_LENGTH / 2.0,
-                                        FieldConstants.FIELD_WIDTH / 2.0),
-                                new Rotation2d())),
-                GlobalState.LocalizerType.Hybrid);
-
-        visualizer = new SwerveVisualizer(this, swerveMods);
+        visualizer = new SwerveVisualizer(swerveMods);
 
         setpointProcessor.setDisabled(true);
+
+        odometryThread.start();
     }
 
     public void drive(ChassisSpeeds speeds, boolean isOpenLoop) {
@@ -120,20 +123,6 @@ public class Swerve extends SubsystemBase implements Logged {
         return gyro.getYawRads();
     }
 
-    /**
-     * @return The raw gyro pitch value in radians
-     */
-    public double getPitchRads() {
-        return gyro.getPitchRads();
-    }
-
-    /**
-     * @return The raw gyro roll value in radians
-     */
-    public double getRollRads() {
-        return gyro.getRollRads();
-    }
-
     public SwerveModulePosition[] getModulePositions() {
         SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
         for (SwerveModule module : swerveMods) {
@@ -162,37 +151,12 @@ public class Swerve extends SubsystemBase implements Logged {
         return kSwerve.SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
     }
 
-    public Pose2d getPose() {
-        return GlobalState.getLocalizedPose();
-    }
-
-    public void resetOdometry(Pose2d pose) {
-        setYaw(pose.getRotation());
-        GlobalState.resetSwerveLocalization(pose.getRotation(), pose, getModulePositions());
-    }
-
     public double rotVeloForRotation(Rotation2d wantedAngle, double deadband) {
         return rotController.calculate(getYawRads(), wantedAngle.getRadians(), deadband);
     }
 
-    public double rotVeloForRotation(Rotation2d wantedAngle) {
-        return rotController.calculate(getYawRads(), wantedAngle.getRadians());
-    }
-
     public void resetRotController() {
         rotController.reset(MathUtil.angleModulus(getYawRads()), getChassisSpeed().omegaRadiansPerSecond);
-    }
-
-    public Rotation2d rotationRelativeToPose(Rotation2d wantedAngleOffet, Translation2d pose) {
-        return rotationRelativeToPose(getPose().getTranslation(), wantedAngleOffet, pose);
-    }
-
-    public Rotation2d rotationRelativeToPose(Translation2d currentTrans, Rotation2d wantedAngleOffet, Translation2d pose) {
-        double angleBetween = Math.atan2(
-                pose.getY() - currentTrans.getY(),
-                pose.getX() - currentTrans.getX());
-        return Rotation2d.fromRadians(angleBetween)
-                .plus(wantedAngleOffet);
     }
 
     @Override
@@ -205,13 +169,15 @@ public class Swerve extends SubsystemBase implements Logged {
 
         Tracer.traceFunc("Gyro", gyro::periodic);
 
-        visualizer.update(GlobalState.submitSwerveData(getYawWrappedRot(), getModulePositions()));
-
         if (DriverStation.isDisabled()) {
-            log("targetChassisSpeed", new ChassisSpeeds());
+            log("targetChassisSpeed", ZERO_SPEEDS);
         }
 
-        GlobalState.setVelocity(getChassisSpeed());
+        ChassisSpeeds measuredSpeeds = getChassisSpeed();
+        log("measuredChassisSpeed", measuredSpeeds);
+        velocitySender.send(measuredSpeeds);
+
+        visualizer.update();
 
         Tracer.endTrace();
     }

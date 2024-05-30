@@ -42,6 +42,15 @@ public class RobotSetup {
             this.subsystems = subsystems;
             this.constID = constants;
         }
+
+        public boolean isSubsystemEnabled(Subsystems sub) {
+            for (Subsystems enabledSub : subsystems) {
+                if (enabledSub == sub) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     /**
@@ -90,6 +99,9 @@ public class RobotSetup {
     }
 
     public static void testOverrideRobotID(RobotID id) {
+        if (!Robot.isUnitTest()) {
+            throw new RuntimeException("Tried to override robot ID in non-unit test environment");
+        }
         currentID = id;
     }
 }

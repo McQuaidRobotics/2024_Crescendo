@@ -22,9 +22,6 @@ public class Autos {
      */
     public static void createSendableChooser(Swerve swerve) {
         autoChooser = AutoBuilder.buildAutoChooser("No Auto");
-        for (Command dynamicAutoCmd : DynamicRoutines.choosableDynamicRoutines(swerve)) {
-            autoChooser.addOption("(Dynamic) " + dynamicAutoCmd.getName(), dynamicAutoCmd);
-        }
         MonoDashboard.publishSendable("AutoChooser", autoChooser);
     }
 

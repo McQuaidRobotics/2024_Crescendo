@@ -1,21 +1,17 @@
 package com.igknighters.subsystems.swerve.gyro;
 
-import java.util.function.Supplier;
-
-import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.igknighters.GlobalState;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.HardwareIndex.SwerveHW;
+import com.igknighters.subsystems.swerve.odometryThread.RealSwerveOdometryThread;
 import com.igknighters.util.BootupLogger;
 import com.igknighters.util.FaultManager;
 import com.igknighters.util.can.CANRetrier;
 import com.igknighters.util.can.CANSignalManager;
 
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 
@@ -26,7 +22,7 @@ public class GyroReal extends Gyro {
     private final StatusSignal<Double> rollVeloSignal, pitchVeloSignal, yawVeloSignal;
     private final StatusSignal<Double> xAccel, yAccel;
 
-    public GyroReal() {
+    public GyroReal(RealSwerveOdometryThread odoThread) {
         gyro = new Pigeon2(ConstValues.kSwerve.PIGEON_ID, ConstValues.kSwerve.CANBUS);
         CANRetrier.retryStatusCode(() -> gyro.getConfigurator().apply(new Pigeon2Configuration()), 5);
 
@@ -43,19 +39,13 @@ public class GyroReal extends Gyro {
 
         CANSignalManager.registerSignals(
                 kSwerve.CANBUS,
-                rollSignal, pitchSignal, yawSignal,
-                rollVeloSignal, pitchVeloSignal, yawVeloSignal,
+                rollSignal, pitchSignal,
+                rollVeloSignal, pitchVeloSignal,
                 xAccel, yAccel);
 
-        gyro.optimizeBusUtilization(1.0);
+        odoThread.addGyroStatusSignals(yawSignal, yawVeloSignal);
 
-        Supplier<Rotation3d> sup = () -> {
-            return new Rotation3d(
-                    Math.toRadians(BaseStatusSignal.getLatencyCompensatedValue(rollSignal, rollVeloSignal)),
-                    Math.toRadians(BaseStatusSignal.getLatencyCompensatedValue(pitchSignal, pitchVeloSignal)),
-                    Math.toRadians(yawSignal.getValue()));
-        };
-        GlobalState.setGyroRotSupplier(sup);
+        gyro.optimizeBusUtilization(1.0);
 
         BootupLogger.bootupLog("    Gyro initialized (real)");
     }

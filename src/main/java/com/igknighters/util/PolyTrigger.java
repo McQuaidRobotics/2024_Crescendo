@@ -2,7 +2,6 @@ package com.igknighters.util;
 
 import java.util.function.Supplier;
 
-import com.igknighters.GlobalState;
 import com.igknighters.util.geom.Polygon2d;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -22,14 +21,6 @@ public class PolyTrigger extends Trigger {
 
     public PolyTrigger(Supplier<Pose2d> poseSupplier, Translation2d... polygonVertecies) {
         this(poseSupplier, new Polygon2d(polygonVertecies));
-    }
-
-    public PolyTrigger(Polygon2d polygon) {
-        this(GlobalState::getLocalizedPose, polygon);
-    }
-
-    public PolyTrigger(Translation2d... polygonVertecies) {
-        this(new Polygon2d(polygonVertecies));
     }
 
     public Polygon2d getPolygon() {

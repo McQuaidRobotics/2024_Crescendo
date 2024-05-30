@@ -1,5 +1,6 @@
 package com.igknighters.commands.autos;
 
+import com.igknighters.Localizer;
 import com.igknighters.commands.HigherOrderCommands;
 import com.igknighters.commands.autos.SpecializedNamedCommands.SpecializedNamedCommand;
 import com.igknighters.commands.stem.StemCommands;
@@ -44,7 +45,7 @@ public class AutosCmdRegister {
         NamedCommands.registerCommand(name, cmd);
     }
 
-    public static void registerCommands(AllSubsystems allSubsystems) {
+    public static void registerCommands(AllSubsystems allSubsystems, Localizer localizer) {
         if (!allSubsystems.hasAllSubsystems()) {
             return;
         }
@@ -92,20 +93,35 @@ public class AutosCmdRegister {
 
         registerCommand(
                 "Aim",
-                StemCommands.aimAtSpeaker(stem, AimSolveStrategy.STATIONARY_PIVOT_TELESCOPE_EXTEND, false)
-                    .withName("Aim")
+                StemCommands.aimAtSpeaker(
+                    stem,
+                    AimSolveStrategy.STATIONARY_PIVOT_TELESCOPE_EXTEND,
+                    false,
+                    localizer::pose,
+                    swerve::getChassisSpeed
+                ).withName("Aim")
         );
 
         registerCommand(
                 "AimRetract",
-                StemCommands.aimAtSpeaker(stem, AimSolveStrategy.STATIONARY_PIVOT, false)
-                    .withName("AimRetract")
+                StemCommands.aimAtSpeaker(
+                    stem,
+                    AimSolveStrategy.STATIONARY_PIVOT,
+                    false,
+                    localizer::pose,
+                    swerve::getChassisSpeed
+                ).withName("AimRetract")
         );
 
         registerCommand(
                 "AimVision",
-                StemCommands.aimAtSpeaker(stem, AimSolveStrategy.STATIONARY_PIVOT_TELESCOPE_EXTEND, false, vision::getLatestPoseWithFallback)
-                    .withName("AimVision")
+                StemCommands.aimAtSpeaker(
+                    stem,
+                    AimSolveStrategy.STATIONARY_PIVOT_TELESCOPE_EXTEND,
+                    false,
+                    vision::getLatestPoseWithFallback,
+                    swerve::getChassisSpeed
+                ).withName("AimVision")
         );
 
         registerCommand(
@@ -126,8 +142,13 @@ public class AutosCmdRegister {
             Commands.parallel(
                 new AutoSwerveTargetSpeaker(swerve, vision::getLatestPoseWithFallback)
                     .finallyDo(() -> logAutoEvent("SwerveTargeting", "Done")),
-                StemCommands.aimAtSpeaker(stem, AimSolveStrategy.STATIONARY_PIVOT_TELESCOPE_EXTEND, true)
-                    .finallyDo(() -> logAutoEvent("Stem Targeting", "Done"))
+                StemCommands.aimAtSpeaker(
+                    stem,
+                    AimSolveStrategy.STATIONARY_PIVOT_TELESCOPE_EXTEND,
+                    true,
+                    vision::getLatestPoseWithFallback,
+                    swerve::getChassisSpeed
+                ).finallyDo(() -> logAutoEvent("Stem Targeting", "Done"))
             ).andThen(
                 UmbrellaCommands.shootAuto(umbrella)
                     .finallyDo(() -> logAutoEvent("Shooting", "Done"))
@@ -139,8 +160,13 @@ public class AutosCmdRegister {
             Commands.parallel(
                 new AutoSwerveTargetSpeaker(swerve, vision::getLatestPoseWithFallback)
                     .finallyDo(() -> logAutoEvent("SwerveTargeting", "Done")),
-                StemCommands.aimAtSpeaker(stem, AimSolveStrategy.STATIONARY_PIVOT, true)
-                    .finallyDo(() -> logAutoEvent("Stem Targeting", "Done"))
+                StemCommands.aimAtSpeaker(
+                    stem,
+                    AimSolveStrategy.STATIONARY_PIVOT,
+                    true,
+                    vision::getLatestPoseWithFallback,
+                    swerve::getChassisSpeed
+                ).finallyDo(() -> logAutoEvent("Stem Targeting", "Done"))
             ).andThen(
                 UmbrellaCommands.shootAuto(umbrella)
                     .finallyDo(() -> logAutoEvent("Shooting", "Done"))
@@ -172,7 +198,8 @@ public class AutosCmdRegister {
                     stem,
                     AimSolveStrategy.STATIONARY_PIVOT_GRAVITY_TELESCOPE_EXTEND,
                     true,
-                    vision::getLatestPoseWithFallback
+                    vision::getLatestPoseWithFallback,
+                    swerve::getChassisSpeed
                 ).finallyDo(() -> logAutoEvent("Stem Targeting", "Done"))
             ).andThen(
                 UmbrellaCommands.shootAuto(umbrella)

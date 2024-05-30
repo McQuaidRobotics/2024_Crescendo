@@ -3,7 +3,6 @@ package com.igknighters.commands.stem;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-import com.igknighters.GlobalState;
 import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kUmbrella;
@@ -11,7 +10,6 @@ import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
-import com.igknighters.subsystems.stem.StemSolvers;
 import com.igknighters.subsystems.stem.StemSolvers.AimSolveStrategy;
 import com.igknighters.subsystems.stem.StemSolvers.StemSolveInput;
 import com.igknighters.util.geom.AllianceFlip;
@@ -27,26 +25,26 @@ public class StemCommands {
      * at the speaker
      */
     private static class AimAtSpeakerCommand extends Command {
-        private Stem stem;
-        private AimSolveStrategy aimStrategy;
+        private final Stem stem;
+        private final AimSolveStrategy aimStrategy;
+        private final Supplier<Pose2d> poseSupplier;
+        private final Supplier<ChassisSpeeds> velocitySupplier;
 
         private boolean hasFinished = false, canFinish = false;
 
-        private Supplier<Pose2d> poseSupplier = GlobalState::getLocalizedPose;
-
-        private AimAtSpeakerCommand(Stem stem, AimSolveStrategy aimStrategy, boolean canFinish, Supplier<Pose2d> poseSupplier) {
+        private AimAtSpeakerCommand(
+            Stem stem,
+            AimSolveStrategy aimStrategy,
+            boolean canFinish,
+            Supplier<Pose2d> poseSupplier,
+            Supplier<ChassisSpeeds> velocitySupplier
+        ) {
             addRequirements(stem);
             this.stem = stem;
             this.aimStrategy = aimStrategy;
             this.canFinish = canFinish;
             this.poseSupplier = poseSupplier;
-        }
-
-        private AimAtSpeakerCommand(Stem stem, AimSolveStrategy aimStrategy, boolean canFinish) {
-            addRequirements(stem);
-            this.stem = stem;
-            this.aimStrategy = aimStrategy;
-            this.canFinish = canFinish;
+            this.velocitySupplier = velocitySupplier;
         }
 
         @Override
@@ -54,7 +52,7 @@ public class StemCommands {
             Translation2d speaker = FieldConstants.SPEAKER.toTranslation2d();
             Translation2d targetTranslation = AllianceFlip.isBlue() ? speaker : AllianceFlip.flipTranslation(speaker);
 
-            ChassisSpeeds currentChassisSpeed = GlobalState.getFieldRelativeVelocity();
+            ChassisSpeeds currentChassisSpeed = velocitySupplier.get();
 
             Pose2d currentPose = poseSupplier.get();
 
@@ -92,52 +90,64 @@ public class StemCommands {
         }
     }
 
-    /**
-     * A command class that continually calculates the wrist radians needed to pass a gamepiece to a position on then field
-     */
-    private static class AimAtPassPointCommand extends Command {
-        private Stem stem;
-        private double time;
-        private Translation2d passPoint;
-        private boolean hasFinished = false, canFinish = false;
+    // /**
+    //  * A command class that continually calculates the wrist radians needed to pass a gamepiece to a position on then field
+    //  */
+    // private static class AimAtPassPointCommand extends Command {
+    //     private final Stem stem;
+    //     private final double time;
+    //     private final Translation2d passPoint;
+    //     private final Supplier<Pose2d> poseSupplier;
+    //     private final Supplier<ChassisSpeeds> velocitySupplier;
 
-        private AimAtPassPointCommand(Stem stem, Translation2d passPoint, double time, boolean canFinish) {
-            addRequirements(stem);
-            this.stem = stem;
-            this.time = time;
-            this.passPoint = passPoint;
-            this.canFinish = canFinish;
-        }
+    //     private boolean hasFinished = false, canFinish = false;
 
-        @Override
-        public void execute() {
-            Translation2d passPoint = this.passPoint;
-            Translation2d targetTranslation = AllianceFlip.isBlue() ? passPoint : AllianceFlip.flipTranslation(passPoint);
+    //     private AimAtPassPointCommand(
+    //         Stem stem,
+    //         Translation2d passPoint,
+    //         double time,
+    //         boolean canFinish,
+    //         Supplier<Pose2d> poseSupplier,
+    //         Supplier<ChassisSpeeds> velocitySupplier
+    //     ) {
+    //         addRequirements(stem);
+    //         this.stem = stem;
+    //         this.time = time;
+    //         this.passPoint = passPoint;
+    //         this.canFinish = canFinish;
+    //         this.poseSupplier = poseSupplier;
+    //         this.velocitySupplier = velocitySupplier;
+    //     }
 
-            Pose2d currentPose = GlobalState.getLocalizedPose();
-            double distance = currentPose.getTranslation().getDistance(targetTranslation);
+    //     @Override
+    //     public void execute() {
+    //         Translation2d passPoint = this.passPoint;
+    //         Translation2d targetTranslation = AllianceFlip.isBlue() ? passPoint : AllianceFlip.flipTranslation(passPoint);
 
-            double pivotRads = kControls.STATIONARY_AIM_AT_PIVOT_RADIANS;
-            double telescopeMeters = kTelescope.MIN_METERS;
-            double wristRads = StemSolvers.passWristSolveTheta(
-                telescopeMeters,
-                pivotRads,
-                distance,
-                kUmbrella.NOTE_VELO,
-                time,
-                true
-            ); 
+    //         Pose2d currentPose = poseSupplier.get();
+    //         double distance = currentPose.getTranslation().getDistance(targetTranslation);
 
-            hasFinished = stem.setStemPosition(
-                StemPosition.fromRadians(pivotRads, wristRads, telescopeMeters)
-            );
-        }
+    //         double pivotRads = kControls.STATIONARY_AIM_AT_PIVOT_RADIANS;
+    //         double telescopeMeters = kTelescope.MIN_METERS;
+    //         double wristRads = StemSolvers.passWristSolveTheta(
+    //             telescopeMeters,
+    //             pivotRads,
+    //             distance,
+    //             kUmbrella.NOTE_VELO,
+    //             time,
+    //             true
+    //         ); 
 
-        @Override
-        public boolean isFinished() {
-            return hasFinished && canFinish;
-        }
-    }
+    //         hasFinished = stem.setStemPosition(
+    //             StemPosition.fromRadians(pivotRads, wristRads, telescopeMeters)
+    //         );
+    //     }
+
+    //     @Override
+    //     public boolean isFinished() {
+    //         return hasFinished && canFinish;
+    //     }
+    // }
 
     /**
      * Will move the stem to a position and finish when it has reached
@@ -183,24 +193,12 @@ public class StemCommands {
      * 
      * @param stem      The stem subsystem
      * @param canFinish Whether the command can finish
+     * @param poseSupplier Localizer
      * @return A command to be scheduled
      */
-    public static Command aimAtSpeaker(Stem stem, boolean canFinish) {
-        return new AimAtSpeakerCommand(stem, kControls.DEFAULT_AIM_STRATEGY, canFinish)
-                .withName("Aim At SPEAKER");
-    }
-
-    /**
-     * Aims the pivot or wrist or both depending on the default aim
-     * strategy in constants.
-     * 
-     * @param stem        The stem subsystem
-     * @param aimStrategy The aiming strategy to use when targeting the speaker
-     * @return A command to be scheduled
-     */
-    public static Command aimAtSpeaker(Stem stem, AimSolveStrategy aimStrategy, boolean canFinish) {
-        return new AimAtSpeakerCommand(stem, aimStrategy, canFinish)
-                .withName("Aim At SPEAKER");
+    public static Command aimAtSpeaker(Stem stem, boolean canFinish, Supplier<Pose2d> poseSupplier, Supplier<ChassisSpeeds> veloSupplier) {
+        return new AimAtSpeakerCommand(stem, kControls.DEFAULT_AIM_STRATEGY, canFinish, poseSupplier, veloSupplier)
+                .withName("Aim At SPEAKER(" + kControls.DEFAULT_AIM_STRATEGY + ")");
     }
 
     /**
@@ -213,15 +211,15 @@ public class StemCommands {
      * @param poseSupplier Localizer
      * @return A command to be scheduled
      */
-    public static Command aimAtSpeaker(Stem stem, AimSolveStrategy aimStrategy, boolean canFinish, Supplier<Pose2d> poseSupplier) {
-        return new AimAtSpeakerCommand(stem, aimStrategy, canFinish, poseSupplier)
-                .withName("Aim At SPEAKER");
+    public static Command aimAtSpeaker(Stem stem, AimSolveStrategy aimStrategy, boolean canFinish, Supplier<Pose2d> poseSupplier, Supplier<ChassisSpeeds> veloSupplier) {
+        return new AimAtSpeakerCommand(stem, aimStrategy, canFinish, poseSupplier, veloSupplier)
+                .withName("Aim At SPEAKER(" + aimStrategy + ")");
     }
 
-    public static Command aimAtPassPoint(Stem stem, Translation2d passPoint, double time, boolean canFinish) {
-        return new AimAtPassPointCommand(stem, passPoint, time, canFinish)
-            .withName("Aim At Pass Point");
-    }
+    // public static Command aimAtPassPoint(Stem stem, Translation2d passPoint, double time, boolean canFinish) {
+    //     return new AimAtPassPointCommand(stem, passPoint, time, canFinish)
+    //         .withName("Aim At Pass Point");
+    // }
 
     /**
      * Allows manual control of the output of each individual component of the stem.
@@ -233,8 +231,11 @@ public class StemCommands {
      * @return A command to be scheduled
      */
     public static Command testStem(
-            Stem stem, DoubleSupplier pivotPercentOut,
-            DoubleSupplier telescopePercentOut, DoubleSupplier wristPercentOut) {
+            Stem stem,
+            DoubleSupplier pivotPercentOut,
+            DoubleSupplier telescopePercentOut,
+            DoubleSupplier wristPercentOut
+    ) {
         return stem.run(() -> {
             stem.setStemVolts(
                     pivotPercentOut.getAsDouble() * 12.0,

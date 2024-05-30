@@ -8,6 +8,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.numbers.N5;
 
+import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.igknighters.util.BootupLogger;

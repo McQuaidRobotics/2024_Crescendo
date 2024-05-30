@@ -3,25 +3,22 @@ package com.igknighters;
 import java.util.HashMap;
 import java.util.function.BiConsumer;
 
-import monologue.LogLevel;
 import monologue.Logged;
 import monologue.MonoDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
 
 import com.ctre.phoenix6.SignalLogger;
-import com.igknighters.commands.autos.AutosCmdRegister;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstantHelper;
 import com.igknighters.constants.RobotSetup;
-import com.igknighters.constants.ConstValues.kAuto;
-import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.controllers.DriverController;
 import com.igknighters.controllers.OperatorController;
 import com.igknighters.controllers.TestingController;
@@ -32,46 +29,38 @@ import com.igknighters.util.ShuffleboardApi;
 import com.igknighters.util.Tracer;
 import com.igknighters.util.can.CANBusLogging;
 import com.igknighters.util.can.CANSignalManager;
-import com.igknighters.util.geom.AllianceFlip;
+import com.igknighters.util.geom.GeomUtil;
 import com.igknighters.util.robots.UnitTestableRobot;
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.pathfinding.LocalADStar;
-import com.pathplanner.lib.pathfinding.Pathfinding;
 
-public class Robot extends UnitTestableRobot implements Logged {
+public class Robot extends UnitTestableRobot<Robot> implements Logged {
+
+    private final CommandScheduler scheduler = CommandScheduler.getInstance();
+    private final PowerLogger powerLogger = new PowerLogger(
+        ConstValues.PDH_CAN_ID,
+        ModuleType.kRev,
+        "/PowerDistribution",
+        true
+    );;
+
+    public final Localizer localizer = new Localizer();
+
+    private final DriverController driverController = new DriverController(0, localizer);;
+    private final OperatorController operatorController = new OperatorController(1);
+    private final TestingController testingController = new TestingController(3, true);
+
+    public final AllSubsystems allSubsystems;
 
     private Command autoCmd;
-    private final CommandScheduler scheduler = CommandScheduler.getInstance();
-    private PowerLogger powerLogger;
 
-    private final DriverController driverController;
-    private final OperatorController operatorController;
-    private final TestingController testingController;
-    private AllSubsystems allSubsystems;
 
     public Robot() {
         super(ConstValues.PERIODIC_TIME);
-        if (isUnitTest()) GlobalState.restoreDefaultState();
 
         // logging needs to be setup asap as to not lose logging calls b4 its setup
         setupLogging();
 
-        // creates the controllers but doesnt assign the bindings
-        // controllers have to be in the constructor to all them to be final
-        driverController = new DriverController(0);
-        operatorController = new OperatorController(1);
-        testingController = new TestingController(3, true);
-
         // consts also should be early initialized
         ConstantHelper.applyRoboConst(ConstValues.class);
-    }
-
-    @Override
-    public void robotInit() {
-        Pathfinding.setPathfinder(new LocalADStar());
-
-        GlobalState.publishField2d();
 
         allSubsystems = new AllSubsystems(RobotSetup.getRobotID().subsystems);
 
@@ -86,11 +75,13 @@ public class Robot extends UnitTestableRobot implements Logged {
         testingController.assignButtons(allSubsystems);
 
         if (allSubsystems.swerve.isPresent()) {
-            var swerve = allSubsystems.swerve.get();
+            final Swerve swerve = allSubsystems.swerve.get();
 
-            swerve.setDefaultCommand(new TeleopSwerveBase.TeleopSwerveOmni(swerve, driverController));
+            localizer.resetOdometry(GeomUtil.POSE2D_CENTER, swerve.getModulePositions());
 
-            setupAutos(swerve);
+            swerve.setDefaultCommand(new TeleopSwerveBase.TeleopSwerveOmni(swerve, driverController, localizer));
+
+            // setupAutos(swerve);
         }
 
         if (allSubsystems.umbrella.isPresent()) {
@@ -99,6 +90,8 @@ public class Robot extends UnitTestableRobot implements Logged {
                 UmbrellaCommands.idleShooter(umbrella)
             );
         }
+
+        autoCmd = Commands.none().withName("Nothing Auto");
 
         System.gc();
     }
@@ -112,22 +105,17 @@ public class Robot extends UnitTestableRobot implements Logged {
         Tracer.traceFunc("CANBusLoggung", CANBusLogging::run);
         Tracer.traceFunc("Shuffleboard", ShuffleboardApi::run);
         Tracer.traceFunc("Monologue", Monologue::updateAll);
-        Tracer.traceFunc("GlobalStateLog", GlobalState::log);
         Tracer.traceFunc("PowerLogger", powerLogger::log);
         Tracer.endTrace();
     }
 
     @Override
     public void disabledPeriodic() {
-        autoCmd = GlobalState.getAutoCommand();
         MonoDashboard.put("Commands/SelectedAutoCommand", autoCmd.getName());
     }
 
     @Override
     public void autonomousInit() {
-        if (isUnitTest()) {
-            autoCmd = GlobalState.getAutoCommand();
-        }
         if (autoCmd != null) {
             MonoDashboard.put("Commands/CurrentAutoCommand", autoCmd.getName());
             System.out.println("---- Starting auto command: " + autoCmd.getName() + " ----");
@@ -149,7 +137,7 @@ public class Robot extends UnitTestableRobot implements Logged {
         if (isReal()) SignalLogger.enableAutoLogging(false);
 
         if (!isUnitTest()) {
-            // setup monologue with lazy logging and now datalog prefix
+            // setup monologue with lazy logging and no datalog prefix
             // robot is the root object
             Monologue.setupMonologue(
                 this,
@@ -164,13 +152,6 @@ public class Robot extends UnitTestableRobot implements Logged {
             Monologue.setupMonologueDisabled(this, "/Robot", true);
         }
 
-        powerLogger = new PowerLogger(
-            ConstValues.PDH_CAN_ID,
-            ModuleType.kRev,
-            "/PowerDistribution",
-            false
-        );
-
         // send all library/utility made tables that don't use monologue to file aswell
         Monologue.sendNetworkToFile("/Visualizers");
         Monologue.sendNetworkToFile("/PathPlanner");
@@ -180,21 +161,21 @@ public class Robot extends UnitTestableRobot implements Logged {
 
         // logs build data to the datalog
         final String meta = "/BuildData/";
-        MonoDashboard.put(meta + "RuntimeType", getRuntimeType().toString(), LogLevel.OVERRIDE_FILE_ONLY);
-        MonoDashboard.put(meta + "ProjectName", BuildConstants.MAVEN_NAME, LogLevel.OVERRIDE_FILE_ONLY);
-        MonoDashboard.put(meta + "BuildDate", BuildConstants.BUILD_DATE, LogLevel.OVERRIDE_FILE_ONLY);
-        MonoDashboard.put(meta + "GitSHA", BuildConstants.GIT_SHA, LogLevel.OVERRIDE_FILE_ONLY);
-        MonoDashboard.put(meta + "GitDate", BuildConstants.GIT_DATE, LogLevel.OVERRIDE_FILE_ONLY);
-        MonoDashboard.put(meta + "GitBranch", BuildConstants.GIT_BRANCH, LogLevel.OVERRIDE_FILE_ONLY);
+        MonoDashboard.put(meta + "RuntimeType", getRuntimeType().toString());
+        MonoDashboard.put(meta + "ProjectName", BuildConstants.MAVEN_NAME);
+        MonoDashboard.put(meta + "BuildDate", BuildConstants.BUILD_DATE);
+        MonoDashboard.put(meta + "GitSHA", BuildConstants.GIT_SHA);
+        MonoDashboard.put(meta + "GitDate", BuildConstants.GIT_DATE);
+        MonoDashboard.put(meta + "GitBranch", BuildConstants.GIT_BRANCH);
         switch (BuildConstants.DIRTY) {
             case 0:
-                MonoDashboard.put(meta + "GitDirty", "All changes committed", LogLevel.OVERRIDE_FILE_ONLY);
+                MonoDashboard.put(meta + "GitDirty", "All changes committed");
                 break;
             case 1:
-                MonoDashboard.put(meta + "GitDirty", "Uncomitted changes", LogLevel.OVERRIDE_FILE_ONLY);
+                MonoDashboard.put(meta + "GitDirty", "Uncomitted changes");
                 break;
             default:
-                MonoDashboard.put(meta + "GitDirty", "Unknown", LogLevel.OVERRIDE_FILE_ONLY);
+                MonoDashboard.put(meta + "GitDirty", "Unknown");
                 break;
         }
 
@@ -223,45 +204,5 @@ public class Robot extends UnitTestableRobot implements Logged {
                         (Command command) -> {
                             logCommandFunction.accept(command, false);
                         });
-    }
-
-    private void setupAutos(Swerve swerve) {
-
-        if (AutoBuilder.isConfigured() && isUnitTest()) {
-            // this code can be run multiple times during unit tests,
-            // because of AutoBuilder once paradigm this causes a crash
-            return;
-        }
-
-        AutosCmdRegister.registerCommands(allSubsystems);
-
-        AutoBuilder.configureHolonomic(
-                swerve::getPose,
-                swerve::resetOdometry,
-                swerve::getChassisSpeed,
-                chassisSpeeds -> swerve.drive(
-                        chassisSpeeds, false),
-                new HolonomicPathFollowerConfig(
-                        kAuto.AUTO_TRANSLATION_PID,
-                        kAuto.AUTO_ANGULAR_PID,
-                        kSwerve.MAX_DRIVE_VELOCITY,
-                        kSwerve.DRIVEBASE_RADIUS,
-                        kAuto.DYNAMIC_REPLANNING_CONFIG),
-                AllianceFlip::isRed,
-                swerve);
-
-        GlobalState.onceInitAutoChooser(swerve);
-    }
-
-    /**
-     * Should only be used for unit tests
-     * 
-     * @throws RuntimeException Ff called outside of a unit test
-     */
-    public AllSubsystems getAllSubsystems() {
-        if (!isUnitTest()) {
-            throw new RuntimeException("This method should only be called in unit tests");
-        }
-        return allSubsystems;
     }
 }

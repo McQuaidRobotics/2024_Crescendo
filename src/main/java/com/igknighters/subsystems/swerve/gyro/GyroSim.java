@@ -1,8 +1,10 @@
 package com.igknighters.subsystems.swerve.gyro;
 
 import com.igknighters.constants.ConstValues;
+import com.igknighters.subsystems.swerve.odometryThread.SimSwerveOdometryThread;
 import com.igknighters.util.BootupLogger;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 
@@ -12,8 +14,10 @@ public class GyroSim extends Gyro {
 
     private final Supplier<ChassisSpeeds> chassisSpeedSupplier;
 
-    public GyroSim(Supplier<ChassisSpeeds> chassisSpeedSupplier) {
+    public GyroSim(Supplier<ChassisSpeeds> chassisSpeedSupplier, SimSwerveOdometryThread odoThread) {
         this.chassisSpeedSupplier = chassisSpeedSupplier;
+
+        odoThread.addRotationSupplier(() -> Rotation2d.fromRadians(this.getYawRads()));
 
         BootupLogger.bootupLog("    Gyro initialized (sim)");
     }

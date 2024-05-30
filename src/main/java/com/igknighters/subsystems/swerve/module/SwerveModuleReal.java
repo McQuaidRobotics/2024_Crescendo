@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kSwerve.kAngleMotor;
 import com.igknighters.constants.ConstValues.kSwerve.kDriveMotor;
+import com.igknighters.subsystems.swerve.odometryThread.RealSwerveOdometryThread;
 import com.igknighters.util.BootupLogger;
 import com.igknighters.util.can.CANRetrier;
 import com.igknighters.util.can.CANSignalManager;
@@ -48,7 +49,7 @@ public class SwerveModuleReal extends SwerveModule {
 
     private Rotation2d lastAngle = new Rotation2d();
 
-    public SwerveModuleReal(final SwerveModuleConstants moduleConstants, boolean isPro) {
+    public SwerveModuleReal(final SwerveModuleConstants moduleConstants, boolean isPro, RealSwerveOdometryThread odoThread) {
         this.isPro = isPro;
         this.moduleNumber = moduleConstants.getModuleId().num;
         this.rotationOffset = moduleConstants.getRotationOffset();
@@ -76,11 +77,17 @@ public class SwerveModuleReal extends SwerveModule {
 
         CANSignalManager.registerSignals(
             kSwerve.CANBUS,
-            drivePositionSignal, driveVelocitySignal,
             driveVoltSignal, driveAmpSignal,
-            anglePositionSignal, angleVelocitySignal,
             angleVoltSignal, angleAmpSignal,
             angleAbsoluteSignal, angleAbsoluteVeloSignal
+        );
+
+        odoThread.addModuleStatusSignals(
+            moduleNumber,
+            drivePositionSignal,
+            driveVelocitySignal,
+            anglePositionSignal,
+            angleVelocitySignal
         );
 
         driveMotor.optimizeBusUtilization(1.0);

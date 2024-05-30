@@ -51,6 +51,13 @@ public class Channels {
         public abstract T recv();
 
         /**
+         * Inspects the received value without removing it from the channel
+         * 
+         * @return the received value
+         */
+        public abstract T inspect();
+
+        /**
          * @return an optional containing the received value, or empty if the channel is
          *         empty,
          *         removing the value from the channel
@@ -60,6 +67,35 @@ public class Channels {
                 return Optional.of(recv());
             } else {
                 return Optional.empty();
+            }
+        }
+
+        /**
+         * Attempts to inspect the received value without removing it from the channel
+         * 
+         * @return an optional containing the received value, or empty if the channel is
+         */
+        public Optional<T> tryInspect() {
+            if (hasData()) {
+                return Optional.of(inspect());
+            } else {
+                return Optional.empty();
+            }
+        }
+
+        public T recvOrDefault(T defaultValue) {
+            if (hasData()) {
+                return recv();
+            } else {
+                return defaultValue;
+            }
+        }
+
+        public T inspectOrDefault(T defaultValue) {
+            if (hasData()) {
+                return inspect();
+            } else {
+                return defaultValue;
             }
         }
 
@@ -115,9 +151,8 @@ public class Channels {
          * @param consumer    the consumer to call with the received value
          * @return the receiver
          */
-        public static <T> Receiver<T> reactor(final String channelName, Class<T> clazz,
-                Consumer<T> consumer) {
-            return new ReceiverReactor<T>(clazz, channelName, consumer);
+        public static <T> void reactor(final String channelName, Class<T> clazz, Consumer<T> consumer) {
+            new ReceiverReactor<T>(clazz, channelName, consumer);
         }
     }
 
@@ -128,7 +163,7 @@ public class Channels {
         private final ReadWriteLock lock = new ReentrantReadWriteLock();
         private final String channelName;
 
-        private Optional<T> value;
+        private Optional<T> value = Optional.empty();
 
         public ReceiverLatest(Class<T> clazz, final String channelName) {
             super(clazz, channelName);
@@ -142,6 +177,16 @@ public class Channels {
                 return value.get();
             } finally {
                 value = Optional.empty();
+                lock.readLock().unlock();
+            }
+        }
+
+        @Override
+        public T inspect() {
+            lock.readLock().lock();
+            try {
+                return value.get();
+            } finally {
                 lock.readLock().unlock();
             }
         }
@@ -214,6 +259,16 @@ public class Channels {
         }
 
         @Override
+        public T inspect() {
+            lock.readLock().lock();
+            try {
+                return buffer[oldIndex];
+            } finally {
+                lock.readLock().unlock();
+            }
+        }
+
+        @Override
         public boolean hasData() {
             lock.readLock().lock();
             try {
@@ -260,6 +315,11 @@ public class Channels {
         @Override
         public T recv() {
             throw new UnsupportedOperationException("Reactor channels do not support recv");
+        }
+
+        @Override
+        public T inspect() {
+            throw new UnsupportedOperationException("Reactor channels do not support inspect");
         }
 
         @Override

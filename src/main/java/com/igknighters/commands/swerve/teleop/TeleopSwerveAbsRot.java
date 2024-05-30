@@ -4,6 +4,8 @@ import com.igknighters.subsystems.swerve.Swerve;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
+
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.controllers.ControllerParent;
 
@@ -17,7 +19,7 @@ public class TeleopSwerveAbsRot extends TeleopSwerveBase {
     @Override
     public void execute() {
         Translation2d absRotation = orientForUser(new Translation2d(getRotationX(), getRotationY()));
-        double rotVelo = swerve.rotVeloForRotation(absRotation.getAngle()) * absRotation.getNorm();
+        double rotVelo = swerve.rotVeloForRotation(absRotation.getAngle(), Units.degreesToRadians(0.75)) * absRotation.getNorm();
 
         Translation2d vt = orientForUser(
                 new Translation2d(getTranslationX(), getTranslationY())).times(kSwerve.MAX_DRIVE_VELOCITY);

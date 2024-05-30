@@ -18,7 +18,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
-import com.igknighters.GlobalState;
 import com.igknighters.LED;
 import com.igknighters.LED.LedAnimations;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
@@ -45,10 +44,7 @@ public class TestingController extends ControllerParent {
                                     0.53)));
         });
 
-        this.B.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
-            trig.onTrue(
-                    StemCommands.aimAtSpeaker(allss.stem.get(), false));
-        });
+        // this.B.binding = 
 
         this.X.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
             trig.onTrue(
@@ -108,31 +104,9 @@ public class TestingController extends ControllerParent {
         // allss.umbrella.get()));
         // }, Subsystems.Umbrella);
 
-        this.LT.binding = new Binding((trig, allss) -> {
-            trig.whileTrue(
-                    Commands.parallel(
-                        StemCommands.holdAt(allss.stem.get(), StemPosition.fromRadians(
-                            Units.degreesToRadians(90.0), 
-                            Units.degreesToRadians(90.0), 
-                            kTelescope.MIN_METERS)),
-                        UmbrellaCommands.spinupShooter(
-                                allss.umbrella.get(),
-                                kControls.SHOOTER_RPM,
-                                ShooterSpinupReason.None))
-                        .finallyDo(allss.umbrella.get()::stopAll)
-                        .withName("Parallel to ground"));
-        }, Subsystems.Swerve, Subsystems.Stem, Subsystems.Umbrella);
+        // this.LT.binding = 
 
-        this.RT.binding = new Binding((trig, allss) -> {
-            trig.onTrue(
-                new ProxyCommand(
-                    () -> HigherOrderCommands.genericShoot(
-                        allss.swerve.get(),
-                        allss.stem.get(),
-                        allss.umbrella.get(),
-                        this))
-            .withName("Proxy Shoot"));
-        }, Subsystems.Umbrella, Subsystems.Stem, Subsystems.Swerve);
+        // this.RT.binding 
 
         /// DPAD
         this.DPR.binding = new Binding((trig, allss) -> {
