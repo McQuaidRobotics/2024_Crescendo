@@ -56,6 +56,7 @@ public class DriverController extends ControllerParent {
                     StemPosition.STOW));
         }, Subsystems.Stem);
 
+        /*Aims at a good height and shoots at a good speed to hit kids with */
         this.Y.binding = new Binding(
             (trig, allss) -> {
                 trig.onTrue(
