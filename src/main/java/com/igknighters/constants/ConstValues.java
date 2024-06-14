@@ -72,7 +72,7 @@ public final class ConstValues {
         public static final double UMBRELLA_HEIGHT = 5.0 * Conv.INCHES_TO_METERS;
         public static final double UMBRELLA_OFFSET = 2.45 * Conv.INCHES_TO_METERS;
 
-        public static final double EXTENSION_MAX = 12.5;
+        public static final double EXTENSION_MAX = 14.0;
 
         public static final Rectangle2d DRIVE_BASE = new Rectangle2d(
                 0.0,
@@ -420,7 +420,7 @@ public final class ConstValues {
             public static final int RIGHT_MOTOR_ID = 12;
             public static final int PIGEON_ID = 31;
 
-            public static final double MOTOR_kP = 1.0;
+            public static final double MOTOR_kP = 0.7;
             public static final double MOTOR_kI = 0.0;
             public static final double MOTOR_kD = 0.0;
             public static final double MOTOR_kS = 0.0;
@@ -504,9 +504,9 @@ public final class ConstValues {
 
             public static final double MOTOR_TO_MECHANISM_RATIO = 5.0 * 5.0 * (84.0 / 22.0);
 
-            public static final double MAX_VELOCITY = 20;
-            public static final double MAX_ACCELERATION = 60; //was 80, slowing down because of degradation of wrist gears
-            public static final double MAX_JERK = 250; //was 320, slowing down because of degradation of wrist gears
+            public static final double MAX_VELOCITY = 1;
+            public static final double MAX_ACCELERATION = 8;
+            public static final double MAX_JERK = 20;
 
             /**
              * Tolerance in radians

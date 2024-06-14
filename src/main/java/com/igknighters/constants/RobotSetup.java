@@ -14,8 +14,7 @@ import monologue.MonoDashboard;
 public class RobotSetup {
 
     public enum RobotID {
-        CRASH(Subsystems.all(),
-                RobotConstID.CRASH),
+        CRASH(Subsystems.all(), RobotConstID.CRASH),
 
         BURN(Subsystems.list(Subsystems.Swerve),
                 RobotConstID.BURN),

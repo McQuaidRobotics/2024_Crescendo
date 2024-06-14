@@ -9,6 +9,7 @@ import com.igknighters.controllers.OperatorController;
 // import com.igknighters.controllers.TestingController;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.swerve.Swerve;
+import com.igknighters.util.Channels;
 import com.igknighters.util.geom.AllianceFlip;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
@@ -67,6 +68,12 @@ public class RobotContainer implements Logged {
                 UmbrellaCommands.idleShooter(umbrella)
             );
         }
+
+        Channels.Receiver.reactor(
+            "controllerRumble",
+            Double.class,
+            driverController::rumble
+        );
     }
 
     public void initMonologue() {

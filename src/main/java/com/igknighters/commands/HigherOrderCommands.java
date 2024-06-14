@@ -14,6 +14,7 @@ import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
@@ -35,7 +36,9 @@ public class HigherOrderCommands {
             .andThen(
                 StemCommands.holdAt(stem, StemPosition.STOW)
                     .alongWith(UmbrellaCommands.idleShooter(umbrella))
-                    .beforeStarting(() -> LED.sendAnimation(LedAnimations.INTAKE).withDuration(1.0))
+                    .beforeStarting(() -> {
+                        LED.sendAnimation(LedAnimations.INTAKE).withDuration(1.0);
+                    })
             ).withName("Intake");
     }
 
@@ -59,7 +62,7 @@ public class HigherOrderCommands {
         if (reason.equals(ShooterSpinupReason.Amp)) {
             name = "Amp Shoot";
             cmd = Commands.sequence(
-                    StemCommands.moveTo(stem, StemPosition.AMP_SCORE, 1.1),
+                    StemCommands.moveTo(stem, StemPosition.AMP_SCORE, 1.4),
                     umbrella.run(
                             () -> {
                                 umbrella.spinupShooter(kControls.SHOOTER_RPM);
