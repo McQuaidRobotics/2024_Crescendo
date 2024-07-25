@@ -36,27 +36,22 @@ public class TestingController extends ControllerParent {
         // disregard null safety as it is checked on assignment
 
         /// FACE BUTTONS
-        this.A.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
+        this.A.binding = new Binding(Subsystems.Umbrella, (trig, allss) -> {
             trig.onTrue(
-                    StemCommands.holdAt(
-                            allss.stem.get(), StemPosition.fromDegrees(
-                                    70.0,
-                                    80.0,
-                                    0.53)));
+                    UmbrellaCommands.intake(allss.umbrella.get()));
         });
 
-        this.B.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
+        this.B.binding = new Binding(Subsystems.Umbrella, (trig, allss) -> {
             trig.onTrue(
-                    StemCommands.aimAtSpeaker(allss.stem.get(), false));
+                    UmbrellaCommands.runIntakeAndShooter(
+                        allss.umbrella.get(),
+                        1000
+                    ));
         });
 
         this.X.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
             trig.onTrue(
-                    StemCommands.holdAt(
-                            allss.stem.get(), StemPosition.fromDegrees(
-                                    11.0,
-                                    kControls.STATIONARY_WRIST_ANGLE,
-                                    kTelescope.MIN_METERS + Units.inchesToMeters(4.7))));
+                    UmbrellaCommands.expell(allss.umbrella.get()));
         });
 
         this.Y.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
