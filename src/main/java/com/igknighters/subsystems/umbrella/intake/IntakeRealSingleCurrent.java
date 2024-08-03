@@ -8,6 +8,8 @@ import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.constants.ConstValues.kUmbrella.kIntake;
 import com.igknighters.util.BootupLogger;
 import com.igknighters.util.FaultManager;
+import com.igknighters.util.TunableValues;
+import com.igknighters.util.TunableValues.TunableDouble;
 import com.igknighters.util.can.CANSignalManager;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -22,6 +24,7 @@ public class IntakeRealSingleCurrent extends Intake {
     private final StatusSignal<Double> voltSignal, ampSignal;
     @Log.NT
     private boolean forcedOutput = false;
+    private TunableDouble currentTripValue = TunableValues.getDouble("IntakeCurrentTrip", 115.0);
 
     public IntakeRealSingleCurrent() {
         FaultManager.captureFault(
@@ -98,7 +101,7 @@ public class IntakeRealSingleCurrent extends Intake {
 
         if (!super.exitBeamBroken && !forcedOutput) {
             ampSignal.refresh();
-            super.exitBeamBroken = Math.abs(ampSignal.getValue()) > 140.0;
+            super.exitBeamBroken = Math.abs(ampSignal.getValue()) > currentTripValue.get();
         } else if (super.exitBeamBroken && forcedOutput) {
             super.exitBeamBroken = false;
         }

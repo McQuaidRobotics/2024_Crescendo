@@ -62,7 +62,7 @@ public class RobotContainer implements Logged {
         //     }).withName("StemDefaultCommand"));
         // }
 
-        if (allSubsystems.umbrella.isPresent()) {
+        if (allSubsystems.umbrella.isPresent() && !Robot.isDemo()) {
             var umbrella = allSubsystems.umbrella.get();
             umbrella.setDefaultCommand(
                 UmbrellaCommands.idleShooter(umbrella)

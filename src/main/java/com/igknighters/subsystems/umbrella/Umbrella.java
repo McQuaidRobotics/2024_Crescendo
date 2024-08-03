@@ -29,7 +29,7 @@ public class Umbrella extends SubsystemBase implements Logged {
             intake = new IntakeSim();
             shooter = new ShooterDisabled();
         } else {
-            intake = new IntakeRealSingle();
+            intake = new IntakeRealSingleCurrent();
             shooter = new ShooterReal();
         }
     }

@@ -154,4 +154,15 @@ public class StemPosition implements StructSerializable {
             return "Starting";
         }
     };
+
+    public static final StemPosition KID_WEAK = new StemPosition(
+            Units.degreesToRadians(75.0),
+            Units.degreesToRadians(75.0),
+            kTelescope.MIN_METERS) {
+
+        @Override
+        public String toString() {
+            return "Starting";
+        }
+    };
 }

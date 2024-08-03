@@ -185,4 +185,8 @@ public class Robot extends UnitTestableRobot {
         }
         return roboContainer.getAllSubsystemsForTest();
     }
+
+    public static boolean isDemo() {
+        return ConstValues.DEMO;
+    }
 }
