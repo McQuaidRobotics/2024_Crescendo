@@ -3,6 +3,7 @@ package com.igknighters.controllers;
 import com.igknighters.LED;
 import com.igknighters.Robot;
 import com.igknighters.LED.LedAnimations;
+import com.igknighters.commands.Emotes;
 import com.igknighters.commands.HigherOrderCommands;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.SwerveCommands;
@@ -113,10 +114,10 @@ public class DriverController extends ControllerParent {
                     Subsystems.Stem, Subsystems.Umbrella);
         }
 
-        // this.RB.binding = # Is used as an or with LB
-
         /// CENTER BUTTONS
-        // this.Back.binding =
+        this.Back.binding = new Binding(Subsystems.all(), (trig, allss) -> {
+            trig.onTrue(Emotes.yes(allss));
+        });
 
         this.Start.binding = new Binding(Subsystems.Swerve, (trig, allss) -> {
                 trig.onTrue(SwerveCommands.orientGyro(allss.swerve.get()));

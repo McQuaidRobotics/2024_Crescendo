@@ -1,0 +1,124 @@
+package com.igknighters.commands;
+
+import java.util.Set;
+import java.util.function.Supplier;
+
+import com.igknighters.LED.LedAnimations;
+import com.igknighters.commands.stem.StemCommands;
+import com.igknighters.commands.swerve.SwerveCommands;
+import com.igknighters.commands.umbrella.UmbrellaCommands;
+import com.igknighters.constants.ConstValues.kStem.kTelescope;
+import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
+import com.igknighters.subsystems.stem.StemPosition;
+import com.igknighters.subsystems.swerve.Swerve;
+
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+
+public class Emotes {
+    private static Command turnToRelative(Swerve swerve, Rotation2d angle) {
+        return SwerveCommands.pointTowards(swerve, swerve.getYawWrappedRot().plus(angle));
+    }
+
+    public static Command bopYourHead(AllSubsystems subsystems) {
+        if (!subsystems.hasAllSubsystems()) return Commands.idle(subsystems.getEnabledSubsystemsArr());
+
+        Supplier<Command> cmd = () -> {
+            var swerve = SwerveCommands.driveChassisSpeed(
+                subsystems.swerve.get(),
+                new ChassisSpeeds(0.0, 0.0, 1.0)
+            );
+            var stem = Commands.repeatingSequence(
+                StemCommands.moveTo(
+                    subsystems.stem.get(),
+                    StemPosition.fromDegrees(
+                        60.0,
+                        75.0,
+                        kTelescope.MIN_METERS
+                    ),
+                    3.0
+                ),
+                StemCommands.moveTo(
+                    subsystems.stem.get(),
+                    StemPosition.fromDegrees(
+                        70.0,
+                        105.0,
+                        kTelescope.MIN_METERS
+                    ),
+                    3.0
+                )
+            );
+            var umbrella = UmbrellaCommands.stopShooter(subsystems.umbrella.get());
+            var leds = Commands.repeatingSequence(
+                LEDCommands.setLED(LedAnimations.SHOOTING),
+                Commands.waitSeconds(0.5),
+                LEDCommands.setLED(LedAnimations.TEST),
+                Commands.waitSeconds(0.5)
+            );
+
+            return Commands.parallel(
+                swerve,
+                stem,
+                umbrella,
+                leds
+            );
+        };
+
+        return Commands.defer(cmd, Set.of(subsystems.getEnabledSubsystemsArr()));
+    }
+
+    public static Command yes(AllSubsystems subsystems) {
+        if (!subsystems.hasAllSubsystems()) return Commands.idle(subsystems.getEnabledSubsystemsArr());
+
+        var umbrella = UmbrellaCommands.stopShooter(subsystems.umbrella.get());
+        var swerve = Commands.idle(subsystems.swerve.get());
+        var stem = Commands.sequence(
+            StemCommands.moveTo(
+                subsystems.stem.get(),
+                StemPosition.fromDegrees(
+                    90.0,
+                    85.0,
+                    kTelescope.MIN_METERS + 0.1
+                ),
+                3.0
+            ),
+            StemCommands.moveTo(
+                subsystems.stem.get(),
+                StemPosition.fromDegrees(
+                    90.0,
+                    113.0,
+                    kTelescope.MIN_METERS + 0.1
+                ),
+                1.5
+            ),
+            StemCommands.moveTo(
+                subsystems.stem.get(),
+                StemPosition.fromDegrees(
+                    90.0,
+                    62.0,
+                    kTelescope.MIN_METERS + 0.1
+                ),
+                1.5
+            ),
+            StemCommands.moveTo(
+                subsystems.stem.get(),
+                StemPosition.fromDegrees(
+                    90.0,
+                    90.0,
+                    kTelescope.MIN_METERS + 0.1
+                ),
+                1.0
+            )
+        );
+        var leds = LEDCommands.setLED(LedAnimations.TELEOP);
+
+        return Commands.parallel(
+            umbrella,
+            swerve,
+            stem,
+            leds
+        );
+    }
+}

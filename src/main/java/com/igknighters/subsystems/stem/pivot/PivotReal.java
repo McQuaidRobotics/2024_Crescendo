@@ -161,7 +161,7 @@ public class PivotReal extends Pivot {
     }
 
     private void seedPivot() {
-        leaderMotor.setPosition(mechRadiansToMotorRots(getPivotRadiansPigeon()));
+        leaderMotor.setPosition(mechRadiansToMotorRots(getPivotRadiansPigeon()), 0.01);
         super.radians = getPivotRadiansPigeon();
     }
 

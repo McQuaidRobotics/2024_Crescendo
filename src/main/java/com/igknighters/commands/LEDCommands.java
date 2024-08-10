@@ -6,12 +6,12 @@ import com.igknighters.LED.LedAnimations;
 import com.igknighters.LED;
 
 public class LEDCommands {
-    public Command commandSetLED(LedAnimations pattern) {
+    public static Command setLED(LedAnimations pattern) {
         return Commands.runOnce(() -> LED.sendAnimation(pattern))
             .withName("LED " + pattern.toString());
     }
 
-    public Command commandSetLED(LedAnimations pattern, double seconds) {
+    public static Command setLED(LedAnimations pattern, double seconds) {
         return Commands.runOnce(() -> LED.sendAnimation(pattern).withDuration(seconds))
             .withName("LED " + pattern.toString() + " for " + seconds + " seconds");
     }

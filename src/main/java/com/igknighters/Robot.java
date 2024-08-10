@@ -189,4 +189,8 @@ public class Robot extends UnitTestableRobot {
     public static boolean isDemo() {
         return ConstValues.DEMO;
     }
+
+    public static boolean isDebug() {
+        return ConstValues.DEBUG;
+    }
 }

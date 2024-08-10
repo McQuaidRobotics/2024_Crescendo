@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 import com.igknighters.commands.autos.SimplePathfindingCommand;
@@ -56,34 +57,57 @@ public class SwerveCommands {
                                 swerve).flipForAlliance().withConstraints(0.2));
     }
 
-    private static class PointTowardsCommand extends Command {
+    private static abstract class PointTowardsCommand extends Command {
         private final Swerve swerve;
-        private final Translation2d target;
-        private double velo = 1.0;
+        private ChassisSpeeds velo = new ChassisSpeeds();
 
-        public PointTowardsCommand(Swerve swerve, Translation2d target) {
+        public PointTowardsCommand(Swerve swerve) {
             this.swerve = swerve;
-            this.target = target;
             addRequirements(swerve);
         }
 
+        abstract Rotation2d getTarget();
+
         @Override
-        public void initialize() {
-            velo = swerve.rotVeloForRotation(
-                    swerve.rotationRelativeToPose(
-                            new Rotation2d(), target));
-            swerve.drive(
-                    new ChassisSpeeds(0, 0, velo),
-                    false);
+        public void execute() {
+            velo.omegaRadiansPerSecond = swerve.rotVeloForRotation(getTarget());
+            swerve.drive(velo, false);
         }
 
         @Override
         public boolean isFinished() {
-            return velo < 0.05;
+            return velo.omegaRadiansPerSecond < 0.05;
+        }
+
+        @Override
+        public String getName() {
+            return "PointTowards";
         }
     }
 
     public static Command pointTowards(Swerve swerve, Translation2d target) {
-        return new PointTowardsCommand(swerve, target);
+        return new PointTowardsCommand(swerve) {
+            @Override
+            Rotation2d getTarget() {
+                return swerve.rotationRelativeToPose(
+                        new Rotation2d(), target);
+            }
+        };
+    }
+
+    public static Command pointTowards(Swerve swerve, Rotation2d target) {
+        return new PointTowardsCommand(swerve) {
+            @Override
+            Rotation2d getTarget() {
+                return target;
+            }
+        };
+    }
+
+    public static Command driveChassisSpeed(Swerve swerve, final ChassisSpeeds speeds) {
+        return Commands.run(
+            () -> swerve.drive(speeds, false),
+            swerve
+        );
     }
 }
