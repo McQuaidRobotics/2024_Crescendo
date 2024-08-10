@@ -155,14 +155,25 @@ public class StemPosition implements StructSerializable {
         }
     };
 
-    public static final StemPosition KID_WEAK = new StemPosition(
+    public static final StemPosition DEMO_LOW = new StemPosition(
             Units.degreesToRadians(75.0),
             Units.degreesToRadians(75.0),
             kTelescope.MIN_METERS) {
 
         @Override
         public String toString() {
-            return "Starting";
+            return "DEMO_LOW";
+        }
+    };
+
+    public static final StemPosition DEMO_HIGH = new StemPosition(
+            Units.degreesToRadians(75.0),
+            Units.degreesToRadians(90.0),
+            kTelescope.MIN_METERS) {
+
+        @Override
+        public String toString() {
+            return "DEMO_HIGH";
         }
     };
 }

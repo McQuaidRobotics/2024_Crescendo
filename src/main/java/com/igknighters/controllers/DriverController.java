@@ -84,7 +84,7 @@ public class DriverController extends ControllerParent {
                         Commands.parallel(
                             StemCommands.holdAt(
                                 allss.stem.get(),
-                                StemPosition.KID_WEAK),
+                                StemPosition.DEMO_LOW),
                             UmbrellaCommands.spinupShooter(
                                 allss.umbrella.get(),
                                 3000.0,
@@ -94,6 +94,23 @@ public class DriverController extends ControllerParent {
                             ));
                 },
                 Subsystems.Stem, Subsystems.Umbrella);
+
+                this.RB.binding = new Binding(
+                    (trig, allss) -> {
+                        trig.onTrue(
+                            Commands.parallel(
+                                StemCommands.holdAt(
+                                    allss.stem.get(),
+                                    StemPosition.DEMO_HIGH),
+                                UmbrellaCommands.spinupShooter(
+                                    allss.umbrella.get(),
+                                    3000.0,
+                                    ShooterSpinupReason.ManualAimSpeaker))
+                                .finallyDo(
+                                    () -> allss.umbrella.get().stopAll()
+                                ));
+                    },
+                    Subsystems.Stem, Subsystems.Umbrella);
         }
 
         // this.RB.binding = # Is used as an or with LB
