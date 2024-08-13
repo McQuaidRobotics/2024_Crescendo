@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 import com.igknighters.Localizer;
@@ -41,5 +42,59 @@ public class SwerveCommands {
                 localizer.resetOdometry(pose, swerve.getModulePositions());
             }
         });
+    }
+
+    // private static abstract class PointTowardsCommand extends Command {
+    //     private final Swerve swerve;
+    //     private ChassisSpeeds velo = new ChassisSpeeds();
+
+    //     public PointTowardsCommand(Swerve swerve) {
+    //         this.swerve = swerve;
+    //         addRequirements(swerve);
+    //     }
+
+    //     abstract Rotation2d getTarget();
+
+    //     @Override
+    //     public void execute() {
+    //         velo.omegaRadiansPerSecond = swerve.rotVeloForRotation(getTarget());
+    //         swerve.drive(velo, false);
+    //     }
+
+    //     @Override
+    //     public boolean isFinished() {
+    //         return velo.omegaRadiansPerSecond < 0.05;
+    //     }
+
+    //     @Override
+    //     public String getName() {
+    //         return "PointTowards";
+    //     }
+    // }
+
+    // public static Command pointTowards(Swerve swerve, Translation2d target) {
+    //     return new PointTowardsCommand(swerve) {
+    //         @Override
+    //         Rotation2d getTarget() {
+    //             return swerve.rotationRelativeToPose(
+    //                     new Rotation2d(), target);
+    //         }
+    //     };
+    // }
+
+    // public static Command pointTowards(Swerve swerve, Rotation2d target) {
+    //     return new PointTowardsCommand(swerve) {
+    //         @Override
+    //         Rotation2d getTarget() {
+    //             return target;
+    //         }
+    //     };
+    // }
+
+    public static Command driveChassisSpeed(Swerve swerve, final ChassisSpeeds speeds) {
+        return Commands.run(
+            () -> swerve.drive(speeds, false),
+            swerve
+        );
     }
 }

@@ -22,8 +22,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 public final class ConstValues {
     private final static double TAU = 2 * Math.PI;
 
-    public final static boolean DEBUG = true;
-
     // all measurements are in meters unless otherwise specified
     // all angles are in radians unless otherwise specified
     @SuppressWarnings("unused")
@@ -59,6 +57,8 @@ public final class ConstValues {
         }
     }
 
+    public static final boolean DEBUG = true; // this should be false for competition
+    public static final boolean DEMO = true; // this should be false for competition
     public static final double PERIODIC_TIME = 0.02; // 20ms
     public static final int PDH_CAN_ID = 61;
 
@@ -82,7 +82,7 @@ public final class ConstValues {
         public static final double UMBRELLA_HEIGHT = 5.0 * Conv.INCHES_TO_METERS;
         public static final double UMBRELLA_OFFSET = 2.45 * Conv.INCHES_TO_METERS;
 
-        public static final double EXTENSION_MAX = 12.5;
+        public static final double EXTENSION_MAX = 14.0;
 
         public static final Rectangle2d DRIVE_BASE = new Rectangle2d(
                 0.0,
@@ -273,7 +273,7 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 2;
             public static final int CANCODER_ID = 21;
 
-            @DoubleConst(crash = -0.323, burn = -0.127441)
+            @DoubleConst(crash = -0.1015, burn = -0.2133)
             public static double ROTATION_OFFSET;
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0, -TRACK_WIDTH / 2.0);
@@ -286,7 +286,7 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 4;
             public static final int CANCODER_ID = 22;
 
-            @DoubleConst(crash = -0.352, burn = -0.259521)
+            @DoubleConst(crash = 0.42529, burn = -0.39868)
             public static double ROTATION_OFFSET;
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0,
@@ -300,7 +300,7 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 6;
             public static final int CANCODER_ID = 23;
 
-            @DoubleConst(crash = -0.4189, burn = 0.077393)
+            @DoubleConst(crash = -0.4182, burn = 0.060546)
             public static double ROTATION_OFFSET;
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0, TRACK_WIDTH / 2.0);
@@ -313,8 +313,8 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 8;
             public static final int CANCODER_ID = 24;
 
-            @DoubleConst(crash = -0.1025, burn = 0.123291)
-            public static double ROTATION_OFFSET = -0.041504;
+            @DoubleConst(crash = -0.1086, burn = 0.108154)
+            public static double ROTATION_OFFSET;
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0,
                     TRACK_WIDTH / 2.0);
@@ -429,7 +429,7 @@ public final class ConstValues {
             public static final int RIGHT_MOTOR_ID = 12;
             public static final int PIGEON_ID = 31;
 
-            public static final double MOTOR_kP = 1.0;
+            public static final double MOTOR_kP = 0.7;
             public static final double MOTOR_kI = 0.0;
             public static final double MOTOR_kD = 0.0;
             public static final double MOTOR_kS = 0.0;
@@ -505,17 +505,17 @@ public final class ConstValues {
 
             public static final boolean INVERTED = false;
 
-            public static final double CANCODER_OFFSET = -0.5158691;
+            public static final double CANCODER_OFFSET = -0.6822;
 
             public static final double MIN_ANGLE = 8.0 * Conv.DEGREES_TO_RADIANS;
             public static final double MAX_ANGLE = 117.0 * Conv.DEGREES_TO_RADIANS;
             public static final double FROZEN_WRIST_ANGLE = 72.0 * Conv.DEGREES_TO_RADIANS;
 
-            public static final double MOTOR_TO_MECHANISM_RATIO = 5.0 * 5.0 * (84.0 / 22.0);
+            public static final double MOTOR_TO_MECHANISM_RATIO = 9.0 * 4.0 * (84.0 / 22.0);
 
-            public static final double MAX_VELOCITY = 20;
-            public static final double MAX_ACCELERATION = 60; //was 80, slowing down because of degradation of wrist gears
-            public static final double MAX_JERK = 250; //was 320, slowing down because of degradation of wrist gears
+            public static final double MAX_VELOCITY = 1;
+            public static final double MAX_ACCELERATION = 8;
+            public static final double MAX_JERK = 20;
 
             /**
              * Tolerance in radians

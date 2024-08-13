@@ -1,6 +1,8 @@
 package com.igknighters.commands.swerve.teleop;
 
 import com.igknighters.subsystems.swerve.Swerve;
+import com.igknighters.util.TunableValues;
+import com.igknighters.util.TunableValues.TunableDouble;
 import com.igknighters.util.geom.AllianceFlip;
 
 import java.util.function.DoubleSupplier;
@@ -13,6 +15,7 @@ import com.igknighters.Robot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import monologue.Monologue;
 import edu.wpi.first.wpilibj2.command.Command;
+
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.controllers.ControllerParent;
 
@@ -47,6 +50,9 @@ public class TeleopSwerveBase extends Command {
     private final DoubleSupplier rawRotationXSup;
     private final DoubleSupplier rawRotationYSup;
 
+    private TunableDouble translationMod;
+    private TunableDouble rotationMod;
+
     public TeleopSwerveBase(Swerve swerve, ControllerParent controller) {
         this.swerve = swerve;
         addRequirements(swerve);
@@ -55,6 +61,11 @@ public class TeleopSwerveBase extends Command {
         this.rawTranslationYSup = controller.leftStickY();
         this.rawRotationXSup = controller.rightStickX();
         this.rawRotationYSup = controller.rightStickY();
+
+        if (Robot.isDemo()) {
+            translationMod = TunableValues.getDouble("DemoSwerveTranslationModifier", 0.8);
+            rotationMod = TunableValues.getDouble("DemoSwerveRotationalModifier", 0.8);
+        }
     }
 
     @SuppressWarnings("unused")
@@ -75,6 +86,7 @@ public class TeleopSwerveBase extends Command {
         Monologue.log("/Robot/Swerve/TeleopCommand/RawTranslationX", raw);
         var processed = -kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(raw) * invert();
         Monologue.log("/Robot/Swerve/TeleopCommand/TranslationX", processed);
+        if (Robot.isDemo()) processed *= translationMod.value();
         return processed;
     }
 
@@ -83,6 +95,7 @@ public class TeleopSwerveBase extends Command {
         Monologue.log("/Robot/Swerve/TeleopCommand/RawTranslationY", raw);
         var processed = kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(raw) * invert();
         Monologue.log("/Robot/Swerve/TeleopCommand/TranslationY", processed);
+        if (Robot.isDemo()) processed *= translationMod.value();
         return processed;
     }
 
@@ -93,6 +106,7 @@ public class TeleopSwerveBase extends Command {
         Monologue.log("/Robot/Swerve/TeleopCommand/RawRotationX", raw);
         var processed = -kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(raw);
         Monologue.log("/Robot/Swerve/TeleopCommand/RotationX", processed);
+        if (Robot.isDemo()) processed *= rotationMod.value();
         return processed;
     }
 
@@ -101,6 +115,7 @@ public class TeleopSwerveBase extends Command {
         Monologue.log("/Robot/Swerve/TeleopCommand/RawRotationY", raw);
         var processed = kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(raw);
         Monologue.log("/Robot/Swerve/TeleopCommand/RotationY", processed);
+        if (Robot.isDemo()) processed *= rotationMod.value();
         return processed;
     }
 

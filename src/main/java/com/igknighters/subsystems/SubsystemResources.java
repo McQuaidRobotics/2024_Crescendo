@@ -148,6 +148,10 @@ public class SubsystemResources {
             return subsystemsList;
         }
 
+        public Subsystem[] getEnabledSubsystemsArr() {
+            return subsystemsList.toArray(new Subsystem[subsystemsList.size()]);
+        }
+
         public boolean hasAllSubsystems() {
 
             if (!stem.isPresent()) {

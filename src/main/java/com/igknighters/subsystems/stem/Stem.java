@@ -2,6 +2,7 @@
 package com.igknighters.subsystems.stem;
 
 import com.igknighters.LED;
+import com.igknighters.Robot;
 import com.igknighters.LED.LedAnimations;
 import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.subsystems.stem.StemValidator.ValidationResponse;
@@ -12,7 +13,6 @@ import com.igknighters.util.Tracer;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
-import com.igknighters.Robot;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -35,7 +35,11 @@ public class Stem extends SubsystemBase implements Logged {
             wrist = new WristDisabled();
         } else {
             pivot = new PivotReal();
-            telescope = new TelescopeReal();
+            if (Robot.isDemo()) {
+                telescope = new TelescopeRealSunshine();
+            } else {
+                telescope = new TelescopeReal();
+            }
             wrist = new WristRealFused();
         }
 

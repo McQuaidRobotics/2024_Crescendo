@@ -1,12 +1,12 @@
 package com.igknighters.subsystems.umbrella;
 
+import com.igknighters.Robot;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.umbrella.intake.*;
 import com.igknighters.subsystems.umbrella.shooter.*;
 import com.igknighters.util.Tracer;
 
 import edu.wpi.first.math.util.Units;
-import com.igknighters.Robot;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import monologue.Logged;
 
@@ -29,7 +29,11 @@ public class Umbrella extends SubsystemBase implements Logged {
             intake = new IntakeSim();
             shooter = new ShooterDisabled();
         } else {
-            intake = new IntakeReal();
+            if (Robot.isDemo()) {
+                intake = new IntakeRealSingleCurrent();
+            } else {
+                intake = new IntakeRealSingle();
+            }
             shooter = new ShooterReal();
         }
     }

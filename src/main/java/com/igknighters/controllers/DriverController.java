@@ -2,7 +2,9 @@ package com.igknighters.controllers;
 
 import com.igknighters.LED;
 import com.igknighters.Localizer;
+import com.igknighters.Robot;
 import com.igknighters.LED.LedAnimations;
+import com.igknighters.commands.Emotes;
 import com.igknighters.commands.HigherOrderCommands;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.SwerveCommands;
@@ -14,6 +16,7 @@ import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
+import com.igknighters.util.Channels;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
@@ -77,20 +80,46 @@ public class DriverController extends ControllerParent {
 
         /// BUMPER
         // # Our main driver doesn't use bumpers
-        this.LB.binding = new Binding(Subsystems.Stem, (trig, allss) -> {
-            trig.or(RB.trigger).onTrue(
-                Commands.parallel(
-                    StemCommands.holdAt(
-                        allss.stem.get(),
-                        StemPosition.STOW),
-                        UmbrellaCommands.spinupShooter(allss.umbrella.get(), kControls.SHOOTER_RPM, ShooterSpinupReason.ManualAimSpeaker)
-                ));
-        });
+        if (Robot.isDemo()) {
+            this.LB.binding = new Binding(
+                (trig, allss) -> {
+                    trig.onTrue(
+                        Commands.parallel(
+                            StemCommands.holdAt(
+                                allss.stem.get(),
+                                StemPosition.DEMO_LOW),
+                            UmbrellaCommands.spinupShooter(
+                                allss.umbrella.get(),
+                                3000.0,
+                                ShooterSpinupReason.ManualAimSpeaker))
+                            .finallyDo(
+                                () -> allss.umbrella.get().stopAll()
+                            ));
+                },
+                Subsystems.Stem, Subsystems.Umbrella);
 
-        // this.RB.binding = # Is used as an or with LB
+                this.RB.binding = new Binding(
+                    (trig, allss) -> {
+                        trig.onTrue(
+                            Commands.parallel(
+                                StemCommands.holdAt(
+                                    allss.stem.get(),
+                                    StemPosition.DEMO_HIGH),
+                                UmbrellaCommands.spinupShooter(
+                                    allss.umbrella.get(),
+                                    3000.0,
+                                    ShooterSpinupReason.ManualAimSpeaker))
+                                .finallyDo(
+                                    () -> allss.umbrella.get().stopAll()
+                                ));
+                    },
+                    Subsystems.Stem, Subsystems.Umbrella);
+        }
 
         /// CENTER BUTTONS
-        // this.Back.binding =
+        this.Back.binding = new Binding(Subsystems.all(), (trig, allss) -> {
+            trig.onTrue(Emotes.yes(allss));
+        });
 
         this.Start.binding = new Binding(Subsystems.Swerve, (trig, allss) -> {
                 trig.onTrue(SwerveCommands.orientGyro(allss.swerve.get(), localizer));
@@ -139,9 +168,21 @@ public class DriverController extends ControllerParent {
         }, Subsystems.Umbrella, Subsystems.Stem, Subsystems.Swerve);
 
         /// DPAD
-        // this.DPR.binding = 
+        this.DPR.binding = this.DPR.binding = this.DPL.binding = new Binding((trig, allss) -> {
+            trig.onTrue(Commands.runOnce(() -> {
+                    Channels.Sender.broadcast("HomePivot", Boolean.class)
+                            .send(true);
+            }));
+        }, Subsystems.Stem);
 
-        // this.DPD.binding =
+        this.DPD.binding = new Binding((trig, allss) -> {
+            trig.onTrue(
+                StemCommands.moveTo(allss.stem.get(), StemPosition.STOW, 2.0)
+                .andThen(
+                    UmbrellaCommands.expell(allss.umbrella.get())
+                )
+            );
+        }, Subsystems.Stem, Subsystems.Umbrella);
 
         this.DPL.binding = new Binding((trig, allss) -> {
                 trig.onTrue(Commands.runOnce(() -> {

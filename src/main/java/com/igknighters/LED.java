@@ -46,7 +46,7 @@ public class LED {
         }
 
         @Override
-        public DurationHandle sendMultiAnimationInner(double[] percents, LedAnimations[] anims) {
+        public DurationHandle sendMultiAnimation(double[] percents, LedAnimations[] anims) {
             return new DurationHandle(this);
         }
     }
@@ -274,7 +274,7 @@ public class LED {
 
     public static DurationHandle sendMultiAnimation(
             double percent1, LedAnimations anim1) {
-        return getInstance().sendMultiAnimationInner(
+        return getInstance().sendMultiAnimation(
                 new double[] { percent1 },
                 new LedAnimations[] { anim1 });
     }
@@ -282,7 +282,7 @@ public class LED {
     public static DurationHandle sendMultiAnimation(
             double percent1, LedAnimations anim1,
             double percent2, LedAnimations anim2) {
-        return getInstance().sendMultiAnimationInner(
+        return getInstance().sendMultiAnimation(
                 new double[] { percent1, percent2 },
                 new LedAnimations[] { anim1, anim2 });
     }
@@ -291,7 +291,7 @@ public class LED {
             double percent1, LedAnimations anim1,
             double percent2, LedAnimations anim2,
             double percent3, LedAnimations anim3) {
-        return getInstance().sendMultiAnimationInner(
+        return getInstance().sendMultiAnimation(
                 new double[] { percent1, percent2, percent3 },
                 new LedAnimations[] { anim1, anim2, anim3 });
     }
@@ -301,7 +301,7 @@ public class LED {
             double percent2, LedAnimations anim2,
             double percent3, LedAnimations anim3,
             double percent4, LedAnimations anim4) {
-        return getInstance().sendMultiAnimationInner(
+        return getInstance().sendMultiAnimation(
                 new double[] { percent1, percent2, percent3, percent4 },
                 new LedAnimations[] { anim1, anim2, anim3, anim4 });
     }
@@ -338,7 +338,7 @@ public class LED {
             double percent3, LedAnimations anim3,
             double percent4, LedAnimations anim4,
             double percent5, LedAnimations anim5) {
-        return getInstance().sendMultiAnimationInner(
+        return getInstance().sendMultiAnimation(
                 new double[] { percent1, percent2, percent3, percent4, percent5 },
                 new LedAnimations[] { anim1, anim2, anim3, anim4, anim5 });
     }
@@ -356,7 +356,7 @@ public class LED {
      * @param anims    The animations to be passed through the CANdle
      * @return A {@code DurationHandle}
      */
-    public DurationHandle sendMultiAnimationInner(
+    public DurationHandle sendMultiAnimation(
             final double[] percents, final LedAnimations[] anims) {
         if (percents.length != anims.length || anims.length > 9) {
             DriverStation.reportError(

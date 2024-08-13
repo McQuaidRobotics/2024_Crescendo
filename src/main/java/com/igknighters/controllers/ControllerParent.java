@@ -12,6 +12,7 @@ import com.igknighters.subsystems.SubsystemResources.Subsystems;
 import com.igknighters.util.BootupLogger;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -288,5 +289,14 @@ public class ControllerParent {
         } else {
             return () -> controller.getLeftTriggerAxis();
         }
+    }
+
+    /**
+     * Will rumble both sides of the controller with a magnitude
+     * 
+     * @param magnitude The magnitude to rumble at
+     */
+    public void rumble(double magnitude) {
+        controller.getHID().setRumble(RumbleType.kBothRumble, magnitude);
     }
 }

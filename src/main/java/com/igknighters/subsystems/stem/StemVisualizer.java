@@ -2,6 +2,7 @@ package com.igknighters.subsystems.stem;
 
 import java.util.HashMap;
 
+import com.igknighters.Robot;
 import com.igknighters.constants.ConstValues.kRobotCollisionGeometry;
 import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
@@ -76,12 +77,14 @@ public class StemVisualizer {
                                 StemVisualizerDot.class,
                                 this::addDot);
 
-                var table = NetworkTableInstance.getDefault()
-                                .getTable("Visualizers")
-                                .getSubTable("Stem");
-                var builder = new SendableBuilderImpl();
-                builder.setTable(table);
-                mechanism.initSendable(builder);
+                if (Robot.isDebug()) {
+                    var table = NetworkTableInstance.getDefault()
+                        .getTable("Visualizers")
+                        .getSubTable("Stem");
+                    var builder = new SendableBuilderImpl();
+                    builder.setTable(table);
+                    mechanism.initSendable(builder);
+                }
         }
 
         private void drawUmbrella(MechanismLigament2d wristRoot, boolean isSetpoint) {
