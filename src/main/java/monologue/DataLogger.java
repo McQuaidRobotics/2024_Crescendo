@@ -20,26 +20,6 @@ class DataLogger extends GenericLogger {
         log = DataLogManager.getLog();
     }
 
-    private static class NTIntegerArrayLogEntry extends DataLogEntry {
-        public static final String kDataType = "int[]";
-
-        public NTIntegerArrayLogEntry(DataLog log, String name, String metadata, long timestamp) {
-            super(log, name, kDataType, metadata, timestamp);
-        }
-
-        public NTIntegerArrayLogEntry(DataLog log, String name) {
-            this(log, name, "", 0);
-        }
-
-        public void append(long[] value, long timestamp) {
-            m_log.appendIntegerArray(m_entry, value, timestamp);
-        }
-
-        public void append(long[] value) {
-            m_log.appendIntegerArray(m_entry, value, 0);
-        }
-    }
-
 
 
     @Override
@@ -503,7 +483,7 @@ class DataLogger extends GenericLogger {
         if (value == null) {return;}
 
 
-        new NTIntegerArrayLogEntry(log, prefix + entryName)
+        new IntegerArrayLogEntry(log, prefix + entryName)
             .append(toLongArray(value));
 
     }
@@ -515,7 +495,7 @@ class DataLogger extends GenericLogger {
         LogLevel level
     ) {
 
-        var entry = new NTIntegerArrayLogEntry(log, prefix + entryName);
+        var entry = new IntegerArrayLogEntry(log, prefix + entryName);
 
         LongConsumer consumer;
 
@@ -564,7 +544,7 @@ class DataLogger extends GenericLogger {
         if (value == null) {return;}
 
 
-        new NTIntegerArrayLogEntry(log, prefix + entryName)
+        new IntegerArrayLogEntry(log, prefix + entryName)
         .append(value);
 
     }
@@ -576,7 +556,7 @@ class DataLogger extends GenericLogger {
         LogLevel level
     ) {
 
-        var entry = new NTIntegerArrayLogEntry(log, prefix + entryName);
+        var entry = new IntegerArrayLogEntry(log, prefix + entryName);
 
         LongConsumer consumer;
 

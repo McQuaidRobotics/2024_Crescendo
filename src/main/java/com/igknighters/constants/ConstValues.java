@@ -13,9 +13,6 @@ import com.igknighters.subsystems.vision.camera.Camera.CameraConfig;
 import com.igknighters.util.LerpTable;
 import com.igknighters.util.LerpTable.LerpTableEntry;
 import com.igknighters.util.geom.Rectangle2d;
-import com.pathplanner.lib.path.PathConstraints;
-import com.pathplanner.lib.util.PIDConstants;
-import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -24,6 +21,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 public final class ConstValues {
     private final static double TAU = 2 * Math.PI;
+
+    public final static boolean DEBUG = true;
 
     // all measurements are in meters unless otherwise specified
     // all angles are in radians unless otherwise specified
@@ -61,7 +60,7 @@ public final class ConstValues {
     }
 
     public static final double PERIODIC_TIME = 0.02; // 20ms
-    public static final int PDH_CAN_ID = 0;
+    public static final int PDH_CAN_ID = 61;
 
     public static final class kChannels {
         public static final String POSITION = "POSITION";
@@ -163,7 +162,7 @@ public final class ConstValues {
          * The cameras used for vision.
          */
         public final static CameraConfig[] CAMERA_CONFIGS = CameraConfigs.valueOf(
-                RobotSetup.getRobotID().constID.name() // most based java code of the century
+                RobotConfig.getRobotID().constID.name() // most based java code of the century
         ).cameras;
     }
 
@@ -334,16 +333,16 @@ public final class ConstValues {
     }
 
     public static final class kAuto {
-        public static final PIDConstants AUTO_TRANSLATION_PID = new PIDConstants(3.4, 0, 0.0);
-        public static final PIDConstants AUTO_ANGULAR_PID = new PIDConstants(3.0, 0.0, 0.0);
-        public static final PathConstraints DYNAMIC_PATH_CONSTRAINTS = new PathConstraints(
-                kSwerve.MAX_DRIVE_VELOCITY,
-                kSwerve.MAX_DRIVE_ACCELERATION,
-                kSwerve.MAX_ANGULAR_VELOCITY,
-                kSwerve.MAX_ANGULAR_ACCELERATION);
-        public static final ReplanningConfig DYNAMIC_REPLANNING_CONFIG = new ReplanningConfig(
-                true,
-                false);
+        public static final class kTranslation {
+            public static final double kP = 3.4;
+            public static final double kI = 0.0;
+            public static final double kD = 0.0;
+        }
+        public static final class kRotation {
+            public static final double kP = 3.0;
+            public static final double kI = 0.0;
+            public static final double kD = 0.0;
+        }
         public static final double AUTO_SHOOTER_RPM = 6000.0;
     }
 

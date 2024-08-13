@@ -16,7 +16,7 @@ import com.igknighters.util.geom.AllianceFlip;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import monologue.MonoDashboard;
+import monologue.Monologue;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class StemCommands {
@@ -65,7 +65,7 @@ public class StemCommands {
                             - (currentChassisSpeed.vyMetersPerSecond * (targetDistance / kUmbrella.NOTE_VELO)));
 
             double distance = currentPose.getTranslation().getDistance(adjustedTarget);
-            MonoDashboard.put("Aim/distance", distance);
+            Monologue.log("Aim/distance", distance);
 
             StemSolveInput solveInput = new StemSolveInput(
                 stem.getStemPosition(),

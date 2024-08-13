@@ -6,7 +6,7 @@ import com.ctre.phoenix6.CANBus;
 import com.igknighters.Robot;
 
 import edu.wpi.first.wpilibj.Timer;
-import monologue.MonoDashboard;
+import monologue.Monologue;
 
 /**
  * A utility to log CAN bus status to the dashboard.
@@ -27,7 +27,7 @@ public class CANBusLogging {
             return;
         }
 
-        MonoDashboard.put(
+        Monologue.log(
                 path + "/" + busName + "/" + "isFd",
                 CANBus.isNetworkFD(busName));
 
@@ -39,7 +39,7 @@ public class CANBusLogging {
     /**
      * Runs the CAN bus logging.
      */
-    public static void run() {
+    public static void log() {
         if (Robot.isSimulation() || loggedBuses.isEmpty()) {
             return;
         }
@@ -56,12 +56,12 @@ public class CANBusLogging {
 
         String prefix = path + "/" + busName + "/";
 
-        MonoDashboard.put(prefix + "status", status.Status.name());
-        MonoDashboard.put(prefix + "percentBusUtilization", status.BusUtilization);
-        MonoDashboard.put(prefix + "busOffCount", status.BusOffCount);
-        MonoDashboard.put(prefix + "txFullCount", status.TxFullCount);
-        MonoDashboard.put(prefix + "receiveErrorCount", status.REC);
-        MonoDashboard.put(prefix + "transmitErrorCount", status.TEC);
+        Monologue.log(prefix + "status", status.Status.name());
+        Monologue.log(prefix + "percentBusUtilization", status.BusUtilization);
+        Monologue.log(prefix + "busOffCount", status.BusOffCount);
+        Monologue.log(prefix + "txFullCount", status.TxFullCount);
+        Monologue.log(prefix + "receiveErrorCount", status.REC);
+        Monologue.log(prefix + "transmitErrorCount", status.TEC);
 
         index++;
 

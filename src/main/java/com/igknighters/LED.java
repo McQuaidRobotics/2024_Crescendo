@@ -11,17 +11,30 @@ import com.ctre.phoenix.led.StrobeAnimation;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.ColorFlowAnimation.Direction;
 import com.igknighters.constants.ConstValues;
-import com.pathplanner.lib.auto.AutoBuilder.TriFunction;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
-import monologue.MonoDashboard;
+import monologue.Monologue;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class LED {
+    /** Functional interface for a function that takes 3 inputs */
+    @FunctionalInterface
+    public interface TriFunction<In1, In2, In3, Out> {
+        /**
+         * Apply the inputs to this function
+         *
+         * @param in1 Input 1
+         * @param in2 Input 2
+         * @param in3 Input 3
+         * @return Output
+         */
+        Out apply(In1 in1, In2 in2, In3 in3);
+    }
+
     private static class NoLED extends LED {
         NoLED() {
             super(false);
@@ -430,7 +443,7 @@ public class LED {
             log += partial.toString() + ",";
             lastMode = robotMode;
         }
-        MonoDashboard.put("LED", log + "]");
+        Monologue.log("LED", log + "]");
 
         double batteryVolts = RobotController.getBatteryVoltage();
         if (batteryVolts < RobotController.getBrownoutVoltage() || RobotController.isBrownedOut()) {

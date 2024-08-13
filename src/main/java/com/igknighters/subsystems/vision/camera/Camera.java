@@ -235,7 +235,7 @@ public abstract class Camera implements Logged {
 
             @Override
             public void pack(ByteBuffer bb, VisionPoseEstimate value) {
-                // MonoDashboard.put("idk" + value.cameraId(), value.pose);
+                // Monologue.log("idk" + value.cameraId(), value.pose);
                 bb.putInt(value.cameraId);
                 Pose3d.struct.pack(bb, value.pose);
                 bb.putDouble(value.timestamp);

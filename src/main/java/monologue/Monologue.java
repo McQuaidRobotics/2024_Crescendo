@@ -3,7 +3,6 @@ package monologue;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.datalog.DataLog;
-import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
@@ -11,7 +10,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.WeakHashMap;
 import java.util.function.BooleanSupplier;
@@ -37,7 +35,7 @@ import java.util.function.BooleanSupplier;
  * #setupMonologueDisabled(Logged, String, boolean)} to disable logging and only run the error
  * checking.
  */
-public class Monologue {
+public class Monologue extends GlobalLogged {
 
   static {
     // we need to make sure we never log network tables through the implicit wpilib logger
@@ -57,7 +55,6 @@ public class Monologue {
   static final NTLogger ntLogger = new NTLogger();
   static final DataLogger dataLogger = new DataLogger();
   static final WeakHashMap<Logged, String> loggedRegistry = new WeakHashMap<Logged, String>();
-  static final HashMap<Class<?>, Struct<?>> structRegistry = new HashMap<Class<?>, Struct<?>>();
 
   /**
    * An object to hold the configuration for the Monologue library. This allows for easier default
@@ -71,9 +68,16 @@ public class Monologue {
       boolean throwOnWarn,
       boolean allowNonFinalLoggedFields) {
     public MonologueConfig {
+      if (fileOnly == null) {
+        MonologueLog.runtimeWarn(
+            "fileOnly cannot be null in MonologueConfig, falling back to false (always log NT)");
+
+        fileOnly = () -> false;
+      }
       if (datalogPrefix == null) {
-        throw new IllegalArgumentException(
-            "[Monologue] datalogPrefix cannot be null in MonologueConfig");
+        MonologueLog.runtimeWarn(
+            "datalogPrefix cannot be null in MonologueConfig, falling back to \"NT:\"");
+        datalogPrefix = "NT:";
       }
     }
 
@@ -166,7 +170,9 @@ public class Monologue {
    */
   public static void setupMonologue(Logged loggable, String rootpath, MonologueConfig config) {
     if (HAS_SETUP_BEEN_CALLED) {
-      throw new IllegalStateException("Monologue.setupMonologue() has already been called");
+      MonologueLog.runtimeWarn(
+          "Monologue.setupMonologue() has already been called, further calls will do nothing");
+      return;
     }
 
     // create and start a timer to time the setup process
@@ -176,7 +182,7 @@ public class Monologue {
     Monologue.config = config;
     HAS_SETUP_BEEN_CALLED = true;
     rootpath = NetworkTable.normalizeKey(rootpath, true);
-    MonoDashboard.setRootPath(rootpath);
+    Monologue.setRootPath(rootpath);
     MonologueLog.runtimeLog(
         "Monologue.setupMonologue() called on "
             + loggable.getClass().getName()
@@ -196,7 +202,8 @@ public class Monologue {
 
     DataLog dataLog = DataLogManager.getLog();
 
-    NetworkTableInstance.getDefault().startEntryDataLog(dataLog, rootpath, config.datalogPrefix + rootpath);
+    NetworkTableInstance.getDefault()
+        .startEntryDataLog(dataLog, rootpath, config.datalogPrefix + rootpath);
     NetworkTableInstance.getDefault().startConnectionDataLog(dataLog, "NTConnection");
     DriverStation.startDataLog(dataLog, true);
 
@@ -223,7 +230,9 @@ public class Monologue {
    */
   public static void setupMonologueDisabled(Logged loggable, String rootpath, boolean throwOnWarn) {
     if (HAS_SETUP_BEEN_CALLED && !IS_DISABLED) {
-      throw new IllegalStateException("Monologue.setupMonologue() has already been called");
+      MonologueLog.runtimeWarn(
+          "Monologue.setupMonologue() has already been called, disabling after setup will do nothing");
+      return;
     }
 
     HAS_SETUP_BEEN_CALLED = true;
@@ -246,15 +255,12 @@ public class Monologue {
   }
 
   /**
-   * Will interate over every element of the provided {@link Logged} object and handle the data
-   * transmission from there.
-   *
-   * <p>Will also recursively check field values for classes that implement {@link Logged} and log
-   * those as well.
+   * Creates a logging tree for the provided {@link Logged} object. Will also recursively check
+   * field values for classes that implement {@link Logged} and log those as well.
    *
    * @param loggable the obj to scrape
    * @param path the path to log to
-   * @apiNote make sure {@link #setupMonologue(Logged, String, boolean, boolean)} or {@link
+   * @throws IllegalStateException Make sure {@link #setupMonologue()} or {@link
    *     #setupMonologueDisabled()} is called first
    */
   public static void logObj(Logged loggable, String path) {
@@ -263,9 +269,11 @@ public class Monologue {
           "Tried to use Monologue.logObj before using a Monologue setup method");
 
     if (path == null || path.isEmpty()) {
-      throw new IllegalArgumentException("Invalid path: " + path);
+      MonologueLog.runtimeWarn("Invalid path for Monologue.logObj(): " + path);
+      return;
     } else if (path == "/") {
-      throw new IllegalArgumentException("Root path of / is not allowed");
+      MonologueLog.runtimeWarn("Root path of / is not allowed for Monologue.logObj()");
+      return;
     }
     MonologueLog.runtimeLog(
         "Monologue.logObj() called on " + loggable.getClass().getName() + " with path " + path);
@@ -290,8 +298,7 @@ public class Monologue {
   public static void updateAll() {
     if (isMonologueDisabled()) return;
     if (!hasBeenSetup())
-      throw new IllegalStateException(
-          "Tried to use Monologue.updateAll before using a Monologue setup method");
+      MonologueLog.runtimeWarn("Called Monologue.updateAll before Monologue was setup");
     boolean newFileOnly = config.fileOnly.getAsBoolean();
     if (newFileOnly != FILE_ONLY)
       MonologueLog.runtimeLog("Monologue.updateAll() updated FILE_ONLY flag to " + newFileOnly);
@@ -303,11 +310,8 @@ public class Monologue {
   public static void sendNetworkToFile(String subtablePath) {
     if (isMonologueDisabled()) return;
     subtablePath = NetworkTable.normalizeKey(subtablePath, true);
-    NetworkTableInstance.getDefault().startEntryDataLog(
-      dataLogger.log,
-      subtablePath,
-      config.datalogPrefix + subtablePath
-    );
+    NetworkTableInstance.getDefault()
+        .startEntryDataLog(dataLogger.log, subtablePath, config.datalogPrefix + subtablePath);
   }
 
   private static List<Field> getAllFields(Class<?> type) {

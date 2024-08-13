@@ -136,7 +136,7 @@ public class ConstantHelper {
         if (field.getAnnotations().length == 0) {
             return;
         }
-        RobotConstID constID = com.igknighters.constants.RobotSetup.getRobotID().constID;
+        RobotConstID constID = com.igknighters.constants.RobotConfig.getRobotID().constID;
 
         // handle robot dependent constants
 

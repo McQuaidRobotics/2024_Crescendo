@@ -23,8 +23,8 @@ import edu.wpi.first.math.numbers.N3;
 
 public class Localizer {
     private final Sender<Pose2d> positionSender = Sender.broadcast(kChannels.POSITION, Pose2d.class);
-    private final Sender<Pose2d> visionPositionSender = Sender.broadcast(kChannels.POSITION, Pose2d.class);
-    private final Sender<Pose2d> swervePositionSender = Sender.broadcast(kChannels.POSITION, Pose2d.class);
+    private final Sender<Pose2d> visionPositionSender = Sender.broadcast(kChannels.POSITION_VISION, Pose2d.class);
+    private final Sender<Pose2d> swervePositionSender = Sender.broadcast(kChannels.POSITION_SWERVE, Pose2d.class);
     private final Receiver<VisionPoseEstimate> visionDataReceiver = Receiver.buffered(kChannels.VISION, 32, VisionPoseEstimate.class);
     private final Receiver<SwerveDriveSample> swerveDataReveiver = Receiver.buffered(kChannels.SWERVE_ODO_SAMPLES, 32, SwerveDriveSample.class);
 

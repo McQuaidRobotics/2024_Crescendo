@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
 import com.igknighters.LED;
+import com.igknighters.Robot;
 import com.igknighters.LED.LedAnimations;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.commands.HigherOrderCommands;
@@ -29,8 +30,8 @@ import com.igknighters.commands.umbrella.UmbrellaCommands;
 
 /** If debug is false this controller does not initialize */
 public class TestingController extends ControllerParent {
-    public TestingController(int port, boolean debug) {
-        super(port, debug);
+    public TestingController(int port) {
+        super(port, ConstValues.DEBUG);
 
         // disregard null safety as it is checked on assignment
 

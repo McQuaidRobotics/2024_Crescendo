@@ -4,13 +4,11 @@ import java.util.HashMap;
 import java.util.function.BiConsumer;
 
 import monologue.Logged;
-import monologue.MonoDashboard;
+import monologue.Monologue;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
-import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
 
 import com.ctre.phoenix6.SignalLogger;
@@ -18,14 +16,15 @@ import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstantHelper;
-import com.igknighters.constants.RobotSetup;
+import com.igknighters.constants.RobotConfig;
 import com.igknighters.controllers.DriverController;
 import com.igknighters.controllers.OperatorController;
 import com.igknighters.controllers.TestingController;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.swerve.Swerve;
+import com.igknighters.util.FilesystemLogger;
+import com.igknighters.util.GlobalField;
 import com.igknighters.util.PowerLogger;
-import com.igknighters.util.ShuffleboardApi;
 import com.igknighters.util.Tracer;
 import com.igknighters.util.can.CANBusLogging;
 import com.igknighters.util.can.CANSignalManager;
@@ -36,22 +35,20 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
     private final CommandScheduler scheduler = CommandScheduler.getInstance();
     private final PowerLogger powerLogger = new PowerLogger(
-        ConstValues.PDH_CAN_ID,
-        ModuleType.kRev,
-        "/PowerDistribution",
-        true
-    );;
+            ConstValues.PDH_CAN_ID,
+            ModuleType.kRev,
+            "/PowerDistribution",
+            true
+    );
+    private final FilesystemLogger filesystemLogger = new FilesystemLogger();
 
     public final Localizer localizer = new Localizer();
 
     private final DriverController driverController = new DriverController(0, localizer);;
     private final OperatorController operatorController = new OperatorController(1);
-    private final TestingController testingController = new TestingController(3, true);
+    private final TestingController testingController = new TestingController(3);
 
     public final AllSubsystems allSubsystems;
-
-    private Command autoCmd;
-
 
     public Robot() {
         super(ConstValues.PERIODIC_TIME);
@@ -62,7 +59,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
         // consts also should be early initialized
         ConstantHelper.applyRoboConst(ConstValues.class);
 
-        allSubsystems = new AllSubsystems(RobotSetup.getRobotID().subsystems);
+        allSubsystems = new AllSubsystems(RobotConfig.getRobotID().subsystems);
 
         for (var subsystem : allSubsystems.getEnabledSubsystems()) {
             if (subsystem instanceof Logged) {
@@ -80,18 +77,13 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
             localizer.resetOdometry(GeomUtil.POSE2D_CENTER, swerve.getModulePositions());
 
             swerve.setDefaultCommand(new TeleopSwerveBase.TeleopSwerveOmni(swerve, driverController, localizer));
-
-            // setupAutos(swerve);
         }
 
         if (allSubsystems.umbrella.isPresent()) {
             var umbrella = allSubsystems.umbrella.get();
             umbrella.setDefaultCommand(
-                UmbrellaCommands.idleShooter(umbrella)
-            );
+                    UmbrellaCommands.idleShooter(umbrella));
         }
-
-        autoCmd = Commands.none().withName("Nothing Auto");
 
         System.gc();
     }
@@ -100,53 +92,59 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
     public void robotPeriodic() {
         Tracer.startTrace("RobotPeriodic");
         Tracer.traceFunc("CANSignalRefresh", CANSignalManager::refreshSignals);
+        Tracer.traceFunc("Localizer", localizer::update);
         Tracer.traceFunc("CommandScheduler", scheduler::run);
         Tracer.traceFunc("LEDUpdate", LED::run);
-        Tracer.traceFunc("CANBusLoggung", CANBusLogging::run);
-        Tracer.traceFunc("Shuffleboard", ShuffleboardApi::run);
-        Tracer.traceFunc("Monologue", Monologue::updateAll);
+        Tracer.traceFunc("CANBusLoggung", CANBusLogging::log);
         Tracer.traceFunc("PowerLogger", powerLogger::log);
+        Tracer.traceFunc("FilesystemLogger", filesystemLogger::log);
+        Tracer.traceFunc("Monologue", Monologue::updateAll);
         Tracer.endTrace();
     }
 
     @Override
     public void disabledPeriodic() {
-        MonoDashboard.put("Commands/SelectedAutoCommand", autoCmd.getName());
+        // Monologue.log("Commands/SelectedAutoCommand", autoCmd.getName());
     }
 
     @Override
     public void autonomousInit() {
-        if (autoCmd != null) {
-            MonoDashboard.put("Commands/CurrentAutoCommand", autoCmd.getName());
-            System.out.println("---- Starting auto command: " + autoCmd.getName() + " ----");
-            scheduler.schedule(autoCmd);
-        }
+        // if (autoCmd != null) {
+        //     Monologue.log("Commands/CurrentAutoCommand", autoCmd.getName());
+        //     System.out.println("---- Starting auto command: " + autoCmd.getName() + " ----");
+        //     scheduler.schedule(autoCmd);
+        // }
     }
 
     @Override
     public void autonomousExit() {
-        if (autoCmd != null) {
-            MonoDashboard.put("Commands/CurrentAutoCommand", "");
-            autoCmd.cancel();
-        }
+        // if (autoCmd != null) {
+        //     Monologue.log("Commands/CurrentAutoCommand", "");
+        //     autoCmd.cancel();
+        // }
         System.gc();
     }
 
     private void setupLogging() {
         // turn off auto logging for signal logger, doesnt get us any info we need
-        if (isReal()) SignalLogger.enableAutoLogging(false);
+        if (isReal()) {
+            SignalLogger.enableAutoLogging(false);
+            filesystemLogger.addFile("/home/lvuser/FRC_UserProgram.log");
+            filesystemLogger.addFile("/var/log/dmesg");
+        }
 
         if (!isUnitTest()) {
             // setup monologue with lazy logging and no datalog prefix
             // robot is the root object
             Monologue.setupMonologue(
-                this,
-                "/Robot",
-                new MonologueConfig()
-                    .withDatalogPrefix("")
-                    .withFileOnly(DriverStation::isFMSAttached)
-                    .withLazyLogging(true)
-            );
+                    this,
+                    "/Robot",
+                    new MonologueConfig()
+                            .withDatalogPrefix("")
+                            .withFileOnly(DriverStation::isFMSAttached)
+                            .withLazyLogging(true));
+
+            GlobalField.enable();
         } else {
             // used for tests and CI, does not actually log anything but asserts the logging is setup mostly correct
             Monologue.setupMonologueDisabled(this, "/Robot", true);
@@ -154,28 +152,27 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
         // send all library/utility made tables that don't use monologue to file aswell
         Monologue.sendNetworkToFile("/Visualizers");
-        Monologue.sendNetworkToFile("/PathPlanner");
         Monologue.sendNetworkToFile("/Tunables");
         Monologue.sendNetworkToFile("/Tracer");
         Monologue.sendNetworkToFile("/PowerDistribution");
 
         // logs build data to the datalog
         final String meta = "/BuildData/";
-        MonoDashboard.put(meta + "RuntimeType", getRuntimeType().toString());
-        MonoDashboard.put(meta + "ProjectName", BuildConstants.MAVEN_NAME);
-        MonoDashboard.put(meta + "BuildDate", BuildConstants.BUILD_DATE);
-        MonoDashboard.put(meta + "GitSHA", BuildConstants.GIT_SHA);
-        MonoDashboard.put(meta + "GitDate", BuildConstants.GIT_DATE);
-        MonoDashboard.put(meta + "GitBranch", BuildConstants.GIT_BRANCH);
+        Monologue.log(meta + "RuntimeType", getRuntimeType().toString());
+        Monologue.log(meta + "ProjectName", BuildConstants.MAVEN_NAME);
+        Monologue.log(meta + "BuildDate", BuildConstants.BUILD_DATE);
+        Monologue.log(meta + "GitSHA", BuildConstants.GIT_SHA);
+        Monologue.log(meta + "GitDate", BuildConstants.GIT_DATE);
+        Monologue.log(meta + "GitBranch", BuildConstants.GIT_BRANCH);
         switch (BuildConstants.DIRTY) {
             case 0:
-                MonoDashboard.put(meta + "GitDirty", "All changes committed");
+                Monologue.log(meta + "GitDirty", "All changes committed");
                 break;
             case 1:
-                MonoDashboard.put(meta + "GitDirty", "Uncomitted changes");
+                Monologue.log(meta + "GitDirty", "Uncomitted changes");
                 break;
             default:
-                MonoDashboard.put(meta + "GitDirty", "Unknown");
+                Monologue.log(meta + "GitDirty", "Unknown");
                 break;
         }
 
@@ -184,25 +181,22 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
             String name = command.getName();
             int count = commandCounts.getOrDefault(name, 0) + (active ? 1 : -1);
             commandCounts.put(name, count);
-            MonoDashboard.put(
+            Monologue.log(
                     "Commands/CommandsUnique/" + name + "_" + Integer.toHexString(command.hashCode()),
                     active.booleanValue());
-            MonoDashboard.put("Commands/CommandsAll/" + name, count > 0);
+            Monologue.log("Commands/CommandsAll/" + name, count > 0);
         };
-        CommandScheduler.getInstance()
-                .onCommandInitialize(
-                        (Command command) -> {
-                            logCommandFunction.accept(command, true);
-                        });
-        CommandScheduler.getInstance()
-                .onCommandFinish(
-                        (Command command) -> {
-                            logCommandFunction.accept(command, false);
-                        });
-        CommandScheduler.getInstance()
-                .onCommandInterrupt(
-                        (Command command) -> {
-                            logCommandFunction.accept(command, false);
-                        });
+        scheduler.onCommandInitialize(
+                (Command command) -> {
+                    logCommandFunction.accept(command, true);
+                });
+        scheduler.onCommandFinish(
+                (Command command) -> {
+                    logCommandFunction.accept(command, false);
+                });
+        scheduler.onCommandInterrupt(
+                (Command command) -> {
+                    logCommandFunction.accept(command, false);
+                });
     }
 }

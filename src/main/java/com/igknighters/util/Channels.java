@@ -83,6 +83,10 @@ public class Channels {
             }
         }
 
+        /**
+         * @return the received value or the default value if the channel is empty,
+         *         removing the value from the channel
+         */
         public T recvOrDefault(T defaultValue) {
             if (hasData()) {
                 return recv();
@@ -91,6 +95,10 @@ public class Channels {
             }
         }
 
+        /**
+         * @return the received value or the default value if the channel is empty,
+         *         without removing the value from the channel
+         */
         public T inspectOrDefault(T defaultValue) {
             if (hasData()) {
                 return inspect();
@@ -106,6 +114,9 @@ public class Channels {
             return false;
         }
 
+        /**
+         * @return the name of the channel
+         */
         public abstract String getChannelName();
 
         /**

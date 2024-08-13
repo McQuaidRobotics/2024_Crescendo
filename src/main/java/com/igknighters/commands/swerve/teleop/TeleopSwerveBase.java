@@ -11,7 +11,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import com.igknighters.Localizer;
 import com.igknighters.Robot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import monologue.MonoDashboard;
+import monologue.Monologue;
 import edu.wpi.first.wpilibj2.command.Command;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.controllers.ControllerParent;
@@ -72,17 +72,17 @@ public class TeleopSwerveBase extends Command {
         // inverted because left is positive for field due to Y being increased but left
         // is negative for controller
         final double raw = rawTranslationXSup.getAsDouble();
-        MonoDashboard.put("/Robot/Swerve/TeleopCommand/RawTranslationX", raw);
+        Monologue.log("/Robot/Swerve/TeleopCommand/RawTranslationX", raw);
         var processed = -kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(raw) * invert();
-        MonoDashboard.put("/Robot/Swerve/TeleopCommand/TranslationX", processed);
+        Monologue.log("/Robot/Swerve/TeleopCommand/TranslationX", processed);
         return processed;
     }
 
     protected double getTranslationY() {
         final double raw = rawTranslationYSup.getAsDouble();
-        MonoDashboard.put("/Robot/Swerve/TeleopCommand/RawTranslationY", raw);
+        Monologue.log("/Robot/Swerve/TeleopCommand/RawTranslationY", raw);
         var processed = kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(raw) * invert();
-        MonoDashboard.put("/Robot/Swerve/TeleopCommand/TranslationY", processed);
+        Monologue.log("/Robot/Swerve/TeleopCommand/TranslationY", processed);
         return processed;
     }
 
@@ -90,17 +90,17 @@ public class TeleopSwerveBase extends Command {
         // inverted because left is positive for field due to Y being increased but left
         // is negative for controller
         final double raw = rawRotationXSup.getAsDouble();
-        MonoDashboard.put("/Robot/Swerve/TeleopCommand/RawRotationX", raw);
+        Monologue.log("/Robot/Swerve/TeleopCommand/RawRotationX", raw);
         var processed = -kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(raw);
-        MonoDashboard.put("/Robot/Swerve/TeleopCommand/RotationX", processed);
+        Monologue.log("/Robot/Swerve/TeleopCommand/RotationX", processed);
         return processed;
     }
 
     protected double getRotationY() {
         final double raw = rawRotationYSup.getAsDouble();
-        MonoDashboard.put("/Robot/Swerve/TeleopCommand/RawRotationY", raw);
+        Monologue.log("/Robot/Swerve/TeleopCommand/RawRotationY", raw);
         var processed = kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(raw);
-        MonoDashboard.put("/Robot/Swerve/TeleopCommand/RotationY", processed);
+        Monologue.log("/Robot/Swerve/TeleopCommand/RotationY", processed);
         return processed;
     }
 
@@ -133,7 +133,7 @@ public class TeleopSwerveBase extends Command {
 
             currentCmd = traditional;
 
-            MonoDashboard.publishSendable("/Robot/Swerve/TeleopMode", chooser);
+            Monologue.publishSendable("/Robot/Swerve/TeleopMode", chooser);
         }
 
         @Override

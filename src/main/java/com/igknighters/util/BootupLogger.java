@@ -2,7 +2,7 @@ package com.igknighters.util;
 
 import com.igknighters.Robot;
 
-import monologue.MonoDashboard;
+import monologue.Monologue;
 
 /**
  * A utility to log stuff initializing during "bootup"
@@ -18,7 +18,7 @@ public class BootupLogger {
      * @param message The message to log
      */
     public static synchronized void bootupLog(String message) {
-        MonoDashboard.put("/Bootup", message);
+        Monologue.log("/Bootup", message);
 
         if (!Robot.isUnitTest()) {
             System.out.println(println_prefix + message);

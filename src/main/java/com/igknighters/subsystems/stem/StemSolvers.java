@@ -8,7 +8,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
-import monologue.MonoDashboard;
+import monologue.Monologue;
 
 public class StemSolvers {
 
@@ -187,13 +187,13 @@ public class StemSolvers {
         double linearWristRads = linearSolveWristTheta(stemLength, pivotRads, horizDist, vertDist, false);
         double vertcialDistanceError = linearSolveVerticalDistError(linearWristRads, horizDist, vertDist, deltaNoteVelo);
 
-        MonoDashboard.put("Aim/GravDistOffset", vertcialDistanceError);
-        MonoDashboard.put("Aim/Linear", linearSolveWristTheta(stemLength, pivotRads, horizDist, vertDist, true));
+        Monologue.log("Aim/GravDistOffset", vertcialDistanceError);
+        Monologue.log("Aim/Linear", linearSolveWristTheta(stemLength, pivotRads, horizDist, vertDist, true));
 
         double newVerticalDist = vertDist + vertcialDistanceError;
 
         double grav = linearSolveWristTheta(stemLength, pivotRads, horizDist, newVerticalDist, true);
-        MonoDashboard.put("Aim/Gravity", grav);
+        Monologue.log("Aim/Gravity", grav);
         return grav;
     }
 

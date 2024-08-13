@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.Notifier;
+import edu.wpi.first.wpilibj.RobotController;
 
 public class SimSwerveOdometryThread extends SwerveOdometryThread{
     private final Notifier notifier;
@@ -18,6 +19,7 @@ public class SimSwerveOdometryThread extends SwerveOdometryThread{
     public SimSwerveOdometryThread(int hz) {
         super(hz);
         notifier = new Notifier(this::run);
+        notifier.setName("SwerveOdometry");
     }
 
     public void addModulePositionSupplier(int moduleId, Supplier<SwerveModulePosition> sup) {
@@ -37,6 +39,7 @@ public class SimSwerveOdometryThread extends SwerveOdometryThread{
     }
 
     private void run() {
+        long startTime = RobotController.getFPGATime();
         swerveDataSender.send(
             new SwerveDriveSample(
                 new SwerveDriveWheelPositions(getModulePositions()),
@@ -44,10 +47,12 @@ public class SimSwerveOdometryThread extends SwerveOdometryThread{
                 MathSharedStore.getTimestamp()
             )
         );
+        updateTimeMicros.set(RobotController.getFPGATime() - startTime);
     }
 
     @Override
     public void start() {
         notifier.startPeriodic(1.0 / ((double) hz));
+        isRunning.set(true);
     }
 }

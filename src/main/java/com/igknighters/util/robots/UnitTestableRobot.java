@@ -128,7 +128,6 @@ public abstract class UnitTestableRobot<R extends UnitTestableRobot<R>> extends 
                 }
             }.getAsDouble()
         );
-        System.out.println("isUnitTest: " + isUnitTest());
         if (isUnitTest()) {
             DriverStationSim.setEnabled(false);
             DriverStationSim.setAutonomous(false);

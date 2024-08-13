@@ -6,6 +6,7 @@ import com.igknighters.util.Channels.Receiver;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
+import monologue.Monologue;
 
 public class GlobalField {
     public static final String NOTES_POSITION = "FieldNotes";
@@ -17,7 +18,9 @@ public class GlobalField {
     private static final FieldObject2d modules = field.getObject(MODULES_POSITION);
     private static final FieldObject2d notes = field.getObject(NOTES_POSITION);
     private static final FieldObject2d seenTags = field.getObject(SEEN_TAGS_POSITION);
-    static {
+
+
+    public static void enable(){
         Receiver.reactor(
             kChannels.POSITION,
             Pose2d.class,
@@ -38,5 +41,7 @@ public class GlobalField {
             Pose2d[].class,
             pose -> seenTags.setPoses(pose)
         );
+
+        Monologue.publishSendable("/Visualizers/Field", field);
     }
 }

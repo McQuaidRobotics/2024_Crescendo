@@ -77,7 +77,8 @@ class EvalField {
               rootPath + "." + field.getName() + " is reccomended to be final for logging");
         }
         int idx = 0;
-        // Include all elements whose runtime class is Loggable
+        // Include all elements whose runtime class is Logged
+
         for (Object obj : (Object[]) fieldOptional.get()) {
           if (obj instanceof Logged) {
             String pathOverride = ((Logged) obj).getOverrideName();
@@ -93,7 +94,8 @@ class EvalField {
       }
     } else if (Collection.class.isAssignableFrom(field.getType())) {
       int idx = 0;
-      // Include all elements whose runtime class is Loggable
+      // Include all elements whose runtime class is Logged
+
       for (Object obj : (Collection<?>) fieldOptional.get()) {
         if (obj instanceof Logged) {
           String pathOverride = ((Logged) obj).getOverrideName();
@@ -131,7 +133,8 @@ class EvalField {
     LogMetadata logMetadata = EvalAnno.LogMetadata.from(field);
 
     if (logMetadata.once && getField(field, loggable).isEmpty()) {
-      MonologueLog.runtimeWarn(rootPath + "." + field.getName() + " is once and null at setup");
+      MonologueLog.runtimeWarn(
+          rootPath + "." + field.getName() + " is logged once and is null at setup");
     }
 
     String name = logMetadata.relativePath.equals("") ? field.getName() : logMetadata.relativePath;
@@ -152,7 +155,12 @@ class EvalField {
     if (logType == LogType.File) {
       if (NTSendable.class.isAssignableFrom(type)) {
         MonologueLog.runtimeWarn(
-            "NTSendable isn't supported yet for file logging: " + rootPath + "." + field.getName());
+            "NTSendable isn't supported for @Log.File, use @Log or @Log.NT instead: "
+                + rootPath
+                + "."
+                + field.getName());
+
+        Monologue.ntLogger.addSendable(key, (NTSendable) getField(field, loggable).get());
       } else if (Sendable.class.isAssignableFrom(type)) {
         Monologue.dataLogger.addSendable(key, (Sendable) getField(field, loggable).get());
       } else {
@@ -174,6 +182,5 @@ class EvalField {
         }
       }
     }
-    return;
   }
 }

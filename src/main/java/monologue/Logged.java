@@ -1,6 +1,7 @@
 package monologue;
 
 import edu.wpi.first.util.struct.StructSerializable;
+import edu.wpi.first.util.struct.Struct;
 
 /**
  * Interface for classes that can hold {@link Monologue} annotated fields for
@@ -36,8 +37,8 @@ public interface Logged {
    * @param key The key to log the value under relative to the objects path.
    * @param value The value to log.
    */
-  public default void log(String key, boolean value) {
-    log(key, value, LogLevel.DEFAULT);
+  public default boolean  log(String key, boolean value) {
+    return log(key, value, LogLevel.DEFAULT);
   }
 
   /**
@@ -48,9 +49,10 @@ public interface Logged {
    * @param value The value to log.
    * @param level The log level to log the value under.
    */
-  public default void log(String key, boolean value, LogLevel level) {
-    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return;
+  public default boolean log(String key, boolean value, LogLevel level) {
+    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return value;
     Monologue.ntLogger.put(getFullPath(this) + "/" + key, value, level);
+    return value;
   }
 
   /**
@@ -60,8 +62,8 @@ public interface Logged {
    * @param key The key to log the value under relative to the objects path.
    * @param value The value to log.
    */
-  public default void log(String key, int value) {
-    log(key, value, LogLevel.DEFAULT);
+  public default int  log(String key, int value) {
+    return log(key, value, LogLevel.DEFAULT);
   }
 
   /**
@@ -72,9 +74,10 @@ public interface Logged {
    * @param value The value to log.
    * @param level The log level to log the value under.
    */
-  public default void log(String key, int value, LogLevel level) {
-    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return;
+  public default int log(String key, int value, LogLevel level) {
+    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return value;
     Monologue.ntLogger.put(getFullPath(this) + "/" + key, value, level);
+    return value;
   }
 
   /**
@@ -84,8 +87,8 @@ public interface Logged {
    * @param key The key to log the value under relative to the objects path.
    * @param value The value to log.
    */
-  public default void log(String key, long value) {
-    log(key, value, LogLevel.DEFAULT);
+  public default long  log(String key, long value) {
+    return log(key, value, LogLevel.DEFAULT);
   }
 
   /**
@@ -96,9 +99,10 @@ public interface Logged {
    * @param value The value to log.
    * @param level The log level to log the value under.
    */
-  public default void log(String key, long value, LogLevel level) {
-    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return;
+  public default long log(String key, long value, LogLevel level) {
+    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return value;
     Monologue.ntLogger.put(getFullPath(this) + "/" + key, value, level);
+    return value;
   }
 
   /**
@@ -108,8 +112,8 @@ public interface Logged {
    * @param key The key to log the value under relative to the objects path.
    * @param value The value to log.
    */
-  public default void log(String key, float value) {
-    log(key, value, LogLevel.DEFAULT);
+  public default float  log(String key, float value) {
+    return log(key, value, LogLevel.DEFAULT);
   }
 
   /**
@@ -120,9 +124,10 @@ public interface Logged {
    * @param value The value to log.
    * @param level The log level to log the value under.
    */
-  public default void log(String key, float value, LogLevel level) {
-    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return;
+  public default float log(String key, float value, LogLevel level) {
+    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return value;
     Monologue.ntLogger.put(getFullPath(this) + "/" + key, value, level);
+    return value;
   }
 
   /**
@@ -132,8 +137,8 @@ public interface Logged {
    * @param key The key to log the value under relative to the objects path.
    * @param value The value to log.
    */
-  public default void log(String key, double value) {
-    log(key, value, LogLevel.DEFAULT);
+  public default double  log(String key, double value) {
+    return log(key, value, LogLevel.DEFAULT);
   }
 
   /**
@@ -144,9 +149,10 @@ public interface Logged {
    * @param value The value to log.
    * @param level The log level to log the value under.
    */
-  public default void log(String key, double value, LogLevel level) {
-    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return;
+  public default double log(String key, double value, LogLevel level) {
+    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return value;
     Monologue.ntLogger.put(getFullPath(this) + "/" + key, value, level);
+    return value;
   }
 
   /**
@@ -156,8 +162,8 @@ public interface Logged {
    * @param key The key to log the value under relative to the objects path.
    * @param value The value to log.
    */
-  public default void log(String key, String value) {
-    log(key, value, LogLevel.DEFAULT);
+  public default String  log(String key, String value) {
+    return log(key, value, LogLevel.DEFAULT);
   }
 
   /**
@@ -168,9 +174,10 @@ public interface Logged {
    * @param value The value to log.
    * @param level The log level to log the value under.
    */
-  public default void log(String key, String value, LogLevel level) {
-    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return;
+  public default String log(String key, String value, LogLevel level) {
+    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return value;
     Monologue.ntLogger.put(getFullPath(this) + "/" + key, value, level);
+    return value;
   }
 
   /**
@@ -180,8 +187,8 @@ public interface Logged {
    * @param key The key to log the value under relative to the objects path.
    * @param value The value to log.
    */
-  public default void log(String key, byte[] value) {
-    log(key, value, LogLevel.DEFAULT);
+  public default byte[]  log(String key, byte[] value) {
+    return log(key, value, LogLevel.DEFAULT);
   }
 
   /**
@@ -192,9 +199,10 @@ public interface Logged {
    * @param value The value to log.
    * @param level The log level to log the value under.
    */
-  public default void log(String key, byte[] value, LogLevel level) {
-    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return;
+  public default byte[] log(String key, byte[] value, LogLevel level) {
+    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return value;
     Monologue.ntLogger.put(getFullPath(this) + "/" + key, value, level);
+    return value;
   }
 
   /**
@@ -204,8 +212,8 @@ public interface Logged {
    * @param key The key to log the value under relative to the objects path.
    * @param value The value to log.
    */
-  public default void log(String key, boolean[] value) {
-    log(key, value, LogLevel.DEFAULT);
+  public default boolean[]  log(String key, boolean[] value) {
+    return log(key, value, LogLevel.DEFAULT);
   }
 
   /**
@@ -216,9 +224,10 @@ public interface Logged {
    * @param value The value to log.
    * @param level The log level to log the value under.
    */
-  public default void log(String key, boolean[] value, LogLevel level) {
-    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return;
+  public default boolean[] log(String key, boolean[] value, LogLevel level) {
+    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return value;
     Monologue.ntLogger.put(getFullPath(this) + "/" + key, value, level);
+    return value;
   }
 
   /**
@@ -228,8 +237,8 @@ public interface Logged {
    * @param key The key to log the value under relative to the objects path.
    * @param value The value to log.
    */
-  public default void log(String key, int[] value) {
-    log(key, value, LogLevel.DEFAULT);
+  public default int[]  log(String key, int[] value) {
+    return log(key, value, LogLevel.DEFAULT);
   }
 
   /**
@@ -240,9 +249,10 @@ public interface Logged {
    * @param value The value to log.
    * @param level The log level to log the value under.
    */
-  public default void log(String key, int[] value, LogLevel level) {
-    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return;
+  public default int[] log(String key, int[] value, LogLevel level) {
+    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return value;
     Monologue.ntLogger.put(getFullPath(this) + "/" + key, value, level);
+    return value;
   }
 
   /**
@@ -252,8 +262,8 @@ public interface Logged {
    * @param key The key to log the value under relative to the objects path.
    * @param value The value to log.
    */
-  public default void log(String key, long[] value) {
-    log(key, value, LogLevel.DEFAULT);
+  public default long[]  log(String key, long[] value) {
+    return log(key, value, LogLevel.DEFAULT);
   }
 
   /**
@@ -264,9 +274,10 @@ public interface Logged {
    * @param value The value to log.
    * @param level The log level to log the value under.
    */
-  public default void log(String key, long[] value, LogLevel level) {
-    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return;
+  public default long[] log(String key, long[] value, LogLevel level) {
+    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return value;
     Monologue.ntLogger.put(getFullPath(this) + "/" + key, value, level);
+    return value;
   }
 
   /**
@@ -276,8 +287,8 @@ public interface Logged {
    * @param key The key to log the value under relative to the objects path.
    * @param value The value to log.
    */
-  public default void log(String key, float[] value) {
-    log(key, value, LogLevel.DEFAULT);
+  public default float[]  log(String key, float[] value) {
+    return log(key, value, LogLevel.DEFAULT);
   }
 
   /**
@@ -288,9 +299,10 @@ public interface Logged {
    * @param value The value to log.
    * @param level The log level to log the value under.
    */
-  public default void log(String key, float[] value, LogLevel level) {
-    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return;
+  public default float[] log(String key, float[] value, LogLevel level) {
+    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return value;
     Monologue.ntLogger.put(getFullPath(this) + "/" + key, value, level);
+    return value;
   }
 
   /**
@@ -300,8 +312,8 @@ public interface Logged {
    * @param key The key to log the value under relative to the objects path.
    * @param value The value to log.
    */
-  public default void log(String key, double[] value) {
-    log(key, value, LogLevel.DEFAULT);
+  public default double[]  log(String key, double[] value) {
+    return log(key, value, LogLevel.DEFAULT);
   }
 
   /**
@@ -312,9 +324,10 @@ public interface Logged {
    * @param value The value to log.
    * @param level The log level to log the value under.
    */
-  public default void log(String key, double[] value, LogLevel level) {
-    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return;
+  public default double[] log(String key, double[] value, LogLevel level) {
+    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return value;
     Monologue.ntLogger.put(getFullPath(this) + "/" + key, value, level);
+    return value;
   }
 
   /**
@@ -324,8 +337,8 @@ public interface Logged {
    * @param key The key to log the value under relative to the objects path.
    * @param value The value to log.
    */
-  public default void log(String key, String[] value) {
-    log(key, value, LogLevel.DEFAULT);
+  public default String[]  log(String key, String[] value) {
+    return log(key, value, LogLevel.DEFAULT);
   }
 
   /**
@@ -336,9 +349,10 @@ public interface Logged {
    * @param value The value to log.
    * @param level The log level to log the value under.
    */
-  public default void log(String key, String[] value, LogLevel level) {
-    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return;
+  public default String[] log(String key, String[] value, LogLevel level) {
+    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return value;
     Monologue.ntLogger.put(getFullPath(this) + "/" + key, value, level);
+    return value;
   }
 
   /**
@@ -348,8 +362,8 @@ public interface Logged {
    * @param key The key to log the value under relative to the objects path.
    * @param value The value to log.
    */
-  public default <R extends StructSerializable> void log(String key, R value) {
-    log(key, value, LogLevel.DEFAULT);
+  public default <R extends StructSerializable> R log(String key, R value) {
+    return log(key, value, LogLevel.DEFAULT);
   }
 
   /**
@@ -360,9 +374,10 @@ public interface Logged {
    * @param value The value to log.
    * @param level The log level to log the value under.
    */
-  public default <R extends StructSerializable> void log(String key, R value, LogLevel level) {
-    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return;
+  public default <R extends StructSerializable> R log(String key, R value, LogLevel level) {
+    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return value;
     Monologue.ntLogger.put(getFullPath(this) + "/" + key, value, level);
+    return value;
   }
 
   /**
@@ -372,8 +387,8 @@ public interface Logged {
    * @param key The key to log the value under relative to the objects path.
    * @param value The value to log.
    */
-  public default <R extends StructSerializable> void log(String key, R[] value) {
-    log(key, value, LogLevel.DEFAULT);
+  public default <R extends StructSerializable> R[] log(String key, R[] value) {
+    return log(key, value, LogLevel.DEFAULT);
   }
 
   /**
@@ -384,8 +399,113 @@ public interface Logged {
    * @param value The value to log.
    * @param level The log level to log the value under.
    */
-  public default <R extends StructSerializable> void log(String key, R[] value, LogLevel level) {
-    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return;
+  public default <R extends StructSerializable> R[] log(String key, R[] value, LogLevel level) {
+    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return value;
     Monologue.ntLogger.put(getFullPath(this) + "/" + key, value, level);
+    return value;
+  }
+
+  /**
+   * Logs a value with the default log level.
+   * The key is relative to the objects path this is being called in.
+   * 
+   * @param key The key to log the value under relative to the objects path.
+   * @param value The value to log.
+   */
+  public default <R> R log(String key, Struct<R> struct, R value) {
+    return log(key, struct, value, LogLevel.DEFAULT);
+  }
+
+  /**
+   * Logs a value with the specified log level.
+   * The key is relative to the objects path this is being called in.
+   * 
+   * @param key The key to log the value under relative to the objects path.
+   * @param value The value to log.
+   * @param level The log level to log the value under.
+   */
+  public default <R> R log(String key, Struct<R> struct, R value, LogLevel level) {
+    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return value;
+    Monologue.ntLogger.putStruct(getFullPath(this) + "/" + key, struct, value, level);
+    return value;
+  }
+
+  /**
+   * Logs a value with the default log level.
+   * The key is relative to the objects path this is being called in.
+   * 
+   * @param key The key to log the value under relative to the objects path.
+   * @param value The value to log.
+   */
+  public default <R> R[] log(String key, Struct<R> struct, R[] value) {
+    return log(key, struct, value, LogLevel.DEFAULT);
+  }
+
+  /**
+   * Logs a value with the specified log level.
+   * The key is relative to the objects path this is being called in.
+   * 
+   * @param key The key to log the value under relative to the objects path.
+   * @param value The value to log.
+   * @param level The log level to log the value under.
+   */
+  public default <R> R[] log(String key, Struct<R> struct, R[] value, LogLevel level) {
+    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return value;
+    Monologue.ntLogger.putStructArray(getFullPath(this) + "/" + key, struct, value, level);
+    return value;
+  }
+
+  /**
+   * Logs a value with the default log level.
+   * The key is relative to the objects path this is being called in.
+   * 
+   * @param key The key to log the value under relative to the objects path.
+   * @param value The value to log. (for enums, the names of the enums are logged)
+   */
+  public default <E extends Enum<?>> E log(String key, E value) {
+    return log(key, value, LogLevel.DEFAULT);
+  }
+
+  /**
+   * Logs a value with the specified log level.
+   * The key is relative to the objects path this is being called in.
+   * 
+   * @param key The key to log the value under relative to the objects path.
+   * @param value The value to log. (for enums, the names of the enums are logged)
+   * @param level The log level to log the value under.
+   */
+  public default <E extends Enum<?>> E log(String key, E value, LogLevel level) {
+    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return value;
+    Monologue.ntLogger.put(getFullPath(this) + "/" + key, value.name(), level);
+    return value;
+  }
+
+  /**
+   * Logs a value with the default log level.
+   * The key is relative to the objects path this is being called in.
+   * 
+   * @param key The key to log the value under relative to the objects path.
+   * @param value The value to log. (for enums, the names of the enums are logged)
+   */
+  public default <E extends Enum<?>> E[] log(String key, E[] value) {
+    return log(key, value, LogLevel.DEFAULT);
+  }
+
+  /**
+   * Logs a value with the specified log level.
+   * The key is relative to the objects path this is being called in.
+   * 
+   * @param key The key to log the value under relative to the objects path.
+   * @param value The value to log. (for enums, the names of the enums are logged)
+   * @param level The log level to log the value under.
+   */
+  public default <E extends Enum<?>> E[] log(String key, E[] value, LogLevel level) {
+    if (!Monologue.isMonologueReady(key) || Monologue.isMonologueDisabled()) return value;
+    String[] names = new String[value.length];
+    for (int i = 0; i < value.length; i++) {
+      names[i] = value[i].name();
+    }
+    Monologue.ntLogger.put(getFullPath(this) + "/" + key, names, level);
+    return value;
   }
 }

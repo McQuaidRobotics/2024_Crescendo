@@ -9,9 +9,9 @@ import com.igknighters.util.BootupLogger;
 
 import com.igknighters.Robot;
 import edu.wpi.first.wpilibj.RobotController;
-import monologue.MonoDashboard;
+import monologue.Monologue;
 
-public class RobotSetup {
+public class RobotConfig {
 
     public enum RobotID {
         CRASH(Subsystems.all(),
@@ -86,14 +86,14 @@ public class RobotSetup {
                 throw new RuntimeException("Robot ID not found, " + currentSerialNum + " not in serialToID map");
             }
             BootupLogger.bootupLog("Robot Name: " + currentID.name);
-            MonoDashboard.put("RobotSetup/RobotId", currentID.name());
-            MonoDashboard.put(
-                    "RobotSetup/EnabledSubsystems",
+            Monologue.log("RobotConfig/RobotId", currentID.name());
+            Monologue.log(
+                    "RobotConfig/EnabledSubsystems",
                     List.of(currentID.subsystems)
                             .stream()
                             .map(sub -> sub.name())
                             .reduce("", (acc, sub) -> acc + sub + ", "));
-            MonoDashboard.put("RobotSetup/ConstantsID", currentID.constID.name());
+            Monologue.log("RobotConfig/ConstantsID", currentID.constID.name());
         }
         return currentID;
     }
