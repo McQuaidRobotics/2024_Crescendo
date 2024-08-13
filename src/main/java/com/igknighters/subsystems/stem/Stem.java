@@ -3,6 +3,7 @@ package com.igknighters.subsystems.stem;
 
 import com.igknighters.GlobalState;
 import com.igknighters.LED;
+import com.igknighters.Robot;
 import com.igknighters.LED.LedAnimations;
 import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.subsystems.stem.StemValidator.ValidationResponse;
@@ -36,7 +37,11 @@ public class Stem extends SubsystemBase implements Logged {
             wrist = new WristDisabled();
         } else {
             pivot = new PivotReal();
-            telescope = new TelescopeRealSunshine();
+            if (Robot.isDemo()) {
+                telescope = new TelescopeRealSunshine();
+            } else {
+                telescope = new TelescopeReal();
+            }
             wrist = new WristRealFused();
         }
 

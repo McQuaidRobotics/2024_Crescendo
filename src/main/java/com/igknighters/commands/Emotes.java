@@ -10,17 +10,12 @@ import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.stem.StemPosition;
-import com.igknighters.subsystems.swerve.Swerve;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 public class Emotes {
-    private static Command turnToRelative(Swerve swerve, Rotation2d angle) {
-        return SwerveCommands.pointTowards(swerve, swerve.getYawWrappedRot().plus(angle));
-    }
 
     public static Command bopYourHead(AllSubsystems subsystems) {
         if (!subsystems.hasAllSubsystems()) return Commands.idle(subsystems.getEnabledSubsystemsArr());
@@ -38,7 +33,7 @@ public class Emotes {
                         75.0,
                         kTelescope.MIN_METERS
                     ),
-                    3.0
+                    10.0
                 ),
                 StemCommands.moveTo(
                     subsystems.stem.get(),
@@ -47,7 +42,7 @@ public class Emotes {
                         105.0,
                         kTelescope.MIN_METERS
                     ),
-                    3.0
+                    10.0
                 )
             );
             var umbrella = UmbrellaCommands.stopShooter(subsystems.umbrella.get());

@@ -1,5 +1,6 @@
 package com.igknighters.subsystems.umbrella;
 
+import com.igknighters.Robot;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.umbrella.intake.*;
 import com.igknighters.subsystems.umbrella.shooter.*;
@@ -29,7 +30,11 @@ public class Umbrella extends SubsystemBase implements Logged {
             intake = new IntakeSim();
             shooter = new ShooterDisabled();
         } else {
-            intake = new IntakeRealSingleCurrent();
+            if (Robot.isDemo()) {
+                intake = new IntakeRealSingleCurrent();
+            } else {
+                intake = new IntakeRealSingle();
+            }
             shooter = new ShooterReal();
         }
     }
