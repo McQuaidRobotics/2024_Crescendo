@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 /**
@@ -75,16 +76,16 @@ public class ChoreoAutoFactory {
   private final ChoreoControlFunction controller;
   private final Consumer<ChassisSpeeds> outputChassisSpeeds;
   private final BooleanSupplier mirrorTrajectory;
-  private final Optional<Consumer<ChoreoTrajectory>> trajLogger;
   private final Subsystem driveSubsystem;
   private final ChoreoAutoBindings bindings = new ChoreoAutoBindings();
+  private Optional<BiConsumer<ChoreoTrajectory, Boolean>> trajLogger;
 
   ChoreoAutoFactory(
       Supplier<Pose2d> poseSupplier,
       ChoreoControlFunction controller,
       Consumer<ChassisSpeeds> outputChassisSpeeds,
       BooleanSupplier mirrorTrajectory,
-      Optional<Consumer<ChoreoTrajectory>> trajLogger,
+      Optional<BiConsumer<ChoreoTrajectory, Boolean>> trajLogger,
       Subsystem driveSubsystem,
       ChoreoAutoBindings bindings) {
     this.poseSupplier = poseSupplier;
@@ -113,7 +114,7 @@ public class ChoreoAutoFactory {
    * @return A new auto trajectory.
    */
   public ChoreoAutoTrajectory traj(String trajName, ChoreoAutoLoop loop) {
-    return new ChoreoAutoTrajectory(
+    var traj = new ChoreoAutoTrajectory(
         trajName,
         Choreo.getTrajectory(trajName)
             .orElseGet(
@@ -128,7 +129,11 @@ public class ChoreoAutoFactory {
         trajLogger,
         driveSubsystem,
         loop.getLoop(),
-        bindings);
+        bindings,
+        loop::onNewTrajectory
+    );
+    loop.addTrajectory(traj);
+    return traj;
   }
 
   /**
@@ -139,7 +144,7 @@ public class ChoreoAutoFactory {
    * @return A new auto trajectory.
    */
   public ChoreoAutoTrajectory traj(ChoreoTrajectory trajectory, ChoreoAutoLoop loop) {
-    return new ChoreoAutoTrajectory(
+    var traj = new ChoreoAutoTrajectory(
         trajectory.name(),
         trajectory,
         poseSupplier,
@@ -149,7 +154,11 @@ public class ChoreoAutoFactory {
         trajLogger,
         driveSubsystem,
         loop.getLoop(),
-        bindings);
+        bindings,
+        loop::onNewTrajectory
+    );
+    loop.addTrajectory(traj);
+    return traj;
   }
 
   /**
@@ -160,7 +169,7 @@ public class ChoreoAutoFactory {
    * @return A new auto trajectory.
    */
   public ChoreoAutoTrajectory trajGroup(String trajName, ChoreoAutoLoop loop) {
-    return new ChoreoAutoTrajectory(
+    var traj =  new ChoreoAutoTrajectory(
         trajName,
         Choreo.getTrajectoryGroup(trajName)
             .orElseGet(
@@ -175,7 +184,11 @@ public class ChoreoAutoFactory {
         trajLogger,
         driveSubsystem,
         loop.getLoop(),
-        bindings);
+        bindings,
+        loop::onNewTrajectory
+    );
+    loop.addTrajectory(traj);
+    return traj;
   }
 
   /**
@@ -186,7 +199,7 @@ public class ChoreoAutoFactory {
    * @return A new auto trajectory.
    */
   public ChoreoAutoTrajectory trajGroup(List<ChoreoTrajectory> trajectories, ChoreoAutoLoop loop) {
-    return new ChoreoAutoTrajectory(
+    var traj =  new ChoreoAutoTrajectory(
         "", // TODO
         trajectories,
         poseSupplier,
@@ -196,7 +209,11 @@ public class ChoreoAutoFactory {
         trajLogger,
         driveSubsystem,
         loop.getLoop(),
-        bindings);
+        bindings,
+        loop::onNewTrajectory
+    );
+    loop.addTrajectory(traj);
+    return traj;
   }
 
   /**

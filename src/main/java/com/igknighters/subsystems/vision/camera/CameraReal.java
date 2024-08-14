@@ -11,7 +11,7 @@ import org.photonvision.estimation.TargetModel;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.igknighters.constants.FieldConstants;
-import com.igknighters.util.BootupLogger;
+import com.igknighters.util.logging.BootupLogger;
 
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Transform3d;

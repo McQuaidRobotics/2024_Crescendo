@@ -12,8 +12,7 @@ import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
 
 import com.igknighters.subsystems.vision.Vision;
-
-import com.igknighters.util.BootupLogger;
+import com.igknighters.util.logging.BootupLogger;
 
 import edu.wpi.first.wpilibj2.command.Subsystem;
 

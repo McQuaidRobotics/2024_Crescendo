@@ -58,9 +58,9 @@ public final class ConstValues {
     }
 
     public static final boolean DEBUG = true; // this should be false for competition
-    public static final boolean DEMO = true; // this should be false for competition
+    public static final boolean DEMO = false; // this should be false for competition
     public static final double PERIODIC_TIME = 0.02; // 20ms
-    public static final int PDH_CAN_ID = 61;
+    public static final int PDH_CAN_ID = 63;
 
     public static final class kChannels {
         public static final String POSITION = "POSITION";
@@ -210,7 +210,7 @@ public final class ConstValues {
         /** User defined acceleration time in seconds */
         public static final double ACCELERATION_TIME = 0.9;
 
-        public static final double SLIP_CURRENT = 50.0;
+        public static final double SLIP_CURRENT = 65.0;
 
         public static final double MAX_DRIVE_VELOCITY = ((Motors.KrakenX60Foc.FREE_SPEED / TAU) / DRIVE_GEAR_RATIO)
                 * WHEEL_CIRCUMFERENCE * MOTOR_CLOSED_LOOP_OUTPUT_SCALAR;
@@ -253,7 +253,7 @@ public final class ConstValues {
             public static final double CONSTRAINT_SCALAR = 0.7;
         }
 
-        public static final boolean ORIENT_TELEOP_FOR_SIM = false;
+        public static final boolean ORIENT_TELEOP_FOR_SIM_DEFAULT = false;
 
         public static final LerpTable TELEOP_TRANSLATION_AXIS_CURVE = new LerpTable(
                 new LerpTableEntry(0.0, 0.0),

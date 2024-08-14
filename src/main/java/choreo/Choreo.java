@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 /** Utilities to load and follow ChoreoTrajectories */
@@ -55,14 +56,19 @@ public final class Choreo {
   public static Optional<ChoreoTrajectory> getTrajectory(String trajName) {
     requireNonNullParam(trajName, "trajName", "Choreo.getTrajectory");
 
-    String fileExtension = ".traj";
+    final String fileExtension = ".traj";
     if (trajName.endsWith(fileExtension)) {
       trajName = trajName.substring(0, trajName.length() - fileExtension.length());
     }
     var traj_dir = new File(Filesystem.getDeployDirectory(), "choreo");
     var traj_file = new File(traj_dir, trajName + fileExtension);
 
-    return loadFile(traj_file);
+    //Option::map didnt like trajName not being final
+    var optTraj = loadFile(traj_file);
+    if (optTraj.isPresent()) {
+      return Optional.of(optTraj.get().withName(trajName));
+    }
+    return Optional.empty();
   }
 
   /**
@@ -164,7 +170,7 @@ public final class Choreo {
       Consumer<ChassisSpeeds> outputChassisSpeeds,
       BooleanSupplier mirrorTrajectory,
       ChoreoAutoBindings bindings,
-      Consumer<ChoreoTrajectory> trajLogger) {
+      BiConsumer<ChoreoTrajectory, Boolean> trajLogger) {
     return new ChoreoAutoFactory(
         requireNonNullParam(poseSupplier, "poseSupplier", "Choreo.createAutoFactory"),
         requireNonNullParam(controller, "controller", "Choreo.createAutoFactory"),

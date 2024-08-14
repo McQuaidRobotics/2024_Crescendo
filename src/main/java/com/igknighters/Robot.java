@@ -9,10 +9,14 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import monologue.Monologue.MonologueConfig;
 
 import com.ctre.phoenix6.SignalLogger;
-import com.igknighters.commands.swerve.teleop.TeleopSwerveBase;
+import com.igknighters.commands.autos.AutoController;
+import com.igknighters.commands.autos.AutoManager;
+import com.igknighters.commands.autos.AutoRoutines;
+import com.igknighters.commands.swerve.teleop.TeleopSwerveTraditionalCmd;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstantHelper;
@@ -22,14 +26,20 @@ import com.igknighters.controllers.OperatorController;
 import com.igknighters.controllers.TestingController;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.swerve.Swerve;
-import com.igknighters.util.FilesystemLogger;
-import com.igknighters.util.GlobalField;
-import com.igknighters.util.PowerLogger;
-import com.igknighters.util.Tracer;
+import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.util.can.CANBusLogging;
 import com.igknighters.util.can.CANSignalManager;
+import com.igknighters.util.geom.AllianceFlip;
 import com.igknighters.util.geom.GeomUtil;
+import com.igknighters.util.logging.FilesystemLogger;
+import com.igknighters.util.logging.GlobalField;
+import com.igknighters.util.logging.PowerLogger;
+import com.igknighters.util.logging.WatchdogSilencer;
+import com.igknighters.util.logging.Tracer;
 import com.igknighters.util.robots.UnitTestableRobot;
+
+import choreo.Choreo;
+import choreo.ChoreoAutoFactory.ChoreoAutoBindings;
 
 public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
@@ -38,17 +48,19 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
             ConstValues.PDH_CAN_ID,
             ModuleType.kRev,
             "/PowerDistribution",
-            true
+            false
     );
     private final FilesystemLogger filesystemLogger = new FilesystemLogger();
 
     public final Localizer localizer = new Localizer();
 
-    private final DriverController driverController = new DriverController(0, localizer);;
-    private final OperatorController operatorController = new OperatorController(1);
-    private final TestingController testingController = new TestingController(3);
+    private final DriverController driverController;
+    private final OperatorController operatorController;
+    private final TestingController testingController;
 
     public final AllSubsystems allSubsystems;
+
+    public final AutoManager autoManager;
 
     public Robot() {
         super(ConstValues.PERIODIC_TIME);
@@ -56,12 +68,15 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
         // logging needs to be setup asap as to not lose logging calls b4 its setup
         setupLogging();
 
-        // consts also should be early initialized
         ConstantHelper.applyRoboConst(ConstValues.class);
+
+        driverController = new DriverController(0, localizer);
+        operatorController = new OperatorController(1);
+        testingController = new TestingController(3);
 
         allSubsystems = new AllSubsystems(RobotConfig.getRobotID().subsystems);
 
-        for (var subsystem : allSubsystems.getEnabledSubsystems()) {
+        for (final var subsystem : allSubsystems.getEnabledSubsystems()) {
             if (subsystem instanceof Logged) {
                 Monologue.logObj((Logged) subsystem, "/Robot/" + subsystem.getName());
             }
@@ -76,14 +91,38 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
             localizer.resetOdometry(GeomUtil.POSE2D_CENTER, swerve.getModulePositions());
 
-            swerve.setDefaultCommand(new TeleopSwerveBase.TeleopSwerveOmni(swerve, driverController, localizer));
+            swerve.setDefaultCommand(new TeleopSwerveTraditionalCmd(swerve, driverController));
         }
 
         if (allSubsystems.umbrella.isPresent()) {
-            var umbrella = allSubsystems.umbrella.get();
+            final Umbrella umbrella = allSubsystems.umbrella.get();
             umbrella.setDefaultCommand(
                     UmbrellaCommands.idleShooter(umbrella));
+
+            umbrella.setupSimNoteDetection(localizer);
         }
+
+        autoManager = new AutoManager(
+            Choreo.createAutoFactory(
+                allSubsystems.swerve.isPresent() ? allSubsystems.swerve.get() : new Subsystem() {},
+                localizer::pose,
+                new AutoController(),
+                allSubsystems.swerve.isPresent()
+                    ? chassisSpeeds -> allSubsystems.swerve.get().drive(chassisSpeeds, false)
+                    : chassisSpeeds -> {},
+                AllianceFlip::isRed,
+                new ChoreoAutoBindings(),
+                (traj, starting) -> {
+                    String msg = "Auto Trajectory " + traj.name() + " " + (starting ? "Started" : "Finished");
+                    System.out.println(msg);
+                    Monologue.log("AutoEvent", msg);
+                }
+            )
+        );
+
+        var routines = new AutoRoutines(allSubsystems, localizer);
+        autoManager.addAutoRoutine("5 Piece Amp Side", routines::fivePieceAmpSide);
+        autoManager.addAutoRoutine("4 Piece Amp Side Far", routines::fourPieceFarAmpSide);
 
         System.gc();
     }
@@ -99,38 +138,39 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
         Tracer.traceFunc("PowerLogger", powerLogger::log);
         Tracer.traceFunc("FilesystemLogger", filesystemLogger::log);
         Tracer.traceFunc("Monologue", Monologue::updateAll);
+        Tracer.traceFunc("AutoManager", autoManager::update);
         Tracer.endTrace();
     }
 
     @Override
-    public void disabledPeriodic() {
-        // Monologue.log("Commands/SelectedAutoCommand", autoCmd.getName());
-    }
+    public void disabledPeriodic() {}
 
     @Override
     public void autonomousInit() {
-        // if (autoCmd != null) {
-        //     Monologue.log("Commands/CurrentAutoCommand", autoCmd.getName());
-        //     System.out.println("---- Starting auto command: " + autoCmd.getName() + " ----");
-        //     scheduler.schedule(autoCmd);
-        // }
+        Command autoCmd = autoManager.getSelectedAutoRoutine();
+        System.out.println("---- Starting auto command: " + autoCmd.getName() + " ----");
+        scheduler.schedule(autoCmd);
     }
 
     @Override
+    public void autonomousPeriodic() {}
+
+    @Override
     public void autonomousExit() {
-        // if (autoCmd != null) {
-        //     Monologue.log("Commands/CurrentAutoCommand", "");
-        //     autoCmd.cancel();
-        // }
+        scheduler.cancelAll();
         System.gc();
     }
 
+    @Override
+    public void simulationPeriodic() {}
+
     private void setupLogging() {
+        WatchdogSilencer.silence(this, "m_watchdog");
+        WatchdogSilencer.silence(scheduler, "m_watchdog");
+
         // turn off auto logging for signal logger, doesnt get us any info we need
         if (isReal()) {
             SignalLogger.enableAutoLogging(false);
-            filesystemLogger.addFile("/home/lvuser/FRC_UserProgram.log");
-            filesystemLogger.addFile("/var/log/dmesg");
         }
 
         if (!isUnitTest()) {
@@ -155,6 +195,10 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
         Monologue.sendNetworkToFile("/Tunables");
         Monologue.sendNetworkToFile("/Tracer");
         Monologue.sendNetworkToFile("/PowerDistribution");
+
+        filesystemLogger.addFile("/home/lvuser/FRC_UserProgram.log", "Console", 0.27);
+        filesystemLogger.addFile("/var/log/dmesg", "Dmesg", 2.2);
+        filesystemLogger.addFile("/var/log/messages", "Kernel", 1.4);
 
         // logs build data to the datalog
         final String meta = "/BuildData/";
@@ -181,10 +225,10 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
             String name = command.getName();
             int count = commandCounts.getOrDefault(name, 0) + (active ? 1 : -1);
             commandCounts.put(name, count);
-            Monologue.log(
-                    "Commands/CommandsUnique/" + name + "_" + Integer.toHexString(command.hashCode()),
-                    active.booleanValue());
-            Monologue.log("Commands/CommandsAll/" + name, count > 0);
+            // Monologue.log(
+            //         "Commands/CommandsUnique/" + name + "_" + Integer.toHexString(command.hashCode()),
+            //         active.booleanValue());
+            Monologue.log("Commands/" + name, count > 0);
         };
         scheduler.onCommandInitialize(
                 (Command command) -> {

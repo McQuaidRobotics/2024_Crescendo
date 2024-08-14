@@ -2,7 +2,7 @@ package com.igknighters.subsystems.swerve.gyro;
 
 import com.igknighters.constants.ConstValues;
 import com.igknighters.subsystems.swerve.odometryThread.SimSwerveOdometryThread;
-import com.igknighters.util.BootupLogger;
+import com.igknighters.util.logging.BootupLogger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;

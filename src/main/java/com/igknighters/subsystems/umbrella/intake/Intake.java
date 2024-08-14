@@ -23,5 +23,12 @@ public abstract class Intake extends Component {
      */
     public abstract boolean isExitBeamBroken();
 
+    /**
+     * @return The output of the {@code Intake} in volts
+     */
+    public double getVoltageOut() {
+        return voltsLower;
+    }
+
     public abstract void setVoltageOut(double volts, boolean force);
 }

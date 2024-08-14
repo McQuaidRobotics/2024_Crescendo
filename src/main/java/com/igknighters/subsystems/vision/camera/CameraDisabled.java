@@ -11,7 +11,7 @@ import edu.wpi.first.math.numbers.N5;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-import com.igknighters.util.BootupLogger;
+import com.igknighters.util.logging.BootupLogger;
 
 import java.util.List;
 import java.util.Optional;

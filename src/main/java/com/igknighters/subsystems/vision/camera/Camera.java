@@ -159,8 +159,9 @@ public abstract class Camera implements Logged {
             Pose3d pose,
             double timestamp,
             List<Integer> apriltags,
-            double ambiguity,
-            double maxDistance) implements StructSerializable {
+            double trust,
+            double maxDistance
+        ) implements StructSerializable {
 
         public double distanceFrom(VisionPoseEstimate other) {
             return pose.getTranslation().getDistance(other.pose.getTranslation());
@@ -188,7 +189,7 @@ public abstract class Camera implements Logged {
             VisionEstimateFault fault = new VisionEstimateFault(
                     oob,
                     maxDistance > 6.0,
-                    ambiguity > kVision.AMBIGUITY_CUTOFF,
+                    trust > kVision.AMBIGUITY_CUTOFF,
                     this.distanceFrom(last) > jitterTimer.get() * kSwerve.MAX_DRIVE_VELOCITY,
                     this.apriltags.isEmpty(),
                     Math.abs(pose.getTranslation().getZ()) > kVision.MAX_Z_DELTA,
@@ -235,14 +236,10 @@ public abstract class Camera implements Logged {
 
             @Override
             public void pack(ByteBuffer bb, VisionPoseEstimate value) {
-                // Monologue.log("idk" + value.cameraId(), value.pose);
                 bb.putInt(value.cameraId);
                 Pose3d.struct.pack(bb, value.pose);
                 bb.putDouble(value.timestamp);
-                // for (int i = 0; i < AprilTags.APRILTAGS.length; i++) {
-                // bb.put(value.apriltags.contains(i) ? (byte) 1 : (byte) 0);
-                // }
-                bb.putDouble(value.ambiguity);
+                bb.putDouble(value.trust);
                 bb.putDouble(value.maxDistance);
             }
 
@@ -251,11 +248,6 @@ public abstract class Camera implements Logged {
                 int cameraId = bb.getInt();
                 Pose3d pose = Pose3d.struct.unpack(bb);
                 double timestamp = bb.getDouble();
-                // ArrayList<Integer> apriltags = new ArrayList<>();
-                // for (int i = 0; i < 16; i++) {
-                // if (bb.get() == 1)
-                // apriltags.add(i);
-                // }
                 double ambiguity = bb.getDouble();
                 double maxDistance = bb.getDouble();
                 return new VisionPoseEstimate(cameraId, pose, timestamp, new ArrayList<Integer>(), ambiguity,

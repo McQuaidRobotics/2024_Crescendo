@@ -4,7 +4,7 @@ import com.igknighters.LED;
 import com.igknighters.Localizer;
 import com.igknighters.LED.LedAnimations;
 import com.igknighters.commands.stem.StemCommands;
-import com.igknighters.commands.swerve.teleop.TeleopSwerveTargetSpeaker;
+import com.igknighters.commands.swerve.teleop.TeleopSwerveTargetSpeakerCmd;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
@@ -50,7 +50,7 @@ public class HigherOrderCommands {
             Localizer localizer
     ) {
         return Commands.parallel(
-                new TeleopSwerveTargetSpeaker(swerve, controller, localizer),
+                new TeleopSwerveTargetSpeakerCmd(swerve, controller, localizer),
                 StemCommands.aimAtSpeaker(stem, false, localizer::pose, swerve::getChassisSpeed)).withName("Aim");
     }
 
@@ -83,20 +83,17 @@ public class HigherOrderCommands {
                             controller,
                             localizer),
                     UmbrellaCommands.shoot(umbrella)
-                ).until(() -> controller.leftTrigger(true).getAsDouble() < 0.5)
-                .asProxy();
+                ).until(() -> controller.leftTrigger(true).getAsDouble() < 0.5);
         } else {
             name = "Traditional Shoot";
             cmd = UmbrellaCommands.shoot(umbrella);
         }
 
-        return cmd.finallyDo(
-                umbrella::stopAll).andThen(
-                        StemCommands.holdAt(
-                                stem,
-                                StemPosition.STOW)
-                            .alongWith(UmbrellaCommands.idleShooter(umbrella))
-                        )
-                .withName(name);
+        return cmd.finallyDo(() -> {
+            StemCommands.holdAt(
+                    stem,
+                    StemPosition.STOW
+            ).schedule();
+        }).withName(name);
     }
 }

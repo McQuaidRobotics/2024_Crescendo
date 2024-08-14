@@ -10,9 +10,9 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
-import com.igknighters.util.BootupLogger;
-import com.igknighters.util.FaultManager;
 import com.igknighters.util.can.CANSignalManager;
+import com.igknighters.util.logging.BootupLogger;
+import com.igknighters.util.logging.FaultManager;
 import com.igknighters.constants.HardwareIndex.UmbrellaHW;
 
 import edu.wpi.first.math.util.Units;

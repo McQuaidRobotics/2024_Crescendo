@@ -1,7 +1,7 @@
 package com.igknighters.subsystems.umbrella.intake;
 
 import com.igknighters.constants.ConstValues.kUmbrella.kIntake;
-import com.igknighters.util.BootupLogger;
+import com.igknighters.util.logging.BootupLogger;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -14,7 +14,7 @@ public class IntakeSim extends Intake {
         BootupLogger.bootupLog("    Intake initialized (sim)");
     }
 
-    private void setExitBeam(boolean broken) {
+    public void setExitBeam(boolean broken) {
         super.exitBeamBroken = broken;
     }
 
@@ -34,7 +34,7 @@ public class IntakeSim extends Intake {
             volts = 0.0;
         }
 
-        if (force || volts > 0.0) {
+        if ((force && volts < 0.1) || volts > 0.1) {
             setExitBeam(false);
         }
 

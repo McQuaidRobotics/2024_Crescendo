@@ -7,10 +7,10 @@ import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.HardwareIndex.SwerveHW;
 import com.igknighters.subsystems.swerve.odometryThread.RealSwerveOdometryThread;
-import com.igknighters.util.BootupLogger;
-import com.igknighters.util.FaultManager;
 import com.igknighters.util.can.CANRetrier;
 import com.igknighters.util.can.CANSignalManager;
+import com.igknighters.util.logging.BootupLogger;
+import com.igknighters.util.logging.FaultManager;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;

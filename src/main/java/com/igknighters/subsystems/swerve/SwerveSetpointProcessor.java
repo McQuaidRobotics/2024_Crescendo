@@ -12,8 +12,8 @@ import java.util.Optional;
 
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kSwerve;
-import com.igknighters.util.Tracer;
 import com.igknighters.util.geom.GeomUtil;
+import com.igknighters.util.logging.Tracer;
 
 /**
  * "Inspired" by FRC team 254.

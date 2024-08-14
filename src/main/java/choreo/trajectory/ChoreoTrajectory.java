@@ -46,6 +46,16 @@ public class ChoreoTrajectory {
   }
 
   /**
+   * Returns a new trajectory with the given name
+   * 
+   * @param name the new name of the trajectory
+   * @return a new trajectory with the given name
+   */
+  public ChoreoTrajectory withName(String name) {
+    return new ChoreoTrajectory(name, samples, events);
+  }
+
+  /**
    * Returns the first ChoreoTrajectoryState in the trajectory.
    *
    * @return The first ChoreoTrajectoryState in the trajectory.

@@ -13,10 +13,10 @@ import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.constants.HardwareIndex.StemHW;
-import com.igknighters.util.BootupLogger;
-import com.igknighters.util.FaultManager;
 import com.igknighters.util.can.CANRetrier;
 import com.igknighters.util.can.CANSignalManager;
+import com.igknighters.util.logging.BootupLogger;
+import com.igknighters.util.logging.FaultManager;
 
 import edu.wpi.first.math.util.Units;
 

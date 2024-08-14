@@ -1,12 +1,23 @@
 package com.igknighters.subsystems.umbrella;
 
+import java.util.List;
+
+import com.igknighters.Localizer;
 import com.igknighters.Robot;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.umbrella.intake.*;
 import com.igknighters.subsystems.umbrella.shooter.*;
-import com.igknighters.util.Tracer;
+import com.igknighters.util.GamepieceSimulator;
+import com.igknighters.util.geom.GeomUtil;
+import com.igknighters.util.logging.GlobalField;
+import com.igknighters.util.logging.Tracer;
+import com.igknighters.util.plumbing.Channels.Sender;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import monologue.Logged;
 
@@ -85,6 +96,13 @@ public class Umbrella extends SubsystemBase implements Logged {
     }
 
     /**
+     * @return If the {@code Intake} is running inwards
+     */
+    public boolean isIntaking() {
+        return intake.getVoltageOut() < 0.0;
+    }
+
+    /**
      * @return If the exit beam is broken
      */
     public boolean holdingGamepiece() {
@@ -153,5 +171,53 @@ public class Umbrella extends SubsystemBase implements Logged {
         var reason = spinupReason;
         spinupReason = ShooterSpinupReason.None;
         return reason;
+    }
+
+    public void setupSimNoteDetection(Localizer localizer) {
+        if (!Robot.isSimulation() || !(intake instanceof IntakeSim)) {
+            return;
+        }
+
+        IntakeSim intakeSim = (IntakeSim) intake;
+
+        var noteSender = Sender.broadcast(
+            GlobalField.NOTES_POSITION,
+            Pose2d[].class
+        );
+
+        GamepieceSimulator.setupGamepieceIntakeSim(
+            localizer::pose,
+            this::isIntaking,
+            notes -> {
+                Pose2d[] notePoses = notes.stream().map(p -> new Pose2d(p, GeomUtil.ROTATION2D_ZERO)).toArray(Pose2d[]::new);
+                noteSender.send(notePoses);
+            },
+            List.of(
+                new Transform2d(
+                    new Translation2d(
+                        Units.inchesToMeters(24.0),
+                        Units.inchesToMeters(0.0)
+                    ),
+                    GeomUtil.ROTATION2D_ZERO
+                ),
+                new Transform2d(
+                    new Translation2d(
+                        Units.inchesToMeters(24.0),
+                        Units.inchesToMeters(-7.0)
+                    ),
+                    GeomUtil.ROTATION2D_ZERO
+                ),
+                new Transform2d(
+                    new Translation2d(
+                        Units.inchesToMeters(24.0),
+                        Units.inchesToMeters(7.0)
+                    ),
+                    GeomUtil.ROTATION2D_ZERO
+                )
+            )
+        ).onTrue(
+            Commands.runOnce(() -> intakeSim.setExitBeam(true))
+                .withName("SetExitBeamTrue")
+        );
     }
 }

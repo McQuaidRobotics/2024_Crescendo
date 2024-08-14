@@ -6,7 +6,7 @@ import com.igknighters.Robot;
 import com.igknighters.constants.ConstValues.kRobotCollisionGeometry;
 import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
-import com.igknighters.util.Channels.Receiver;
+import com.igknighters.util.plumbing.Channels.Receiver;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;

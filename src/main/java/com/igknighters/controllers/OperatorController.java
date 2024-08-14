@@ -5,7 +5,7 @@ import com.igknighters.commands.umbrella.UmbrellaCommands;
 
 import com.igknighters.subsystems.SubsystemResources.Subsystems;
 import com.igknighters.subsystems.stem.StemPosition;
-import com.igknighters.util.Channels;
+import com.igknighters.util.plumbing.Channels;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 
@@ -78,7 +78,7 @@ public class OperatorController extends ControllerParent {
             trig.onTrue(Commands.runOnce(() -> {
                     Channels.Sender.broadcast("HomePivot", Boolean.class)
                             .send(true);
-            }));
+            }).withName("HomePivot"));
         }, Subsystems.Stem);
 
         // this.DPD.binding =
@@ -87,7 +87,7 @@ public class OperatorController extends ControllerParent {
             trig.onTrue(Commands.runOnce(() -> {
                     allss.stem.get().stopMechanisms();
                     allss.umbrella.get().stopAll();
-            }));
+            }).withName("StopAll"));
     }, Subsystems.Stem, Subsystems.Umbrella);
 
         // this.DPU.binding =

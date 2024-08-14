@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.igknighters.util.Tracer;
+import com.igknighters.util.logging.Tracer;
 
 /**
  * A utility to clump CAN signals together and update them all at once.

@@ -9,7 +9,11 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 
+import java.util.Optional;
+
 import com.igknighters.Robot;
+import com.igknighters.commands.swerve.teleop.TeleopSwerveBaseCmd;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import monologue.Logged;
 
@@ -24,8 +28,8 @@ import com.igknighters.subsystems.swerve.module.SwerveModuleSim;
 import com.igknighters.subsystems.swerve.odometryThread.RealSwerveOdometryThread;
 import com.igknighters.subsystems.swerve.odometryThread.SimSwerveOdometryThread;
 import com.igknighters.subsystems.swerve.odometryThread.SwerveOdometryThread;
-import com.igknighters.util.Tracer;
-import com.igknighters.util.Channels.Sender;
+import com.igknighters.util.logging.Tracer;
+import com.igknighters.util.plumbing.Channels.Sender;
 import com.igknighters.constants.ConstValues;
 
 /**
@@ -56,6 +60,8 @@ public class Swerve extends SubsystemBase implements Logged {
     private final SwerveSetpointProcessor setpointProcessor = new SwerveSetpointProcessor();
 
     private final RotationalController rotController = new RotationalController();
+
+    private Optional<TeleopSwerveBaseCmd> defaultCommand = Optional.empty();
 
     public Swerve() {
         if (Robot.isReal()) {
@@ -179,6 +185,10 @@ public class Swerve extends SubsystemBase implements Logged {
 
         visualizer.update();
 
+        defaultCommand.ifPresent(cmd -> {
+            log("Commanded", cmd);
+        });
+
         Tracer.endTrace();
     }
 
@@ -189,5 +199,10 @@ public class Swerve extends SubsystemBase implements Logged {
             angle %= 360;
         }
         return angle;
+    }
+
+    public void setDefaultCommand(TeleopSwerveBaseCmd defaultCmd) {
+        defaultCommand = Optional.of(defaultCmd);
+        super.setDefaultCommand(defaultCmd);
     }
 }

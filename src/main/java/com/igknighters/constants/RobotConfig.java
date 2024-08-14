@@ -5,8 +5,7 @@ import java.util.Map;
 
 import com.igknighters.constants.ConstantHelper.RobotConstID;
 import com.igknighters.subsystems.SubsystemResources.Subsystems;
-import com.igknighters.util.BootupLogger;
-
+import com.igknighters.util.logging.BootupLogger;
 import com.igknighters.Robot;
 import edu.wpi.first.wpilibj.RobotController;
 import monologue.Monologue;

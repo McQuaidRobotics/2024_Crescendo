@@ -16,7 +16,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
 import com.igknighters.LED;
 import com.igknighters.Robot;
@@ -31,7 +30,7 @@ import com.igknighters.commands.umbrella.UmbrellaCommands;
 /** If debug is false this controller does not initialize */
 public class TestingController extends ControllerParent {
     public TestingController(int port) {
-        super(port, ConstValues.DEBUG);
+        super(port, Robot.isDebug());
 
         // disregard null safety as it is checked on assignment
 

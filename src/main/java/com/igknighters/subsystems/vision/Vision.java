@@ -5,10 +5,10 @@ import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kVision;
 import com.igknighters.subsystems.vision.camera.Camera;
 import com.igknighters.subsystems.vision.camera.Camera.VisionPoseEstimate;
-import com.igknighters.util.Tracer;
-import com.igknighters.util.Channels.Receiver;
-import com.igknighters.util.Channels.Sender;
 import com.igknighters.util.geom.GeomUtil;
+import com.igknighters.util.logging.Tracer;
+import com.igknighters.util.plumbing.Channels.Receiver;
+import com.igknighters.util.plumbing.Channels.Sender;
 
 import java.util.HashSet;
 import java.util.List;
@@ -110,7 +110,7 @@ public class Vision extends SubsystemBase implements Logged {
                 lastEvalTime.restart();
             }
 
-            double ambiguity = eval.ambiguity();
+            double ambiguity = eval.trust();
 
             log("cameras/" + camera.getName() + "/rawAmbiguity", ambiguity);
 

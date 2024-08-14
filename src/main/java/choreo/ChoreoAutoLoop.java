@@ -1,17 +1,20 @@
 package choreo;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.function.BooleanSupplier;
+import java.util.ArrayList;
 
 /**
  * A loop that represents an autonomous routine. This loop is used to handle autonomous trigger
  * logic and schedule commands.
  */
 public class ChoreoAutoLoop {
+  protected final ArrayList<ChoreoAutoTrajectory> trajectories = new ArrayList<>();
+
   /** The underlying {@link EventLoop} stuff is bound to and polled */
   protected final EventLoop loop;
 
@@ -43,7 +46,7 @@ public class ChoreoAutoLoop {
    */
   public Trigger enabled() {
     // TODO: Maybe add a warning if this is called while `hasBeenPolled` is already true
-    return new Trigger(loop, () -> isActive).and(RobotModeTriggers.autonomous());
+    return new Trigger(loop, () -> isActive).and(DriverStation::isAutonomousEnabled);
   }
 
   /** Polls the loop. Should be called in the autonomous periodic method. */
@@ -62,6 +65,25 @@ public class ChoreoAutoLoop {
   }
 
   /**
+   * A callback that will cleanup state of all trajectories when a new trajectory is started.
+   */
+  public void onNewTrajectory() {
+    for (ChoreoAutoTrajectory traj : trajectories) {
+      traj.onNewTrajectory();
+    }
+  }
+
+  /**
+   * Adds a trajectory to the loop. This is used to ensure that all trajectories are reset when a
+   * new trajectory is started.
+   *
+   * @param traj The trajectory to add to the loop.
+   */
+  void addTrajectory(ChoreoAutoTrajectory traj) {
+    trajectories.add(traj);
+  }
+
+  /**
    * Resets the loop. This can either be called on auto init or auto end to reset the loop incase
    * you run it again. If this is called on a loop that doesn't need to be reset it will do nothing.
    */
@@ -76,7 +98,9 @@ public class ChoreoAutoLoop {
    * @see #cmd(BooleanSupplier) A version of this method that takes a condition to finish the loop.
    */
   public Command cmd() {
-    return Commands.run(this::poll).finallyDo(this::reset);
+    return Commands.run(this::poll).finallyDo(this::reset)
+      .until(() -> !DriverStation.isAutonomousEnabled())
+      .withName("ChoreoAutoLoop");
   }
 
   /**
@@ -87,6 +111,8 @@ public class ChoreoAutoLoop {
    * @see #cmd() A version of this method that doesn't take a condition and never finishes.
    */
   public Command cmd(BooleanSupplier finishCondition) {
-    return this.cmd().until(finishCondition);
+    return this.cmd()
+      .until(() -> finishCondition.getAsBoolean() || !DriverStation.isAutonomousEnabled())
+      .withName("ChoreoAutoLoop");
   }
 }

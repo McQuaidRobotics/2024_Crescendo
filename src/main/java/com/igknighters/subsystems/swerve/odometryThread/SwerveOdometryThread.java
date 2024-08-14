@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.igknighters.constants.ConstValues.kChannels;
-import com.igknighters.util.Channels.Sender;
+import com.igknighters.util.plumbing.Channels.Sender;
 
 import monologue.Logged;
 import monologue.Annotations.Log;

@@ -47,7 +47,8 @@ public class AutoController implements ChoreoControlFunction {
             xFF + xFeedback,
             yFF + yFeedback,
             rotationFF + rotationFeedback,
-            pose.getRotation());
+            pose.getRotation()
+        );
 
         return out;
     }

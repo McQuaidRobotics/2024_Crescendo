@@ -9,7 +9,7 @@ import java.util.function.DoubleSupplier;
 import com.igknighters.Robot;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.SubsystemResources.Subsystems;
-import com.igknighters.util.BootupLogger;
+import com.igknighters.util.logging.BootupLogger;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -105,7 +105,7 @@ public class ControllerParent {
      * {@link edu.wpi.first.wpilibj.XboxController.Button}
      */
     protected ControllerParent(int port, boolean makeController) {
-        DriverStation.silenceJoystickConnectionWarning(Robot.isSimulation());
+        DriverStation.silenceJoystickConnectionWarning(Robot.isDebug());
         this.madeController = makeController;
         if (madeController) {
             controller = new CommandXboxController(port);

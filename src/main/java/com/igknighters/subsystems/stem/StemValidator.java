@@ -10,8 +10,8 @@ import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.subsystems.stem.StemVisualizer.StemVisualizerDot;
-import com.igknighters.util.Channels.Sender;
 import com.igknighters.util.geom.Rectangle2d;
+import com.igknighters.util.plumbing.Channels.Sender;
 
 public class StemValidator {
         /**

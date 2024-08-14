@@ -5,7 +5,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.RobotController;
 
 public class PivotDisabled extends Pivot {
-    final double slewRate = (2.37 / 50.0) * 0.75;
+    final double slewRate = (2.37 / 50.0) * 0.5;
 
     public PivotDisabled() {
         super(StemPosition.STARTING.pivotRads);

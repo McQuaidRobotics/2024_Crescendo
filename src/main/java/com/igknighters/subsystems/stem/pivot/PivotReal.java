@@ -22,11 +22,11 @@ import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.constants.HardwareIndex.StemHW;
-import com.igknighters.util.BootupLogger;
-import com.igknighters.util.FaultManager;
-import com.igknighters.util.Channels.Receiver;
 import com.igknighters.util.can.CANRetrier;
 import com.igknighters.util.can.CANSignalManager;
+import com.igknighters.util.logging.BootupLogger;
+import com.igknighters.util.logging.FaultManager;
+import com.igknighters.util.plumbing.Channels.Receiver;
 
 public class PivotReal extends Pivot {
 

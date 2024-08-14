@@ -23,9 +23,9 @@ import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kSwerve.kAngleMotor;
 import com.igknighters.constants.ConstValues.kSwerve.kDriveMotor;
 import com.igknighters.subsystems.swerve.odometryThread.RealSwerveOdometryThread;
-import com.igknighters.util.BootupLogger;
 import com.igknighters.util.can.CANRetrier;
 import com.igknighters.util.can.CANSignalManager;
+import com.igknighters.util.logging.BootupLogger;
 
 public class SwerveModuleReal extends SwerveModule {
     private final TalonFX driveMotor;

@@ -6,9 +6,9 @@ import com.igknighters.subsystems.swerve.odometryThread.SwerveDriveSample;
 import com.igknighters.subsystems.vision.VisionOnlyPoseEstimator;
 import com.igknighters.subsystems.vision.VisionOnlyPoseEstimator.FakeWheelPositions;
 import com.igknighters.subsystems.vision.camera.Camera.VisionPoseEstimate;
-import com.igknighters.util.Channels.Receiver;
-import com.igknighters.util.Channels.Sender;
 import com.igknighters.util.geom.GeomUtil;
+import com.igknighters.util.plumbing.Channels.Receiver;
+import com.igknighters.util.plumbing.Channels.Sender;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -79,8 +79,8 @@ public class Localizer {
         while (visionDataReceiver.hasData()) {
             var sample = visionDataReceiver.recv();
             visionOnlyEstimator.addVisionMeasurement(sample.pose().toPose2d(), sample.timestamp());
-            visionStdDevs.set(0, 0, sample.ambiguity());
-            visionStdDevs.set(1, 0, sample.ambiguity());
+            visionStdDevs.set(0, 0, sample.trust());
+            visionStdDevs.set(1, 0, sample.trust());
             hybridPoseEstimator.addVisionMeasurement(
                 sample.pose().toPose2d(),
                 sample.timestamp(),

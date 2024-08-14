@@ -13,9 +13,9 @@ import com.ctre.phoenix6.signals.ReverseLimitValue;
 import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.HardwareIndex.StemHW;
-import com.igknighters.util.FaultManager;
 import com.igknighters.util.can.CANRetrier;
 import com.igknighters.util.can.CANSignalManager;
+import com.igknighters.util.logging.FaultManager;
 
 import monologue.Annotations.Log;
 

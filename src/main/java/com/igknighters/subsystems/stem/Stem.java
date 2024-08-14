@@ -9,7 +9,7 @@ import com.igknighters.subsystems.stem.StemValidator.ValidationResponse;
 import com.igknighters.subsystems.stem.pivot.*;
 import com.igknighters.subsystems.stem.telescope.*;
 import com.igknighters.subsystems.stem.wrist.*;
-import com.igknighters.util.Tracer;
+import com.igknighters.util.logging.Tracer;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -54,12 +54,14 @@ public class Stem extends SubsystemBase implements Logged {
                         pivot.setCoast(true);
                         telescope.setCoast(true);
                         wrist.setCoast(true);
-                    }).ignoringDisable(true))
+                    }).ignoringDisable(true)
+                    .withName("CoastOn"))
                     .onFalse(Commands.runOnce(() -> {
                         pivot.setCoast(false);
                         telescope.setCoast(false);
                         wrist.setCoast(false);
-                    }).ignoringDisable(true));
+                    }).ignoringDisable(true)
+                    .withName("CoastOff"));
         } else {
             coastSwitch = null;
         }

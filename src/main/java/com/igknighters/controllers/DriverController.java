@@ -1,5 +1,7 @@
 package com.igknighters.controllers;
 
+import java.util.Set;
+
 import com.igknighters.LED;
 import com.igknighters.Localizer;
 import com.igknighters.Robot;
@@ -16,10 +18,10 @@ import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
-import com.igknighters.util.Channels;
+import com.igknighters.util.plumbing.Channels;
 
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ProxyCommand;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 
 public class DriverController extends ControllerParent {
 
@@ -47,9 +49,8 @@ public class DriverController extends ControllerParent {
                             allss.umbrella.get(),
                             kControls.SHOOTER_IDLE_RPM,
                             ShooterSpinupReason.Amp))
-                        .finallyDo(
-                            () -> allss.umbrella.get()
-                                .stopAll()));
+                        .finallyDo(() -> allss.umbrella.get().stopAll())
+                        .withName("AimAmp"));
             },
             Subsystems.Stem,
             Subsystems.Umbrella);
@@ -74,7 +75,7 @@ public class DriverController extends ControllerParent {
                             ShooterSpinupReason.ManualAimSpeaker))
                         .finallyDo(
                             () -> allss.umbrella.get().stopAll()
-                        ));
+                        ).withName("SubwooferAim"));
             },
             Subsystems.Stem, Subsystems.Umbrella);
 
@@ -94,7 +95,7 @@ public class DriverController extends ControllerParent {
                                 ShooterSpinupReason.ManualAimSpeaker))
                             .finallyDo(
                                 () -> allss.umbrella.get().stopAll()
-                            ));
+                            ).withName("DemoLow"));
                 },
                 Subsystems.Stem, Subsystems.Umbrella);
 
@@ -111,7 +112,7 @@ public class DriverController extends ControllerParent {
                                     ShooterSpinupReason.ManualAimSpeaker))
                                 .finallyDo(
                                     () -> allss.umbrella.get().stopAll()
-                                ));
+                                ).withName("DemoHigh"));
                     },
                     Subsystems.Stem, Subsystems.Umbrella);
         }
@@ -152,19 +153,25 @@ public class DriverController extends ControllerParent {
                         }
                     ))
                     .finallyDo(allss.umbrella.get()::stopAll)
-                    .withName("Highorder Aim"));
+                    .withName("HighorderAim"));
         }, Subsystems.Swerve, Subsystems.Stem, Subsystems.Umbrella);
 
         this.RT.binding = new Binding((trig, allss) -> {
+            var swerve = allss.swerve.get();
+            var stem = allss.stem.get();
+            var umbrella = allss.umbrella.get();
                 trig.onTrue(
-                    new ProxyCommand(
+                    new DeferredCommand(
                         () -> HigherOrderCommands.genericShoot(
-                            allss.swerve.get(),
-                            allss.stem.get(),
-                            allss.umbrella.get(),
+                            swerve,
+                            stem,
+                            umbrella,
                             this,
-                            localizer))
-                .withName("Proxy Shoot"));
+                            localizer
+                        ),
+                        Set.of(swerve, stem, umbrella)
+                    ).withName("DeferedShoot")
+                );
         }, Subsystems.Umbrella, Subsystems.Stem, Subsystems.Swerve);
 
         /// DPAD
@@ -172,7 +179,7 @@ public class DriverController extends ControllerParent {
             trig.onTrue(Commands.runOnce(() -> {
                     Channels.Sender.broadcast("HomePivot", Boolean.class)
                             .send(true);
-            }));
+            }).withName("HomePivot"));
         }, Subsystems.Stem);
 
         this.DPD.binding = new Binding((trig, allss) -> {
@@ -188,7 +195,7 @@ public class DriverController extends ControllerParent {
                 trig.onTrue(Commands.runOnce(() -> {
                     allss.stem.get().stopMechanisms();
                     allss.umbrella.get().stopAll();
-                }));
+                }).withName("StopAll"));
         }, Subsystems.Stem, Subsystems.Umbrella); 
 
         this.DPU.binding = new Binding((trig, allss) -> {

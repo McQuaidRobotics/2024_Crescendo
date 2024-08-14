@@ -7,7 +7,8 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-import com.igknighters.util.BootupLogger;
+import com.igknighters.util.logging.BootupLogger;
+
 import edu.wpi.first.wpilibj.DriverStation;
 
 public class ConstantHelper {
@@ -378,7 +379,7 @@ public class ConstantHelper {
         for (Field field : consts.getDeclaredFields()) {
             handleConstField(field, consts);
         }
-        BootupLogger.bootupLog("Finished applying constants");
+        BootupLogger.bootupLog("Applied Robot Constants");
     }
 
     public enum RobotConstID {
