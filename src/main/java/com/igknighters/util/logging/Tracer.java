@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
-import edu.wpi.first.networktables.DoubleEntry;
+import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -57,7 +57,7 @@ public class Tracer {
 
     private static final List<GarbageCollectorMXBean> gcs = ManagementFactory.getGarbageCollectorMXBeans();
     private static final AtomicLong gcTimeThisCycle = new AtomicLong();
-    private static final DoubleEntry gcTimeEntry = rootTable.getDoubleTopic("GCTime").getEntry(0.0);
+    private static final DoublePublisher gcTimeEntry = rootTable.getDoubleTopic("GCTime").publish();
 
     private static boolean threadValidation = false;
     private static long tracedThread = 0;

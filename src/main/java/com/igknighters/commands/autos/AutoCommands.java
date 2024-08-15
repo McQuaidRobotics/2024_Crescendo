@@ -1,6 +1,7 @@
 package com.igknighters.commands.autos;
 
 import com.igknighters.Localizer;
+import com.igknighters.Robot;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.teleop.AutoSwerveTargetSpeakerCmd;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
@@ -35,7 +36,7 @@ public class AutoCommands {
 
     protected void logAutoEvent(String name, String event) {
         String msg = "Auto Command " + name + " " + event;
-        System.out.println(msg);
+        if (Robot.isDebug()) System.out.println(msg);
         Monologue.log("AutoEvent", msg);
     }
 

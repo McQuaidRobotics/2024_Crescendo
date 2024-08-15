@@ -14,7 +14,9 @@ import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.subsystems.vision.Vision;
 import com.igknighters.util.logging.BootupLogger;
 
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import monologue.Logged;
 
 public class SubsystemResources {
 
@@ -88,7 +90,8 @@ public class SubsystemResources {
 
     public static class AllSubsystems {
         private Subsystems[] subsystems;
-        private List<Subsystem> subsystemsList = new ArrayList<>();
+        private List<LockFullSubsystem> subsystemsListLockFull = new ArrayList<>();
+        private List<LockFreeSubsystem> subsystemsListLockFree = new ArrayList<>();
 
         public final Optional<Stem> stem;
 
@@ -130,12 +133,36 @@ public class SubsystemResources {
             } else {
                 vision = Optional.empty();
             }
+
+            CommandScheduler.getInstance().registerSubsystem(
+                getEnabledLockFullSubsystemsArr()
+            );
+            CommandScheduler.getInstance().registerSubsystem(
+                new Subsystem() {
+                    public void periodic() {
+                        for (LockFreeSubsystem subsystem : getEnabledLockFreeSubsystemsArr()) {
+                            subsystem.periodic();
+                        }
+                    }
+
+                    @Override
+                    public String getName() {
+                        return "LockFreeProxy";
+                    }
+                }
+            );
         }
 
-        private <T extends Subsystem> Optional<T> createSubsystem(Supplier<T> subsystemSupplier) {
+        private <T extends Object> Optional<T> createSubsystem(Supplier<T> subsystemSupplier) {
             T subsystem = subsystemSupplier.get();
             BootupLogger.bootupLog("Subsystem " + subsystem.getClass().getSimpleName() + " created");
-            subsystemsList.add(subsystem);
+            if (subsystem instanceof LockFullSubsystem) {
+                subsystemsListLockFull.add((LockFullSubsystem) subsystem);
+            } else if (subsystem instanceof LockFreeSubsystem) {
+                subsystemsListLockFree.add((LockFreeSubsystem) subsystem);
+            } else {
+                throw new IllegalArgumentException("Subsystem " + subsystem.getClass().getSimpleName() + " is not a valid subsystem");
+            }
             return Optional.of(subsystem);
         }
 
@@ -143,12 +170,19 @@ public class SubsystemResources {
             return subsystems;
         }
 
-        public List<Subsystem> getEnabledSubsystems() {
-            return subsystemsList;
+        public LockFullSubsystem[] getEnabledLockFullSubsystemsArr() {
+            return subsystemsListLockFull.toArray(new LockFullSubsystem[subsystemsListLockFull.size()]);
         }
 
-        public Subsystem[] getEnabledSubsystemsArr() {
-            return subsystemsList.toArray(new Subsystem[subsystemsList.size()]);
+        public LockFreeSubsystem[] getEnabledLockFreeSubsystemsArr() {
+            return subsystemsListLockFree.toArray(new LockFreeSubsystem[subsystemsListLockFree.size()]);
+        }
+
+        public List<Logged> getLoggableSubsystems() {
+            List<Logged> loggableSubsystems = new ArrayList<>();
+            loggableSubsystems.addAll(subsystemsListLockFull);
+            loggableSubsystems.addAll(subsystemsListLockFree);
+            return loggableSubsystems;
         }
 
         public boolean hasAllSubsystems() {
@@ -170,6 +204,26 @@ public class SubsystemResources {
             }
 
             return true;
+        }
+    }
+
+    public static interface LockFullSubsystem extends Subsystem, Logged {
+        @Override
+        default String getOverrideName() {
+            return this.getName();
+        }
+    }
+
+    public static interface LockFreeSubsystem extends Logged {
+        default void periodic() {}
+        default void simulationPeriodic() {}
+        default String getName() {
+            return this.getClass().getSimpleName();
+        }
+
+        @Override
+        default String getOverrideName() {
+            return this.getName();
         }
     }
 }

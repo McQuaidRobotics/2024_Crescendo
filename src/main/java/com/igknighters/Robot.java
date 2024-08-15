@@ -85,10 +85,8 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
         allSubsystems = new AllSubsystems(robotID.subsystems);
 
-        for (final var subsystem : allSubsystems.getEnabledSubsystems()) {
-            if (subsystem instanceof Logged) {
-                Monologue.logObj((Logged) subsystem, "/Robot/" + subsystem.getName());
-            }
+        for (final Logged subsystem : allSubsystems.getLoggableSubsystems()) {
+            Monologue.logObj(subsystem, "/Robot/" + subsystem.getOverrideName());
         }
 
         driverController.assignButtons(allSubsystems);
@@ -161,7 +159,9 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
     @Override
     public void autonomousInit() {
         Command autoCmd = autoManager.getSelectedAutoRoutine();
-        System.out.println("---- Starting auto command: " + autoCmd.getName() + " ----");
+        String msg = "---- Starting auto command: " + autoCmd.getName() + " ----";
+        if (isDebug()) System.out.println(msg);
+        Monologue.log("AutoEvent", msg);
         scheduler.schedule(autoCmd);
     }
 
