@@ -5,6 +5,7 @@ import choreo.ext.TriggerExt;
 import choreo.trajectory.ChoreoTrajectory;
 import choreo.trajectory.ChoreoTrajectoryState;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -352,11 +353,14 @@ public class ChoreoAutoTrajectory {
 
   // private because this is a terrible way to schedule stuff
   private TriggerExt atPose(Pose2d pose, double toleranceMeters) {
+    Translation2d checkedTrans = mirrorTrajectory.getAsBoolean()
+        ? new Translation2d(16.5410515 - pose.getTranslation().getX(), pose.getTranslation().getY())
+        : pose.getTranslation();
     return new TriggerExt(
         loop,
         () -> {
-          Pose2d currentPose = poseSupplier.get();
-          return currentPose.getTranslation().getDistance(pose.getTranslation()) < toleranceMeters;
+          Translation2d currentTrans = poseSupplier.get().getTranslation();
+          return currentTrans.getDistance(checkedTrans) < toleranceMeters;
         });
   }
 
