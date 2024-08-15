@@ -58,18 +58,18 @@ public class PowerLogger {
         pd = new PD(handle, module);
         data = new PDData(pd);
 
-        if (!datalogOnly) {
-            StructEntry<PDData> entry = NetworkTableInstance.getDefault()
-                    .getStructTopic("PowerDistribution/", new PDDataStruct())
-                    .getEntry(data);
-            output = entry::set;
-        } else {
+        if (datalogOnly) {
             StructLogEntry<PDData> entry = StructLogEntry.create(
                 DataLogManager.getLog(),
                 path,
                 new PDDataStruct()
             );
             output = entry::append;
+        } else {
+            StructEntry<PDData> entry = NetworkTableInstance.getDefault()
+                    .getStructTopic("PowerDistribution/", new PDDataStruct())
+                    .getEntry(data);
+            output = entry::set;
         }
     }
 

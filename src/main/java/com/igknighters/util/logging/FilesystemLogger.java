@@ -161,7 +161,7 @@ public class FilesystemLogger {
             return output;
         }
 
-        private String readFileSimple(FileReader file) {
+        private String readFileSim(FileReader file) {
             return "Simulated file data " + Double.toHexString(Math.random());
         }
 
@@ -176,7 +176,7 @@ public class FilesystemLogger {
 
                 String output = Robot.isReal()
                     ? readFile(file)
-                    : readFileSimple(file);
+                    : readFileSim(file);
                 if (!output.isEmpty()) {
                     try {
                         queue.put(new FileData(file.name, output));

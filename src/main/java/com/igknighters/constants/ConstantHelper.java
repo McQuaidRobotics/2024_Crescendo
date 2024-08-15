@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
+import com.igknighters.constants.RobotConfig.RobotID;
 import com.igknighters.util.logging.BootupLogger;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -133,11 +134,11 @@ public class ConstantHelper {
 
     }
 
-    public static void handleConstField(Field field, Class<?> obj) {
+    public static void handleConstField(Field field, Class<?> obj, RobotID id) {
         if (field.getAnnotations().length == 0) {
             return;
         }
-        RobotConstID constID = com.igknighters.constants.RobotConfig.getRobotID().constID;
+        RobotConstID constID = id.constID;
 
         // handle robot dependent constants
 
@@ -355,9 +356,9 @@ public class ConstantHelper {
         }
     }
 
-    public static void handleConstSubclass(Class<?> cls) {
+    public static void handleConstSubclass(Class<?> cls, RobotID id) {
         for (Class<?> clazz : cls.getDeclaredClasses()) {
-            handleConstSubclass(clazz);
+            handleConstSubclass(clazz, id);
         }
         if (Modifier.isAbstract(cls.getModifiers())) {
             return;
@@ -368,16 +369,16 @@ public class ConstantHelper {
                         + " in constants", false);
                 continue;
             }
-            handleConstField(field, cls);
+            handleConstField(field, cls, id);
         }
     }
 
-    public static void applyRoboConst(Class<com.igknighters.constants.ConstValues> consts) {
+    public static void applyRoboConst(Class<com.igknighters.constants.ConstValues> consts, RobotID id) {
         for (Class<?> clazz : consts.getDeclaredClasses()) {
-            handleConstSubclass(clazz);
+            handleConstSubclass(clazz, id);
         }
         for (Field field : consts.getDeclaredFields()) {
-            handleConstField(field, consts);
+            handleConstField(field, consts, id);
         }
         BootupLogger.bootupLog("Applied Robot Constants");
     }

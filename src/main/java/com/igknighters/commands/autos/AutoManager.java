@@ -10,8 +10,10 @@ import choreo.ChoreoAutoFactory;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringEntry;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import monologue.Logged;
 import monologue.Monologue;
 import monologue.Annotations.Log;
@@ -49,15 +51,20 @@ public class AutoManager implements Logged {
         Monologue.log(path + "/default", NONE_NAME);
         Monologue.log(path + "/active", NONE_NAME);
         Monologue.log(path + "/options", autoRoutines.keySet().toArray(new String[0]));
+
+        if (Robot.isSimulation()) {
+            new Trigger(DriverStation::isAutonomousEnabled).onTrue(
+                Commands.waitSeconds(15.3).andThen(() -> DriverStationSim.setEnabled(false))
+            );
+        }
     }
 
     public void update() {
-        if ((DriverStation.isDisabled() || Robot.isSimulation()) && DriverStation.isDSAttached()) {
+        if ((DriverStation.isDisabled() || Robot.isSimulation()) && DriverStation.isDSAttached() && !Robot.isUnitTest()) {
             if (selected.get().equals(lastAutoRoutineName)) return;
             lastAutoRoutineName = selected.get();
             lastAutoRoutine = autoRoutines.get(lastAutoRoutineName)
-                .apply(this.factory)
-                .until(() -> !DriverStation.isAutonomous());
+                .apply(this.factory);
             Monologue.log(path + "/active", lastAutoRoutineName);
         }
     }
@@ -68,8 +75,13 @@ public class AutoManager implements Logged {
     }
 
     public void choose(String choice) {
-        selected.set(choice);
-        update();
+        if (Robot.isUnitTest()) {
+            lastAutoRoutineName = choice;
+            lastAutoRoutine = autoRoutines.get(choice).apply(factory);
+        } else {
+            selected.set(choice);
+            update();
+        }
     }
 
     public Command getSelectedAutoRoutine() {

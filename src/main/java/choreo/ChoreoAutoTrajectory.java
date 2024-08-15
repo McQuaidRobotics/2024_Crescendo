@@ -191,6 +191,15 @@ public class ChoreoAutoTrajectory {
    * @return The command that will follow the trajectory
    */
   public Command cmd() {
+    if (!trajectories.isEmpty()) {
+      for (var traj : trajectories) {
+        if (traj.getSamples().isEmpty()) {
+          return driveSubsystem.runOnce(() -> {
+            DriverStation.reportError("Trajectory " + name + " has no samples", false);
+          }).withName("Trajectory_" + name);
+        }
+      }
+    }
     return new FunctionalCommand(
         this::cmdInitialize,
         this::cmdExecute,
@@ -208,11 +217,27 @@ public class ChoreoAutoTrajectory {
    *
    * @return The starting pose
    */
-  public Pose2d getStartingPose() {
+  public Pose2d getInitialPose() {
     if (mirrorTrajectory.getAsBoolean()) {
       return trajectories.get(0).getFlippedInitialPose();
     } else {
       return trajectories.get(0).getInitialPose();
+    }
+  }
+
+  /**
+   * Will get the ending pose of the trajectory.
+   *
+   * <p>This position is mirrored based on the {@code mirrorTrajectory} boolean supplier in the
+   * factory used to make this trajectory
+   *
+   * @return The starting pose
+   */
+  public Pose2d getFinalPose() {
+    if (mirrorTrajectory.getAsBoolean()) {
+      return trajectories.get(lastTrajIndex()).getFlippedFinalPose();
+    } else {
+      return trajectories.get(lastTrajIndex()).getFinalPose();
     }
   }
 

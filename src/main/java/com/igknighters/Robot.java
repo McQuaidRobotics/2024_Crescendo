@@ -21,6 +21,7 @@ import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstantHelper;
 import com.igknighters.constants.RobotConfig;
+import com.igknighters.constants.RobotConfig.RobotID;
 import com.igknighters.controllers.DriverController;
 import com.igknighters.controllers.OperatorController;
 import com.igknighters.controllers.TestingController;
@@ -63,18 +64,26 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
     public final AutoManager autoManager;
 
     public Robot() {
+        this(null);
+    }
+
+    public Robot(RobotID robotID) {
         super(ConstValues.PERIODIC_TIME);
 
         // logging needs to be setup asap as to not lose logging calls b4 its setup
         setupLogging();
 
-        ConstantHelper.applyRoboConst(ConstValues.class);
+        if (robotID == null) {
+            robotID = RobotConfig.getRobotID();
+        }
+
+        ConstantHelper.applyRoboConst(ConstValues.class, robotID);
 
         driverController = new DriverController(0, localizer);
         operatorController = new OperatorController(1);
         testingController = new TestingController(3);
 
-        allSubsystems = new AllSubsystems(RobotConfig.getRobotID().subsystems);
+        allSubsystems = new AllSubsystems(robotID.subsystems);
 
         for (final var subsystem : allSubsystems.getEnabledSubsystems()) {
             if (subsystem instanceof Logged) {
@@ -120,9 +129,13 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
             )
         );
 
-        var routines = new AutoRoutines(allSubsystems, localizer);
-        autoManager.addAutoRoutine("5 Piece Amp Side", routines::fivePieceAmpSide);
-        autoManager.addAutoRoutine("4 Piece Amp Side Far", routines::fourPieceFarAmpSide);
+        if (allSubsystems.hasAllSubsystems()) {
+            var routines = new AutoRoutines(allSubsystems, localizer);
+            autoManager.addAutoRoutine("5 Piece Amp Side", routines::fivePieceAmpSide);
+            autoManager.addAutoRoutine("6 Piece Amp Side Far", routines::sixPieceFarAmpSide);
+            autoManager.addAutoRoutine("4 Piece Src Side", routines::fourPieceSourceSide);
+            autoManager.addAutoRoutine("3 Piece Sub Middle", routines::threePieceSubMiddle);
+        }
 
         System.gc();
     }

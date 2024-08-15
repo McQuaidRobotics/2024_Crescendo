@@ -23,6 +23,8 @@ public class RobotConfig {
 
         TestBoard("testBoard(crash)", Subsystems.list(Subsystems.Umbrella), RobotConstID.CRASH),
 
+        UNIT_TEST(Subsystems.all(), RobotConstID.CRASH),
+
         Unlabeled("", Subsystems.none(), RobotConstID.BURN);
 
         public final String name;
@@ -94,12 +96,5 @@ public class RobotConfig {
             Monologue.log("RobotConfig/ConstantsID", currentID.constID.name());
         }
         return currentID;
-    }
-
-    public static void testOverrideRobotID(RobotID id) {
-        if (!Robot.isUnitTest()) {
-            throw new RuntimeException("Tried to override robot ID in non-unit test environment");
-        }
-        currentID = id;
     }
 }

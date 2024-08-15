@@ -4,6 +4,7 @@ import com.igknighters.Localizer;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.teleop.AutoSwerveTargetSpeakerCmd;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
+import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.stem.StemSolvers.AimSolveStrategy;
@@ -11,6 +12,7 @@ import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.subsystems.vision.Vision;
 
+import choreo.ChoreoAutoTrajectory;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WrapperCommand;
@@ -64,13 +66,13 @@ public class AutoCommands {
         );
     }
 
-    protected Command aimStem() {
+    protected Command aimStem(ChoreoAutoTrajectory traj) {
         return loggedCmd(
             StemCommands.aimAtSpeaker(
                 stem,
                 AimSolveStrategy.STATIONARY_PIVOT_TELESCOPE_EXTEND,
                 false,
-                localizer::pose,
+                traj::getFinalPose,
                 swerve::getChassisSpeed
             ).withName("AimStem")
         );
@@ -117,15 +119,16 @@ public class AutoCommands {
                     true,
                     vision::getLatestPoseWithFallback,
                     swerve::getChassisSpeed
-                ).finallyDo(() -> logAutoEvent("Stem Targeting", "Done"))
+                ).finallyDo(() -> logAutoEvent("Stem Targeting", "Done")),
+                UmbrellaCommands.waitUntilSpunUp(umbrella, kControls.AUTO_SHOOTER_RPM)
             ).andThen(
-                UmbrellaCommands.shootAuto(umbrella)
+                feedShooter()
                     .finallyDo(() -> logAutoEvent("Shooting", "Done"))
             ).withName("AutoShoot")
         );
     }
 
-    protected Command autoShootRetract() {
+    protected Command autoShootBegining() {
         return loggedCmd(
             Commands.parallel(
                 new AutoSwerveTargetSpeakerCmd(swerve, vision::getLatestPoseWithFallback)
@@ -136,9 +139,10 @@ public class AutoCommands {
                     true,
                     vision::getLatestPoseWithFallback,
                     swerve::getChassisSpeed
-                ).finallyDo(() -> logAutoEvent("Stem Targeting", "Done"))
+                ).finallyDo(() -> logAutoEvent("Stem Targeting", "Done")),
+                UmbrellaCommands.waitUntilSpunUp(umbrella, kControls.AUTO_SHOOTER_RPM, 0.4)
             ).andThen(
-                UmbrellaCommands.shootAuto(umbrella)
+                feedShooter()
                     .finallyDo(() -> logAutoEvent("Shooting", "Done"))
             ).withName("AutoShootRetract")
         );
@@ -146,8 +150,8 @@ public class AutoCommands {
 
     protected Command feedShooter() {
         return loggedCmd(
-            UmbrellaCommands.shootAuto(umbrella)
-                .withName("FeedShooter")
+            UmbrellaCommands.runIntakeAndShooter(umbrella, kControls.AUTO_SHOOTER_RPM)
+                .withTimeout(0.15).withName("FeedShooter")
         );
     }
 

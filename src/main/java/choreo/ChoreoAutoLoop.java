@@ -51,6 +51,10 @@ public class ChoreoAutoLoop {
 
   /** Polls the loop. Should be called in the autonomous periodic method. */
   public void poll() {
+    if (!DriverStation.isAutonomousEnabled()) {
+      isActive = false;
+      return;
+    }
     loop.poll();
     isActive = true;
   }
@@ -89,6 +93,7 @@ public class ChoreoAutoLoop {
    */
   public void reset() {
     isActive = false;
+    onNewTrajectory();
   }
 
   /**
@@ -112,7 +117,7 @@ public class ChoreoAutoLoop {
    */
   public Command cmd(BooleanSupplier finishCondition) {
     return this.cmd()
-      .until(() -> finishCondition.getAsBoolean() || !DriverStation.isAutonomousEnabled())
+      .until(() -> finishCondition.getAsBoolean())
       .withName("ChoreoAutoLoop");
   }
 }
