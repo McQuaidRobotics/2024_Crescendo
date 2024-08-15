@@ -1,9 +1,14 @@
 package com.igknighters.util.logging;
 
+import java.lang.management.GarbageCollectorMXBean;
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
+import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -34,11 +39,25 @@ import edu.wpi.first.wpilibj.Timer;
  * </code></pre>
  */
 public class Tracer {
+    private static final class TraceStartData {
+        private double startTime = 0.0;
+        private double startGCTotalTime = 0.0;
+
+        private void set(double startTime, double startGCTotalTime) {
+            this.startTime = startTime;
+            this.startGCTotalTime = startGCTotalTime;
+        }
+    }
+
     private static final ArrayList<String> trace = new ArrayList<>();
     private static final HashMap<String, Double> traceTimes = new HashMap<>();
-    private static final HashMap<String, Double> traceStartTimes = new HashMap<>();
+    private static final HashMap<String, TraceStartData> traceStartTimes = new HashMap<>();
     private static final NetworkTable rootTable = NetworkTableInstance.getDefault().getTable("Tracer");
     private static final HashMap<String, NetworkTableEntry> entryHeap = new HashMap<>();
+
+    private static final List<GarbageCollectorMXBean> gcs = ManagementFactory.getGarbageCollectorMXBeans();
+    private static final AtomicLong gcTimeThisCycle = new AtomicLong();
+    private static final DoubleEntry gcTimeEntry = rootTable.getDoubleTopic("GCTime").getEntry(0.0);
 
     private static boolean threadValidation = false;
     private static long tracedThread = 0;
@@ -50,6 +69,14 @@ public class Tracer {
             sb.append("/");
         }
         return sb.toString().substring(0, sb.length() - 1);
+    }
+
+    private static double totalGCTime() {
+        double gcTime = 0;
+        for (GarbageCollectorMXBean gc : gcs) {
+            gcTime += gc.getCollectionTime();
+        }
+        return gcTime;
     }
 
     /**
@@ -86,7 +113,12 @@ public class Tracer {
             }
         }
         trace.add(name);
-        traceStartTimes.put(traceStack(), Timer.getFPGATimestamp() * 1_000.0);
+        var data = traceStartTimes.get(traceStack());
+        if (data == null) {
+            data = new TraceStartData();
+            traceStartTimes.put(traceStack(), data);
+        }
+        data.set(Timer.getFPGATimestamp() * 1_000.0, totalGCTime());
     }
 
     /**
@@ -97,8 +129,15 @@ public class Tracer {
      */
     public static void endTrace() {
         try {
-            var startTime = traceStartTimes.get(traceStack());
-            traceTimes.put(traceStack(), Timer.getFPGATimestamp() * 1_000.0 - startTime);
+            var startData = traceStartTimes.get(traceStack());
+            double gcTimeSinceStart = totalGCTime() - startData.startGCTotalTime;
+            gcTimeThisCycle.addAndGet((long) gcTimeSinceStart);
+            traceTimes.put(
+                traceStack(),
+                Timer.getFPGATimestamp() * 1_000.0
+                - startData.startTime
+                - gcTimeSinceStart
+            );
             trace.remove(trace.size() - 1);
             if (trace.size() == 0) {
                 endCycle();
@@ -165,5 +204,6 @@ public class Tracer {
             entry.setDouble(trace.getValue());
         }
         traceTimes.clear();
+        gcTimeEntry.set(gcTimeThisCycle.getAndSet(0));
     }
 }
