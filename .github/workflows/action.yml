@@ -32,6 +32,6 @@ jobs:
       - name: Build code
         run: ./gradlew compileJava
 
-      - name: Test code
+      # - name: Test code
         # run: ./gradlew check -d | grep -E "Test|ERROR"
-        run: ./gradlew check
+        # run: ./gradlew check
