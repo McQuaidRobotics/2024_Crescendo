@@ -5,6 +5,7 @@ import com.igknighters.LED;
 import com.igknighters.Robot;
 import com.igknighters.LED.LedAnimations;
 import com.igknighters.constants.ConstValues.kStem;
+import com.igknighters.subsystems.SubsystemResources.LockFullSubsystem;
 import com.igknighters.subsystems.stem.StemValidator.ValidationResponse;
 import com.igknighters.subsystems.stem.pivot.*;
 import com.igknighters.subsystems.stem.telescope.*;
@@ -14,11 +15,9 @@ import com.igknighters.util.logging.Tracer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import monologue.Logged;
 
-public class Stem extends SubsystemBase implements Logged {
+public class Stem implements LockFullSubsystem {
 
     private final Pivot pivot;
     private final Telescope telescope;

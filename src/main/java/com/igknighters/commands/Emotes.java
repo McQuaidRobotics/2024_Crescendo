@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 public class Emotes {
 
     public static Command bopYourHead(AllSubsystems subsystems) {
-        if (!subsystems.hasAllSubsystems()) return Commands.idle(subsystems.getEnabledSubsystemsArr());
+        if (!subsystems.hasAllSubsystems()) return Commands.idle(subsystems.getEnabledLockFullSubsystemsArr());
 
         Supplier<Command> cmd = () -> {
             var swerve = SwerveCommands.driveChassisSpeed(
@@ -61,11 +61,11 @@ public class Emotes {
             );
         };
 
-        return Commands.defer(cmd, Set.of(subsystems.getEnabledSubsystemsArr()));
+        return Commands.defer(cmd, Set.of(subsystems.getEnabledLockFullSubsystemsArr()));
     }
 
     public static Command yes(AllSubsystems subsystems) {
-        if (!subsystems.hasAllSubsystems()) return Commands.idle(subsystems.getEnabledSubsystemsArr());
+        if (!subsystems.hasAllSubsystems()) return Commands.idle(subsystems.getEnabledLockFullSubsystemsArr());
 
         var umbrella = UmbrellaCommands.stopShooter(subsystems.umbrella.get());
         var swerve = Commands.idle(subsystems.swerve.get());

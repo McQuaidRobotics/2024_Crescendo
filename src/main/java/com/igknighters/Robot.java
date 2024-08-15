@@ -85,10 +85,8 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
         allSubsystems = new AllSubsystems(robotID.subsystems);
 
-        for (final var subsystem : allSubsystems.getEnabledSubsystems()) {
-            if (subsystem instanceof Logged) {
-                Monologue.logObj((Logged) subsystem, "/Robot/" + subsystem.getName());
-            }
+        for (final Logged subsystem : allSubsystems.getLoggableSubsystems()) {
+            Monologue.logObj(subsystem, "/Robot/" + subsystem.getOverrideName());
         }
 
         driverController.assignButtons(allSubsystems);

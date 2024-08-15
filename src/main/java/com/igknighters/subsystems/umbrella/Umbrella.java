@@ -5,6 +5,7 @@ import java.util.List;
 import com.igknighters.Localizer;
 import com.igknighters.Robot;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
+import com.igknighters.subsystems.SubsystemResources.LockFullSubsystem;
 import com.igknighters.subsystems.umbrella.intake.*;
 import com.igknighters.subsystems.umbrella.shooter.*;
 import com.igknighters.util.GamepieceSimulator;
@@ -18,10 +19,8 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import monologue.Logged;
 
-public class Umbrella extends SubsystemBase implements Logged {
+public class Umbrella implements LockFullSubsystem {
 
     public static enum ShooterSpinupReason {
         None,

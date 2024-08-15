@@ -14,11 +14,11 @@ import java.util.Optional;
 import com.igknighters.Robot;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBaseCmd;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import monologue.Logged;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 import com.igknighters.constants.ConstValues.kChannels;
 import com.igknighters.constants.ConstValues.kSwerve;
+import com.igknighters.subsystems.SubsystemResources.LockFullSubsystem;
 import com.igknighters.subsystems.swerve.gyro.Gyro;
 import com.igknighters.subsystems.swerve.gyro.GyroReal;
 import com.igknighters.subsystems.swerve.gyro.GyroSim;
@@ -41,13 +41,13 @@ import com.igknighters.constants.ConstValues;
  * reading the Gyro.
  * 
  * The Swerve subsystem is also responsible for updating the robot's pose and
- * submitting data to the GlobalState.
+ * submitting data to the Localizer.
  * 
  * {@link https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html}
  * 
  * The coordinate system used in this code is the field coordinate system.
  */
-public class Swerve extends SubsystemBase implements Logged {
+public class Swerve implements LockFullSubsystem {
     private static final ChassisSpeeds ZERO_SPEEDS = new ChassisSpeeds();
 
     private final Sender<ChassisSpeeds> velocitySender = Sender.broadcast(kChannels.VELOCITY, ChassisSpeeds.class);
@@ -203,6 +203,6 @@ public class Swerve extends SubsystemBase implements Logged {
 
     public void setDefaultCommand(TeleopSwerveBaseCmd defaultCmd) {
         defaultCommand = Optional.of(defaultCmd);
-        super.setDefaultCommand(defaultCmd);
+        CommandScheduler.getInstance().setDefaultCommand(this, defaultCmd);
     }
 }
