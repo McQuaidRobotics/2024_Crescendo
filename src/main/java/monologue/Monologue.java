@@ -209,6 +209,8 @@ public class Monologue extends GlobalLogged {
 
     logObj(loggable, rootpath);
 
+    sendNetworkToFile(".schema/");
+
     System.gc();
 
     MonologueLog.runtimeLog("Monologue.setupMonologue() finished in " + timer.get() + " seconds");

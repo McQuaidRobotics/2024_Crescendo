@@ -8,13 +8,16 @@ import com.igknighters.Robot;
 import edu.wpi.first.hal.PowerDistributionFaults;
 import edu.wpi.first.hal.PowerDistributionJNI;
 import edu.wpi.first.hal.PowerDistributionStickyFaults;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructEntry;
-import edu.wpi.first.util.datalog.StructLogEntry;
+// import edu.wpi.first.networktables.NetworkTableInstance;
+// import edu.wpi.first.networktables.StructEntry;
+// import edu.wpi.first.util.datalog.StructLogEntry;
+// import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.util.struct.Struct;
-import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.util.struct.StructSerializable;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import monologue.Monologue;
 
 /**
  * A utility to log data from the PDP/PDH with as little overhead as possible.
@@ -58,19 +61,26 @@ public class PowerLogger {
         pd = new PD(handle, module);
         data = new PDData(pd);
 
-        if (datalogOnly) {
-            StructLogEntry<PDData> entry = StructLogEntry.create(
-                DataLogManager.getLog(),
-                path,
-                new PDDataStruct()
-            );
-            output = entry::append;
-        } else {
-            StructEntry<PDData> entry = NetworkTableInstance.getDefault()
-                    .getStructTopic("PowerDistribution/", new PDDataStruct())
-                    .getEntry(data);
-            output = entry::set;
-        }
+        // StructLogEntry<PDData> datalogEntry = StructLogEntry.create(
+        //         DataLogManager.getLog(),
+        //         path,
+        //         new PDDataStruct()
+        //     );
+        // if (datalogOnly) {
+        //     output = datalogEntry::append;
+        // } else {
+        //     StructEntry<PDData> entry = NetworkTableInstance.getDefault()
+        //             .getStructTopic(path, new PDDataStruct())
+        //             .getEntry(data);
+        //     output = v -> {
+        //         datalogEntry.append(v);
+        //         entry.set(v);
+        //     };
+        // }
+
+        output = v -> {
+            Monologue.log(path, v);
+        };
     }
 
     /**
@@ -102,19 +112,37 @@ public class PowerLogger {
         }
 
         public double getVoltage() {
-            return PowerDistributionJNI.getVoltage(handle);
+            if (Robot.isReal()) {
+                return PowerDistributionJNI.getVoltage(handle);
+            } else {
+                return RobotController.getBatteryVoltage();
+            }
         }
 
         public double getTotalCurrent() {
-            return PowerDistributionJNI.getTotalCurrent(handle);
+            if (Robot.isReal()) {
+                return PowerDistributionJNI.getTotalCurrent(handle);
+            } else {
+                return Math.random() * 100;
+            }
         }
 
         public double getTemperature() {
-            return PowerDistributionJNI.getTemperature(handle);
+            if (Robot.isReal()) {
+                return PowerDistributionJNI.getTemperature(handle);
+            } else {
+                return Math.random() * 50;
+            }
         }
 
         public void getAllCurrents(double[] outCurrents) {
-            PowerDistributionJNI.getAllCurrents(handle, outCurrents);
+            if (Robot.isReal()) {
+                PowerDistributionJNI.getAllCurrents(handle, outCurrents);
+            } else {
+                for (int i = 0; i < 24; i++) {
+                    outCurrents[i] = Math.random() * 100;
+                }
+            }
         }
     }
 
@@ -158,7 +186,7 @@ public class PowerLogger {
                 + "bool Channel23BreakerFault:1; "
                 + "bool Brownout:1; "
                 + "bool CanWarning:1; "
-                + "bool HardwareFault:1; ";
+                + "bool HardwareFault:1;";
         }
 
         @Override
@@ -251,7 +279,7 @@ public class PowerLogger {
                 + "bool Brownout:1; "
                 + "bool CanWarning:1; "
                 + "bool CanBusOff:1; "
-                + "bool HasReset:1; ";
+                + "bool HasReset:1;";
         }
 
         @Override
@@ -305,17 +333,16 @@ public class PowerLogger {
         }
     }
 
-    protected static final class PDData {
-        public int faults;
-        public int stickyFaults;
-        public double voltage;
-        public double totalCurrent;
-        public boolean switchableChannel;
-        public double temperature;
-        public double[] currents;
+    protected static final class PDData implements StructSerializable {
+        public int faults = 0;
+        public int stickyFaults = 0;
+        public double voltage = 0.0;
+        public double totalCurrent = 0.0;
+        public boolean switchableChannel = false;
+        public double temperature = 0.0;
+        public double[] currents =  new double[24];
 
         public PDData(final PD pd) {
-            currents = new double[24];
             update(pd);
         }
 
@@ -328,9 +355,13 @@ public class PowerLogger {
             temperature = pd.getTemperature();
             pd.getAllCurrents(currents);
         }
+
+        public final static PDDataStruct struct = new PDDataStruct();
     }
 
     protected static final class PDDataStruct implements Struct<PDData> {
+        private static final int kSize = 4 + 4 + 8 + 8 + 1 + 8 + (8 * 24);
+
         @Override
         public Class<PDData> getTypeClass() {
             return PDData.class;
@@ -338,7 +369,7 @@ public class PowerLogger {
 
         @Override
         public int getSize() {
-            return 4 + 4 + 8 + 8 + 1 + 8 + 8 * 24;
+            return kSize;
         }
 
         @Override
@@ -348,9 +379,8 @@ public class PowerLogger {
                 + "double voltage; "
                 + "double totalCurrent; "
                 + "bool switchableChannel; "
-                + "double temperature; "
-                + "double currents[24]; ";
-
+                + "double temperature;"
+                + "double currents[24];";
         }
 
         @Override
@@ -366,7 +396,7 @@ public class PowerLogger {
             bb.putDouble(value.totalCurrent);
             bb.put((byte) (value.switchableChannel ? 1 : 0));
             bb.putDouble(value.temperature);
-            for (int i = 0; i < 24; i++) {
+            for (int i = 0; i < value.currents.length; i++) {
                 bb.putDouble(value.currents[i]);
             }
         }

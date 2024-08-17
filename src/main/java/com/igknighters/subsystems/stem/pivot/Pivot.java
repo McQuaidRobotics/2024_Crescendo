@@ -2,9 +2,14 @@ package com.igknighters.subsystems.stem.pivot;
 
 import com.igknighters.constants.ConstValues;
 import com.igknighters.subsystems.Component;
+import com.igknighters.subsystems.stem.Stem;
 
 import monologue.Annotations.Log;
 
+/**
+ * A standardized interface for a {@link Pivot} {@link Stem} {@link Component}.
+ * This allows us to abstract over the underlying implementation of the pivot for various reasons.
+ */
 public abstract class Pivot extends Component {
     @Log.NT protected double radians;
     @Log.NT protected double targetRadians;
@@ -65,6 +70,12 @@ public abstract class Pivot extends Component {
         return Math.abs(this.getPivotRadians() - radians) < ConstValues.kStem.kPivot.TARGET_TOLERANCE * toleranceMult;
     }
 
+    /**
+     * Sets the mechanism to coast or brake mode.
+     * 
+     * @param shouldBeCoasting If the mechanism should be coasting
+     */
     public void setCoast(boolean shouldBeCoasting) {
+        // provide a no-op implementation to make sim classes less verbose
     }
 }

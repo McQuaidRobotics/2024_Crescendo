@@ -79,7 +79,7 @@ public class StemCommands {
                 kShooter.AVERAGE_NOTE_VELO_EST
             );
 
-            hasFinished = stem.setStemPosition(
+            hasFinished = stem.gotoStemPosition(
                 aimStrategy.solve(solveInput)
             );
         }
@@ -171,7 +171,7 @@ public class StemCommands {
      * @return A command to be scheduled
      */
     public static Command moveTo(Stem stem, StemPosition pose, double toleranceMult) {
-        return stem.run(() -> stem.setStemPosition(pose))
+        return stem.run(() -> stem.gotoStemPosition(pose))
             .until(() -> stem.isAt(pose, toleranceMult))
             .withName("Move Stem(" + pose + ")");
     }
@@ -184,7 +184,7 @@ public class StemCommands {
      * @return A command to be scheduled
      */
     public static Command holdAt(Stem stem, StemPosition pose) {
-        return stem.run(() -> stem.setStemPosition(pose, 0.0))
+        return stem.run(() -> stem.gotoStemPosition(pose, 0.0))
                 .withName("Hold Stem(" + pose + ")");
     }
 

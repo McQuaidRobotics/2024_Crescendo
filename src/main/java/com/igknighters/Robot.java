@@ -48,7 +48,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
     private final PowerLogger powerLogger = new PowerLogger(
             ConstValues.PDH_CAN_ID,
             ModuleType.kRev,
-            "/PowerDistribution",
+            "/Robot/PowerDistribution",
             false
     );
     private final FilesystemLogger filesystemLogger = new FilesystemLogger();
