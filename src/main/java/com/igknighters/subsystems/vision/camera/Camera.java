@@ -3,7 +3,6 @@ package com.igknighters.subsystems.vision.camera;
 import edu.wpi.first.wpilibj.DriverStation;
 import com.igknighters.Robot;
 import edu.wpi.first.wpilibj.Timer;
-import monologue.Logged;
 import monologue.Annotations.Log;
 
 import java.util.ArrayList;
@@ -23,8 +22,9 @@ import edu.wpi.first.util.struct.StructSerializable;
 import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kVision;
+import com.igknighters.subsystems.Component;
 
-public abstract class Camera implements Logged {
+public abstract class Camera extends Component {
     @Log.NT
     protected VisionPoseEstimate latestPoseEst;
     @Log.NT
@@ -89,7 +89,7 @@ public abstract class Camera implements Logged {
             return new CameraDisabled(config.cameraName, config.id, config.cameraPose);
         } else {
             try {
-                return new CameraReal(config.cameraName, config.id, config.cameraPose);
+                return new CameraRealPhoton(config.cameraName, config.id, config.cameraPose);
             } catch (Exception e) {
                 DriverStation.reportError(e.getMessage(), e.getStackTrace());
                 return new CameraDisabled(config.cameraName, config.id, config.cameraPose);
@@ -151,8 +151,6 @@ public abstract class Camera implements Logged {
     public String getOverrideName() {
         return getName();
     }
-
-    public abstract void periodic();
 
     public record VisionPoseEstimate(
             int cameraId,

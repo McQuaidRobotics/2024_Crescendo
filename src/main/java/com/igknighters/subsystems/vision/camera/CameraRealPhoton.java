@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj.Timer;
 /**
  * An abstraction for a photon camera.
  */
-public class CameraReal extends Camera {
+public class CameraRealPhoton extends Camera {
     private final PhotonCamera camera;
     private final Integer id;
     private final Transform3d cameraPose;
@@ -38,7 +38,7 @@ public class CameraReal extends Camera {
      * @param id         The ID of the camera
      * @param cameraPose The pose of the camera relative to the robot
      */
-    public CameraReal(String cameraName, Integer id, Transform3d cameraPose) {
+    public CameraRealPhoton(String cameraName, Integer id, Transform3d cameraPose) {
         super(id);
         this.camera = new PhotonCamera(cameraName);
         this.id = id;

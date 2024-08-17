@@ -13,7 +13,9 @@ public abstract class Component implements Logged {
      * Runs the mechanism in open loop at the specified voltage
      * @param volts The specified volts: [-12.0 .. 12.0]
      */
-    public abstract void setVoltageOut(double volts);
+    public void setVoltageOut(double volts) {
+        throw new UnsupportedOperationException("setVoltageOut not implemented");
+    }
 
     /**
      * Stops the mechanism
