@@ -41,10 +41,19 @@ public abstract class Telescope extends Component {
      */
     public abstract double getTelescopeMeters();
 
+    /**
+     * @return If the forward limit switch is currently being triggered
+     */
     public abstract boolean isFwdLimitSwitchHit();
 
+    /**
+     * @return If the reverse limit switch is currently being triggered
+     */
     public abstract boolean isRevLimitSwitchHit();
 
+    /**
+     * @return If the mechanism has homed since bootup
+     */
     public abstract boolean hasHomed();
 
     /**
@@ -73,6 +82,12 @@ public abstract class Telescope extends Component {
         return Math.abs(this.getTelescopeMeters() - radians) < ConstValues.kStem.kTelescope.TARGET_TOLERANCE * toleranceMult;
     }
 
+    /**
+     * Sets the mechanism to coast or brake mode.
+     * 
+     * @param shouldBeCoasting If the mechanism should be coasting
+     */
     public void setCoast(boolean shouldBeCoasting) {
+        // provide a no-op implementation to make sim classes less verbose
     }
 }

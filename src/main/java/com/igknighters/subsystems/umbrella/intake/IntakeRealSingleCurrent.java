@@ -2,6 +2,7 @@ package com.igknighters.subsystems.umbrella.intake;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.igknighters.constants.ConstValues.kUmbrella;
@@ -21,10 +22,14 @@ import monologue.Annotations.Log;
 public class IntakeRealSingleCurrent extends Intake {
 
     private final TalonFX motor = new TalonFX(kIntake.UPPER_MOTOR_ID, kUmbrella.CANBUS);
+
     private final StatusSignal<Double> voltSignal, ampSignal;
-    @Log.NT
-    private boolean forcedOutput = false;
+
+    private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
+
     private TunableDouble currentTripValue = TunableValues.getDouble("IntakeCurrentTrip", 115.0);
+
+    @Log.NT private boolean forcedOutput = false;
 
     public IntakeRealSingleCurrent() {
         FaultManager.captureFault(
@@ -67,9 +72,9 @@ public class IntakeRealSingleCurrent extends Intake {
         forcedOutput = false;
         super.voltsUpper = volts;
         if (super.exitBeamBroken) {
-            motor.setVoltage(0.0);
+            motor.setControl(controlReqVolts.withOutput(0.0));
         } else {
-            motor.setVoltage(volts);
+            motor.setControl(controlReqVolts.withOutput(volts));
         }
     }
 
@@ -81,7 +86,7 @@ public class IntakeRealSingleCurrent extends Intake {
             return;
         }
         super.voltsUpper = volts;
-        motor.setVoltage(volts);
+        motor.setControl(controlReqVolts.withOutput(volts));
     }
 
     @Override

@@ -4,7 +4,6 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -44,8 +43,7 @@ public class PivotReal extends Pivot {
     private final StatusSignal<ReverseLimitValue> reverseLimitSwitch;
 
     private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
-    private final NeutralOut controlReqNeutral = new NeutralOut().withUpdateFreqHz(0);
-    private final MotionMagicVoltage controlReqMotionMagic = new MotionMagicVoltage(0.0);
+    private final MotionMagicVoltage controlReqMotionMagic = new MotionMagicVoltage(0.0).withUpdateFreqHz(0);
 
     private final Receiver<Boolean> homeChannel = Receiver.buffered("HomePivot", 1, Boolean.class);
 
@@ -143,12 +141,6 @@ public class PivotReal extends Pivot {
     public void setVoltageOut(double volts) {
         super.targetRadians = 0.0;
         this.leaderMotor.setControl(controlReqVolts.withOutput(volts));
-    }
-
-    @Override
-    public void stopMechanism() {
-        super.targetRadians = super.radians;
-        this.leaderMotor.setControl(controlReqNeutral);
     }
 
     @Override

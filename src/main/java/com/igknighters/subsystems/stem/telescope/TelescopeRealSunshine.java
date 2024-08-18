@@ -4,6 +4,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ForwardLimitTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -19,11 +20,20 @@ import com.igknighters.util.logging.FaultManager;
 
 import monologue.Annotations.Log;
 
+/**
+ * A {@link RealTelescope} variant that doesn't use the forward limit switch.
+ * 
+ * The forward limit switch is an IR beam break sensor that is used to detect when the telescope is fully extended.
+ * This is unreliable in the sun and thus has to be disabled when using the robot outside.
+ */
 public class TelescopeRealSunshine extends Telescope {
     private final TalonFX motor;
 
     private final StatusSignal<Double> motorVolts, motorAmps, motorVelo, motorRots;
     private final StatusSignal<ReverseLimitValue> reverseLimitSwitch;
+
+    private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
+    private final MotionMagicTorqueCurrentFOC controlReqMotionMagic = new MotionMagicTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
 
     @Log.NT
     private boolean hasHomed = false;
@@ -34,7 +44,7 @@ public class TelescopeRealSunshine extends Telescope {
         super(kTelescope.MIN_METERS);
 
         motor = new TalonFX(kTelescope.MOTOR_ID, kStem.CANBUS);
-        CANRetrier.retryStatusCode(() -> motor.getConfigurator().apply(motorConfig(), 1.0), 5);
+        CANRetrier.retryStatusCodeFatal(() -> motor.getConfigurator().apply(motorConfig(), 1.0), 10);
 
         motorRots = motor.getRotorPosition();
         motorVelo = motor.getRotorVelocity();
@@ -99,25 +109,22 @@ public class TelescopeRealSunshine extends Telescope {
     @Override
     public void setVoltageOut(double volts) {
         super.targetMeters = 0.0;
-        this.motor.setVoltage(volts);
+        this.motor.setControl(
+            controlReqVolts.withOutput(volts)
+        );
     }
 
     @Override
     public void setTelescopeMeters(double meters) {
         super.targetMeters = meters;
-        var posControlRequest = new MotionMagicTorqueCurrentFOC(mechMetersToMotorRots(meters));
-        this.motor.setControl(posControlRequest);
+        this.motor.setControl(
+            controlReqMotionMagic.withPosition(mechMetersToMotorRots(meters))
+        );
     }
 
     @Override
     public double getTelescopeMeters() {
         return super.meters;
-    }
-
-    @Override
-    public void stopMechanism() {
-        super.volts = 0.0;
-        this.motor.setVoltage(0);
     }
 
     @Override

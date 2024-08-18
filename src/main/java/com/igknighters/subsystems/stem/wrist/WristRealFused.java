@@ -4,6 +4,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
@@ -26,6 +27,10 @@ public class WristRealFused extends Wrist {
 
     private final StatusSignal<Double> motorRots, motorVelo, motorAmps, motorVolts;
     private final StatusSignal<Double> cancoderRots, cancoderVelo;
+
+    private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
+    private final MotionMagicVoltage controlReqMotionMagic = new MotionMagicVoltage(0.0).withUpdateFreqHz(0)
+        .withEnableFOC(true);
 
     public WristRealFused() {
         super(0.0);
@@ -95,7 +100,9 @@ public class WristRealFused extends Wrist {
     @Override
     public void setWristRadians(double targetRadians) {
         super.targetRadians = targetRadians;
-        this.motor.setControl(new MotionMagicVoltage(Units.radiansToRotations(targetRadians)));
+        this.motor.setControl(
+            controlReqMotionMagic.withPosition(Units.radiansToRotations(targetRadians))
+        );
     }
 
     @Override
@@ -106,7 +113,9 @@ public class WristRealFused extends Wrist {
     @Override
     public void setVoltageOut(double volts) {
         super.targetRadians = 0.0;
-        motor.setVoltage(volts);
+        motor.setControl(
+            controlReqVolts.withOutput(volts)
+        );
     }
 
     @Override

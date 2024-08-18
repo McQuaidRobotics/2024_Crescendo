@@ -3,6 +3,7 @@ package com.igknighters.subsystems.umbrella.intake;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.ReverseLimitSourceValue;
@@ -19,11 +20,15 @@ import monologue.Annotations.Log;
 public class IntakeRealSingle extends Intake {
 
     private final TalonFX upperMotor = new TalonFX(kIntake.UPPER_MOTOR_ID, kUmbrella.CANBUS);
+
     private final StatusSignal<Double> voltUpperSignal, ampUpperSignal;
     private final StatusSignal<ReverseLimitValue> revLimitSignal;
+
     private final HardwareLimitSwitchConfigs upperLimitCfg;
-    @Log.NT
-    private boolean wasBeamBroken = false;
+
+    private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
+
+    @Log.NT private boolean wasBeamBroken = false;
 
     public IntakeRealSingle() {
         FaultManager.captureFault(
@@ -97,9 +102,9 @@ public class IntakeRealSingle extends Intake {
     public void setVoltageOut(double volts) {
         super.voltsUpper = volts;
         if (super.exitBeamBroken) {
-            upperMotor.setVoltage(0.0);
+            upperMotor.setControl(controlReqVolts.withOutput(0.0));
         } else {
-            upperMotor.setVoltage(volts);
+            upperMotor.setControl(controlReqVolts.withOutput(volts));
         }
     }
 
@@ -110,7 +115,7 @@ public class IntakeRealSingle extends Intake {
             return;
         }
         super.voltsUpper = volts;
-        upperMotor.setVoltage(volts);
+        upperMotor.setControl(controlReqVolts.withOutput(volts));
     }
 
     @Override

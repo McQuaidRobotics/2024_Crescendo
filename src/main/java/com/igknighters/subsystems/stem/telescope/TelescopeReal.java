@@ -4,6 +4,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ForwardLimitTypeValue;
 import com.ctre.phoenix6.signals.ForwardLimitValue;
@@ -27,16 +28,17 @@ public class TelescopeReal extends Telescope {
     private final StatusSignal<ForwardLimitValue> forwardLimitSwitch;
     private final StatusSignal<ReverseLimitValue> reverseLimitSwitch;
 
-    @Log.NT
-    private boolean hasHomed = false;
-    @Log.NT
-    private boolean motorAutoseed = true;
+    private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
+    private final MotionMagicTorqueCurrentFOC controlReqMotionMagic = new MotionMagicTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
+
+    @Log.NT private boolean hasHomed = false;
+    @Log.NT private boolean motorAutoseed = true;
 
     public TelescopeReal() {
         super(kTelescope.MIN_METERS);
 
         motor = new TalonFX(kTelescope.MOTOR_ID, kStem.CANBUS);
-        CANRetrier.retryStatusCode(() -> motor.getConfigurator().apply(motorConfig(), 1.0), 5);
+        CANRetrier.retryStatusCodeFatal(() -> motor.getConfigurator().apply(motorConfig(), 1.0), 10);
 
         motorRots = motor.getRotorPosition();
         motorVelo = motor.getRotorVelocity();
@@ -102,25 +104,22 @@ public class TelescopeReal extends Telescope {
     @Override
     public void setVoltageOut(double volts) {
         super.targetMeters = 0.0;
-        this.motor.setVoltage(volts);
+        this.motor.setControl(
+            controlReqVolts.withOutput(volts)
+        );
     }
 
     @Override
     public void setTelescopeMeters(double meters) {
         super.targetMeters = meters;
-        var posControlRequest = new MotionMagicTorqueCurrentFOC(mechMetersToMotorRots(meters));
-        this.motor.setControl(posControlRequest);
+        this.motor.setControl(
+            controlReqMotionMagic.withPosition(mechMetersToMotorRots(meters))
+        );
     }
 
     @Override
     public double getTelescopeMeters() {
         return super.meters;
-    }
-
-    @Override
-    public void stopMechanism() {
-        super.volts = 0.0;
-        this.motor.setVoltage(0);
     }
 
     @Override
