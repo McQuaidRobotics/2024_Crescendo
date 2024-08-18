@@ -1,5 +1,6 @@
 package com.igknighters.subsystems.swerve.odometryThread;
 
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.DoubleFunction;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -21,6 +22,13 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
 
     protected final MedianFilter peakRemover = new MedianFilter(3);
     protected final LinearFilter lowPass = LinearFilter.movingAverage(50);
+
+    /** An array that holds [module1Pos, module1Velo, module2Pos, ...] */
+    protected final AtomicLong[] moduleStates = new AtomicLong[MODULE_COUNT * 2];
+
+    private double getAtomicDouble(AtomicLong[] array, int index) {
+        return Double.longBitsToDouble(array[index].get());
+    }
 
     public RealSwerveOdometryThread(int hz, DoubleFunction<Double> driveRotsToMeters) {
         super(hz);
@@ -111,6 +119,14 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
                 )
             );
 
+            for (int i = 0; i < MODULE_COUNT; i++) {
+                int positionOffset = 4 * i;
+                int veloOffset = positionOffset + 1;
+
+                moduleStates[i * 2].set(Double.doubleToLongBits(signals[positionOffset].getValueAsDouble()));
+                moduleStates[(i * 2) + 1].set(Double.doubleToLongBits(signals[veloOffset].getValueAsDouble()));
+            }
+
             swerveDataSender.send(
                 new SwerveDriveSample(
                     new SwerveDriveWheelPositions(getModulePositions()),
@@ -125,5 +141,13 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
     public void start() {
         isRunning.set(true);
         thread.start();
+    }
+
+    public double getModulePosition(int moduleId) {
+        return getAtomicDouble(moduleStates, moduleId * 2);
+    }
+
+    public double getModuleVelocity(int moduleId) {
+        return getAtomicDouble(moduleStates, (moduleId * 2) + 1);
     }
 }

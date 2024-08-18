@@ -29,13 +29,11 @@ import com.igknighters.util.logging.BootupLogger;
 
 public class SwerveModuleReal extends SwerveModule {
     private final TalonFX driveMotor;
-    private final StatusSignal<Double> drivePositionSignal, driveVelocitySignal;
     private final StatusSignal<Double> driveVoltSignal, driveAmpSignal;
     private final ControlRequest driveMotorClosedReq;
     private final ControlRequest driveMotorOpenReq;
 
     private final TalonFX angleMotor;
-    private final StatusSignal<Double> anglePositionSignal, angleVelocitySignal;
     private final StatusSignal<Double> angleVoltSignal, angleAmpSignal;
     private final PositionDutyCycle angleMotorReq = new PositionDutyCycle(0)
             .withUpdateFreqHz(0);
@@ -47,9 +45,13 @@ public class SwerveModuleReal extends SwerveModule {
     private final double rotationOffset;
     private final boolean isPro;
 
+    private final RealSwerveOdometryThread odoThread;
+
     private Rotation2d lastAngle = new Rotation2d();
 
-    public SwerveModuleReal(final SwerveModuleConstants moduleConstants, boolean isPro, RealSwerveOdometryThread odoThread) {
+    public SwerveModuleReal(final SwerveModuleConstants moduleConstants, boolean isPro, final RealSwerveOdometryThread odoThread) {
+        this.odoThread = odoThread;
+
         this.isPro = isPro;
         this.moduleNumber = moduleConstants.getModuleId().num;
         this.rotationOffset = moduleConstants.getRotationOffset();
@@ -62,13 +64,9 @@ public class SwerveModuleReal extends SwerveModule {
         CANRetrier.retryStatusCode(() -> angleMotor.getConfigurator().apply(angleMotorConfig(), 1.0), 5);
         CANRetrier.retryStatusCode(() -> angleEncoder.getConfigurator().apply(cancoderConfig(), 1.0), 5);
 
-        drivePositionSignal = driveMotor.getPosition();
-        driveVelocitySignal = driveMotor.getVelocity();
         driveVoltSignal = driveMotor.getMotorVoltage();
         driveAmpSignal = driveMotor.getTorqueCurrent();
 
-        anglePositionSignal = angleMotor.getPosition();
-        angleVelocitySignal = angleMotor.getVelocity();
         angleVoltSignal = angleMotor.getMotorVoltage();
         angleAmpSignal = angleMotor.getTorqueCurrent();
 
@@ -84,10 +82,10 @@ public class SwerveModuleReal extends SwerveModule {
 
         odoThread.addModuleStatusSignals(
             moduleNumber,
-            drivePositionSignal,
-            driveVelocitySignal,
-            anglePositionSignal,
-            angleVelocitySignal
+            driveMotor.getPosition(),
+            driveMotor.getVelocity(),
+            angleMotor.getPosition(),
+            angleMotor.getVelocity()
         );
 
         driveMotor.optimizeBusUtilization(1.0);
@@ -99,12 +97,7 @@ public class SwerveModuleReal extends SwerveModule {
         log("isPro", isPro);
 
         driveMotorOpenReq = new VoltageOut(0).withEnableFOC(isPro).withUpdateFreqHz(0);
-        // if (isPro) {
-        //     driveMotorClosedReq = new VelocityTorqueCurrentFOC(0).withUpdateFreqHz(0);
-        // } else {
-        //     driveMotorClosedReq = new VelocityVoltage(0).withUpdateFreqHz(0);
-        // }
-        driveMotorClosedReq = new VelocityVoltage(0).withUpdateFreqHz(0);
+        driveMotorClosedReq = new VelocityVoltage(0).withEnableFOC(isPro).withUpdateFreqHz(0);
 
         BootupLogger.bootupLog(
                 "    SwerveModule[" + this.moduleNumber + "] initialized ("
@@ -227,8 +220,8 @@ public class SwerveModuleReal extends SwerveModule {
         super.angleVolts = angleVoltSignal.getValue();
         super.angleAmps = angleAmpSignal.getValue();
 
-        super.drivePositionMeters = driveRotationsToMeters(drivePositionSignal.getValue());
-        super.driveVeloMPS = driveRotationsToMeters(driveVelocitySignal.getValue());
+        super.drivePositionMeters = driveRotationsToMeters(odoThread.getModulePosition(moduleNumber));
+        super.driveVeloMPS = driveRotationsToMeters(odoThread.getModuleVelocity(moduleNumber));
         super.driveVolts = driveVoltSignal.getValue();
         super.driveAmps = driveAmpSignal.getValue();
     }
