@@ -25,9 +25,26 @@ public abstract class Wrist extends Component {
         return "Wrist";
     }
 
-    public abstract void setWristRadians(double radians);
+    /**
+     * Commands the wrist to move towards a certain angle in radians.
+     * 
+     * @param radians The target angle to move to
+     */
+    public abstract void gotoPosition(double radians);
 
-    public abstract double getWristRadians();
+    /**
+     * @return The current position of the wrist in radians
+     */
+    public double getPosition() {
+        return this.radians;
+    }
+
+    /**
+     * @return The current velocity of the wrist in radians per second
+     */
+    public double getVelocity() {
+        return this.radiansPerSecond;
+    }
 
     /**
      * Moves the wrist to the target and returns if it has reached the target.
@@ -40,7 +57,7 @@ public abstract class Wrist extends Component {
      * @return If the mechanism has reached the target
      */
     public boolean target(double radians, double tolerancMult) {
-        this.setWristRadians(radians);
+        this.gotoPosition(radians);
         return isAt(radians, tolerancMult);
     }
 
@@ -52,28 +69,34 @@ public abstract class Wrist extends Component {
      * @return If the mechanism is within the tolerance of the angle
      */
     public boolean isAt(double radians, double toleranceMult) {
-        return Math.abs(this.getWristRadians() - radians) < ConstValues.kStem.kWrist.TARGET_TOLERANCE * toleranceMult;
+        return Math.abs(this.getPosition() - radians) < ConstValues.kStem.kWrist.TARGET_TOLERANCE * toleranceMult;
     }
 
-    static final double slope = 0.0075789;
-    static final double offset = 0.32939;
+    public void setCoast(boolean shouldBeCoasting) {}
 
-    static double mechanismRadsToMotorRots(Double radians) {
+    /**
+     * Runs the mechanism in open loop at the specified voltage
+     * 
+     * @param volts The specified volts: [-12.0 .. 12.0]
+     */
+    public abstract void setVoltageOut(double volts);
+
+    private static final double slope = 0.0075789;
+    private static final double offset = 0.32939;
+
+    protected static double mechanismRadsToMotorRots(Double radians) {
         return (Units.radiansToRotations(radians) - offset) / slope;
     }
 
-    static double mechanismRadsToMotorRads(Double radians) {
+    protected static double mechanismRadsToMotorRads(Double radians) {
         return Units.rotationsToRadians(mechanismRadsToMotorRots(radians));
     }
 
-    static double motorRotsToMechanismRads(double motorRots) {
+    protected static double motorRotsToMechanismRads(double motorRots) {
         return Units.rotationsToRadians((slope*motorRots)+offset);
     }
 
-    static double motorRadsToMechanismRads(double motorRads) {
+    protected static double motorRadsToMechanismRads(double motorRads) {
         return motorRotsToMechanismRads(Units.radiansToRotations(motorRads));
-    }
-
-    public void setCoast(boolean shouldBeCoasting) {
     }
 }

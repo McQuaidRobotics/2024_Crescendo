@@ -133,8 +133,8 @@ public class IntakeRealSingle extends Intake {
         revLimitSignal.refresh();
 
         super.exitBeamBroken = revLimitSignal.getValue().equals(ReverseLimitValue.ClosedToGround);
-        super.voltsUpper = voltUpperSignal.getValue();
-        super.ampsUpper = ampUpperSignal.getValue();
+        super.voltsUpper = voltUpperSignal.getValueAsDouble();
+        super.ampsUpper = ampUpperSignal.getValueAsDouble();
         super.voltsLower = 0;
         super.ampsLower = 0;
 

@@ -30,5 +30,18 @@ public abstract class Intake extends Component {
         return voltsLower;
     }
 
+    /**
+     * Runs the mechanism in open loop at the specified voltage
+     * 
+     * @param volts The specified volts: [-12.0 .. 12.0]
+     */
+    public abstract void setVoltageOut(double volts);
+
+    /**
+     * Runs the mechanism in open loop at the specified voltage
+     * 
+     * @param volts The specified volts: [-12.0 .. 12.0]
+     * @param force If the mechanism should force past the limit switches
+     */
     public abstract void setVoltageOut(double volts, boolean force);
 }

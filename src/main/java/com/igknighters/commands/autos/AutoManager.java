@@ -14,19 +14,17 @@ import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import monologue.Logged;
 import monologue.Monologue;
-import monologue.Annotations.Log;
 
 /**
  * An auto chooser that allows for the selection of auto routines at runtime.
  */
-public class AutoManager implements Logged {
+public class AutoManager {
     public static interface AutoRoutineGenerator extends Function<ChoreoAutoFactory, Command> {
         static final AutoRoutineGenerator NONE = factory -> Commands.none().withName("Do Nothing Auto");
     }
 
-    private final String path = "/Auto Chooser";
+    private final String path = "/Choosers/Auto Chooser";
     private final String NONE_NAME = "Nothing";
 
     private final HashMap<String, AutoRoutineGenerator> autoRoutines = new HashMap<>(
@@ -41,7 +39,6 @@ public class AutoManager implements Logged {
 
     private final ChoreoAutoFactory factory;
 
-    @Log(key = "selected")
     private String lastAutoRoutineName = NONE_NAME;
     private Command lastAutoRoutine = AutoRoutineGenerator.NONE.apply(null);
 

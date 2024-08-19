@@ -34,14 +34,25 @@ public abstract class Pivot extends Component {
     }
 
     /**
-     * @param radians the angle to set the mechanism to
+     * Commands the pivot to move towards a certain angle in radians.
+     * 
+     * @param radians The target angle to move to
      */
-    public abstract void setPivotRadians(double radians);
+    public abstract void gotoPosition(double radians);
 
     /**
-     * @return the current angle of the mechanism
+     * @return The current angle of the mechanism
      */
-    public abstract double getPivotRadians();
+    public double getPosition() {
+        return this.radians;
+    }
+
+    /**
+     * @return The current velocity of the mechanism in radians per second
+     */
+    public double getVelocity() {
+        return this.radiansPerSecond;
+    }
 
     /**
      * Move the pivot to the target and returns if it has reached the target.
@@ -54,7 +65,7 @@ public abstract class Pivot extends Component {
      * @return If the mechanism has reached the target
      */
     public boolean target(double radians, double tolerancMult) {
-        this.setPivotRadians(radians);
+        this.gotoPosition(radians);
         return isAt(radians, tolerancMult);
     }
 
@@ -67,7 +78,7 @@ public abstract class Pivot extends Component {
      * @return If the mechanism is within the tolerance of the angle
      */
     public boolean isAt(double radians, double toleranceMult) {
-        return Math.abs(this.getPivotRadians() - radians) < ConstValues.kStem.kPivot.TARGET_TOLERANCE * toleranceMult;
+        return Math.abs(this.getPosition() - radians) < ConstValues.kStem.kPivot.TARGET_TOLERANCE * toleranceMult;
     }
 
     /**
@@ -78,4 +89,11 @@ public abstract class Pivot extends Component {
     public void setCoast(boolean shouldBeCoasting) {
         // provide a no-op implementation to make sim classes less verbose
     }
+
+    /**
+     * Runs the mechanism in open loop at the specified voltage
+     * 
+     * @param volts The specified volts: [-12.0 .. 12.0]
+     */
+    public abstract void setVoltageOut(double volts);
 }

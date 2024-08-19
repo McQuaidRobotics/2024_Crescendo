@@ -68,7 +68,7 @@ public class PivotReal extends Pivot {
         CANRetrier.retryStatusCodeFatal(() -> followerMotor.setControl(new Follower(leaderMotor.getDeviceID(), true)),
                 10);
 
-        double startingRads = Units.degreesToRadians(gyroMeasurement.getValue());
+        double startingRads = Units.degreesToRadians(gyroMeasurement.getValueAsDouble());
         super.gyroRadians = startingRads;
         super.radians = startingRads;
         super.targetRadians = startingRads;
@@ -132,7 +132,7 @@ public class PivotReal extends Pivot {
     }
 
     @Override
-    public void setPivotRadians(double radians) {
+    public void gotoPosition(double radians) {
         super.targetRadians = radians;
         this.leaderMotor.setControl(controlReqMotionMagic.withPosition(mechRadiansToMotorRots(radians)));
     }
@@ -141,11 +141,6 @@ public class PivotReal extends Pivot {
     public void setVoltageOut(double volts) {
         super.targetRadians = 0.0;
         this.leaderMotor.setControl(controlReqVolts.withOutput(volts));
-    }
-
-    @Override
-    public double getPivotRadians() {
-        return super.radians;
     }
 
     private double getPivotRadiansPigeon() {
@@ -188,17 +183,17 @@ public class PivotReal extends Pivot {
             gyroMeasurement
         );
 
-        super.radians = motorRotsToMechRadians(motorRots.getValue());
-        super.radiansPerSecond = -Units.rotationsToRadians(motorVelo.getValue()) / kPivot.MOTOR_TO_MECHANISM_RATIO;
-        super.leftVolts = leaderMotorVolts.getValue();
-        super.rightVolts = followerMotorVolts.getValue();
-        super.leftAmps = leaderMotorAmps.getValue();
-        super.rightAmps = followerMotorAmps.getValue();
+        super.radians = motorRotsToMechRadians(motorRots.getValueAsDouble());
+        super.radiansPerSecond = -Units.rotationsToRadians(motorVelo.getValueAsDouble()) / kPivot.MOTOR_TO_MECHANISM_RATIO;
+        super.leftVolts = leaderMotorVolts.getValueAsDouble();
+        super.rightVolts = followerMotorVolts.getValueAsDouble();
+        super.leftAmps = leaderMotorAmps.getValueAsDouble();
+        super.rightAmps = followerMotorAmps.getValueAsDouble();
 
         super.isLimitFwdSwitchHit = forwardLimitSwitch.getValue() == ForwardLimitValue.Open;
         super.isLimitRevSwitchHit = reverseLimitSwitch.getValue() == ReverseLimitValue.Open;
 
-        double newGyroRadians = Units.degreesToRadians(gyroMeasurement.getValue() + 90.0);
+        double newGyroRadians = Units.degreesToRadians(gyroMeasurement.getValueAsDouble() + 90.0);
         super.gyroRadiansPerSecondAbs = Math.abs(super.gyroRadians - newGyroRadians) / ConstValues.PERIODIC_TIME;
         super.gyroRadians = newGyroRadians;
 

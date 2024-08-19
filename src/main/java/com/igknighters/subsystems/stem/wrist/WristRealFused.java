@@ -58,7 +58,7 @@ public class WristRealFused extends Wrist {
         cancoder.optimizeBusUtilization(1.0);
         motor.optimizeBusUtilization(1.0);
 
-        super.encoderRadians = Units.rotationsToRadians(cancoderRots.getValue());
+        super.encoderRadians = Units.rotationsToRadians(cancoderRots.getValueAsDouble());
         super.radians = encoderRadians;
         super.targetRadians = encoderRadians;
 
@@ -98,16 +98,11 @@ public class WristRealFused extends Wrist {
     }
 
     @Override
-    public void setWristRadians(double targetRadians) {
+    public void gotoPosition(double targetRadians) {
         super.targetRadians = targetRadians;
         this.motor.setControl(
             controlReqMotionMagic.withPosition(Units.radiansToRotations(targetRadians))
         );
-    }
-
-    @Override
-    public double getWristRadians() {
-        return super.radians;
     }
 
     @Override
@@ -137,10 +132,10 @@ public class WristRealFused extends Wrist {
                 StemHW.WristEncoder,
                 cancoderRots);
 
-        super.radians = Units.rotationsToRadians(motorRots.getValue());
-        super.radiansPerSecond = Units.rotationsToRadians(cancoderVelo.getValue());
-        super.encoderRadians = Units.rotationsToRadians(cancoderRots.getValue());
-        super.amps = motorAmps.getValue();
-        super.volts = motorVolts.getValue();
+        super.radians = Units.rotationsToRadians(motorRots.getValueAsDouble());
+        super.radiansPerSecond = Units.rotationsToRadians(cancoderVelo.getValueAsDouble());
+        super.encoderRadians = Units.rotationsToRadians(cancoderRots.getValueAsDouble());
+        super.amps = motorAmps.getValueAsDouble();
+        super.volts = motorVolts.getValueAsDouble();
     }
 }

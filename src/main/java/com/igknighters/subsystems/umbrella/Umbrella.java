@@ -20,8 +20,14 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Commands;
 
+/**
+ * 
+ */
 public class Umbrella implements LockFullSubsystem {
 
+    /**
+     * A collection of reasons the shooter can be spun up
+     */
     public static enum ShooterSpinupReason {
         None,
         Idle,
@@ -40,6 +46,7 @@ public class Umbrella implements LockFullSubsystem {
             shooter = new ShooterDisabled();
         } else {
             if (Robot.isDemo()) {
+                // Demo are more likely to be outside so just assume we are
                 intake = new IntakeRealSingleCurrent();
             } else {
                 intake = new IntakeRealSingle();
@@ -162,16 +169,29 @@ public class Umbrella implements LockFullSubsystem {
         shooter.setSpeed(0.0);
     }
 
+    /**
+     * Updates the reason the shooter was spun up
+     * 
+     * @param reason The reason the shooter was spun up
+     */
     public void pushSpinupReason(ShooterSpinupReason reason) {
         spinupReason = reason;
     }
 
+    /**
+     * @return The reason the shooter was spun up
+     */
     public ShooterSpinupReason popSpinupReason() {
         var reason = spinupReason;
         spinupReason = ShooterSpinupReason.None;
         return reason;
     }
 
+    /**
+     * Sets up the simulation for intaking notes in simulation
+     * 
+     * @param localizer The {@link Localizer} to use for the simulation
+     */
     public void setupSimNoteDetection(Localizer localizer) {
         if (!Robot.isSimulation() || !(intake instanceof IntakeSim)) {
             return;

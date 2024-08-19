@@ -165,6 +165,12 @@ public class Swerve implements LockFullSubsystem {
         rotController.reset(MathUtil.angleModulus(getYawRads()), getChassisSpeed().omegaRadiansPerSecond);
     }
 
+    public void setVoltageOut(double voltage, Rotation2d angle) {
+        for (SwerveModule module : swerveMods) {
+            module.setVoltageOut(voltage, angle);
+        }
+    }
+
     @Override
     public void periodic() {
         Tracer.startTrace("SwervePeriodic");

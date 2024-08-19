@@ -156,10 +156,6 @@ public class SwerveModuleSim extends SwerveModule {
     }
 
     @Override
-    public void setVoltageOut(double volts) {
-    }
-
-    @Override
     public void setVoltageOut(double volts, Rotation2d angle) {
     }
 }

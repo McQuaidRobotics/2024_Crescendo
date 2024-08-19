@@ -12,12 +12,7 @@ public class PivotDisabled extends Pivot {
     }
 
     @Override
-    public double getPivotRadians() {
-        return super.radians;
-    }
-
-    @Override
-    public void setPivotRadians(double radians) {
+    public void gotoPosition(double radians) {
         super.radians = super.radians + MathUtil.clamp(radians - super.radians, -slewRate, slewRate);
     }
 

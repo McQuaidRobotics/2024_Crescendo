@@ -13,12 +13,7 @@ public class TelescopeDisabled extends Telescope {
     }
 
     @Override
-    public double getTelescopeMeters() {
-        return super.meters;
-    }
-
-    @Override
-    public void setTelescopeMeters(double meters) {
+    public void gotoPosition(double meters) {
         super.targetMeters = meters;
         super.meters = super.meters + MathUtil.clamp(meters - super.meters, -slewRate, slewRate);
     }

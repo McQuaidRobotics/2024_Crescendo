@@ -13,7 +13,6 @@ import com.igknighters.util.logging.BootupLogger;
 import com.igknighters.util.logging.FaultManager;
 
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
 
 public class GyroReal extends Gyro {
 
@@ -71,11 +70,6 @@ public class GyroReal extends Gyro {
     }
 
     @Override
-    public void setVoltageOut(double volts) {
-        DriverStation.reportError("\"GyroSim.setVoltageOut\" is not a supported operation", false);
-    }
-
-    @Override
     public void periodic() {
         FaultManager.captureFault(
                 SwerveHW.Pigeon2,
@@ -83,14 +77,14 @@ public class GyroReal extends Gyro {
                 rollVeloSignal, pitchVeloSignal, yawVeloSignal,
                 xAccel, yAccel);
 
-        super.pitchRads = Units.degreesToRadians(pitchSignal.getValue());
-        super.pitchVelRadsPerSec = Units.degreesToRadians(pitchVeloSignal.getValue());
-        super.rollRads = Units.degreesToRadians(rollSignal.getValue());
-        super.rollVelRadsPerSec = Units.degreesToRadians(rollVeloSignal.getValue());
-        super.yawRads = Units.degreesToRadians(yawSignal.getValue());
-        super.yawVelRadsPerSec = Units.degreesToRadians(yawVeloSignal.getValue());
+        super.pitchRads = Units.degreesToRadians(pitchSignal.getValueAsDouble());
+        super.pitchVelRadsPerSec = Units.degreesToRadians(pitchVeloSignal.getValueAsDouble());
+        super.rollRads = Units.degreesToRadians(rollSignal.getValueAsDouble());
+        super.rollVelRadsPerSec = Units.degreesToRadians(rollVeloSignal.getValueAsDouble());
+        super.yawRads = Units.degreesToRadians(yawSignal.getValueAsDouble());
+        super.yawVelRadsPerSec = Units.degreesToRadians(yawVeloSignal.getValueAsDouble());
 
-        log("XAccel", xAccel.getValue());
-        log("YAccel", yAccel.getValue());
+        log("XAccel", xAccel.getValueAsDouble());
+        log("YAccel", yAccel.getValueAsDouble());
     }
 }

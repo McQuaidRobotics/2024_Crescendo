@@ -43,4 +43,11 @@ public abstract class Shooter extends Component {
      * @param speedRadPerSec The speed in Rad/S to spin the flywheel at
      */
     public abstract void setSpeed(double speedRadPerSec);
+
+    /**
+     * Runs the mechanism in open loop at the specified voltage
+     * 
+     * @param volts The specified volts: [-12.0 .. 12.0]
+     */
+    public abstract void setVoltageOut(double volts);
 }

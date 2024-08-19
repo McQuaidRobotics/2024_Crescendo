@@ -17,6 +17,8 @@ import com.igknighters.commands.autos.AutoController;
 import com.igknighters.commands.autos.AutoManager;
 import com.igknighters.commands.autos.AutoRoutines;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveTraditionalCmd;
+import com.igknighters.commands.tests.Characterizers;
+import com.igknighters.commands.tests.TestManager;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstantHelper;
@@ -62,6 +64,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
     public final AllSubsystems allSubsystems;
 
     public final AutoManager autoManager;
+    public final TestManager testManager;
 
     public Robot() {
         this(null);
@@ -135,6 +138,27 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
             autoManager.addAutoRoutine("3 Piece Sub Middle", routines::threePieceSubMiddle);
         }
 
+        testManager = new TestManager();
+
+        if (allSubsystems.hasAllSubsystems()) {
+            testManager.addTestRoutine(
+                "Characterize Swerve",
+                Characterizers.characterizeSwerve(allSubsystems.swerve.get())
+            );
+            testManager.addTestRoutine(
+                "Characterize Pivot",
+                Characterizers.characterizePivot(allSubsystems.stem.get())
+            );
+            testManager.addTestRoutine(
+                "Characterize Wrist",
+                Characterizers.characterizeWrist(allSubsystems.stem.get())
+            );
+            testManager.addTestRoutine(
+                "Characterize Telescope",
+                Characterizers.characterizeTelescope(allSubsystems.stem.get())
+            );
+        }
+
         System.gc();
     }
 
@@ -154,6 +178,12 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
     }
 
     @Override
+    public void disabledInit() {
+        scheduler.cancelAll();
+        System.gc();
+    }
+
+    @Override
     public void disabledPeriodic() {}
 
     @Override
@@ -170,6 +200,18 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
     @Override
     public void autonomousExit() {
+        scheduler.cancelAll();
+        System.gc();
+    }
+
+    @Override
+    public void testInit() {
+        CANSignalManager.setCharacterizationMode(true);
+    }
+
+    @Override
+    public void testExit() {
+        CANSignalManager.setCharacterizationMode(false);
         scheduler.cancelAll();
         System.gc();
     }

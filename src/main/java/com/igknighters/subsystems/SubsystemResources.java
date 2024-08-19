@@ -145,6 +145,12 @@ public class SubsystemResources {
                         }
                     }
 
+                    public void simulationPeriodic() {
+                        for (LockFreeSubsystem subsystem : getEnabledLockFreeSubsystemsArr()) {
+                            subsystem.simulationPeriodic();
+                        }
+                    };
+
                     @Override
                     public String getName() {
                         return "LockFreeProxy";
@@ -217,6 +223,7 @@ public class SubsystemResources {
     public static interface LockFreeSubsystem extends Logged {
         default void periodic() {}
         default void simulationPeriodic() {}
+
         default String getName() {
             return this.getClass().getSimpleName();
         }

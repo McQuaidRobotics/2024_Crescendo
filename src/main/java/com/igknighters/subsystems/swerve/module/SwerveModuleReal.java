@@ -215,20 +215,15 @@ public class SwerveModuleReal extends SwerveModule {
 
     @Override
     public void periodic() {
-        super.angleAbsoluteRads = Units.rotationsToRadians(angleAbsoluteSignal.getValue());
-        super.angleVeloRadPS = Units.rotationsToRadians(angleAbsoluteVeloSignal.getValue());
-        super.angleVolts = angleVoltSignal.getValue();
-        super.angleAmps = angleAmpSignal.getValue();
+        super.angleAbsoluteRads = Units.rotationsToRadians(angleAbsoluteSignal.getValueAsDouble());
+        super.angleVeloRadPS = Units.rotationsToRadians(angleAbsoluteVeloSignal.getValueAsDouble());
+        super.angleVolts = angleVoltSignal.getValueAsDouble();
+        super.angleAmps = angleAmpSignal.getValueAsDouble();
 
         super.drivePositionMeters = driveRotationsToMeters(odoThread.getModulePosition(moduleNumber));
         super.driveVeloMPS = driveRotationsToMeters(odoThread.getModuleVelocity(moduleNumber));
-        super.driveVolts = driveVoltSignal.getValue();
-        super.driveAmps = driveAmpSignal.getValue();
-    }
-
-    @Override
-    public void setVoltageOut(double volts) {
-        driveMotor.setVoltage(volts);
+        super.driveVolts = driveVoltSignal.getValueAsDouble();
+        super.driveAmps = driveAmpSignal.getValueAsDouble();
     }
 
     @Override

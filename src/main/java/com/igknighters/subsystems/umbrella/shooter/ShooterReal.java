@@ -2,7 +2,6 @@ package com.igknighters.subsystems.umbrella.shooter;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -25,7 +24,6 @@ public class ShooterReal extends Shooter {
     private final StatusSignal<Double> veloSignalLeft, voltSignalLeft, currentSignalLeft;
 
     private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
-    private final NeutralOut controlReqNeutral = new NeutralOut().withUpdateFreqHz(0);
     private final VelocityVoltage controlReq = new VelocityVoltage(0.0).withUpdateFreqHz(0).withEnableFOC(true);
 
     public ShooterReal() {
@@ -126,14 +124,6 @@ public class ShooterReal extends Shooter {
     }
 
     @Override
-    public void stopMechanism() {
-        super.targetRadiansPerSecondRight = 0.0;
-        super.targetRadiansPerSecondLeft = 0.0;
-        rightMotor.setControl(controlReqNeutral);
-        leftMotor.setControl(controlReqNeutral);
-    }
-
-    @Override
     public void periodic() {
         FaultManager.captureFault(
                 UmbrellaHW.RightShooterMotor,
@@ -147,15 +137,15 @@ public class ShooterReal extends Shooter {
                 voltSignalLeft,
                 currentSignalLeft);
 
-        super.radiansPerSecondRight = Units.rotationsToRadians(veloSignalRight.getValue() * kShooter.MECHANISM_RATIO);
-        log("currentRotsRight", veloSignalRight.getValue());
-        super.voltsRight = voltSignalRight.getValue();
-        super.ampsRight = currentSignalRight.getValue();
+        super.radiansPerSecondRight = Units.rotationsToRadians(veloSignalRight.getValueAsDouble() * kShooter.MECHANISM_RATIO);
+        log("currentRotsRight", veloSignalRight.getValueAsDouble());
+        super.voltsRight = voltSignalRight.getValueAsDouble();
+        super.ampsRight = currentSignalRight.getValueAsDouble();
 
-        super.radiansPerSecondLeft = Units.rotationsToRadians(veloSignalLeft.getValue() * kShooter.MECHANISM_RATIO);
-        log("currentRotsLeft", veloSignalLeft.getValue());
-        super.voltsLeft = voltSignalLeft.getValue();
-        super.ampsLeft = currentSignalLeft.getValue();
+        super.radiansPerSecondLeft = Units.rotationsToRadians(veloSignalLeft.getValueAsDouble() * kShooter.MECHANISM_RATIO);
+        log("currentRotsLeft", veloSignalLeft.getValueAsDouble());
+        super.voltsLeft = voltSignalLeft.getValueAsDouble();
+        super.ampsLeft = currentSignalLeft.getValueAsDouble();
 
         super.shooterRightRPM = Units.radiansPerSecondToRotationsPerMinute(radiansPerSecondRight);
         super.shooterLeftRPM = Units.radiansPerSecondToRotationsPerMinute(radiansPerSecondLeft);

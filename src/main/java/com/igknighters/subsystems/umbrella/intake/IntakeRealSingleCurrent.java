@@ -19,6 +19,9 @@ import com.igknighters.constants.HardwareIndex.UmbrellaHW;
 
 import monologue.Annotations.Log;
 
+/**
+ * 
+ */
 public class IntakeRealSingleCurrent extends Intake {
 
     private final TalonFX motor = new TalonFX(kIntake.UPPER_MOTOR_ID, kUmbrella.CANBUS);
@@ -106,13 +109,13 @@ public class IntakeRealSingleCurrent extends Intake {
 
         if (!super.exitBeamBroken && !forcedOutput) {
             ampSignal.refresh();
-            super.exitBeamBroken = Math.abs(ampSignal.getValue()) > currentTripValue.value();
+            super.exitBeamBroken = Math.abs(ampSignal.getValueAsDouble()) > currentTripValue.value();
         } else if (super.exitBeamBroken && forcedOutput) {
             super.exitBeamBroken = false;
         }
 
-        super.voltsUpper = voltSignal.getValue();
-        super.ampsUpper = ampSignal.getValue();
+        super.voltsUpper = voltSignal.getValueAsDouble();
+        super.ampsUpper = ampSignal.getValueAsDouble();
         super.voltsLower = 0;
         super.ampsLower = 0;
     }

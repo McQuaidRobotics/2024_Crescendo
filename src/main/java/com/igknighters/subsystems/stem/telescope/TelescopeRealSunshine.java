@@ -115,16 +115,11 @@ public class TelescopeRealSunshine extends Telescope {
     }
 
     @Override
-    public void setTelescopeMeters(double meters) {
+    public void gotoPosition(double meters) {
         super.targetMeters = meters;
         this.motor.setControl(
             controlReqMotionMagic.withPosition(mechMetersToMotorRots(meters))
         );
-    }
-
-    @Override
-    public double getTelescopeMeters() {
-        return super.meters;
     }
 
     @Override
@@ -158,10 +153,10 @@ public class TelescopeRealSunshine extends Telescope {
                 motorVolts, motorAmps,
                 reverseLimitSwitch);
 
-        super.meters = motorRotsToMechMeters(motorRots.getValue());
-        super.metersPerSecond = motorRotsToMechMeters(motorVelo.getValue());
-        super.volts = motorVolts.getValue();
-        super.amps = motorAmps.getValue();
+        super.meters = motorRotsToMechMeters(motorRots.getValueAsDouble());
+        super.metersPerSecond = motorRotsToMechMeters(motorVelo.getValueAsDouble());
+        super.volts = motorVolts.getValueAsDouble();
+        super.amps = motorAmps.getValueAsDouble();
         super.isLimitFwdSwitchHit = false;
         super.isLimitRevSwitchHit = reverseLimitSwitch.getValue() == ReverseLimitValue.Open;
 

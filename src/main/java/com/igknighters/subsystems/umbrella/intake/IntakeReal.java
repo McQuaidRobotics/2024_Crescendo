@@ -161,10 +161,10 @@ public class IntakeReal extends Intake {
         revLimitSignal.refresh();
 
         super.exitBeamBroken = revLimitSignal.getValue().equals(ReverseLimitValue.ClosedToGround);
-        super.voltsUpper = voltUpperSignal.getValue();
-        super.ampsUpper = ampUpperSignal.getValue();
-        super.voltsLower = voltLowerSignal.getValue();
-        super.ampsLower = ampLowerSignal.getValue();
+        super.voltsUpper = voltUpperSignal.getValueAsDouble();
+        super.ampsUpper = ampUpperSignal.getValueAsDouble();
+        super.voltsLower = voltLowerSignal.getValueAsDouble();
+        super.ampsLower = ampLowerSignal.getValueAsDouble();
 
         if (super.exitBeamBroken && !wasBeamBroken) {
             this.setVoltageOut(0.0);

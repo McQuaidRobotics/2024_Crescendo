@@ -27,19 +27,30 @@ public abstract class Telescope extends Component {
     }
 
     /**
-     * @param meters The distance to set the mechanism to
+     * Commands the telescope to move towards a certain distance in meters.
+     * 
+     * @param meters The target distance to move to
      * 
      * @apiNote This is distance from pivot axel to the wrist axel,
      *          this means 0.0 is not fully retraccted but rather an unreachable
-     *          position. Check {@link ConstValues.kStem.kTelescope.MIN_METERS} and
-     *          {@link ConstValues.kStem.kTelescope.MAX_METERS} for the min and max.
+     *          position. Between {@value ConstValues.kStem.kTelescope.MIN_METERS} and
+     *          {@value ConstValues.kStem.kTelescope.MAX_METERS} for the min and max.
      */
-    public abstract void setTelescopeMeters(double meters);
+    public abstract void gotoPosition(double meters);
 
     /**
-     * @return The current distance from the pivot axel to the wrist axel
+     * @return The current distance from the pivot axel to the wrist axel in meters
      */
-    public abstract double getTelescopeMeters();
+    public double getPosition() {
+        return this.meters;
+    }
+
+    /**
+     * @return The current velocity of the mechanism in meters per second
+     */
+    public double getVelocity() {
+        return this.metersPerSecond;
+    }
 
     /**
      * @return If the forward limit switch is currently being triggered
@@ -67,7 +78,7 @@ public abstract class Telescope extends Component {
      * @return If the mechanism has reached the target
      */
     public boolean target(double meters, double tolerancMult) {
-        this.setTelescopeMeters(meters);
+        this.gotoPosition(meters);
         return isAt(meters, tolerancMult);
     }
 
@@ -79,7 +90,7 @@ public abstract class Telescope extends Component {
      * @return If the mechanism is within the tolerance of the angle
      */
     public boolean isAt(double radians, double toleranceMult) {
-        return Math.abs(this.getTelescopeMeters() - radians) < ConstValues.kStem.kTelescope.TARGET_TOLERANCE * toleranceMult;
+        return Math.abs(this.getPosition() - radians) < ConstValues.kStem.kTelescope.TARGET_TOLERANCE * toleranceMult;
     }
 
     /**
@@ -90,4 +101,11 @@ public abstract class Telescope extends Component {
     public void setCoast(boolean shouldBeCoasting) {
         // provide a no-op implementation to make sim classes less verbose
     }
+
+    /**
+     * Runs the mechanism in open loop at the specified voltage
+     * 
+     * @param volts The specified volts: [-12.0 .. 12.0]
+     */
+    public abstract void setVoltageOut(double volts);
 }

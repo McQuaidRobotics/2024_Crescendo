@@ -12,12 +12,7 @@ public class WristDisabled extends Wrist {
     }
 
     @Override
-    public double getWristRadians() {
-        return super.radians;
-    }
-
-    @Override
-    public void setWristRadians(double radians) {
+    public void gotoPosition(double radians) {
         super.targetRadians = radians;
         super.radians = super.radians + MathUtil.clamp(radians - super.radians, -slewRate, slewRate);
     }

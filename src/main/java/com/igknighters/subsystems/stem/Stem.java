@@ -118,9 +118,9 @@ public class Stem implements LockFullSubsystem {
 
         // Generate and move to the next safe position
         StemPosition step = StemValidator.stepTowardsTargetPosition(getStemPosition(), position, 1.0);
-        pivot.setPivotRadians(step.pivotRads);
-        telescope.setTelescopeMeters(step.telescopeMeters);
-        wrist.setWristRadians(step.wristRads);
+        pivot.gotoPosition(step.pivotRads);
+        telescope.gotoPosition(step.telescopeMeters);
+        wrist.gotoPosition(step.wristRads);
 
         // Query if the mechanisms have reached their target position
         boolean pivotSuccess = pivot.isAt(position.pivotRads, toleranceMult);
@@ -176,9 +176,9 @@ public class Stem implements LockFullSubsystem {
      */
     public StemPosition getStemPosition() {
         return StemPosition.fromRadians(
-                pivot.getPivotRadians(),
-                wrist.getWristRadians(),
-                telescope.getTelescopeMeters());
+                pivot.getPosition(),
+                wrist.getPosition(),
+                telescope.getPosition());
     }
 
     /**
@@ -187,20 +187,35 @@ public class Stem implements LockFullSubsystem {
      */
     public void stopMechanisms() {
         visualizer.updateSetpoint(getStemPosition());
-        pivot.stopMechanism();
-        telescope.stopMechanism();
-        wrist.stopMechanism();
+        pivot.setVoltageOut(0.0);
+        telescope.setVoltageOut(0.0);
+        wrist.setVoltageOut(0.0);
     }
 
     /**
      * Control each component with voltage control.
      * This is NOT recommended for general use and should only be used to test
      * the mechanisms.
+     * 
+     * @param pivotVolts     The voltage to run the pivot at
+     * @param wristVolts     The voltage to run the wrist at
+     * @param telescopeVolts The voltage to run the telescope at
      */
     public void setStemVolts(double pivotVolts, double wristVolts, double telescopeVolts) {
         pivot.setVoltageOut(pivotVolts);
         wrist.setVoltageOut(wristVolts);
         telescope.setVoltageOut(telescopeVolts);
+    }
+
+    /**
+     * @return An array holding velocity values for [pivot, telescope, wrist]
+     */
+    public double[] getStemVelocities() {
+        return new double[] {
+            pivot.getVelocity(),
+            telescope.getVelocity(),
+            wrist.getVelocity()
+        };
     }
 
     @Override
