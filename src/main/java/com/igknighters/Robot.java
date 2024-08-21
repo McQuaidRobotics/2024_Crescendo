@@ -173,7 +173,10 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
         Tracer.traceFunc("PowerLogger", powerLogger::log);
         Tracer.traceFunc("FilesystemLogger", filesystemLogger::log);
         Tracer.traceFunc("Monologue", Monologue::updateAll);
-        Tracer.traceFunc("AutoManager", autoManager::update);
+        Tracer.traceFunc("Choosers", () -> {
+            autoManager.update();
+            testManager.update();
+        });
         Tracer.endTrace();
     }
 
@@ -207,6 +210,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
     @Override
     public void testInit() {
         CANSignalManager.setCharacterizationMode(true);
+        testManager.getSelectedTestRoutine().schedule();
     }
 
     @Override

@@ -218,6 +218,13 @@ public class Stem implements LockFullSubsystem {
         };
     }
 
+    /**
+     * Homes any of the mechanisms that need homing
+     */
+    public void home() {
+        pivot.home();
+    }
+
     @Override
     public void periodic() {
         Tracer.startTrace("StemPeriodic");

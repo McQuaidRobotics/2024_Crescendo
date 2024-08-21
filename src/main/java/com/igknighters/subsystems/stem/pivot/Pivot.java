@@ -55,6 +55,11 @@ public abstract class Pivot extends Component {
     }
 
     /**
+     * Homes the pivot based on an absolute sensor
+     */
+    public abstract void home();
+
+    /**
      * Move the pivot to the target and returns if it has reached the target.
      * Meant to be used in a kind of polling loop to wait the mechanism to reach
      * the target.

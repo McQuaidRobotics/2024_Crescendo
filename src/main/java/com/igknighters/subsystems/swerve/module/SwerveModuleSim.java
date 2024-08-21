@@ -20,8 +20,8 @@ import com.igknighters.subsystems.swerve.odometryThread.SimSwerveOdometryThread;
 import com.igknighters.util.logging.BootupLogger;
 
 public class SwerveModuleSim extends SwerveModule {
-    private FlywheelSim driveSim = new FlywheelSim(DCMotor.getFalcon500(1), kSwerve.DRIVE_GEAR_RATIO, 0.025);
-    private FlywheelSim angleSim = new FlywheelSim(DCMotor.getFalcon500(1), kSwerve.ANGLE_GEAR_RATIO, 0.004);
+    private final FlywheelSim driveSim = new FlywheelSim(DCMotor.getFalcon500(1), kSwerve.DRIVE_GEAR_RATIO, 0.025);
+    private final FlywheelSim angleSim = new FlywheelSim(DCMotor.getFalcon500(1), kSwerve.ANGLE_GEAR_RATIO, 0.004);
 
     private boolean gotDirectionsLastCycle = false;
 
@@ -36,9 +36,12 @@ public class SwerveModuleSim extends SwerveModule {
             kAngleMotor.kD,
             ConstValues.PERIODIC_TIME);
 
+    private final SwerveModuleConstants moduleConstants;
+
     public final int moduleNumber;
 
     public SwerveModuleSim(final SwerveModuleConstants moduleConstants, SimSwerveOdometryThread odoThread) {
+        this.moduleConstants = moduleConstants;
         this.moduleNumber = moduleConstants.getModuleId().num;
 
         // just to test the consts
@@ -157,5 +160,8 @@ public class SwerveModuleSim extends SwerveModule {
 
     @Override
     public void setVoltageOut(double volts, Rotation2d angle) {
+        super.driveVolts = volts;
+        super.angleAbsoluteRads = angle.getRadians();
+        super.targetAngleAbsoluteRads = angle.getRadians();
     }
 }

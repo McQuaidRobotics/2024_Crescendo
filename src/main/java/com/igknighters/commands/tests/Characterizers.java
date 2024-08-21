@@ -12,7 +12,7 @@ public class Characterizers {
             stem,
             volt -> stem.setStemVolts(volt, 0.0, 0.0),
             () -> stem.getStemVelocities()[0]
-        );
+        ).withName("Pivot Characterization");
     }
 
     public static Command characterizeWrist(Stem stem) {
@@ -20,7 +20,7 @@ public class Characterizers {
             stem,
             volt -> stem.setStemVolts(0.0, volt, 0.0),
             () -> stem.getStemVelocities()[1]
-        );
+        ).withName("Wrist Characterization");
     }
 
     public static Command characterizeTelescope(Stem stem) {
@@ -28,7 +28,7 @@ public class Characterizers {
             stem,
             volt -> stem.setStemVolts(0.0, 0.0, volt),
             () -> stem.getStemVelocities()[2]
-        );
+        ).withName("Telescope Characterization");
     }
 
     public static Command characterizeSwerve(Swerve swerve) {
@@ -36,6 +36,6 @@ public class Characterizers {
             swerve,
             volt -> swerve.setVoltageOut(volt, GeomUtil.ROTATION2D_ZERO),
             () -> swerve.getChassisSpeed().vxMetersPerSecond
-        );
+        ).withName("Swerve Characterization");
     }
 }

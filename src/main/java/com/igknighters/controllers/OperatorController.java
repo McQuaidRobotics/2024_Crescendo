@@ -4,8 +4,8 @@ import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 
 import com.igknighters.subsystems.SubsystemResources.Subsystems;
+import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
-import com.igknighters.util.plumbing.Channels;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 
@@ -75,9 +75,9 @@ public class OperatorController extends ControllerParent {
 
         /// DPAD
         this.DPR.binding = this.DPR.binding = this.DPL.binding = new Binding((trig, allss) -> {
-            trig.onTrue(Commands.runOnce(() -> {
-                    Channels.Sender.broadcast("HomePivot", Boolean.class)
-                            .send(true);
+            Stem stem = allss.stem.get();
+            trig.onTrue(stem.runOnce(() -> {
+                    stem.home();
             }).withName("HomePivot"));
         }, Subsystems.Stem);
 
