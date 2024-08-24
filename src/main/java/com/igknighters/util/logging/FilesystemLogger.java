@@ -76,7 +76,8 @@ public class FilesystemLogger {
                     timer
                 ));
             } catch (FileNotFoundException e) {
-                DriverStation.reportError("[FilesystemLogger] Failed to open file \"" + desc + "\", skipping capture.", true);
+                DriverStation.reportError("[FilesystemLogger] Failed to open file \"" + desc + "\", skipping capture.", false);
+                DriverStation.reportError(e.getMessage(), e.getStackTrace());
                 return Optional.empty();
             }
         };

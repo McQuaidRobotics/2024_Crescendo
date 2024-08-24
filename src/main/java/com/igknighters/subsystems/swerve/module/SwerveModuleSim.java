@@ -36,12 +36,9 @@ public class SwerveModuleSim extends SwerveModule {
             kAngleMotor.kD,
             ConstValues.PERIODIC_TIME);
 
-    private final SwerveModuleConstants moduleConstants;
-
     public final int moduleNumber;
 
     public SwerveModuleSim(final SwerveModuleConstants moduleConstants, SimSwerveOdometryThread odoThread) {
-        this.moduleConstants = moduleConstants;
         this.moduleNumber = moduleConstants.getModuleId().num;
 
         // just to test the consts

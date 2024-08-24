@@ -25,11 +25,6 @@ public class StemPosition implements StructSerializable {
         return new StemPosition(pivotPosRads, wristPosRads, telescopePosMeters);
     }
 
-    public static StemPosition fromRotations(double pivotPosRot, double wristPosRot, double telescopePosMeters) {
-        return new StemPosition(Math.toRadians(pivotPosRot * 360.0), Math.toRadians(wristPosRot * 360.0),
-                telescopePosMeters);
-    }
-
     public double getPivotRads() {
         return pivotRads;
     }

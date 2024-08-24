@@ -104,42 +104,46 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
     }
 
     private void run() {
-        Threads.setCurrentThreadPriority(true, 1);
+        isRunning.set(true);
+        try {
+            Threads.setCurrentThreadPriority(true, 1);
 
-        while (this.isRunning.get()) {
-            long startTime = RobotController.getFPGATime();
-            BaseStatusSignal.waitForAll(2.0 / hz, signals);
-            long elapsedTime = RobotController.getFPGATime() - startTime;
+            while (this.isRunning.get()) {
+                long startTime = RobotController.getFPGATime();
+                BaseStatusSignal.waitForAll(2.0 / hz, signals);
+                long elapsedTime = RobotController.getFPGATime() - startTime;
 
-            updateTimeMicros.set(
-                (long) lowPass.calculate(
-                    peakRemover.calculate(
-                        elapsedTime
+                updateTimeMicros.set(
+                    (long) lowPass.calculate(
+                        peakRemover.calculate(
+                            elapsedTime
+                        )
                     )
-                )
-            );
+                );
 
-            for (int i = 0; i < MODULE_COUNT; i++) {
-                int positionOffset = 4 * i;
-                int veloOffset = positionOffset + 1;
+                for (int i = 0; i < MODULE_COUNT; i++) {
+                    int positionOffset = 4 * i;
+                    int veloOffset = positionOffset + 1;
 
-                moduleStates[i * 2].set(Double.doubleToLongBits(signals[positionOffset].getValueAsDouble()));
-                moduleStates[(i * 2) + 1].set(Double.doubleToLongBits(signals[veloOffset].getValueAsDouble()));
+                    moduleStates[i * 2].set(Double.doubleToLongBits(signals[positionOffset].getValueAsDouble()));
+                    moduleStates[(i * 2) + 1].set(Double.doubleToLongBits(signals[veloOffset].getValueAsDouble()));
+                }
+
+                swerveDataSender.send(
+                    new SwerveDriveSample(
+                        new SwerveDriveWheelPositions(getModulePositions()),
+                        getGyroRotation(),
+                        MathSharedStore.getTimestamp()
+                    )
+                );
             }
-
-            swerveDataSender.send(
-                new SwerveDriveSample(
-                    new SwerveDriveWheelPositions(getModulePositions()),
-                    getGyroRotation(),
-                    MathSharedStore.getTimestamp()
-                )
-            );
+        } finally {
+            isRunning.set(false);
         }
     }
 
     @Override
     public void start() {
-        isRunning.set(true);
         thread.start();
     }
 

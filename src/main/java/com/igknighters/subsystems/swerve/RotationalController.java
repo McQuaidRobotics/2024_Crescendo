@@ -10,19 +10,22 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 public class RotationalController {
     private double positionError = 0, prevError = 0, velocityError = 0;
 
-    private TrapezoidProfile profile = new TrapezoidProfile(
+    private final TrapezoidProfile profile = new TrapezoidProfile(
             new TrapezoidProfile.Constraints(
                     kSwerve.MAX_ANGULAR_VELOCITY * kRotationController.CONSTRAINT_SCALAR,
                     kSwerve.MAX_ANGULAR_ACCELERATION * kRotationController.CONSTRAINT_SCALAR));
     private TrapezoidProfile.State goalState = new TrapezoidProfile.State();
     private TrapezoidProfile.State setpointState = new TrapezoidProfile.State();
 
+    // OBJ_COUNT: 4
     public double calculate(double measurement, double target, double deadband) {
         if (Math.abs(measurement - target) < deadband) {
             return 0.0;
         }
 
-        goalState = new TrapezoidProfile.State(target, 0.0);
+        // set fields individually to prevent new object
+        goalState.position = target;
+        goalState.velocity = 0.0;
 
         double goalMinDistance = MathUtil.angleModulus(goalState.position - measurement);
         double setpointMinDistance = MathUtil.angleModulus(setpointState.position - measurement);

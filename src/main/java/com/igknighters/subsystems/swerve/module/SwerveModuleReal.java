@@ -2,7 +2,6 @@ package com.igknighters.subsystems.swerve.module;
 
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
-import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -184,11 +183,7 @@ public class SwerveModuleReal extends SwerveModule {
         } else {
             double rps = (desiredState.speedMetersPerSecond / kSwerve.WHEEL_CIRCUMFERENCE) * kSwerve.DRIVE_GEAR_RATIO;
             log("DriveRPS", rps);
-            if (isPro) {
-                driveMotor.setControl(((VelocityTorqueCurrentFOC) driveMotorClosedReq).withVelocity(rps));
-            } else {
-                driveMotor.setControl(((VelocityVoltage) driveMotorClosedReq).withVelocity(rps));
-            }
+            driveMotor.setControl(((VelocityVoltage) driveMotorClosedReq).withVelocity(rps));
         }
     }
 
