@@ -113,10 +113,11 @@ public class Tracer {
             }
         }
         trace.add(name);
-        var data = traceStartTimes.get(traceStack());
+        var stack = traceStack();
+        var data = traceStartTimes.get(stack);
         if (data == null) {
             data = new TraceStartData();
-            traceStartTimes.put(traceStack(), data);
+            traceStartTimes.put(stack, data);
         }
         data.set(Timer.getFPGATimestamp() * 1_000.0, totalGCTime());
     }

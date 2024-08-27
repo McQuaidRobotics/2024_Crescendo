@@ -13,7 +13,7 @@ import monologue.Monologue;
 public class RobotConfig {
 
     public enum RobotID {
-        CRASH(Subsystems.list(Subsystems.Stem, Subsystems.Umbrella, Subsystems.Vision), RobotConstID.CRASH),
+        CRASH(Subsystems.all(), RobotConstID.CRASH),
 
         BURN(Subsystems.list(Subsystems.Swerve),
                 RobotConstID.BURN),

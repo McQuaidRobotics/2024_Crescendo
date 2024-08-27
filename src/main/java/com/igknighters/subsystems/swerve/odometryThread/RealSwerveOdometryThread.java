@@ -34,6 +34,9 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
         super(hz);
         this.thread = new Thread(this::run, "OdometryThread");
         this.driveRotsToMeters = driveRotsToMeters;
+        for (int i = 0; i < MODULE_COUNT * 2; i++) {
+            moduleStates[i] = new AtomicLong();
+        }
     }
 
     public void addModuleStatusSignals(
