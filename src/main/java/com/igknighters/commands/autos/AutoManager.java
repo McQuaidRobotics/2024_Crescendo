@@ -51,7 +51,9 @@ public class AutoManager {
 
         if (Robot.isSimulation()) {
             new Trigger(DriverStation::isAutonomousEnabled).onTrue(
-                Commands.waitSeconds(15.3).andThen(() -> DriverStationSim.setEnabled(false))
+                Commands.waitSeconds(15.3)
+                .andThen(() -> DriverStationSim.setEnabled(false))
+                .withName("Simulated Auto Ender")
             );
         }
     }
