@@ -23,7 +23,7 @@ public class Localizer {
     private final Receiver<VisionPoseEstimate> visionDataReceiver = Receiver.buffered(kChannels.VISION, 32, VisionPoseEstimate.class);
     private final Receiver<SwerveDriveSample> swerveDataReveiver = Receiver.buffered(kChannels.SWERVE_ODO_SAMPLES, 32, SwerveDriveSample.class);
 
-    private final SwerveDrivePoseEstimator hybridPoseEstimator;
+    private final SwerveDrivePoseEstimator poseEstimator;
 
     private final Matrix<N3, N1> visionStdDevs = VecBuilder.fill(0, 0, 1.0);
 
@@ -37,7 +37,7 @@ public class Localizer {
             new SwerveModulePosition()
         };
 
-        hybridPoseEstimator = new SwerveDrivePoseEstimator(
+        poseEstimator = new SwerveDrivePoseEstimator(
             kSwerve.SWERVE_KINEMATICS,
             GeomUtil.ROTATION2D_ZERO,
             defaultModulePositions,
@@ -49,29 +49,27 @@ public class Localizer {
 
     public void resetOdometry(Pose2d pose, SwerveModulePosition[] modulePositions) {
         Rotation2d gyroAngle = pose.getRotation();
-        hybridPoseEstimator.resetPosition(gyroAngle, modulePositions, pose);
+        poseEstimator.resetPosition(gyroAngle, modulePositions, pose);
     }
 
     public void update() {
         while (swerveDataReveiver.hasData()) {
             var sample = swerveDataReveiver.recv();
-            hybridPoseEstimator.updateWithTime(sample.timestamp(), sample.gyroYaw(), sample.modulePositions());
+            poseEstimator.updateWithTime(sample.timestamp(), sample.gyroYaw(), sample.modulePositions());
         }
         while (visionDataReceiver.hasData()) {
             var sample = visionDataReceiver.recv();
             visionStdDevs.set(0, 0, sample.trust());
             visionStdDevs.set(1, 0, sample.trust());
-            hybridPoseEstimator.addVisionMeasurement(
+            poseEstimator.addVisionMeasurement(
                 sample.pose().toPose2d(),
                 sample.timestamp(),
                 visionStdDevs
             );
         }
 
-        latestPose = hybridPoseEstimator.getEstimatedPosition();
+        latestPose = poseEstimator.getEstimatedPosition();
         positionSender.send(latestPose);
-        // visionPositionSender.send(visionOnlyEstimator.getEstimatedPosition());
-        // swervePositionSender.send(swerveOnlyEstimator.getPoseMeters());
     }
 
     public Pose2d pose() {

@@ -5,6 +5,7 @@ import java.util.function.DoubleFunction;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.igknighters.constants.ConstValues;
 
 import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.filter.LinearFilter;
@@ -12,6 +13,7 @@ import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
 
@@ -25,6 +27,9 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
 
     /** An array that holds [module1Pos, module1Velo, module2Pos, ...] */
     protected final AtomicLong[] moduleStates = new AtomicLong[MODULE_COUNT * 2];
+    protected final AtomicLong[] gyroStates = new AtomicLong[2];
+
+    protected boolean enableLatencyCompensation = true;
 
     private double getAtomicDouble(AtomicLong[] array, int index) {
         return Double.longBitsToDouble(array[index].get());
@@ -37,6 +42,17 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
         for (int i = 0; i < MODULE_COUNT * 2; i++) {
             moduleStates[i] = new AtomicLong();
         }
+    }
+
+    private static double latencyCompensatedValue(BaseStatusSignal signal, BaseStatusSignal signalSlope) {
+        final double maxLatencySeconds = ConstValues.PERIODIC_TIME * 5;
+        final double nonCompensatedSignal = signal.getValueAsDouble();
+        final double changeInSignal = signalSlope.getValueAsDouble();
+        double latency = signal.getTimestamp().getLatency();
+        if (maxLatencySeconds > 0.0 && latency > maxLatencySeconds) {
+            latency = maxLatencySeconds;
+        }
+        return nonCompensatedSignal + (changeInSignal * latency);
     }
 
     public void addModuleStatusSignals(
@@ -73,36 +89,40 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
         signals[signals.length - 1] = yawRate;
     }
 
-    @SuppressWarnings("unchecked")
     private SwerveModulePosition[] getModulePositions() {
         SwerveModulePosition[] positions = new SwerveModulePosition[MODULE_COUNT];
         for (int i = 0; i < MODULE_COUNT; i++) {
             int offset = 4 * i;
             positions[i] = new SwerveModulePosition(
                 driveRotsToMeters.apply(
-                    BaseStatusSignal.getLatencyCompensatedValue(
-                        (StatusSignal<Double>) signals[offset + 0],
-                        (StatusSignal<Double>) signals[offset + 1]
+                    enableLatencyCompensation
+                    ? latencyCompensatedValue(
+                        signals[offset + 0],
+                        signals[offset + 1]
                     )
+                    : signals[offset + 0].getValueAsDouble()
                 ),
                 Rotation2d.fromRotations(
-                    BaseStatusSignal.getLatencyCompensatedValue(
-                        (StatusSignal<Double>) signals[offset + 2],
-                        (StatusSignal<Double>) signals[offset + 3]
+                    enableLatencyCompensation
+                    ? latencyCompensatedValue(
+                        signals[offset + 2],
+                        signals[offset + 3]
                     )
+                    : signals[offset + 2].getValueAsDouble()
                 )
             );
         }
         return positions;
     }
 
-    @SuppressWarnings("unchecked")
     private Rotation2d getGyroRotation() {
         return Rotation2d.fromRotations(
-            BaseStatusSignal.getLatencyCompensatedValue(
-                (StatusSignal<Double>) signals[signals.length - 2],
-                (StatusSignal<Double>) signals[signals.length - 1]
+            enableLatencyCompensation
+            ? latencyCompensatedValue(
+                signals[signals.length - 2],
+                signals[signals.length - 1]
             )
+            : signals[signals.length - 2].getValueAsDouble()
         );
     }
 
@@ -132,6 +152,9 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
                     moduleStates[(i * 2) + 1].set(Double.doubleToLongBits(signals[veloOffset].getValueAsDouble()));
                 }
 
+                gyroStates[0].set(Double.doubleToLongBits(Units.degreesToRadians(signals[signals.length - 2].getValueAsDouble())));
+                gyroStates[1].set(Double.doubleToLongBits(Units.degreesToRadians(signals[signals.length - 1].getValueAsDouble())));
+
                 swerveDataSender.send(
                     new SwerveDriveSample(
                         new SwerveDriveWheelPositions(getModulePositions()),
@@ -156,5 +179,13 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
 
     public double getModuleVelocity(int moduleId) {
         return getAtomicDouble(moduleStates, (moduleId * 2) + 1);
+    }
+
+    public double getGyroYaw() {
+        return getAtomicDouble(gyroStates, 0);
+    }
+
+    public double getGyroYawRate() {
+        return getAtomicDouble(gyroStates, 1);
     }
 }
