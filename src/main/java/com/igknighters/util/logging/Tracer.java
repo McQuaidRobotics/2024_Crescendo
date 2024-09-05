@@ -49,7 +49,8 @@ public class Tracer {
         }
     }
 
-    private static final ArrayList<String> trace = new ArrayList<>();
+    private static final ArrayList<String> traceStack = new ArrayList<>();
+    private static final ArrayList<String> traceStackHistory = new ArrayList<>();
     private static final HashMap<String, Double> traceTimes = new HashMap<>();
     private static final HashMap<String, TraceStartData> traceStartTimes = new HashMap<>();
     private static final NetworkTable rootTable = NetworkTableInstance.getDefault().getTable("Tracer");
@@ -62,13 +63,23 @@ public class Tracer {
     private static boolean threadValidation = false;
     private static long tracedThread = 0;
 
-    private static String traceStack() {
+    private static String appendTraceStack(String trace) {
+        traceStack.add(trace);
         StringBuilder sb = new StringBuilder();
-        for (String s : trace) {
-            sb.append(s);
-            sb.append("/");
+        for (int i = 0; i < traceStack.size(); i++) {
+            sb.append(traceStack.get(i));
+            if (i < traceStack.size() - 1) {
+                sb.append("/");
+            }
         }
-        return sb.toString().substring(0, sb.length() - 1);
+        String str = sb.toString();
+        traceStackHistory.add(str);
+        return str;
+    }
+
+    private static String popTraceStack() {
+        traceStack.remove(traceStack.size() - 1);
+        return traceStackHistory.remove(traceStackHistory.size() - 1);
     }
 
     private static double totalGCTime() {
@@ -112,9 +123,8 @@ public class Tracer {
                 DriverStation.reportError("[Tracer] Tracer is being used by multiple threads", true);
             }
         }
-        trace.add(name);
-        var stack = traceStack();
-        var data = traceStartTimes.get(stack);
+        String stack = appendTraceStack(name);
+        TraceStartData data = traceStartTimes.get(stack);
         if (data == null) {
             data = new TraceStartData();
             traceStartTimes.put(stack, data);
@@ -130,17 +140,17 @@ public class Tracer {
      */
     public static void endTrace() {
         try {
-            var startData = traceStartTimes.get(traceStack());
+            String stack = popTraceStack();
+            var startData = traceStartTimes.get(stack);
             double gcTimeSinceStart = totalGCTime() - startData.startGCTotalTime;
             gcTimeThisCycle.addAndGet((long) gcTimeSinceStart);
             traceTimes.put(
-                traceStack(),
+                stack,
                 Timer.getFPGATimestamp() * 1_000.0
                 - startData.startTime
                 - gcTimeSinceStart
             );
-            trace.remove(trace.size() - 1);
-            if (trace.size() == 0) {
+            if (traceStack.size() == 0) {
                 endCycle();
             }
         } catch (Exception e) {
@@ -205,6 +215,7 @@ public class Tracer {
             entry.setDouble(trace.getValue());
         }
         traceTimes.clear();
+        traceStackHistory.clear();
         gcTimeEntry.set(gcTimeThisCycle.getAndSet(0));
     }
 }
