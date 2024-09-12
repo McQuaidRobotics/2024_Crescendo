@@ -44,7 +44,8 @@ public class PivotReal extends Pivot {
     private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
     private final MotionMagicVoltage controlReqMotionMagic = new MotionMagicVoltage(0.0).withUpdateFreqHz(0);
 
-    private boolean homed = false;
+    private boolean homedThisCycle = false;
+    private boolean hasBeenEnabled = false;
 
     private double mechRadiansToMotorRots(Double mechRads) {
         return Units.radiansToRotations(Math.PI - mechRads) * kPivot.MOTOR_TO_MECHANISM_RATIO;
@@ -150,7 +151,7 @@ public class PivotReal extends Pivot {
     public void home() {
         leaderMotor.setPosition(mechRadiansToMotorRots(getPivotRadiansPigeon()), 0.01);
         super.radians = getPivotRadiansPigeon();
-        homed = true;
+        homedThisCycle = true;
     }
 
     @Override
@@ -198,16 +199,20 @@ public class PivotReal extends Pivot {
         super.gyroRadiansPerSecondAbs = Math.abs(super.gyroRadians - newGyroRadians) / ConstValues.PERIODIC_TIME;
         super.gyroRadians = newGyroRadians;
 
+        if (DriverStation.isEnabled()) {
+            hasBeenEnabled = true;
+        }
+
         if (Math.abs(super.radiansPerSecond) < 0.01
                 && Math.abs(super.gyroRadiansPerSecondAbs) < 0.01
-                && Units.radiansToDegrees(super.gyroRadians) > 20.0
+                && (Units.radiansToDegrees(super.gyroRadians) > 20.0 || !hasBeenEnabled)
                 && DriverStation.isDisabled()
         ) {
             home();
         }
 
-        log("SeededPivot", homed);
-        homed = false;
+        log("SeededPivot", homedThisCycle);
+        homedThisCycle = false;
     }
 
 }
