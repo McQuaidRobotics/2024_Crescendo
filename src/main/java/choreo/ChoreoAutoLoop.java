@@ -6,6 +6,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.function.BooleanSupplier;
+
+import choreo.ext.TriggerExt;
+
 import java.util.ArrayList;
 
 /**
@@ -44,9 +47,9 @@ public class ChoreoAutoLoop {
    *
    * @return A {@link Trigger} that is true while this autonomous loop is being polled.
    */
-  public Trigger enabled() {
+  public TriggerExt enabled() {
     // TODO: Maybe add a warning if this is called while `hasBeenPolled` is already true
-    return new Trigger(loop, () -> isActive).and(DriverStation::isAutonomousEnabled);
+    return TriggerExt.from(new Trigger(loop, () -> isActive).and(DriverStation::isAutonomousEnabled));
   }
 
   /** Polls the loop. Should be called in the autonomous periodic method. */

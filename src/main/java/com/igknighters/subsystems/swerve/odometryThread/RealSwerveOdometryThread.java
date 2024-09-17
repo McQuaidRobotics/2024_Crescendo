@@ -42,6 +42,8 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
         for (int i = 0; i < MODULE_COUNT * 2; i++) {
             moduleStates[i] = new AtomicLong();
         }
+        gyroStates[0] = new AtomicLong();
+        gyroStates[1] = new AtomicLong();
     }
 
     private static double latencyCompensatedValue(BaseStatusSignal signal, BaseStatusSignal signalSlope) {

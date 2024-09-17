@@ -4,13 +4,12 @@ import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
@@ -49,60 +48,130 @@ public class Tracer {
         }
     }
 
-    private static final ArrayList<String> traceStack = new ArrayList<>();
-    private static final ArrayList<String> traceStackHistory = new ArrayList<>();
-    private static final HashMap<String, Double> traceTimes = new HashMap<>();
-    private static final HashMap<String, TraceStartData> traceStartTimes = new HashMap<>();
-    private static final NetworkTable rootTable = NetworkTableInstance.getDefault().getTable("Tracer");
-    private static final HashMap<String, NetworkTableEntry> entryHeap = new HashMap<>();
-
-    private static final List<GarbageCollectorMXBean> gcs = ManagementFactory.getGarbageCollectorMXBeans();
-    private static final AtomicLong gcTimeThisCycle = new AtomicLong();
-    private static final DoublePublisher gcTimeEntry = rootTable.getDoubleTopic("GCTime").publish();
-
-    private static boolean threadValidation = false;
-    private static long tracedThread = 0;
-
-    private static String appendTraceStack(String trace) {
-        traceStack.add(trace);
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < traceStack.size(); i++) {
-            sb.append(traceStack.get(i));
-            if (i < traceStack.size() - 1) {
-                sb.append("/");
-            }
-        }
-        String str = sb.toString();
-        traceStackHistory.add(str);
-        return str;
-    }
-
-    private static String popTraceStack() {
-        traceStack.remove(traceStack.size() - 1);
-        return traceStackHistory.remove(traceStackHistory.size() - 1);
-    }
-
-    private static double totalGCTime() {
-        double gcTime = 0;
-        for (GarbageCollectorMXBean gc : gcs) {
-            gcTime += gc.getCollectionTime();
-        }
-        return gcTime;
-    }
-
     /**
-     * Enables thread validation on {@link Tracer#startTrace(String)}
-     * and functions that use that like {@link Tracer#traceFunc(String, Runnable)}.
-     * 
-     * Thread validation will check if the thread that called the first {@link Tracer#startTrace(String)}
-     * is the same thread that calls are further {@link Tracer#startTrace(String)}.
-     * 
-     * If not the same thread, a {@link DriverStation#reportError(String, boolean)} will be called with the message.
-     * 
-     * This is not on by default due to the performance overhead this introduces.
+     * All of the tracers persistent state in a single object to be stored in a
+     * {@link ThreadLocal}.
      */
-    public static void enableThreadValidation() {
-        threadValidation = true;
+    private static final class TracerState {
+        private final NetworkTable rootTable;
+
+        // the stack of traces, every startTrace will add to this stack
+        // and every endTrace will remove from this stack
+        private final ArrayList<String> traceStack = new ArrayList<>();
+        // ideally we only need `traceStack` but in the interest of memory optimization
+        // and string concatenation speed we store the history of the stack to reuse the stack names
+        private final ArrayList<String> traceStackHistory = new ArrayList<>();
+        // the time of each trace, the key is the trace name, modified every endTrace
+        private final HashMap<String, Double> traceTimes = new HashMap<>();
+        // the start time of each trace and the gc time at the start of the trace,
+        // the key is the trace name, modified every startTrace and endTrace.
+        private final HashMap<String, TraceStartData> traceStartTimes = new HashMap<>();
+        // the publishers for each trace, the key is the trace name, modified every endCycle
+        private final HashMap<String, DoublePublisher> publisherHeap = new HashMap<>();
+
+        // the garbage collector beans
+        private final ArrayList<GarbageCollectorMXBean> gcs = new ArrayList<>(ManagementFactory.getGarbageCollectorMXBeans());
+        private final DoublePublisher gcTimeEntry;
+        private double gcTimeThisCycle = 0.0;
+
+        private TracerState(String threadName) {
+            this.rootTable = NetworkTableInstance.getDefault().getTable("Tracer").getSubTable(threadName);
+            this.gcTimeEntry = rootTable.getDoubleTopic("GCTime").publishEx(
+                "double",
+                "{ \"cached\": false}"
+            );
+        }
+
+        private String appendTraceStack(String trace) {
+            traceStack.add(trace);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < traceStack.size(); i++) {
+                sb.append(traceStack.get(i));
+                if (i < traceStack.size() - 1) {
+                    sb.append("/");
+                }
+            }
+            String str = sb.toString();
+            traceStackHistory.add(str);
+            return str;
+        }
+
+        private String popTraceStack() {
+            traceStack.remove(traceStack.size() - 1);
+            return traceStackHistory.remove(traceStackHistory.size() - 1);
+        }
+
+        private double totalGCTime() {
+            double gcTime = 0;
+            for (GarbageCollectorMXBean gc : gcs) {
+                gcTime += gc.getCollectionTime();
+            }
+            return gcTime;
+        }
+
+        private void endCycle() {
+            // update times for all already existing publishers
+            for (var publisher : publisherHeap.entrySet()) {
+                Double time = traceTimes.remove(publisher.getKey());
+                if (time == null) time = 0.0;
+                publisher.getValue().set(time);
+            }
+            // create publishers for all new entries
+            for (var traceTime : traceTimes.entrySet()) {
+                DoublePublisher publisher = rootTable.getDoubleTopic(traceTime.getKey()).publishEx(
+                    "double",
+                    "{ \"cached\": false}"
+                );
+                publisher.set(traceTime.getValue());
+                publisherHeap.put(traceTime.getKey(), publisher);
+            }
+
+            // log gc time
+            if (gcs.size() > 0) gcTimeEntry.set(gcTimeThisCycle);
+            gcTimeThisCycle = 0.0;
+
+            // clean up state
+            traceTimes.clear();
+            traceStackHistory.clear();
+        }
+    }
+
+    private static final ThreadLocal<TracerState> threadLocalState = ThreadLocal.withInitial(() -> {
+        return new TracerState(Thread.currentThread().getName());
+    });
+
+    private static void startTraceInner(final String name, final TracerState state) {
+        String stack = state.appendTraceStack(name);
+        TraceStartData data = state.traceStartTimes.get(stack);
+        if (data == null) {
+            data = new TraceStartData();
+            state.traceStartTimes.put(stack, data);
+        }
+        data.set(Timer.getFPGATimestamp() * 1_000.0, state.totalGCTime());
+    }
+
+    private static void endTraceInner(final TracerState state) {
+        try {
+            String stack = state.popTraceStack();
+            var startData = state.traceStartTimes.get(stack);
+            double gcTimeSinceStart = state.totalGCTime() - startData.startGCTotalTime;
+            state.gcTimeThisCycle += gcTimeSinceStart;
+            state.traceTimes.put(
+                stack,
+                Timer.getFPGATimestamp() * 1_000.0
+                - startData.startTime
+                - gcTimeSinceStart
+            );
+            if (state.traceStack.size() == 0) {
+                state.endCycle();
+            }
+        } catch (Exception e) {
+            DriverStation.reportError("[Tracer] An end trace was called with no opening trace " + e, true);
+            for (var trace : state.traceStack) {
+                DriverStation.reportError("[Tracer] Open trace: " + trace, false);
+            }
+            state.endCycle();
+        }
     }
 
     /**
@@ -116,20 +185,7 @@ public class Tracer {
      * @param name the name of the trace, should be unique to the function.
      */
     public static void startTrace(String name) {
-        if (threadValidation) {
-            if (tracedThread == 0) {
-                tracedThread = Thread.currentThread().getId();
-            } else if (tracedThread != Thread.currentThread().getId()) {
-                DriverStation.reportError("[Tracer] Tracer is being used by multiple threads", true);
-            }
-        }
-        String stack = appendTraceStack(name);
-        TraceStartData data = traceStartTimes.get(stack);
-        if (data == null) {
-            data = new TraceStartData();
-            traceStartTimes.put(stack, data);
-        }
-        data.set(Timer.getFPGATimestamp() * 1_000.0, totalGCTime());
+        startTraceInner(name, threadLocalState.get());
     }
 
     /**
@@ -139,23 +195,17 @@ public class Tracer {
      * {@link Tracer#endTrace()} there could be a crash.
      */
     public static void endTrace() {
-        try {
-            String stack = popTraceStack();
-            var startData = traceStartTimes.get(stack);
-            double gcTimeSinceStart = totalGCTime() - startData.startGCTotalTime;
-            gcTimeThisCycle.addAndGet((long) gcTimeSinceStart);
-            traceTimes.put(
-                stack,
-                Timer.getFPGATimestamp() * 1_000.0
-                - startData.startTime
-                - gcTimeSinceStart
-            );
-            if (traceStack.size() == 0) {
-                endCycle();
-            }
-        } catch (Exception e) {
-            DriverStation.reportError("[Tracer] An end trace was called with no opening trace " + e, true);
-        }
+        endTraceInner(threadLocalState.get());
+    }
+
+    /**
+     * Disables garbage collection logging for the current thread.
+     * This can help performance in some cases.
+     */
+    public static void disableGcLoggingForCurrentThread() {
+        TracerState state = threadLocalState.get();
+        state.gcTimeEntry.close();
+        state.gcs.clear();
     }
 
     /**
@@ -171,9 +221,10 @@ public class Tracer {
      *          {@link Tracer#traceFunc(String, Supplier)}.
      */
     public static void traceFunc(String name, Runnable runnable) {
-        startTrace(name);
+        final TracerState state = threadLocalState.get();
+        startTraceInner(name, state);
         runnable.run();
-        endTrace();
+        endTraceInner(state);
     }
 
     /**
@@ -185,37 +236,27 @@ public class Tracer {
      * @param name     the name of the trace, should be unique to the function.
      * @param supplier the function to trace.
      */
-    public static <T> T traceFunc(String name, Supplier<T> supplier) {
-        startTrace(name);
-        T ret = supplier.get();
-        endTrace();
+    public static <R> R traceFunc(String name, Supplier<R> supplier) {
+        final TracerState state = threadLocalState.get();
+        startTraceInner(name, state);
+        R ret = supplier.get();
+        endTraceInner(state);
         return ret;
     }
 
-    private static void endCycle() {
-        var keys = new ArrayList<String>();
-        entryHeap
-                .entrySet()
-                .stream()
-                .filter(mapEntry -> !traceTimes.containsKey(mapEntry.getKey()))
-                .forEach(mapEntry -> {
-                    keys.add(mapEntry.getKey());
-                    mapEntry.getValue().unpublish();
-                });
-        keys.forEach(key -> entryHeap.remove(key));
+    public static <R, A> R traceFunc(String name, Function<A, R> function, A arg) {
+        final TracerState state = threadLocalState.get();
+        startTraceInner(name, state);
+        R ret = function.apply(arg);
+        endTraceInner(state);
+        return ret;
+    }
 
-        for (var trace : traceTimes.entrySet()) {
-            NetworkTableEntry entry;
-            if (!entryHeap.containsKey(trace.getKey())) {
-                entry = rootTable.getEntry(trace.getKey());
-                entryHeap.put(trace.getKey(), entry);
-            } else {
-                entry = entryHeap.get(trace.getKey());
-            }
-            entry.setDouble(trace.getValue());
-        }
-        traceTimes.clear();
-        traceStackHistory.clear();
-        gcTimeEntry.set(gcTimeThisCycle.getAndSet(0));
+    public static <R, A, B> R traceFunc(String name, BiFunction<A, B, R> function, A arg1, B arg2) {
+        final TracerState state = threadLocalState.get();
+        startTraceInner(name, state);
+        R ret = function.apply(arg1, arg2);
+        endTraceInner(state);
+        return ret;
     }
 }

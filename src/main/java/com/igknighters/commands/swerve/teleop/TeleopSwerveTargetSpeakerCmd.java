@@ -18,6 +18,7 @@ import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.controllers.ControllerParent;
 
 public class TeleopSwerveTargetSpeakerCmd extends TeleopSwerveBaseCmd {
+    private final static Translation2d SPEAKER = FieldConstants.SPEAKER.toTranslation2d();
 
     private final Localizer localizer;
     private final TunableDouble lookaheadTime = TunableValues.getDouble("AutoAimLookaheadTime", 0.2);
@@ -36,12 +37,7 @@ public class TeleopSwerveTargetSpeakerCmd extends TeleopSwerveBaseCmd {
 
     @Override
     public void execute() {
-        Translation2d speaker = FieldConstants.SPEAKER.toTranslation2d();
-        Translation2d targetTranslation = AllianceFlip.isBlue() ? speaker : AllianceFlip.flipTranslation(speaker);
-
-        // GlobalState.modifyField2d(field -> {
-        //     field.getObject("target").setPose(new Pose2d(targetTranslation, new Rotation2d()));
-        // });
+        Translation2d targetTranslation = AllianceFlip.isBlue() ? SPEAKER : AllianceFlip.flipTranslation(SPEAKER);
 
         Translation2d vt = orientForUser(new Translation2d(
                 getTranslationX() * kSwerve.MAX_DRIVE_VELOCITY * speedMult.value(),
@@ -67,10 +63,6 @@ public class TeleopSwerveTargetSpeakerCmd extends TeleopSwerveBaseCmd {
                 targetTranslation.getX() - (avgChassisSpeeds.vxMetersPerSecond * (distance / noteVelo)),
                 targetTranslation.getY() - (avgChassisSpeeds.vyMetersPerSecond * (distance / noteVelo)));
 
-        // GlobalState.modifyField2d(field -> {
-        //     field.getObject("adjustedTarget").setPose(new Pose2d(adjustedTarget, GeomUtil.ROTATION2D_ZERO));
-        // });
-
         double lookaheadTimeValue = lookaheadTime.value();
         Translation2d lookaheadTranslation = localizer.pose().getTranslation()
             .minus(new Translation2d(
@@ -85,22 +77,9 @@ public class TeleopSwerveTargetSpeakerCmd extends TeleopSwerveBaseCmd {
 
         double rotVelo = swerve.rotVeloForRotation(targetAngle, Units.degreesToRadians(0.3));
 
-        // GlobalState.modifyField2d(field -> {
-        //     field.getObject("lookaheadRobot").setPose(new Pose2d(lookaheadTranslation, targetAngle));
-        // });
-
         desiredChassisSpeeds.omegaRadiansPerSecond = rotVelo;
 
         swerve.drive(desiredChassisSpeeds, false);
-    }
-
-    @Override
-    public void end(boolean interrupted) {
-        // GlobalState.modifyField2d(field -> {
-        //     field.getObject("lookaheadRobot").setPoses();
-        //     field.getObject("target").setPoses();
-        //     field.getObject("adjustedTarget").setPoses();
-        // });
     }
 
     public static final TeleopSwerveBaseStruct struct = new TeleopSwerveBaseStruct();

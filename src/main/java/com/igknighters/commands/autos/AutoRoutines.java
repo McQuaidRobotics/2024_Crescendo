@@ -80,6 +80,8 @@ public class AutoRoutines extends AutoCommands {
             ).withName("FivePieceAmpSideEntry")
         );
 
+        loop.enabled().whileTrueDefault(spinnupShooter());
+
         // picking up first note and shooting if we have a note
         ampToC1.done().onTrueWith(
             gamepiece(loop),

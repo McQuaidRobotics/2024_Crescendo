@@ -11,6 +11,7 @@ import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.stem.StemSolvers.AimSolveStrategy;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
+import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
 import com.igknighters.subsystems.vision.Vision;
 
 import choreo.ChoreoAutoTrajectory;
@@ -153,6 +154,13 @@ public class AutoCommands {
         return loggedCmd(
             UmbrellaCommands.runIntakeAndShooter(umbrella, kControls.AUTO_SHOOTER_RPM)
                 .withTimeout(0.15).withName("FeedShooter")
+        );
+    }
+
+    protected Command spinnupShooter() {
+        return loggedCmd(
+            UmbrellaCommands.spinupShooter(umbrella, kControls.AUTO_SHOOTER_RPM, ShooterSpinupReason.Idle)
+                .withName("Spinnupshooter")
         );
     }
 

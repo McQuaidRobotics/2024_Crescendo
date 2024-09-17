@@ -81,20 +81,6 @@ public class Vision implements LockFreeSubsystem {
 
             Pose2d localPose = getLocalizedPose();
 
-            // if (cameraPositionFieldVisualizer.get(false)) {
-            //     log(
-            //             camera.getName() + "/3d",
-            //             localPose.plus(
-            //                     camera.getRobotToCameraTransform3d()));
-            //     GlobalState.modifyField2d(field -> {
-            //         Transform2d tf = new Transform2d(
-            //                 camera.getRobotToCameraTransform3d().getTranslation().toTranslation2d(),
-            //                 camera.getRobotToCameraTransform3d().getRotation().toRotation2d());
-            //         field.getObject(camera.getName()).setPose(
-            //                 field.getRobotPose().plus(tf));
-            //     });
-            // }
-
             Optional<VisionPoseEstimate> optEval = camera.evalPose();
 
             if (!optEval.isPresent() || camera.getFaults().isFaulty()) {

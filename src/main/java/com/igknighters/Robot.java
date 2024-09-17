@@ -106,8 +106,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
         if (allSubsystems.umbrella.isPresent()) {
             final Umbrella umbrella = allSubsystems.umbrella.get();
-            umbrella.setDefaultCommand(
-                    UmbrellaCommands.idleShooter(umbrella));
+            umbrella.setDefaultCommand(UmbrellaCommands.idleShooter(umbrella));
 
             umbrella.setupSimNoteDetection(localizer);
         }
@@ -164,7 +163,6 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
     @Override
     public void robotPeriodic() {
-        Tracer.startTrace("RobotPeriodic");
         Tracer.traceFunc("CANSignalRefresh", CANSignalManager::refreshSignals);
         Tracer.traceFunc("Localizer", localizer::update);
         Tracer.traceFunc("CommandScheduler", scheduler::run);
@@ -177,7 +175,6 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
             autoManager.update();
             testManager.update();
         });
-        Tracer.endTrace();
     }
 
     @Override
@@ -255,9 +252,9 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
         Monologue.sendNetworkToFile("/Tracer");
         Monologue.sendNetworkToFile("/PowerDistribution");
 
-        filesystemLogger.addFile("/home/lvuser/FRC_UserProgram.log", "Console", 0.27);
-        filesystemLogger.addFile("/var/log/dmesg", "Dmesg", 2.2);
-        filesystemLogger.addFile("/var/log/messages", "Kernel", 1.4);
+        // filesystemLogger.addFile("/home/lvuser/FRC_UserProgram.log", "Console", 0.27);
+        // filesystemLogger.addFile("/var/log/dmesg", "Dmesg", 2.2);
+        // filesystemLogger.addFile("/var/log/messages", "Kernel", 1.4);
 
         // logs build data to the datalog
         final String meta = "/BuildData/";
