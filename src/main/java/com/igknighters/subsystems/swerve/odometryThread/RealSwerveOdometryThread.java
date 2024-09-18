@@ -118,7 +118,7 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
     }
 
     private Rotation2d getGyroRotation() {
-        return Rotation2d.fromRotations(
+        return Rotation2d.fromDegrees(
             enableLatencyCompensation
             ? latencyCompensatedValue(
                 signals[signals.length - 2],
