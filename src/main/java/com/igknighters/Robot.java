@@ -6,7 +6,6 @@ import java.util.function.BiConsumer;
 import monologue.Logged;
 import monologue.Monologue;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -34,9 +33,7 @@ import com.igknighters.util.can.CANBusLogging;
 import com.igknighters.util.can.CANSignalManager;
 import com.igknighters.util.geom.AllianceFlip;
 import com.igknighters.util.geom.GeomUtil;
-import com.igknighters.util.logging.FilesystemLogger;
 import com.igknighters.util.logging.GlobalField;
-import com.igknighters.util.logging.PowerLogger;
 import com.igknighters.util.logging.WatchdogSilencer;
 import com.igknighters.util.logging.Tracer;
 import com.igknighters.util.robots.UnitTestableRobot;
@@ -47,13 +44,13 @@ import choreo.ChoreoAutoFactory.ChoreoAutoBindings;
 public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
     private final CommandScheduler scheduler = CommandScheduler.getInstance();
-    private final PowerLogger powerLogger = new PowerLogger(
-            ConstValues.PDH_CAN_ID,
-            ModuleType.kRev,
-            "/Robot/PowerDistribution",
-            false
-    );
-    private final FilesystemLogger filesystemLogger = new FilesystemLogger();
+    // private final PowerLogger powerLogger = new PowerLogger(
+    //         ConstValues.PDH_CAN_ID,
+    //         ModuleType.kRev,
+    //         "/Robot/PowerDistribution",
+    //         false
+    // );
+    // private final FilesystemLogger filesystemLogger = new FilesystemLogger();
 
     public final Localizer localizer = new Localizer();
 
@@ -135,6 +132,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
             autoManager.addAutoRoutine("6 Piece Amp Side Far", routines::sixPieceFarAmpSide);
             autoManager.addAutoRoutine("4 Piece Src Side", routines::fourPieceSourceSide);
             autoManager.addAutoRoutine("3 Piece Sub Middle", routines::threePieceSubMiddle);
+            autoManager.addAutoRoutine("rahhh", routines::driveForward);
         }
 
         testManager = new TestManager();
@@ -168,8 +166,8 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
         Tracer.traceFunc("CommandScheduler", scheduler::run);
         Tracer.traceFunc("LEDUpdate", LED::run);
         Tracer.traceFunc("CANBusLoggung", CANBusLogging::log);
-        Tracer.traceFunc("PowerLogger", powerLogger::log);
-        Tracer.traceFunc("FilesystemLogger", filesystemLogger::log);
+        // Tracer.traceFunc("PowerLogger", powerLogger::log);
+        // Tracer.traceFunc("FilesystemLogger", filesystemLogger::log);
         Tracer.traceFunc("Monologue", Monologue::updateAll);
         Tracer.traceFunc("Choosers", () -> {
             autoManager.update();

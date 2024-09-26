@@ -4,14 +4,17 @@ import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -31,7 +34,7 @@ import edu.wpi.first.wpilibj.Timer;
  * public void robotPeriodic() {
  *     Tracer.startTrace("RobotPeriodic");
  *     Tracer.traceFunc("CommandScheduler", scheduler::run);
- *     Tracer.traceFunc("Monologue", Monologue::updateAll);
+ *     Tracer.traceFunc("MyVendorDep", MyVendorDep::updateAll);
  *     Tracer.endTrace();
  * }
  * 
@@ -46,6 +49,10 @@ public class Tracer {
             this.startTime = startTime;
             this.startGCTotalTime = startGCTotalTime;
         }
+    }
+    private static final class TraceDurationLogger {
+        private Optional<DoublePublisher> networkLogger;
+        private Optional<DoubleLogEntry> localLogger;
     }
 
     /**
@@ -70,16 +77,20 @@ public class Tracer {
         private final HashMap<String, DoublePublisher> publisherHeap = new HashMap<>();
 
         // the garbage collector beans
-        private final ArrayList<GarbageCollectorMXBean> gcs = new ArrayList<>(ManagementFactory.getGarbageCollectorMXBeans());
+        private final ArrayList<GarbageCollectorMXBean> gcs = new ArrayList<>(
+                ManagementFactory.getGarbageCollectorMXBeans());
         private final DoublePublisher gcTimeEntry;
         private double gcTimeThisCycle = 0.0;
 
         private TracerState(String threadName) {
-            this.rootTable = NetworkTableInstance.getDefault().getTable("Tracer").getSubTable(threadName);
+            if (threadName == null) {
+                this.rootTable = NetworkTableInstance.getDefault().getTable("Tracer");
+            } else {
+                this.rootTable = NetworkTableInstance.getDefault().getTable("Tracer").getSubTable(threadName);
+            }
             this.gcTimeEntry = rootTable.getDoubleTopic("GCTime").publishEx(
-                "double",
-                "{ \"cached\": false}"
-            );
+                    "double",
+                    "{ \"cached\": false}");
         }
 
         private String appendTraceStack(String trace) {
@@ -113,21 +124,22 @@ public class Tracer {
             // update times for all already existing publishers
             for (var publisher : publisherHeap.entrySet()) {
                 Double time = traceTimes.remove(publisher.getKey());
-                if (time == null) time = 0.0;
+                if (time == null)
+                    time = 0.0;
                 publisher.getValue().set(time);
             }
             // create publishers for all new entries
             for (var traceTime : traceTimes.entrySet()) {
                 DoublePublisher publisher = rootTable.getDoubleTopic(traceTime.getKey()).publishEx(
-                    "double",
-                    "{ \"cached\": false}"
-                );
+                        "double",
+                        "{ \"cached\": false}");
                 publisher.set(traceTime.getValue());
                 publisherHeap.put(traceTime.getKey(), publisher);
             }
 
             // log gc time
-            if (gcs.size() > 0) gcTimeEntry.set(gcTimeThisCycle);
+            if (gcs.size() > 0)
+                gcTimeEntry.set(gcTimeThisCycle);
             gcTimeThisCycle = 0.0;
 
             // clean up state
@@ -136,7 +148,13 @@ public class Tracer {
         }
     }
 
+    private static final AtomicBoolean singleThreadedMode = new AtomicBoolean(false);
+    private static final AtomicBoolean anyTracesStarted = new AtomicBoolean(false);
     private static final ThreadLocal<TracerState> threadLocalState = ThreadLocal.withInitial(() -> {
+        if (singleThreadedMode.get()) {
+            throw new IllegalStateException("Single threaded mode is enabled, cannot create new TracerState");
+        }
+        anyTracesStarted.set(true);
         return new TracerState(Thread.currentThread().getName());
     });
 
@@ -157,11 +175,10 @@ public class Tracer {
             double gcTimeSinceStart = state.totalGCTime() - startData.startGCTotalTime;
             state.gcTimeThisCycle += gcTimeSinceStart;
             state.traceTimes.put(
-                stack,
-                Timer.getFPGATimestamp() * 1_000.0
-                - startData.startTime
-                - gcTimeSinceStart
-            );
+                    stack,
+                    Timer.getFPGATimestamp() * 1_000.0
+                            - startData.startTime
+                            - gcTimeSinceStart);
             if (state.traceStack.size() == 0) {
                 state.endCycle();
             }
@@ -201,11 +218,30 @@ public class Tracer {
     /**
      * Disables garbage collection logging for the current thread.
      * This can help performance in some cases.
+     * 
+     * <p>This counts as starting a tracer on the current thread,
+     * this is important to consider with {@link Tracer#enableSingleThreadedMode()}
+     * and should never be called before if you are using single threaded mode.
      */
     public static void disableGcLoggingForCurrentThread() {
         TracerState state = threadLocalState.get();
         state.gcTimeEntry.close();
         state.gcs.clear();
+    }
+
+    /**
+     * Enables single threaded mode for the Tracer.
+     * This will cause traces on different threads to throw an exception.
+     * This will shorten the path of traced data in NetworkTables by not including the thread name.
+     * 
+     * <p><b>Warning:</b> This will throw an exception if called after any traces have been started.
+     */
+    public static void enableSingleThreadedMode() {
+        if (anyTracesStarted.get()) {
+            throw new IllegalStateException("Cannot enable single threaded mode after traces have been started");
+        }
+        threadLocalState.set(new TracerState(null));
+        singleThreadedMode.set(true);
     }
 
     /**
@@ -244,19 +280,100 @@ public class Tracer {
         return ret;
     }
 
-    public static <R, A> R traceFunc(String name, Function<A, R> function, A arg) {
-        final TracerState state = threadLocalState.get();
-        startTraceInner(name, state);
-        R ret = function.apply(arg);
-        endTraceInner(state);
-        return ret;
+    // A REIMPLEMENTATION OF THE OLD TRACER TO NOT BREAK OLD CODE
+
+    private static final long kMinPrintPeriod = 1000000; // microseconds
+
+    private long m_lastEpochsPrintTime; // microseconds
+    private long m_startTime; // microseconds
+
+    private final HashMap<String, Long> m_epochs = new HashMap<>(); // microseconds
+
+    /** 
+     * A {@code Tracer} constructor compatible with the 2024 {@code Tracer}.
+     * 
+     * @deprecated This constructor is only for compatibility with the 2024 {@code Tracer} and will be removed in 2025.
+     * Use the static methods in {@link Tracer} instead.
+    */
+    @Deprecated(since = "2025", forRemoval = true)
+    public Tracer() {
+        resetTimer();
     }
 
-    public static <R, A, B> R traceFunc(String name, BiFunction<A, B, R> function, A arg1, B arg2) {
-        final TracerState state = threadLocalState.get();
-        startTraceInner(name, state);
-        R ret = function.apply(arg1, arg2);
-        endTraceInner(state);
-        return ret;
+    /** Clears all epochs.
+     * 
+     * @deprecated This method is only for compatibility with the 2024 {@code Tracer} and will be removed in 2025.
+     * Use the static methods in {@link Tracer} instead.
+    */
+    @Deprecated(since = "2025", forRemoval = true)
+    public void clearEpochs() {
+        m_epochs.clear();
+        resetTimer();
+    }
+
+    /** Restarts the epoch timer.
+     * 
+     * @deprecated This method is only for compatibility with the 2024 {@code Tracer} and will be removed in 2025.
+     * Use the static methods in {@link Tracer} instead.
+    */
+    @Deprecated(since = "2025", forRemoval = true)
+    public final void resetTimer() {
+        m_startTime = RobotController.getFPGATime();
+    }
+
+    /**
+     * Adds time since last epoch to the list printed by printEpochs().
+     *
+     * <p>Epochs are a way to partition the time elapsed so that when overruns occur, one can
+     * determine which parts of an operation consumed the most time.
+     *
+     * <p>This should be called immediately after execution has finished, with a call to this method
+     * or {@link #resetTimer()} before execution.
+     *
+     * @param epochName The name to associate with the epoch.
+     * 
+     * @deprecated This method is only for compatibility with the 2024 {@code Tracer} and will be removed in 2025.
+     * Use the static methods in {@link Tracer} instead.
+     */
+    @Deprecated(since = "2025", forRemoval = true)
+    public void addEpoch(String epochName) {
+        long currentTime = RobotController.getFPGATime();
+        m_epochs.put(epochName, currentTime - m_startTime);
+        m_startTime = currentTime;
+    }
+
+    /**
+     * Prints list of epochs added so far and their times to the DriverStation.
+     * 
+     * @deprecated This method is only for compatibility with the 2024 {@code Tracer} and will be removed in 2025.
+     * Use the static methods in {@link Tracer} instead.
+     */
+    @Deprecated(since = "2025", forRemoval = true)
+    public void printEpochs() {
+        printEpochs(out -> DriverStation.reportWarning(out, false));
+    }
+
+    /**
+     * Prints list of epochs added so far and their times to the entered String consumer.
+     *
+     * <p>This overload can be useful for logging to a file, etc.
+     *
+     * @param output the stream that the output is sent to
+     * 
+     * @deprecated This method is only for compatibility with the 2024 {@code Tracer} and will be removed in 2025.
+     * Use the static methods in {@link Tracer} instead.
+     */
+    @Deprecated(since = "2025", forRemoval = true)
+    public void printEpochs(Consumer<String> output) {
+        long now = RobotController.getFPGATime();
+        if (now - m_lastEpochsPrintTime > kMinPrintPeriod) {
+            StringBuilder sb = new StringBuilder();
+            m_lastEpochsPrintTime = now;
+            m_epochs.forEach(
+                    (key, value) -> sb.append(String.format("\t%s: %.6fs\n", key, value / 1.0e6)));
+            if (sb.length() > 0) {
+                output.accept(sb.toString());
+            }
+        }
     }
 }

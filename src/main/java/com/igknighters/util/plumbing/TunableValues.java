@@ -166,7 +166,7 @@ public class TunableValues {
         }
 
         /**
-         * Get the value of the tunable, returns the default value a value is not present.
+         * Get the value of the tunable, returns the default value if a value is not present.
          * 
          * @return The value of the tunable
          */

@@ -404,4 +404,16 @@ public class AutoRoutines extends AutoCommands {
 
         return loop.cmd().withName("FourPieceSourceSide");
     }
+
+    public Command driveForward(ChoreoAutoFactory factory) {
+        if (disabled) return disabledAuto();
+
+        final ChoreoAutoLoop loop = factory.newLoop();
+
+        final ChoreoAutoTrajectory traj = factory.traj(AMP.to(C1), loop);
+
+        loop.enabled().onTrue(traj.cmd());
+
+        return loop.cmd();
+    }
 }
