@@ -2,13 +2,13 @@ package com.igknighters.commands.autos;
 
 import com.igknighters.constants.ConstValues.kAuto;
 
-import choreo.ChoreoControlFunction;
-import choreo.trajectory.ChoreoTrajectoryState;
+import choreo.Choreo.ControlFunction;
+import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
-public class AutoController implements ChoreoControlFunction {
+public class AutoController implements ControlFunction<SwerveSample> {
     private final PIDController xController = new PIDController(
         kAuto.kTranslation.kP,
         kAuto.kTranslation.kI,
@@ -33,10 +33,10 @@ public class AutoController implements ChoreoControlFunction {
     }
 
     @Override
-    public ChassisSpeeds apply(Pose2d pose, ChoreoTrajectoryState referenceState) {
-        double xFF = referenceState.velocityX;
-        double yFF = referenceState.velocityY;
-        double rotationFF = referenceState.angularVelocity;
+    public ChassisSpeeds apply(Pose2d pose, SwerveSample referenceState) {
+        double xFF = referenceState.vx;
+        double yFF = referenceState.vy;
+        double rotationFF = referenceState.omega;
 
         double xFeedback = xController.calculate(pose.getX(), referenceState.x);
         double yFeedback = yController.calculate(pose.getY(), referenceState.y);

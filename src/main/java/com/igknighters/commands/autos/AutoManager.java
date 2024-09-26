@@ -6,7 +6,7 @@ import java.util.function.Function;
 
 import com.igknighters.Robot;
 
-import choreo.ChoreoAutoFactory;
+import choreo.autos.AutoFactory;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringEntry;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -20,7 +20,7 @@ import monologue.Monologue;
  * An auto chooser that allows for the selection of auto routines at runtime.
  */
 public class AutoManager {
-    public static interface AutoRoutineGenerator extends Function<ChoreoAutoFactory, Command> {
+    public static interface AutoRoutineGenerator extends Function<AutoFactory, Command> {
         static final AutoRoutineGenerator NONE = factory -> Commands.none().withName("Do Nothing Auto");
     }
 
@@ -37,12 +37,12 @@ public class AutoManager {
         .getStringTopic("selected")
         .getEntry(NONE_NAME);
 
-    private final ChoreoAutoFactory factory;
+    private final AutoFactory factory;
 
     private String lastAutoRoutineName = NONE_NAME;
     private Command lastAutoRoutine = AutoRoutineGenerator.NONE.apply(null);
 
-    public AutoManager(ChoreoAutoFactory factory) {
+    public AutoManager(AutoFactory factory) {
         this.factory = factory;
         Monologue.log(path + "/.type", "String Chooser");
         Monologue.log(path + "/default", NONE_NAME);

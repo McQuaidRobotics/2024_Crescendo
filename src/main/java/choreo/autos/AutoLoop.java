@@ -1,60 +1,72 @@
-package choreo;
+// Copyright (c) Choreo contributors
 
+package choreo.autos;
+
+import choreo.ext.TriggerExt;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.function.BooleanSupplier;
 
-import choreo.ext.TriggerExt;
-
-import java.util.ArrayList;
-
 /**
- * A loop that represents an autonomous routine. This loop is used to handle autonomous trigger
- * logic and schedule commands.
+ * A loop that represents an autonomous routine.
+ *
+ * <p>This loop is used to handle autonomous trigger logic and schedule commands. This loop should
+ * **not** be shared across multiple autonomous routines.
  */
-public class ChoreoAutoLoop {
-  protected final ArrayList<ChoreoAutoTrajectory> trajectories = new ArrayList<>();
-
-  /** The underlying {@link EventLoop} stuff is bound to and polled */
+public class AutoLoop {
+  /** The underlying {@link EventLoop} that triggers are bound to and polled */
   protected final EventLoop loop;
+
+  /** The name of the auto routine this loop is associated with */
+  protected final String name;
 
   /** A boolean utilized in {@link #enabled()} to resolve trueness */
   protected boolean isActive = false;
 
+  /** A boolean that is true when the loop is killed */
+  protected boolean isKilled = false;
+
   /**
    * Creates a new loop with a specific name
    *
-   * @see choreo.ChoreoAutoFactory#newLoop() Creating a loop from a ChoreoAutoFactory
+   * @param name The name of the loop
+   * @see AutoFactory#newLoop Creating a loop from a ChoreoAutoFactory
    */
-  public ChoreoAutoLoop() {
+  public AutoLoop(String name) {
     this.loop = new EventLoop();
+    this.name = name;
   }
 
   /**
    * A constructor to be used when inhereting this class to instantiate a custom inner loop
    *
+   * @param name The name of the loop
    * @param loop The inner {@link EventLoop}
    */
-  protected ChoreoAutoLoop(EventLoop loop) {
+  protected AutoLoop(String name, EventLoop loop) {
     this.loop = loop;
+    this.name = name;
   }
 
   /**
-   * Creates a {@link Trigger} that is true while this autonomous loop is being polled.
+   * Returns a {@link Trigger} that is true while this autonomous loop is being polled.
+   *
+   * <p>Using a {@link Trigger#onFalse(Command)} will do nothing as when this is false the loop is
+   * not being polled anymore.
    *
    * @return A {@link Trigger} that is true while this autonomous loop is being polled.
    */
   public TriggerExt enabled() {
-    // TODO: Maybe add a warning if this is called while `hasBeenPolled` is already true
-    return TriggerExt.from(new Trigger(loop, () -> isActive).and(DriverStation::isAutonomousEnabled));
+    return new TriggerExt(loop, () -> isActive && DriverStation.isAutonomousEnabled());
   }
 
   /** Polls the loop. Should be called in the autonomous periodic method. */
   public void poll() {
-    if (!DriverStation.isAutonomousEnabled()) {
+    if (!DriverStation.isAutonomousEnabled() || isKilled) {
       isActive = false;
       return;
     }
@@ -72,31 +84,22 @@ public class ChoreoAutoLoop {
   }
 
   /**
-   * A callback that will cleanup state of all trajectories when a new trajectory is started.
-   */
-  public void onNewTrajectory() {
-    for (ChoreoAutoTrajectory traj : trajectories) {
-      traj.onNewTrajectory();
-    }
-  }
-
-  /**
-   * Adds a trajectory to the loop. This is used to ensure that all trajectories are reset when a
-   * new trajectory is started.
-   *
-   * @param traj The trajectory to add to the loop.
-   */
-  void addTrajectory(ChoreoAutoTrajectory traj) {
-    trajectories.add(traj);
-  }
-
-  /**
    * Resets the loop. This can either be called on auto init or auto end to reset the loop incase
    * you run it again. If this is called on a loop that doesn't need to be reset it will do nothing.
    */
   public void reset() {
     isActive = false;
-    onNewTrajectory();
+  }
+
+  /** Kills the loop and prevents it from running again. */
+  public void kill() {
+    CommandScheduler.getInstance().cancelAll();
+    if (isKilled) {
+      return;
+    }
+    reset();
+    DriverStation.reportWarning("Killed An Auto Loop", true);
+    isKilled = true;
   }
 
   /**
@@ -106,9 +109,10 @@ public class ChoreoAutoLoop {
    * @see #cmd(BooleanSupplier) A version of this method that takes a condition to finish the loop.
    */
   public Command cmd() {
-    return Commands.run(this::poll).finallyDo(this::reset)
-      .until(() -> !DriverStation.isAutonomousEnabled())
-      .withName("ChoreoAutoLoop");
+    return Commands.run(this::poll)
+        .finallyDo(this::reset)
+        .until(() -> !DriverStation.isAutonomousEnabled())
+        .withName(name);
   }
 
   /**
@@ -119,8 +123,9 @@ public class ChoreoAutoLoop {
    * @see #cmd() A version of this method that doesn't take a condition and never finishes.
    */
   public Command cmd(BooleanSupplier finishCondition) {
-    return this.cmd()
-      .until(() -> finishCondition.getAsBoolean())
-      .withName("ChoreoAutoLoop");
+    return Commands.run(this::poll)
+        .finallyDo(this::reset)
+        .until(() -> !DriverStation.isAutonomousEnabled() || finishCondition.getAsBoolean())
+        .withName(name);
   }
 }

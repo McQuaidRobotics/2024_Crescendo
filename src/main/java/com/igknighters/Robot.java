@@ -39,7 +39,7 @@ import com.igknighters.util.logging.Tracer;
 import com.igknighters.util.robots.UnitTestableRobot;
 
 import choreo.Choreo;
-import choreo.ChoreoAutoFactory.ChoreoAutoBindings;
+import choreo.autos.AutoFactory.ChoreoAutoBindings;
 
 public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
@@ -129,9 +129,9 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
         if (allSubsystems.hasAllSubsystems()) {
             var routines = new AutoRoutines(allSubsystems, localizer);
             autoManager.addAutoRoutine("5 Piece Amp Side", routines::fivePieceAmpSide);
-            autoManager.addAutoRoutine("6 Piece Amp Side Far", routines::sixPieceFarAmpSide);
-            autoManager.addAutoRoutine("4 Piece Src Side", routines::fourPieceSourceSide);
-            autoManager.addAutoRoutine("3 Piece Sub Middle", routines::threePieceSubMiddle);
+            // autoManager.addAutoRoutine("6 Piece Amp Side Far", routines::sixPieceFarAmpSide);
+            // autoManager.addAutoRoutine("4 Piece Src Side", routines::fourPieceSourceSide);
+            // autoManager.addAutoRoutine("3 Piece Sub Middle", routines::threePieceSubMiddle);
             autoManager.addAutoRoutine("rahhh", routines::driveForward);
         }
 
