@@ -5,7 +5,6 @@ import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import choreo.autos.AutoFactory;
 import choreo.autos.AutoLoop;
 import choreo.autos.AutoTrajectory;
-import choreo.ext.TriggerExt;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -32,7 +31,7 @@ public class AutoRoutines extends AutoCommands {
         var optPose = traj.getInitialPose();
         if (optPose.isEmpty()) {
             loop.kill();
-            return Commands.none();
+            return Commands.print("Killed loop due to lack of startung pose");
         }
         var pose = optPose.get();
         return loggedCmd(swerve.runOnce(() -> {
@@ -82,8 +81,6 @@ public class AutoRoutines extends AutoCommands {
                 )
             ).withName("FivePieceAmpSideEntry")
         );
-
-        loop.enabled().whileTrueDefault(spinnupShooter());
 
         // picking up first note and shooting if we have a note
         ampToC1.done().onTrue(autoShootThenTraj(loop, c1ToM1));

@@ -1,0 +1,271 @@
+{
+ "name":"crescendo",
+ "version":"v2025.0.0",
+ "type":"Swerve",
+ "variables":{
+  "expressions":{},
+  "poses":{
+   "M3":{
+    "x":{
+     "exp":"7.65 m",
+     "val":7.65
+    },
+    "y":{
+     "exp":"4 m",
+     "val":4.0
+    },
+    "heading":{
+     "exp":"0.27 rad",
+     "val":0.27
+    }
+   },
+   "M5":{
+    "x":{
+     "exp":"7.75 m",
+     "val":7.75
+    },
+    "y":{
+     "exp":"1.2 m",
+     "val":1.2
+    },
+    "heading":{
+     "exp":"-0.825 rad",
+     "val":-0.825
+    }
+   },
+   "SRC":{
+    "x":{
+     "exp":"1.47 m",
+     "val":1.47
+    },
+    "y":{
+     "exp":"3.75 m",
+     "val":3.75
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "S3":{
+    "x":{
+     "exp":"3.6 m",
+     "val":3.6
+    },
+    "y":{
+     "exp":"2.25 m",
+     "val":2.25
+    },
+    "heading":{
+     "exp":"-0.747 rad",
+     "val":-0.747
+    }
+   },
+   "SUB":{
+    "x":{
+     "exp":"1.36 m",
+     "val":1.36
+    },
+    "y":{
+     "exp":"5.5 m",
+     "val":5.5
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "M4":{
+    "x":{
+     "exp":"7.75 m",
+     "val":7.75
+    },
+    "y":{
+     "exp":"1.93 m",
+     "val":1.93
+    },
+    "heading":{
+     "exp":"0.76 rad",
+     "val":0.76
+    }
+   },
+   "S2":{
+    "x":{
+     "exp":"4 m",
+     "val":4.0
+    },
+    "y":{
+     "exp":"5.45 m",
+     "val":5.45
+    },
+    "heading":{
+     "exp":"-0.024 rad",
+     "val":-0.024
+    }
+   },
+   "C2":{
+    "x":{
+     "exp":"2.2 m",
+     "val":2.2
+    },
+    "y":{
+     "exp":"5.55 m",
+     "val":5.55
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "AMP":{
+    "x":{
+     "exp":"1.47 m",
+     "val":1.47
+    },
+    "y":{
+     "exp":"7.35 m",
+     "val":7.35
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "C1":{
+    "x":{
+     "exp":"2.2 m",
+     "val":2.2
+    },
+    "y":{
+     "exp":"7 m",
+     "val":7.0
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "M1":{
+    "x":{
+     "exp":"8.1 m",
+     "val":8.1
+    },
+    "y":{
+     "exp":"6.93 m",
+     "val":6.93
+    },
+    "heading":{
+     "exp":"1.277 rad",
+     "val":1.277
+    }
+   },
+   "C3":{
+    "x":{
+     "exp":"2.24 m",
+     "val":2.24
+    },
+    "y":{
+     "exp":"4.37 m",
+     "val":4.37
+    },
+    "heading":{
+     "exp":"-0.4388 rad",
+     "val":-0.4388
+    }
+   },
+   "M2":{
+    "x":{
+     "exp":"7.65 m",
+     "val":7.65
+    },
+    "y":{
+     "exp":"5.5 m",
+     "val":5.5
+    },
+    "heading":{
+     "exp":"0.385 rad",
+     "val":0.385
+    }
+   },
+   "S1":{
+    "x":{
+     "exp":"4.3 m",
+     "val":4.3
+    },
+    "y":{
+     "exp":"6.6 m",
+     "val":6.6
+    },
+    "heading":{
+     "exp":"0.24 rad",
+     "val":0.24
+    }
+   }
+  }
+ },
+ "config":{
+  "frontLeft":{
+   "x":{
+    "exp":"11 in",
+    "val":0.2794
+   },
+   "y":{
+    "exp":"11 in",
+    "val":0.2794
+   }
+  },
+  "backLeft":{
+   "x":{
+    "exp":"-11 in",
+    "val":-0.2794
+   },
+   "y":{
+    "exp":"11 in",
+    "val":0.2794
+   }
+  },
+  "mass":{
+   "exp":"150 lbs",
+   "val":68.0388555
+  },
+  "inertia":{
+   "exp":"6 kg m ^ 2",
+   "val":6.0
+  },
+  "gearing":{
+   "exp":"6.5",
+   "val":6.5
+  },
+  "radius":{
+   "exp":"2 in",
+   "val":0.0508
+  },
+  "vmax":{
+   "exp":"502.65482457436696 rad / s",
+   "val":502.65482457436696
+  },
+  "tmax":{
+   "exp":"1.162295081967213 N m",
+   "val":1.162295081967213
+  },
+  "bumper":{
+   "front":{
+    "exp":"16 in",
+    "val":0.4064
+   },
+   "side":{
+    "exp":"16 in",
+    "val":0.4064
+   },
+   "back":{
+    "exp":"16 in",
+    "val":0.4064
+   }
+  },
+  "differentialTrackWidth":{
+   "exp":"22 in",
+   "val":0.5588
+  }
+ },
+ "generationFeatures":[]
+}
