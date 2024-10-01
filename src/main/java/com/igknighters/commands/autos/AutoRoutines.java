@@ -7,12 +7,10 @@ import choreo.autos.AutoLoop;
 import choreo.autos.AutoTrajectory;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import static com.igknighters.commands.autos.Waypoints.*;
 
 import com.igknighters.Localizer;
-import com.igknighters.commands.umbrella.UmbrellaCommands;
 
 public class AutoRoutines extends AutoCommands {
 
