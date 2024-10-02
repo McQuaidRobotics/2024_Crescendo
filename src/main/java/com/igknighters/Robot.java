@@ -305,4 +305,8 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
     public static boolean isDebug() {
         return ConstValues.DEBUG;
     }
+
+    public static boolean isSunlight() {
+        return ConstValues.SUNLIGHT;
+    }
 }

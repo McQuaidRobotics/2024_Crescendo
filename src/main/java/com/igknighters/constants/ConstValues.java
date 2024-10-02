@@ -59,6 +59,7 @@ public final class ConstValues {
 
     public static final boolean DEBUG = true; // this should be false for competition
     public static final boolean DEMO = false; // this should be false for competition
+    public static final boolean SUNLIGHT = false; // this should be false for competition
     public static final double PERIODIC_TIME = 0.02; // 20ms
     public static final int PDH_CAN_ID = 61;
 

@@ -45,8 +45,7 @@ public class Umbrella implements LockFullSubsystem {
             intake = new IntakeSim();
             shooter = new ShooterDisabled();
         } else {
-            if (Robot.isDemo()) {
-                // Demo are more likely to be outside so just assume we are
+            if (Robot.isSunlight()) {
                 intake = new IntakeRealSingleCurrent();
             } else {
                 intake = new IntakeRealSingle();

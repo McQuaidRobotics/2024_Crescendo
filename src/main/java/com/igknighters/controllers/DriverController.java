@@ -118,7 +118,7 @@ public class DriverController extends ControllerParent {
 
         /// CENTER BUTTONS
         this.Back.binding = new Binding(Subsystems.all(), (trig, allss) -> {
-            trig.onTrue(Emotes.yes(allss));
+            trig.onTrue(Emotes.bopYourHead(allss));
         });
 
         this.Start.binding = new Binding(Subsystems.Swerve, (trig, allss) -> {
@@ -197,8 +197,14 @@ public class DriverController extends ControllerParent {
                 }).withName("StopAll"));
         }, Subsystems.Stem, Subsystems.Umbrella); 
 
-        this.DPU.binding = new Binding((trig, allss) -> {
-            trig.onTrue(StemCommands.holdAt(allss.stem.get(), StemPosition.STARTING));
-        }, Subsystems.Stem);
+        if (Robot.isDemo()) {
+            this.DPU.binding = new Binding((trig, allss) -> {
+                trig.onTrue(Emotes.yes(allss));
+            }, Subsystems.Stem, Subsystems.Umbrella);
+        } else {
+            this.DPU.binding = new Binding((trig, allss) -> {
+                trig.onTrue(StemCommands.holdAt(allss.stem.get(), StemPosition.STARTING));
+            }, Subsystems.Stem);
+        }
     }
 }

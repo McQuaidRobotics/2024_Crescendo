@@ -34,8 +34,7 @@ public class Stem implements LockFullSubsystem {
             wrist = new WristDisabled();
         } else {
             pivot = new PivotReal();
-            if (Robot.isDemo()) {
-                // Demo are more likely to be outside so just assume we are
+            if (Robot.isSunlight()) {
                 telescope = new TelescopeRealSunshine();
             } else {
                 telescope = new TelescopeReal();
