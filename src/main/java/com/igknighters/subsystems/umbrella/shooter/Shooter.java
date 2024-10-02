@@ -2,6 +2,7 @@ package com.igknighters.subsystems.umbrella.shooter;
 
 import com.igknighters.subsystems.Component;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import monologue.Annotations.Log;
 
@@ -50,4 +51,22 @@ public abstract class Shooter extends Component {
      * @param volts The specified volts: [-12.0 .. 12.0]
      */
     public abstract void setVoltageOut(double volts);
+
+    /**
+     * 
+     * @param rpm The rpm of the shooter
+     * @return 
+     */
+    public static double rpmToMps(double rpm) {
+        final double LOW_END_RPM = 4500.0;
+        final double LOW_END_MPS = 11.7;
+        final double HIGH_END_RPM = 8000.0;
+        final double HIGH_END_MPS = 15.2;
+        final double DIFF_RPM = HIGH_END_RPM - LOW_END_RPM;
+        final double DIFF_MPS = HIGH_END_MPS - LOW_END_MPS;
+
+        double clamped = MathUtil.clamp(rpm, LOW_END_RPM, HIGH_END_RPM);
+        double t = (clamped - LOW_END_RPM) / DIFF_RPM;
+        return (t * DIFF_MPS) + LOW_END_MPS;
+    }
 }

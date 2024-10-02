@@ -7,14 +7,19 @@ import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
-import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.stem.StemSolvers;
 import com.igknighters.subsystems.stem.StemSolvers.AimSolveStrategy;
 import com.igknighters.subsystems.stem.StemSolvers.StemSolveInput;
+import com.igknighters.subsystems.umbrella.shooter.Shooter;
 import com.igknighters.util.geom.AllianceFlip;
+import com.igknighters.util.logging.GlobalField;
+import com.igknighters.util.plumbing.TunableValues;
+import com.igknighters.util.plumbing.Channels.Sender;
+
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import monologue.Monologue;
@@ -81,7 +86,7 @@ public class StemCommands {
                 ),
                 distance,
                 FieldConstants.SPEAKER.getZ(),
-                kShooter.AVERAGE_NOTE_VELO_EST
+                kUmbrella.NOTE_VELO
             );
 
             hasFinished = stem.gotoStemPosition(
@@ -105,6 +110,8 @@ public class StemCommands {
         private final Supplier<Pose2d> poseSupplier;
         private final boolean canFinish;
 
+        private final Sender<Pose2d[]> targetSender = Sender.broadcast(GlobalField.ARBITRARY_TARGETS, Pose2d[].class);
+
         private Translation2d targetTranslation;
         private boolean hasFinished = false;
 
@@ -126,21 +133,23 @@ public class StemCommands {
         @Override
         public void initialize() {
             targetTranslation = AllianceFlip.isBlue() ? passPoint : AllianceFlip.flipTranslation(passPoint);
+            targetSender.send(new Pose2d[] { new Pose2d(targetTranslation, new Rotation2d()) });
         }
 
         @Override
         public void execute() {
             Pose2d currentPose = poseSupplier.get();
             double distance = currentPose.getTranslation().getDistance(targetTranslation);
+            Monologue.log("Aim/PassDistance", distance);
 
-            double pivotRads = kControls.STATIONARY_AIM_AT_PIVOT_RADIANS;
+            double pivotRads = kControls.STATIONARY_PASS_PIVOT_RADIANS;
             double telescopeMeters = kTelescope.MIN_METERS;
             double wristRads = StemSolvers.passWristSolveTheta(
                 telescopeMeters,
                 pivotRads,
                 distance,
-                kUmbrella.NOTE_VELO,
-                time,
+                Shooter.rpmToMps(TunableValues.getDouble("PassRpm", 4500).value()),
+                TunableValues.getDouble("PassTime", time).value(),
                 true
             ); 
 

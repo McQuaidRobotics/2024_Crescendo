@@ -30,11 +30,21 @@ public class DriverController extends ControllerParent {
         // disregard null safety for subsystems as it is checked on assignment
 
         /// FACE BUTTONS
+        // this.A.binding = new Binding((trig, allss) -> {
+        //     trig.onTrue(
+        //         HigherOrderCommands.intakeGamepiece(
+        //             allss.stem.get(),
+        //             allss.umbrella.get()));
+        // }, Subsystems.Stem, Subsystems.Umbrella);
+
         this.A.binding = new Binding((trig, allss) -> {
             trig.onTrue(
-                HigherOrderCommands.intakeGamepiece(
+                HigherOrderCommands.aimNotePass(
                     allss.stem.get(),
-                    allss.umbrella.get()));
+                    allss.umbrella.get(),
+                    localizer
+                )
+            );
         }, Subsystems.Stem, Subsystems.Umbrella);
 
         this.B.binding = new Binding(

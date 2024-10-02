@@ -17,6 +17,7 @@ import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
 import com.igknighters.util.plumbing.DoubleMonad;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
@@ -55,6 +56,25 @@ public class HigherOrderCommands {
                 StemCommands.aimAtSpeaker(stem, false, localizer::pose, swerve::getChassisSpeed)).withName("Aim");
     }
 
+    public static Command aimNotePass(
+        Stem stem,
+        Umbrella umbrella,
+        Localizer localizer
+    ) {
+        return Commands.parallel(
+            UmbrellaCommands.spinupShooter(umbrella, 4500, ShooterSpinupReason.ManualAimSpeaker),
+            StemCommands.aimAtPassPoint(
+                stem,
+                new Translation2d(
+                    1.0, 7.0
+                ),
+                2.5,
+                false,
+                localizer::pose
+            )
+        );
+    }
+
     public static Command genericShoot(
             Swerve swerve,
             Stem stem,
@@ -90,7 +110,10 @@ public class HigherOrderCommands {
                 ).until(() -> controller.leftTrigger(true).getAsDouble() < 0.5);
         } else {
             name = "Traditional Shoot";
-            cmd = UmbrellaCommands.shoot(umbrella, targetRpm);
+            cmd = Commands.deadline(
+                UmbrellaCommands.shoot(umbrella, targetRpm),
+                StemCommands.holdAt(stem, stem.getStemPosition())
+            );
         }
 
         return cmd.finallyDo(() -> {

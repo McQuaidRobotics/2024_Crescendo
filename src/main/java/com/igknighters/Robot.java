@@ -173,6 +173,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
             autoManager.update();
             testManager.update();
         });
+        TestingGround.periodic();
     }
 
     @Override

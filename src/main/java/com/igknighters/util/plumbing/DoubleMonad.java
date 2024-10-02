@@ -11,9 +11,7 @@ import java.util.function.DoubleSupplier;
 import java.util.function.DoubleUnaryOperator;
 
 /**
- * A functional interface to aid in modifying double suppliers, such as from a joystick.
- *
- * <p>Inspired by 694's StuyLib.
+ * A functional interface to aid in modifying double suppliers.
  */
 @FunctionalInterface
 public interface DoubleMonad extends DoubleSupplier {

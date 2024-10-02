@@ -109,6 +109,7 @@ public final class ConstValues {
         public static final double INTAKE_PERCENT = 0.8;
 
         public static final double STATIONARY_AIM_AT_PIVOT_RADIANS = 40.0 * Conv.DEGREES_TO_RADIANS;
+        public static final double STATIONARY_PASS_PIVOT_RADIANS = 60.0 * Conv.DEGREES_TO_RADIANS;
         public static final double STATIONARY_WRIST_ANGLE = 71.0 * Conv.DEGREES_TO_RADIANS;
         public static final double MAX_HEIGHT_AIM_AT_PIVOT_RADIANS = 86.0 * Conv.DEGREES_TO_RADIANS;
         public static final double MAX_HEIGHT_AIM_AT_TELESCOPE_METERS = kTelescope.MAX_METERS;
@@ -348,7 +349,7 @@ public final class ConstValues {
     }
 
     public static final class kUmbrella {
-        public static final double NOTE_VELO = 25.0;
+        public static final double NOTE_VELO = 15.0;
         public static final String CANBUS = "SuperStructureBus";
 
         public static final class kShooter {
@@ -386,8 +387,6 @@ public final class ConstValues {
             //     new LerpTableEntry(0, 25.0),
             //     new LerpTableEntry(100000, 25.0)
             // );
-
-            public static final double AVERAGE_NOTE_VELO_EST = 25.0;
         }
 
         public static final class kIntake {
