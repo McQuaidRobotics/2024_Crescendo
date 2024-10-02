@@ -22,6 +22,7 @@ public class StemSolvers {
      * @param pivotRads  The angle of the pivot in radians
      * @param horizDist  The horizontal distance from the pivot axel to the target
      * @param vertDist   The vertical distance from the pivot axel to the target
+     * @param offsetPivot Whether or not to offset the pivot angle
      * @return The angle of the wrist in radians
      */
     public static double linearSolveWristTheta(
@@ -48,6 +49,7 @@ public class StemSolvers {
      * @param horizDist     The horizontal distance from the pivot axel to the target
      * @param deltaNoteVelo The average velocity of the note
      * @param time          The time that the entire pass should take from start to finish
+     * @param offsetPivot   Whether or not to offset the pivot angle
      * @return The angle of the wrist in radians
      */
     public static double passWristSolveTheta(

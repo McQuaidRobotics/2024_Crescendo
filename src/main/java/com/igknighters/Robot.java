@@ -103,7 +103,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
         if (allSubsystems.umbrella.isPresent()) {
             final Umbrella umbrella = allSubsystems.umbrella.get();
-            umbrella.setDefaultCommand(UmbrellaCommands.idleShooter(umbrella));
+            umbrella.setDefaultCommand(UmbrellaCommands.idleShooter(umbrella, UmbrellaCommands::defaultIdleRPM));
 
             umbrella.setupSimNoteDetection(localizer);
         }

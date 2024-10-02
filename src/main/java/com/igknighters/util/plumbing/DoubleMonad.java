@@ -16,7 +16,7 @@ import java.util.function.DoubleUnaryOperator;
  * <p>Inspired by 694's StuyLib.
  */
 @FunctionalInterface
-public interface InputStream extends DoubleSupplier {
+public interface DoubleMonad extends DoubleSupplier {
 
     /**
      * Creates an input stream from another.
@@ -24,7 +24,7 @@ public interface InputStream extends DoubleSupplier {
      * @param base The base stream.
      * @return A new input stream.
      */
-    public static InputStream of(DoubleSupplier base) {
+    public static DoubleMonad of(DoubleSupplier base) {
         return base::getAsDouble;
     }
 
@@ -34,15 +34,15 @@ public interface InputStream extends DoubleSupplier {
      * @param base The base value.
      * @return A new input stream.
      */
-    public static InputStream of(double base) {
+    public static DoubleMonad of(double base) {
         return () -> base;
     }
 
-    public static InputStream hypot(InputStream x, InputStream y) {
+    public static DoubleMonad hypot(DoubleMonad x, DoubleMonad y) {
         return () -> Math.hypot(x.get(), y.get());
     }
 
-    public static InputStream atan(InputStream x, InputStream y) {
+    public static DoubleMonad atan(DoubleMonad x, DoubleMonad y) {
         return () -> Math.atan2(x.get(), y.get());
     }
 
@@ -61,7 +61,7 @@ public interface InputStream extends DoubleSupplier {
      * @param operator A function that takes in a double input and returns a double output.
      * @return A mapped stream.
      */
-    public default InputStream map(DoubleUnaryOperator operator) {
+    public default DoubleMonad map(DoubleUnaryOperator operator) {
         return () -> operator.applyAsDouble(getAsDouble());
     }
 
@@ -71,7 +71,7 @@ public interface InputStream extends DoubleSupplier {
      * @param factor A supplier of scaling factors.
      * @return A scaled stream.
      */
-    public default InputStream scale(DoubleSupplier factor) {
+    public default DoubleMonad scale(DoubleSupplier factor) {
         return map(x -> x * factor.getAsDouble());
     }
 
@@ -81,7 +81,7 @@ public interface InputStream extends DoubleSupplier {
      * @param factor A scaling factor.
      * @return A scaled stream.
      */
-    public default InputStream scale(double factor) {
+    public default DoubleMonad scale(double factor) {
         return scale(() -> factor);
     }
 
@@ -90,7 +90,7 @@ public interface InputStream extends DoubleSupplier {
      *
      * @return A stream scaled by -1.
      */
-    public default InputStream negate() {
+    public default DoubleMonad negate() {
         return scale(-1);
     }
 
@@ -100,7 +100,7 @@ public interface InputStream extends DoubleSupplier {
      * @param factor A supplier of offset values.
      * @return An offset stream.
      */
-    public default InputStream add(DoubleSupplier offset) {
+    public default DoubleMonad add(DoubleSupplier offset) {
         return map(x -> x + offset.getAsDouble());
     }
 
@@ -110,7 +110,7 @@ public interface InputStream extends DoubleSupplier {
      * @param factor An offset.
      * @return An offset stream.
      */
-    public default InputStream add(double factor) {
+    public default DoubleMonad add(double factor) {
         return add(() -> factor);
     }
 
@@ -120,7 +120,7 @@ public interface InputStream extends DoubleSupplier {
      * @param exponent The exponent to raise them to.
      * @return An exponentiated stream.
      */
-    public default InputStream pow(double exponent) {
+    public default DoubleMonad pow(double exponent) {
         return map(x -> Math.pow(x, exponent));
     }
 
@@ -130,7 +130,7 @@ public interface InputStream extends DoubleSupplier {
      * @param exponent The exponent to raise them to.
      * @return An exponentiated stream.
      */
-    public default InputStream signedPow(double exponent) {
+    public default DoubleMonad signedPow(double exponent) {
         return map(x -> Math.copySign(Math.pow(x, exponent), x));
     }
 
@@ -140,7 +140,7 @@ public interface InputStream extends DoubleSupplier {
      * @param filter The linear filter to use.
      * @return A filtered stream.
      */
-    public default InputStream filter(LinearFilter filter) {
+    public default DoubleMonad filter(LinearFilter filter) {
         return map(filter::calculate);
     }
 
@@ -151,7 +151,7 @@ public interface InputStream extends DoubleSupplier {
      * @param max The maximum value to scale with.
      * @return A deadbanded stream.
      */
-    public default InputStream deadband(double deadband, double max) {
+    public default DoubleMonad deadband(double deadband, double max) {
         return map(x -> MathUtil.applyDeadband(x, deadband, max));
     }
 
@@ -161,7 +161,7 @@ public interface InputStream extends DoubleSupplier {
      * @param magnitude The upper bound to clamp with.
      * @return A clamped stream.
      */
-    public default InputStream clamp(double magnitude) {
+    public default DoubleMonad clamp(double magnitude) {
         return map(x -> MathUtil.clamp(x, -magnitude, magnitude));
     }
 
@@ -171,7 +171,7 @@ public interface InputStream extends DoubleSupplier {
      * @param rate The rate in units / s.
      * @return A rate limited stream.
      */
-    public default InputStream rateLimit(double rate) {
+    public default DoubleMonad rateLimit(double rate) {
         var limiter = new SlewRateLimiter(rate);
         return map(x -> limiter.calculate(x));
     }
@@ -185,7 +185,7 @@ public interface InputStream extends DoubleSupplier {
      * @param key The NetworkTables key to publish to.
      * @return A stream with the same output as this one.
      */
-    public default InputStream log(String key) {
+    public default DoubleMonad log(String key) {
         DoublePublisher pub = NetworkTableInstance.getDefault().getDoubleTopic(key).publish();
         return () -> {
             double val = this.get();
@@ -199,7 +199,7 @@ public interface InputStream extends DoubleSupplier {
      * 
      * @param consumer The consumer to give the value to.
      */
-    public default InputStream tee(DoubleConsumer consumer) {
+    public default DoubleMonad tee(DoubleConsumer consumer) {
         return () -> {
             double val = this.get();
             consumer.accept(val);

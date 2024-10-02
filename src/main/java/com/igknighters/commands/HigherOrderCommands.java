@@ -15,6 +15,7 @@ import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
+import com.igknighters.util.plumbing.DoubleMonad;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -36,7 +37,7 @@ public class HigherOrderCommands {
                 )
             .andThen(
                 StemCommands.holdAt(stem, StemPosition.STOW)
-                    .alongWith(UmbrellaCommands.idleShooter(umbrella))
+                    .alongWith(UmbrellaCommands.idleShooter(umbrella, UmbrellaCommands::defaultIdleRPM))
                     .beforeStarting(() -> {
                         LED.sendAnimation(LedAnimations.INTAKE).withDuration(1.0);
                     })
@@ -63,6 +64,9 @@ public class HigherOrderCommands {
     ) {
         Command cmd;
         String name;
+        DoubleMonad targetRpm = DoubleMonad.of(umbrella::getShooterTargetSpeed)
+            .scale(30.0 / Math.PI)
+            .log("Aim/ShooterRPM");
         var reason = umbrella.popSpinupReason();
         if (reason.equals(ShooterSpinupReason.Amp)) {
             name = "Amp Shoot";
@@ -82,11 +86,11 @@ public class HigherOrderCommands {
                             stem,
                             controller,
                             localizer),
-                    UmbrellaCommands.shoot(umbrella)
+                    UmbrellaCommands.shoot(umbrella, targetRpm)
                 ).until(() -> controller.leftTrigger(true).getAsDouble() < 0.5);
         } else {
             name = "Traditional Shoot";
-            cmd = UmbrellaCommands.shoot(umbrella);
+            cmd = UmbrellaCommands.shoot(umbrella, targetRpm);
         }
 
         return cmd.finallyDo(() -> {

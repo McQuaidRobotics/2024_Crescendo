@@ -1,11 +1,9 @@
 package com.igknighters.controllers;
 
-import com.igknighters.commands.stem.StemCommands;
-import com.igknighters.commands.umbrella.UmbrellaCommands;
+import com.igknighters.commands.ShotMetricTesting;
 
 import com.igknighters.subsystems.SubsystemResources.Subsystems;
 import com.igknighters.subsystems.stem.Stem;
-import com.igknighters.subsystems.stem.StemPosition;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 
@@ -19,36 +17,36 @@ public class OperatorController extends ControllerParent {
         /// FACE BUTTONS
         this.A.binding = new Binding((trig, allss) -> {
             trig.onTrue(
-                StemCommands.moveTo(allss.stem.get(), StemPosition.STOW, 2.0)
-                .andThen(
-                    UmbrellaCommands.expell(allss.umbrella.get())
+                ShotMetricTesting.shootStraightUp(
+                    allss.stem.get(),
+                    allss.umbrella.get()
                 )
             );
         }, Subsystems.Stem, Subsystems.Umbrella);
 
         this.B.binding = new Binding((trig, allss) -> {
             trig.onTrue(
-                StemCommands.moveTo(allss.stem.get(), StemPosition.STOW, 2.0)
-                .andThen(
-                    UmbrellaCommands.expell(allss.umbrella.get())
+                ShotMetricTesting.intakeStraightUp(
+                    allss.stem.get(),
+                    allss.umbrella.get()
                 )
             );
         }, Subsystems.Stem, Subsystems.Umbrella);
 
         this.X.binding = new Binding((trig, allss) -> {
             trig.onTrue(
-                StemCommands.moveTo(allss.stem.get(), StemPosition.STOW, 2.0)
-                .andThen(
-                    UmbrellaCommands.expell(allss.umbrella.get())
+                ShotMetricTesting.shootTest(
+                    allss.stem.get(),
+                    allss.umbrella.get()
                 )
             );
         }, Subsystems.Stem, Subsystems.Umbrella);
 
         this.Y.binding = new Binding((trig, allss) -> {
             trig.onTrue(
-                StemCommands.moveTo(allss.stem.get(), StemPosition.STOW, 2.0)
-                .andThen(
-                    UmbrellaCommands.expell(allss.umbrella.get())
+                ShotMetricTesting.intakeTest(
+                    allss.stem.get(),
+                    allss.umbrella.get()
                 )
             );
         }, Subsystems.Stem, Subsystems.Umbrella);

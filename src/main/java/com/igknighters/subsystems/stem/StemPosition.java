@@ -157,7 +157,7 @@ public class StemPosition implements StructSerializable {
 
         @Override
         public String toString() {
-            return "DEMO_LOW";
+            return "DemoLow";
         }
     };
 
@@ -168,7 +168,18 @@ public class StemPosition implements StructSerializable {
 
         @Override
         public String toString() {
-            return "DEMO_HIGH";
+            return "DemoHight";
+        }
+    };
+
+    public static final StemPosition SHOOTER_TEST = new StemPosition(
+            Units.degreesToRadians(85.0),
+            Units.degreesToRadians(95.0),
+            kTelescope.MIN_METERS) {
+
+        @Override
+        public String toString() {
+            return "ShooterTest";
         }
     };
 }

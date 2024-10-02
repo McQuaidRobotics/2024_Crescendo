@@ -42,9 +42,9 @@ public class TestingController extends ControllerParent {
 
         this.B.binding = new Binding(Subsystems.Umbrella, (trig, allss) -> {
             trig.onTrue(
-                    UmbrellaCommands.runIntakeAndShooter(
+                    UmbrellaCommands.shoot(
                         allss.umbrella.get(),
-                        1000
+                        () -> 1000
                     ));
         });
 

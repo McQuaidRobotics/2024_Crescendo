@@ -62,7 +62,7 @@ public class AutoCommands {
         return loggedCmd(
             Commands.race(
                 StemCommands.holdAt(stem, StemPosition.INTAKE),
-                UmbrellaCommands.intakeWithIdle(umbrella)
+                UmbrellaCommands.intakeWWhileIdleShooter(umbrella, UmbrellaCommands::defaultIdleRPM)
                     .until(() -> umbrella.holdingGamepiece())
             ).withName("IntakeGamepieceNoStow")
         );
@@ -152,7 +152,7 @@ public class AutoCommands {
 
     protected Command feedShooter() {
         return loggedCmd(
-            UmbrellaCommands.runIntakeAndShooter(umbrella, kControls.AUTO_SHOOTER_RPM)
+            UmbrellaCommands.shoot(umbrella, () -> kControls.AUTO_SHOOTER_RPM)
                 .withTimeout(0.15).withName("FeedShooter")
         );
     }
