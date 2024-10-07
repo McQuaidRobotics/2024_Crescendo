@@ -103,13 +103,15 @@ public final class ConstValues {
     }
 
     public static final class kControls {
-        public static final double SHOOTER_RPM = 6500.0;
+        public static final double SHOOTER_RPM = 7000.0;
+        public static final double SHOOTER_PASS_RPM = 4000.0;
         public static final double AUTO_SHOOTER_RPM = 8000.0;
         public static final double SHOOTER_IDLE_RPM = 2000.0;
         public static final double INTAKE_PERCENT = 0.8;
 
         public static final double STATIONARY_AIM_AT_PIVOT_RADIANS = 40.0 * Conv.DEGREES_TO_RADIANS;
         public static final double STATIONARY_PASS_PIVOT_RADIANS = 60.0 * Conv.DEGREES_TO_RADIANS;
+        public static final double STATIONARY_PASS_TELESCOPE_METERS = kTelescope.MIN_METERS + (0.0 * Conv.INCHES_TO_METERS);
         public static final double STATIONARY_WRIST_ANGLE = 71.0 * Conv.DEGREES_TO_RADIANS;
         public static final double MAX_HEIGHT_AIM_AT_PIVOT_RADIANS = 86.0 * Conv.DEGREES_TO_RADIANS;
         public static final double MAX_HEIGHT_AIM_AT_TELESCOPE_METERS = kTelescope.MAX_METERS;

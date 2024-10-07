@@ -33,7 +33,6 @@ import com.igknighters.util.can.CANBusLogging;
 import com.igknighters.util.can.CANSignalManager;
 import com.igknighters.util.geom.AllianceFlip;
 import com.igknighters.util.geom.GeomUtil;
-import com.igknighters.util.logging.GlobalField;
 import com.igknighters.util.logging.WatchdogSilencer;
 import com.igknighters.util.logging.Tracer;
 import com.igknighters.util.robots.UnitTestableRobot;
@@ -52,7 +51,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
     // );
     // private final FilesystemLogger filesystemLogger = new FilesystemLogger();
 
-    public final Localizer localizer = new Localizer();
+    public final Localizer localizer;
 
     private final DriverController driverController;
     private final OperatorController operatorController;
@@ -79,11 +78,13 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
         ConstantHelper.applyRoboConst(ConstValues.class, robotID);
 
+        localizer = new Localizer();
+
         driverController = new DriverController(0, localizer);
         operatorController = new OperatorController(1);
-        testingController = new TestingController(3);
+        testingController = new TestingController(3, localizer);
 
-        allSubsystems = new AllSubsystems(robotID.subsystems);
+        allSubsystems = new AllSubsystems(localizer, robotID.subsystems);
 
         for (final Logged subsystem : allSubsystems.getLoggableSubsystems()) {
             Monologue.logObj(subsystem, "/Robot/" + subsystem.getOverrideName());
@@ -119,7 +120,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
                 AllianceFlip::isRed,
                 new ChoreoAutoBindings(),
                 (traj, starting) -> {
-                    String msg = "Auto Trajectory " + traj.name() + " " + (starting ? "Started" : "Finished");
+                    String msg = "[Auto] Trajectory " + traj.name() + " " + (starting ? "Started" : "Finished");
                     System.out.println(msg);
                     Monologue.log("AutoEvent", msg);
                 }
@@ -173,7 +174,6 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
             autoManager.update();
             testManager.update();
         });
-        TestingGround.periodic();
     }
 
     @Override
@@ -238,8 +238,6 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
                             .withDatalogPrefix("")
                             .withFileOnly(DriverStation::isFMSAttached)
                             .withLazyLogging(true));
-
-            GlobalField.enable();
         } else {
             // used for tests and CI, does not actually log anything but asserts the logging is setup mostly correct
             Monologue.setupMonologueDisabled(this, "/Robot", true);

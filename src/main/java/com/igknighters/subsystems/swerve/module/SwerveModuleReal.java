@@ -17,6 +17,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
+import monologue.Annotations.IgnoreLogged;
 
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kSwerve.kAngleMotor;
@@ -44,6 +45,7 @@ public class SwerveModuleReal extends SwerveModule {
     private final double rotationOffset;
     private final boolean isPro;
 
+    @IgnoreLogged
     private final RealSwerveOdometryThread odoThread;
 
     private Rotation2d lastAngle = new Rotation2d();

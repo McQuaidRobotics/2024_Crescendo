@@ -202,8 +202,8 @@ public abstract class Camera extends Component {
             return new Pair<>(this, fault);
         }
 
-        public VisionPoseEstimate withAmbiguity(double newAmbiguity) {
-            return new VisionPoseEstimate(cameraId, pose, timestamp, apriltags, newAmbiguity, maxDistance);
+        public VisionPoseEstimate withError(double newError) {
+            return new VisionPoseEstimate(cameraId, pose, timestamp, apriltags, newError, maxDistance);
         }
 
         public static class VisionPoseEstimateStruct implements Struct<VisionPoseEstimate> {

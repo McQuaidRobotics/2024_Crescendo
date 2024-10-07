@@ -85,32 +85,28 @@ public class TeleopSwerveBaseCmd extends Command implements StructSerializable {
         }
     }
 
-    protected double getTranslationX() {
-        // inverted because left is positive for field due to Y being increased but left
-        // is negative for controller
-        double processed = -kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(rawTranslationXSup.getAsDouble()) * invert();
-        if (Robot.isDemo()) processed *= translationMod.value();
-        return processed;
+    protected Translation2d getTranslation() {
+        double rawX = -rawTranslationXSup.getAsDouble();
+        double rawY = rawTranslationYSup.getAsDouble();
+        double angle = Math.atan2(rawY, rawX);
+        double rawMagnitude = Math.hypot(rawX, rawY);
+        double magnitude = kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(rawMagnitude);
+        if (Robot.isDemo()) magnitude *= translationMod.value();
+        double processedX = magnitude * Math.cos(angle) * invert();
+        double processedY = magnitude * Math.sin(angle) * invert();
+        return new Translation2d(processedX, processedY);
     }
 
-    protected double getTranslationY() {
-        double processed = kSwerve.TELEOP_TRANSLATION_AXIS_CURVE.lerpKeepSign(rawTranslationYSup.getAsDouble()) * invert();
-        if (Robot.isDemo()) processed *= translationMod.value();
-        return processed;
-    }
-
-    protected double getRotationX() {
-        // inverted because left is positive for field due to Y being increased but left
-        // is negative for controller
-        double processed = -kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(rawRotationXSup.getAsDouble());
-        if (Robot.isDemo()) processed *= rotationMod.value();
-        return processed;
-    }
-
-    protected double getRotationY() {
-        double processed = kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(rawRotationYSup.getAsDouble());
-        if (Robot.isDemo()) processed *= rotationMod.value();
-        return processed;
+    protected Translation2d getRotation() {
+        double rawX = -rawRotationXSup.getAsDouble();
+        double rawY = rawRotationYSup.getAsDouble();
+        double angle = Math.atan2(rawY, rawX);
+        double rawMagnitude = Math.hypot(rawX, rawY);
+        double magnitude = kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(rawMagnitude);
+        if (Robot.isDemo()) magnitude *= rotationMod.value();
+        double processedX = magnitude * Math.cos(angle);
+        double processedY = magnitude * Math.sin(angle);
+        return new Translation2d(processedX, processedY);
     }
 
     public static class TeleopSwerveBaseStruct implements Struct<TeleopSwerveBaseCmd> {
@@ -144,14 +140,16 @@ public class TeleopSwerveBaseCmd extends Command implements StructSerializable {
         @Override
         public void pack(ByteBuffer bb, TeleopSwerveBaseCmd value) {
             if (value.isScheduled()) {
+                Translation2d translation = value.getTranslation();
+                Translation2d rotation = value.getRotation();
                 bb.putDouble(value.rawTranslationXSup.getAsDouble());
-                bb.putDouble(value.getTranslationX());
+                bb.putDouble(translation.getX());
                 bb.putDouble(value.rawTranslationYSup.getAsDouble());
-                bb.putDouble(value.getTranslationY());
+                bb.putDouble(translation.getY());
                 bb.putDouble(value.rawRotationXSup.getAsDouble());
-                bb.putDouble(value.getRotationX());
+                bb.putDouble(rotation.getX());
                 bb.putDouble(value.rawRotationYSup.getAsDouble());
-                bb.putDouble(value.getRotationY());
+                bb.putDouble(rotation.getY());
             } else {
                 bb.putDouble(0.0);
                 bb.putDouble(0.0);

@@ -12,22 +12,24 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 
 import com.igknighters.Localizer;
-import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.controllers.ControllerParent;
 
-public class TeleopSwerveTargetSpeakerCmd extends TeleopSwerveBaseCmd {
-    private final static Translation2d SPEAKER = FieldConstants.SPEAKER.toTranslation2d();
+public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
+    private static final TunableDouble lookaheadTime = TunableValues.getDouble("SwerveTargetCmd/AutoAimLookaheadTime", 0.2);
+    private static final TunableDouble speedMult = TunableValues.getDouble("SwerveTargetCmd/AutoAimSpeedMult", 0.4);
 
     private final Localizer localizer;
-    private final TunableDouble lookaheadTime = TunableValues.getDouble("AutoAimLookaheadTime", 0.2);
-    private final TunableDouble speedMult = TunableValues.getDouble("AutoAimSpeedMult", 0.4);
+    private final Translation2d target;
+    private final boolean movementComp;
 
-    public TeleopSwerveTargetSpeakerCmd(Swerve swerve, ControllerParent controller, Localizer localizer) {
+    public TeleopSwerveTargetCmd(Swerve swerve, ControllerParent controller, Localizer localizer, Translation2d target, boolean movementComp) {
         super(swerve, controller);
         addRequirements(swerve);
         this.localizer = localizer;
+        this.target = target;
+        this.movementComp = movementComp;
     }
 
     @Override
@@ -37,17 +39,16 @@ public class TeleopSwerveTargetSpeakerCmd extends TeleopSwerveBaseCmd {
 
     @Override
     public void execute() {
-        Translation2d targetTranslation = AllianceFlip.isBlue() ? SPEAKER : AllianceFlip.flipTranslation(SPEAKER);
+        Translation2d targetTranslation = AllianceFlip.isBlue() ? target : AllianceFlip.flipTranslation(target);
 
-        Translation2d vt = orientForUser(new Translation2d(
-                getTranslationX() * kSwerve.MAX_DRIVE_VELOCITY * speedMult.value(),
-                getTranslationY() * kSwerve.MAX_DRIVE_VELOCITY * speedMult.value()));
+        Translation2d vt = orientForUser(getTranslation())
+                .times(kSwerve.MAX_DRIVE_VELOCITY * speedMult.value());
 
         ChassisSpeeds desiredChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 vt.getX(),
                 vt.getY(),
                 0.0,
-                swerve.getYawWrappedRot());
+                new Rotation2d(swerve.getYawRads()));
         ChassisSpeeds currentChassisSpeeds = swerve.getChassisSpeed();
 
         ChassisSpeeds avgChassisSpeeds = new ChassisSpeeds(
@@ -70,10 +71,19 @@ public class TeleopSwerveTargetSpeakerCmd extends TeleopSwerveBaseCmd {
                 avgChassisSpeeds.vyMetersPerSecond * lookaheadTimeValue
             ));
 
-        Rotation2d targetAngle = GeomUtil.rotationRelativeToPose(
+        Rotation2d targetAngle;
+
+        if (movementComp) {
+            targetAngle = GeomUtil.rotationRelativeToPose(
                 lookaheadTranslation,
                 adjustedTarget
-        ).plus(GeomUtil.ROTATION2D_PI);
+            ).plus(GeomUtil.ROTATION2D_PI);
+        } else {
+            targetAngle = GeomUtil.rotationRelativeToPose(
+                localizer.pose().getTranslation(),
+                targetTranslation
+            ).plus(GeomUtil.ROTATION2D_PI);
+        }
 
         double rotVelo = swerve.rotVeloForRotation(targetAngle, Units.degreesToRadians(0.3));
 

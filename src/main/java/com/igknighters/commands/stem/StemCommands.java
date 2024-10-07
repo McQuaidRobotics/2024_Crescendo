@@ -12,15 +12,13 @@ import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.stem.StemSolvers;
 import com.igknighters.subsystems.stem.StemSolvers.AimSolveStrategy;
 import com.igknighters.subsystems.stem.StemSolvers.StemSolveInput;
-import com.igknighters.subsystems.umbrella.shooter.Shooter;
 import com.igknighters.util.geom.AllianceFlip;
-import com.igknighters.util.logging.GlobalField;
 import com.igknighters.util.plumbing.TunableValues;
-import com.igknighters.util.plumbing.Channels.Sender;
+import com.igknighters.util.plumbing.TunableValues.TunableDouble;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import monologue.Monologue;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -104,13 +102,12 @@ public class StemCommands {
      * A command class that continually calculates the wrist radians needed to pass a gamepiece to a position on then field
      */
     private static class AimAtPassPointCommand extends Command {
+        private static final TunableDouble noteMps = TunableValues.getDouble("Aim/NoteMps", 11.0);
+
         private final Stem stem;
-        private final double time;
         private final Translation2d passPoint;
         private final Supplier<Pose2d> poseSupplier;
         private final boolean canFinish;
-
-        private final Sender<Pose2d[]> targetSender = Sender.broadcast(GlobalField.ARBITRARY_TARGETS, Pose2d[].class);
 
         private Translation2d targetTranslation;
         private boolean hasFinished = false;
@@ -118,13 +115,11 @@ public class StemCommands {
         private AimAtPassPointCommand(
             Stem stem,
             Translation2d passPoint,
-            double time,
             boolean canFinish,
             Supplier<Pose2d> poseSupplier
         ) {
             addRequirements(stem);
             this.stem = stem;
-            this.time = time;
             this.passPoint = passPoint;
             this.canFinish = canFinish;
             this.poseSupplier = poseSupplier;
@@ -133,7 +128,6 @@ public class StemCommands {
         @Override
         public void initialize() {
             targetTranslation = AllianceFlip.isBlue() ? passPoint : AllianceFlip.flipTranslation(passPoint);
-            targetSender.send(new Pose2d[] { new Pose2d(targetTranslation, new Rotation2d()) });
         }
 
         @Override
@@ -143,18 +137,28 @@ public class StemCommands {
             Monologue.log("Aim/PassDistance", distance);
 
             double pivotRads = kControls.STATIONARY_PASS_PIVOT_RADIANS;
-            double telescopeMeters = kTelescope.MIN_METERS;
-            double wristRads = StemSolvers.passWristSolveTheta(
+            double telescopeMeters = kControls.STATIONARY_PASS_TELESCOPE_METERS;
+
+            double wristRads = StemSolvers.gravitySolveWristTheta2(
                 telescopeMeters,
                 pivotRads,
-                distance,
-                Shooter.rpmToMps(TunableValues.getDouble("PassRpm", 4500).value()),
-                TunableValues.getDouble("PassTime", time).value(),
+                currentPose.getTranslation(),
+                new Translation3d(
+                    targetTranslation.getX(),
+                    targetTranslation.getY(),
+                    0.0
+                ),
+                noteMps.value(),
+                false,
                 true
-            ); 
+            );
 
             stem.gotoStemPosition(
-                StemPosition.fromRadians(pivotRads, wristRads, telescopeMeters)
+                StemPosition.fromRadians(
+                    pivotRads,
+                    wristRads,
+                    telescopeMeters
+                )
             );
         }
 
@@ -204,6 +208,17 @@ public class StemCommands {
     }
 
     /**
+     * Will command the stem to hold still at its current position.
+     * 
+     * @param stem The stem subsystem
+     * @return A command to be scheduled
+     */
+    public static Command holdStill(Stem stem) {
+        return stem.run(() -> stem.gotoStemPosition(stem.getStemPosition(), 0.0))
+                .withName("Hold Stem Still");
+    }
+
+    /**
      * Aims the pivot or wrist or both depending on the aim strategy.
      * 
      * @param stem      The stem subsystem
@@ -239,8 +254,8 @@ public class StemCommands {
      * @param poseSupplier
      * @return
      */
-    public static Command aimAtPassPoint(Stem stem, Translation2d passPoint, double time, boolean canFinish, Supplier<Pose2d> poseSupplier) {
-        return new AimAtPassPointCommand(stem, passPoint, time, canFinish, poseSupplier)
+    public static Command aimAtPassPoint(Stem stem, Translation2d passPoint, boolean canFinish, Supplier<Pose2d> poseSupplier) {
+        return new AimAtPassPointCommand(stem, passPoint, canFinish, poseSupplier)
             .withName(String.format("AimAtPassPoint(x: %.2f, y: %.2f)", passPoint.getX(), passPoint.getY()));
     }
 

@@ -54,7 +54,7 @@ public class GamepieceSimulator {
      * @param intakePointTransform A list of the robot relative transforms of the intake when the robot is intaking
      * @return A Trigger that will have a guranteed rising edge for every note the robot intakes
      */
-    public static Trigger setupGamepieceIntakeSim(
+    public static Trigger setupGamepieceAcquisitionSim(
             Supplier<Pose2d> poseSupplier,
             BooleanSupplier isIntakingSupplier,
             Consumer<List<Translation2d>> noteDisplayFunction,

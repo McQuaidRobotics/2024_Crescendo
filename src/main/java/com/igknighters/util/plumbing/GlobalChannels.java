@@ -11,7 +11,7 @@ import java.lang.reflect.Type;
 /**
  * A utility implementing broadcast(multi-sender, multi-receiver) type-safe channels for inner and inter thread communication
  */
-public class Channels {
+public class GlobalChannels {
     private static final HashMap<String, ArrayList<Receiver<?>>> receivers = new HashMap<>();
     private static final HashMap<String, Type> types = new HashMap<>();
 
@@ -22,7 +22,10 @@ public class Channels {
      * @param <T> The type of the channel
      */
     public static abstract class Receiver<T> {
+        private final String channelName;
+
         Receiver(Class<T> clazz, String channelName) {
+            this.channelName = channelName;
             if (!types.containsKey(channelName)) {
                 types.put(channelName, clazz);
             } else {
@@ -31,9 +34,7 @@ public class Channels {
                             + types.get(channelName) + " but tried to create with type " + clazz);
                 }
             }
-            if (!receivers.containsKey(channelName)) {
-                receivers.put(channelName, new ArrayList<>());
-            }
+            receivers.putIfAbsent(channelName, new ArrayList<>());
             receivers.get(channelName).add(this);
         }
 
@@ -117,7 +118,16 @@ public class Channels {
         /**
          * @return the name of the channel
          */
-        public abstract String getChannelName();
+        public String getChannelName() {
+            return channelName;
+        }
+
+        /**
+         * Closes the receiver, removing it from the channel
+         */
+        public void close() {
+            receivers.get(getChannelName()).remove(this);
+        }
 
         /**
          * Creates a receiver that stores the latest value
@@ -160,7 +170,6 @@ public class Channels {
          * @param <T>         the type of the channel
          * @param channelName the name of the channel to receive from
          * @param consumer    the consumer to call with the received value
-         * @return the receiver
          */
         public static <T> void reactor(final String channelName, Class<T> clazz, Consumer<T> consumer) {
             new ReceiverReactor<T>(clazz, channelName, consumer);
@@ -172,97 +181,19 @@ public class Channels {
      */
     private static final class ReceiverLatest<T> extends Receiver<T> {
         private final ReadWriteLock lock = new ReentrantReadWriteLock();
-        private final String channelName;
 
-        private Optional<T> value = Optional.empty();
+        private boolean hasValue = false;
+        private T value = null;
 
         public ReceiverLatest(Class<T> clazz, final String channelName) {
             super(clazz, channelName);
-            this.channelName = channelName;
         }
 
         @Override
         public T recv() {
             lock.readLock().lock();
             try {
-                return value.get();
-            } finally {
-                value = Optional.empty();
-                lock.readLock().unlock();
-            }
-        }
-
-        @Override
-        public T inspect() {
-            lock.readLock().lock();
-            try {
-                return value.get();
-            } finally {
-                lock.readLock().unlock();
-            }
-        }
-
-        @Override
-        public boolean hasData() {
-            lock.readLock().lock();
-            try {
-                return value.isPresent();
-            } finally {
-                lock.readLock().unlock();
-            }
-        }
-
-        @Override
-        protected void send(T newValue) {
-            lock.writeLock().lock();
-            try {
-                value = Optional.of(newValue);
-            } finally {
-                lock.writeLock().unlock();
-            }
-        }
-
-        @Override
-        public String getChannelName() {
-            return channelName;
-        }
-    }
-
-    /**
-     * The receiving end of a broadcast channel that stores all values in a circular
-     * buffer,
-     * can hold up to specified number of values
-     */
-    private static final class ReceiverBuffered<T> extends Receiver<T> {
-        private final ReadWriteLock lock = new ReentrantReadWriteLock();
-        private final String channelName;
-
-        private final T[] buffer;
-        /** the index of the newest data */
-        private int newIndex = 0;
-        /** the index of the oldest data */
-        private int oldIndex = 0;
-
-        @SuppressWarnings("unchecked")
-        public ReceiverBuffered(int bufferSize, Class<T> clazz, final String channelName) {
-            super(clazz, channelName);
-            if (bufferSize <= 0) {
-                throw new IllegalArgumentException("bufferSize must be positive and non-zero");
-            }
-            this.channelName = channelName;
-            buffer = (T[]) new Object[bufferSize];
-            for (int i = 0; i < bufferSize; i++) {
-                buffer[i] = null;
-            }
-        }
-
-        @Override
-        public T recv() {
-            lock.readLock().lock();
-            try {
-                T value = buffer[oldIndex];
-                buffer[oldIndex] = null;
-                oldIndex = (oldIndex + 1) % buffer.length;
+                hasValue = false;
                 return value;
             } finally {
                 lock.readLock().unlock();
@@ -273,7 +204,7 @@ public class Channels {
         public T inspect() {
             lock.readLock().lock();
             try {
-                return buffer[oldIndex];
+                return value;
             } finally {
                 lock.readLock().unlock();
             }
@@ -283,7 +214,7 @@ public class Channels {
         public boolean hasData() {
             lock.readLock().lock();
             try {
-                return buffer[oldIndex] != null;
+                return hasValue;
             } finally {
                 lock.readLock().unlock();
             }
@@ -293,19 +224,86 @@ public class Channels {
         protected void send(T newValue) {
             lock.writeLock().lock();
             try {
-                buffer[newIndex] = newValue;
-                newIndex = (newIndex + 1) % buffer.length;
-                if (newIndex == oldIndex) {
-                    oldIndex = (oldIndex + 1) % buffer.length;
-                }
+                value = newValue;
+                hasValue = true;
             } finally {
                 lock.writeLock().unlock();
             }
         }
+    }
+
+    /**
+     * The receiving end of a broadcast channel that stores all values in a circular
+     * buffer,
+     * can hold up to specified number of values
+     */
+    private static final class ReceiverBuffered<T> extends Receiver<T> {
+        private final ReadWriteLock lock = new ReentrantReadWriteLock();
+
+        /** the buffer of all currently held values */
+        private final T[] buffer;
+        /** the index of the newest data */
+        private int newestIndex = 0;
+        /** the index of the oldest data */
+        private int oldestIndex = 0;
+
+        @SuppressWarnings("unchecked")
+        public ReceiverBuffered(int bufferSize, Class<T> clazz, final String channelName) {
+            super(clazz, channelName);
+            if (bufferSize <= 0) {
+                throw new IllegalArgumentException("bufferSize must be positive and non-zero");
+            }
+            buffer = (T[]) new Object[bufferSize];
+            for (int i = 0; i < bufferSize; i++) {
+                buffer[i] = null;
+            }
+        }
 
         @Override
-        public String getChannelName() {
-            return channelName;
+        public T recv() {
+            lock.readLock().lock();
+            try {
+                T value = buffer[oldestIndex];
+                buffer[oldestIndex] = null;
+                oldestIndex = (oldestIndex + 1) % buffer.length;
+                return value;
+            } finally {
+                lock.readLock().unlock();
+            }
+        }
+
+        @Override
+        public T inspect() {
+            lock.readLock().lock();
+            try {
+                return buffer[oldestIndex];
+            } finally {
+                lock.readLock().unlock();
+            }
+        }
+
+        @Override
+        public boolean hasData() {
+            lock.readLock().lock();
+            try {
+                return buffer[oldestIndex] != null;
+            } finally {
+                lock.readLock().unlock();
+            }
+        }
+
+        @Override
+        protected void send(T newValue) {
+            lock.writeLock().lock();
+            try {
+                buffer[newestIndex] = newValue;
+                newestIndex = (newestIndex + 1) % buffer.length;
+                if (newestIndex == oldestIndex) {
+                    oldestIndex = (oldestIndex + 1) % buffer.length;
+                }
+            } finally {
+                lock.writeLock().unlock();
+            }
         }
     }
 
@@ -314,12 +312,10 @@ public class Channels {
      * received value
      */
     private static final class ReceiverReactor<T> extends Receiver<T> {
-        private final String channelName;
         private final Consumer<T> consumer;
 
         public ReceiverReactor(Class<T> clazz, final String channelName, Consumer<T> consumer) {
             super(clazz, channelName);
-            this.channelName = channelName;
             this.consumer = consumer;
         }
 
@@ -335,17 +331,12 @@ public class Channels {
 
         @Override
         public boolean hasData() {
-            return false;
+            throw new UnsupportedOperationException("Reactor channels do not support hasData");
         }
 
         @Override
         protected void send(T newValue) {
             consumer.accept(newValue);
-        }
-
-        @Override
-        public String getChannelName() {
-            return channelName;
         }
     }
 
@@ -356,6 +347,8 @@ public class Channels {
      */
     public static final class Sender<T> {
         private final String channelName;
+        /** A reference to the entry value in the {@code receivers} map */
+        private final ArrayList<Receiver<?>> receiverCache;
 
         private Sender(final String channelName, Class<T> clazz) {
             this.channelName = channelName;
@@ -370,6 +363,7 @@ public class Channels {
             } else {
                 types.put(channelName, clazz);
             }
+            receiverCache = receivers.get(channelName);
         }
 
         /**
@@ -379,9 +373,16 @@ public class Channels {
          */
         @SuppressWarnings("unchecked")
         public void send(T newValue) {
-            for (Receiver<?> receiver : receivers.get(channelName)) {
+            for (Receiver<?> receiver : receiverCache) {
                 ((Receiver<T>) receiver).send(newValue);
             }
+        }
+
+        /**
+         * @return the name of the channel
+         */
+        public String getChannelName() {
+            return channelName;
         }
 
         public static <T> Sender<T> broadcast(final String channelName, Class<T> clazz) {

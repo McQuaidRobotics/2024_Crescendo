@@ -1,40 +1,57 @@
 package com.igknighters;
 
-import com.igknighters.constants.ConstValues.kChannels;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.subsystems.swerve.odometryThread.SwerveDriveSample;
 import com.igknighters.subsystems.vision.camera.Camera.VisionPoseEstimate;
 import com.igknighters.util.geom.GeomUtil;
-import com.igknighters.util.plumbing.Channels.Receiver;
-import com.igknighters.util.plumbing.Channels.Sender;
+import com.igknighters.util.plumbing.Channel;
+import com.igknighters.util.plumbing.Channel.Receiver;
+import com.igknighters.util.plumbing.Channel.Sender;
+import com.igknighters.util.plumbing.Channel.ThreadSafetyMarker;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import monologue.Logged;
+import monologue.Monologue;
 
+public class Localizer implements Logged{
 
-public class Localizer {
-    private final Sender<Pose2d> positionSender = Sender.broadcast(kChannels.POSITION, Pose2d.class);
-    private final Receiver<VisionPoseEstimate> visionDataReceiver = Receiver.buffered(kChannels.VISION, 32, VisionPoseEstimate.class);
-    private final Receiver<SwerveDriveSample> swerveDataReveiver = Receiver.buffered(kChannels.SWERVE_ODO_SAMPLES, 32, SwerveDriveSample.class);
+    private final Channel<VisionPoseEstimate> visionDataChannel = new Channel<>();
+    private final Channel<SwerveDriveSample> swerveDataChannel = new Channel<>();
+
+    private final Receiver<VisionPoseEstimate> visionDataReceiver = visionDataChannel.openReceiver(8, ThreadSafetyMarker.CONCURRENT);
+    private final Receiver<SwerveDriveSample> swerveDataReveiver = swerveDataChannel.openReceiver(32, ThreadSafetyMarker.CONCURRENT);
 
     private final SwerveDrivePoseEstimator poseEstimator;
 
-    private final Matrix<N3, N1> visionStdDevs = VecBuilder.fill(0, 0, 1.0);
+    private final Matrix<N3, N1> visionStdDevs = VecBuilder.fill(0, 0, Math.PI * 10);
 
     private Pose2d latestPose = GeomUtil.POSE2D_CENTER;
+    private Pose2d latestVisionPose = GeomUtil.POSE2D_CENTER;
+    private double latestVisionTimestamp = 0;
+
+    private final Field2d field;
+    public static record NamedPositions(String name, Pose2d[] positions) {}
+    private final Channel<NamedPositions> namedPositionsChannel = new Channel<>();
+    private final Receiver<NamedPositions> namedPositionsReceiver = namedPositionsChannel.openReceiver(24, ThreadSafetyMarker.SEQUENTIAL);
+
+    private final Channel<ChassisSpeeds> velocityChannel = new Channel<>();
 
     public Localizer() {
         final var defaultModulePositions = new SwerveModulePosition[] {
-            new SwerveModulePosition(),
-            new SwerveModulePosition(),
-            new SwerveModulePosition(),
-            new SwerveModulePosition()
+                new SwerveModulePosition(),
+                new SwerveModulePosition(),
+                new SwerveModulePosition(),
+                new SwerveModulePosition()
         };
 
         poseEstimator = new SwerveDrivePoseEstimator(
@@ -43,8 +60,27 @@ public class Localizer {
             defaultModulePositions,
             GeomUtil.POSE2D_CENTER,
             VecBuilder.fill(0.1, 0.1, 0.1),
-            VecBuilder.fill(1.0, 1.0, 1.0)
+            visionStdDevs
         );
+
+        field = new Field2d();
+        Monologue.publishSendable("/Visualizers/Field", field);
+    }
+
+    public Sender<VisionPoseEstimate> visionDataSender() {
+        return visionDataChannel.sender();
+    }
+
+    public Sender<SwerveDriveSample> swerveDataSender() {
+        return swerveDataChannel.sender();
+    }
+
+    public Sender<NamedPositions> namedPositionsSender() {
+        return namedPositionsChannel.sender();
+    }
+
+    public Channel<ChassisSpeeds> velocityChannel() {
+        return velocityChannel;
     }
 
     public void resetOdometry(Pose2d pose, SwerveModulePosition[] modulePositions) {
@@ -61,18 +97,31 @@ public class Localizer {
             var sample = visionDataReceiver.recv();
             visionStdDevs.set(0, 0, sample.trust());
             visionStdDevs.set(1, 0, sample.trust());
+            latestVisionPose = sample.pose().toPose2d();
+            latestVisionTimestamp = sample.timestamp();
             poseEstimator.addVisionMeasurement(
-                sample.pose().toPose2d(),
-                sample.timestamp(),
-                visionStdDevs
-            );
+                    latestVisionPose,
+                    latestVisionTimestamp,
+                    visionStdDevs);
+        }
+        while (namedPositionsReceiver.hasData()) {
+            var namedPositions = namedPositionsReceiver.recv();
+            field.getObject(namedPositions.name()).setPoses(namedPositions.positions());
         }
 
         latestPose = poseEstimator.getEstimatedPosition();
-        positionSender.send(latestPose);
+        field.getRobotObject().setPose(latestPose);
     }
 
     public Pose2d pose() {
         return latestPose;
+    }
+
+    public Pose2d visionPose(double ageLimit) {
+        if (latestVisionTimestamp + ageLimit < Timer.getFPGATimestamp()) {
+            return latestPose;
+        } else {
+            return latestVisionPose;
+        }
     }
 }

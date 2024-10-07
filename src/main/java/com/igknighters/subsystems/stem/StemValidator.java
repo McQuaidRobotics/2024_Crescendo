@@ -9,19 +9,13 @@ import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
-import com.igknighters.subsystems.stem.StemVisualizer.StemVisualizerDot;
 import com.igknighters.util.geom.Rectangle2d;
-import com.igknighters.util.plumbing.Channels.Sender;
 
 public class StemValidator {
     /**
      * An effectively miniscule value used to define incredibly steep slopes
      */
     private static final double SMOL = 0.00000001;
-    private static final boolean SHOW_DOTS = false;
-
-    private static final Sender<StemVisualizerDot> DOT_SENDER = Sender.broadcast(
-            "StemVisualizerDots", StemVisualizerDot.class);
 
     public static class MechanismPoints {
         public final Translation2d wristAxelPoint, umbrellaBottomRightPoint, umbrellaTopRightPoint,
@@ -214,14 +208,6 @@ public class StemValidator {
         // umbrella within the x y coordinate plane from (0, 0)
         MechanismPoints mechPts = new MechanismPoints(stemPosition);
 
-        if (SHOW_DOTS) {
-            DOT_SENDER.send(new StemVisualizerDot("wristAxel", mechPts.wristAxelPoint));
-            DOT_SENDER.send(new StemVisualizerDot("umbrellaBottomRight", mechPts.umbrellaBottomRightPoint));
-            DOT_SENDER.send(new StemVisualizerDot("umbrellaTopRight", mechPts.umbrellaTopRightPoint));
-            DOT_SENDER.send(new StemVisualizerDot("umbrellaBottomLeft", mechPts.umbrellaBottomLeftPoint));
-            DOT_SENDER.send(new StemVisualizerDot("umbrellaTopLeft", mechPts.umbrellaTopLeftPoint));
-        }
-
         // The x coordinates of where on the top and bottom of the drive base's
         // y coordinates intesects with the function of the line of the angle
         // of the wrist with the umbrella length from the umbrella point of
@@ -253,24 +239,6 @@ public class StemValidator {
                 mechPts.wristAxelPoint,
                 kRobotCollisionGeometry.DRIVE_BASE.getBottomY());
 
-        if (SHOW_DOTS) {
-            DOT_SENDER.send(new StemVisualizerDot("wristDriveBaseTopIntersect",
-                    new Translation2d(wristDriveBaseTopIntersect,
-                            kRobotCollisionGeometry.DRIVE_BASE.getTopY())));
-
-            DOT_SENDER.send(new StemVisualizerDot("wristDriveBaseTopIntersect",
-                    new Translation2d(wristDriveBaseTopIntersect,
-                            kRobotCollisionGeometry.DRIVE_BASE.getTopY())));
-
-            DOT_SENDER.send(new StemVisualizerDot("wristDriveBaseTopIntersect",
-                    new Translation2d(wristDriveBaseTopIntersect,
-                            kRobotCollisionGeometry.DRIVE_BASE.getTopY())));
-
-            DOT_SENDER.send(new StemVisualizerDot("wristDriveBaseBottomIntersect",
-                    new Translation2d(wristDriveBaseBottomIntersect,
-                            kRobotCollisionGeometry.DRIVE_BASE.getBottomY())));
-        }
-
         // Boolean logic for recognizing when the intersection points on the drive
         // base are within the interval of the drive base left and right side.
         // Also boolean logic to determine when the actual mechanism is outside the
@@ -298,15 +266,6 @@ public class StemValidator {
         boolean stemCollidesDrivebase = isWristAxelPointBelowDrivebase
                 && (topStemInterceptInRect || bottomStemInterceptInRect);
         boolean drivebaseCollides = umbrellaCollidesDrivebase || stemCollidesDrivebase;
-
-        if (SHOW_DOTS) {
-            DOT_SENDER.send(new StemVisualizerDot("boundsTopRight", kRobotCollisionGeometry.BOUNDS.getTopRight()));
-            DOT_SENDER.send(new StemVisualizerDot("boundsBottomRight",
-                    kRobotCollisionGeometry.BOUNDS.getBottomRight()));
-            DOT_SENDER.send(new StemVisualizerDot("boundsTopLeft", kRobotCollisionGeometry.BOUNDS.getTopLeft()));
-            DOT_SENDER.send(new StemVisualizerDot("boundsBottomLeft",
-                    kRobotCollisionGeometry.BOUNDS.getBottomLeft()));
-        }
 
         return ValidationResponse.collisionFrom(drivebaseCollides, mechPts.outsideBounds());
     }
@@ -417,13 +376,12 @@ public class StemValidator {
             }
         }
 
-        Monologue.log("/Robot/Stem/StemValidator/StepTowardsTargetPosition/Mid State Stem Position",
+        Monologue.log("/Robot/Stem/StemValidator/StepTowardsTargetPosition/MidState",
                 StemPosition
                         .fromRadians(midStatePivotRads, midStateWristRads,
-                                midStateTelescopeMeters)
-                        .toString());
-        Monologue.log("/Robot/Stem/StemValidator/StepTowardsTargetPosition/Target Stem Position",
-                targetState.toString());
+                                midStateTelescopeMeters));
+        Monologue.log("/Robot/Stem/StemValidator/StepTowardsTargetPosition/Target",
+                targetState);
 
         return StemPosition.fromRadians(midStatePivotRads, midStateWristRads, midStateTelescopeMeters);
     }

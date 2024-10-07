@@ -6,7 +6,6 @@ import com.igknighters.Robot;
 import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.umbrella.Umbrella;
-import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,10 +29,9 @@ public class UmbrellaCommands {
      * @param rpmSup      A supplier for the target speed in rotations per minute
      * @return A command to be scheduled
      */
-    public static Command spinupShooter(Umbrella umbrella, DoubleSupplier rpmSup, ShooterSpinupReason reason) {
+    public static Command spinupShooter(Umbrella umbrella, DoubleSupplier rpmSup) {
         return umbrella.run(() -> {
             umbrella.spinupShooterToRPM(rpmSup.getAsDouble());
-            umbrella.pushSpinupReason(reason);
         }).withName("Spinup Shooter");
     }
 
@@ -44,8 +42,8 @@ public class UmbrellaCommands {
      * @param rpm      The target speed in rotations per minute
      * @return A command to be scheduled
      */
-    public static Command spinupShooter(Umbrella umbrella, double rpm, ShooterSpinupReason reason) {
-        return spinupShooter(umbrella, () -> rpm, reason);
+    public static Command spinupShooter(Umbrella umbrella, double rpm) {
+        return spinupShooter(umbrella, () -> rpm);
     }
 
     /**
@@ -136,7 +134,6 @@ public class UmbrellaCommands {
         return umbrella.run(() -> {
             umbrella.runIntakeAt(0.0);
             umbrella.spinupShooterToRPM(rpmSupplier.getAsDouble());
-            umbrella.pushSpinupReason(ShooterSpinupReason.Idle);
         }).withName("IdleIntake");
     }
 
@@ -151,7 +148,6 @@ public class UmbrellaCommands {
                 () -> {
                     umbrella.runIntakeAt(-0.7, false);
                     umbrella.spinupShooterToRPM(rpmSupplier.getAsDouble());
-                    umbrella.pushSpinupReason(ShooterSpinupReason.Idle);
                 },
                 () -> umbrella.runIntakeAt(0.0, false)
         ).until(umbrella::holdingGamepiece)

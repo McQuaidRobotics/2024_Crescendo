@@ -1,6 +1,7 @@
 package com.igknighters.subsystems.umbrella;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.igknighters.Localizer;
 import com.igknighters.Robot;
@@ -10,9 +11,7 @@ import com.igknighters.subsystems.umbrella.intake.*;
 import com.igknighters.subsystems.umbrella.shooter.*;
 import com.igknighters.util.GamepieceSimulator;
 import com.igknighters.util.geom.GeomUtil;
-import com.igknighters.util.logging.GlobalField;
 import com.igknighters.util.logging.Tracer;
-import com.igknighters.util.plumbing.Channels.Sender;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -24,21 +23,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
  * 
  */
 public class Umbrella implements LockFullSubsystem {
-
-    /**
-     * A collection of reasons the shooter can be spun up
-     */
-    public static enum ShooterSpinupReason {
-        None,
-        Idle,
-        AutoAimSpeaker,
-        ManualAimSpeaker,
-        Amp
-    }
-
     private final Intake intake;
     private final Shooter shooter;
-    private ShooterSpinupReason spinupReason = ShooterSpinupReason.None;
 
     public Umbrella() {
         if (Robot.isSimulation()) {
@@ -169,24 +155,6 @@ public class Umbrella implements LockFullSubsystem {
     }
 
     /**
-     * Updates the reason the shooter was spun up
-     * 
-     * @param reason The reason the shooter was spun up
-     */
-    public void pushSpinupReason(ShooterSpinupReason reason) {
-        spinupReason = reason;
-    }
-
-    /**
-     * @return The reason the shooter was spun up
-     */
-    public ShooterSpinupReason popSpinupReason() {
-        var reason = spinupReason;
-        spinupReason = ShooterSpinupReason.None;
-        return reason;
-    }
-
-    /**
      * Sets up the simulation for intaking notes in simulation
      * 
      * @param localizer The {@link Localizer} to use for the simulation
@@ -197,18 +165,15 @@ public class Umbrella implements LockFullSubsystem {
         }
 
         IntakeSim intakeSim = (IntakeSim) intake;
+        var s = localizer.namedPositionsSender();
+        Consumer<Pose2d[]> noteSender = poses -> s.send(new Localizer.NamedPositions("Notes", poses));
 
-        var noteSender = Sender.broadcast(
-            GlobalField.NOTES_POSITION,
-            Pose2d[].class
-        );
-
-        GamepieceSimulator.setupGamepieceIntakeSim(
+        GamepieceSimulator.setupGamepieceAcquisitionSim(
             localizer::pose,
             this::isIntaking,
             notes -> {
                 Pose2d[] notePoses = notes.stream().map(p -> new Pose2d(p, GeomUtil.ROTATION2D_ZERO)).toArray(Pose2d[]::new);
-                noteSender.send(notePoses);
+                noteSender.accept(notePoses);
             },
             List.of(
                 new Transform2d(

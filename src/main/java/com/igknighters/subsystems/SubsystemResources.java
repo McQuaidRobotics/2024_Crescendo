@@ -3,8 +3,10 @@ package com.igknighters.subsystems;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
+import com.igknighters.Localizer;
 import com.igknighters.subsystems.stem.Stem;
 
 import com.igknighters.subsystems.swerve.Swerve;
@@ -101,7 +103,7 @@ public class SubsystemResources {
 
         public final Optional<Vision> vision;
 
-        public AllSubsystems(Subsystems... subsystems) {
+        public AllSubsystems(Localizer localizer, Subsystems... subsystems) {
             this.subsystems = subsystems;
 
             if (subsystems.length == 0) {
@@ -117,7 +119,7 @@ public class SubsystemResources {
             }
 
             if (enabledSubsystems.contains(Subsystems.Swerve)) {
-                swerve = createSubsystem(Swerve::new);
+                swerve = createSubsystem(Swerve::new, localizer);
             } else {
                 swerve = Optional.empty();
             }
@@ -129,7 +131,7 @@ public class SubsystemResources {
             }
 
             if (enabledSubsystems.contains(Subsystems.Vision)) {
-                vision = createSubsystem(Vision::new);
+                vision = createSubsystem(Vision::new, localizer);
             } else {
                 vision = Optional.empty();
             }
@@ -161,6 +163,19 @@ public class SubsystemResources {
 
         private <T extends Object> Optional<T> createSubsystem(Supplier<T> subsystemSupplier) {
             T subsystem = subsystemSupplier.get();
+            BootupLogger.bootupLog("Subsystem " + subsystem.getClass().getSimpleName() + " created");
+            if (subsystem instanceof LockFullSubsystem) {
+                subsystemsListLockFull.add((LockFullSubsystem) subsystem);
+            } else if (subsystem instanceof LockFreeSubsystem) {
+                subsystemsListLockFree.add((LockFreeSubsystem) subsystem);
+            } else {
+                throw new IllegalArgumentException("Subsystem " + subsystem.getClass().getSimpleName() + " is not a valid subsystem");
+            }
+            return Optional.of(subsystem);
+        }
+
+        private <T extends Object> Optional<T> createSubsystem(Function<Localizer, T> subsystemSupplier, Localizer localizer) {
+            T subsystem = subsystemSupplier.apply(localizer);
             BootupLogger.bootupLog("Subsystem " + subsystem.getClass().getSimpleName() + " created");
             if (subsystem instanceof LockFullSubsystem) {
                 subsystemsListLockFull.add((LockFullSubsystem) subsystem);

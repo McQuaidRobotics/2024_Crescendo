@@ -36,12 +36,12 @@ public interface DoubleMonad extends DoubleSupplier {
         return () -> base;
     }
 
-    public static DoubleMonad hypot(DoubleMonad x, DoubleMonad y) {
-        return () -> Math.hypot(x.get(), y.get());
+    public static DoubleMonad hypot(DoubleSupplier x, DoubleSupplier y) {
+        return () -> Math.hypot(x.getAsDouble(), y.getAsDouble());
     }
 
-    public static DoubleMonad atan(DoubleMonad x, DoubleMonad y) {
-        return () -> Math.atan2(x.get(), y.get());
+    public static DoubleMonad atan(DoubleSupplier x, DoubleSupplier y) {
+        return () -> Math.atan2(x.getAsDouble(), y.getAsDouble());
     }
 
     /**
