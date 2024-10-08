@@ -1,27 +1,29 @@
 package com.igknighters.commands;
 
-import com.igknighters.LED;
 import com.igknighters.Localizer;
-import com.igknighters.LED.LedAnimations;
+import com.igknighters.commands.led.LedCommands;
 import com.igknighters.commands.stem.StemCommands;
-import com.igknighters.commands.swerve.teleop.TeleopSwerveTargetSpeakerCmd;
+import com.igknighters.commands.swerve.teleop.TeleopSwerveTargetCmd;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
+import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.controllers.ControllerParent;
+import com.igknighters.subsystems.led.Led;
+import com.igknighters.subsystems.led.LedAnimations;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
-import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 
 public class HigherOrderCommands {
 
-    public static Command intakeGamepiece(Stem stem, Umbrella umbrella) {
+    public static Command intakeGamepiece(Stem stem, Umbrella umbrella, Led led) {
         return Commands.race(
                 StemCommands.holdAt(stem, StemPosition.INTAKE),
                 Commands.idle().until(
@@ -35,11 +37,10 @@ public class HigherOrderCommands {
                         .until(() -> umbrella.holdingGamepiece()))
                 )
             .andThen(
-                StemCommands.holdAt(stem, StemPosition.STOW)
-                    .alongWith(UmbrellaCommands.idleShooter(umbrella))
-                    .beforeStarting(() -> {
-                        LED.sendAnimation(LedAnimations.INTAKE).withDuration(1.0);
-                    })
+                new ScheduleCommand(
+                    StemCommands.holdAt(stem, StemPosition.STOW),
+                    LedCommands.animate(led, LedAnimations.Intake, 1.0)
+                )
             ).withName("Intake");
     }
 
@@ -50,50 +51,101 @@ public class HigherOrderCommands {
             Localizer localizer
     ) {
         return Commands.parallel(
-                new TeleopSwerveTargetSpeakerCmd(swerve, controller, localizer),
+                new TeleopSwerveTargetCmd(
+                    swerve,
+                    controller,
+                    localizer,
+                    FieldConstants.SPEAKER.toTranslation2d(),
+                    true
+                ),
                 StemCommands.aimAtSpeaker(stem, false, localizer::pose, swerve::getChassisSpeed)).withName("Aim");
     }
 
-    public static Command genericShoot(
-            Swerve swerve,
-            Stem stem,
-            Umbrella umbrella,
-            ControllerParent controller,
-            Localizer localizer
+    public static Command aimNotePass(
+        Swerve swerve,
+        Stem stem,
+        ControllerParent controller,
+        Localizer localizer
     ) {
-        Command cmd;
-        String name;
-        var reason = umbrella.popSpinupReason();
-        if (reason.equals(ShooterSpinupReason.Amp)) {
-            name = "Amp Shoot";
-            cmd = Commands.sequence(
-                    StemCommands.moveTo(stem, StemPosition.AMP_SCORE, 1.4),
-                    umbrella.run(
-                            () -> {
-                                umbrella.spinupShooter(kControls.SHOOTER_RPM);
-                                umbrella.runIntakeAt(-1.0, true);
-                            }).withTimeout(0.3),
-                    StemCommands.moveTo(stem, StemPosition.AMP_SAFE, 1.5));
-        } else if (reason.equals(ShooterSpinupReason.AutoAimSpeaker)) {
-            name = "Auto Aim Shoot";
-            cmd = Commands.parallel(
-                    HigherOrderCommands.aim(
-                            swerve,
-                            stem,
-                            controller,
-                            localizer),
-                    UmbrellaCommands.shoot(umbrella)
-                ).until(() -> controller.leftTrigger(true).getAsDouble() < 0.5);
-        } else {
-            name = "Traditional Shoot";
-            cmd = UmbrellaCommands.shoot(umbrella);
+        return Commands.parallel(
+            new TeleopSwerveTargetCmd(
+                swerve,
+                controller,
+                localizer,
+                FieldConstants.PASS_POINT,
+                true
+            ),
+            StemCommands.aimAtPassPoint(
+                stem,
+                FieldConstants.PASS_POINT,
+                false,
+                localizer::pose
+            )
+        );
+    }
+
+    public static class ShootSequences {
+        private static double targetRpm(Umbrella umbrella) {
+            return (umbrella.getShooterTargetSpeed() / 60.0) * (2.0 * Math.PI);
+        }
+        public static Command shoot(
+                Stem stem,
+                Umbrella umbrella
+        ) {
+            return Commands.deadline(
+                UmbrellaCommands.shoot(umbrella, () -> targetRpm(umbrella)),
+                StemCommands.holdStill(stem)
+            ).withName("Shoot");
         }
 
-        return cmd.finallyDo(() -> {
-            StemCommands.holdAt(
+        public static Command autoAimShoot(
+                Swerve swerve,
+                Stem stem,
+                Umbrella umbrella,
+                ControllerParent controller,
+                Localizer localizer
+        ) {
+            return Commands.parallel(
+                HigherOrderCommands.aim(
+                    swerve,
                     stem,
-                    StemPosition.STOW
-            ).schedule();
-        }).withName(name);
+                    controller,
+                    localizer),
+                UmbrellaCommands.shoot(umbrella, () -> targetRpm(umbrella))
+            ).until(() -> controller.leftTrigger(true).getAsDouble() < 0.5)
+            .withName("AutoAimShoot");
+        }
+
+        public static Command autoAimPassShoot(
+                Swerve swerve,
+                Stem stem,
+                Umbrella umbrella,
+                ControllerParent controller,
+                Localizer localizer
+        ) {
+            return Commands.parallel(
+                HigherOrderCommands.aimNotePass(
+                    swerve,
+                    stem,
+                    controller,
+                    localizer),
+                    UmbrellaCommands.shoot(umbrella, () -> targetRpm(umbrella))
+            ).withName("AutoAimShoot");
+        }
+
+        public static Command ampShoot(
+                Stem stem,
+                Umbrella umbrella
+        ) {
+            return Commands.sequence(
+                StemCommands.moveTo(stem, StemPosition.AMP_SCORE, 1.4),
+                umbrella.run(
+                    () -> {
+                        umbrella.spinupShooter(kControls.SHOOTER_RPM);
+                        umbrella.runIntakeAt(-1.0, true);
+                    }).withTimeout(0.3),
+                StemCommands.moveTo(stem, StemPosition.AMP_SAFE, 1.5)
+            ).withName("AmpShoot");
+        }
     }
 }

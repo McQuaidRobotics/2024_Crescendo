@@ -6,8 +6,8 @@ import java.util.function.DoubleFunction;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.igknighters.constants.ConstValues;
+import com.igknighters.util.plumbing.Channel.Sender;
 
-import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -16,10 +16,11 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
+import edu.wpi.first.wpilibj.Timer;
 
 public class RealSwerveOdometryThread extends SwerveOdometryThread {
     private final Thread thread;
-    private final BaseStatusSignal[] signals = new BaseStatusSignal[(MODULE_COUNT * 4) + 2];
+    private final BaseStatusSignal[] signals = new BaseStatusSignal[(MODULE_COUNT * 4) + 4];
     private final DoubleFunction<Double> driveRotsToMeters;
 
     protected final MedianFilter peakRemover = new MedianFilter(3);
@@ -35,8 +36,8 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
         return Double.longBitsToDouble(array[index].get());
     }
 
-    public RealSwerveOdometryThread(int hz, DoubleFunction<Double> driveRotsToMeters) {
-        super(hz);
+    public RealSwerveOdometryThread(int hz, DoubleFunction<Double> driveRotsToMeters, Sender<SwerveDriveSample> swerveDataSender) {
+        super(hz, swerveDataSender);
         this.thread = new Thread(this::run, "OdometryThread");
         this.driveRotsToMeters = driveRotsToMeters;
         for (int i = 0; i < MODULE_COUNT * 2; i++) {
@@ -80,15 +81,21 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
 
     public void addGyroStatusSignals(
         StatusSignal<Double> yaw,
-        StatusSignal<Double> yawRate
+        StatusSignal<Double> yawRate,
+        StatusSignal<Double> xAccel,
+        StatusSignal<Double> yAccel
     ) {
         BaseStatusSignal.setUpdateFrequencyForAll(
             hz,
             yaw,
-            yawRate
+            yawRate,
+            xAccel,
+            yAccel
         );
-        signals[signals.length - 2] = yaw;
-        signals[signals.length - 1] = yawRate;
+        signals[MODULE_COUNT * 4] = yaw;
+        signals[(MODULE_COUNT * 4) + 1] = yawRate;
+        signals[(MODULE_COUNT * 4) + 2] = xAccel;
+        signals[(MODULE_COUNT * 4) + 3] = yAccel;
     }
 
     private SwerveModulePosition[] getModulePositions() {
@@ -121,10 +128,17 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
         return Rotation2d.fromDegrees(
             enableLatencyCompensation
             ? latencyCompensatedValue(
-                signals[signals.length - 2],
-                signals[signals.length - 1]
+                signals[MODULE_COUNT * 4],
+                signals[(MODULE_COUNT * 4) + 1]
             )
-            : signals[signals.length - 2].getValueAsDouble()
+            : signals[MODULE_COUNT * 4].getValueAsDouble()
+        );
+    }
+
+    private double getGForce() {
+        return Math.hypot(
+            signals[(MODULE_COUNT * 4) + 2].getValueAsDouble(),
+            signals[(MODULE_COUNT * 4) + 3].getValueAsDouble()
         );
     }
 
@@ -161,7 +175,8 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
                     new SwerveDriveSample(
                         new SwerveDriveWheelPositions(getModulePositions()),
                         getGyroRotation(),
-                        MathSharedStore.getTimestamp()
+                        getGForce(),
+                        Timer.getFPGATimestamp()
                     )
                 );
             }

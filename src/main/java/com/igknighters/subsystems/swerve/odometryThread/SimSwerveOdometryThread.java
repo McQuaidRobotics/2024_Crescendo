@@ -2,12 +2,14 @@ package com.igknighters.subsystems.swerve.odometryThread;
 
 import java.util.function.Supplier;
 
-import edu.wpi.first.math.MathSharedStore;
+import com.igknighters.util.plumbing.Channel.Sender;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 
 public class SimSwerveOdometryThread extends SwerveOdometryThread{
     private final Notifier notifier;
@@ -16,8 +18,8 @@ public class SimSwerveOdometryThread extends SwerveOdometryThread{
     private final Supplier<SwerveModulePosition>[] positiionSuppliers = new Supplier[MODULE_COUNT];
     private Supplier<Rotation2d> rotationSupplier = Rotation2d::new;
 
-    public SimSwerveOdometryThread(int hz) {
-        super(hz);
+    public SimSwerveOdometryThread(int hz, Sender<SwerveDriveSample> swerveDataSender) {
+        super(hz, swerveDataSender);
         notifier = new Notifier(this::run);
         notifier.setName("SwerveOdometry");
     }
@@ -44,7 +46,8 @@ public class SimSwerveOdometryThread extends SwerveOdometryThread{
             new SwerveDriveSample(
                 new SwerveDriveWheelPositions(getModulePositions()),
                 rotationSupplier.get(),
-                MathSharedStore.getTimestamp()
+                0.0,
+                Timer.getFPGATimestamp()
             )
         );
         updateTimeMicros.set(RobotController.getFPGATime() - startTime);

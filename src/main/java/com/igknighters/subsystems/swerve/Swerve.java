@@ -6,17 +6,16 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 
 import java.util.Optional;
 
+import com.igknighters.Localizer;
 import com.igknighters.Robot;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveBaseCmd;
 
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-import com.igknighters.constants.ConstValues.kChannels;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.subsystems.SubsystemResources.LockFullSubsystem;
 import com.igknighters.subsystems.swerve.gyro.Gyro;
@@ -29,7 +28,7 @@ import com.igknighters.subsystems.swerve.odometryThread.RealSwerveOdometryThread
 import com.igknighters.subsystems.swerve.odometryThread.SimSwerveOdometryThread;
 import com.igknighters.subsystems.swerve.odometryThread.SwerveOdometryThread;
 import com.igknighters.util.logging.Tracer;
-import com.igknighters.util.plumbing.Channels.Sender;
+import com.igknighters.util.plumbing.Channel.Sender;
 import com.igknighters.constants.ConstValues;
 
 /**
@@ -50,8 +49,6 @@ import com.igknighters.constants.ConstValues;
 public class Swerve implements LockFullSubsystem {
     private static final ChassisSpeeds ZERO_SPEEDS = new ChassisSpeeds();
 
-    private final Sender<ChassisSpeeds> velocitySender = Sender.broadcast(kChannels.VELOCITY, ChassisSpeeds.class);
-
     private final Gyro gyro;
     private final SwerveModule[] swerveMods;
     private final SwerveOdometryThread odometryThread;
@@ -61,13 +58,16 @@ public class Swerve implements LockFullSubsystem {
 
     private final RotationalController rotController = new RotationalController();
 
+    private final Sender<ChassisSpeeds> velocitySender;
+
     private Optional<TeleopSwerveBaseCmd> defaultCommand = Optional.empty();
 
-    public Swerve() {
+    public Swerve(final Localizer localizer) {
         if (Robot.isReal()) {
             RealSwerveOdometryThread ot = new RealSwerveOdometryThread(
                 250,
-                rots -> (rots / kSwerve.DRIVE_GEAR_RATIO) * kSwerve.WHEEL_CIRCUMFERENCE
+                rots -> (rots / kSwerve.DRIVE_GEAR_RATIO) * kSwerve.WHEEL_CIRCUMFERENCE,
+                localizer.swerveDataSender()
             );
             swerveMods = new SwerveModule[] {
                     new SwerveModuleReal(ConstValues.kSwerve.kMod0.CONSTANTS, true, ot),
@@ -78,7 +78,7 @@ public class Swerve implements LockFullSubsystem {
             gyro = new GyroReal(ot);
             odometryThread = ot;
         } else {
-            SimSwerveOdometryThread ot = new SimSwerveOdometryThread(250);
+            SimSwerveOdometryThread ot = new SimSwerveOdometryThread(250, localizer.swerveDataSender());
             swerveMods = new SwerveModule[] {
                     new SwerveModuleSim(ConstValues.kSwerve.kMod0.CONSTANTS, ot),
                     new SwerveModuleSim(ConstValues.kSwerve.kMod1.CONSTANTS, ot),
@@ -94,6 +94,8 @@ public class Swerve implements LockFullSubsystem {
         setpointProcessor.setDisabled(true);
 
         odometryThread.start();
+
+        velocitySender = localizer.velocityChannel().sender();
     }
 
     public void drive(ChassisSpeeds speeds, boolean isOpenLoop) {
@@ -111,15 +113,6 @@ public class Swerve implements LockFullSubsystem {
      */
     public void setYaw(Rotation2d rot) {
         gyro.setYawRads(rot.getRadians());
-    }
-
-    /**
-     * @return The gyro yaw value in degrees, wrapped to 0-360, as a Rotation2d
-     */
-    public Rotation2d getYawWrappedRot() {
-        return Rotation2d.fromDegrees(
-                scope0To360(
-                        Units.radiansToDegrees(this.getYawRads())));
     }
 
     /**

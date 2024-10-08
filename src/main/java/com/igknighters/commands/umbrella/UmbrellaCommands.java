@@ -6,7 +6,6 @@ import com.igknighters.Robot;
 import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
 import com.igknighters.subsystems.umbrella.Umbrella;
-import com.igknighters.subsystems.umbrella.Umbrella.ShooterSpinupReason;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,10 +29,9 @@ public class UmbrellaCommands {
      * @param rpmSup      A supplier for the target speed in rotations per minute
      * @return A command to be scheduled
      */
-    public static Command spinupShooter(Umbrella umbrella, DoubleSupplier rpmSup, ShooterSpinupReason reason) {
+    public static Command spinupShooter(Umbrella umbrella, DoubleSupplier rpmSup) {
         return umbrella.run(() -> {
             umbrella.spinupShooterToRPM(rpmSup.getAsDouble());
-            umbrella.pushSpinupReason(reason);
         }).withName("Spinup Shooter");
     }
 
@@ -44,8 +42,8 @@ public class UmbrellaCommands {
      * @param rpm      The target speed in rotations per minute
      * @return A command to be scheduled
      */
-    public static Command spinupShooter(Umbrella umbrella, double rpm, ShooterSpinupReason reason) {
-        return spinupShooter(umbrella, () -> rpm, reason);
+    public static Command spinupShooter(Umbrella umbrella, double rpm) {
+        return spinupShooter(umbrella, () -> rpm);
     }
 
     /**
@@ -75,50 +73,18 @@ public class UmbrellaCommands {
     }
 
     /**
-     * Will shoot any held game piece, otherwise will do nothing
-     * 
-     * @param umbrella The umbrella subsystem
-     * @return A command to be scheduled
-     */
-    public static Command shoot(Umbrella umbrella) {
-        return umbrella.run(
-                () -> {
-                    umbrella.spinupShooter(umbrella.getShooterTargetSpeed());
-                    umbrella.runIntakeAt(-1.0, true);
-                })
-                .withTimeout(0.75)
-                // .until(umbrella::notHoldingGamepiece)
-                .unless(() -> umbrella.getShooterSpeed() < 30.0)
-                .finallyDo(umbrella::stopAll)
-                .withName("Shoot");
-    }
-
-    /**
-     * Will shoot any held game piece, otherwise will do nothing
-     * 
-     * @param umbrella The umbrella subsystem
-     * @return A command to be scheduled
-     */
-    public static Command shootAuto(Umbrella umbrella) {
-        return umbrella.run(
-                () -> umbrella.runIntakeAt(-1.0, true))
-                .withTimeout(0.16)
-                .withName("Shoot");
-    }
-
-    /**
      * Runs the intake and the shooter, feeding notes through the umbrella
      * 
      * @param umbrella The umbrella subsystem
      * @param rpm The rpm to spin the shooter up to
      * @return A command to be scheduled
      */
-    public static Command runIntakeAndShooter(Umbrella umbrella, double rpm) {
+    public static Command shoot(Umbrella umbrella, DoubleSupplier rpmSupplier) {
         return umbrella.run(
                 () -> {
                     umbrella.runIntakeAt(-1.0, true);
-                    umbrella.spinupShooterToRPM(rpm);
-                }).withName("Run Intake And Shooter");
+                    umbrella.spinupShooterToRPM(rpmSupplier.getAsDouble());
+                }).withTimeout(0.5).withName("Shoot");
     }
 
     /**
@@ -147,7 +113,12 @@ public class UmbrellaCommands {
                 .withName("Expell");
     }
 
-    private static double getIdleRPM() {
+    /**
+     * Returns the target RPM of the shoote rwhile idling based off the current mode
+     * 
+     * @return The target RPM
+     */
+    public static double defaultIdleRPM() {
         return Robot.isDemo() ? 0.0
                 : DriverStation.isAutonomousEnabled() ? kControls.AUTO_SHOOTER_RPM : kControls.SHOOTER_IDLE_RPM;
     }
@@ -159,12 +130,11 @@ public class UmbrellaCommands {
      * @param umbrella The umbrella subsystem
      * @return A command to be scheduled
      */
-    public static Command idleShooter(Umbrella umbrella) {
+    public static Command idleShooter(Umbrella umbrella, DoubleSupplier rpmSupplier) {
         return umbrella.run(() -> {
             umbrella.runIntakeAt(0.0);
-            umbrella.spinupShooterToRPM(getIdleRPM());
-            umbrella.pushSpinupReason(ShooterSpinupReason.Idle);
-        }).withName("Idle Intake");
+            umbrella.spinupShooterToRPM(rpmSupplier.getAsDouble());
+        }).withName("IdleIntake");
     }
 
     /**
@@ -173,12 +143,14 @@ public class UmbrellaCommands {
      * @param umbrella The umbrella subsystem
      * @return A command to be scheduled
      */
-    public static Command intakeWithIdle(Umbrella umbrella) {
+    public static Command intakeWWhileIdleShooter(Umbrella umbrella, DoubleSupplier rpmSupplier) {
         return umbrella.runEnd(
                 () -> {
                     umbrella.runIntakeAt(-0.7, false);
-                    umbrella.spinupShooterToRPM(getIdleRPM());
+                    umbrella.spinupShooterToRPM(rpmSupplier.getAsDouble());
                 },
-                () -> umbrella.runIntakeAt(0.0, false)).until(umbrella::holdingGamepiece).withName("Intake");
+                () -> umbrella.runIntakeAt(0.0, false)
+        ).until(umbrella::holdingGamepiece)
+        .withName("IntakeWWhileSpinupShooter");
     }
 }

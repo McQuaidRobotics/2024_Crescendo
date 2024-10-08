@@ -1,11 +1,16 @@
 package com.igknighters.util.plumbing;
 
 import java.util.HashMap;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.DoubleEntry;
+import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.IntegerEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.PubSubOption;
 
 /**
  * An api for creating NT tunable values.
@@ -28,20 +33,25 @@ public class TunableValues {
      * @see TunableValues#getDouble(String, double) Creating a tunable double
      */
     public static class TunableDouble implements Cloneable {
-        private final DoubleEntry entry;
+        private final DoubleSubscriber subscriber;
         private final double defaultValue;
 
         private TunableDouble(String path, double defaultValue) {
-            this.entry = NetworkTableInstance
+            DoubleEntry entry = NetworkTableInstance
                 .getDefault()
                 .getDoubleTopic(pathPrefix + path)
-                .getEntry(defaultValue);
+                .getEntry(
+                    defaultValue,
+                    PubSubOption.pollStorage(1),
+                    PubSubOption.excludeSelf(true)
+                );
             entry.setDefault(defaultValue);
+            this.subscriber = entry;
             this.defaultValue = defaultValue;
         }
 
-        private TunableDouble(DoubleEntry entry, double defaultValue) {
-            this.entry = entry;
+        private TunableDouble(DoubleSubscriber subscriber, double defaultValue) {
+            this.subscriber = subscriber;
             this.defaultValue = defaultValue;
         }
 
@@ -51,12 +61,25 @@ public class TunableValues {
          * @return The value of the tunable
          */
         public double value() {
-            return entry.get(defaultValue);
+            return subscriber.get(defaultValue);
+        }
+
+        /**
+         * Gets the new value if the tunable has been changed.
+         * 
+         * @return The new value if available
+         */
+        public OptionalDouble newValue() {
+            var vals = subscriber.readQueueValues();
+            if (vals.length > 0) {
+                return OptionalDouble.of(vals[0]);
+            }
+            return OptionalDouble.empty();
         }
 
         @Override
         public TunableDouble clone() {
-            return new TunableDouble(entry, defaultValue);
+            return new TunableDouble(subscriber, defaultValue);
         }
     }
 
@@ -95,7 +118,11 @@ public class TunableValues {
             this.entry = NetworkTableInstance
                 .getDefault()
                 .getIntegerTopic(pathPrefix + path)
-                .getEntry(defaultValue);
+                .getEntry(
+                    defaultValue,
+                    PubSubOption.pollStorage(1),
+                    PubSubOption.excludeSelf(true)
+                );
             entry.setDefault(defaultValue);
             this.defaultValue = defaultValue;
         }
@@ -112,6 +139,19 @@ public class TunableValues {
          */
         public int value() {
             return (int) Math.min(Math.max(entry.get(defaultValue), Integer.MIN_VALUE), Integer.MAX_VALUE);
+        }
+
+        /**
+         * Gets the new value if the tunable has been changed.
+         * 
+         * @return The new value if available
+         */
+        public OptionalInt newValue() {
+            var vals = entry.readQueueValues();
+            if (vals.length > 0) {
+                return OptionalInt.of((int) Math.min(Math.max(vals[0], Integer.MIN_VALUE), Integer.MAX_VALUE));
+            }
+            return OptionalInt.empty();
         }
 
         @Override
@@ -172,6 +212,19 @@ public class TunableValues {
          */
         public boolean value() {
             return entry.get(defaultValue);
+        }
+
+        /**
+         * Gets the new value if the tunable has been changed.
+         * 
+         * @return The new value if available
+         */
+        public Optional<Boolean> newValue() {
+            var vals = entry.readQueueValues();
+            if (vals.length > 0) {
+                return Optional.of(vals[0]);
+            }
+            return Optional.empty();
         }
 
         @Override

@@ -59,6 +59,7 @@ public final class ConstValues {
 
     public static final boolean DEBUG = true; // this should be false for competition
     public static final boolean DEMO = false; // this should be false for competition
+    public static final boolean SUNLIGHT = false; // this should be false for competition
     public static final double PERIODIC_TIME = 0.02; // 20ms
     public static final int PDH_CAN_ID = 61;
 
@@ -102,17 +103,25 @@ public final class ConstValues {
     }
 
     public static final class kControls {
-        public static final double SHOOTER_RPM = 6500.0;
+        public static final double SHOOTER_RPM = 7000.0;
+        public static final double SHOOTER_PASS_RPM = 4000.0;
         public static final double AUTO_SHOOTER_RPM = 8000.0;
         public static final double SHOOTER_IDLE_RPM = 2000.0;
         public static final double INTAKE_PERCENT = 0.8;
 
         public static final double STATIONARY_AIM_AT_PIVOT_RADIANS = 40.0 * Conv.DEGREES_TO_RADIANS;
+        public static final double STATIONARY_PASS_PIVOT_RADIANS = 60.0 * Conv.DEGREES_TO_RADIANS;
+        public static final double STATIONARY_PASS_TELESCOPE_METERS = kTelescope.MIN_METERS + (0.0 * Conv.INCHES_TO_METERS);
         public static final double STATIONARY_WRIST_ANGLE = 71.0 * Conv.DEGREES_TO_RADIANS;
         public static final double MAX_HEIGHT_AIM_AT_PIVOT_RADIANS = 86.0 * Conv.DEGREES_TO_RADIANS;
         public static final double MAX_HEIGHT_AIM_AT_TELESCOPE_METERS = kTelescope.MAX_METERS;
 
         public static final AimSolveStrategy DEFAULT_AIM_STRATEGY = AimSolveStrategy.STATIONARY_PIVOT_GRAVITY;
+    }
+
+    public static final class kLed {
+        public static final int LED_COUNT = 38;
+        public static final int CANDLE_LEDS = 8;
     }
 
     public static final class kVision {
@@ -165,9 +174,6 @@ public final class ConstValues {
                 RobotConfig.getRobotID().constID.name() // most based java code of the century
         ).cameras;
     }
-
-    @BoolConst(crash = true, burn = false)
-    public static boolean LED_ENABLED;
 
     public static final class kSwerve {
         /**
@@ -347,7 +353,7 @@ public final class ConstValues {
     }
 
     public static final class kUmbrella {
-        public static final double NOTE_VELO = 25.0;
+        public static final double NOTE_VELO = 15.0;
         public static final String CANBUS = "SuperStructureBus";
 
         public static final class kShooter {
@@ -385,8 +391,6 @@ public final class ConstValues {
             //     new LerpTableEntry(0, 25.0),
             //     new LerpTableEntry(100000, 25.0)
             // );
-
-            public static final double AVERAGE_NOTE_VELO_EST = 25.0;
         }
 
         public static final class kIntake {

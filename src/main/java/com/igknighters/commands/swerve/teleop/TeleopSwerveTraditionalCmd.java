@@ -2,6 +2,7 @@ package com.igknighters.commands.swerve.teleop;
 
 import com.igknighters.subsystems.swerve.Swerve;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
@@ -16,15 +17,14 @@ public class TeleopSwerveTraditionalCmd extends TeleopSwerveBaseCmd {
 
     @Override
     public void execute() {
-        Translation2d vt = orientForUser(
-                new Translation2d(getTranslationX(), getTranslationY())
-        ).times(kSwerve.MAX_DRIVE_VELOCITY);
+        Translation2d vt = orientForUser(getTranslation())
+                .times(kSwerve.MAX_DRIVE_VELOCITY);
 
         ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 vt.getX(),
                 vt.getY(),
-                -getRotationX() * kSwerve.MAX_ANGULAR_VELOCITY, // invert because CCW is positive
-                swerve.getYawWrappedRot()
+                -getRotation().getX() * kSwerve.MAX_ANGULAR_VELOCITY, // invert because CCW is positive
+                new Rotation2d(swerve.getYawRads())
         );
 
         swerve.drive(chassisSpeeds, true);

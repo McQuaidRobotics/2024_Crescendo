@@ -3,8 +3,7 @@ package com.igknighters.subsystems.swerve.odometryThread;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.igknighters.constants.ConstValues.kChannels;
-import com.igknighters.util.plumbing.Channels.Sender;
+import com.igknighters.util.plumbing.Channel.Sender;
 
 import monologue.Logged;
 import monologue.Annotations.Log;
@@ -17,10 +16,11 @@ public abstract class SwerveOdometryThread implements Logged {
     protected final AtomicBoolean isRunning = new AtomicBoolean(false);
     protected final AtomicLong updateTimeMicros = new AtomicLong();
 
-    protected final Sender<SwerveDriveSample> swerveDataSender = Sender.broadcast(kChannels.SWERVE_ODO_SAMPLES, SwerveDriveSample.class);
+    protected final Sender<SwerveDriveSample> swerveDataSender;
 
-    protected SwerveOdometryThread(int hz) {
+    protected SwerveOdometryThread(int hz, Sender<SwerveDriveSample> swerveDataSender) {
         this.hz = hz;
+        this.swerveDataSender = swerveDataSender;
     }
 
     @Log

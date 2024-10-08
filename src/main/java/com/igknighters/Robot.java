@@ -29,11 +29,9 @@ import com.igknighters.controllers.TestingController;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
-import com.igknighters.util.can.CANBusLogging;
 import com.igknighters.util.can.CANSignalManager;
 import com.igknighters.util.geom.AllianceFlip;
 import com.igknighters.util.geom.GeomUtil;
-import com.igknighters.util.logging.GlobalField;
 import com.igknighters.util.logging.WatchdogSilencer;
 import com.igknighters.util.logging.Tracer;
 import com.igknighters.util.robots.UnitTestableRobot;
@@ -44,15 +42,8 @@ import choreo.autos.AutoFactory.ChoreoAutoBindings;
 public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
     private final CommandScheduler scheduler = CommandScheduler.getInstance();
-    // private final PowerLogger powerLogger = new PowerLogger(
-    //         ConstValues.PDH_CAN_ID,
-    //         ModuleType.kRev,
-    //         "/Robot/PowerDistribution",
-    //         false
-    // );
-    // private final FilesystemLogger filesystemLogger = new FilesystemLogger();
 
-    public final Localizer localizer = new Localizer();
+    public final Localizer localizer;
 
     private final DriverController driverController;
     private final OperatorController operatorController;
@@ -79,11 +70,13 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
         ConstantHelper.applyRoboConst(ConstValues.class, robotID);
 
+        localizer = new Localizer();
+
         driverController = new DriverController(0, localizer);
         operatorController = new OperatorController(1);
-        testingController = new TestingController(3);
+        testingController = new TestingController(3, localizer);
 
-        allSubsystems = new AllSubsystems(robotID.subsystems);
+        allSubsystems = new AllSubsystems(localizer, robotID.subsystems);
 
         for (final Logged subsystem : allSubsystems.getLoggableSubsystems()) {
             Monologue.logObj(subsystem, "/Robot/" + subsystem.getOverrideName());
@@ -103,7 +96,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
         if (allSubsystems.umbrella.isPresent()) {
             final Umbrella umbrella = allSubsystems.umbrella.get();
-            umbrella.setDefaultCommand(UmbrellaCommands.idleShooter(umbrella));
+            umbrella.setDefaultCommand(UmbrellaCommands.idleShooter(umbrella, UmbrellaCommands::defaultIdleRPM));
 
             umbrella.setupSimNoteDetection(localizer);
         }
@@ -119,7 +112,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
                 AllianceFlip::isRed,
                 new ChoreoAutoBindings(),
                 (traj, starting) -> {
-                    String msg = "Auto Trajectory " + traj.name() + " " + (starting ? "Started" : "Finished");
+                    String msg = "[Auto] Trajectory " + traj.name() + " " + (starting ? "Started" : "Finished");
                     System.out.println(msg);
                     Monologue.log("AutoEvent", msg);
                 }
@@ -164,10 +157,6 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
         Tracer.traceFunc("CANSignalRefresh", CANSignalManager::refreshSignals);
         Tracer.traceFunc("Localizer", localizer::update);
         Tracer.traceFunc("CommandScheduler", scheduler::run);
-        Tracer.traceFunc("LEDUpdate", LED::run);
-        Tracer.traceFunc("CANBusLoggung", CANBusLogging::log);
-        // Tracer.traceFunc("PowerLogger", powerLogger::log);
-        // Tracer.traceFunc("FilesystemLogger", filesystemLogger::log);
         Tracer.traceFunc("Monologue", Monologue::updateAll);
         Tracer.traceFunc("Choosers", () -> {
             autoManager.update();
@@ -237,8 +226,6 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
                             .withDatalogPrefix("")
                             .withFileOnly(DriverStation::isFMSAttached)
                             .withLazyLogging(true));
-
-            GlobalField.enable();
         } else {
             // used for tests and CI, does not actually log anything but asserts the logging is setup mostly correct
             Monologue.setupMonologueDisabled(this, "/Robot", true);
@@ -279,9 +266,6 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
             String name = command.getName();
             int count = commandCounts.getOrDefault(name, 0) + (active ? 1 : -1);
             commandCounts.put(name, count);
-            // Monologue.log(
-            //         "Commands/CommandsUnique/" + name + "_" + Integer.toHexString(command.hashCode()),
-            //         active.booleanValue());
             Monologue.log("Commands/" + name, count > 0);
         };
         scheduler.onCommandInitialize(
@@ -304,5 +288,9 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
     public static boolean isDebug() {
         return ConstValues.DEBUG;
+    }
+
+    public static boolean isSunlight() {
+        return ConstValues.SUNLIGHT;
     }
 }
