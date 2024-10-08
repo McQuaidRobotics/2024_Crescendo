@@ -1,11 +1,15 @@
 package com.igknighters.subsystems.led;
 
+import java.nio.ByteBuffer;
+
 import com.igknighters.util.logging.ProceduralStructGenerator;
+import com.igknighters.util.logging.ProceduralStructGenerator.SchemaBuilder;
+import com.igknighters.util.logging.ProceduralStructGenerator.SchemaBuilder.EnumFieldBuilder;
 
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
 
-public enum LedAnimations {
+public enum LedAnimations implements StructSerializable {
     DISABLED(new LedPattern.Flow(255, 0, 0, 0, 0.5, false)),
     TELEOP(new LedPattern.Flow(0, 255, 0, 0, 0.2, false)),
     AUTO(new LedPattern.Rainbow(1.0, 0.5, false)),
@@ -22,7 +26,43 @@ public enum LedAnimations {
         this.pattern = pattern;
     }
 
-    public static final Struct<LedAnimations> struct = ProceduralStructGenerator.genEnum(LedAnimations.class);
+    public static final Struct<LedAnimations> struct = new Struct<LedAnimations>() {
+        @Override
+        public String getSchema() {
+            SchemaBuilder schema = new SchemaBuilder();
+            EnumFieldBuilder enumField = new EnumFieldBuilder("pattern");
+            for (LedAnimations anim : LedAnimations.values()) {
+                enumField.addVariant(anim.name(), anim.ordinal());
+            }
+            schema.addEnumField(enumField);
+            return schema.build();
+        }
+
+        @Override
+        public int getSize() {
+            return 1;
+        }
+
+        @Override
+        public Class<LedAnimations> getTypeClass() {
+            return LedAnimations.class;
+        }
+
+        @Override
+        public String getTypeString() {
+            return "struct:LedAnimations";
+        }
+
+        @Override
+        public void pack(ByteBuffer bb, LedAnimations value) {
+            bb.put((byte) value.ordinal());
+        }
+
+        @Override
+        public LedAnimations unpack(ByteBuffer bb) {
+            return LedAnimations.values()[bb.get()];
+        }
+    };
 
     public sealed interface LedPattern extends StructSerializable {
         public record Solid(int r, int g, int b, int w) implements LedPattern {
