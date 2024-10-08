@@ -33,23 +33,22 @@ public final class ConstValues {
         public static final double RPM_TO_RADIANS_PER_SECOND = TAU / 60.0;
     }
 
-    @SuppressWarnings("unused")
-    private static final class Motors {
-        private static final class Falcon500 {
+    public static final class kMotors {
+        public static final class kFalcon500 {
             public static final double FREE_SPEED = 668.1;
             public static final double FREE_CURRENT = 1.5;
             public static final double STALL_TORQUE = 4.69;
             public static final double STALL_CURRENT = 257.0;
         }
 
-        private static final class Falcon500Foc {
+        public static final class kFalcon500Foc {
             public static final double FREE_SPEED = 636.7;
             public static final double FREE_CURRENT = 1.5;
             public static final double STALL_TORQUE = 5.84;
             public static final double STALL_CURRENT = 304.0;
         }
 
-        public static final class KrakenX60Foc {
+        public static final class kKrakenX60Foc {
             public static final double FREE_SPEED = 608.0;
             public static final double FREE_CURRENT = 2.0;
             public static final double STALL_TORQUE = 9.37;
@@ -218,14 +217,14 @@ public final class ConstValues {
 
         public static final double SLIP_CURRENT = 65.0;
 
-        public static final double MAX_DRIVE_VELOCITY = ((Motors.KrakenX60Foc.FREE_SPEED / TAU) / DRIVE_GEAR_RATIO)
+        public static final double MAX_DRIVE_VELOCITY = ((kMotors.kKrakenX60Foc.FREE_SPEED / TAU) / DRIVE_GEAR_RATIO)
                 * WHEEL_CIRCUMFERENCE * MOTOR_CLOSED_LOOP_OUTPUT_SCALAR;
         public static final double MAX_DRIVE_ACCELERATION = MAX_DRIVE_VELOCITY / ACCELERATION_TIME;
 
         public static final double MAX_ANGULAR_VELOCITY = MAX_DRIVE_VELOCITY / DRIVEBASE_RADIUS;
         public static final double MAX_ANGULAR_ACCELERATION = MAX_ANGULAR_VELOCITY / ACCELERATION_TIME;
 
-        public static final double MAX_STEERING_VELOCITY = Motors.Falcon500Foc.FREE_SPEED
+        public static final double MAX_STEERING_VELOCITY = kMotors.kFalcon500Foc.FREE_SPEED
                 / (ANGLE_GEAR_RATIO * MOTOR_CLOSED_LOOP_OUTPUT_SCALAR);
 
         /* Inverts */
