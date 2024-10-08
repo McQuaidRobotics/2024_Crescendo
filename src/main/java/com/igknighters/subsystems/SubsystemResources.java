@@ -7,6 +7,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.igknighters.Localizer;
+import com.igknighters.subsystems.led.Led;
 import com.igknighters.subsystems.stem.Stem;
 
 import com.igknighters.subsystems.swerve.Swerve;
@@ -34,6 +35,8 @@ public class SubsystemResources {
         Umbrella("Umbrella"),
 
         Vision("Vision"),
+
+        Led("Led"),
 
         ;
 
@@ -103,6 +106,8 @@ public class SubsystemResources {
 
         public final Optional<Vision> vision;
 
+        public final Optional<Led> led;
+
         public AllSubsystems(Localizer localizer, Subsystems... subsystems) {
             this.subsystems = subsystems;
 
@@ -136,29 +141,30 @@ public class SubsystemResources {
                 vision = Optional.empty();
             }
 
+            if (enabledSubsystems.contains(Subsystems.Led)) {
+                led = createSubsystem(Led::new);
+            } else {
+                led = Optional.empty();
+            }
+
             CommandScheduler.getInstance().registerSubsystem(
                 getEnabledLockFullSubsystemsArr()
             );
-            CommandScheduler.getInstance().registerSubsystem(
-                new Subsystem() {
-                    public void periodic() {
-                        for (LockFreeSubsystem subsystem : getEnabledLockFreeSubsystemsArr()) {
+            for (LockFreeSubsystem subsystem : getEnabledLockFreeSubsystemsArr()) {
+                CommandScheduler.getInstance().registerSubsystem(
+                    new Subsystem() {
+                        @Override
+                        public void periodic() {
                             subsystem.periodic();
                         }
-                    }
 
-                    public void simulationPeriodic() {
-                        for (LockFreeSubsystem subsystem : getEnabledLockFreeSubsystemsArr()) {
-                            subsystem.simulationPeriodic();
+                        @Override
+                        public String getName() {
+                            return subsystem.getName();
                         }
-                    };
-
-                    @Override
-                    public String getName() {
-                        return "LockFreeProxy";
                     }
-                }
-            );
+                );
+            }
         }
 
         private <T extends Object> Optional<T> createSubsystem(Supplier<T> subsystemSupplier) {

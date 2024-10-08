@@ -1,16 +1,17 @@
 package com.igknighters.controllers;
 
-import com.igknighters.LED;
 import com.igknighters.Localizer;
 import com.igknighters.Robot;
-import com.igknighters.LED.LedAnimations;
 import com.igknighters.commands.Emotes;
 import com.igknighters.commands.HigherOrderCommands;
+import com.igknighters.commands.LedCommands;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.SwerveCommands;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.subsystems.SubsystemResources.Subsystems;
+import com.igknighters.subsystems.led.Led;
+import com.igknighters.subsystems.led.LedAnimations;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.swerve.Swerve;
@@ -36,8 +37,9 @@ public class DriverController extends ControllerParent {
             trig.onTrue(
                 HigherOrderCommands.intakeGamepiece(
                     allss.stem.get(),
-                    allss.umbrella.get()));
-        }, Subsystems.Stem, Subsystems.Umbrella);
+                    allss.umbrella.get(),
+                    allss.led.get()));
+        }, Subsystems.Stem, Subsystems.Umbrella, Subsystems.Led);
 
         this.B.binding = new Binding(
             (trig, allss) -> {
@@ -180,6 +182,7 @@ public class DriverController extends ControllerParent {
             Swerve swerve = allss.swerve.get();
             Stem stem = allss.stem.get();
             Umbrella umbrella = allss.umbrella.get();
+            Led led = allss.led.get();
             trig.whileTrue(
                 Commands.parallel(
                     HigherOrderCommands.aim(
@@ -187,19 +190,15 @@ public class DriverController extends ControllerParent {
                     UmbrellaCommands.spinupShooter(
                         umbrella,
                         kControls.SHOOTER_RPM),
-                    Commands.run(
-                        () -> {
-                            if (umbrella.isShooterAtSpeed(0.05)) {
-                                LED.sendAnimation(LedAnimations.SHOOTING).withDuration(1.0);
-                            }
-                        }
-                    )).until(this.RT.trigger)
-                    .andThen(
-                        HigherOrderCommands.ShootSequences.autoAimShoot(
-                            swerve, stem, umbrella, this, localizer),
-                        scheduleStow(stem)
-                    ).withName("HighorderAim"));
-        }, Subsystems.Swerve, Subsystems.Stem, Subsystems.Umbrella);
+                    LedCommands.animate(led, LedAnimations.SHOOTING, 1.0)
+                        .beforeStarting(Commands.waitUntil(() -> umbrella.isShooterAtSpeed(0.05)))
+                ).until(this.RT.trigger)
+                .andThen(
+                    HigherOrderCommands.ShootSequences.autoAimShoot(
+                        swerve, stem, umbrella, this, localizer),
+                    scheduleStow(stem)
+                ).withName("HighorderAim"));
+        }, Subsystems.Swerve, Subsystems.Stem, Subsystems.Umbrella, Subsystems.Led);
 
         // this.RT.binding = Used as the shoot button
 

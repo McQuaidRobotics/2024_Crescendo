@@ -1,9 +1,7 @@
 
 package com.igknighters.subsystems.stem;
 
-import com.igknighters.LED;
 import com.igknighters.Robot;
-import com.igknighters.LED.LedAnimations;
 import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.subsystems.SubsystemResources.LockFullSubsystem;
 import com.igknighters.subsystems.stem.StemValidator.ValidationResponse;
@@ -95,7 +93,6 @@ public class Stem implements LockFullSubsystem {
         if (!telescope.hasHomed()) {
             if (!position.isStow()) {
                 DriverStation.reportWarning("Stem Telescope has not been homed, run stow to home", false);
-                LED.sendAnimation(LedAnimations.WARNING).withDuration(1.0);
                 return false;
             }
 
@@ -116,7 +113,7 @@ public class Stem implements LockFullSubsystem {
         }
 
         // Generate and move to the next safe position
-        StemPosition step = StemValidator.stepTowardsTargetPosition(getStemPosition(), position, 1.0);
+        StemPosition step = StemValidator.stepTowardsTargetPosition(getStemPosition(), position);
         pivot.gotoPosition(step.pivotRads);
         telescope.gotoPosition(step.telescopeMeters);
         wrist.gotoPosition(step.wristRads);
@@ -126,9 +123,9 @@ public class Stem implements LockFullSubsystem {
         boolean telescopeSuccess = telescope.isAt(position.telescopeMeters, toleranceMult);
         boolean wristSuccess = wrist.isAt(position.wristRads, toleranceMult);
 
-        log("/PivotReached", pivotSuccess);
-        log("/TelescopeReached", telescopeSuccess);
-        log("/WristReached", wristSuccess);
+        log("PivotReached", pivotSuccess);
+        log("TelescopeReached", telescopeSuccess);
+        log("WristReached", wristSuccess);
 
         // Return if all mechanisms have reached their target position
         return pivotSuccess && telescopeSuccess && wristSuccess;
@@ -224,6 +221,17 @@ public class Stem implements LockFullSubsystem {
         pivot.home();
     }
 
+    /**
+     * Returns if the stem is OK,
+     * the stem can not be OK for a variety of reasons
+     * such as the telescope not being homed,
+     * hardware being dropped, or the stem being in an invalid position.
+     */
+    public boolean isOk() {
+        return StemValidator.validatePosition(getStemPosition()).isValid()
+                && telescope.hasHomed();
+    }
+
     @Override
     public void periodic() {
         Tracer.startTrace("StemPeriodic");
@@ -241,9 +249,12 @@ public class Stem implements LockFullSubsystem {
         // run logging code after loops to have the most up to date information
         log("CurrentPosition", getStemPosition());
         log("StemValidator/CurrentStateValidation",
-                StemValidator.validatePosition(getStemPosition()).toString());
+                StemValidator.validatePosition(getStemPosition()));
 
-        visualizer.updateCurrent(getStemPosition());
+        Tracer.traceFunc(
+            "Visualizer",
+            () -> visualizer.updateCurrent(getStemPosition())
+        );
 
         Tracer.endTrace();
     }

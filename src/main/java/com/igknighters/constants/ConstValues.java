@@ -119,6 +119,11 @@ public final class ConstValues {
         public static final AimSolveStrategy DEFAULT_AIM_STRATEGY = AimSolveStrategy.STATIONARY_PIVOT_GRAVITY;
     }
 
+    public static final class kLed {
+        public static final int LED_COUNT = 38;
+        public static final int CANDLE_LEDS = 8;
+    }
+
     public static final class kVision {
         public static final double AMBIGUITY_CUTOFF = 0.15;
 
@@ -169,9 +174,6 @@ public final class ConstValues {
                 RobotConfig.getRobotID().constID.name() // most based java code of the century
         ).cameras;
     }
-
-    @BoolConst(crash = true, burn = false)
-    public static boolean LED_ENABLED;
 
     public static final class kSwerve {
         /**

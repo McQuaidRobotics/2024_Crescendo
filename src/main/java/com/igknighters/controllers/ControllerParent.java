@@ -32,8 +32,12 @@ public class ControllerParent {
     }
 
     protected static class Binding {
+        private static final Binding EMPTY = new Binding((trig, allss) -> {
+        });
+
         public final List<Subsystems> subsystemArray;
         public final BiConsumer<Trigger, AllSubsystems> action;
+        private boolean isBound = false;
 
         public Binding(Subsystems[] subsystemArray, BiConsumer<Trigger, AllSubsystems> action) {
             this.subsystemArray = Arrays.asList(subsystemArray);
@@ -61,19 +65,19 @@ public class ControllerParent {
 
         public void assign(Trigger trigger, AllSubsystems subsystems) {
             action.accept(trigger, subsystems);
+            isBound = true;
         }
 
         public boolean isBound() {
-            return true;
+            return isBound;
         }
 
         public static Binding empty() {
-            return new Binding((controller, allSS) -> {});
+            return EMPTY;
         }
     }
 
     protected final TriggerBindingTuple A, B, X, Y;
-    // i alwayss forget which is which
     /** Left Center */
     protected final TriggerBindingTuple Back;
     /** Right Center */
@@ -113,22 +117,23 @@ public class ControllerParent {
         } else {
             controller = null;
             BootupLogger.bootupLog("Controller " + port + " not initialized");
-            A = new TriggerBindingTuple(null, Binding.empty());
-            B = new TriggerBindingTuple(null, Binding.empty());
-            X = new TriggerBindingTuple(null, Binding.empty());
-            Y = new TriggerBindingTuple(null, Binding.empty());
-            LB = new TriggerBindingTuple(null, Binding.empty());
-            RB = new TriggerBindingTuple(null, Binding.empty());
-            Back = new TriggerBindingTuple(null, Binding.empty());
-            Start = new TriggerBindingTuple(null, Binding.empty());
-            LS = new TriggerBindingTuple(null, Binding.empty());
-            RS = new TriggerBindingTuple(null, Binding.empty());
-            LT = new TriggerBindingTuple(null, Binding.empty());
-            RT = new TriggerBindingTuple(null, Binding.empty());
-            DPR = new TriggerBindingTuple(null, Binding.empty());
-            DPD = new TriggerBindingTuple(null, Binding.empty());
-            DPL = new TriggerBindingTuple(null, Binding.empty());
-            DPU = new TriggerBindingTuple(null, Binding.empty());
+            final Trigger t = new Trigger(() -> false);
+            A = new TriggerBindingTuple(t, Binding.empty());
+            B = new TriggerBindingTuple(t, Binding.empty());
+            X = new TriggerBindingTuple(t, Binding.empty());
+            Y = new TriggerBindingTuple(t, Binding.empty());
+            LB = new TriggerBindingTuple(t, Binding.empty());
+            RB = new TriggerBindingTuple(t, Binding.empty());
+            Back = new TriggerBindingTuple(t, Binding.empty());
+            Start = new TriggerBindingTuple(t, Binding.empty());
+            LS = new TriggerBindingTuple(t, Binding.empty());
+            RS = new TriggerBindingTuple(t, Binding.empty());
+            LT = new TriggerBindingTuple(t, Binding.empty());
+            RT = new TriggerBindingTuple(t, Binding.empty());
+            DPR = new TriggerBindingTuple(t, Binding.empty());
+            DPD = new TriggerBindingTuple(t, Binding.empty());
+            DPL = new TriggerBindingTuple(t, Binding.empty());
+            DPU = new TriggerBindingTuple(t, Binding.empty());
             return;
         }
         A = new TriggerBindingTuple(controller.a(), Binding.empty());
@@ -206,7 +211,7 @@ public class ControllerParent {
      * @return A supplier for the value of the right stick y axis
      */
     public DoubleSupplier rightStickY() {
-        return () -> controller.getRightY();
+        return controller::getRightY;
     }
 
     /**
@@ -244,7 +249,7 @@ public class ControllerParent {
      * @return A supplier for the value of the left stick y axis
      */
     public DoubleSupplier leftStickY() {
-        return () -> controller.getLeftY();
+        return controller::getLeftY;
     }
 
     /**
@@ -266,11 +271,11 @@ public class ControllerParent {
     public DoubleSupplier rightTrigger(boolean suppressWarning) {
         if (RT.binding.isBound() && !suppressWarning) {
             return () -> {
-                System.out.println("WARNING: Right Trigger is bound to a command");
+                DriverStation.reportError("WARNING: Right Trigger is bound to a command", false);
                 return controller.getRightTriggerAxis();
             };
         } else {
-            return () -> controller.getRightTriggerAxis();
+            return controller::getRightTriggerAxis;
         }
     }
 
@@ -283,11 +288,11 @@ public class ControllerParent {
     public DoubleSupplier leftTrigger(boolean suppressWarning) {
         if (LT.binding.isBound() && !suppressWarning) {
             return () -> {
-                System.out.println("WARNING: Left Trigger is bound to a command");
+                DriverStation.reportError("WARNING: Left Trigger is bound to a command", false);
                 return controller.getLeftTriggerAxis();
             };
         } else {
-            return () -> controller.getLeftTriggerAxis();
+            return controller::getLeftTriggerAxis;
         }
     }
 

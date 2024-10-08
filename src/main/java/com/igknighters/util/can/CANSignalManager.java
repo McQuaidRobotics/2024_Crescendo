@@ -34,7 +34,6 @@ public class CANSignalManager {
      * @param signals The signals to register
      */
     public static void registerSignals(String canbus, BaseStatusSignal... signals) {
-        CANBusLogging.logBus(canbus);
         HashMap<SignalType, ArrayList<BaseStatusSignal>> map;
         if (signalsDatabase.containsKey(canbus)) {
             map = signalsDatabase.get(canbus);

@@ -1,8 +1,6 @@
 package com.igknighters.commands;
 
-import com.igknighters.LED;
 import com.igknighters.Localizer;
-import com.igknighters.LED.LedAnimations;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveTargetCmd;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
@@ -11,6 +9,8 @@ import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.controllers.ControllerParent;
+import com.igknighters.subsystems.led.Led;
+import com.igknighters.subsystems.led.LedAnimations;
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.swerve.Swerve;
@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 
 public class HigherOrderCommands {
 
-    public static Command intakeGamepiece(Stem stem, Umbrella umbrella) {
+    public static Command intakeGamepiece(Stem stem, Umbrella umbrella, Led led) {
         return Commands.race(
                 StemCommands.holdAt(stem, StemPosition.INTAKE),
                 Commands.idle().until(
@@ -36,10 +36,10 @@ public class HigherOrderCommands {
                         .until(() -> umbrella.holdingGamepiece()))
                 )
             .andThen(
-                new ScheduleCommand(StemCommands.holdAt(stem, StemPosition.STOW)
-                    .beforeStarting(() -> {
-                        LED.sendAnimation(LedAnimations.INTAKE).withDuration(1.0);
-                    }))
+                new ScheduleCommand(
+                    StemCommands.holdAt(stem, StemPosition.STOW),
+                    LedCommands.animate(led, LedAnimations.Intake, 1.0)
+                )
             ).withName("Intake");
     }
 

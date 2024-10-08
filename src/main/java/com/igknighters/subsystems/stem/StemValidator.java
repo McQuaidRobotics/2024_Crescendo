@@ -2,6 +2,8 @@ package com.igknighters.subsystems.stem;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.util.struct.StructSerializable;
 import monologue.Monologue;
 
 import com.igknighters.constants.ConstValues.kRobotCollisionGeometry;
@@ -10,6 +12,7 @@ import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.util.geom.Rectangle2d;
+import com.igknighters.util.logging.ProceduralStructGenerator;
 
 public class StemValidator {
     /**
@@ -118,7 +121,7 @@ public class StemValidator {
         }
     }
 
-    public enum ValidationResponse {
+    public enum ValidationResponse implements StructSerializable {
         VALID,
         COLLIDES_DRIVE_BASE,
         COLLIDES_BOUNDS,
@@ -148,6 +151,8 @@ public class StemValidator {
             }
             return VALID;
         }
+
+        public static final Struct<ValidationResponse> struct = ProceduralStructGenerator.genEnum(ValidationResponse.class);
     }
 
     /**
@@ -273,8 +278,7 @@ public class StemValidator {
     /**
      * Will
      */
-    public static StemPosition stepTowardsTargetPosition(StemPosition currentState, StemPosition targetState,
-            double proportion) {
+    public static StemPosition stepTowardsTargetPosition(StemPosition currentState, StemPosition targetState) {
         ValidationResponse pivotMovementValidReason = validatePosition(StemPosition.fromRadians(
                 targetState.getPivotRads(),
                 currentState.getWristRads(),
@@ -289,25 +293,20 @@ public class StemValidator {
                 targetState.getTelescopeMeters()));
 
         Monologue.log("/Robot/Stem/StemValidator/StepTowardsTargetPosition/pivotMovementValidationReason",
-                pivotMovementValidReason.name());
+                pivotMovementValidReason);
         Monologue.log("/Robot/Stem/StemValidator/StepTowardsTargetPosition/wristMovementValidationReason",
-                wristMovementValidReason.name());
+                wristMovementValidReason);
         Monologue.log("/Robot/Stem/StemValidator/StepTowardsTargetPosition/telescopeMovementValidationReason",
-                telescopeMovementValidReason.name());
+                telescopeMovementValidReason);
 
         double midStatePivotRads = pivotMovementValidReason.isValid()
-                ? currentState.getPivotRads()
-                        + ((targetState.getPivotRads() - currentState.getPivotRads())
-                                * proportion)
+                ? targetState.getPivotRads()
                 : currentState.getPivotRads();
         double midStateWristRads = wristMovementValidReason.isValid()
-                ? currentState.getWristRads()
-                        + ((targetState.getWristRads() - currentState.getWristRads())
-                                * proportion)
+                ? targetState.getWristRads()
                 : currentState.getWristRads();
         double midStateTelescopeMeters = telescopeMovementValidReason.isValid()
-                ? currentState.getTelescopeMeters() + ((targetState.getTelescopeMeters()
-                        - currentState.getTelescopeMeters()) * proportion)
+                ? targetState.getTelescopeMeters()
                 : currentState.getTelescopeMeters();
 
         if (!pivotMovementValidReason.isValid()
@@ -362,11 +361,8 @@ public class StemValidator {
                                 leftDiff - rightDiff,
                                 bottomDiff - topDiff));
 
-                Translation2d pivotAxelToWristAxelSlope = new Translation2d(
-                        midWristAxelPoint.getX()
-                                - kRobotCollisionGeometry.PIVOT_LOCATION.getX(),
-                        midWristAxelPoint.getY()
-                                - kRobotCollisionGeometry.PIVOT_LOCATION.getY());
+                Translation2d pivotAxelToWristAxelSlope = midWristAxelPoint.minus(
+                        kRobotCollisionGeometry.PIVOT_LOCATION);
 
                 midStateTelescopeMeters = Math.sqrt(
                         Math.pow(pivotAxelToWristAxelSlope.getX(), 2)
@@ -376,13 +372,14 @@ public class StemValidator {
             }
         }
 
+        StemPosition midState = StemPosition.fromRadians(midStatePivotRads, midStateWristRads,
+                midStateTelescopeMeters);
+
         Monologue.log("/Robot/Stem/StemValidator/StepTowardsTargetPosition/MidState",
-                StemPosition
-                        .fromRadians(midStatePivotRads, midStateWristRads,
-                                midStateTelescopeMeters));
+                midState);
         Monologue.log("/Robot/Stem/StemValidator/StepTowardsTargetPosition/Target",
                 targetState);
 
-        return StemPosition.fromRadians(midStatePivotRads, midStateWristRads, midStateTelescopeMeters);
+        return midState;
     }
 }

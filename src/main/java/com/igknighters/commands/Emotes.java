@@ -3,12 +3,12 @@ package com.igknighters.commands;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import com.igknighters.LED.LedAnimations;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.SwerveCommands;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
+import com.igknighters.subsystems.led.LedAnimations;
 import com.igknighters.subsystems.stem.StemPosition;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -47,9 +47,9 @@ public class Emotes {
             );
             var umbrella = UmbrellaCommands.stopShooter(subsystems.umbrella.get());
             var leds = Commands.repeatingSequence(
-                LEDCommands.setLED(LedAnimations.SHOOTING),
+                LedCommands.animate(subsystems.led.get(), LedAnimations.SHOOTING),
                 Commands.waitSeconds(0.5),
-                LEDCommands.setLED(LedAnimations.TEST),
+                LedCommands.animate(subsystems.led.get(), LedAnimations.Intake),
                 Commands.waitSeconds(0.5)
             );
 
@@ -107,7 +107,7 @@ public class Emotes {
                 1.0
             )
         );
-        var leds = LEDCommands.setLED(LedAnimations.TELEOP);
+        var leds = LedCommands.animate(subsystems.led.get(), LedAnimations.TELEOP);
 
         return Commands.parallel(
             umbrella,

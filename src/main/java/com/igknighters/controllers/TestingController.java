@@ -27,10 +27,8 @@ import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import com.igknighters.LED;
 import com.igknighters.Localizer;
 import com.igknighters.Robot;
-import com.igknighters.LED.LedAnimations;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.commands.HigherOrderCommands;
 import com.igknighters.commands.stem.StemCommands;
@@ -153,20 +151,20 @@ public class TestingController extends ControllerParent {
         // this.RT.binding 
 
         /// DPAD
-        this.DPR.binding = new Binding((trig, allss) -> {
-            trig.onTrue(Commands.runOnce(() -> LED.sendAnimation(LedAnimations.TELEOP)).ignoringDisable(true));
-        });
+        // this.DPR.binding = new Binding((trig, allss) -> {
+        //     trig.onTrue(Commands.runOnce(() -> LED.sendAnimation(LedAnimations.TELEOP)).ignoringDisable(true));
+        // });
 
-        this.DPD.binding = new Binding((trig, allss) -> {
-            trig.onTrue(Commands.runOnce(() -> LED.sendAnimation(LedAnimations.ERROR)).ignoringDisable(true));
-        });
+        // this.DPD.binding = new Binding((trig, allss) -> {
+        //     trig.onTrue(Commands.runOnce(() -> LED.sendAnimation(LedAnimations.ERROR)).ignoringDisable(true));
+        // });
 
-        this.DPL.binding = new Binding((trig, allss) -> {
-            trig.onTrue(Commands.runOnce(() -> LED.sendAnimation(LedAnimations.SHOOTING)).ignoringDisable(true));
-        });
+        // this.DPL.binding = new Binding((trig, allss) -> {
+        //     trig.onTrue(Commands.runOnce(() -> LED.sendAnimation(LedAnimations.SHOOTING)).ignoringDisable(true));
+        // });
 
-        this.DPU.binding = new Binding((trig, allss) -> {
-            trig.onTrue(Commands.runOnce(() -> LED.sendAnimation(LedAnimations.INTAKE)).ignoringDisable(true));
-        });
+        // this.DPU.binding = new Binding((trig, allss) -> {
+        //     trig.onTrue(Commands.runOnce(() -> LED.sendAnimation(LedAnimations.INTAKE)).ignoringDisable(true));
+        // });
     }
 }

@@ -260,7 +260,7 @@ public final class ProceduralStructGenerator {
     }
   }
 
-  private static <T> Struct<T> noopStruct(Class<T> cls) {
+  public static <T> Struct<T> noopStruct(Class<T> cls) {
     return new Struct<>() {
       @Override
       public Class<T> getTypeClass() {
@@ -302,7 +302,7 @@ public final class ProceduralStructGenerator {
    * @return The generated struct.
    */
   @SuppressWarnings({"unchecked", "PMD.AvoidAccessibilityAlteration"})
-  static <R extends Record> Struct<R> genRecord(final Class<R> recordClass) {
+  public static <R extends Record> Struct<R> genRecord(final Class<R> recordClass) {
     final RecordComponent[] components = recordClass.getRecordComponents();
     final SchemaBuilder schemaBuilder = new SchemaBuilder();
     final ArrayList<Struct<?>> nestedStructs = new ArrayList<>();
@@ -459,7 +459,7 @@ public final class ProceduralStructGenerator {
    * @return The generated struct.
    */
   @SuppressWarnings({"unchecked", "PMD.AvoidAccessibilityAlteration"})
-  static <E extends Enum<E>> Struct<E> genEnum(Class<E> enumClass) {
+  public static <E extends Enum<E>> Struct<E> genEnum(Class<E> enumClass) {
     final E[] enumVariants = enumClass.getEnumConstants();
     final Field[] allEnumFields = enumClass.getDeclaredFields();
     final SchemaBuilder schemaBuilder = new SchemaBuilder();
@@ -618,7 +618,7 @@ public final class ProceduralStructGenerator {
    * @return The generated struct.
    */
   @SuppressWarnings({"unchecked", "PMD.AvoidAccessibilityAlteration"})
-  static <E> Struct<E> genObject(Class<E> objectClass, Supplier<E> objectSupplier) {
+  public static <E> Struct<E> genObject(Class<E> objectClass, Supplier<E> objectSupplier) {
     final SchemaBuilder schemaBuilder = new SchemaBuilder();
     final ArrayList<Struct<?>> nestedStructs = new ArrayList<>();
     final ArrayList<Unpacker<?>> unpackers = new ArrayList<>();

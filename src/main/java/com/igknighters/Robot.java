@@ -29,7 +29,6 @@ import com.igknighters.controllers.TestingController;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
-import com.igknighters.util.can.CANBusLogging;
 import com.igknighters.util.can.CANSignalManager;
 import com.igknighters.util.geom.AllianceFlip;
 import com.igknighters.util.geom.GeomUtil;
@@ -43,13 +42,6 @@ import choreo.ChoreoAutoFactory.ChoreoAutoBindings;
 public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
     private final CommandScheduler scheduler = CommandScheduler.getInstance();
-    // private final PowerLogger powerLogger = new PowerLogger(
-    //         ConstValues.PDH_CAN_ID,
-    //         ModuleType.kRev,
-    //         "/Robot/PowerDistribution",
-    //         false
-    // );
-    // private final FilesystemLogger filesystemLogger = new FilesystemLogger();
 
     public final Localizer localizer;
 
@@ -165,10 +157,6 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
         Tracer.traceFunc("CANSignalRefresh", CANSignalManager::refreshSignals);
         Tracer.traceFunc("Localizer", localizer::update);
         Tracer.traceFunc("CommandScheduler", scheduler::run);
-        Tracer.traceFunc("LEDUpdate", LED::run);
-        Tracer.traceFunc("CANBusLoggung", CANBusLogging::log);
-        // Tracer.traceFunc("PowerLogger", powerLogger::log);
-        // Tracer.traceFunc("FilesystemLogger", filesystemLogger::log);
         Tracer.traceFunc("Monologue", Monologue::updateAll);
         Tracer.traceFunc("Choosers", () -> {
             autoManager.update();
@@ -278,9 +266,6 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
             String name = command.getName();
             int count = commandCounts.getOrDefault(name, 0) + (active ? 1 : -1);
             commandCounts.put(name, count);
-            // Monologue.log(
-            //         "Commands/CommandsUnique/" + name + "_" + Integer.toHexString(command.hashCode()),
-            //         active.booleanValue());
             Monologue.log("Commands/" + name, count > 0);
         };
         scheduler.onCommandInitialize(
