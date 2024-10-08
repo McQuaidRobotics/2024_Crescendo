@@ -1,4 +1,4 @@
-package com.igknighters.commands;
+package com.igknighters.commands.led;
 
 import com.igknighters.subsystems.led.Led;
 import com.igknighters.subsystems.led.LedAnimations;

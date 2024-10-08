@@ -4,7 +4,7 @@ import com.igknighters.Localizer;
 import com.igknighters.Robot;
 import com.igknighters.commands.Emotes;
 import com.igknighters.commands.HigherOrderCommands;
-import com.igknighters.commands.LedCommands;
+import com.igknighters.commands.led.LedCommands;
 import com.igknighters.commands.stem.StemCommands;
 import com.igknighters.commands.swerve.SwerveCommands;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
