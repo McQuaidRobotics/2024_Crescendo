@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import monologue.Monologue.MonologueConfig;
 
 import com.ctre.phoenix6.SignalLogger;
+import com.igknighters.commands.AutoGifGenerator;
 import com.igknighters.commands.autos.AutoController;
 import com.igknighters.commands.autos.AutoManager;
 import com.igknighters.commands.autos.AutoRoutines;
@@ -60,6 +61,8 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
     public Robot(RobotID robotID) {
         super(ConstValues.PERIODIC_TIME);
+
+        // RobotModeTriggers.autonomous().whileTrue(AutoGifMaker.convertToJson());//autoManager.getSelectedAutoRoutine().getName()));
 
         // logging needs to be setup asap as to not lose logging calls b4 its setup
         setupLogging();
@@ -179,7 +182,8 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
         String msg = "---- Starting auto command: " + autoCmd.getName() + " ----";
         if (isDebug()) System.out.println(msg);
         Monologue.log("AutoEvent", msg);
-        scheduler.schedule(autoCmd);
+        if (isRecording()) scheduler.schedule(autoCmd.alongWith(AutoGifGenerator.convertToJson(autoCmd.getName(), localizer)));
+        else scheduler.schedule(autoCmd);
     }
 
     @Override
@@ -292,5 +296,9 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
     public static boolean isSunlight() {
         return ConstValues.SUNLIGHT;
+    }
+
+    public static boolean isRecording() {
+        return ConstValues.RECORDING;
     }
 }

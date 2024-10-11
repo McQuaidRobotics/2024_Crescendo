@@ -60,6 +60,7 @@ public final class ConstValues {
     public static final boolean DEBUG = true; // this should be false for competition
     public static final boolean DEMO = false; // this should be false for competition
     public static final boolean SUNLIGHT = false; // this should be false for competition
+    public static final boolean RECORDING = true; // this should be false for competition
     public static final double PERIODIC_TIME = 0.02; // 20ms
     public static final int PDH_CAN_ID = 61;
 
@@ -72,6 +73,7 @@ public final class ConstValues {
         public static final String SWERVE_ODO_SAMPLES = "SWERVE_ODO_SAMPLES";
         public static final String VISION = "VISION";
         public static final String APRILTAGS = "APRILTAGS";
+        public static final String PICKED_UP_NOTES = "PICKED_UP_NOTES";
     }
 
     public static final class kRobotCollisionGeometry {

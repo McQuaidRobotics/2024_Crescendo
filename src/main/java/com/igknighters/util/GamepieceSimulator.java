@@ -8,7 +8,9 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.igknighters.constants.FieldConstants;
+import com.igknighters.constants.ConstValues.kChannels;
 import com.igknighters.util.geom.AllianceFlip;
+import com.igknighters.util.plumbing.GlobalChannels.Sender;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -63,6 +65,7 @@ public class GamepieceSimulator {
         AtomicBoolean didJustIntake = new AtomicBoolean(false);
         ArrayList<Translation2d> notes = new ArrayList<>();
 
+        Sender<Translation2d> noteSender = Sender.broadcast(kChannels.PICKED_UP_NOTES, Translation2d.class);
         // auto sim notes
         Command autoCmd = new FunctionalCommand(
                 () -> {
@@ -92,6 +95,7 @@ public class GamepieceSimulator {
                                     }
                                     for (Translation2d intakePoint : intakePoints) {
                                         if (note.getDistance(intakePoint) < NOTE_RADIUS) {
+                                            noteSender.send(note);
                                             didJustIntake.set(true);
                                             return false;
                                         }
