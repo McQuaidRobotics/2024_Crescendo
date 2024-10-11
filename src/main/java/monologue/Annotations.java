@@ -140,6 +140,20 @@ public class Annotations {
   @Target({ElementType.FIELD})
   public @interface IgnoreLogged {}
 
+  /**
+   * Allows singletons to be logged only once with a predefined key.
+   * 
+   * <p>This also allows static variables to be logged under the singleton's key.
+   * 
+   * @param key the key to log at, still appends the class name
+   */
+  @Documented
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.TYPE})
+  public @interface SingletonLogged {
+    public String key();
+  }
+
   // Not ready yet
   // /**
   //  * Will cause the internal fields of the annotated field to be logged as if they were fields of

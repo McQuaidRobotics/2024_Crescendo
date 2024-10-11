@@ -5,7 +5,6 @@ import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.DriverStation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Supplier;
 import monologue.Annotations.IgnoreLogged;
@@ -39,13 +38,31 @@ class EvalField {
     field.setAccessible(true);
 
     if (evalNestedLogged(field, loggable, rootPath)) {
-      MonologueLog.runtimeLog(rootPath + "." + field.getName() + " was logged recursively");
+      MonologueLog.runtimeLog(
+        rootPath + "."
+        + field.getName()
+        + " of type "
+        + field.getType().getSimpleName()
+        + " was logged recursively");
     } else {
       evalFieldAnnotations(field, loggable, rootPath);
     }
   }
 
   private static boolean evalNestedLogged(Field field, Logged loggable, String rootPath) {
+    // //check for kotlin singletons
+    if (field.getName().equals("INSTANCE")
+      && field.getType().equals(loggable.getClass())
+      && EvalAnno.singletonKey(loggable.getClass()).isEmpty()) {
+        MonologueLog.runtimeWarn(
+          rootPath + "."
+          + field.getName()
+          + " of type "
+          + field.getType().getSimpleName()
+          + " is a kotlin singleton, consider using @SingletonLogged");
+      return false;
+    }
+
     final Optional<Object> fieldOptional = getField(field, loggable);
 
     if (fieldOptional.isEmpty() || field.isAnnotationPresent(IgnoreLogged.class)) {
@@ -66,7 +83,9 @@ class EvalField {
       if (pathOverride.equals("")) {
         pathOverride = field.getName();
       }
-      Monologue.logObj(logged, rootPath + "/" + pathOverride);
+      var singletonKey = EvalAnno.singletonKey(field.getType());
+      String rtpth = singletonKey.isEmpty() ? rootPath : singletonKey.get();
+      Monologue.logObj(logged, rtpth + "/" + pathOverride);
       recursed = true;
     } else if (field.getType().isArray()) {
       // If object array
@@ -92,22 +111,6 @@ class EvalField {
           }
         }
       }
-    } else if (Collection.class.isAssignableFrom(field.getType())) {
-      int idx = 0;
-      // Include all elements whose runtime class is Logged
-
-      for (Object obj : (Collection<?>) fieldOptional.get()) {
-        if (obj instanceof Logged) {
-          String pathOverride = ((Logged) obj).getOverrideName();
-          if (pathOverride.equals("")) {
-            pathOverride = obj.getClass().getSimpleName();
-          }
-          Monologue.logObj(
-              (Logged) obj,
-              rootPath + "/" + field.getName() + "/" + pathOverride + "[" + idx++ + "]");
-          recursed = true;
-        }
-      }
     }
     return recursed;
   }
@@ -119,7 +122,7 @@ class EvalField {
       return;
     }
 
-    if (Modifier.isStatic(field.getModifiers())) {
+    if (Modifier.isStatic(field.getModifiers()) && EvalAnno.singletonKey(loggable.getClass()).isEmpty()) {
       MonologueLog.runtimeWarn(rootPath + "." + field.getName() + " is static and will be ignored");
       return;
     }

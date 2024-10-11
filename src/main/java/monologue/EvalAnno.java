@@ -1,7 +1,9 @@
 package monologue;
 
 import java.lang.reflect.AccessibleObject;
+import java.util.Optional;
 import monologue.Annotations.Log;
+import monologue.Annotations.SingletonLogged;
 
 class EvalAnno {
 
@@ -46,6 +48,17 @@ class EvalAnno {
       }
     }
     return count > 1;
+  }
+
+  /**
+   * Checks if the class is a singleton and returns its key if it is.
+   */
+  static Optional<String> singletonKey(Class<?> clazz) {
+    if (clazz.isAnnotationPresent(SingletonLogged.class)) {
+      return Optional.of(clazz.getAnnotation(SingletonLogged.class).key());
+    } else {
+      return Optional.empty();
+    }
   }
 
   /** A condensed packaged of what describes a singular logged field/method */

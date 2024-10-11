@@ -270,6 +270,16 @@ public class Monologue extends GlobalLogged {
       throw new IllegalStateException(
           "Tried to use Monologue.logObj before using a Monologue setup method");
 
+    if (loggedRegistry.containsKey(loggable)) {
+      MonologueLog.runtimeLog(
+          "Monologue.logObj() called on "
+              + loggable.getClass().getName()
+              + " with path "
+              + path
+              + " but it has already been logged");
+      return;
+    }
+
     if (path == null || path.isEmpty()) {
       MonologueLog.runtimeWarn("Invalid path for Monologue.logObj(): " + path);
       return;
@@ -282,7 +292,9 @@ public class Monologue extends GlobalLogged {
 
     loggedRegistry.put(loggable, path);
 
-    for (Field field : getAllFields(loggable.getClass())) {
+    var fields = getAllFields(loggable.getClass());
+    MonologueLog.runtimeLog(fields.size() + " fields found in " + loggable.getClass().getName());
+    for (Field field : fields) {
       EvalField.evalField(field, loggable, path);
     }
     for (Method method : getAllMethods(loggable.getClass())) {
