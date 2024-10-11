@@ -17,8 +17,10 @@ import com.igknighters.util.plumbing.TunableValues;
 import com.igknighters.util.plumbing.TunableValues.TunableDouble;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
@@ -32,6 +34,7 @@ import com.igknighters.Robot;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.commands.HigherOrderCommands;
 import com.igknighters.commands.stem.StemCommands;
+import com.igknighters.commands.swerve.SwerveCommands;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveTargetCmd;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 
@@ -126,7 +129,22 @@ public class TestingController extends ControllerParent {
         /// CENTER BUTTONS
         // this.Back.binding =
 
-        // this.Start.binding =
+        this.Start.binding = new Binding((trig, allss) -> {
+            Swerve swerve = allss.swerve.get();
+            Timer timer = new Timer();
+            trig.onTrue(
+                Commands.defer(
+                    () -> SwerveCommands.pointTowards(
+                        swerve,
+                        Rotation2d.fromRadians(swerve.getYawRads())
+                            .plus(Rotation2d.fromDegrees(90.0))
+                    ),
+                    Set.of(swerve)
+                ).beforeStarting(timer::restart)
+                .andThen(Commands.defer(() -> Commands.print("Time: " + timer.get()), Set.of()))
+                .andThen(timer::stop)
+            );
+        }, Subsystems.Swerve);
 
         /// STICKS
         // this.LS.binding =

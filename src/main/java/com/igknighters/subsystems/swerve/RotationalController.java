@@ -8,6 +8,8 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 public class RotationalController {
+    private final Swerve swerve;
+
     private double positionError = 0, prevError = 0, velocityError = 0;
 
     private final TrapezoidProfile profile = new TrapezoidProfile(
@@ -17,8 +19,14 @@ public class RotationalController {
     private TrapezoidProfile.State goalState = new TrapezoidProfile.State();
     private TrapezoidProfile.State setpointState = new TrapezoidProfile.State();
 
+    public RotationalController(Swerve swerve) {
+        this.swerve = swerve;
+    }
+
     // OBJ_COUNT: 4
-    public double calculate(double measurement, double target, double deadband) {
+    public double calculate(double target, double deadband) {
+        double measurement = MathUtil.angleModulus(swerve.getYawRads());
+
         if (Math.abs(measurement - target) < deadband) {
             return 0.0;
         }
@@ -45,10 +53,10 @@ public class RotationalController {
                 + (kRotationController.kD * velocityError);
     }
 
-    public void reset(double measuredPosition, double measuredVelocity) {
+    public void reset() {
         positionError = 0;
         prevError = 0;
         velocityError = 0;
-        setpointState = new TrapezoidProfile.State(measuredPosition, measuredVelocity);
+        setpointState = new TrapezoidProfile.State(swerve.getYawRads(), swerve.getChassisSpeed().omegaRadiansPerSecond);
     }
 }

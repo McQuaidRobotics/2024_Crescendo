@@ -1,5 +1,6 @@
 package com.igknighters.commands.swerve.teleop;
 
+import com.igknighters.subsystems.swerve.RotationalController;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.util.geom.AllianceFlip;
 import com.igknighters.util.geom.GeomUtil;
@@ -23,6 +24,7 @@ public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
     private final Localizer localizer;
     private final Translation2d target;
     private final boolean movementComp;
+    private final RotationalController rotController;
 
     public TeleopSwerveTargetCmd(Swerve swerve, ControllerParent controller, Localizer localizer, Translation2d target, boolean movementComp) {
         super(swerve, controller);
@@ -30,11 +32,12 @@ public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
         this.localizer = localizer;
         this.target = target;
         this.movementComp = movementComp;
+        this.rotController = new RotationalController(swerve);
     }
 
     @Override
     public void initialize() {
-        swerve.resetRotController();
+        rotController.reset();
     }
 
     @Override
@@ -85,7 +88,7 @@ public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
             ).plus(GeomUtil.ROTATION2D_PI);
         }
 
-        double rotVelo = swerve.rotVeloForRotation(targetAngle, Units.degreesToRadians(0.3));
+        double rotVelo = rotController.calculate(targetAngle.getRadians(), Units.degreesToRadians(0.3));
 
         desiredChassisSpeeds.omegaRadiansPerSecond = rotVelo;
 

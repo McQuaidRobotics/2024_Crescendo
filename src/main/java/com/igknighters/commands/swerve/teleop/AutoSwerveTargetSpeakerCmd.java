@@ -1,5 +1,6 @@
 package com.igknighters.commands.swerve.teleop;
 
+import com.igknighters.subsystems.swerve.RotationalController;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.util.geom.AllianceFlip;
 import com.igknighters.util.geom.GeomUtil;
@@ -20,6 +21,7 @@ public class AutoSwerveTargetSpeakerCmd extends Command {
 
     private final Swerve swerve;
     private final Supplier<Pose2d> poseSupplier;
+    private final RotationalController rotController;
     private boolean isDone = false;
     ChassisSpeeds desiredChassisSpeeds = new ChassisSpeeds();
 
@@ -27,11 +29,12 @@ public class AutoSwerveTargetSpeakerCmd extends Command {
         addRequirements(swerve);
         this.poseSupplier = poseSupplier;
         this.swerve = swerve;
+        this.rotController = new RotationalController(swerve);
     }
 
     @Override
     public void initialize() {
-        swerve.resetRotController();
+        rotController.reset();
         isDone = false;
         desiredChassisSpeeds.omegaRadiansPerSecond = 0.0;
     }
@@ -41,15 +44,11 @@ public class AutoSwerveTargetSpeakerCmd extends Command {
         Translation2d speaker = FieldConstants.SPEAKER.toTranslation2d();
         Translation2d targetTranslation = AllianceFlip.isBlue() ? speaker : AllianceFlip.flipTranslation(speaker);
 
-        // GlobalState.modifyField2d(field -> {
-        //     field.getObject("targetTranslation").setPose(new Pose2d(targetTranslation, GeomUtil.ROTATION2D_ZERO));
-        // });
-
         Rotation2d targetAngle = GeomUtil.rotationRelativeToPose(
                 poseSupplier.get().getTranslation(),
                 targetTranslation
         ).plus(GeomUtil.ROTATION2D_PI);
-        double rotVelo = swerve.rotVeloForRotation(targetAngle, Units.degreesToRadians(1.5));
+        double rotVelo = rotController.calculate(targetAngle.getRadians(), Units.degreesToRadians(1.5));
 
         desiredChassisSpeeds.omegaRadiansPerSecond = rotVelo;
 
