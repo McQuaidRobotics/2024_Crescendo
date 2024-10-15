@@ -175,6 +175,47 @@ public final class ProceduralStructGenerator {
     }
   }
 
+  /**
+   * Introspects a class to determine if it's a fixed size.
+   * 
+   * <p>Fixed size means no collections, no strings, no arrays, etc.
+   * 
+   * @param clazz The class to introspect.
+   * @return Whether the class is fixed size.
+   */
+  public static boolean isFixedSize(Class<?> clazz) {
+    if (clazz.isArray()) {
+      return false;
+    } else if (clazz.isRecord()) {
+      for (RecordComponent component : clazz.getRecordComponents()) {
+        if (!isFixedSize(component.getType())) {
+          return false;
+        }
+      }
+    } else if (clazz.isEnum()) {
+      for (Field field : clazz.getDeclaredFields()) {
+        if (field.isEnumConstant() || Modifier.isStatic(field.getModifiers())) {
+          continue;
+        }
+        if (!primitiveTypeMap.containsKey(field.getType())
+            && !customStructTypeMap.containsKey(field.getType())) {
+          return false;
+        }
+      }
+    } else {
+      for (Field field : clazz.getDeclaredFields()) {
+        if (Modifier.isStatic(field.getModifiers())) {
+          continue;
+        }
+        if (!primitiveTypeMap.containsKey(field.getType())
+            && !customStructTypeMap.containsKey(field.getType())) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   /** A utility for building schema syntax in a procedural manner. */
   @SuppressWarnings("PMD.AvoidStringBufferField")
   public static class SchemaBuilder {

@@ -32,7 +32,7 @@ public class IntakeRealSingleCurrent extends Intake {
 
     private TunableDouble currentTripValue = TunableValues.getDouble("IntakeCurrentTrip", 115.0);
 
-    @Log.NT private boolean forcedOutput = false;
+    @Log private boolean forcedOutput = false;
 
     public IntakeRealSingleCurrent() {
         FaultManager.captureFault(

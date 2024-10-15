@@ -129,6 +129,9 @@ public class CandleDriver extends Driver {
         int red = (int) ((1 - percent) * 255);
         candle.setLEDs(red, green, 0, 255, 0, 8);
         if (newAnimations) {
+            for (int i = 0; i < lastAnimations.length; i++) {
+                candle.clearAnimation(i + 1);
+            }
             for (int i = 0; i < animations.length; i++) {
                 execPattern(animations[i], i + 1);
             }

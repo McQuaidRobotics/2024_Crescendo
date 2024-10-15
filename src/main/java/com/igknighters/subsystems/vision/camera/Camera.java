@@ -25,13 +25,13 @@ import com.igknighters.constants.ConstValues.kVision;
 import com.igknighters.subsystems.Component;
 
 public abstract class Camera extends Component {
-    @Log.NT
+    @Log
     protected VisionPoseEstimate latestPoseEst;
-    @Log.NT
+    @Log
     protected VisionEstimateFault latestFault;
-    @Log.NT
+    @Log
     protected boolean isPresent = false;
-    @Log.NT
+    @Log
     protected boolean isConnected = false;
 
     protected Camera(int id) {

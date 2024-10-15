@@ -168,8 +168,8 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
                     moduleStates[(i * 2) + 1].set(Double.doubleToLongBits(signals[veloOffset].getValueAsDouble()));
                 }
 
-                gyroStates[0].set(Double.doubleToLongBits(Units.degreesToRadians(signals[signals.length - 2].getValueAsDouble())));
-                gyroStates[1].set(Double.doubleToLongBits(Units.degreesToRadians(signals[signals.length - 1].getValueAsDouble())));
+                gyroStates[0].set(Double.doubleToLongBits(Units.degreesToRadians(signals[signals.length - 4].getValueAsDouble())));
+                gyroStates[1].set(Double.doubleToLongBits(Units.degreesToRadians(signals[signals.length - 3].getValueAsDouble())));
 
                 swerveDataSender.send(
                     new SwerveDriveSample(

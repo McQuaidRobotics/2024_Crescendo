@@ -405,6 +405,62 @@ public class AutoRoutines extends AutoCommands {
         return loop.cmd().withName("FourPieceSourceSide");
     }
 
+    /**
+     * 
+     * 
+     * 
+     * @param factory The factory to create trajectories with
+     * @return The command that represents the auto routine
+     */
+    public Command fourPieceCloseAmpSide(ChoreoAutoFactory factory) {
+        if (disabled) return disabledAuto();
+
+        final ChoreoAutoLoop loop = factory.newLoop();
+
+        final ChoreoAutoTrajectory ampToC1 = factory.traj(AMP.to(C1), loop);
+        final ChoreoAutoTrajectory c1ToC2 = factory.traj(C1.to(C2), loop);
+        final ChoreoAutoTrajectory c2ToC3 = factory.traj(C2.to(C3), loop);
+
+        // entry point for the auto
+        loop.enabled().onTrue(
+            resetOdometry(ampToC1).andThen(
+                Commands.parallel(
+                    UmbrellaCommands.waitUntilSpunUp(umbrella, 5000, 0.1),
+                    aimSub()
+                ),
+                feedShooter(),
+                Commands.parallel(
+                    intakeGamepieceNoStow(),
+                    Commands.waitSeconds(0.2)
+                        .andThen(ampToC1.cmd())
+                )
+            ).withName("ThreePieceSubMiddleEntry")
+        );
+
+        ampToC1.done().onTrueWith(
+            gamepiece(loop),
+            autoShoot(),
+            c1ToC2.cmd()
+        );
+
+        c1ToC2.active().onTrue(intakeGamepieceNoStow());
+        c1ToC2.done().onTrueWith(
+            gamepiece(loop),
+            autoShoot(),
+            c2ToC3.cmd()
+        );
+
+
+        c2ToC3.active().onTrue(intakeGamepieceNoStow());
+        c2ToC3.done().onTrueWith(
+            gamepiece(loop),
+            autoShoot(),
+            stow()
+        );
+
+        return loop.cmd().withName("fourPieceCloseAmp");
+    }
+
     public Command driveForward(ChoreoAutoFactory factory) {
         if (disabled) return disabledAuto();
 

@@ -88,9 +88,7 @@ public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
             ).plus(GeomUtil.ROTATION2D_PI);
         }
 
-        double rotVelo = rotController.calculate(targetAngle.getRadians(), Units.degreesToRadians(0.3));
-
-        desiredChassisSpeeds.omegaRadiansPerSecond = rotVelo;
+        desiredChassisSpeeds.omegaRadiansPerSecond = rotController.calculate(targetAngle.getRadians(), Units.degreesToRadians(0.3));
 
         swerve.drive(desiredChassisSpeeds, false);
     }

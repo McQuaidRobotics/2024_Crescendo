@@ -20,6 +20,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import monologue.LogSink;
 import monologue.Logged;
 import monologue.Monologue;
 
@@ -64,7 +65,7 @@ public class Localizer implements Logged{
         );
 
         field = new Field2d();
-        Monologue.publishSendable("/Visualizers/Field", field);
+        Monologue.publishSendable("/Visualizers/Field", field, LogSink.NT);
     }
 
     public Sender<VisionPoseEstimate> visionDataSender() {

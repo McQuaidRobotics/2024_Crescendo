@@ -30,7 +30,7 @@ public class IntakeReal extends Intake {
 
     private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
 
-    @Log.NT private boolean wasBeamBroken = false;
+    @Log private boolean wasBeamBroken = false;
 
     public IntakeReal() {
         FaultManager.captureFault(
