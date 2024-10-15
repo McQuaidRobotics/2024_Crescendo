@@ -6,12 +6,12 @@ import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import monologue.LoggingTree.StaticObjectNode;
+
+import java.io.File;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.WeakHashMap;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -24,7 +24,7 @@ import java.util.function.BooleanSupplier;
  *
  * <p>Monologue works by creating a tree of objects that implement the {@link Logged} interface and
  * then logging the fields and methods of those objects to NetworkTables and Datalog based on their
- * annotations. For example let's say the root object is {@code RobotContainer.java}, you would
+ * annotations. For example let's say the root object is {@code Robot.java}, you would
  * implemenet {@link Logged} on the root object and then call {@link #setupMonologue(Logged, String,
  * MonologueConfig)} with the root object and a root path (typically "/Robot"). This will recurse
  * through all the fields in {@code RobotContainer.java} and search for more objects that implement
@@ -34,27 +34,26 @@ import java.util.function.BooleanSupplier;
  * did it wrong. If you would like to run Monologue in whole robot Unit Tests you can use {@link
  * #setupMonologueDisabled(Logged, String, boolean)} to disable logging and only run the error
  * checking.
+ * 
+ * <p><b>WARNING:</b> Any use of `DatalogManager` before Monologue.setupMonologue()
+ * is undefined behavior and can result in a crash.
  */
 public class Monologue extends GlobalLogged {
-
   static {
-    // we need to make sure we never log network tables through the implicit wpilib logger
-    DataLogManager.logNetworkTables(false);
+    monologifyDatalog();
   }
 
-  /** The Monologue library wide FILE_ONLY flag, is used to filter logging behavior */
-  private static boolean FILE_ONLY = true;
+  /** The Monologue library wide OPTIMIZE_BANDWIDTH flag, is used to divert logging */
+  private static boolean OPTIMIZE_BANDWIDTH = true;
 
   private static MonologueConfig config = new MonologueConfig();
 
   private static boolean HAS_SETUP_BEEN_CALLED = false;
   private static boolean IS_DISABLED = false;
   private static boolean THROW_ON_WARN = false;
-  private static boolean ALLOW_NON_FINAL_LOGGED_FIELDS = false;
 
-  static final NTLogger ntLogger = new NTLogger();
-  static final DataLogger dataLogger = new DataLogger();
-  static final WeakHashMap<Logged, String> loggedRegistry = new WeakHashMap<Logged, String>();
+  private static final ArrayList<Runnable> prematureCalls = new ArrayList<Runnable>();
+  private static final ArrayList<StaticObjectNode> trees = new ArrayList<StaticObjectNode>();
 
   /**
    * An object to hold the configuration for the Monologue library. This allows for easier default
@@ -62,17 +61,17 @@ public class Monologue extends GlobalLogged {
    * existing code.
    */
   public static record MonologueConfig(
-      BooleanSupplier fileOnly,
+      BooleanSupplier optimizeBandwidthSupplier,
       boolean lazyLogging,
       String datalogPrefix,
       boolean throwOnWarn,
       boolean allowNonFinalLoggedFields) {
     public MonologueConfig {
-      if (fileOnly == null) {
+      if (optimizeBandwidthSupplier == null) {
         MonologueLog.runtimeWarn(
-            "fileOnly cannot be null in MonologueConfig, falling back to false (always log NT)");
+            "shouldOptimizeBandwidthSupplier cannot be null in MonologueConfig, falling back to false (always log NT)");
 
-        fileOnly = () -> false;
+            optimizeBandwidthSupplier = () -> false;
       }
       if (datalogPrefix == null) {
         MonologueLog.runtimeWarn(
@@ -86,25 +85,25 @@ public class Monologue extends GlobalLogged {
     }
 
     /**
-     * Updates the fileOnly flag supplier.
+     * Updates the OptimizeBandwidth flag supplier.
      *
-     * @param fileOnly The new fileOnly flag supplier
-     * @return A new MonologueConfig object with the updated fileOnly flag supplier
+     * @param optimizeBandwidth The new OptimizeBandwidth flag supplier
+     * @return A new MonologueConfig object with the updated OptimizeBandwidth flag supplier
      */
-    public MonologueConfig withFileOnly(BooleanSupplier fileOnly) {
+    public MonologueConfig withOptimizeBandwidth(BooleanSupplier optimizeBandwidth) {
       return new MonologueConfig(
-          fileOnly, lazyLogging, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
+        optimizeBandwidth, lazyLogging, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
     }
 
     /**
-     * Updates the fileOnly static flag.
+     * Updates the OptimizeBandwidth static flag.
      *
-     * @param fileOnly The new fileOnly flag
-     * @return A new MonologueConfig object with the updated fileOnly flag
+     * @param optimizeBandwidth The new OptimizeBandwidth flag
+     * @return A new MonologueConfig object with the updated OptimizeBandwidth flag
      */
-    public MonologueConfig withFileOnly(Boolean fileOnly) {
+    public MonologueConfig withOptimizeBandwidth(boolean optimizeBandwidth) {
       return new MonologueConfig(
-          () -> fileOnly, lazyLogging, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
+          () -> optimizeBandwidth, lazyLogging, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
     }
 
     /**
@@ -115,7 +114,7 @@ public class Monologue extends GlobalLogged {
      */
     public MonologueConfig withLazyLogging(boolean lazyLogging) {
       return new MonologueConfig(
-          fileOnly, lazyLogging, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
+          optimizeBandwidthSupplier, lazyLogging, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
     }
 
     /**
@@ -126,7 +125,7 @@ public class Monologue extends GlobalLogged {
      */
     public MonologueConfig withDatalogPrefix(String datalogPrefix) {
       return new MonologueConfig(
-          fileOnly, lazyLogging, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
+          optimizeBandwidthSupplier, lazyLogging, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
     }
 
     /**
@@ -138,7 +137,7 @@ public class Monologue extends GlobalLogged {
      */
     public MonologueConfig withThrowOnWarning(boolean throwOnWarn) {
       return new MonologueConfig(
-          fileOnly, lazyLogging, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
+          optimizeBandwidthSupplier, lazyLogging, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
     }
 
     /**
@@ -151,7 +150,7 @@ public class Monologue extends GlobalLogged {
      */
     public MonologueConfig withAllowNonFinalLoggedFields(boolean allowNonFinalLoggedFields) {
       return new MonologueConfig(
-          fileOnly, lazyLogging, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
+          optimizeBandwidthSupplier, lazyLogging, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
     }
   }
 
@@ -166,7 +165,7 @@ public class Monologue extends GlobalLogged {
    * @param rootpath the root path to log to\
    * @param config the configuration for the Monologue library
    * @apiNote Should only be called once, if another {@link Logged} tree needs to be created use
-   *     {@link #logObj(Logged, String)} for additional trees
+   *     {@link #logTree(Logged, String)} for additional trees
    */
   public static void setupMonologue(Logged loggable, String rootpath, MonologueConfig config) {
     if (HAS_SETUP_BEEN_CALLED) {
@@ -174,6 +173,9 @@ public class Monologue extends GlobalLogged {
           "Monologue.setupMonologue() has already been called, further calls will do nothing");
       return;
     }
+
+    NetworkTableInstance.getDefault()
+        .startEntryDataLog(DataLogManager.getLog(), "", config.datalogPrefix);
 
     // create and start a timer to time the setup process
     Timer timer = new Timer();
@@ -192,24 +194,12 @@ public class Monologue extends GlobalLogged {
             + config);
 
     THROW_ON_WARN = config.throwOnWarn;
-    ALLOW_NON_FINAL_LOGGED_FIELDS = config.allowNonFinalLoggedFields;
 
-    FILE_ONLY = config.fileOnly.getAsBoolean();
-    ntLogger.setLazy(config.lazyLogging);
-    dataLogger.setLazy(config.lazyLogging);
+    OPTIMIZE_BANDWIDTH = config.optimizeBandwidthSupplier.getAsBoolean();
 
-    dataLogger.prefix = config.datalogPrefix;
+    logTree(loggable, rootpath);
 
-    DataLog dataLog = DataLogManager.getLog();
-
-    NetworkTableInstance.getDefault()
-        .startEntryDataLog(dataLog, rootpath, config.datalogPrefix + rootpath);
-    NetworkTableInstance.getDefault().startConnectionDataLog(dataLog, "NTConnection");
-    DriverStation.startDataLog(dataLog, true);
-
-    logObj(loggable, rootpath);
-
-    sendNetworkToFile(".schema/");
+    prematureCalls.forEach(Runnable::run);
 
     System.gc();
 
@@ -249,9 +239,9 @@ public class Monologue extends GlobalLogged {
 
     // wont actually log anything, will just do state and type validation to provide use in CI/unit
     // tests
-    logObj(loggable, rootpath);
+    logTree(loggable, rootpath);
 
-    loggedRegistry.clear();
+    Logged.registry.clear();
 
     MonologueLog.runtimeLog("Monologue.setupMonologueDisabled() finished");
   }
@@ -262,94 +252,56 @@ public class Monologue extends GlobalLogged {
    *
    * @param loggable the obj to scrape
    * @param path the path to log to
-   * @throws IllegalStateException Make sure {@link #setupMonologue()} or {@link
-   *     #setupMonologueDisabled()} is called first
+   * @throws IllegalStateException If {@link #setupMonologue()} or {@link
+   *     #setupMonologueDisabled()} is not called first
    */
-  public static void logObj(Logged loggable, String path) {
+  public static void logTree(Logged loggable, String path) {
     if (!hasBeenSetup())
       throw new IllegalStateException(
-          "Tried to use Monologue.logObj before using a Monologue setup method");
-
-    if (loggedRegistry.containsKey(loggable)) {
-      MonologueLog.runtimeLog(
-          "Monologue.logObj() called on "
-              + loggable.getClass().getName()
-              + " with path "
-              + path
-              + " but it has already been logged");
-      return;
-    }
+          "Tried to use Monologue.logTree() before using a Monologue setup method");
 
     if (path == null || path.isEmpty()) {
-      MonologueLog.runtimeWarn("Invalid path for Monologue.logObj(): " + path);
+      MonologueLog.runtimeWarn("Invalid path for Monologue.logTree(): " + path);
       return;
     } else if (path == "/") {
-      MonologueLog.runtimeWarn("Root path of / is not allowed for Monologue.logObj()");
+      MonologueLog.runtimeWarn("Root path of / is not allowed for Monologue.logTree()");
       return;
     }
     MonologueLog.runtimeLog(
-        "Monologue.logObj() called on " + loggable.getClass().getName() + " with path " + path);
+        "Monologue.logTree() called on " + loggable.getClass().getName() + " with path " + path);
 
-    loggedRegistry.put(loggable, path);
+    StaticObjectNode node = new LoggingTree.StaticObjectNode(path, loggable);
+    Eval.exploreNodes(Eval.getLoggedClasses(loggable.getClass()), node);
+    Logged.addNode(loggable, node);
 
-    var fields = getAllFields(loggable.getClass());
-    MonologueLog.runtimeLog(fields.size() + " fields found in " + loggable.getClass().getName());
-    for (Field field : fields) {
-      EvalField.evalField(field, loggable, path);
-    }
-    for (Method method : getAllMethods(loggable.getClass())) {
-      EvalMethod.evalMethod(method, loggable, path);
-    }
+    trees.add(node);
+
+    updateAll();
   }
 
   /**
    * Updates all the loggers, ideally called every cycle.
    *
-   * @param fileOnlyOverride the new fileOnly flag to use for the whole library, the flag will
-   *     persist after this method until changed again
    * @apiNote Should only be called on the same thread monologue was setup on
    */
   public static void updateAll() {
     if (isMonologueDisabled()) return;
     if (!hasBeenSetup())
       MonologueLog.runtimeWarn("Called Monologue.updateAll before Monologue was setup");
-    boolean newFileOnly = config.fileOnly.getAsBoolean();
-    if (newFileOnly != FILE_ONLY)
-      MonologueLog.runtimeLog("Monologue.updateAll() updated FILE_ONLY flag to " + newFileOnly);
-    FILE_ONLY = newFileOnly;
-    ntLogger.update(FILE_ONLY);
-    dataLogger.update(FILE_ONLY);
-  }
-
-  public static void sendNetworkToFile(String subtablePath) {
-    if (isMonologueDisabled()) return;
-    subtablePath = NetworkTable.normalizeKey(subtablePath, true);
-    NetworkTableInstance.getDefault()
-        .startEntryDataLog(dataLogger.log, subtablePath, config.datalogPrefix + subtablePath);
-  }
-
-  private static List<Field> getAllFields(Class<?> type) {
-    List<Field> result = new ArrayList<Field>();
-
-    Class<?> i = type;
-    while (i != null && i != Object.class) {
-      Collections.addAll(result, i.getDeclaredFields());
-      i = i.getSuperclass();
+    boolean newOptimizeBandwidth = config.optimizeBandwidthSupplier.getAsBoolean();
+    if (newOptimizeBandwidth != OPTIMIZE_BANDWIDTH) {
+      MonologueLog.runtimeLog("Monologue.updateAll() updated FILE_ONLY flag to " + newOptimizeBandwidth);
+      log("MonologueOptimizeBandwidth", newOptimizeBandwidth);
     }
-
-    return result;
+    OPTIMIZE_BANDWIDTH = newOptimizeBandwidth;
+    MonologueSendableLayer.updateAll();
+    for (StaticObjectNode tree : trees) {
+      tree.log(null);
+    }
   }
 
-  private static List<Method> getAllMethods(Class<?> type) {
-    List<Method> result = new ArrayList<Method>();
-
-    Class<?> i = type;
-    while (i != null && i != Object.class) {
-      Collections.addAll(result, i.getDeclaredMethods());
-      i = i.getSuperclass();
-    }
-
-    return result;
+  static void prematureLog(Runnable runnable) {
+    prematureCalls.add(runnable);
   }
 
   /**
@@ -357,8 +309,8 @@ public class Monologue extends GlobalLogged {
    *
    * @return true if Monologue is in file only mode, false otherwise
    */
-  static boolean isFileOnly() {
-    return FILE_ONLY;
+  static boolean isBandwidthOptimizationEnabled() {
+    return OPTIMIZE_BANDWIDTH;
   }
 
   /**
@@ -391,17 +343,6 @@ public class Monologue extends GlobalLogged {
   }
 
   /**
-   * Checks if the Monologue library should allow non-final fields containing {@link Logged} objects
-   * to be logged.
-   *
-   * @return true if Monologue should allow non-final fields containing {@link Logged} objects to be
-   *     logged, false otherwise
-   */
-  static boolean shouldAllowNonFinalLoggedFields() {
-    return ALLOW_NON_FINAL_LOGGED_FIELDS;
-  }
-
-  /**
    * Checks if the Monologue library is ready to log. If it is not ready, it will log a warning
    * using the key provided.
    *
@@ -414,5 +355,64 @@ public class Monologue extends GlobalLogged {
       return false;
     }
     return true;
+  }
+
+  private static void monologifyDatalog() {
+    // Until 2027, pushing data to nt includes overhead on compute and bandwidth that can be undesirable in certain contexts.
+    // Being able to hotswap from nt to datalog is useful for saving resources on the field,
+    // one downside however with current implementation is that fields sent to datalog via nt are prefixed with "NT:"
+    // by default, this is not a huge issue but it can be annoying to deal with.
+    //
+    // To get around this Monologue wants to be in complete control of the datalog without making it a hassel for users.
+    // This code allows Monologue to make the path data is logged while sending to network and sending to file the same.
+    // The only leaky part of this workaround is that user created log entries that are initialized before Monologue.setupMonologue()
+    // will report errors after the log is closed and reopened.
+
+    VarHandle datalogThreadHandle;
+    VarHandle datalogHandle;
+    try {
+        datalogThreadHandle = MethodHandles.privateLookupIn(DataLogManager.class, MethodHandles.lookup())
+            .findStaticVarHandle(DataLogManager.class, "m_thread", Thread.class);
+        datalogHandle = MethodHandles.privateLookupIn(DataLogManager.class, MethodHandles.lookup())
+            .findStaticVarHandle(DataLogManager.class, "m_log", DataLog.class);
+    } catch (NoSuchFieldException | IllegalAccessException e) {
+        MonologueLog.runtimeWarn("Failed to get VarHandles for DataLogManager, falling back to old method");
+        return;
+    }
+
+    boolean killedDatalog = false;
+
+    String dir = DataLogManager.getLogDir();
+    // if dir is empty no datalog is running
+    if (!dir.isEmpty()) {
+        // hang onto the old datalog and it's thread,
+        // `DataLogManager.stop()` nulls both of these out in the manager
+        DataLog oldDataLog = DataLogManager.getLog();
+        Thread oldDatalogThread = (Thread) datalogThreadHandle.get();
+
+        DataLogManager.logNetworkTables(false);
+        DataLogManager.stop();
+        try {
+        oldDatalogThread.join();
+        } catch (InterruptedException e) {
+        MonologueLog.runtimeWarn("Failed to join datalog thread");
+        }
+        datalogHandle.set(null);
+        oldDataLog.setFilename("DELETME");
+        oldDataLog.close();
+        new File(dir + "/DELETME").delete();
+        killedDatalog = true;
+    }
+
+    DataLogManager.logNetworkTables(false);
+    DataLog dataLog = DataLogManager.getLog();
+    NetworkTableInstance.getDefault().startConnectionDataLog(dataLog, "NTConnection");
+    DriverStation.startDataLog(dataLog, true);
+
+    if (killedDatalog) {
+      MonologueLog.runtimeWarn(
+          "DatalogManager was used before Monologue.setupMonologue(), this can cause issues with datalog entries"
+      );
+    }
   }
 }

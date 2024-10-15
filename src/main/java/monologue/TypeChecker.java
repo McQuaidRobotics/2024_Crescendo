@@ -21,11 +21,12 @@ class TypeChecker {
     Long.class,
     Float.class,
     Double.class,
-    String.class
+    String.class,
+    StructSerializable.class
   };
 
   private static final Class<?>[] EXTENDABLE_TYPES = {
-    Enum.class, StructSerializable.class, Sendable.class
+    Sendable.class
   };
 
   private static final Class<?>[] FUNCTIONAL_TYPES = {
