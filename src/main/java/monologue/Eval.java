@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import monologue.Annotations.FlattenedLogged;
 import monologue.Annotations.IgnoreLogged;
 import monologue.Annotations.Log;
 import monologue.Annotations.MaybeLoggedType;
@@ -139,6 +140,7 @@ public class Eval {
 
   static boolean isNestedLogged(Field field) {
     boolean fieldTyLogged = Logged.class.isAssignableFrom(field.getType());
+        // || (field.getType().isArray() && Logged.class.isAssignableFrom(field.getType().getComponentType()));
     boolean maybeLoggedAnnotation = field.isAnnotationPresent(MaybeLoggedType.class);
     boolean ignoreLoggedAnnotation = field.isAnnotationPresent(IgnoreLogged.class);
     if (fieldTyLogged && maybeLoggedAnnotation) {
@@ -151,42 +153,92 @@ public class Eval {
     return (fieldTyLogged || maybeLoggedAnnotation) && !ignoreLoggedAnnotation;
   }
 
-  static <LN extends ComposableNode> LN exploreNodes(List<Class<?>> types, LN rootNode) {
+  static VarHandle getHandle(Field field, MethodHandles.Lookup lookup) {
+    try {
+      var privateLookup = MethodHandles.privateLookupIn(field.getDeclaringClass(), lookup);
+      return privateLookup.unreflectVarHandle(field);
+    } catch (IllegalAccessException e) {
+      MonologueLog.runtimeWarn(
+          "Could not access field "
+              + field.getName()
+              + " of type "
+              + field.getType().getSimpleName()
+              + " in "
+              + field.getDeclaringClass().getSimpleName()
+              + ": "
+              + e.getMessage());
+      return null;
+    }
+  }
+
+  static MethodHandle getHandle(Method method, MethodHandles.Lookup lookup) {
+    try {
+      var privateLookup = MethodHandles.privateLookupIn(method.getDeclaringClass(), lookup);
+      return privateLookup.unreflect(method);
+    } catch (IllegalAccessException e) {
+      MonologueLog.runtimeWarn(
+          "Could not access field "
+              + method.getName()
+              + " in "
+              + method.getDeclaringClass().getSimpleName()
+              + ": "
+              + e.getMessage());
+      return null;
+    }
+  }
+
+  static <LN extends ComposableNode> LN exploreNodes(List<Class<?>> types, final LN rootNode) {
     final List<Field> fields = getAllFields(types);
     final List<Method> methods = getAllMethods(types);
     final MethodHandles.Lookup lookup = MethodHandles.lookup();
     final String rootPath = rootNode.getPath();
 
-    for (Field field : fields) {
-      boolean isNestedLogged = isNestedLogged(field);
-      boolean isValidLiteralType = TypeChecker.isValidLiteralType(field.getType());
+    for (final Field field : fields) {
+      final boolean isNestedLogged = isNestedLogged(field);
+      final boolean isValidLiteralType = TypeChecker.isValidLiteralType(field.getType());
+      final boolean isStatic = Modifier.isStatic(field.getModifiers());
+      final LogMetadata metadata = LogMetadata.from(field);
       if (!isNestedLogged && !isValidLiteralType) {
         continue;
       }
-      VarHandle handle;
-      try {
-        var privateLookup = MethodHandles.privateLookupIn(field.getDeclaringClass(), lookup);
-        handle = privateLookup.unreflectVarHandle(field);
-      } catch (IllegalAccessException e) {
+      final VarHandle handle = getHandle(field, lookup);
+      if (handle == null) {
+        continue;
+      }
+
+      // handle singletons
+      if (isNestedLogged && isStatic) {
+        Optional<String> singletonKey = singletonKey(field.getType());
+        if (singletonKey.isPresent() && !Logged.singletonAlreadyAdded(field.getType())) {
+          try {
+            Monologue.logTree((Logged) field.get(null), singletonKey.get());
+            Logged.addSingleton(field.getType(), new SingletonNode(singletonKey.get(), field.getType(), handle));
+          } catch (IllegalAccessException e) {
+            MonologueLog.runtimeWarn("Issue with singleton " + field.getType().getSimpleName());
+          }
+        }
+        continue;
+      } else if (metadata.annotated && isStatic) {
         MonologueLog.runtimeWarn(
-            "Could not access field "
+            "Static field "
                 + field.getName()
                 + " of type "
                 + field.getType().getSimpleName()
                 + " in "
                 + rootPath
-                + ": "
-                + e.getMessage());
+                + " is will not be logged");
         continue;
       }
+
       if (isNestedLogged) {
+        boolean isFlattened = field.isAnnotationPresent(FlattenedLogged.class);
+        String suffix = isFlattened ? "" : "/" + field.getName();
         ComposableNode node = new ObjectNode(
-          rootPath + "/" + field.getName(),
+          rootPath + suffix,
           handle
         );
         rootNode.addChild(exploreNodes(getLoggedClasses(field.getType()), node));
       } else if (isValidLiteralType) {
-        LogMetadata metadata = LogMetadata.from(field);
         if (!metadata.annotated || overloadedAnno(field)) {
           continue;
         }
@@ -215,26 +267,23 @@ public class Eval {
       }
     }
 
-    for (Method method : methods) {
+    for (final Method method : methods) {
       LogMetadata metadata = LogMetadata.from(method);
       if (!metadata.annotated || method.getParameterCount() > 0
           || !TypeChecker.isValidLiteralType(method.getReturnType())) {
         continue;
       }
-      method.setAccessible(true);
-      MethodHandle handle;
-      try {
-        handle = lookup.unreflect(method);
-      } catch (IllegalAccessException e) {
-        MonologueLog.runtimeWarn(
-            "Could not access method "
-                + method.getName()
-                + " in "
-                + rootPath
-                + ": "
-                + e.getMessage());
+      MethodHandle handle = getHandle(method, lookup);
+      if (handle == null) {
         continue;
       }
+
+      final String err = "Could not invoke method "
+          + method.getName()
+          + " in "
+          + rootPath
+          + ": ";
+
       boolean isPrimitive = method.getReturnType().isPrimitive();
       LoggingNode node;
       if (method.getReturnType().isArray()) {
@@ -244,13 +293,7 @@ public class Eval {
             obj -> {
               try { return (Object[]) handle.invoke(obj); }
               catch (Throwable e) {
-                MonologueLog.runtimeWarn(
-                    "Could not invoke method "
-                        + method.getName()
-                        + " in "
-                        + rootPath
-                        + ": "
-                        + e.getMessage());
+                MonologueLog.runtimeWarn(err + e.getMessage());
                 return null;
               }
             },
@@ -262,13 +305,7 @@ public class Eval {
             obj -> {
               try { return handle.invoke(obj); }
               catch (Throwable e) {
-                MonologueLog.runtimeWarn(
-                    "Could not invoke method "
-                        + method.getName()
-                        + " in "
-                        + rootPath
-                        + ": "
-                        + e.getMessage());
+                MonologueLog.runtimeWarn(err + e.getMessage());
                 return null;
               }
             },

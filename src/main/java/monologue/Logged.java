@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import monologue.LoggingTree.LoggingNode;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.WeakHashMap;
 
@@ -26,7 +27,7 @@ import edu.wpi.first.util.struct.Struct;
 public interface Logged {
 
   static final WeakHashMap<Logged, ArrayList<LoggingNode>> registry = new WeakHashMap<>();
-  static final WeakHashMap<Class<? extends Logged>, LoggingNode> singletons = new WeakHashMap<>();
+  static final HashMap<Class<?>, LoggingNode> singletons = new HashMap<>();
 
   static void addNode(Logged logged, LoggingNode node) {
     var lst = getNodes(logged);
@@ -35,11 +36,11 @@ public interface Logged {
     }
   }
 
-  static void addSingleton(Class<? extends Logged> logged, LoggingNode node) {
+  static void addSingleton(Class<?> logged, LoggingNode node) {
     singletons.put(logged, node);
   }
 
-  static boolean singletonAlreadyAdded(Class<? extends Logged> logged) {
+  static boolean singletonAlreadyAdded(Class<?> logged) {
     return singletons.containsKey(logged);
   }
 

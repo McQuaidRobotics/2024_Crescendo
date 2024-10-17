@@ -59,11 +59,19 @@ public class LoggingTree {
     }
 
     public void addChild(LoggingNode child) {
+      for (LoggingNode node : children) {
+        if (node.path.equals(child.path)) {
+          MonologueLog.runtimeWarn("Duplicate path: " + child.path);
+          return;
+        }
+      }
       children.add(child);
     }
 
     public void addAllChildren(List<LoggingNode> children) {
-      this.children.addAll(children);
+      for (LoggingNode child : children) {
+        addChild(child);
+      }
     }
   }
 
@@ -293,6 +301,28 @@ public class LoggingTree {
         for (int i = 0; i < o.length; i++) {
           child.log(o[i]);
         }
+      }
+    }
+  }
+
+  public static class SingletonNode extends ComposableNode {
+    private final Class<?> type;
+    private final VarHandle handle;
+
+    public SingletonNode(String path, Class<?> type, VarHandle handle) {
+      super(path);
+      this.type = type;
+      this.handle = handle;
+    }
+
+    public void log(Object obj) {
+      Object o = handle.get(type);
+      if (o == null) {
+        MonologueLog.runtimeWarn(path + " is null");
+        return;
+      }
+      for (LoggingNode child : children) {
+        child.log(o);
       }
     }
   }

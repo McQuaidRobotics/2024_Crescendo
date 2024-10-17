@@ -35,7 +35,7 @@ public class Annotations {
     /**
      * The {@link LogSink} to use.
      */
-    public LogSink sink() default LogSink.OP;
+    public LogSink sink() default LogSink.NT;
 
     /**
      * Logs the annotated field/method to NetworkTables if inside a {@link Logged} class.
