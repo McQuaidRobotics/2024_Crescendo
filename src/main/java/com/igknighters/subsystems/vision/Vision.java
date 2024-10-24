@@ -21,6 +21,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import monologue.Monologue;
 
 public class Vision implements LockFreeSubsystem {
     private static final ChassisSpeeds ZERO_SPEEDS = new ChassisSpeeds();
@@ -42,6 +43,10 @@ public class Vision implements LockFreeSubsystem {
                 .stream()
                 .map(Camera::create)
                 .toArray(Camera[]::new);
+
+        for (final var camera : cameras) {
+            Monologue.logTree(camera, "/Robot/Vision/" + camera.getName());
+        }
 
         cameraPositionFieldVisualizer = NetworkTableInstance.getDefault()
                 .getTable("Visualizers")

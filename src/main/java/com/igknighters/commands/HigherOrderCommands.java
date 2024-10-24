@@ -9,7 +9,7 @@ import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
-import com.igknighters.controllers.ControllerParent;
+import com.igknighters.controllers.ControllerBase;
 import com.igknighters.subsystems.led.Led;
 import com.igknighters.subsystems.led.LedAnimations;
 import com.igknighters.subsystems.stem.Stem;
@@ -47,7 +47,7 @@ public class HigherOrderCommands {
     public static Command aim(
             Swerve swerve,
             Stem stem,
-            ControllerParent controller,
+            ControllerBase controller,
             Localizer localizer
     ) {
         return Commands.parallel(
@@ -56,7 +56,8 @@ public class HigherOrderCommands {
                     controller,
                     localizer,
                     FieldConstants.SPEAKER.toTranslation2d(),
-                    true
+                    true,
+                    0.4
                 ),
                 StemCommands.aimAtSpeaker(stem, false, localizer::pose, swerve::getChassisSpeed)).withName("Aim");
     }
@@ -64,7 +65,7 @@ public class HigherOrderCommands {
     public static Command aimNotePass(
         Swerve swerve,
         Stem stem,
-        ControllerParent controller,
+        ControllerBase controller,
         Localizer localizer
     ) {
         return Commands.parallel(
@@ -72,12 +73,13 @@ public class HigherOrderCommands {
                 swerve,
                 controller,
                 localizer,
-                FieldConstants.PASS_POINT,
-                true
+                kControls.PASS_LAND_LOCATION,
+                true,
+                0.4
             ),
             StemCommands.aimAtPassPoint(
                 stem,
-                FieldConstants.PASS_POINT,
+                kControls.PASS_LAND_LOCATION,
                 false,
                 localizer::pose
             )
@@ -102,7 +104,7 @@ public class HigherOrderCommands {
                 Swerve swerve,
                 Stem stem,
                 Umbrella umbrella,
-                ControllerParent controller,
+                ControllerBase controller,
                 Localizer localizer
         ) {
             return Commands.parallel(
@@ -120,7 +122,7 @@ public class HigherOrderCommands {
                 Swerve swerve,
                 Stem stem,
                 Umbrella umbrella,
-                ControllerParent controller,
+                ControllerBase controller,
                 Localizer localizer
         ) {
             return Commands.parallel(

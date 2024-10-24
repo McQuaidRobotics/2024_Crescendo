@@ -32,10 +32,6 @@ public final class FieldConstants {
                 2.08
         );
 
-        public static final Translation2d PASS_POINT = new Translation2d(
-                1.0, 7.0
-        );
-
         public static final AprilTagFieldLayout APRIL_TAG_FIELD = new AprilTagFieldLayout(
                         List.of(AprilTags.APRILTAGS),
                         FieldConstants.FIELD_LENGTH,

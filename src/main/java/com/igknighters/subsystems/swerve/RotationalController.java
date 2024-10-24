@@ -9,7 +9,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
-import monologue.Monologue;
 
 public class RotationalController {
     private final Swerve swerve;
@@ -35,7 +34,7 @@ public class RotationalController {
             var output = new RotationalControllerOutput(
                 target, measurement, true,
                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-            Monologue.log("/Robot/Swerve/RotationalControllerOutput", output);
+            swerve.log("RotationalControllerOutput", output);
             return 0.0;
         }
 
@@ -67,7 +66,7 @@ public class RotationalController {
             positionError, velocityError, rotVelo
         );
 
-        Monologue.log("/Robot/Swerve/RotationalControllerOutput", output);
+        swerve.log("RotationalControllerOutput", output);
 
         return rotVelo;
     }

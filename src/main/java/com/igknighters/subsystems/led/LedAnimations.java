@@ -10,7 +10,7 @@ import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
 
 public enum LedAnimations implements StructSerializable {
-    DISABLED(new LedPattern.Solid(255, 0, 0, 0)),
+    DISABLED(new LedPattern.Strobe(255, 0, 0, 0, 0.0)),
     TELEOP(new LedPattern.Flow(0, 255, 0, 0, 0.2, false)),
     AUTO(new LedPattern.Rainbow(1.0, 0.5, false)),
     Test(new LedPattern.Flow(0, 0, 255, 0, 0.2, false)),

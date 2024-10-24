@@ -7,7 +7,7 @@ import com.igknighters.subsystems.stem.Stem;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 
-public class OperatorController extends ControllerParent {
+public class OperatorController extends ControllerBase {
     public double frozenWristRadsOffset = 0.0;
 
     public OperatorController(int port) {

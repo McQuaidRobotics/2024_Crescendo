@@ -139,8 +139,8 @@ public class Eval {
   }
 
   static boolean isNestedLogged(Field field) {
-    boolean fieldTyLogged = Logged.class.isAssignableFrom(field.getType());
-        // || (field.getType().isArray() && Logged.class.isAssignableFrom(field.getType().getComponentType()));
+    boolean fieldTyLogged = Logged.class.isAssignableFrom(field.getType())
+        || (field.getType().isArray() && Logged.class.isAssignableFrom(field.getType().getComponentType()));
     boolean maybeLoggedAnnotation = field.isAnnotationPresent(MaybeLoggedType.class);
     boolean ignoreLoggedAnnotation = field.isAnnotationPresent(IgnoreLogged.class);
     if (fieldTyLogged && maybeLoggedAnnotation) {
@@ -197,6 +197,7 @@ public class Eval {
       final boolean isNestedLogged = isNestedLogged(field);
       final boolean isValidLiteralType = TypeChecker.isValidLiteralType(field.getType());
       final boolean isStatic = Modifier.isStatic(field.getModifiers());
+      final boolean isArray = field.getType().isArray();
       final LogMetadata metadata = LogMetadata.from(field);
       if (!isNestedLogged && !isValidLiteralType) {
         continue;
@@ -230,7 +231,9 @@ public class Eval {
         continue;
       }
 
-      if (isNestedLogged) {
+      if (isArray && isNestedLogged) {
+        
+      } else if (isNestedLogged) {
         boolean isFlattened = field.isAnnotationPresent(FlattenedLogged.class);
         String suffix = isFlattened ? "" : "/" + field.getName();
         ComposableNode node = new ObjectNode(

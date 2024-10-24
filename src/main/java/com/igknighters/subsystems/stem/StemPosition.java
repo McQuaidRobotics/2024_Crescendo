@@ -150,7 +150,7 @@ public class StemPosition implements StructSerializable {
             "DemoLow"
     );
 
-    public static final StemPosition DEMO_HIGH = new StemPosition(
+    public static final StemPosition PASS_STRAIGHT = new StemPosition(
             Units.degreesToRadians(75.0),
             Units.degreesToRadians(90.0),
             kTelescope.MIN_METERS,

@@ -14,6 +14,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
@@ -24,7 +25,7 @@ import monologue.LogSink;
 import monologue.Logged;
 import monologue.Monologue;
 
-public class Localizer implements Logged{
+public class Localizer implements Logged {
 
     private final Channel<VisionPoseEstimate> visionDataChannel = new Channel<>();
     private final Channel<SwerveDriveSample> swerveDataChannel = new Channel<>();
@@ -65,6 +66,9 @@ public class Localizer implements Logged{
         );
 
         field = new Field2d();
+    }
+
+    public void publishField() {
         Monologue.publishSendable("/Visualizers/Field", field, LogSink.NT);
     }
 
@@ -99,6 +103,7 @@ public class Localizer implements Logged{
             visionStdDevs.set(0, 0, sample.trust());
             visionStdDevs.set(1, 0, sample.trust());
             latestVisionPose = sample.pose().toPose2d();
+            log("pose", latestVisionPose);
             latestVisionTimestamp = sample.timestamp();
             poseEstimator.addVisionMeasurement(
                     latestVisionPose,
@@ -116,6 +121,10 @@ public class Localizer implements Logged{
 
     public Pose2d pose() {
         return latestPose;
+    }
+
+    public Translation2d translation() {
+        return latestPose.getTranslation();
     }
 
     public Pose2d visionPose(double ageLimit) {

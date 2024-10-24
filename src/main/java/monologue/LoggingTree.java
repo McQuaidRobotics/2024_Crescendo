@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.util.struct.StructSerializable;
 import monologue.MonologueEntryLayer.MonologueEntry;
 
 public class LoggingTree {
@@ -22,7 +23,7 @@ public class LoggingTree {
   }
 
   public static abstract class LoggingNode {
-    protected final String path;
+    private final String path;
 
     public LoggingNode(String path) {
       this.path = path;
@@ -106,7 +107,16 @@ public class LoggingTree {
     public ValueNode(String path, LogSink sink, Function<Object, Object> getter, Class<? extends Object> type) {
       super(path);
       this.getter = getter;
-      this.entry = MonologueEntry.create(path, (Class<Object>) type, sink);
+      if (StructSerializable.class.isAssignableFrom(type)) {
+        this.entry = MonologueEntry.create(
+          path,
+          (Struct<Object>) ProceduralStructGenerator.extractClassStructDynamic(type).get(),
+          (Class<Object>) type,
+          sink
+        );
+      } else {
+        this.entry = MonologueEntry.create(path, (Class<Object>) type, sink);
+      }
     }
 
     @SuppressWarnings("unchecked")
@@ -318,7 +328,7 @@ public class LoggingTree {
     public void log(Object obj) {
       Object o = handle.get(type);
       if (o == null) {
-        MonologueLog.runtimeWarn(path + " is null");
+        MonologueLog.runtimeWarn(getPath() + " is null");
         return;
       }
       for (LoggingNode child : children) {

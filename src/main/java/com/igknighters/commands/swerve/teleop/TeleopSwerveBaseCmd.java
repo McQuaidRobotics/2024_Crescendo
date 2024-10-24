@@ -17,7 +17,7 @@ import com.igknighters.Robot;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import com.igknighters.constants.ConstValues.kSwerve;
-import com.igknighters.controllers.ControllerParent;
+import com.igknighters.controllers.ControllerBase;
 
 public class TeleopSwerveBaseCmd extends Command implements StructSerializable {
     private static boolean shouldOrientForSim() {
@@ -57,7 +57,7 @@ public class TeleopSwerveBaseCmd extends Command implements StructSerializable {
     private final TunableDouble translationMod;
     private final TunableDouble rotationMod;
 
-    public TeleopSwerveBaseCmd(Swerve swerve, ControllerParent controller) {
+    public TeleopSwerveBaseCmd(Swerve swerve, ControllerBase controller) {
         this.swerve = swerve;
         addRequirements(swerve);
 
@@ -107,6 +107,13 @@ public class TeleopSwerveBaseCmd extends Command implements StructSerializable {
         double processedX = magnitude * Math.cos(angle);
         double processedY = magnitude * Math.sin(angle);
         return new Translation2d(processedX, processedY);
+    }
+
+    protected double getRotationX() {
+        double rawX = -rawRotationXSup.getAsDouble();
+        double processed = kSwerve.TELEOP_ROTATION_AXIS_CURVE.lerpKeepSign(rawX);
+        if (Robot.isDemo()) processed *= rotationMod.value();
+        return processed;
     }
 
     public static class TeleopSwerveBaseStruct implements Struct<TeleopSwerveBaseCmd> {

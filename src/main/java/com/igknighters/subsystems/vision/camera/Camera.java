@@ -183,7 +183,9 @@ public abstract class Camera extends Component {
             boolean oob = simplePose.getX() < 0.0
                     || simplePose.getX() > FieldConstants.FIELD_LENGTH
                     || simplePose.getY() < 0.0
-                    || simplePose.getY() > FieldConstants.FIELD_WIDTH;
+                    || simplePose.getY() > FieldConstants.FIELD_WIDTH
+                    || Double.isNaN(simplePose.getX())
+                    || Double.isNaN(simplePose.getY());
             VisionEstimateFault fault = new VisionEstimateFault(
                     oob,
                     maxDistance > 6.0,
@@ -297,7 +299,7 @@ public abstract class Camera extends Component {
                         + "bool infeasibleZValue; "
                         + "bool infeasiblePitchValue; "
                         + "bool infeasibleRollValue; "
-                        + "bool isDisabled; ";
+                        + "bool isDisabled;";
             }
 
             @Override

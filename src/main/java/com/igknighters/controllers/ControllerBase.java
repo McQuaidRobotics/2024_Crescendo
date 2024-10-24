@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-public class ControllerParent {
+public class ControllerBase {
 
     private final CommandXboxController controller;
     private boolean madeController;
@@ -77,38 +77,45 @@ public class ControllerParent {
         }
     }
 
-    protected final TriggerBindingTuple A, B, X, Y;
-    /** Left Center */
+    /** Button: 1 */
+    protected final TriggerBindingTuple A;
+    /** Button: 2 */
+    protected final TriggerBindingTuple B;
+    /** Button: 3 */
+    protected final TriggerBindingTuple X;
+    /** Button: 4 */
+    protected final TriggerBindingTuple Y;
+    /** Left Center; Button: 7 */
     protected final TriggerBindingTuple Back;
-    /** Right Center */
+    /** Right Center; Button: 8 */
     protected final TriggerBindingTuple Start;
-    /** Left Bumper */
+    /** Left Bumper; Button: 5 */
     protected final TriggerBindingTuple LB;
-    /** Right Bumper */
+    /** Right Bumper; Button: 6 */
     protected final TriggerBindingTuple RB;
-    /** Left Stick */
+    /** Left Stick; Button: 9 */
     protected final TriggerBindingTuple LS;
-    /** Right Stick */
+    /** Right Stick; Button: 10 */
     protected final TriggerBindingTuple RS;
-    /** Left Trigger */
+    /** Left Trigger; Axis: 2  */
     protected final TriggerBindingTuple LT;
-    /** Right Trigger */
+    /** Right Trigger; Axis: 3 */
     protected final TriggerBindingTuple RT;
-    /** DPad Right */
-    protected final TriggerBindingTuple DPR;
-    /** DPad Down */
-    protected final TriggerBindingTuple DPD;
-    /** DPad Left */
-    protected final TriggerBindingTuple DPL;
-    /** DPad Up */
+    /** DPad Up; Degrees: 0 */
     protected final TriggerBindingTuple DPU;
+    /** DPad Right; Degrees: 90 */
+    protected final TriggerBindingTuple DPR;
+    /** DPad Down; Degrees: 180 */
+    protected final TriggerBindingTuple DPD;
+    /** DPad Left; Degrees: 270 */
+    protected final TriggerBindingTuple DPL;
 
 
     /**
      * for button idx (nice for sim)
      * {@link edu.wpi.first.wpilibj.XboxController.Button}
      */
-    protected ControllerParent(int port, boolean makeController) {
+    protected ControllerBase(int port, boolean makeController) {
         DriverStation.silenceJoystickConnectionWarning(Robot.isDebug());
         this.madeController = makeController;
         if (madeController) {

@@ -28,6 +28,8 @@ public class CameraRealPhoton extends Camera {
     private final Transform3d cameraPose;
     private final PhotonPoseEstimator poseEstimator;
 
+    private final VisionPoseEstimate noPoseEst;
+
     private VisionPoseEstimate previousPoseEst;
     private Timer previousPoseTimer;
 
@@ -51,6 +53,7 @@ public class CameraRealPhoton extends Camera {
                 this.cameraPose);
         poseEstimator.setTagModel(TargetModel.kAprilTag36h11);
         poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_CAMERA_HEIGHT);
+        noPoseEst = VisionPoseEstimate.empty(id);
 
         BootupLogger.bootupLog("    " + cameraName + " camera initialized (real)");
     }
@@ -59,10 +62,13 @@ public class CameraRealPhoton extends Camera {
         Optional<EstimatedRobotPose> opt = poseEstimator.update();
 
         if (!opt.isPresent()) {
+            log("poseEst", noPoseEst);
             return Optional.empty();
         }
 
         EstimatedRobotPose estRoboPose = opt.get();
+
+        log("photonPoseEst", estRoboPose.estimatedPose);
 
         List<Integer> targetIds = estRoboPose.targetsUsed
                 .stream()
@@ -83,13 +89,17 @@ public class CameraRealPhoton extends Camera {
                 .map(Translation2d::getNorm)
                 .reduce(0.0, Math::max);
 
-        return Optional.of(new VisionPoseEstimate(
-                this.id,
-                estRoboPose.estimatedPose,
-                estRoboPose.timestampSeconds,
-                targetIds,
-                avgAmbiguity,
-                maxDistance));
+        return Optional.of(
+            log(
+                "poseEst",
+                new VisionPoseEstimate(
+                    this.id,
+                    estRoboPose.estimatedPose,
+                    estRoboPose.timestampSeconds,
+                    targetIds,
+                    avgAmbiguity,
+                    maxDistance)
+        ));
     }
 
     @Override

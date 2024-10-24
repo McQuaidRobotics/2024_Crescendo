@@ -43,7 +43,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
     private final CommandScheduler scheduler = CommandScheduler.getInstance();
 
-    public final Localizer localizer;
+    public final Localizer localizer = new Localizer();
 
     private final DriverController driverController;
     private final OperatorController operatorController;
@@ -69,7 +69,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
         ConstantHelper.applyRoboConst(ConstValues.class, robotID);
 
-        localizer = new Localizer();
+        localizer.publishField();
 
         driverController = new DriverController(0, localizer);
         operatorController = new OperatorController(1);
@@ -119,7 +119,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
         );
 
         if (allSubsystems.hasAllSubsystems()) {
-            var routines = new AutoRoutines(allSubsystems, localizer);
+            final var routines = new AutoRoutines(allSubsystems, localizer);
             autoManager.addAutoRoutine("5 Piece Amp Side", routines::fivePieceAmpSide);
             autoManager.addAutoRoutine("6 Piece Amp Side Far", routines::sixPieceFarAmpSide);
             autoManager.addAutoRoutine("4 Piece Src Side", routines::fourPieceSourceSide);

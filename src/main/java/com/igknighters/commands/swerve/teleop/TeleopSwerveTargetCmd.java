@@ -12,27 +12,34 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 
+import java.util.function.Supplier;
+
 import com.igknighters.Localizer;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kUmbrella;
-import com.igknighters.controllers.ControllerParent;
+import com.igknighters.controllers.ControllerBase;
 
 public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
     private static final TunableDouble lookaheadTime = TunableValues.getDouble("SwerveTargetCmd/AutoAimLookaheadTime", 0.2);
-    private static final TunableDouble speedMult = TunableValues.getDouble("SwerveTargetCmd/AutoAimSpeedMult", 0.4);
 
-    private final Localizer localizer;
+    private final Supplier<Translation2d> translationSupplier;
     private final Translation2d target;
     private final boolean movementComp;
     private final RotationalController rotController;
+    private final double speedMult;
 
-    public TeleopSwerveTargetCmd(Swerve swerve, ControllerParent controller, Localizer localizer, Translation2d target, boolean movementComp) {
+    public TeleopSwerveTargetCmd(Swerve swerve, ControllerBase controller, Localizer localizer, Translation2d target, boolean movementComp, double speedScalar) {
+        this(swerve, controller, localizer::translation, target, movementComp, speedScalar);
+    }
+
+    public TeleopSwerveTargetCmd(Swerve swerve, ControllerBase controller, Supplier<Translation2d> poseSupplier, Translation2d target, boolean movementComp, double speedScalar) {
         super(swerve, controller);
         addRequirements(swerve);
-        this.localizer = localizer;
+        this.translationSupplier = poseSupplier;
         this.target = target;
         this.movementComp = movementComp;
         this.rotController = new RotationalController(swerve);
+        this.speedMult = speedScalar;
     }
 
     @Override
@@ -42,10 +49,11 @@ public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
 
     @Override
     public void execute() {
+        Translation2d currentTranslation = translationSupplier.get();
         Translation2d targetTranslation = AllianceFlip.isBlue() ? target : AllianceFlip.flipTranslation(target);
 
         Translation2d vt = orientForUser(getTranslation())
-                .times(kSwerve.MAX_DRIVE_VELOCITY * speedMult.value());
+                .times(kSwerve.MAX_DRIVE_VELOCITY * speedMult);
 
         ChassisSpeeds desiredChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 vt.getX(),
@@ -59,7 +67,7 @@ public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
                 (desiredChassisSpeeds.vyMetersPerSecond + currentChassisSpeeds.vyMetersPerSecond) / 2.0,
                 0.0);
 
-        double distance = localizer.pose().getTranslation().getDistance(targetTranslation);
+        double distance = currentTranslation.getDistance(targetTranslation);
 
         double noteVelo = TunableValues.getDouble("Note Average Velo", kUmbrella.NOTE_VELO).value();
 
@@ -68,8 +76,7 @@ public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
                 targetTranslation.getY() - (avgChassisSpeeds.vyMetersPerSecond * (distance / noteVelo)));
 
         double lookaheadTimeValue = lookaheadTime.value();
-        Translation2d lookaheadTranslation = localizer.pose().getTranslation()
-            .minus(new Translation2d(
+        Translation2d lookaheadTranslation = currentTranslation.minus(new Translation2d(
                 avgChassisSpeeds.vxMetersPerSecond * lookaheadTimeValue,
                 avgChassisSpeeds.vyMetersPerSecond * lookaheadTimeValue
             ));
@@ -83,7 +90,7 @@ public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
             ).plus(GeomUtil.ROTATION2D_PI);
         } else {
             targetAngle = GeomUtil.rotationRelativeToPose(
-                localizer.pose().getTranslation(),
+                currentTranslation,
                 targetTranslation
             ).plus(GeomUtil.ROTATION2D_PI);
         }
