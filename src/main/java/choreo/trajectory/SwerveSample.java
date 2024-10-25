@@ -11,17 +11,17 @@ import edu.wpi.first.util.struct.Struct;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-/** A single robot sample in a ChoreoTrajectory. */
+/** A single swerve robot sample in a Trajectory. */
 public class SwerveSample implements TrajectorySample<SwerveSample> {
   private static final double[] EMPTY_MODULE_FORCES = new double[] {0, 0, 0, 0};
 
   /** The timestamp of this sample, relative to the beginning of the trajectory. */
   public final double t;
 
-  /** The X position of the sample in meters. */
+  /** The X position of the sample relative to the blue alliance wall origin in meters. */
   public final double x;
 
-  /** The Y position of the sample in meters. */
+  /** The Y position of the sample relative to the blue alliance wall origin in meters. */
   public final double y;
 
   /** The heading of the sample in radians, with 0 being in the +X direction. */
@@ -36,13 +36,13 @@ public class SwerveSample implements TrajectorySample<SwerveSample> {
   /** The angular velocity of the sample in rad/s. */
   public final double omega;
 
-  /** The acceleration of the in the X direction in m/s^2 */
+  /** The acceleration of the in the X direction in m/s^2. */
   public final double ax;
 
-  /** The acceleration of the in the Y direction in m/s^2 */
+  /** The acceleration of the in the Y direction in m/s^2. */
   public final double ay;
 
-  /** The angular acceleration of the sample in rad/s^2 */
+  /** The angular acceleration of the sample in rad/s^2. */
   public final double alpha;
 
   /**
@@ -70,8 +70,10 @@ public class SwerveSample implements TrajectorySample<SwerveSample> {
    * @param ax The acceleration of the sample in the X direction in m/s^2.
    * @param ay The acceleration of the sample in the Y direction in m/s^2.
    * @param alpha The angular acceleration of the sample in rad/s^2.
-   * @param moduleForcesX The force on each swerve module in the X direction in Newtons.
-   * @param moduleForcesY The force on each swerve module in the Y direction in Netwons.
+   * @param moduleForcesX The force on each swerve module in the X direction in Newtons. Module
+   *     forces appear in the following order: [FL, FR, BL, BR].
+   * @param moduleForcesY The force on each swerve module in the Y direction in Newtons. Module
+   *     forces appear in the following order: [FL, FR, BL, BR].
    */
   public SwerveSample(
       double t,
@@ -102,7 +104,7 @@ public class SwerveSample implements TrajectorySample<SwerveSample> {
 
   /**
    * A null safe getter for the module forces in the X direction.
-   * 
+   *
    * @return The module forces in the X direction.
    */
   public double[] moduleForcesX() {
@@ -114,7 +116,7 @@ public class SwerveSample implements TrajectorySample<SwerveSample> {
 
   /**
    * A null safe getter for the module forces in the Y direction.
-   * 
+   *
    * @return The module forces in the Y direction.
    */
   public double[] moduleForcesY() {
@@ -147,8 +149,10 @@ public class SwerveSample implements TrajectorySample<SwerveSample> {
     double[] interp_fx = new double[4];
     double[] interp_fy = new double[4];
     for (int i = 0; i < 4; ++i) {
-      interp_fx[i] = MathUtil.interpolate(this.moduleForcesX()[i], endValue.moduleForcesX()[i], scale);
-      interp_fy[i] = MathUtil.interpolate(this.moduleForcesY()[i], endValue.moduleForcesY()[i], scale);
+      interp_fx[i] =
+          MathUtil.interpolate(this.moduleForcesX()[i], endValue.moduleForcesX()[i], scale);
+      interp_fy[i] =
+          MathUtil.interpolate(this.moduleForcesY()[i], endValue.moduleForcesY()[i], scale);
     }
 
     return new SwerveSample(
@@ -198,23 +202,23 @@ public class SwerveSample implements TrajectorySample<SwerveSample> {
               -this.ax,
               this.ay,
               -this.alpha,
-              // FL, BL, BR, FR
-              // Flipped
-              // -FR, -BR, -BL, -FR
+              // FL, FR, BL, BR
+              // Mirrored
+              // -FR, -FL, -BR, -BL
               new double[] {
-                -this.moduleForcesX()[3],
-                -this.moduleForcesX()[2],
                 -this.moduleForcesX()[1],
-                -this.moduleForcesX()[0]
+                -this.moduleForcesX()[0],
+                -this.moduleForcesX()[3],
+                -this.moduleForcesX()[2]
               },
-              // FL, BL, BR, FR
-              // Flipped
-              // FR, BR, BL, FR
+              // FL, FR, BL, BR
+              // Mirrored
+              // FR, FL, BR, BL
               new double[] {
-                this.moduleForcesY()[3],
-                this.moduleForcesY()[2],
                 this.moduleForcesY()[1],
-                this.moduleForcesY()[0]
+                this.moduleForcesY()[0],
+                this.moduleForcesY()[3],
+                this.moduleForcesY()[2]
               });
       case ROTATE_AROUND ->
           new SwerveSample(
@@ -312,5 +316,26 @@ public class SwerveSample implements TrajectorySample<SwerveSample> {
         bb.putDouble(value.moduleForcesY()[i]);
       }
     }
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof SwerveSample)) {
+      return false;
+    }
+
+    var other = (SwerveSample) obj;
+    return this.t == other.t
+        && this.x == other.x
+        && this.y == other.y
+        && this.heading == other.heading
+        && this.vx == other.vx
+        && this.vy == other.vy
+        && this.omega == other.omega
+        && this.ax == other.ax
+        && this.ay == other.ay
+        && this.alpha == other.alpha
+        && Arrays.equals(this.fx, other.fx)
+        && Arrays.equals(this.fy, other.fy);
   }
 }

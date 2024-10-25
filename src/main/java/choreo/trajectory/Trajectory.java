@@ -143,7 +143,7 @@ public class Trajectory<SampleType extends TrajectorySample<SampleType>> {
    * @param timestamp The timestamp of this sample relative to the beginning of the trajectory.
    * @param mirrorForRedAlliance whether or not to return the sample as mirrored across the field
    *     midline (as in 2023).
-   * @return The ChoreoTrajectoryState at the given time.
+   * @return The SampleType at the given time.
    */
   public SampleType sampleAt(double timestamp, boolean mirrorForRedAlliance) {
     SampleType state;
@@ -276,5 +276,18 @@ public class Trajectory<SampleType extends TrajectorySample<SampleType>> {
                 .filter(e -> e.timestamp >= startTime && e.timestamp <= endTime)
                 .map(e -> e.offsetBy(-startTime))
                 .toList()));
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof Trajectory<?>)) {
+      return false;
+    }
+
+    var other = (Trajectory<?>) obj;
+    return this.name.equals(other.name)
+        && this.samples.equals(other.samples)
+        && this.splits.equals(other.splits)
+        && this.events.equals(other.events);
   }
 }

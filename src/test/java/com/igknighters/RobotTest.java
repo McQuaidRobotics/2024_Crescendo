@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import choreo.Choreo;
-import choreo.autos.AutoLoop;
-import choreo.autos.AutoTrajectory;
+import choreo.auto.AutoRoutine;
+import choreo.auto.AutoTrajectory;
 import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
 
@@ -46,18 +46,18 @@ public class RobotTest {
         robot.localizer.resetOdometry(traj.getInitialPose(false), swerve.getModulePositions());
         swerve.setYaw(traj.getInitialPose(false).getRotation());
 
-        robot.autoManager.addAutoRoutine(
+        robot.autoChooser.addAutoRoutine(
             "TestAuto",
             factory -> {
-                AutoLoop loop = factory.newLoop("TestAutoLoop");
-                AutoTrajectory aTraj = factory.trajectory(traj, loop);
+                AutoRoutine routine = factory.newRoutine("TestAutoLoop");
+                AutoTrajectory aTraj = factory.trajectory(traj, routine);
 
-                loop.enabled().onTrue(aTraj.cmd());
+                routine.enabled().onTrue(aTraj.cmd());
 
-                return loop.cmd().withName("TestAuto");
+                return routine;
             }
         );
-        robot.autoManager.choose("TestAuto");
+        // robot.autoChooser.choose("TestAuto");
 
         DriverStationSim.setAutonomous(true);
         DriverStationSim.setEnabled(true);

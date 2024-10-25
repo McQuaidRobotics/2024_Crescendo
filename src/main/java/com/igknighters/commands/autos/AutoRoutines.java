@@ -2,15 +2,19 @@ package com.igknighters.commands.autos;
 
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 
-import choreo.autos.AutoFactory;
-import choreo.autos.AutoLoop;
-import choreo.autos.AutoTrajectory;
+import choreo.auto.AutoFactory;
+import choreo.auto.AutoRoutine;
+import choreo.auto.AutoTrajectory;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import static com.igknighters.commands.autos.Waypoints.*;
 
 import com.igknighters.Localizer;
+import com.igknighters.Robot;
 
 public class AutoRoutines extends AutoCommands {
 
@@ -19,16 +23,24 @@ public class AutoRoutines extends AutoCommands {
     public AutoRoutines(AllSubsystems allSubsystems, Localizer localizer) {
         super(allSubsystems.swerve.get(), allSubsystems.stem.get(), allSubsystems.umbrella.get(), allSubsystems.vision.get(), localizer);
         disabled = !allSubsystems.hasAllSubsystems();
+
+        if (Robot.isSimulation()) {
+            new Trigger(DriverStation::isAutonomousEnabled).onTrue(
+                Commands.waitSeconds(15.3)
+                .andThen(() -> DriverStationSim.setEnabled(false))
+                .withName("Simulated Auto Ender")
+            );
+        }
     }
 
-    private Command disabledAuto() {
-        return Commands.print("AutoRoutines disabled");
+    private AutoRoutine disabledAuto(AutoFactory factory) {
+        return factory.commandAsAutoRoutine(Commands.print("AutoRoutines disabled"));
     }
 
-    private Command resetOdometry(AutoTrajectory traj, AutoLoop loop) {
+    private Command resetOdometry(AutoTrajectory traj, AutoRoutine routine) {
         var optPose = traj.getInitialPose();
         if (optPose.isEmpty()) {
-            loop.kill();
+            routine.kill();
             return Commands.print("Killed loop due to lack of startung pose");
         }
         var pose = optPose.get();
@@ -50,27 +62,27 @@ public class AutoRoutines extends AutoCommands {
      * Finally we pickup C3 and shoot it.
      * 
      * @param factory The factory to create trajectories with
-     * @return The command that represents the auto routine
+     * @return The {@link AutoRoutine}
      */
-    public Command fivePieceAmpSide(AutoFactory factory) {
-        if (disabled) return disabledAuto();
+    public AutoRoutine fivePieceAmpSide(AutoFactory factory) {
+        if (disabled) return disabledAuto(factory);
 
-        final AutoLoop loop = factory.newLoop("FivePieceAmpSide");
+        final AutoRoutine routine = factory.newRoutine("FivePieceAmpSide");
 
-        final AutoTrajectory ampToC1 = factory.trajectory(AMP.to(C1), loop);
-        final AutoTrajectory c1ToM1 = factory.trajectory(C1.to(M1), loop);
-        final AutoTrajectory m1ToM2 = factory.trajectory(M1.to(M2), loop);
-        final AutoTrajectory m2ToM3 = factory.trajectory(M2.to(M3), loop);
-        final AutoTrajectory m1ToS1 = factory.trajectory(M1.to(S1), loop);
-        final AutoTrajectory m2ToS1 = factory.trajectory(M2.to(S1), loop);
-        final AutoTrajectory m3ToS2 = factory.trajectory(M3.to(S2), loop);
-        final AutoTrajectory s1ToC2 = factory.trajectory(S1.to(C2), loop);
-        final AutoTrajectory s2ToC2 = factory.trajectory(S2.to(C2), loop);
-        final AutoTrajectory c2ToC3 = factory.trajectory(C2.to(C3), loop);
+        final AutoTrajectory ampToC1 = factory.trajectory(AMP.to(C1), routine);
+        final AutoTrajectory c1ToM1 = factory.trajectory(C1.to(M1), routine);
+        final AutoTrajectory m1ToM2 = factory.trajectory(M1.to(M2), routine);
+        final AutoTrajectory m2ToM3 = factory.trajectory(M2.to(M3), routine);
+        final AutoTrajectory m1ToS1 = factory.trajectory(M1.to(S1), routine);
+        final AutoTrajectory m2ToS1 = factory.trajectory(M2.to(S1), routine);
+        final AutoTrajectory m3ToS2 = factory.trajectory(M3.to(S2), routine);
+        final AutoTrajectory s1ToC2 = factory.trajectory(S1.to(C2), routine);
+        final AutoTrajectory s2ToC2 = factory.trajectory(S2.to(C2), routine);
+        final AutoTrajectory c2ToC3 = factory.trajectory(C2.to(C3), routine);
 
         // entry point for the auto
-        loop.enabled().onTrue(
-            resetOdometry(ampToC1, loop).andThen(
+        routine.enabled().onTrue(
+            resetOdometry(ampToC1, routine).andThen(
                 autoShootBegining(),
                 Commands.race(
                     intakeGamepieceNoStow(),
@@ -81,43 +93,43 @@ public class AutoRoutines extends AutoCommands {
         );
 
         // picking up first note and shooting if we have a note
-        ampToC1.done().onTrue(autoShootThenTraj(loop, c1ToM1));
+        ampToC1.done().onTrue(autoShootThenTraj(routine, c1ToM1));
 
         // picking up the second note and branching based on whether we're holding a gamepiece
         c1ToM1.atTime(0.35).onTrue(intakeGamepieceNoStow());
-        c1ToM1.done().and(yeGp(loop)).onTrue(m1ToS1.cmd());
-        c1ToM1.done().and(noGp(loop)).onTrue(m1ToM2.cmd());
+        c1ToM1.done().and(yeGp(routine)).onTrue(m1ToS1.cmd());
+        c1ToM1.done().and(noGp(routine)).onTrue(m1ToM2.cmd());
 
         // the branch where we're holding a gamepiece
         m1ToS1.active().onTrue(aimStem(m1ToS1));
-        m1ToS1.done().onTrue(autoShootThenTraj(loop, s1ToC2));
+        m1ToS1.done().onTrue(autoShootThenTraj(routine, s1ToC2));
 
         // the branch where we're not holding a gamepiece
         m1ToM2.active().onTrue(intakeGamepieceNoStow());
-        m1ToM2.done().and(yeGp(loop)).onTrue(m2ToS1.cmd());
-        m1ToM2.done().and(noGp(loop)).onTrue(m2ToM3.cmd());
+        m1ToM2.done().and(yeGp(routine)).onTrue(m2ToS1.cmd());
+        m1ToM2.done().and(noGp(routine)).onTrue(m2ToM3.cmd());
 
         // the branch where we're holding a gamepiece
         m2ToS1.active().onTrue(aimStem(m2ToS1));
-        m2ToS1.done().onTrue(autoShootThenTraj(loop, s1ToC2));
+        m2ToS1.done().onTrue(autoShootThenTraj(routine, s1ToC2));
 
         // the branch where we're not holding a gamepiece
         m2ToM3.active().onTrue(intakeGamepieceNoStow());
-        m1ToM2.done().and(yeGp(loop)).onTrue(m3ToS2.cmd());
-        m1ToM2.done().and(noGp(loop)).onTrue(stow());
+        m1ToM2.done().and(yeGp(routine)).onTrue(m3ToS2.cmd());
+        m1ToM2.done().and(noGp(routine)).onTrue(stow());
 
         m3ToS2.active().onTrue(stow());
-        m3ToS2.done().onTrue(autoShootThenTraj(loop, s2ToC2));
+        m3ToS2.done().onTrue(autoShootThenTraj(routine, s2ToC2));
 
         // picking up the third note, only shooting if we have a note
         s1ToC2.active().or(s2ToC2.active()).onTrue(intakeGamepieceNoStow());
-        s1ToC2.done().or(s2ToC2.done()).onTrue(autoShootThenTraj(loop, c2ToC3));
+        s1ToC2.done().or(s2ToC2.done()).onTrue(autoShootThenTraj(routine, c2ToC3));
 
         // picking up the fourth note and shooting if we have a note
         c2ToC3.active().onTrue(intakeGamepieceNoStow());
-        c2ToC3.done().onTrue(autoShoot(loop));
+        c2ToC3.done().onTrue(autoShoot(routine));
 
-        return loop.cmd().withName("FivePieceAmpSide");
+        return routine;
     }
 
     // /**
@@ -129,7 +141,7 @@ public class AutoRoutines extends AutoCommands {
     // public Command sixPieceFarAmpSide(AutoFactory factory) {
     //     if (disabled) return disabledAuto();
 
-    //     final AutoLoop loop = factory.newLoop("SixPieceFarAmpSide");
+    //     final AutoRoutine loop = factory.newRoutine("SixPieceFarAmpSide");
 
     //     final AutoTrajectory ampToC1 = factory.trajectory(AMP.to(C1), loop);
     //     final AutoTrajectory c1ToM1 = factory.trajectory(C1.to(M1), loop);
@@ -248,7 +260,7 @@ public class AutoRoutines extends AutoCommands {
     // public Command fourPieceSourceSide(AutoFactory factory) {
     //     if (disabled) return disabledAuto();
 
-    //     final AutoLoop loop = factory.newLoop("FourPieceSourceSide");
+    //     final AutoRoutine loop = factory.newRoutine("FourPieceSourceSide");
 
     //     final AutoTrajectory srcToM5 = factory.trajectory(SRC.to(M5), loop);
     //     final AutoTrajectory m5ToM4 = factory.trajectory(M5.to(M4), loop);
@@ -325,7 +337,7 @@ public class AutoRoutines extends AutoCommands {
     // public Command threePieceSubMiddle(AutoFactory factory) {
     //     if (disabled) return disabledAuto();
 
-    //     final AutoLoop loop = factory.newLoop("ThreePieceSubMiddle");
+    //     final AutoRoutine loop = factory.newRoutine("ThreePieceSubMiddle");
 
     //     final AutoTrajectory subToC3 = factory.trajectory(SUB.to(C3), loop);
     //     final AutoTrajectory c3ToM3 = factory.trajectory(C3.to(M3), loop);
@@ -377,7 +389,7 @@ public class AutoRoutines extends AutoCommands {
     // public Command driveForward(AutoFactory factory) {
     //     if (disabled) return disabledAuto();
 
-    //     final AutoLoop loop = factory.newLoop("DriveForward");
+    //     final AutoRoutine loop = factory.newRoutine("DriveForward");
 
     //     final ChoreoAutoTrajectory ampToC1 = factory.traj(AMP.to(C1), loop);
     //     final ChoreoAutoTrajectory c1ToM1 = factory.traj(C1.to(M1), loop);
@@ -496,7 +508,7 @@ public class AutoRoutines extends AutoCommands {
     // public Command fourPieceSourceSide(ChoreoAutoFactory factory) {
     //     if (disabled) return disabledAuto();
 
-    //     final ChoreoAutoLoop loop = factory.newLoop();
+    //     final ChoreoAutoRoutine loop = factory.newRoutine();
 
     //     final ChoreoAutoTrajectory srcToM5 = factory.traj(SRC.to(M5), loop);
     //     final ChoreoAutoTrajectory m5ToM4 = factory.traj(M5.to(M4), loop);
@@ -573,7 +585,7 @@ public class AutoRoutines extends AutoCommands {
     // public Command threePieceSubMiddle(ChoreoAutoFactory factory) {
     //     if (disabled) return disabledAuto();
 
-    //     final ChoreoAutoLoop loop = factory.newLoop();
+    //     final ChoreoAutoRoutine loop = factory.newRoutine();
 
     //     final ChoreoAutoTrajectory subToC3 = factory.traj(SUB.to(C3), loop);
     //     final ChoreoAutoTrajectory c3ToM3 = factory.traj(C3.to(M3), loop);
@@ -632,7 +644,7 @@ public class AutoRoutines extends AutoCommands {
     // public Command fourPieceCloseAmpSide(ChoreoAutoFactory factory) {
     //     if (disabled) return disabledAuto();
 
-    //     final ChoreoAutoLoop loop = factory.newLoop();
+    //     final ChoreoAutoRoutine loop = factory.newRoutine();
 
     //     final ChoreoAutoTrajectory ampToC1 = factory.traj(AMP.to(C1), loop);
     //     final ChoreoAutoTrajectory c1ToC2 = factory.traj(C1.to(C2), loop);
@@ -681,7 +693,7 @@ public class AutoRoutines extends AutoCommands {
     // public Command driveForward(ChoreoAutoFactory factory) {
     //     if (disabled) return disabledAuto();
 
-    //     final ChoreoAutoLoop loop = factory.newLoop();
+    //     final ChoreoAutoRoutine loop = factory.newRoutine();
 
     //     final ChoreoAutoTrajectory traj = factory.traj(AMP.to(C1), loop);
 

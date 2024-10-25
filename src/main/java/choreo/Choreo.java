@@ -4,11 +4,11 @@ package choreo;
 
 import static edu.wpi.first.util.ErrorMessages.requireNonNullParam;
 
-import choreo.autos.AutoChooser;
-import choreo.autos.AutoFactory;
-import choreo.autos.AutoFactory.ChoreoAutoBindings;
-import choreo.autos.AutoLoop;
-import choreo.autos.AutoTrajectory;
+import choreo.auto.AutoChooser;
+import choreo.auto.AutoFactory;
+import choreo.auto.AutoFactory.AutoBindings;
+import choreo.auto.AutoRoutine;
+import choreo.auto.AutoTrajectory;
 import choreo.trajectory.DifferentialSample;
 import choreo.trajectory.EventMarker;
 import choreo.trajectory.ProjectFile;
@@ -16,10 +16,10 @@ import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
 import choreo.trajectory.TrajectorySample;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,20 +28,25 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /** Utilities to load and follow Choreo Trajectories */
 public final class Choreo {
-  private static final Gson GSON = new Gson();
+  private static final Gson GSON =
+      new GsonBuilder()
+          .registerTypeAdapter(EventMarker.class, new EventMarker.Deserializer())
+          .create();
   private static final String TRAJECTORY_FILE_EXTENSION = ".traj";
+  private static final String SPEC_VERSION = "v2025.0.0";
 
   private static File CHOREO_DIR = new File(Filesystem.getDeployDirectory(), "choreo");
 
@@ -72,25 +77,25 @@ public final class Choreo {
       } else if (projectFiles.length > 1) {
         throw new RuntimeException("Found multiple project files in deploy directory");
       }
-      LAZY_PROJECT_FILE =
-          Optional.of(GSON.fromJson(new FileReader(projectFiles[0]), ProjectFile.class));
+      BufferedReader reader = new BufferedReader(new FileReader(projectFiles[0]));
+      String str = reader.lines().reduce("", (a, b) -> a + b);
+      reader.close();
+      JsonObject json = GSON.fromJson(str, JsonObject.class);
+      String version = json.get("version").getAsString();
+      if (!SPEC_VERSION.equals(version)) {
+        throw new RuntimeException(
+            ".chor project file: Wrong version " + version + ". Expected " + SPEC_VERSION);
+      }
+      LAZY_PROJECT_FILE = Optional.of(GSON.fromJson(str, ProjectFile.class));
     } catch (JsonSyntaxException ex) {
       throw new RuntimeException("Could not parse project file", ex);
     } catch (FileNotFoundException ex) {
       throw new RuntimeException("Could not find project file", ex);
+    } catch (IOException ex) {
+      throw new RuntimeException("Could not close the project file", ex);
     }
     return LAZY_PROJECT_FILE.get();
   }
-
-  /**
-   * This interface exists as a type alias. A ControlFunction has a signature of ({@link Pose2d},
-   * {@link SampleType})-&gt;{@link ChassisSpeeds}, where the function returns robot-relative {@link
-   * ChassisSpeeds} for the robot.
-   *
-   * @param <SampleType> DifferentialSample or SwerveSample.
-   */
-  public interface ControlFunction<SampleType extends TrajectorySample<SampleType>>
-      extends BiFunction<Pose2d, SampleType, ChassisSpeeds> {}
 
   /**
    * This interface exists as a type alias. A TrajectoryLogger has a signature of ({@link
@@ -112,9 +117,9 @@ public final class Choreo {
    * src/main/deploy/choreo/[trajectoryName].traj.
    *
    * @param <SampleType> The type of samples in the trajectory.
-   * @param trajectoryName the path name in Choreo, which matches the file name in the deploy
+   * @param trajectoryName The path name in Choreo, which matches the file name in the deploy
    *     directory, file extension is optional.
-   * @return the loaded trajectory, or `Optional.empty()` if the trajectory could not be loaded.
+   * @return The loaded trajectory, or `Optional.empty()` if the trajectory could not be loaded.
    */
   @SuppressWarnings("unchecked")
   public static <SampleType extends TrajectorySample<SampleType>>
@@ -131,7 +136,7 @@ public final class Choreo {
       String str = reader.lines().reduce("", (a, b) -> a + b);
       reader.close();
       Trajectory<SampleType> trajectory =
-          (Trajectory<SampleType>) readTrajectoryString(str, getProjectFile());
+          (Trajectory<SampleType>) loadTrajectoryString(str, getProjectFile());
       return Optional.of(trajectory);
     } catch (FileNotFoundException ex) {
       DriverStation.reportError("Could not find trajectory file: " + trajectoryFile, false);
@@ -143,13 +148,38 @@ public final class Choreo {
     return Optional.empty();
   }
 
-  static Trajectory<? extends TrajectorySample<?>> readTrajectoryString(
-      String str, ProjectFile projectFile) {
-    JsonObject wholeTrajectory = GSON.fromJson(str, JsonObject.class);
+  /**
+   * Load a trajectory from a string.
+   *
+   * @param trajectoryJsonString The JSON string.
+   * @param projectFile The project file.
+   * @return The loaded trajectory, or `empty std::optional` if the trajectory could not be loaded.
+   */
+  static Trajectory<? extends TrajectorySample<?>> loadTrajectoryString(
+      String trajectoryJsonString, ProjectFile projectFile) {
+    JsonObject wholeTrajectory = GSON.fromJson(trajectoryJsonString, JsonObject.class);
     String name = wholeTrajectory.get("name").getAsString();
-    EventMarker[] events = GSON.fromJson(wholeTrajectory.get("events"), EventMarker[].class);
+    String version = wholeTrajectory.get("version").getAsString();
+    if (!SPEC_VERSION.equals(version)) {
+      throw new RuntimeException(
+          name + ".traj: Wrong version: " + version + ". Expected " + SPEC_VERSION);
+    }
+    // Filter out markers with negative timestamps or empty names
+    List<EventMarker> unfilteredEvents =
+        new ArrayList<EventMarker>(
+            Arrays.asList(GSON.fromJson(wholeTrajectory.get("events"), EventMarker[].class)));
+    unfilteredEvents.removeIf(marker -> marker.timestamp < 0 || marker.event.length() == 0);
+    EventMarker[] events = new EventMarker[unfilteredEvents.size()];
+    unfilteredEvents.toArray(events);
+
     JsonObject trajectoryObj = wholeTrajectory.getAsJsonObject("trajectory");
     Integer[] splits = GSON.fromJson(trajectoryObj.get("splits"), Integer[].class);
+    if (splits.length == 0 || splits[0] != 0) {
+      Integer[] newArray = new Integer[splits.length + 1];
+      newArray[0] = 0;
+      System.arraycopy(splits, 0, newArray, 1, splits.length);
+      splits = newArray;
+    }
     if (projectFile.type.equals("Swerve")) {
       SwerveSample[] samples = GSON.fromJson(trajectoryObj.get("samples"), SwerveSample[].class);
       return new Trajectory<SwerveSample>(name, List.of(samples), List.of(splits), List.of(events));
@@ -167,23 +197,23 @@ public final class Choreo {
    * A utility for caching loaded trajectories. This allows for loading trajectories only once, and
    * then reusing them.
    */
-  public static class ChoreoTrajectoryCache {
+  public static class TrajectoryCache {
     private final Map<String, Trajectory<?>> cache;
 
-    /** Creates a new ChoreoTrajectoryCache with a normal {@link HashMap} as the cache. */
-    public ChoreoTrajectoryCache() {
+    /** Creates a new TrajectoryCache with a normal {@link HashMap} as the cache. */
+    public TrajectoryCache() {
       cache = new HashMap<>();
     }
 
     /**
-     * Creates a new ChoreoTrajectoryCache with a custom cache.
+     * Creates a new TrajectoryCache with a custom cache.
      *
      * <p>this could be useful if you want to use a concurrent map or a map with a maximum size.
      *
      * @param cache The cache to use.
      */
-    public ChoreoTrajectoryCache(Map<String, Trajectory<?>> cache) {
-      requireNonNullParam(cache, "cache", "ChoreoTrajectoryCache.<init>");
+    public TrajectoryCache(Map<String, Trajectory<?>> cache) {
+      requireNonNullParam(cache, "cache", "TrajectoryCache.<init>");
       this.cache = cache;
     }
 
@@ -199,7 +229,7 @@ public final class Choreo {
      * @see Choreo#loadTrajectory(String)
      */
     public Optional<? extends Trajectory<?>> loadTrajectory(String trajectoryName) {
-      requireNonNullParam(trajectoryName, "trajectoryName", "ChoreoTrajectoryCache.loadTrajectory");
+      requireNonNullParam(trajectoryName, "trajectoryName", "TrajectoryCache.loadTrajectory");
       if (cache.containsKey(trajectoryName)) {
         return Optional.of(cache.get(trajectoryName));
       } else {
@@ -226,7 +256,7 @@ public final class Choreo {
      * @see Choreo#loadTrajectory(String)
      */
     public Optional<? extends Trajectory<?>> loadTrajectory(String trajectoryName, int splitIndex) {
-      requireNonNullParam(trajectoryName, "trajectoryName", "ChoreoTrajectoryCache.loadTrajectory");
+      requireNonNullParam(trajectoryName, "trajectoryName", "TrajectoryCache.loadTrajectory");
       // make the key something that could never possibly be a valid trajectory name
       String key = trajectoryName + ".:." + splitIndex;
       if (cache.containsKey(key)) {
@@ -263,36 +293,32 @@ public final class Choreo {
   }
 
   /**
-   * Create a factory that can be used to create {@link AutoLoop} and {@link AutoTrajectory}.
+   * Create a factory that can be used to create {@link AutoRoutine} and {@link AutoTrajectory}.
    *
    * @param <SampleType> The type of samples in the trajectory.
    * @param driveSubsystem The drive {@link Subsystem} to require for {@link AutoTrajectory} {@link
    *     Command}s.
    * @param poseSupplier A function that returns the current field-relative {@link Pose2d} of the
    *     robot.
-   * @param controller A {@link ControlFunction} to follow the current {@link Trajectory}&lt;{@link
+   * @param controller A {@link BiConsumer} to follow the current {@link Trajectory}&lt;{@link
    *     SampleType}&gt;.
-   * @param outputChassisSpeeds A function that consumes the target robot-relative {@link
-   *     ChassisSpeeds} and commands them to the robot.
    * @param mirrorTrajectory If this returns true, the path will be mirrored to the opposite side,
    *     while keeping the same coordinate system origin. This will be called every loop during the
    *     command.
    * @param bindings Universal trajectory event bindings.
-   * @return An {@link AutoFactory} that can be used to create {@link AutoLoop} and {@link
+   * @return An {@link AutoFactory} that can be used to create {@link AutoRoutine} and {@link
    *     AutoTrajectory}.
    * @see AutoChooser using this factory with AutoChooser to generate auto routines.
    */
   public static <SampleType extends TrajectorySample<SampleType>> AutoFactory createAutoFactory(
       Subsystem driveSubsystem,
       Supplier<Pose2d> poseSupplier,
-      ControlFunction<SampleType> controller,
-      Consumer<ChassisSpeeds> outputChassisSpeeds,
+      BiConsumer<Pose2d, SampleType> controller,
       BooleanSupplier mirrorTrajectory,
-      ChoreoAutoBindings bindings) {
+      AutoBindings bindings) {
     return new AutoFactory(
         requireNonNullParam(poseSupplier, "poseSupplier", "Choreo.createAutoFactory"),
         requireNonNullParam(controller, "controller", "Choreo.createAutoFactory"),
-        requireNonNullParam(outputChassisSpeeds, "outputChassisSpeeds", "Choreo.createAutoFactory"),
         requireNonNullParam(mirrorTrajectory, "mirrorTrajectory", "Choreo.createAutoFactory"),
         requireNonNullParam(driveSubsystem, "driveSubsystem", "Choreo.createAutoFactory"),
         requireNonNullParam(bindings, "bindings", "Choreo.createAutoFactory"),
@@ -300,39 +326,35 @@ public final class Choreo {
   }
 
   /**
-   * Create a factory that can be used to create {@link AutoLoop} and {@link AutoTrajectory}.
+   * Create a factory that can be used to create {@link AutoRoutine} and {@link AutoTrajectory}.
    *
    * @param <SampleType> The type of samples in the trajectory.
    * @param driveSubsystem The drive {@link Subsystem} to require for {@link AutoTrajectory} {@link
    *     Command}s.
    * @param poseSupplier A function that returns the current field-relative {@link Pose2d} of the
    *     robot.
-   * @param controller A {@link ControlFunction} to follow the current {@link Trajectory}&lt;{@link
+   * @param controller A {@link BiConsumer} to follow the current {@link Trajectory}&lt;{@link
    *     SampleType}&gt;.
-   * @param outputChassisSpeeds A function that consumes the target robot-relative {@link
-   *     ChassisSpeeds} and commands them to the robot.
    * @param mirrorTrajectory If this returns true, the path will be mirrored to the opposite side,
    *     while keeping the same coordinate system origin. This will be called every loop during the
    *     command.
    * @param bindings Universal trajectory event bindings.
    * @param trajectoryLogger A {@link TrajectoryLogger} to log {@link Trajectory} as they start and
    *     finish.
-   * @return An {@link AutoFactory} that can be used to create {@link AutoLoop} and {@link
+   * @return An {@link AutoFactory} that can be used to create {@link AutoRoutine} and {@link
    *     AutoTrajectory}.
    * @see AutoChooser using this factory with AutoChooser to generate auto routines.
    */
   public static <SampleType extends TrajectorySample<SampleType>> AutoFactory createAutoFactory(
       Subsystem driveSubsystem,
       Supplier<Pose2d> poseSupplier,
-      ControlFunction<SampleType> controller,
-      Consumer<ChassisSpeeds> outputChassisSpeeds,
+      BiConsumer<Pose2d, SampleType> controller,
       BooleanSupplier mirrorTrajectory,
-      ChoreoAutoBindings bindings,
+      AutoBindings bindings,
       TrajectoryLogger<SampleType> trajectoryLogger) {
     return new AutoFactory(
         requireNonNullParam(poseSupplier, "poseSupplier", "Choreo.createAutoFactory"),
         requireNonNullParam(controller, "controller", "Choreo.createAutoFactory"),
-        requireNonNullParam(outputChassisSpeeds, "outputChassisSpeeds", "Choreo.createAutoFactory"),
         requireNonNullParam(mirrorTrajectory, "mirrorTrajectory", "Choreo.createAutoFactory"),
         requireNonNullParam(driveSubsystem, "driveSubsystem", "Choreo.createAutoFactory"),
         requireNonNullParam(bindings, "bindings", "Choreo.createAutoFactory"),
