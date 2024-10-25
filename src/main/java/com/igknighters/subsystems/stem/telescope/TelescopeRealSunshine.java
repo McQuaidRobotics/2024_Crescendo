@@ -35,9 +35,9 @@ public class TelescopeRealSunshine extends Telescope {
     private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
     private final MotionMagicTorqueCurrentFOC controlReqMotionMagic = new MotionMagicTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
 
-    @Log.NT
+    @Log
     private boolean hasHomed = false;
-    @Log.NT
+    @Log
     private boolean motorAutoseed = true;
 
     public TelescopeRealSunshine() {

@@ -72,8 +72,13 @@ public class StemCommands {
                     targetTranslation.getY()
                             - (currentChassisSpeed.vyMetersPerSecond * (targetDistance / kUmbrella.NOTE_VELO)));
 
-            double distance = currentPose.getTranslation().getDistance(adjustedTarget);
-            Monologue.log("Aim/distance", distance);
+            Translation2d lookaheadTranslation = currentPose.getTranslation().plus(new Translation2d(
+                currentChassisSpeed.vxMetersPerSecond * kControls.SOTM_LOOKAHEAD_TIME,
+                currentChassisSpeed.vyMetersPerSecond * kControls.SOTM_LOOKAHEAD_TIME
+            ));
+
+            double distance = lookaheadTranslation.getDistance(adjustedTarget);
+            stem.log("aim/distance", distance);
 
             StemSolveInput solveInput = new StemSolveInput(
                 stem.getStemPosition(),

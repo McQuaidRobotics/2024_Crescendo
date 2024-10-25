@@ -24,7 +24,6 @@ public final class ConstValues {
 
     // all measurements are in meters unless otherwise specified
     // all angles are in radians unless otherwise specified
-    @SuppressWarnings("unused")
     static final class Conv {
         public static final double FEET_TO_METERS = 0.3048;
         public static final double INCHES_TO_METERS = 0.0254;
@@ -63,17 +62,6 @@ public final class ConstValues {
     public static final double PERIODIC_TIME = 0.02; // 20ms
     public static final int PDH_CAN_ID = 61;
 
-    public static final class kChannels {
-        public static final String POSITION = "POSITION";
-        public static final String POSITION_SWERVE = "POSITION_SWERVE";
-        public static final String POSITION_VISION = "POSITION_VISION";
-        public static final String VELOCITY = "VELOCITY";
-
-        public static final String SWERVE_ODO_SAMPLES = "SWERVE_ODO_SAMPLES";
-        public static final String VISION = "VISION";
-        public static final String APRILTAGS = "APRILTAGS";
-    }
-
     public static final class kRobotCollisionGeometry {
         public static final double BUMPER_THICKNESS = 2.8 * Conv.INCHES_TO_METERS;
         public static final double BUMPER_HEIGHT = 5.75 * Conv.INCHES_TO_METERS;
@@ -104,9 +92,9 @@ public final class ConstValues {
 
     public static final class kControls {
         public static final double SHOOTER_RPM = 7000.0;
-        public static final double SHOOTER_PASS_RPM = 4000.0;
+        public static final double SHOOTER_PASS_RPM = 3900.0;
         public static final double AUTO_SHOOTER_RPM = 8000.0;
-        public static final double SHOOTER_IDLE_RPM = 2000.0;
+        public static final double SHOOTER_IDLE_RPM = 4000.0;
         public static final double INTAKE_PERCENT = 0.8;
 
         public static final double STATIONARY_AIM_AT_PIVOT_RADIANS = 40.0 * Conv.DEGREES_TO_RADIANS;
@@ -117,6 +105,16 @@ public final class ConstValues {
         public static final double MAX_HEIGHT_AIM_AT_TELESCOPE_METERS = kTelescope.MAX_METERS;
 
         public static final AimSolveStrategy DEFAULT_AIM_STRATEGY = AimSolveStrategy.STATIONARY_PIVOT_GRAVITY;
+
+        public static final double SOTM_LOOKAHEAD_TIME = 0.275;
+
+        public static final Translation2d PASS_LAND_LOCATION = new Translation2d(
+            1.0, 7.0
+        );
+
+        public static final Translation2d PASS_SHOOT_FROM_LOCATION = new Translation2d(
+            10.0, 0.7
+        );
     }
 
     public static final class kLed {
@@ -146,7 +144,7 @@ public final class ConstValues {
                                                     -20.0 * Conv.DEGREES_TO_RADIANS,
                                                     Math.PI))),
                             Camera.createConfig(
-                                    "photon__module_2",
+                                    "photon_module_2",
                                     1,
                                     new Transform3d(
                                             new Translation3d(
@@ -214,7 +212,7 @@ public final class ConstValues {
         public static final double MOTOR_CLOSED_LOOP_OUTPUT_SCALAR = 0.95;
 
         /** User defined acceleration time in seconds */
-        public static final double ACCELERATION_TIME = 0.9;
+        public static final double ACCELERATION_TIME = 0.7;
 
         public static final double SLIP_CURRENT = 65.0;
 
@@ -253,10 +251,10 @@ public final class ConstValues {
         }
 
         public static final class kRotationController {
-            public static final double kP = 8.0;
+            public static final double kP = 9.0;
             public static final double kD = 0.2;
 
-            public static final double CONSTRAINT_SCALAR = 0.7;
+            public static final double CONSTRAINT_SCALAR = 1.0;
         }
 
         public static final boolean ORIENT_TELEOP_FOR_SIM_DEFAULT = false;
@@ -270,6 +268,7 @@ public final class ConstValues {
         public static final LerpTable TELEOP_ROTATION_AXIS_CURVE = new LerpTable(
                 new LerpTableEntry(0.0, 0.0),
                 new LerpTableEntry(0.15, 0.0), // deadzone
+                new LerpTableEntry(0.5, 0.2),
                 new LerpTableEntry(0.7, 0.4),
                 new LerpTableEntry(1.0, 1.0));
 
@@ -279,7 +278,7 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 2;
             public static final int CANCODER_ID = 21;
 
-            @DoubleConst(crash = -0.1015, burn = -0.2133)
+            @DoubleConst(crash = -0.1015, burn = 0.5 - 0.4176)
             public static double ROTATION_OFFSET;
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0, -TRACK_WIDTH / 2.0);
@@ -292,7 +291,7 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 4;
             public static final int CANCODER_ID = 22;
 
-            @DoubleConst(crash = 0.42529, burn = -0.39868)
+            @DoubleConst(crash = 0.42529, burn = 0.10595)
             public static double ROTATION_OFFSET;
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0,
@@ -306,7 +305,7 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 6;
             public static final int CANCODER_ID = 23;
 
-            @DoubleConst(crash = -0.4182, burn = 0.060546)
+            @DoubleConst(crash = -0.4182, burn = -0.21533)
             public static double ROTATION_OFFSET;
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0, TRACK_WIDTH / 2.0);
@@ -319,7 +318,7 @@ public final class ConstValues {
             public static final int ANGLE_MOTOR_ID = 8;
             public static final int CANCODER_ID = 24;
 
-            @DoubleConst(crash = -0.1086, burn = 0.108154)
+            @DoubleConst(crash = -0.1086, burn = -0.398925)
             public static double ROTATION_OFFSET;
 
             public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0,
@@ -353,7 +352,7 @@ public final class ConstValues {
     }
 
     public static final class kUmbrella {
-        public static final double NOTE_VELO = 15.0;
+        public static final double NOTE_VELO = 23.5;
         public static final String CANBUS = "SuperStructureBus";
 
         public static final class kShooter {
@@ -366,7 +365,7 @@ public final class ConstValues {
             public static final double MOTOR_LEFT_kP = 0.15;
             public static final double MOTOR_LEFT_kI = 0.0;
             public static final double MOTOR_LEFT_kD = 0.00;
-            public static final double MOTOR_LEFT_kS = 0.15;
+            public static final double MOTOR_LEFT_kS = 0.155;
             public static final double MOTOR_LEFT_kV = 0.118;
 
             public static final int LEFT_MOTOR_ID = 17;
@@ -381,16 +380,6 @@ public final class ConstValues {
             public static final double MAX_SHOOT_SPEED = 8000.0 * Conv.RPM_TO_RADIANS_PER_SECOND;
 
             public static final double LEFT_MOTOR_DIFF = 0.9;
-
-            // public static final LerpTable DISTANCE_TO_RPM_CURVE = new LerpTable(
-            //     new LerpTableEntry(0.0, 8000),
-            //     new LerpTableEntry(20.0, 8000)
-            // );
-
-            // public static final LerpTable RPM_TO_AVERAGE_NOTE_VELO_CURVE = new LerpTable(
-            //     new LerpTableEntry(0, 25.0),
-            //     new LerpTableEntry(100000, 25.0)
-            // );
         }
 
         public static final class kIntake {
@@ -459,7 +448,7 @@ public final class ConstValues {
              * The max voltage of the motors to behave more predictably
              * throughout the match.
              */
-            public static final double VOLTAGE_COMP = 11.8;
+            public static final double VOLTAGE_COMP = 11.0;
             public static final double TARGET_TOLERANCE = 0.5 * Conv.DEGREES_TO_RADIANS;
         }
 
@@ -471,8 +460,8 @@ public final class ConstValues {
             public static final double MOTOR_kD = 0.1;
 
             public static final double MAX_VELOCITY = 50;
-            public static final double MAX_ACCELERATION = 400;
-            public static final double MAX_JERK = 2000;
+            public static final double MAX_ACCELERATION = 600;
+            public static final double MAX_JERK = 3000;
 
             public static final double MOTOR_TO_MECHANISM_RATIO = 20.0;
 
@@ -487,7 +476,7 @@ public final class ConstValues {
             /**
              * Tolerance in meters
              */
-            public static final double TARGET_TOLERANCE = 0.02;
+            public static final double TARGET_TOLERANCE = 1.0 * Conv.INCHES_TO_METERS;
         }
 
         public static final class kWrist {
@@ -501,8 +490,8 @@ public final class ConstValues {
             public static final int MOTOR_ID = 16;
             public static final int CANCODER_ID = 26;
 
-            public static final double MOTOR_kP = 140.0;
-            public static final double MOTOR_kI = 1.0;
+            public static final double MOTOR_kP = 150.0;
+            public static final double MOTOR_kI = 0.0;
             public static final double MOTOR_kD = 3.0;
             public static final double MOTOR_kS = 0.06;
             public static final double MOTOR_kV = 0.0;
@@ -513,18 +502,17 @@ public final class ConstValues {
 
             public static final double MIN_ANGLE = 8.0 * Conv.DEGREES_TO_RADIANS;
             public static final double MAX_ANGLE = 117.0 * Conv.DEGREES_TO_RADIANS;
-            public static final double FROZEN_WRIST_ANGLE = 72.0 * Conv.DEGREES_TO_RADIANS;
 
             public static final double MOTOR_TO_MECHANISM_RATIO = 9.0 * 4.0 * (84.0 / 22.0);
 
             public static final double MAX_VELOCITY = 1;
-            public static final double MAX_ACCELERATION = 8;
+            public static final double MAX_ACCELERATION = 10;
             public static final double MAX_JERK = 20;
 
             /**
              * Tolerance in radians
              */
-            public static final double TARGET_TOLERANCE = 2.5 * Conv.DEGREES_TO_RADIANS;
+            public static final double TARGET_TOLERANCE = 1.5 * Conv.DEGREES_TO_RADIANS;
 
         }
     }

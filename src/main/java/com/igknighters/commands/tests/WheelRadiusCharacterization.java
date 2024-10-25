@@ -12,7 +12,6 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
-import monologue.Monologue;
 
 import java.util.function.DoubleSupplier;
 import java.util.Arrays;
@@ -94,14 +93,14 @@ public class WheelRadiusCharacterization extends Command {
 
         currentEffectiveWheelRadius = (accumGyroYawRads * driveRadius) / averageWheelPosition;
 
-        Monologue.log(
-                "/Robot/Swerve/RadiusCharacterization/DrivePosition",
+        swerve.log(
+                "RadiusCharacterization/DrivePosition",
                 averageWheelPosition);
-        Monologue.log(
-                "/Robot/Swerve/RadiusCharacterization/AccumGyroYawRads",
+        swerve.log(
+                "RadiusCharacterization/AccumGyroYawRads",
                 accumGyroYawRads);
-        Monologue.log(
-                "/Robot/Swerve/RadiusCharacterization/CurrentWheelRadiusInches",
+        swerve.log(
+                "RadiusCharacterization/CurrentWheelRadiusInches",
                 Units.metersToInches(currentEffectiveWheelRadius));
     }
 

@@ -374,15 +374,319 @@ public class AutoRoutines extends AutoCommands {
     //     return loop.cmd().withName("FourPieceSourceSide");
     // }
 
-    public Command driveForward(AutoFactory factory) {
-        if (disabled) return disabledAuto();
+    // public Command driveForward(AutoFactory factory) {
+    //     if (disabled) return disabledAuto();
 
-        final AutoLoop loop = factory.newLoop("DriveForward");
+    //     final AutoLoop loop = factory.newLoop("DriveForward");
 
-        final AutoTrajectory traj = factory.trajectory(AMP.to(C1), loop);
+    //     final ChoreoAutoTrajectory ampToC1 = factory.traj(AMP.to(C1), loop);
+    //     final ChoreoAutoTrajectory c1ToM1 = factory.traj(C1.to(M1), loop);
+    //     final ChoreoAutoTrajectory m1ToM2 = factory.traj(M1.to(M2), loop);
+    //     final ChoreoAutoTrajectory m2ToM3 = factory.traj(M2.to(M3), loop);
+    //     final ChoreoAutoTrajectory m1ToS1 = factory.traj(M1.to(S1), loop);
+    //     final ChoreoAutoTrajectory m2ToS1 = factory.traj(M2.to(S1), loop);
+    //     final ChoreoAutoTrajectory m3ToS2 = factory.traj(M3.to(S2), loop);
+    //     final ChoreoAutoTrajectory s1ToC2 = factory.traj(S1.to(C2), loop);
+    //     final ChoreoAutoTrajectory s2ToC2 = factory.traj(S2.to(C2), loop);
+    //     final ChoreoAutoTrajectory s1ToM2 = factory.traj(S1.to(M2), loop);
+    //     final ChoreoAutoTrajectory s1ToM3 = factory.traj(S1.to(M3), loop);
+    //     final ChoreoAutoTrajectory c2ToSUB = factory.traj(C2.to(SUB), loop);
 
-        loop.enabled().onTrue(traj.cmd());
 
-        return loop.cmd();
-    }
+    //     // entry point for the auto
+    //     loop.enabled().onTrue(
+    //         resetOdometry(ampToC1).andThen(
+    //             autoShootBegining(),
+    //             Commands.race(
+    //                 intakeGamepieceNoStow(),
+    //                 Commands.waitSeconds(0.2)
+    //                     .andThen(ampToC1.cmd())
+    //             )
+    //         ).withName("SixPieceAmpSideEntry")
+    //     );
+
+    //     // picking up first note and shooting if we have a note
+    //     ampToC1.done().onTrueWith(
+    //         gamepiece(loop),
+    //         autoShoot(),
+    //         c1ToM1.cmd()
+    //     );
+
+    //     // picking up the second note and branching based on whether we're holding a gamepiece
+    //     c1ToM1.atTime(0.35).onTrue(intakeGamepieceNoStow());
+    //     c1ToM1.done().onTrueWith(
+    //         gamepiece(loop),
+    //         m1ToS1.cmd(),
+    //         m1ToM2.cmd()
+    //     );
+
+    //     // the branch where we're holding a gamepiece
+    //     m1ToS1.active().onTrue(aimStem(m1ToS1));
+    //     m1ToS1.done().onTrueWith(
+    //         gamepiece(loop),
+    //         autoShoot(),
+    //         s1ToM2.cmd()
+    //     );
+
+    //     // the branch where we're not holding a gamepiece
+    //     m1ToM2.active().onTrue(intakeGamepieceNoStow());
+    //     m1ToM2.done().onTrueWith(
+    //         gamepiece(loop),
+    //         m2ToS1.cmd(),
+    //         m2ToM3.cmd()
+    //     );
+
+    //     // the branch where we're holding a gamepiece
+    //     m2ToS1.active().onTrue(aimStem(m2ToS1));
+    //     m2ToS1.done().onTrueWith(
+    //         gamepiece(loop),
+    //         autoShoot(),
+    //         s1ToM3.cmd()
+    //     );
+
+    //     // the branch where we're not holding a gamepiece
+    //     m2ToM3.active().onTrue(intakeGamepieceNoStow());
+    //     m2ToM3.done().onTrueWith(
+    //         gamepiece(loop),
+    //         m3ToS2.cmd(),
+    //         stow()
+    //     );
+
+    //     m3ToS2.active().onTrue(stow());
+    //     m3ToS2.done().onTrueWith(
+    //         gamepiece(loop),
+    //         autoShoot(),
+    //         s2ToC2.cmd()
+    //     );
+
+    //     s1ToM2.active().onTrue(intakeGamepieceNoStow());
+    //     s1ToM2.done().onTrueWith(
+    //         gamepiece(loop),
+    //         m2ToS1.cmd(),
+    //         m2ToM3.cmd()
+    //     );
+
+    //     s1ToM3.active().onTrue(intakeGamepieceNoStow());
+    //     s1ToM3.done().onTrueWith(
+    //         gamepiece(loop),
+    //         m3ToS2.cmd(),
+    //         stow()
+    //     );
+
+    //     // picking up the third note, only shooting if we have a note
+    //     s1ToC2.active().or(s2ToC2.active()).onTrue(intakeGamepieceNoStow());
+    //     s1ToC2.done().or(s2ToC2.done()).and(gamepiece(loop)).onTrue(
+    //         c2ToSUB.cmd()
+    //     );
+
+    //     // shoot from the subwoofer
+    //     c2ToSUB.active().onTrue(aimSub());
+    //     c2ToSUB.done().onTrue(aimSub().andThen(feedShooter()).withName("AimSubThenFeed"));
+
+    //     return loop.cmd().withName("SixPieceFarAmpSide");
+    // }
+
+    // /**
+    //  * 
+    //  * 
+    //  * 
+    //  * @param factory The factory to create trajectories with
+    //  * @return The command that represents the auto routine
+    //  */
+    // public Command fourPieceSourceSide(ChoreoAutoFactory factory) {
+    //     if (disabled) return disabledAuto();
+
+    //     final ChoreoAutoLoop loop = factory.newLoop();
+
+    //     final ChoreoAutoTrajectory srcToM5 = factory.traj(SRC.to(M5), loop);
+    //     final ChoreoAutoTrajectory m5ToM4 = factory.traj(M5.to(M4), loop);
+    //     final ChoreoAutoTrajectory m5ToS3 = factory.traj(M5.to(S3), loop);
+    //     final ChoreoAutoTrajectory m4ToS3 = factory.traj(M4.to(S3), loop);
+    //     final ChoreoAutoTrajectory s3ToM4 = factory.traj(S3.to(M4), loop);
+    //     final ChoreoAutoTrajectory s3ToM3 = factory.traj(S3.to(M3), loop);
+    //     final ChoreoAutoTrajectory m3ToS2 = factory.traj(M3.to(S2), loop);
+
+
+    //     // entry point for the auto
+    //     loop.enabled().onTrue(
+    //         resetOdometry(srcToM5).andThen(
+    //             autoShootBegining(),
+    //             Commands.parallel(
+    //                 intakeGamepieceNoStow(),
+    //                 srcToM5.cmd()
+    //             )
+    //         ).withName("FourPieceSourceSideEntry")
+    //     );
+
+    //     // picking up first note and shooting if we have a note
+    //     srcToM5.done().onTrueWith(
+    //         gamepiece(loop),
+    //         m5ToS3.cmd(),
+    //         m5ToM4.cmd()
+    //     );
+
+    //     m5ToS3.active().onTrue(aimStem(m5ToS3));
+    //     m5ToS3.done().onTrueWith(
+    //         gamepiece(loop),
+    //         autoShoot(),
+    //         s3ToM4.cmd()
+    //     );
+
+    //     s3ToM4.active().onTrue(intakeGamepieceNoStow());
+    //     s3ToM4.done().onTrueWith(
+    //         gamepiece(loop),
+    //         m4ToS3.cmd(),
+    //         stow()
+    //     );
+
+    //     m4ToS3.active().onTrue(aimStem(m4ToS3));
+    //     m4ToS3.done().onTrueWith(
+    //         gamepiece(loop),
+    //         autoShoot(),
+    //         s3ToM3.cmd()
+    //     );
+
+    //     s3ToM3.active().onTrue(intakeGamepieceNoStow());
+    //     s3ToM3.done().onTrueWith(
+    //         gamepiece(loop),
+    //         m3ToS2.cmd(),
+    //         stow()
+    //     );
+
+    //     m3ToS2.active().onTrue(aimStem(m3ToS2));
+    //     m3ToS2.done().onTrueWith(
+    //         gamepiece(loop),
+    //         autoShoot(),
+    //         stow()
+    //     );
+
+    //     return loop.cmd().withName("FourPieceSourceSide");
+    // }
+
+    // /**
+    //  * 
+    //  * 
+    //  * 
+    //  * @param factory The factory to create trajectories with
+    //  * @return The command that represents the auto routine
+    //  */
+    // public Command threePieceSubMiddle(ChoreoAutoFactory factory) {
+    //     if (disabled) return disabledAuto();
+
+    //     final ChoreoAutoLoop loop = factory.newLoop();
+
+    //     final ChoreoAutoTrajectory subToC3 = factory.traj(SUB.to(C3), loop);
+    //     final ChoreoAutoTrajectory c3ToM3 = factory.traj(C3.to(M3), loop);
+    //     final ChoreoAutoTrajectory m3ToS2 = factory.traj(M3.to(S2), loop);
+    //     final ChoreoAutoTrajectory s2ToM3 = factory.traj(S2.to(M3), loop);
+
+    //     // entry point for the auto
+    //     loop.enabled().onTrue(
+    //         resetOdometry(subToC3).andThen(
+    //             Commands.parallel(
+    //                 UmbrellaCommands.waitUntilSpunUp(umbrella, 5000, 0.1),
+    //                 aimSub()
+    //             ),
+    //             feedShooter(),
+    //             Commands.parallel(
+    //                 intakeGamepieceNoStow(),
+    //                 Commands.waitSeconds(0.2)
+    //                     .andThen(subToC3.cmd())
+    //             )
+    //         ).withName("ThreePieceSubMiddleEntry")
+    //     );
+
+    //     subToC3.done().onTrueWith(
+    //         gamepiece(loop),
+    //         autoShoot(),
+    //         c3ToM3.cmd()
+    //     );
+
+    //     c3ToM3.atTime(1.5).onTrue(intakeGamepieceNoStow());
+    //     c3ToM3.done().onTrueWith(
+    //         gamepiece(loop),
+    //         m3ToS2.cmd(),
+    //         stow()
+    //     );
+
+
+    //     m3ToS2.active().onTrue(aimStem(m3ToS2));
+    //     m3ToS2.done().onTrueWith(
+    //         gamepiece(loop),
+    //         autoShoot(),
+    //         s2ToM3.cmd()
+    //     );
+
+    //     s2ToM3.active().onTrue(stow());
+
+    //     return loop.cmd().withName("FourPieceSourceSide");
+    // }
+
+    // /**
+    //  * 
+    //  * 
+    //  * 
+    //  * @param factory The factory to create trajectories with
+    //  * @return The command that represents the auto routine
+    //  */
+    // public Command fourPieceCloseAmpSide(ChoreoAutoFactory factory) {
+    //     if (disabled) return disabledAuto();
+
+    //     final ChoreoAutoLoop loop = factory.newLoop();
+
+    //     final ChoreoAutoTrajectory ampToC1 = factory.traj(AMP.to(C1), loop);
+    //     final ChoreoAutoTrajectory c1ToC2 = factory.traj(C1.to(C2), loop);
+    //     final ChoreoAutoTrajectory c2ToC3 = factory.traj(C2.to(C3), loop);
+
+    //     // entry point for the auto
+    //     loop.enabled().onTrue(
+    //         resetOdometry(ampToC1).andThen(
+    //             Commands.parallel(
+    //                 UmbrellaCommands.waitUntilSpunUp(umbrella, 5000, 0.1),
+    //                 aimSub()
+    //             ),
+    //             feedShooter(),
+    //             Commands.parallel(
+    //                 intakeGamepieceNoStow(),
+    //                 Commands.waitSeconds(0.2)
+    //                     .andThen(ampToC1.cmd())
+    //             )
+    //         ).withName("ThreePieceSubMiddleEntry")
+    //     );
+
+    //     ampToC1.done().onTrueWith(
+    //         gamepiece(loop),
+    //         autoShoot(),
+    //         c1ToC2.cmd()
+    //     );
+
+    //     c1ToC2.active().onTrue(intakeGamepieceNoStow());
+    //     c1ToC2.done().onTrueWith(
+    //         gamepiece(loop),
+    //         autoShoot(),
+    //         c2ToC3.cmd()
+    //     );
+
+
+    //     c2ToC3.active().onTrue(intakeGamepieceNoStow());
+    //     c2ToC3.done().onTrueWith(
+    //         gamepiece(loop),
+    //         autoShoot(),
+    //         stow()
+    //     );
+
+    //     return loop.cmd().withName("fourPieceCloseAmp");
+    // }
+
+    // public Command driveForward(ChoreoAutoFactory factory) {
+    //     if (disabled) return disabledAuto();
+
+    //     final ChoreoAutoLoop loop = factory.newLoop();
+
+    //     final ChoreoAutoTrajectory traj = factory.traj(AMP.to(C1), loop);
+
+    //     loop.enabled().onTrue(traj.cmd());
+
+    //     return loop.cmd();
+    // }
 }

@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 import com.igknighters.Localizer;
+import com.igknighters.subsystems.swerve.RotationalController;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.util.geom.AllianceFlip;
 import com.igknighters.util.geom.GeomUtil;
@@ -47,24 +48,31 @@ public class SwerveCommands {
 
     private static abstract class PointTowardsCommand extends Command {
         private final Swerve swerve;
+        private final RotationalController rotController;
         private ChassisSpeeds velo = new ChassisSpeeds();
 
         public PointTowardsCommand(Swerve swerve) {
             this.swerve = swerve;
+            this.rotController = new RotationalController(swerve);
             addRequirements(swerve);
         }
 
         abstract Rotation2d getTarget();
 
         @Override
+        public void initialize() {
+            rotController.reset();
+        }
+
+        @Override
         public void execute() {
-            velo.omegaRadiansPerSecond = swerve.rotVeloForRotation(getTarget(), 0.0);
+            velo.omegaRadiansPerSecond = rotController.calculate(getTarget().getRadians(), 0.0);
             swerve.drive(velo, false);
         }
 
         @Override
         public boolean isFinished() {
-            return velo.omegaRadiansPerSecond < 0.05;
+            return Math.abs(velo.omegaRadiansPerSecond) < 0.05;
         }
 
         @Override

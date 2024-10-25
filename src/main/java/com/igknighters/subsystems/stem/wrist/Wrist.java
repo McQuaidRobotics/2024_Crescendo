@@ -7,12 +7,12 @@ import edu.wpi.first.math.util.Units;
 import monologue.Annotations.Log;
 
 public abstract class Wrist extends Component {
-    @Log.NT protected double radians;
-    @Log.NT protected double targetRadians;
-    @Log.NT protected double encoderRadians;
-    @Log.NT protected double radiansPerSecond = 0.0;
-    @Log.NT protected double volts = 0.0;
-    @Log.NT protected double amps = 0.0;
+    @Log protected double radians;
+    @Log protected double targetRadians;
+    @Log protected double encoderRadians;
+    @Log protected double radiansPerSecond = 0.0;
+    @Log protected double volts = 0.0;
+    @Log protected double amps = 0.0;
 
     public Wrist(double startingRadians) {
         this.radians = startingRadians;

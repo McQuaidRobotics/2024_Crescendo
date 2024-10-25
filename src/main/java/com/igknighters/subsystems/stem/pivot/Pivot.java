@@ -11,17 +11,17 @@ import monologue.Annotations.Log;
  * This allows us to abstract over the underlying implementation of the pivot for various reasons.
  */
 public abstract class Pivot extends Component {
-    @Log.NT protected double radians;
-    @Log.NT protected double targetRadians;
-    @Log.NT protected double radiansPerSecond = 0.0;
-    @Log.NT protected double leftVolts = 0.0;
-    @Log.NT protected double rightVolts = 0.0;
-    @Log.NT protected double leftAmps = 0.0;
-    @Log.NT protected double rightAmps = 0.0;
-    @Log.NT protected double gyroRadians = 0.0;
-    @Log.NT protected double gyroRadiansPerSecondAbs = 0.0;
-    @Log.NT protected boolean isLimitFwdSwitchHit = false;
-    @Log.NT protected boolean isLimitRevSwitchHit = false;
+    @Log protected double radians;
+    @Log protected double targetRadians;
+    @Log protected double radiansPerSecond = 0.0;
+    @Log protected double leftVolts = 0.0;
+    @Log protected double rightVolts = 0.0;
+    @Log protected double leftAmps = 0.0;
+    @Log protected double rightAmps = 0.0;
+    @Log protected double gyroRadians = 0.0;
+    @Log protected double gyroRadiansPerSecondAbs = 0.0;
+    @Log protected boolean isLimitFwdSwitchHit = false;
+    @Log protected boolean isLimitRevSwitchHit = false;
 
     protected Pivot(double startingRadians) {
         this.radians = startingRadians;

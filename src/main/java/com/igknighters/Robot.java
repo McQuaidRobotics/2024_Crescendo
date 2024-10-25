@@ -43,7 +43,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
     private final CommandScheduler scheduler = CommandScheduler.getInstance();
 
-    public final Localizer localizer;
+    public final Localizer localizer = new Localizer();
 
     private final DriverController driverController;
     private final OperatorController operatorController;
@@ -61,7 +61,6 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
     public Robot(RobotID robotID) {
         super(ConstValues.PERIODIC_TIME);
 
-        // logging needs to be setup asap as to not lose logging calls b4 its setup
         setupLogging();
 
         if (robotID == null) {
@@ -70,7 +69,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
         ConstantHelper.applyRoboConst(ConstValues.class, robotID);
 
-        localizer = new Localizer();
+        localizer.publishField();
 
         driverController = new DriverController(0, localizer);
         operatorController = new OperatorController(1);
@@ -79,7 +78,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
         allSubsystems = new AllSubsystems(localizer, robotID.subsystems);
 
         for (final Logged subsystem : allSubsystems.getLoggableSubsystems()) {
-            Monologue.logObj(subsystem, "/Robot/" + subsystem.getOverrideName());
+            Monologue.logTree(subsystem, "/Robot/" + subsystem.getOverrideName());
         }
 
         driverController.assignButtons(allSubsystems);
@@ -120,12 +119,12 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
         );
 
         if (allSubsystems.hasAllSubsystems()) {
-            var routines = new AutoRoutines(allSubsystems, localizer);
+            final var routines = new AutoRoutines(allSubsystems, localizer);
             autoManager.addAutoRoutine("5 Piece Amp Side", routines::fivePieceAmpSide);
             // autoManager.addAutoRoutine("6 Piece Amp Side Far", routines::sixPieceFarAmpSide);
             // autoManager.addAutoRoutine("4 Piece Src Side", routines::fourPieceSourceSide);
             // autoManager.addAutoRoutine("3 Piece Sub Middle", routines::threePieceSubMiddle);
-            autoManager.addAutoRoutine("rahhh", routines::driveForward);
+            // autoManager.addAutoRoutine("rahhh", routines::driveForward);
         }
 
         testManager = new TestManager();
@@ -224,18 +223,12 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
                     "/Robot",
                     new MonologueConfig()
                             .withDatalogPrefix("")
-                            .withFileOnly(DriverStation::isFMSAttached)
+                            .withOptimizeBandwidth(DriverStation::isFMSAttached)
                             .withLazyLogging(true));
         } else {
             // used for tests and CI, does not actually log anything but asserts the logging is setup mostly correct
             Monologue.setupMonologueDisabled(this, "/Robot", true);
         }
-
-        // send all library/utility made tables that don't use monologue to file aswell
-        Monologue.sendNetworkToFile("/Visualizers");
-        Monologue.sendNetworkToFile("/Tunables");
-        Monologue.sendNetworkToFile("/Tracer");
-        Monologue.sendNetworkToFile("/PowerDistribution");
 
         // filesystemLogger.addFile("/home/lvuser/FRC_UserProgram.log", "Console", 0.27);
         // filesystemLogger.addFile("/var/log/dmesg", "Dmesg", 2.2);

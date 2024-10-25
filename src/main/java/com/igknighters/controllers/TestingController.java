@@ -17,8 +17,10 @@ import com.igknighters.util.plumbing.TunableValues;
 import com.igknighters.util.plumbing.TunableValues.TunableDouble;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
@@ -32,13 +34,14 @@ import com.igknighters.Robot;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.commands.HigherOrderCommands;
 import com.igknighters.commands.stem.StemCommands;
+import com.igknighters.commands.swerve.SwerveCommands;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveTargetCmd;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 
 @SuppressWarnings("unused")
 
 /** If debug is false this controller does not initialize */
-public class TestingController extends ControllerParent {
+public class TestingController extends ControllerBase {
     private static final TunableDouble passDistance = TunableValues.getDouble("Test/PassTestDist", 11.0);
     private static final TunableDouble passRpm = TunableValues.getDouble("Test/PassTesRpm", 4500.0);
     public TestingController(int port, Localizer localizer) {
@@ -75,39 +78,7 @@ public class TestingController extends ControllerParent {
         });
 
         /// BUMPER
-        this.LB.binding = new Binding((trig, allss) -> {
-            Swerve swerve = allss.swerve.get();
-            Stem stem = allss.stem.get();
-            Umbrella umbrella = allss.umbrella.get();
-            Supplier<Command> bleh = () -> {
-                Translation2d target = localizer.pose().getTranslation().plus(new Translation2d(passDistance.value(), 0.0));
-                return Commands.parallel(
-                    new TeleopSwerveTargetCmd(
-                        swerve,
-                        this,
-                        localizer,
-                        target,
-                        true
-                    ),
-                    StemCommands.aimAtPassPoint(
-                        stem,
-                        target,
-                        false,
-                        localizer::pose
-                    ),
-                    UmbrellaCommands.spinupShooter(
-                        umbrella,
-                        passRpm.value())
-                ).until(this.RT.trigger)
-                .andThen(
-                    HigherOrderCommands.ShootSequences.shoot(stem, umbrella),
-                    new ScheduleCommand(StemCommands.holdStill(stem))
-                ).withName("idk");
-            };
-            trig.whileTrue(
-                new DeferredCommand(bleh, Set.of(swerve, stem, umbrella))
-            );
-        }, Subsystems.Stem, Subsystems.Umbrella, Subsystems.Swerve);
+        // this.LB.binding = 
 
         this.RB.binding = new Binding((trig, allss) -> {
             Stem stem = allss.stem.get();
@@ -126,7 +97,22 @@ public class TestingController extends ControllerParent {
         /// CENTER BUTTONS
         // this.Back.binding =
 
-        // this.Start.binding =
+        this.Start.binding = new Binding((trig, allss) -> {
+            Swerve swerve = allss.swerve.get();
+            Timer timer = new Timer();
+            trig.onTrue(
+                Commands.defer(
+                    () -> SwerveCommands.pointTowards(
+                        swerve,
+                        Rotation2d.fromRadians(swerve.getYawRads())
+                            .plus(Rotation2d.fromDegrees(90.0))
+                    ),
+                    Set.of(swerve)
+                ).beforeStarting(timer::restart)
+                .andThen(Commands.defer(() -> Commands.print("Time: " + timer.get()), Set.of()))
+                .andThen(timer::stop)
+            );
+        }, Subsystems.Swerve);
 
         /// STICKS
         // this.LS.binding =

@@ -7,11 +7,11 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 import com.igknighters.constants.ConstValues.kSwerve;
-import com.igknighters.controllers.ControllerParent;
+import com.igknighters.controllers.ControllerBase;
 
 public class TeleopSwerveTraditionalCmd extends TeleopSwerveBaseCmd {
 
-    public TeleopSwerveTraditionalCmd(Swerve swerve, ControllerParent controller) {
+    public TeleopSwerveTraditionalCmd(Swerve swerve, ControllerBase controller) {
         super(swerve, controller);
     }
 
@@ -23,7 +23,7 @@ public class TeleopSwerveTraditionalCmd extends TeleopSwerveBaseCmd {
         ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 vt.getX(),
                 vt.getY(),
-                -getRotation().getX() * kSwerve.MAX_ANGULAR_VELOCITY, // invert because CCW is positive
+                -getRotationX() * kSwerve.MAX_ANGULAR_VELOCITY, // invert because CCW is positive
                 new Rotation2d(swerve.getYawRads())
         );
 

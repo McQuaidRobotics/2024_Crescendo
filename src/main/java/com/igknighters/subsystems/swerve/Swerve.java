@@ -1,6 +1,5 @@
 package com.igknighters.subsystems.swerve;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -56,8 +55,6 @@ public class Swerve implements LockFullSubsystem {
     private final SwerveVisualizer visualizer;
     private final SwerveSetpointProcessor setpointProcessor = new SwerveSetpointProcessor();
 
-    private final RotationalController rotController = new RotationalController();
-
     private final Sender<ChassisSpeeds> velocitySender;
 
     private Optional<TeleopSwerveBaseCmd> defaultCommand = Optional.empty();
@@ -102,7 +99,7 @@ public class Swerve implements LockFullSubsystem {
         log("targetChassisSpeed", speeds);
 
         setModuleStates(
-                kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(speeds),
+            kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(speeds),
                 isOpenLoop);
     }
 
@@ -133,6 +130,8 @@ public class Swerve implements LockFullSubsystem {
     public void setModuleStates(SwerveModuleState[] desiredStates, boolean isOpenLoop) {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, ConstValues.kSwerve.MAX_DRIVE_VELOCITY);
 
+        log("regurgutatedChassisSpeed", kSwerve.SWERVE_KINEMATICS.toChassisSpeeds(desiredStates));
+
         for (SwerveModule module : swerveMods) {
             module.setDesiredState(desiredStates[module.getModuleNumber()], isOpenLoop);
         }
@@ -148,14 +147,6 @@ public class Swerve implements LockFullSubsystem {
 
     public ChassisSpeeds getChassisSpeed() {
         return kSwerve.SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
-    }
-
-    public double rotVeloForRotation(Rotation2d wantedAngle, double deadband) {
-        return rotController.calculate(getYawRads(), wantedAngle.getRadians(), deadband);
-    }
-
-    public void resetRotController() {
-        rotController.reset(MathUtil.angleModulus(getYawRads()), getChassisSpeed().omegaRadiansPerSecond);
     }
 
     public void setVoltageOut(double voltage, Rotation2d angle) {

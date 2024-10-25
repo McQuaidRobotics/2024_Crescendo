@@ -8,20 +8,20 @@ import monologue.Annotations.Log;
 
 public abstract class Shooter extends Component {
 
-    @Log.NT protected double radiansPerSecondRight = 0.0;
-    @Log.NT protected double targetRadiansPerSecondRight = 0.0;
-    @Log.NT protected double radiansPerSecondLeft = 0.0;
-    @Log.NT protected double targetRadiansPerSecondLeft = 0.0;
-    @Log.NT protected double voltsRight = 0.0;
-    @Log.NT protected double voltsLeft = 0.0;
-    @Log.NT protected double ampsRight = 0.0;
-    @Log.NT protected double ampsLeft = 0.0;
-    @Log.NT protected double tempRight = 0.0;
-    @Log.NT protected double tempLeft = 0.0;
-    @Log.NT protected double shooterRightRPM = Units.radiansPerSecondToRotationsPerMinute(radiansPerSecondRight);
-    @Log.NT protected double shooterLeftRPM = Units.radiansPerSecondToRotationsPerMinute(radiansPerSecondLeft);
-    @Log.NT protected double targetShooterRightRPM = Units.radiansPerSecondToRotationsPerMinute(targetRadiansPerSecondRight);
-    @Log.NT protected double targetShooterLeftRPM = Units.radiansPerSecondToRotationsPerMinute(targetRadiansPerSecondLeft);
+    @Log protected double radiansPerSecondRight = 0.0;
+    @Log protected double targetRadiansPerSecondRight = 0.0;
+    @Log protected double radiansPerSecondLeft = 0.0;
+    @Log protected double targetRadiansPerSecondLeft = 0.0;
+    @Log protected double voltsRight = 0.0;
+    @Log protected double voltsLeft = 0.0;
+    @Log protected double ampsRight = 0.0;
+    @Log protected double ampsLeft = 0.0;
+    @Log protected double tempRight = 0.0;
+    @Log protected double tempLeft = 0.0;
+    @Log protected double shooterRightRPM = Units.radiansPerSecondToRotationsPerMinute(radiansPerSecondRight);
+    @Log protected double shooterLeftRPM = Units.radiansPerSecondToRotationsPerMinute(radiansPerSecondLeft);
+    @Log protected double targetShooterRightRPM = Units.radiansPerSecondToRotationsPerMinute(targetRadiansPerSecondRight);
+    @Log protected double targetShooterLeftRPM = Units.radiansPerSecondToRotationsPerMinute(targetRadiansPerSecondLeft);
 
     @Override
     public String getOverrideName() {

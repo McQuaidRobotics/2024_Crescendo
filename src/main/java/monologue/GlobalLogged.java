@@ -2,9 +2,9 @@ package monologue;
 
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.NetworkTablesJNI;
-import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import monologue.MonologueSendableLayer.NtSendableCompat;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
 
@@ -14,7 +14,7 @@ import edu.wpi.first.util.struct.StructSerializable;
  * allow you to log data to the NetworkTables and DataLog.
  * 
  * @see Monologue
- * @see LogLevel
+ * @see LogSink
  */
 class GlobalLogged {
   static String ROOT_PATH = "";
@@ -29,28 +29,25 @@ class GlobalLogged {
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
     */
-  public static void log(String entryName, boolean value) {
-    log(entryName, value, LogLevel.DEFAULT);
+  public static boolean log(String entryName, boolean value) {
+    return log(entryName, value, LogSink.NT);
   }
   /**
     * Logs a boolean using the Monologue machinery.
     * 
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
-    * @param level The log level to use.
+    * @param sink The log sink to use.
     */
-  public static void log(String entryName, boolean value, LogLevel level) {
-    entryName = NetworkTable.normalizeKey(entryName, true);
-    if (!Monologue.isMonologueReady("GlobalLogged: " + entryName) || Monologue.isMonologueDisabled()) return;
-    Monologue.ntLogger.put(entryName, value, level);
-
-    // The Monologue made NT datalog subscriber only subs to stuff under ROOT_PATH
-    // If this is sending data to a different path, we should also log it to the file
-    if (!ROOT_PATH.isEmpty() && !entryName.startsWith(ROOT_PATH)) {
-      if (!(level == LogLevel.DEFAULT && Monologue.isFileOnly())) {
-        Monologue.dataLogger.put(entryName, value, level);
-      }
+  public static boolean log(String entryName, boolean value, LogSink sink) {
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
+      String entryNameFinal = entryName;
+      Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, value, sink));
+      return value;
     }
+    MonologueEntryLayer.MonologueEntry.create(entryName, boolean.class, sink).log(value);
+
+    return value;
   }
 
   /**
@@ -59,28 +56,25 @@ class GlobalLogged {
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
     */
-  public static void log(String entryName, int value) {
-    log(entryName, value, LogLevel.DEFAULT);
+  public static int log(String entryName, int value) {
+    return log(entryName, value, LogSink.NT);
   }
   /**
     * Logs a int using the Monologue machinery.
     * 
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
-    * @param level The log level to use.
+    * @param sink The log sink to use.
     */
-  public static void log(String entryName, int value, LogLevel level) {
-    entryName = NetworkTable.normalizeKey(entryName, true);
-    if (!Monologue.isMonologueReady("GlobalLogged: " + entryName) || Monologue.isMonologueDisabled()) return;
-    Monologue.ntLogger.put(entryName, value, level);
-
-    // The Monologue made NT datalog subscriber only subs to stuff under ROOT_PATH
-    // If this is sending data to a different path, we should also log it to the file
-    if (!ROOT_PATH.isEmpty() && !entryName.startsWith(ROOT_PATH)) {
-      if (!(level == LogLevel.DEFAULT && Monologue.isFileOnly())) {
-        Monologue.dataLogger.put(entryName, value, level);
-      }
+  public static int log(String entryName, int value, LogSink sink) {
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
+      String entryNameFinal = entryName;
+      Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, value, sink));
+      return value;
     }
+    MonologueEntryLayer.MonologueEntry.create(entryName, int.class, sink).log(value);
+
+    return value;
   }
 
   /**
@@ -89,28 +83,25 @@ class GlobalLogged {
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
     */
-  public static void log(String entryName, long value) {
-    log(entryName, value, LogLevel.DEFAULT);
+  public static long log(String entryName, long value) {
+    return log(entryName, value, LogSink.NT);
   }
   /**
     * Logs a long using the Monologue machinery.
     * 
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
-    * @param level The log level to use.
+    * @param sink The log sink to use.
     */
-  public static void log(String entryName, long value, LogLevel level) {
-    entryName = NetworkTable.normalizeKey(entryName, true);
-    if (!Monologue.isMonologueReady("GlobalLogged: " + entryName) || Monologue.isMonologueDisabled()) return;
-    Monologue.ntLogger.put(entryName, value, level);
-
-    // The Monologue made NT datalog subscriber only subs to stuff under ROOT_PATH
-    // If this is sending data to a different path, we should also log it to the file
-    if (!ROOT_PATH.isEmpty() && !entryName.startsWith(ROOT_PATH)) {
-      if (!(level == LogLevel.DEFAULT && Monologue.isFileOnly())) {
-        Monologue.dataLogger.put(entryName, value, level);
-      }
+  public static long log(String entryName, long value, LogSink sink) {
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
+      String entryNameFinal = entryName;
+      Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, value, sink));
+      return value;
     }
+    MonologueEntryLayer.MonologueEntry.create(entryName, long.class, sink).log(value);
+
+    return value;
   }
 
   /**
@@ -119,28 +110,25 @@ class GlobalLogged {
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
     */
-  public static void log(String entryName, float value) {
-    log(entryName, value, LogLevel.DEFAULT);
+  public static float log(String entryName, float value) {
+    return log(entryName, value, LogSink.NT);
   }
   /**
     * Logs a float using the Monologue machinery.
     * 
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
-    * @param level The log level to use.
+    * @param sink The log sink to use.
     */
-  public static void log(String entryName, float value, LogLevel level) {
-    entryName = NetworkTable.normalizeKey(entryName, true);
-    if (!Monologue.isMonologueReady("GlobalLogged: " + entryName) || Monologue.isMonologueDisabled()) return;
-    Monologue.ntLogger.put(entryName, value, level);
-
-    // The Monologue made NT datalog subscriber only subs to stuff under ROOT_PATH
-    // If this is sending data to a different path, we should also log it to the file
-    if (!ROOT_PATH.isEmpty() && !entryName.startsWith(ROOT_PATH)) {
-      if (!(level == LogLevel.DEFAULT && Monologue.isFileOnly())) {
-        Monologue.dataLogger.put(entryName, value, level);
-      }
+  public static float log(String entryName, float value, LogSink sink) {
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
+      String entryNameFinal = entryName;
+      Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, value, sink));
+      return value;
     }
+    MonologueEntryLayer.MonologueEntry.create(entryName, float.class, sink).log(value);
+
+    return value;
   }
 
   /**
@@ -149,28 +137,25 @@ class GlobalLogged {
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
     */
-  public static void log(String entryName, double value) {
-    log(entryName, value, LogLevel.DEFAULT);
+  public static double log(String entryName, double value) {
+    return log(entryName, value, LogSink.NT);
   }
   /**
     * Logs a double using the Monologue machinery.
     * 
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
-    * @param level The log level to use.
+    * @param sink The log sink to use.
     */
-  public static void log(String entryName, double value, LogLevel level) {
-    entryName = NetworkTable.normalizeKey(entryName, true);
-    if (!Monologue.isMonologueReady("GlobalLogged: " + entryName) || Monologue.isMonologueDisabled()) return;
-    Monologue.ntLogger.put(entryName, value, level);
-
-    // The Monologue made NT datalog subscriber only subs to stuff under ROOT_PATH
-    // If this is sending data to a different path, we should also log it to the file
-    if (!ROOT_PATH.isEmpty() && !entryName.startsWith(ROOT_PATH)) {
-      if (!(level == LogLevel.DEFAULT && Monologue.isFileOnly())) {
-        Monologue.dataLogger.put(entryName, value, level);
-      }
+  public static double log(String entryName, double value, LogSink sink) {
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
+      String entryNameFinal = entryName;
+      Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, value, sink));
+      return value;
     }
+    MonologueEntryLayer.MonologueEntry.create(entryName, double.class, sink).log(value);
+
+    return value;
   }
 
   /**
@@ -179,28 +164,25 @@ class GlobalLogged {
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
     */
-  public static void log(String entryName, String value) {
-    log(entryName, value, LogLevel.DEFAULT);
+  public static String log(String entryName, String value) {
+    return log(entryName, value, LogSink.NT);
   }
   /**
     * Logs a String using the Monologue machinery.
     * 
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
-    * @param level The log level to use.
+    * @param sink The log sink to use.
     */
-  public static void log(String entryName, String value, LogLevel level) {
-    entryName = NetworkTable.normalizeKey(entryName, true);
-    if (!Monologue.isMonologueReady("GlobalLogged: " + entryName) || Monologue.isMonologueDisabled()) return;
-    Monologue.ntLogger.put(entryName, value, level);
-
-    // The Monologue made NT datalog subscriber only subs to stuff under ROOT_PATH
-    // If this is sending data to a different path, we should also log it to the file
-    if (!ROOT_PATH.isEmpty() && !entryName.startsWith(ROOT_PATH)) {
-      if (!(level == LogLevel.DEFAULT && Monologue.isFileOnly())) {
-        Monologue.dataLogger.put(entryName, value, level);
-      }
+  public static String log(String entryName, String value, LogSink sink) {
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
+      String entryNameFinal = entryName;
+      Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, value, sink));
+      return value;
     }
+    MonologueEntryLayer.MonologueEntry.create(entryName, String.class, sink).log(value);
+
+    return value;
   }
 
   /**
@@ -209,28 +191,25 @@ class GlobalLogged {
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
     */
-  public static void log(String entryName, byte[] value) {
-    log(entryName, value, LogLevel.DEFAULT);
+  public static byte[] log(String entryName, byte[] value) {
+    return log(entryName, value, LogSink.NT);
   }
   /**
     * Logs a byte[] using the Monologue machinery.
     * 
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
-    * @param level The log level to use.
+    * @param sink The log sink to use.
     */
-  public static void log(String entryName, byte[] value, LogLevel level) {
-    entryName = NetworkTable.normalizeKey(entryName, true);
-    if (!Monologue.isMonologueReady("GlobalLogged: " + entryName) || Monologue.isMonologueDisabled()) return;
-    Monologue.ntLogger.put(entryName, value, level);
-
-    // The Monologue made NT datalog subscriber only subs to stuff under ROOT_PATH
-    // If this is sending data to a different path, we should also log it to the file
-    if (!ROOT_PATH.isEmpty() && !entryName.startsWith(ROOT_PATH)) {
-      if (!(level == LogLevel.DEFAULT && Monologue.isFileOnly())) {
-        Monologue.dataLogger.put(entryName, value, level);
-      }
+  public static byte[] log(String entryName, byte[] value, LogSink sink) {
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
+      String entryNameFinal = entryName;
+      Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, value, sink));
+      return value;
     }
+    MonologueEntryLayer.MonologueEntry.create(entryName, byte[].class, sink).log(value);
+
+    return value;
   }
 
   /**
@@ -239,28 +218,25 @@ class GlobalLogged {
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
     */
-  public static void log(String entryName, boolean[] value) {
-    log(entryName, value, LogLevel.DEFAULT);
+  public static boolean[] log(String entryName, boolean[] value) {
+    return log(entryName, value, LogSink.NT);
   }
   /**
     * Logs a boolean[] using the Monologue machinery.
     * 
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
-    * @param level The log level to use.
+    * @param sink The log sink to use.
     */
-  public static void log(String entryName, boolean[] value, LogLevel level) {
-    entryName = NetworkTable.normalizeKey(entryName, true);
-    if (!Monologue.isMonologueReady("GlobalLogged: " + entryName) || Monologue.isMonologueDisabled()) return;
-    Monologue.ntLogger.put(entryName, value, level);
-
-    // The Monologue made NT datalog subscriber only subs to stuff under ROOT_PATH
-    // If this is sending data to a different path, we should also log it to the file
-    if (!ROOT_PATH.isEmpty() && !entryName.startsWith(ROOT_PATH)) {
-      if (!(level == LogLevel.DEFAULT && Monologue.isFileOnly())) {
-        Monologue.dataLogger.put(entryName, value, level);
-      }
+  public static boolean[] log(String entryName, boolean[] value, LogSink sink) {
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
+      String entryNameFinal = entryName;
+      Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, value, sink));
+      return value;
     }
+    MonologueEntryLayer.MonologueEntry.create(entryName, boolean[].class, sink).log(value);
+
+    return value;
   }
 
   /**
@@ -269,28 +245,25 @@ class GlobalLogged {
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
     */
-  public static void log(String entryName, int[] value) {
-    log(entryName, value, LogLevel.DEFAULT);
+  public static int[] log(String entryName, int[] value) {
+    return log(entryName, value, LogSink.NT);
   }
   /**
     * Logs a int[] using the Monologue machinery.
     * 
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
-    * @param level The log level to use.
+    * @param sink The log sink to use.
     */
-  public static void log(String entryName, int[] value, LogLevel level) {
-    entryName = NetworkTable.normalizeKey(entryName, true);
-    if (!Monologue.isMonologueReady("GlobalLogged: " + entryName) || Monologue.isMonologueDisabled()) return;
-    Monologue.ntLogger.put(entryName, value, level);
-
-    // The Monologue made NT datalog subscriber only subs to stuff under ROOT_PATH
-    // If this is sending data to a different path, we should also log it to the file
-    if (!ROOT_PATH.isEmpty() && !entryName.startsWith(ROOT_PATH)) {
-      if (!(level == LogLevel.DEFAULT && Monologue.isFileOnly())) {
-        Monologue.dataLogger.put(entryName, value, level);
-      }
+  public static int[] log(String entryName, int[] value, LogSink sink) {
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
+      String entryNameFinal = entryName;
+      Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, value, sink));
+      return value;
     }
+    MonologueEntryLayer.MonologueEntry.create(entryName, int[].class, sink).log(value);
+
+    return value;
   }
 
   /**
@@ -299,28 +272,25 @@ class GlobalLogged {
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
     */
-  public static void log(String entryName, long[] value) {
-    log(entryName, value, LogLevel.DEFAULT);
+  public static long[] log(String entryName, long[] value) {
+    return log(entryName, value, LogSink.NT);
   }
   /**
     * Logs a long[] using the Monologue machinery.
     * 
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
-    * @param level The log level to use.
+    * @param sink The log sink to use.
     */
-  public static void log(String entryName, long[] value, LogLevel level) {
-    entryName = NetworkTable.normalizeKey(entryName, true);
-    if (!Monologue.isMonologueReady("GlobalLogged: " + entryName) || Monologue.isMonologueDisabled()) return;
-    Monologue.ntLogger.put(entryName, value, level);
-
-    // The Monologue made NT datalog subscriber only subs to stuff under ROOT_PATH
-    // If this is sending data to a different path, we should also log it to the file
-    if (!ROOT_PATH.isEmpty() && !entryName.startsWith(ROOT_PATH)) {
-      if (!(level == LogLevel.DEFAULT && Monologue.isFileOnly())) {
-        Monologue.dataLogger.put(entryName, value, level);
-      }
+  public static long[] log(String entryName, long[] value, LogSink sink) {
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
+      String entryNameFinal = entryName;
+      Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, value, sink));
+      return value;
     }
+    MonologueEntryLayer.MonologueEntry.create(entryName, long[].class, sink).log(value);
+
+    return value;
   }
 
   /**
@@ -329,28 +299,25 @@ class GlobalLogged {
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
     */
-  public static void log(String entryName, float[] value) {
-    log(entryName, value, LogLevel.DEFAULT);
+  public static float[] log(String entryName, float[] value) {
+    return log(entryName, value, LogSink.NT);
   }
   /**
     * Logs a float[] using the Monologue machinery.
     * 
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
-    * @param level The log level to use.
+    * @param sink The log sink to use.
     */
-  public static void log(String entryName, float[] value, LogLevel level) {
-    entryName = NetworkTable.normalizeKey(entryName, true);
-    if (!Monologue.isMonologueReady("GlobalLogged: " + entryName) || Monologue.isMonologueDisabled()) return;
-    Monologue.ntLogger.put(entryName, value, level);
-
-    // The Monologue made NT datalog subscriber only subs to stuff under ROOT_PATH
-    // If this is sending data to a different path, we should also log it to the file
-    if (!ROOT_PATH.isEmpty() && !entryName.startsWith(ROOT_PATH)) {
-      if (!(level == LogLevel.DEFAULT && Monologue.isFileOnly())) {
-        Monologue.dataLogger.put(entryName, value, level);
-      }
+  public static float[] log(String entryName, float[] value, LogSink sink) {
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
+      String entryNameFinal = entryName;
+      Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, value, sink));
+      return value;
     }
+    MonologueEntryLayer.MonologueEntry.create(entryName, float[].class, sink).log(value);
+
+    return value;
   }
 
   /**
@@ -359,28 +326,25 @@ class GlobalLogged {
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
     */
-  public static void log(String entryName, double[] value) {
-    log(entryName, value, LogLevel.DEFAULT);
+  public static double[] log(String entryName, double[] value) {
+    return log(entryName, value, LogSink.NT);
   }
   /**
     * Logs a double[] using the Monologue machinery.
     * 
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
-    * @param level The log level to use.
+    * @param sink The log sink to use.
     */
-  public static void log(String entryName, double[] value, LogLevel level) {
-    entryName = NetworkTable.normalizeKey(entryName, true);
-    if (!Monologue.isMonologueReady("GlobalLogged: " + entryName) || Monologue.isMonologueDisabled()) return;
-    Monologue.ntLogger.put(entryName, value, level);
-
-    // The Monologue made NT datalog subscriber only subs to stuff under ROOT_PATH
-    // If this is sending data to a different path, we should also log it to the file
-    if (!ROOT_PATH.isEmpty() && !entryName.startsWith(ROOT_PATH)) {
-      if (!(level == LogLevel.DEFAULT && Monologue.isFileOnly())) {
-        Monologue.dataLogger.put(entryName, value, level);
-      }
+  public static double[] log(String entryName, double[] value, LogSink sink) {
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
+      String entryNameFinal = entryName;
+      Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, value, sink));
+      return value;
     }
+    MonologueEntryLayer.MonologueEntry.create(entryName, double[].class, sink).log(value);
+
+    return value;
   }
 
   /**
@@ -389,28 +353,25 @@ class GlobalLogged {
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
     */
-  public static void log(String entryName, String[] value) {
-    log(entryName, value, LogLevel.DEFAULT);
+  public static String[] log(String entryName, String[] value) {
+    return log(entryName, value, LogSink.NT);
   }
   /**
     * Logs a String[] using the Monologue machinery.
     * 
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
-    * @param level The log level to use.
+    * @param sink The log sink to use.
     */
-  public static void log(String entryName, String[] value, LogLevel level) {
-    entryName = NetworkTable.normalizeKey(entryName, true);
-    if (!Monologue.isMonologueReady("GlobalLogged: " + entryName) || Monologue.isMonologueDisabled()) return;
-    Monologue.ntLogger.put(entryName, value, level);
-
-    // The Monologue made NT datalog subscriber only subs to stuff under ROOT_PATH
-    // If this is sending data to a different path, we should also log it to the file
-    if (!ROOT_PATH.isEmpty() && !entryName.startsWith(ROOT_PATH)) {
-      if (!(level == LogLevel.DEFAULT && Monologue.isFileOnly())) {
-        Monologue.dataLogger.put(entryName, value, level);
-      }
+  public static String[] log(String entryName, String[] value, LogSink sink) {
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
+      String entryNameFinal = entryName;
+      Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, value, sink));
+      return value;
     }
+    MonologueEntryLayer.MonologueEntry.create(entryName, String[].class, sink).log(value);
+
+    return value;
   }
 
 
@@ -420,28 +381,28 @@ class GlobalLogged {
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
     */
-  public static <R extends StructSerializable> void log(String entryName, R value) {
-    log(entryName, value, LogLevel.DEFAULT);
+  public static <R extends StructSerializable> R log(String entryName, R value) {
+    return log(entryName, value, LogSink.NT);
   }
   /**
     * Logs a Serializable Struct using the Monologue machinery.
     * 
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
-    * @param level The log level to use.
+    * @param sink The log sink to use.
     */
-  public static <R extends StructSerializable> void log(String entryName, R value, LogLevel level) {
-    entryName = NetworkTable.normalizeKey(entryName, true);
-    if (!Monologue.isMonologueReady("GlobalLogged: " + entryName) || Monologue.isMonologueDisabled()) return;
-    Monologue.ntLogger.put(entryName, value, level);
-
-    // The Monologue made NT datalog subscriber only subs to stuff under ROOT_PATH
-    // If this is sending data to a different path, we should also log it to the file
-    if (!ROOT_PATH.isEmpty() && !entryName.startsWith(ROOT_PATH)) {
-      if (!(level == LogLevel.DEFAULT && Monologue.isFileOnly())) {
-        Monologue.dataLogger.put(entryName, value, level);
-      }
+  @SuppressWarnings("unchecked")
+  public static <R extends StructSerializable> R log(String entryName, R value, LogSink sink) {
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
+      String entryNameFinal = entryName;
+      Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, value, sink));
+      return value;
     }
+    Class<R> clazz = (Class<R>) value.getClass();
+    Struct<R> struct = ProceduralStructGenerator.extractClassStruct(clazz).get();
+    MonologueEntryLayer.MonologueEntry.create(entryName, struct, clazz, sink).log(value);
+
+    return value;
   }
 
   /**
@@ -450,28 +411,28 @@ class GlobalLogged {
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
     */
-  public static <R extends StructSerializable> void log(String entryName, R[] value) {
-    log(entryName, value, LogLevel.DEFAULT);
+  public static <R extends StructSerializable> R[] log(String entryName, R[] value) {
+    return log(entryName, value, LogSink.NT);
   }
   /**
     * Logs an array of Serializable Structs using the Monologue machinery.
     * 
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
-    * @param level The log level to use.
+    * @param sink The log sink to use.
     */
-  public static <R extends StructSerializable> void log(String entryName, R[] value, LogLevel level) {
-    entryName = NetworkTable.normalizeKey(entryName, true);
-    if (!Monologue.isMonologueReady("GlobalLogged: " + entryName) || Monologue.isMonologueDisabled()) return;
-    Monologue.ntLogger.put(entryName, value, level);
-
-    // The Monologue made NT datalog subscriber only subs to stuff under ROOT_PATH
-    // If this is sending data to a different path, we should also log it to the file
-    if (!ROOT_PATH.isEmpty() && !entryName.startsWith(ROOT_PATH)) {
-      if (!(level == LogLevel.DEFAULT && Monologue.isFileOnly())) {
-        Monologue.dataLogger.put(entryName, value, level);
-      }
+  @SuppressWarnings("unchecked")
+  public static <R extends StructSerializable> R[] log(String entryName, R[] value, LogSink sink) {
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
+      String entryNameFinal = entryName;
+      Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, value, sink));
+      return value;
     }
+    Class<R[]> clazz = (Class<R[]>) value.getClass();
+    Struct<R> struct = (Struct<R>) ProceduralStructGenerator.extractClassStructDynamic(clazz.getComponentType()).get();
+    MonologueEntryLayer.MonologueEntry.createStructArray(entryName, struct, clazz, sink).log(value);
+
+    return value;
   }
 
   /**
@@ -481,8 +442,8 @@ class GlobalLogged {
     * @param struct The struct type to log.
     * @param value The value to log.
     */
-  public static <R> void log(String entryName, Struct<R> struct, R value) {
-    log(entryName, struct, value, LogLevel.DEFAULT);
+  public static <R> R log(String entryName, Struct<R> struct, R value) {
+    return log(entryName, struct, value, LogSink.NT);
   }
   /**
     * Logs a Serializable Struct using the Monologue machinery.
@@ -490,20 +451,19 @@ class GlobalLogged {
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param struct The struct type to log.
     * @param value The value to log.
-    * @param level The log level to use.
+    * @param sink The log sink to use.
     */
-  public static <R> void log(String entryName, Struct<R> struct, R value, LogLevel level) {
-    entryName = NetworkTable.normalizeKey(entryName, true);
-    if (!Monologue.isMonologueReady("GlobalLogged: " + entryName) || Monologue.isMonologueDisabled()) return;
-    Monologue.ntLogger.putStruct(entryName, struct, value, level);
-
-    // The Monologue made NT datalog subscriber only subs to stuff under ROOT_PATH
-    // If this is sending data to a different path, we should also log it to the file
-    if (!ROOT_PATH.isEmpty() && !entryName.startsWith(ROOT_PATH)) {
-      if (!(level == LogLevel.DEFAULT && Monologue.isFileOnly())) {
-        Monologue.dataLogger.putStruct(entryName, struct, value, level);
-      }
+  @SuppressWarnings("unchecked")
+  public static <R> R log(String entryName, Struct<R> struct, R value, LogSink sink) {
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
+      String entryNameFinal = entryName;
+      Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, struct, value, sink));
+      return value;
     }
+    Class<R> clazz = (Class<R>) value.getClass();
+    MonologueEntryLayer.MonologueEntry.create(entryName, struct, clazz, sink).log(value);
+
+    return value;
   }
 
   /**
@@ -513,8 +473,8 @@ class GlobalLogged {
     * @param struct The struct type to log.
     * @param value The value to log.
     */
-  public static <R> void log(String entryName, Struct<R> struct, R[] value) {
-    log(entryName, struct, value, LogLevel.DEFAULT);
+  public static <R> R[] log(String entryName, Struct<R> struct, R[] value) {
+    return log(entryName, struct, value, LogSink.NT);
   }
   /**
     * Logs an array of Serializable Structs using the Monologue machinery.
@@ -522,20 +482,23 @@ class GlobalLogged {
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param struct The struct type to log.
     * @param value The value to log.
-    * @param level The log level to use.
+    * @param sink The log sink to use.
     */
-  public static <R> void log(String entryName, Struct<R> struct, R[] value, LogLevel level) {
-    entryName = NetworkTable.normalizeKey(entryName, true);
-    if (!Monologue.isMonologueReady("GlobalLogged: " + entryName) || Monologue.isMonologueDisabled()) return;
-    Monologue.ntLogger.putStructArray(entryName, struct, value, level);
-
-    // The Monologue made NT datalog subscriber only subs to stuff under ROOT_PATH
-    // If this is sending data to a different path, we should also log it to the file
-    if (!ROOT_PATH.isEmpty() && !entryName.startsWith(ROOT_PATH)) {
-      if (!(level == LogLevel.DEFAULT && Monologue.isFileOnly())) {
-        Monologue.dataLogger.putStructArray(entryName, struct, value, level);
-      }
+  @SuppressWarnings("unchecked")
+  public static <R> R[] log(String entryName, Struct<R> struct, R[] value, LogSink sink) {
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
+      String entryNameFinal = entryName;
+      Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, struct, value, sink));
+      return value;
     }
+    Class<R[]> clazz = (Class<R[]>) value.getClass();
+    MonologueEntryLayer.MonologueEntry.createStructArray(entryName, struct, clazz, sink).log(value);
+
+    return value;
+  }
+
+  static <R> R[] logStructArray(String entryName, Struct<R> struct, R[] value, LogSink sink) {
+    return log(entryName, struct, value, sink);
   }
 
   /**
@@ -544,20 +507,34 @@ class GlobalLogged {
     * @param entryName The name of the entry to log, this is an absolute path.
     * @param value The value to log.
     */
-  public static void publishSendable(String entryName, Sendable value) {
+  public static void publishSendable(String entryName, Sendable value, LogSink sink) {
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) return;
     entryName = NetworkTable.normalizeKey(entryName, true);
-    if (!Monologue.isMonologueReady("GlobalLogged: " + entryName) || Monologue.isMonologueDisabled()) return;
-    Monologue.ntLogger.addSendable(entryName, value);
-
-    // The Monologue made NT datalog subscriber only subs to stuff under ROOT_PATH
-    // If this is sending data to a different path, we should also log it to the file
-    if (!ROOT_PATH.isEmpty() && !entryName.startsWith(ROOT_PATH)) {
-      NetworkTablesJNI.startEntryDataLog(
-        NetworkTableInstance.getDefault().getHandle(),
-        DataLogManager.getLog(),
-        entryName,
-        Monologue.dataLogger.prefix + entryName
-      );
-    }
+    var builder = new MonologueSendableLayer.Builder(entryName, sink);
+    value.initSendable(builder);
   }
+
+    /**
+      * Logs a Sendable using the Monologue machinery.
+      * 
+      * @param entryName The name of the entry to log, this is an absolute path.
+      * @param value The value to log.
+      */
+    public static void publishSendable(String entryName, Field2d value, LogSink sink) {
+      if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) return;
+      entryName = NetworkTable.normalizeKey(entryName, true);
+      NtSendableCompat.addField2d(entryName, value, sink);
+    }
+
+    /**
+      * Logs a Sendable using the Monologue machinery.
+      * 
+      * @param entryName The name of the entry to log, this is an absolute path.
+      * @param value The value to log.
+      */
+    public static void publishSendable(String entryName, Mechanism2d value, LogSink sink) {
+      if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) return;
+      entryName = NetworkTable.normalizeKey(entryName, true);
+      NtSendableCompat.addMechanism2d(entryName, value, sink);
+    }
 }

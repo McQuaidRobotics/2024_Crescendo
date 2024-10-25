@@ -1,8 +1,4 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
-package com.igknighters.util.logging;
+package monologue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -10,6 +6,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.RecordComponent;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -45,7 +42,8 @@ public final class ProceduralStructGenerator {
     }
   }
 
-  private record PrimType<T>(String name, int size, Unpacker<T> unpacker, Packer<T> packer) {}
+  private record PrimType<T>(String name, int size, Unpacker<T> unpacker, Packer<T> packer) {
+  }
 
   /** A map of primitive types to their schema types. */
   private static final HashMap<Class<?>, PrimType<?>> primitiveTypeMap = new HashMap<>();
@@ -192,28 +190,58 @@ public final class ProceduralStructGenerator {
           return false;
         }
       }
-    } else if (clazz.isEnum()) {
+    } else {
       for (Field field : clazz.getDeclaredFields()) {
         if (field.isEnumConstant() || Modifier.isStatic(field.getModifiers())) {
           continue;
         }
-        if (!primitiveTypeMap.containsKey(field.getType())
-            && !customStructTypeMap.containsKey(field.getType())) {
+        if (Collection.class.isAssignableFrom(field.getType())
+            || field.getType().isArray()
+            || field.getType() == String.class
+            || field.getType() == Optional.class) {
           return false;
         }
-      }
-    } else {
-      for (Field field : clazz.getDeclaredFields()) {
-        if (Modifier.isStatic(field.getModifiers())) {
-          continue;
-        }
         if (!primitiveTypeMap.containsKey(field.getType())
-            && !customStructTypeMap.containsKey(field.getType())) {
+            && !isFixedSize(clazz)) {
           return false;
         }
       }
     }
     return true;
+  }
+
+  /**
+   * Introspects a class to determine if it's interiorly mutable.
+   * 
+   * <p>Interior mutability means that the class has fields that are mutable.
+   * 
+   * @param clazz The class to introspect.
+   * @return Whether the class is interiorly mutable.
+   */
+  public static boolean isInteriorlyMutable(Class<?> clazz) {
+    if (clazz.isArray()) {
+      return true;
+    } else if (clazz.isRecord()) {
+      for (RecordComponent component : clazz.getRecordComponents()) {
+        if (isInteriorlyMutable(component.getType())) {
+          return true;
+        }
+      }
+    } else {
+      for (Field field : clazz.getDeclaredFields()) {
+        if (field.isEnumConstant() || Modifier.isStatic(field.getModifiers())) {
+          continue;
+        }
+        if (!Modifier.isFinal(field.getModifiers())) {
+          return true;
+        }
+        if (!primitiveTypeMap.containsKey(field.getType())
+            && isInteriorlyMutable(field.getType())) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   /** A utility for building schema syntax in a procedural manner. */
@@ -264,7 +292,8 @@ public final class ProceduralStructGenerator {
     }
 
     /** Creates a new schema builder. */
-    public SchemaBuilder() {}
+    public SchemaBuilder() {
+    }
 
     private final StringBuilder m_builder = new StringBuilder();
 
@@ -324,7 +353,8 @@ public final class ProceduralStructGenerator {
       }
 
       @Override
-      public void pack(ByteBuffer buffer, T value) {}
+      public void pack(ByteBuffer buffer, T value) {
+      }
 
       @Override
       public T unpack(ByteBuffer buffer) {
@@ -342,7 +372,7 @@ public final class ProceduralStructGenerator {
    * @param recordClass The class of the record.
    * @return The generated struct.
    */
-  @SuppressWarnings({"unchecked", "PMD.AvoidAccessibilityAlteration"})
+  @SuppressWarnings({ "unchecked", "PMD.AvoidAccessibilityAlteration" })
   public static <R extends Record> Struct<R> genRecord(final Class<R> recordClass) {
     final RecordComponent[] components = recordClass.getRecordComponents();
     final SchemaBuilder schemaBuilder = new SchemaBuilder();
@@ -499,13 +529,12 @@ public final class ProceduralStructGenerator {
    * @param enumClass The class of the enum.
    * @return The generated struct.
    */
-  @SuppressWarnings({"unchecked", "PMD.AvoidAccessibilityAlteration"})
+  @SuppressWarnings({ "unchecked", "PMD.AvoidAccessibilityAlteration" })
   public static <E extends Enum<E>> Struct<E> genEnum(Class<E> enumClass) {
     final E[] enumVariants = enumClass.getEnumConstants();
     final Field[] allEnumFields = enumClass.getDeclaredFields();
     final SchemaBuilder schemaBuilder = new SchemaBuilder();
-    final SchemaBuilder.EnumFieldBuilder enumFieldBuilder =
-        new SchemaBuilder.EnumFieldBuilder("variant");
+    final SchemaBuilder.EnumFieldBuilder enumFieldBuilder = new SchemaBuilder.EnumFieldBuilder("variant");
     final HashMap<Integer, E> enumMap = new HashMap<>();
     final ArrayList<Packer<?>> packers = new ArrayList<>();
 
@@ -531,10 +560,9 @@ public final class ProceduralStructGenerator {
     schemaBuilder.addEnumField(enumFieldBuilder);
     size += 1;
 
-    final List<Field> enumFields =
-        List.of(allEnumFields).stream()
-            .filter(f -> !f.isEnumConstant() && !Modifier.isStatic(f.getModifiers()))
-            .toList();
+    final List<Field> enumFields = List.of(allEnumFields).stream()
+        .filter(f -> !f.isEnumConstant() && !Modifier.isStatic(f.getModifiers()))
+        .toList();
 
     for (final Field field : enumFields) {
       final Class<?> type = field.getType();
@@ -658,7 +686,7 @@ public final class ProceduralStructGenerator {
    * @param enumClass The class of the object.
    * @return The generated struct.
    */
-  @SuppressWarnings({"unchecked", "PMD.AvoidAccessibilityAlteration"})
+  @SuppressWarnings({ "unchecked", "PMD.AvoidAccessibilityAlteration" })
   public static <E> Struct<E> genObject(Class<E> objectClass, Supplier<E> objectSupplier) {
     final SchemaBuilder schemaBuilder = new SchemaBuilder();
     final ArrayList<Struct<?>> nestedStructs = new ArrayList<>();

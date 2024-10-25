@@ -384,11 +384,7 @@ public class ConstantHelper {
     }
 
     public enum RobotConstID {
-
         CRASH,
-
-        BURN,
-
-        ;
+        BURN,;
     }
 }

@@ -6,15 +6,15 @@ import com.igknighters.subsystems.Component;
 import monologue.Annotations.Log;
 
 public abstract class Telescope extends Component {
-    @Log.NT protected double meters;
-    @Log.NT protected double targetMeters;
-    @Log.NT protected double metersPerSecond = 0.0;
-    @Log.NT protected double volts = 0.0;
-    @Log.NT protected double temp = 0.0;
-    @Log.NT protected double amps = 0.0;
-    @Log.NT protected boolean isLimitFwdSwitchHit = false;
-    @Log.NT protected boolean isLimitRevSwitchHit = false;
-    @Log.NT protected boolean isHomed = false;
+    @Log protected double meters;
+    @Log protected double targetMeters;
+    @Log protected double metersPerSecond = 0.0;
+    @Log protected double volts = 0.0;
+    @Log protected double temp = 0.0;
+    @Log protected double amps = 0.0;
+    @Log protected boolean isLimitFwdSwitchHit = false;
+    @Log protected boolean isLimitRevSwitchHit = false;
+    @Log protected boolean isHomed = false;
 
     protected Telescope(double startingMeters) {
         this.meters = startingMeters;
