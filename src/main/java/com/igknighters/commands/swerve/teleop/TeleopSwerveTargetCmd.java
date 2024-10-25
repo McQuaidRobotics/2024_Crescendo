@@ -4,7 +4,6 @@ import com.igknighters.subsystems.swerve.RotationalController;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.util.geom.AllianceFlip;
 import com.igknighters.util.geom.GeomUtil;
-import com.igknighters.util.plumbing.TunableValues;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -70,11 +69,9 @@ public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
 
         double distance = currentTranslation.getDistance(targetTranslation);
 
-        double noteVelo = TunableValues.getDouble("Note Average Velo", kUmbrella.NOTE_VELO).value();
-
         Translation2d adjustedTarget = new Translation2d(
-                targetTranslation.getX() - (avgChassisSpeeds.vxMetersPerSecond * (distance / noteVelo)),
-                targetTranslation.getY() - (avgChassisSpeeds.vyMetersPerSecond * (distance / noteVelo)));
+                targetTranslation.getX() - (avgChassisSpeeds.vxMetersPerSecond * (distance / kUmbrella.NOTE_VELO)),
+                targetTranslation.getY() - (avgChassisSpeeds.vyMetersPerSecond * (distance / kUmbrella.NOTE_VELO)));
 
         Translation2d lookaheadTranslation = currentTranslation.plus(new Translation2d(
                 avgChassisSpeeds.vxMetersPerSecond * kControls.SOTM_LOOKAHEAD_TIME,
