@@ -5,7 +5,6 @@ import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.util.geom.AllianceFlip;
 import com.igknighters.util.geom.GeomUtil;
 import com.igknighters.util.plumbing.TunableValues;
-import com.igknighters.util.plumbing.TunableValues.TunableDouble;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -15,12 +14,14 @@ import edu.wpi.first.math.util.Units;
 import java.util.function.Supplier;
 
 import com.igknighters.Localizer;
+import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.controllers.ControllerBase;
 
 public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
-    private static final TunableDouble lookaheadTime = TunableValues.getDouble("SwerveTargetCmd/AutoAimLookaheadTime", 0.2);
+
+    private static final Rotation2d offset = GeomUtil.ROTATION2D_PI.plus(Rotation2d.fromDegrees(1.0));
 
     private final Supplier<Translation2d> translationSupplier;
     private final Translation2d target;
@@ -75,10 +76,9 @@ public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
                 targetTranslation.getX() - (avgChassisSpeeds.vxMetersPerSecond * (distance / noteVelo)),
                 targetTranslation.getY() - (avgChassisSpeeds.vyMetersPerSecond * (distance / noteVelo)));
 
-        double lookaheadTimeValue = lookaheadTime.value();
-        Translation2d lookaheadTranslation = currentTranslation.minus(new Translation2d(
-                avgChassisSpeeds.vxMetersPerSecond * lookaheadTimeValue,
-                avgChassisSpeeds.vyMetersPerSecond * lookaheadTimeValue
+        Translation2d lookaheadTranslation = currentTranslation.plus(new Translation2d(
+                avgChassisSpeeds.vxMetersPerSecond * kControls.SOTM_LOOKAHEAD_TIME,
+                avgChassisSpeeds.vyMetersPerSecond * kControls.SOTM_LOOKAHEAD_TIME
             ));
 
         Rotation2d targetAngle;
@@ -87,12 +87,12 @@ public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
             targetAngle = GeomUtil.rotationRelativeToPose(
                 lookaheadTranslation,
                 adjustedTarget
-            ).plus(GeomUtil.ROTATION2D_PI);
+            ).plus(offset);
         } else {
             targetAngle = GeomUtil.rotationRelativeToPose(
                 currentTranslation,
                 targetTranslation
-            ).plus(GeomUtil.ROTATION2D_PI);
+            ).plus(offset);
         }
 
         desiredChassisSpeeds.omegaRadiansPerSecond = rotController.calculate(targetAngle.getRadians(), Units.degreesToRadians(0.3));

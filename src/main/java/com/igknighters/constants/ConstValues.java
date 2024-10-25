@@ -94,7 +94,7 @@ public final class ConstValues {
         public static final double SHOOTER_RPM = 7000.0;
         public static final double SHOOTER_PASS_RPM = 3900.0;
         public static final double AUTO_SHOOTER_RPM = 8000.0;
-        public static final double SHOOTER_IDLE_RPM = 2000.0;
+        public static final double SHOOTER_IDLE_RPM = 4000.0;
         public static final double INTAKE_PERCENT = 0.8;
 
         public static final double STATIONARY_AIM_AT_PIVOT_RADIANS = 40.0 * Conv.DEGREES_TO_RADIANS;
@@ -104,7 +104,9 @@ public final class ConstValues {
         public static final double MAX_HEIGHT_AIM_AT_PIVOT_RADIANS = 86.0 * Conv.DEGREES_TO_RADIANS;
         public static final double MAX_HEIGHT_AIM_AT_TELESCOPE_METERS = kTelescope.MAX_METERS;
 
-        public static final AimSolveStrategy DEFAULT_AIM_STRATEGY = AimSolveStrategy.STATIONARY_PIVOT;
+        public static final AimSolveStrategy DEFAULT_AIM_STRATEGY = AimSolveStrategy.STATIONARY_PIVOT_GRAVITY;
+
+        public static final double SOTM_LOOKAHEAD_TIME = 0.275;
 
         public static final Translation2d PASS_LAND_LOCATION = new Translation2d(
             1.0, 7.0
@@ -139,20 +141,20 @@ public final class ConstValues {
                                                     8.0 * Conv.INCHES_TO_METERS),
                                             new Rotation3d(
                                                     0.0,
-                                                    -19.8 * Conv.DEGREES_TO_RADIANS,
+                                                    -20.0 * Conv.DEGREES_TO_RADIANS,
                                                     Math.PI))),
-                            // Camera.createConfig(
-                            //         "photon_module_2",
-                            //         1,
-                            //         new Transform3d(
-                            //                 new Translation3d(
-                            //                         -11.3 * Conv.INCHES_TO_METERS,
-                            //                         8.6 * Conv.INCHES_TO_METERS,
-                            //                         8.0 * Conv.INCHES_TO_METERS),
-                            //                 new Rotation3d(
-                            //                         0.0,
-                            //                         -19.0 * Conv.DEGREES_TO_RADIANS,
-                            //                         Math.PI)))
+                            Camera.createConfig(
+                                    "photon_module_2",
+                                    1,
+                                    new Transform3d(
+                                            new Translation3d(
+                                                    -11.3 * Conv.INCHES_TO_METERS,
+                                                    8.6 * Conv.INCHES_TO_METERS,
+                                                    8.0 * Conv.INCHES_TO_METERS),
+                                            new Rotation3d(
+                                                    0.0,
+                                                    -20.0 * Conv.DEGREES_TO_RADIANS,
+                                                    Math.PI)))
                     }),
             BURN(new CameraConfig[] {});
 
@@ -210,7 +212,7 @@ public final class ConstValues {
         public static final double MOTOR_CLOSED_LOOP_OUTPUT_SCALAR = 0.95;
 
         /** User defined acceleration time in seconds */
-        public static final double ACCELERATION_TIME = 0.9;
+        public static final double ACCELERATION_TIME = 0.7;
 
         public static final double SLIP_CURRENT = 65.0;
 
@@ -249,10 +251,10 @@ public final class ConstValues {
         }
 
         public static final class kRotationController {
-            public static final double kP = 8.0;
+            public static final double kP = 9.0;
             public static final double kD = 0.2;
 
-            public static final double CONSTRAINT_SCALAR = 0.7;
+            public static final double CONSTRAINT_SCALAR = 1.0;
         }
 
         public static final boolean ORIENT_TELEOP_FOR_SIM_DEFAULT = false;
@@ -350,7 +352,7 @@ public final class ConstValues {
     }
 
     public static final class kUmbrella {
-        public static final double NOTE_VELO = 15.0;
+        public static final double NOTE_VELO = 23.5;
         public static final String CANBUS = "SuperStructureBus";
 
         public static final class kShooter {

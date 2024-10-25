@@ -57,7 +57,7 @@ public class HigherOrderCommands {
                     localizer,
                     FieldConstants.SPEAKER.toTranslation2d(),
                     true,
-                    0.4
+                    0.25
                 ),
                 StemCommands.aimAtSpeaker(stem, false, localizer::pose, swerve::getChassisSpeed)).withName("Aim");
     }
