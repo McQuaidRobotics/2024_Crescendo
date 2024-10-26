@@ -119,10 +119,10 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
         if (allSubsystems.hasAllSubsystems()) {
             final var routines = new AutoRoutines(allSubsystems, localizer);
             autoChooser.addAutoRoutine("5 Piece Amp Side", routines::fivePieceAmpSide);
-            // autoManager.addAutoRoutine("6 Piece Amp Side Far", routines::sixPieceFarAmpSide);
-            // autoManager.addAutoRoutine("4 Piece Src Side", routines::fourPieceSourceSide);
-            // autoManager.addAutoRoutine("3 Piece Sub Middle", routines::threePieceSubMiddle);
-            // autoManager.addAutoRoutine("rahhh", routines::driveForward);
+            autoChooser.addAutoRoutine("6 Piece Amp Side Far", routines::sixPieceFarAmpSide);
+            autoChooser.addAutoRoutine("4 Piece Src Side", routines::fourPieceSourceSide);
+            // autoChooser.addAutoRoutine("3 Piece Sub Middle", routines::threePieceSubMiddle);
+            // autoChooser.addAutoRoutine("rahhh", routines::driveForward);
         }
 
         testManager = new TestManager();

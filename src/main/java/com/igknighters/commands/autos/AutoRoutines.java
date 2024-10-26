@@ -64,7 +64,7 @@ public class AutoRoutines extends AutoCommands {
      * @param factory The factory to create trajectories with
      * @return The {@link AutoRoutine}
      */
-    public AutoRoutine fivePieceAmpSide(AutoFactory factory) {
+    public AutoRoutine fivePieceAmpSide(final AutoFactory factory) {
         if (disabled) return disabledAuto(factory);
 
         final AutoRoutine routine = factory.newRoutine("FivePieceAmpSide");
@@ -132,200 +132,148 @@ public class AutoRoutines extends AutoCommands {
         return routine;
     }
 
-    // /**
-    //  * 
-    //  * 
-    //  * @param factory The factory to create trajectories with
-    //  * @return The command that represents the auto routine
-    //  */
-    // public Command sixPieceFarAmpSide(AutoFactory factory) {
-    //     if (disabled) return disabledAuto();
+    /**
+     * 
+     * 
+     * @param factory The factory to create trajectories with
+     * @return The {@link AutoRoutine}
+     */
+    public AutoRoutine sixPieceFarAmpSide(AutoFactory factory) {
+        if (disabled) return disabledAuto(factory);
 
-    //     final AutoRoutine loop = factory.newRoutine("SixPieceFarAmpSide");
+        final AutoRoutine routine = factory.newRoutine("SixPieceFarAmpSide");
 
-    //     final AutoTrajectory ampToC1 = factory.trajectory(AMP.to(C1), loop);
-    //     final AutoTrajectory c1ToM1 = factory.trajectory(C1.to(M1), loop);
-    //     final AutoTrajectory m1ToM2 = factory.trajectory(M1.to(M2), loop);
-    //     final AutoTrajectory m2ToM3 = factory.trajectory(M2.to(M3), loop);
-    //     final AutoTrajectory m1ToS1 = factory.trajectory(M1.to(S1), loop);
-    //     final AutoTrajectory m2ToS1 = factory.trajectory(M2.to(S1), loop);
-    //     final AutoTrajectory m3ToS2 = factory.trajectory(M3.to(S2), loop);
-    //     final AutoTrajectory s1ToC2 = factory.trajectory(S1.to(C2), loop);
-    //     final AutoTrajectory s2ToC2 = factory.trajectory(S2.to(C2), loop);
-    //     final AutoTrajectory s1ToM2 = factory.trajectory(S1.to(M2), loop);
-    //     final AutoTrajectory s1ToM3 = factory.trajectory(S1.to(M3), loop);
-    //     final AutoTrajectory c2ToSUB = factory.trajectory(C2.to(SUB), loop);
-
-
-    //     // entry point for the auto
-    //     loop.enabled().onTrue(
-    //         resetOdometry(ampToC1).andThen(
-    //             autoShootBegining(),
-    //             Commands.race(
-    //                 intakeGamepieceNoStow(),
-    //                 Commands.waitSeconds(0.2)
-    //                     .andThen(ampToC1.cmd())
-    //             )
-    //         ).withName("SixPieceAmpSideEntry")
-    //     );
-
-    //     // picking up first note and shooting if we have a note
-    //     ampToC1.done().onTrueWith(
-    //         yeGp(loop),
-    //         autoShoot(),
-    //         c1ToM1.cmd()
-    //     );
-
-    //     // picking up the second note and branching based on whether we're holding a gamepiece
-    //     c1ToM1.atTime(0.35).onTrue(intakeGamepieceNoStow());
-    //     c1ToM1.done().onTrueWith(
-    //         yeGp(loop),
-    //         m1ToS1.cmd(),
-    //         m1ToM2.cmd()
-    //     );
-
-    //     // the branch where we're holding a gamepiece
-    //     m1ToS1.active().onTrue(aimStem(m1ToS1));
-    //     m1ToS1.done().onTrueWith(
-    //         yeGp(loop),
-    //         autoShoot(),
-    //         s1ToM2.cmd()
-    //     );
-
-    //     // the branch where we're not holding a gamepiece
-    //     m1ToM2.active().onTrue(intakeGamepieceNoStow());
-    //     m1ToM2.done().onTrueWith(
-    //         yeGp(loop),
-    //         m2ToS1.cmd(),
-    //         m2ToM3.cmd()
-    //     );
-
-    //     // the branch where we're holding a gamepiece
-    //     m2ToS1.active().onTrue(aimStem(m2ToS1));
-    //     m2ToS1.done().onTrueWith(
-    //         yeGp(loop),
-    //         autoShoot(),
-    //         s1ToM3.cmd()
-    //     );
-
-    //     // the branch where we're not holding a gamepiece
-    //     m2ToM3.active().onTrue(intakeGamepieceNoStow());
-    //     m2ToM3.done().onTrueWith(
-    //         yeGp(loop),
-    //         m3ToS2.cmd(),
-    //         stow()
-    //     );
-
-    //     m3ToS2.active().onTrue(stow());
-    //     m3ToS2.done().onTrueWith(
-    //         yeGp(loop),
-    //         autoShoot(),
-    //         s2ToC2.cmd()
-    //     );
-
-    //     s1ToM2.active().onTrue(intakeGamepieceNoStow());
-    //     s1ToM2.done().onTrueWith(
-    //         yeGp(loop),
-    //         m2ToS1.cmd(),
-    //         m2ToM3.cmd()
-    //     );
-
-    //     s1ToM3.active().onTrue(intakeGamepieceNoStow());
-    //     s1ToM3.done().onTrueWith(
-    //         yeGp(loop),
-    //         m3ToS2.cmd(),
-    //         stow()
-    //     );
-
-    //     // picking up the third note, only shooting if we have a note
-    //     s1ToC2.active().or(s2ToC2.active()).onTrue(intakeGamepieceNoStow());
-    //     s1ToC2.done().or(s2ToC2.done()).and(yeGp(loop)).onTrue(
-    //         c2ToSUB.cmd()
-    //     );
-
-    //     // shoot from the subwoofer
-    //     c2ToSUB.active().onTrue(aimSub());
-    //     c2ToSUB.done().onTrue(aimSub().andThen(feedShooter()).withName("AimSubThenFeed"));
-
-    //     return loop.cmd().withName("SixPieceFarAmpSide");
-    // }
-
-    // /**
-    //  * 
-    //  * 
-    //  * 
-    //  * @param factory The factory to create trajectories with
-    //  * @return The command that represents the auto routine
-    //  */
-    // public Command fourPieceSourceSide(AutoFactory factory) {
-    //     if (disabled) return disabledAuto();
-
-    //     final AutoRoutine loop = factory.newRoutine("FourPieceSourceSide");
-
-    //     final AutoTrajectory srcToM5 = factory.trajectory(SRC.to(M5), loop);
-    //     final AutoTrajectory m5ToM4 = factory.trajectory(M5.to(M4), loop);
-    //     final AutoTrajectory m5ToS3 = factory.trajectory(M5.to(S3), loop);
-    //     final AutoTrajectory m4ToS3 = factory.trajectory(M4.to(S3), loop);
-    //     final AutoTrajectory s3ToM4 = factory.trajectory(S3.to(M4), loop);
-    //     final AutoTrajectory s3ToM3 = factory.trajectory(S3.to(M3), loop);
-    //     final AutoTrajectory m3ToS2 = factory.trajectory(M3.to(S2), loop);
+        final AutoTrajectory ampToC1 = factory.trajectory(AMP.to(C1), routine);
+        final AutoTrajectory c1ToM1 = factory.trajectory(C1.to(M1), routine);
+        final AutoTrajectory m1ToM2 = factory.trajectory(M1.to(M2), routine);
+        final AutoTrajectory m2ToM3 = factory.trajectory(M2.to(M3), routine);
+        final AutoTrajectory m1ToS1 = factory.trajectory(M1.to(S1), routine);
+        final AutoTrajectory m2ToS1 = factory.trajectory(M2.to(S1), routine);
+        final AutoTrajectory m3ToS2 = factory.trajectory(M3.to(S2), routine);
+        final AutoTrajectory s1ToC2 = factory.trajectory(S1.to(C2), routine);
+        final AutoTrajectory s2ToC2 = factory.trajectory(S2.to(C2), routine);
+        final AutoTrajectory s1ToM2 = factory.trajectory(S1.to(M2), routine);
+        final AutoTrajectory s1ToM3 = factory.trajectory(S1.to(M3), routine);
+        final AutoTrajectory c2ToSUB = factory.trajectory(C2.to(SUB), routine);
 
 
-    //     // entry point for the auto
-    //     loop.enabled().onTrue(
-    //         resetOdometry(srcToM5, loop).andThen(
-    //             autoShootBegining(),
-    //             Commands.parallel(
-    //                 intakeGamepieceNoStow(),
-    //                 srcToM5.cmd()
-    //             )
-    //         ).withName("FourPieceSourceSideEntry")
-    //     );
+        // entry point for the auto
+        routine.enabled().onTrue(
+            resetOdometry(ampToC1, routine).andThen(
+                autoShootBegining(),
+                Commands.race(
+                    intakeGamepieceNoStow(),
+                    Commands.waitSeconds(0.2)
+                        .andThen(ampToC1.cmd())
+                )
+            ).withName("SixPieceAmpSideEntry")
+        );
 
-    //     // picking up first note and shooting if we have a note
-    //     srcToM5.done().onTrueWith(
-    //         yeGp(loop),
-    //         m5ToS3.cmd(),
-    //         m5ToM4.cmd()
-    //     );
+        // picking up first note and shooting if we have a note
+        ampToC1.done().onTrue(autoShootThenTraj(routine, c1ToM1));
 
-    //     m5ToS3.active().onTrue(aimStem(m5ToS3));
-    //     m5ToS3.done().onTrueWith(
-    //         yeGp(loop),
-    //         autoShoot(),
-    //         s3ToM4.cmd()
-    //     );
+        // picking up the second note and branching based on whether we're holding a gamepiece
+        c1ToM1.atTime(0.35).onTrue(intakeGamepieceNoStow());
+        c1ToM1.done().and(yeGp(routine)).onTrue(m1ToS1.cmd());
+        c1ToM1.done().and(noGp(routine)).onTrue(m1ToM2.cmd());
 
-    //     s3ToM4.active().onTrue(intakeGamepieceNoStow());
-    //     s3ToM4.done().onTrueWith(
-    //         yeGp(loop),
-    //         m4ToS3.cmd(),
-    //         stow()
-    //     );
+        // the branch where we're holding a gamepiece
+        m1ToS1.active().onTrue(aimStem(m1ToS1));
+        m1ToS1.done().onTrue(autoShootThenTraj(routine, s1ToM2));
 
-    //     m4ToS3.active().onTrue(aimStem(m4ToS3));
-    //     m4ToS3.done().onTrueWith(
-    //         yeGp(loop),
-    //         autoShoot(),
-    //         s3ToM3.cmd()
-    //     );
+        // the branch where we're not holding a gamepiece
+        m1ToM2.active().onTrue(intakeGamepieceNoStow());
+        m1ToM2.done().and(yeGp(routine)).onTrue(m2ToS1.cmd());
+        m1ToM2.done().and(noGp(routine)).onTrue(m2ToM3.cmd());
 
-    //     s3ToM3.active().onTrue(intakeGamepieceNoStow());
-    //     s3ToM3.done().onTrueWith(
-    //         yeGp(loop),
-    //         m3ToS2.cmd(),
-    //         stow()
-    //     );
+        // the branch where we're holding a gamepiece
+        m2ToS1.active().onTrue(aimStem(m2ToS1));
+        m2ToS1.done().onTrue(autoShootThenTraj(routine, s1ToM3));
 
-    //     m3ToS2.active().onTrue(aimStem(m3ToS2));
-    //     m3ToS2.done().onTrueWith(
-    //         yeGp(loop),
-    //         autoShoot(),
-    //         stow()
-    //     );
+        // the branch where we're not holding a gamepiece
+        m2ToM3.active().onTrue(intakeGamepieceNoStow());
+        m2ToM3.done().and(yeGp(routine)).onTrue(m3ToS2.cmd());
+        m2ToM3.done().and(noGp(routine)).onTrue(stow());
 
-    //     return loop.cmd().withName("FourPieceSourceSide");
-    // }
+        m3ToS2.active().onTrue(stow());
+        m3ToS2.done().onTrue(autoShootThenTraj(routine, s2ToC2));
+
+        s1ToM2.active().onTrue(intakeGamepieceNoStow());
+        s1ToM2.done().and(yeGp(routine)).onTrue(m2ToS1.cmd());
+        s1ToM2.done().and(noGp(routine)).onTrue(m2ToM3.cmd());
+
+        s1ToM3.active().onTrue(intakeGamepieceNoStow());
+        s1ToM3.done().and(yeGp(routine)).onTrue(m3ToS2.cmd());
+        s1ToM3.done().and(noGp(routine)).onTrue(stow());
+
+        // picking up the third note, only shooting if we have a note
+        s1ToC2.active().or(s2ToC2.active()).onTrue(intakeGamepieceNoStow());
+        s1ToC2.done().or(s2ToC2.done()).and(yeGp(routine)).onTrue(
+            c2ToSUB.cmd()
+        );
+
+        // shoot from the subwoofer
+        c2ToSUB.active().onTrue(aimSub());
+        c2ToSUB.done().onTrue(aimSub().andThen(feedShooter()).withName("AimSubThenFeed"));
+
+        return routine;
+    }
+
+    /**
+     * 
+     * 
+     * 
+     * @param factory The factory to create trajectories with
+     * @return The {@link AutoRoutine}
+     */
+    public AutoRoutine fourPieceSourceSide(final AutoFactory factory) {
+        if (disabled) return disabledAuto(factory);
+
+        final AutoRoutine routine = factory.newRoutine("FourPieceSourceSide");
+
+        final AutoTrajectory srcToM5 = factory.trajectory(SRC.to(M5), routine);
+        final AutoTrajectory m5ToM4 = factory.trajectory(M5.to(M4), routine);
+        final AutoTrajectory m5ToS3 = factory.trajectory(M5.to(S3), routine);
+        final AutoTrajectory m4ToS3 = factory.trajectory(M4.to(S3), routine);
+        final AutoTrajectory s3ToM4 = factory.trajectory(S3.to(M4), routine);
+        final AutoTrajectory s3ToM3 = factory.trajectory(S3.to(M3), routine);
+        final AutoTrajectory m3ToS2 = factory.trajectory(M3.to(S2), routine);
+
+
+        // entry point for the auto
+        routine.enabled().onTrue(
+            resetOdometry(srcToM5, routine).andThen(
+                autoShootBegining(),
+                Commands.parallel(
+                    intakeGamepieceNoStow(),
+                    srcToM5.cmd()
+                )
+            ).withName("FourPieceSourceSideEntry")
+        );
+
+        srcToM5.done().and(yeGp(routine)).onTrue(m5ToS3.cmd());
+        srcToM5.done().and(noGp(routine)).onTrue(m5ToM4.cmd());
+
+        m5ToS3.active().onTrue(aimStem(m5ToS3));
+        m5ToS3.done().onTrue(autoShootThenTraj(routine, s3ToM4));
+
+        s3ToM4.active().onTrue(intakeGamepieceNoStow());
+        s3ToM4.done().and(yeGp(routine)).onTrue(m4ToS3.cmd());
+        s3ToM4.done().and(noGp(routine)).onTrue(stow());
+
+        m4ToS3.active().onTrue(aimStem(m4ToS3));
+        m4ToS3.done().onTrue(autoShootThenTraj(routine, s3ToM3));
+
+        s3ToM3.active().onTrue(intakeGamepieceNoStow());
+        s3ToM3.done().and(yeGp(routine)).onTrue(m3ToS2.cmd());
+        s3ToM3.done().and(noGp(routine)).onTrue(stow());
+
+        m3ToS2.active().onTrue(aimStem(m3ToS2));
+        m3ToS2.done().and(yeGp(routine)).onTrue(autoShoot(routine));
+        m3ToS2.done().and(noGp(routine)).onTrue(stow());
+
+        return routine;
+    }
 
     // /**
     //  * 
