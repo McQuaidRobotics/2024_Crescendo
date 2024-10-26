@@ -1,14 +1,19 @@
 package com.igknighters.commands.autos;
 
-import com.igknighters.constants.ConstValues.kAuto;
+import java.util.Optional;
+import java.util.function.BiConsumer;
 
-import choreo.ChoreoControlFunction;
-import choreo.trajectory.ChoreoTrajectoryState;
+import com.igknighters.constants.ConstValues.kAuto;
+import com.igknighters.subsystems.swerve.Swerve;
+
+import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
-public class AutoController implements ChoreoControlFunction {
+public class AutoController implements BiConsumer<Pose2d, SwerveSample> {
+    private final Swerve swerve;
+    private final boolean enabled;
     private final PIDController xController = new PIDController(
         kAuto.kTranslation.kP,
         kAuto.kTranslation.kI,
@@ -25,7 +30,14 @@ public class AutoController implements ChoreoControlFunction {
         kAuto.kRotation.kD
     );
 
-    public AutoController() {
+    public AutoController(Optional<Swerve> swerve) {
+        if (swerve.isEmpty()) {
+            this.swerve = null;
+            this.enabled = false;
+            return;
+        }
+        this.swerve = swerve.get();
+        this.enabled = true;
         rController.enableContinuousInput(-Math.PI, Math.PI);
         xController.close();
         yController.close();
@@ -33,10 +45,13 @@ public class AutoController implements ChoreoControlFunction {
     }
 
     @Override
-    public ChassisSpeeds apply(Pose2d pose, ChoreoTrajectoryState referenceState) {
-        double xFF = referenceState.velocityX;
-        double yFF = referenceState.velocityY;
-        double rotationFF = referenceState.angularVelocity;
+    public void accept(Pose2d pose, SwerveSample referenceState) {
+        if (!enabled) {
+            return;
+        }
+        double xFF = referenceState.vx;
+        double yFF = referenceState.vy;
+        double rotationFF = referenceState.omega;
 
         double xFeedback = xController.calculate(pose.getX(), referenceState.x);
         double yFeedback = yController.calculate(pose.getY(), referenceState.y);
@@ -50,6 +65,6 @@ public class AutoController implements ChoreoControlFunction {
             pose.getRotation()
         );
 
-        return out;
+        swerve.drive(out, false);
     }
 }

@@ -17,7 +17,7 @@ import monologue.Monologue;
  */
 public class TestManager {
 
-    private final String path = "/Choosers/Test Chooser";
+    private final String path = "/Choosers/TestChooser";
     private final String NONE_NAME = "Nothing";
 
     private final HashMap<String, Command> autoRoutines = new HashMap<>(

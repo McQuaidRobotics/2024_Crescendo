@@ -2,10 +2,13 @@ package com.igknighters;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import choreo.Choreo;
-import choreo.ChoreoAutoLoop;
-import choreo.ChoreoAutoTrajectory;
-import choreo.trajectory.ChoreoTrajectory;
+import choreo.auto.AutoRoutine;
+import choreo.auto.AutoTrajectory;
+import choreo.trajectory.SwerveSample;
+import choreo.trajectory.Trajectory;
 
 import com.igknighters.constants.RobotConfig.RobotID;
 import com.igknighters.subsystems.swerve.Swerve;
@@ -32,28 +35,29 @@ public class RobotTest {
     public void testAuto() {
         final Robot robot = new Robot(RobotID.UNIT_TEST);
 
-        final ChoreoTrajectory traj = Choreo.getTrajectory("TEST").get();
+        final Optional<Trajectory<SwerveSample>> optTraj = Choreo.loadTrajectory("TEST");
+        final Trajectory<SwerveSample> traj = optTraj.orElseThrow();
 
         DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
 
         final double translationTolerance = 0.2;
 
         Swerve swerve = robot.allSubsystems.swerve.get();
-        robot.localizer.resetOdometry(traj.getInitialPose(), swerve.getModulePositions());
-        swerve.setYaw(traj.getInitialPose().getRotation());
+        robot.localizer.resetOdometry(traj.getInitialPose(false), swerve.getModulePositions());
+        swerve.setYaw(traj.getInitialPose(false).getRotation());
 
-        robot.autoManager.addAutoRoutine(
+        robot.autoChooser.addAutoRoutine(
             "TestAuto",
             factory -> {
-                ChoreoAutoLoop loop = factory.newLoop();
-                ChoreoAutoTrajectory aTraj = factory.traj(traj, loop);
+                AutoRoutine routine = factory.newRoutine("TestAutoLoop");
+                AutoTrajectory aTraj = factory.trajectory(traj, routine);
 
-                loop.enabled().onTrue(aTraj.cmd());
+                routine.enabled().onTrue(aTraj.cmd());
 
-                return loop.cmd().withName("TestAuto");
+                return routine;
             }
         );
-        robot.autoManager.choose("TestAuto");
+        // robot.autoChooser.choose("TestAuto");
 
         DriverStationSim.setAutonomous(true);
         DriverStationSim.setEnabled(true);
@@ -61,7 +65,7 @@ public class RobotTest {
         robot.withAutonomousPeriodicTest(robo -> {
             boolean isFinished = robo.localizer.pose()
                     .getTranslation()
-                    .getDistance(traj.getFinalPose().getTranslation()) < translationTolerance;
+                    .getDistance(traj.getFinalPose(false).getTranslation()) < translationTolerance;
 
             if (isFinished) {
                 robo.finishUnitTestRobot();

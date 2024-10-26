@@ -15,11 +15,14 @@ import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.subsystems.vision.Vision;
 
-import choreo.ChoreoAutoTrajectory;
+import choreo.auto.AutoRoutine;
+import choreo.auto.AutoTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.WrapperCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import monologue.Monologue;
 
 public class AutoCommands {
@@ -73,13 +76,13 @@ public class AutoCommands {
         );
     }
 
-    protected Command aimStem(ChoreoAutoTrajectory traj) {
+    protected Command aimStem(AutoTrajectory traj) {
         return loggedCmd(
             StemCommands.aimAtSpeaker(
                 stem,
                 AimSolveStrategy.STATIONARY_PIVOT_TELESCOPE_EXTEND,
                 false,
-                traj::getFinalPose,
+                () -> traj.getFinalPose().orElseThrow(),
                 swerve::getChassisSpeed
             ).withName("AimStem")
         );
@@ -115,7 +118,7 @@ public class AutoCommands {
         );
     }
 
-    protected Command autoShoot() {
+    protected Command autoShoot(AutoRoutine routine) {
         return loggedCmd(
             Commands.parallel(
                 new AutoSwerveTargetSpeakerCmd(swerve, visionPoseSupplierWithFallback)
@@ -131,7 +134,29 @@ public class AutoCommands {
             ).andThen(
                 feedShooter()
                     .finallyDo(() -> logAutoEvent("Shooting", "Done"))
-            ).withName("AutoShoot")
+            ).onlyWhile(yeGp(routine)).withName("AutoShoot")
+        );
+    }
+
+    protected Command autoShootThenTraj(AutoRoutine routine, AutoTrajectory traj) {
+        return loggedCmd(
+            Commands.parallel(
+                new AutoSwerveTargetSpeakerCmd(swerve, visionPoseSupplierWithFallback)
+                    .finallyDo(() -> logAutoEvent("SwerveTargeting", "Done")),
+                StemCommands.aimAtSpeaker(
+                    stem,
+                    AimSolveStrategy.STATIONARY_PIVOT_TELESCOPE_EXTEND,
+                    true,
+                    visionPoseSupplierWithFallback,
+                    swerve::getChassisSpeed
+                ).finallyDo(() -> logAutoEvent("Stem Targeting", "Done")),
+                UmbrellaCommands.waitUntilSpunUp(umbrella, kControls.AUTO_SHOOTER_RPM)
+            ).andThen(
+                feedShooter()
+                    .finallyDo(() -> logAutoEvent("Shooting", "Done"))
+            ).onlyWhile(yeGp(routine))
+            .andThen(new ScheduleCommand(traj.cmd()))
+            .withName("AutoShootThenTraj")
         );
     }
 
@@ -169,4 +194,11 @@ public class AutoCommands {
         );
     }
 
+    protected Trigger yeGp(AutoRoutine routine) {
+        return new Trigger(routine.loop(), umbrella::holdingGamepiece);
+    }
+
+    protected Trigger noGp(AutoRoutine routine) {
+        return yeGp(routine).negate();
+    }
 }
