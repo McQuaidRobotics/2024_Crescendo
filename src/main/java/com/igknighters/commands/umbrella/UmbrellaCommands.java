@@ -143,10 +143,10 @@ public class UmbrellaCommands {
      * @param umbrella The umbrella subsystem
      * @return A command to be scheduled
      */
-    public static Command intakeWWhileIdleShooter(Umbrella umbrella, DoubleSupplier rpmSupplier) {
+    public static Command intakeWhileIdleShooter(Umbrella umbrella, DoubleSupplier rpmSupplier) {
         return umbrella.runEnd(
                 () -> {
-                    umbrella.runIntakeAt(-0.7, false);
+                    umbrella.runIntakeAt(-0.95, false);
                     umbrella.spinupShooterToRPM(rpmSupplier.getAsDouble());
                 },
                 () -> umbrella.runIntakeAt(0.0, false)

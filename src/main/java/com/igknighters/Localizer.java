@@ -2,20 +2,23 @@ package com.igknighters;
 
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.subsystems.swerve.odometryThread.SwerveDriveSample;
+import com.igknighters.subsystems.vision.VisionOnlyPoseEstimator;
 import com.igknighters.subsystems.vision.camera.Camera.VisionPoseEstimate;
 import com.igknighters.util.geom.GeomUtil;
 import com.igknighters.util.plumbing.Channel;
+import com.igknighters.util.plumbing.TunableValues;
 import com.igknighters.util.plumbing.Channel.Receiver;
 import com.igknighters.util.plumbing.Channel.Sender;
 import com.igknighters.util.plumbing.Channel.ThreadSafetyMarker;
+import com.igknighters.util.plumbing.TunableValues.TunableDouble;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -27,15 +30,19 @@ import monologue.Monologue;
 
 public class Localizer implements Logged {
 
+    private final TunableDouble swerveTrust = TunableValues.getDouble("SwerveEst", 0.1);
+
     private final Channel<VisionPoseEstimate> visionDataChannel = new Channel<>();
     private final Channel<SwerveDriveSample> swerveDataChannel = new Channel<>();
 
     private final Receiver<VisionPoseEstimate> visionDataReceiver = visionDataChannel.openReceiver(8, ThreadSafetyMarker.CONCURRENT);
     private final Receiver<SwerveDriveSample> swerveDataReveiver = swerveDataChannel.openReceiver(32, ThreadSafetyMarker.CONCURRENT);
 
-    private final SwerveDrivePoseEstimator poseEstimator;
+    private final SwerveDriveOdometry odometry;
+    private final VisionOnlyPoseEstimator poseEstimator;
 
     private final Matrix<N3, N1> visionStdDevs = VecBuilder.fill(0, 0, Math.PI * 10);
+    private final Matrix<N3, N1> swerveStdDevs = VecBuilder.fill(0.1, 0.1, 0.1);
 
     private Pose2d latestPose = GeomUtil.POSE2D_CENTER;
     private Pose2d latestVisionPose = GeomUtil.POSE2D_CENTER;
@@ -56,14 +63,8 @@ public class Localizer implements Logged {
                 new SwerveModulePosition()
         };
 
-        poseEstimator = new SwerveDrivePoseEstimator(
-            kSwerve.SWERVE_KINEMATICS,
-            GeomUtil.ROTATION2D_ZERO,
-            defaultModulePositions,
-            GeomUtil.POSE2D_CENTER,
-            VecBuilder.fill(0.1, 0.1, 0.1),
-            visionStdDevs
-        );
+        odometry = new SwerveDriveOdometry(kSwerve.SWERVE_KINEMATICS, GeomUtil.ROTATION2D_PI, defaultModulePositions);
+        poseEstimator = new VisionOnlyPoseEstimator();
 
         field = new Field2d();
     }
@@ -90,13 +91,17 @@ public class Localizer implements Logged {
 
     public void resetOdometry(Pose2d pose, SwerveModulePosition[] modulePositions) {
         Rotation2d gyroAngle = pose.getRotation();
-        poseEstimator.resetPosition(gyroAngle, modulePositions, pose);
+        odometry.resetPosition(gyroAngle, modulePositions, pose);
     }
 
     public void update() {
         while (swerveDataReveiver.hasData()) {
             var sample = swerveDataReveiver.recv();
-            poseEstimator.updateWithTime(sample.timestamp(), sample.gyroYaw(), sample.modulePositions());
+            var pose = odometry.update(sample.gyroYaw(), sample.modulePositions());
+            swerveStdDevs.set(0, 0, swerveTrust.value());
+            swerveStdDevs.set(1, 0, swerveTrust.value());
+            swerveStdDevs.set(2, 0, swerveTrust.value());
+            poseEstimator.addVisionMeasurement(pose, sample.timestamp(), swerveStdDevs);
         }
         while (visionDataReceiver.hasData()) {
             var sample = visionDataReceiver.recv();

@@ -22,7 +22,7 @@ public class ShotMetricTesting {
     public static Command intakeStraightUp(Stem stem,  Umbrella umbrella) {
         return Commands.race(
             StemCommands.holdAt(stem, StemPosition.SHOOTER_TEST),
-            UmbrellaCommands.intakeWWhileIdleShooter(umbrella, shooterSpeed::value)
+            UmbrellaCommands.intakeWhileIdleShooter(umbrella, shooterSpeed::value)
         ).andThen(
             StemCommands.holdAt(stem, StemPosition.SHOOTER_TEST)
                 .alongWith(UmbrellaCommands.idleShooter(umbrella, shooterSpeed::value))
@@ -50,7 +50,7 @@ public class ShotMetricTesting {
     public static Command intakeTest(Stem stem,  Umbrella umbrella) {
         return Commands.race(
             StemCommands.holdAt(stem, testStemPose()),
-            UmbrellaCommands.intakeWWhileIdleShooter(umbrella, shooterSpeed::value)
+            UmbrellaCommands.intakeWhileIdleShooter(umbrella, shooterSpeed::value)
         ).andThen(
             StemCommands.holdAt(stem, testStemPose())
                 .alongWith(UmbrellaCommands.idleShooter(umbrella, shooterSpeed::value))

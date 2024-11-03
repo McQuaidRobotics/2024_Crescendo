@@ -17,6 +17,8 @@ import com.igknighters.subsystems.vision.Vision;
 
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -70,7 +72,7 @@ public class AutoCommands {
         return loggedCmd(
             Commands.race(
                 StemCommands.holdAt(stem, StemPosition.INTAKE),
-                UmbrellaCommands.intakeWWhileIdleShooter(umbrella, UmbrellaCommands::defaultIdleRPM)
+                UmbrellaCommands.intakeWhileIdleShooter(umbrella, UmbrellaCommands::defaultIdleRPM)
                     .until(() -> umbrella.holdingGamepiece())
             ).withName("IntakeGamepieceNoStow")
         );
@@ -149,14 +151,12 @@ public class AutoCommands {
                     true,
                     visionPoseSupplierWithFallback,
                     swerve::getChassisSpeed
-                ).finallyDo(() -> logAutoEvent("Stem Targeting", "Done")),
-                UmbrellaCommands.waitUntilSpunUp(umbrella, kControls.AUTO_SHOOTER_RPM)
+                ).finallyDo(() -> logAutoEvent("Stem Targeting", "Done"))
             ).andThen(
                 feedShooter()
-                    .finallyDo(() -> logAutoEvent("Shooting", "Done"))
-            ).onlyWhile(yeGp(routine))
-            .andThen(new ScheduleCommand(traj.cmd()))
-            .withName("AutoShootThenTraj")
+                    .finallyDo(() -> logAutoEvent("Shooting", "Done")),
+                new ScheduleCommand(traj.cmd())
+            ).withName("AutoShootThenTraj")
         );
     }
 
@@ -183,7 +183,8 @@ public class AutoCommands {
     protected Command feedShooter() {
         return loggedCmd(
             UmbrellaCommands.shoot(umbrella, () -> kControls.AUTO_SHOOTER_RPM)
-                .withTimeout(0.15).withName("FeedShooter")
+                .withTimeout(0.4)
+                .withName("FeedShooter")
         );
     }
 
@@ -195,7 +196,8 @@ public class AutoCommands {
     }
 
     protected Trigger yeGp(AutoRoutine routine) {
-        return new Trigger(routine.loop(), umbrella::holdingGamepiece);
+        Debouncer debouncer = new Debouncer(0.3, DebounceType.kFalling);
+        return new Trigger(routine.loop(), () -> debouncer.calculate(umbrella.holdingGamepiece()));
     }
 
     protected Trigger noGp(AutoRoutine routine) {

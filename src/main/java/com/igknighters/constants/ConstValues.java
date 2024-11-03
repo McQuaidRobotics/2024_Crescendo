@@ -449,7 +449,7 @@ public final class ConstValues {
              * throughout the match.
              */
             public static final double VOLTAGE_COMP = 11.0;
-            public static final double TARGET_TOLERANCE = 0.5 * Conv.DEGREES_TO_RADIANS;
+            public static final double TARGET_TOLERANCE = 0.75 * Conv.DEGREES_TO_RADIANS;
         }
 
         public static final class kTelescope {

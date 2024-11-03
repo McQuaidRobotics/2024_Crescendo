@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import static com.igknighters.commands.autos.Waypoints.*;
@@ -84,15 +85,16 @@ public class AutoRoutines extends AutoCommands {
         routine.enabled().onTrue(
             resetOdometry(ampToC1, routine).andThen(
                 autoShootBegining(),
-                Commands.race(
+                Commands.parallel(
                     intakeGamepieceNoStow(),
                     Commands.waitSeconds(0.2)
-                        .andThen(ampToC1.cmd())
+                        .andThen(new ScheduleCommand(ampToC1.cmd()))
                 )
             ).withName("FivePieceAmpSideEntry")
         );
 
         // picking up first note and shooting if we have a note
+        ampToC1.active().onTrue(intakeGamepieceNoStow());
         ampToC1.done().onTrue(autoShootThenTraj(routine, c1ToM1));
 
         // picking up the second note and branching based on whether we're holding a gamepiece
@@ -161,15 +163,16 @@ public class AutoRoutines extends AutoCommands {
         routine.enabled().onTrue(
             resetOdometry(ampToC1, routine).andThen(
                 autoShootBegining(),
-                Commands.race(
+                Commands.parallel(
                     intakeGamepieceNoStow(),
                     Commands.waitSeconds(0.2)
-                        .andThen(ampToC1.cmd())
+                        .andThen(new ScheduleCommand(ampToC1.cmd()))
                 )
             ).withName("SixPieceAmpSideEntry")
         );
 
         // picking up first note and shooting if we have a note
+        ampToC1.active().onTrue(intakeGamepieceNoStow());
         ampToC1.done().onTrue(autoShootThenTraj(routine, c1ToM1));
 
         // picking up the second note and branching based on whether we're holding a gamepiece
@@ -215,6 +218,66 @@ public class AutoRoutines extends AutoCommands {
         // shoot from the subwoofer
         c2ToSUB.active().onTrue(aimSub());
         c2ToSUB.done().onTrue(aimSub().andThen(feedShooter()).withName("AimSubThenFeed"));
+
+        return routine;
+    }
+
+    /**
+     * 
+     * 
+     * @param factory The factory to create trajectories with
+     * @return The {@link AutoRoutine}
+     */
+    public AutoRoutine celtxAuto(AutoFactory factory) {
+        if (disabled) return disabledAuto(factory);
+
+        final AutoRoutine routine = factory.newRoutine("SixPieceFarAmpSide");
+
+        final AutoTrajectory ampToC1 = factory.trajectory(AMP.to(C1), routine);
+        final AutoTrajectory c1ToM1 = factory.trajectory(C1.to(M1), routine);
+        final AutoTrajectory m1ToM2 = factory.trajectory(M1.to(M2), routine);
+        final AutoTrajectory m1ToS1 = factory.trajectory(M1.to(S1), routine);
+        final AutoTrajectory m2ToS1 = factory.trajectory(M2.to(S1), routine);
+        final AutoTrajectory s1ToM2 = factory.trajectory(S1.to(M2), routine);
+        final AutoTrajectory s1ToM3 = factory.trajectory(S1.to(M3), routine);
+
+
+        // entry point for the auto
+        routine.enabled().onTrue(
+            resetOdometry(ampToC1, routine).andThen(
+                autoShootBegining(),
+                Commands.race(
+                    intakeGamepieceNoStow(),
+                    Commands.waitSeconds(0.45)
+                        .andThen(ampToC1.cmd())
+                )
+            ).withName("SixPieceAmpSideEntry")
+        );
+
+        // picking up first note and shooting if we have a note
+        ampToC1.done().onTrue(autoShootThenTraj(routine, c1ToM1));
+
+        // picking up the second note and branching based on whether we're holding a gamepiece
+        c1ToM1.atTime(0.35).onTrue(intakeGamepieceNoStow());
+        c1ToM1.done().and(yeGp(routine)).onTrue(m1ToS1.cmd());
+        c1ToM1.done().and(noGp(routine)).onTrue(m1ToM2.cmd());
+
+        // the branch where we're holding a gamepiece
+        m1ToS1.active().onTrue(aimStem(m1ToS1));
+        m1ToS1.done().onTrue(autoShootThenTraj(routine, s1ToM2));
+
+        // the branch where we're not holding a gamepiece
+        m1ToM2.active().onTrue(intakeGamepieceNoStow());
+        m1ToM2.done().onTrue(m2ToS1.cmd());
+
+        // the branch where we're holding a gamepiece
+        m2ToS1.active().onTrue(aimStem(m2ToS1));
+        m2ToS1.done().onTrue(autoShootThenTraj(routine, s1ToM3));
+
+        s1ToM2.active().onTrue(intakeGamepieceNoStow());
+        s1ToM2.done().onTrue(m2ToS1.cmd());
+
+        s1ToM3.active().onTrue(stow());
 
         return routine;
     }
@@ -273,6 +336,10 @@ public class AutoRoutines extends AutoCommands {
         m3ToS2.done().and(noGp(routine)).onTrue(stow());
 
         return routine;
+    }
+
+    public AutoRoutine justFeed(final AutoFactory factory) {
+        return factory.commandAsAutoRoutine(feedShooter());
     }
 
     // /**

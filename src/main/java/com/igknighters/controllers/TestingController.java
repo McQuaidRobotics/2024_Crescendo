@@ -85,7 +85,7 @@ public class TestingController extends ControllerBase {
             Umbrella umbrella = allss.umbrella.get();
             trig.whileTrue(
                 Commands.deadline(
-                    UmbrellaCommands.intakeWWhileIdleShooter(umbrella, passRpm::value)
+                    UmbrellaCommands.intakeWhileIdleShooter(umbrella, passRpm::value)
                         .until(() -> umbrella.holdingGamepiece()),
                     StemCommands.holdStill(stem)
                 ).andThen(

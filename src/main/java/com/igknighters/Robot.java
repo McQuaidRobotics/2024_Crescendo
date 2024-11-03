@@ -23,8 +23,8 @@ import com.igknighters.constants.ConstantHelper;
 import com.igknighters.constants.RobotConfig;
 import com.igknighters.constants.RobotConfig.RobotID;
 import com.igknighters.controllers.DriverController;
-import com.igknighters.controllers.OperatorController;
-import com.igknighters.controllers.TestingController;
+// import com.igknighters.controllers.OperatorController;
+// import com.igknighters.controllers.TestingController;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
@@ -46,8 +46,8 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
     public final Localizer localizer = new Localizer();
 
     private final DriverController driverController;
-    private final OperatorController operatorController;
-    private final TestingController testingController;
+    // private final OperatorController operatorController;
+    // private final TestingController testingController;
 
     public final AllSubsystems allSubsystems;
 
@@ -72,8 +72,8 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
         localizer.publishField();
 
         driverController = new DriverController(0, localizer);
-        operatorController = new OperatorController(1);
-        testingController = new TestingController(3, localizer);
+        // operatorController = new OperatorController(1);
+        // testingController = new TestingController(3, localizer);
 
         allSubsystems = new AllSubsystems(localizer, robotID.subsystems);
 
@@ -82,8 +82,8 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
         }
 
         driverController.assignButtons(allSubsystems);
-        operatorController.assignButtons(allSubsystems);
-        testingController.assignButtons(allSubsystems);
+        // operatorController.assignButtons(allSubsystems);
+        // testingController.assignButtons(allSubsystems);
 
         if (allSubsystems.swerve.isPresent()) {
             final Swerve swerve = allSubsystems.swerve.get();
@@ -121,6 +121,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
             autoChooser.addAutoRoutine("5 Piece Amp Side", routines::fivePieceAmpSide);
             autoChooser.addAutoRoutine("6 Piece Amp Side Far", routines::sixPieceFarAmpSide);
             autoChooser.addAutoRoutine("4 Piece Src Side", routines::fourPieceSourceSide);
+            autoChooser.addAutoRoutine("celtx", routines::celtxAuto);
             // autoChooser.addAutoRoutine("3 Piece Sub Middle", routines::threePieceSubMiddle);
             // autoChooser.addAutoRoutine("rahhh", routines::driveForward);
         }
