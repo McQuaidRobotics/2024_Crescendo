@@ -99,7 +99,7 @@ public class Swerve implements LockFullSubsystem {
         log("targetChassisSpeed", speeds);
 
         setModuleStates(
-            kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(speeds),
+            kSwerve.KINEMATICS.toSwerveModuleStates(speeds),
                 isOpenLoop);
     }
 
@@ -130,7 +130,7 @@ public class Swerve implements LockFullSubsystem {
     public void setModuleStates(SwerveModuleState[] desiredStates, boolean isOpenLoop) {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, ConstValues.kSwerve.MAX_DRIVE_VELOCITY);
 
-        log("regurgutatedChassisSpeed", kSwerve.SWERVE_KINEMATICS.toChassisSpeeds(desiredStates));
+        log("regurgutatedChassisSpeed", kSwerve.KINEMATICS.toChassisSpeeds(desiredStates));
 
         for (SwerveModule module : swerveMods) {
             module.setDesiredState(desiredStates[module.getModuleNumber()], isOpenLoop);
@@ -146,7 +146,7 @@ public class Swerve implements LockFullSubsystem {
     }
 
     public ChassisSpeeds getChassisSpeed() {
-        return kSwerve.SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
+        return kSwerve.KINEMATICS.toChassisSpeeds(getModuleStates());
     }
 
     public void setVoltageOut(double voltage, Rotation2d angle) {

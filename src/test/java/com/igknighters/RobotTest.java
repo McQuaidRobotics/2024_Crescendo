@@ -43,7 +43,7 @@ public class RobotTest {
         final double translationTolerance = 0.2;
 
         Swerve swerve = robot.allSubsystems.swerve.get();
-        robot.localizer.resetOdometry(traj.getInitialPose(false), swerve.getModulePositions());
+        robot.localizer.reset(traj.getInitialPose(false));
         swerve.setYaw(traj.getInitialPose(false).getRotation());
 
         robot.autoChooser.addAutoRoutine(

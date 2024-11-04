@@ -46,7 +46,7 @@ public class AutoRoutines extends AutoCommands {
         }
         var pose = optPose.get();
         return loggedCmd(swerve.runOnce(() -> {
-            localizer.resetOdometry(pose, swerve.getModulePositions());
+            localizer.reset(pose);
             swerve.setYaw(pose.getRotation());
         }).withName("ResetOdometry"));
     }

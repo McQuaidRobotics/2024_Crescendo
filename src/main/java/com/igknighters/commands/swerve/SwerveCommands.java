@@ -37,11 +37,11 @@ public class SwerveCommands {
             if (AllianceFlip.isBlue()) {
                 swerve.setYaw(GeomUtil.ROTATION2D_ZERO);
                 var pose = new Pose2d(localizer.pose().getTranslation(), GeomUtil.ROTATION2D_ZERO);
-                localizer.resetOdometry(pose, swerve.getModulePositions());
+                localizer.reset(pose);
             } else {
                 swerve.setYaw(GeomUtil.ROTATION2D_PI);
                 var pose = new Pose2d(localizer.pose().getTranslation(), GeomUtil.ROTATION2D_PI);
-                localizer.resetOdometry(pose, swerve.getModulePositions());
+                localizer.reset(pose);
             }
         });
     }

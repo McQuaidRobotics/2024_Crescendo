@@ -46,7 +46,7 @@ public class SwerveSetpointProcessor {
             double maxSteeringVelocity) {
     }
 
-    private final SwerveDriveKinematics kinematics = kSwerve.SWERVE_KINEMATICS;
+    private final SwerveDriveKinematics kinematics = kSwerve.KINEMATICS;
     private final Translation2d[] moduleLocations = new Translation2d[] {
             kSwerve.kMod0.CHASSIS_OFFSET,
             kSwerve.kMod1.CHASSIS_OFFSET,

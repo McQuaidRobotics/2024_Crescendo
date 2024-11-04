@@ -333,7 +333,7 @@ public final class ConstValues {
                 kMod3.CHASSIS_OFFSET
         };
 
-        public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(
+        public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(
                 MODULE_CHASSIS_OFFSETS);
     }
 

@@ -2,26 +2,17 @@ package com.igknighters;
 
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.subsystems.swerve.odometryThread.SwerveDriveSample;
-import com.igknighters.subsystems.vision.VisionOnlyPoseEstimator;
 import com.igknighters.subsystems.vision.camera.Camera.VisionPoseEstimate;
+import com.igknighters.util.TwistyPoseEst;
 import com.igknighters.util.geom.GeomUtil;
 import com.igknighters.util.plumbing.Channel;
-import com.igknighters.util.plumbing.TunableValues;
 import com.igknighters.util.plumbing.Channel.Receiver;
 import com.igknighters.util.plumbing.Channel.Sender;
 import com.igknighters.util.plumbing.Channel.ThreadSafetyMarker;
-import com.igknighters.util.plumbing.TunableValues.TunableDouble;
 
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import monologue.LogSink;
@@ -30,19 +21,13 @@ import monologue.Monologue;
 
 public class Localizer implements Logged {
 
-    private final TunableDouble swerveTrust = TunableValues.getDouble("SwerveEst", 0.1);
-
     private final Channel<VisionPoseEstimate> visionDataChannel = new Channel<>();
     private final Channel<SwerveDriveSample> swerveDataChannel = new Channel<>();
 
     private final Receiver<VisionPoseEstimate> visionDataReceiver = visionDataChannel.openReceiver(8, ThreadSafetyMarker.CONCURRENT);
     private final Receiver<SwerveDriveSample> swerveDataReveiver = swerveDataChannel.openReceiver(32, ThreadSafetyMarker.CONCURRENT);
 
-    private final SwerveDriveOdometry odometry;
-    private final VisionOnlyPoseEstimator poseEstimator;
-
-    private final Matrix<N3, N1> visionStdDevs = VecBuilder.fill(0, 0, Math.PI * 10);
-    private final Matrix<N3, N1> swerveStdDevs = VecBuilder.fill(0.1, 0.1, 0.1);
+    private final TwistyPoseEst poseEstimator;
 
     private Pose2d latestPose = GeomUtil.POSE2D_CENTER;
     private Pose2d latestVisionPose = GeomUtil.POSE2D_CENTER;
@@ -56,15 +41,8 @@ public class Localizer implements Logged {
     private final Channel<ChassisSpeeds> velocityChannel = new Channel<>();
 
     public Localizer() {
-        final var defaultModulePositions = new SwerveModulePosition[] {
-                new SwerveModulePosition(),
-                new SwerveModulePosition(),
-                new SwerveModulePosition(),
-                new SwerveModulePosition()
-        };
 
-        odometry = new SwerveDriveOdometry(kSwerve.SWERVE_KINEMATICS, GeomUtil.ROTATION2D_PI, defaultModulePositions);
-        poseEstimator = new VisionOnlyPoseEstimator();
+        poseEstimator = new TwistyPoseEst();
 
         field = new Field2d();
     }
@@ -89,38 +67,35 @@ public class Localizer implements Logged {
         return velocityChannel;
     }
 
-    public void resetOdometry(Pose2d pose, SwerveModulePosition[] modulePositions) {
-        Rotation2d gyroAngle = pose.getRotation();
-        odometry.resetPosition(gyroAngle, modulePositions, pose);
+    public void reset(Pose2d pose) {
+        poseEstimator.resetPose(pose);
     }
 
     public void update() {
         while (swerveDataReveiver.hasData()) {
             var sample = swerveDataReveiver.recv();
-            var pose = odometry.update(sample.gyroYaw(), sample.modulePositions());
-            swerveStdDevs.set(0, 0, swerveTrust.value());
-            swerveStdDevs.set(1, 0, swerveTrust.value());
-            swerveStdDevs.set(2, 0, swerveTrust.value());
-            poseEstimator.addVisionMeasurement(pose, sample.timestamp(), swerveStdDevs);
+            poseEstimator.addDriveSample(
+                kSwerve.KINEMATICS,
+                sample.modulePositions(),
+                sample.timestamp(),
+                1.0);
         }
         while (visionDataReceiver.hasData()) {
             var sample = visionDataReceiver.recv();
-            visionStdDevs.set(0, 0, sample.trust());
-            visionStdDevs.set(1, 0, sample.trust());
             latestVisionPose = sample.pose().toPose2d();
-            log("pose", latestVisionPose);
             latestVisionTimestamp = sample.timestamp();
-            poseEstimator.addVisionMeasurement(
-                    latestVisionPose,
-                    latestVisionTimestamp,
-                    visionStdDevs);
+            poseEstimator.addVisionSample(
+                latestVisionPose,
+                latestVisionTimestamp,
+                sample.trust()
+            );
         }
         while (namedPositionsReceiver.hasData()) {
             var namedPositions = namedPositionsReceiver.recv();
             field.getObject(namedPositions.name()).setPoses(namedPositions.positions());
         }
 
-        latestPose = poseEstimator.getEstimatedPosition();
+        latestPose = poseEstimator.getEstimatedPose();
         field.getRobotObject().setPose(latestPose);
     }
 

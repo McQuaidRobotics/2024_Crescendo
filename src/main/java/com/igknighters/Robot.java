@@ -88,7 +88,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
         if (allSubsystems.swerve.isPresent()) {
             final Swerve swerve = allSubsystems.swerve.get();
 
-            localizer.resetOdometry(GeomUtil.POSE2D_CENTER, swerve.getModulePositions());
+            localizer.reset(GeomUtil.POSE2D_CENTER);
 
             swerve.setDefaultCommand(new TeleopSwerveTraditionalCmd(swerve, driverController));
         }

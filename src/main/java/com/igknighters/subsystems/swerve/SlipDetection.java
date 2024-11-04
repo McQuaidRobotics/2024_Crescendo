@@ -8,6 +8,7 @@ import com.igknighters.util.geom.GeomUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 // import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
@@ -50,26 +51,27 @@ public class SlipDetection implements Logged {
 
     public SlipDetection() {}
 
-    // /**
-    //  * Filter the swerve module states to detect slipping and return a better guess of where the robot actually is.
-    //  * @param states
-    //  * @param positions
-    //  * @param acceleration
-    //  * @return
-    //  */
-    // public SwerveModulePosition[] filter(SwerveModuleState[] states, SwerveModulePosition[] positions, double acceleration) {
+    /**
+     * Filter the swerve module states to detect slipping and return a better guess of where the robot actually is.
+     * @param states
+     * @param positions
+     * @param acceleration
+     * @return
+     */
+    public SwerveModulePosition[] filter(SwerveModuleState[] states, SwerveModulePosition[] positions, double acceleration) {
 
-    // }
+    }
 
-    // private boolean modulesStaySquare(SwerveModulePosition[] positions) {
-    //     Translation2d[] poses = new Translation2d[4];
-    //     for (int i = 0; i < 4; i++) {
-    //         var module = modules[i];
-    //         var position = positions[i];
-    //         double distance = modules[i].distance - positions[i].distanceMeters;
-    //         Translation2d movedBy = new Translation2d(distance, position.angle);
-    //         poses[i] = module.position.plus(movedBy);
-    //     }
+    private boolean modulesStaySquare(SwerveModulePosition[] positions) {
+        Translation2d[] poses = new Translation2d[4];
+        for (int i = 0; i < 4; i++) {
+            var module = modules[i];
+            var position = positions[i];
+            double distance = modules[i].distance - positions[i].distanceMeters;
+            Translation2d movedBy = new Translation2d(distance, position.angle);
+            poses[i] = module.position.plus(movedBy);
+        }
+
         
-    // }
+    }
 }
