@@ -225,8 +225,8 @@ public abstract class Camera extends Component {
             }
 
             @Override
-            public String getTypeString() {
-                return "struct:VisionPoseEstimate";
+            public String getTypeName() {
+                return "VisionPoseEstimate";
             }
 
             @Override
@@ -298,8 +298,8 @@ public abstract class Camera extends Component {
             }
 
             @Override
-            public String getTypeString() {
-                return "struct:VisionEstimateFault";
+            public String getTypeName() {
+                return "VisionEstimateFault";
             }
 
             @Override

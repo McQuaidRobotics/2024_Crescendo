@@ -1,6 +1,6 @@
 package com.igknighters.subsystems.umbrella.intake;
 
-import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -26,7 +26,7 @@ public class IntakeRealSingleCurrent extends Intake {
 
     private final TalonFX motor = new TalonFX(kIntake.UPPER_MOTOR_ID, kUmbrella.CANBUS);
 
-    private final StatusSignal<Double> voltSignal, ampSignal;
+    private final BaseStatusSignal voltSignal, ampSignal;
 
     private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
 
@@ -49,7 +49,7 @@ public class IntakeRealSingleCurrent extends Intake {
         );
         ampSignal.setUpdateFrequency(200);
 
-        motor.optimizeBusUtilization(1.0);
+        motor.optimizeBusUtilization(0.0, 1.0);
 
         BootupLogger.bootupLog("    Intake initialized (real)");
     }
@@ -61,11 +61,6 @@ public class IntakeRealSingleCurrent extends Intake {
         cfg.HardwareLimitSwitch.ReverseLimitEnable = false;
 
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-
-        cfg.CurrentLimits.SupplyCurrentLimitEnable = true;
-        cfg.CurrentLimits.SupplyCurrentThreshold = 65.0;
-        cfg.CurrentLimits.SupplyCurrentLimit = 40.0;
-        cfg.CurrentLimits.SupplyTimeThreshold = 0.3;
 
         return cfg;
     }
@@ -108,7 +103,7 @@ public class IntakeRealSingleCurrent extends Intake {
         }
 
         if (!super.exitBeamBroken && !forcedOutput) {
-            ampSignal.refresh();
+            BaseStatusSignal.refreshAll(ampSignal);
             super.exitBeamBroken = Math.abs(ampSignal.getValueAsDouble()) > currentTripValue.value();
         } else if (super.exitBeamBroken && forcedOutput) {
             super.exitBeamBroken = false;

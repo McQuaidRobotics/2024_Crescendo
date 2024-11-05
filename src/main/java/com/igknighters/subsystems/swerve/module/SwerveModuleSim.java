@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
@@ -19,8 +20,9 @@ import com.igknighters.subsystems.swerve.odometryThread.SimSwerveOdometryThread;
 import com.igknighters.util.logging.BootupLogger;
 
 public class SwerveModuleSim extends SwerveModule {
-    private final FlywheelSim driveSim = new FlywheelSim(DCMotor.getFalcon500(1), kSwerve.DRIVE_GEAR_RATIO, 0.025);
-    private final FlywheelSim angleSim = new FlywheelSim(DCMotor.getFalcon500(1), kSwerve.ANGLE_GEAR_RATIO, 0.004);
+    private final static DCMotor MOTOR = DCMotor.getFalcon500(1);
+    private final FlywheelSim driveSim = new FlywheelSim(LinearSystemId.createFlywheelSystem(MOTOR, 0.025, kSwerve.DRIVE_GEAR_RATIO), MOTOR);
+    private final FlywheelSim angleSim = new FlywheelSim(LinearSystemId.createFlywheelSystem(MOTOR, 0.004, kSwerve.ANGLE_GEAR_RATIO), MOTOR);
 
     private boolean gotDirectionsLastCycle = false;
 
@@ -65,7 +67,7 @@ public class SwerveModuleSim extends SwerveModule {
 
     public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop) {
         gotDirectionsLastCycle = true;
-        desiredState = SwerveModuleState.optimize(desiredState, getAngle());
+        desiredState.optimize(getAngle());
         setAngle(desiredState);
         setSpeed(desiredState, isOpenLoop);
     }
@@ -109,7 +111,7 @@ public class SwerveModuleSim extends SwerveModule {
     private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop) {
         super.targetDriveVeloMPS = desiredState.speedMetersPerSecond;
 
-        desiredState.speedMetersPerSecond *= Math.cos(angleFeedback.getPositionError());
+        desiredState.speedMetersPerSecond *= Math.cos(angleFeedback.getError());
 
         double velocityRadPerSec = desiredState.speedMetersPerSecond / (kSwerve.WHEEL_DIAMETER / 2);
         var driveAppliedVolts = MathUtil.clamp(

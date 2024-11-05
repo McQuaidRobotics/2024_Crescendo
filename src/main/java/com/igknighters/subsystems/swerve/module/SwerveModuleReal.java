@@ -7,8 +7,7 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-
-import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 
@@ -29,17 +28,17 @@ import com.igknighters.util.logging.BootupLogger;
 
 public class SwerveModuleReal extends SwerveModule {
     private final TalonFX driveMotor;
-    private final StatusSignal<Double> driveVoltSignal, driveAmpSignal;
+    private final BaseStatusSignal driveVoltSignal, driveAmpSignal;
     private final ControlRequest driveMotorClosedReq;
     private final ControlRequest driveMotorOpenReq;
 
     private final TalonFX angleMotor;
-    private final StatusSignal<Double> angleVoltSignal, angleAmpSignal;
+    private final BaseStatusSignal angleVoltSignal, angleAmpSignal;
     private final PositionDutyCycle angleMotorReq = new PositionDutyCycle(0)
             .withUpdateFreqHz(0);
 
     private final CANcoder angleEncoder;
-    private final StatusSignal<Double> angleAbsoluteSignal, angleAbsoluteVeloSignal;
+    private final BaseStatusSignal angleAbsoluteSignal, angleAbsoluteVeloSignal;
 
     public final int moduleNumber;
     private final double rotationOffset;
@@ -89,9 +88,9 @@ public class SwerveModuleReal extends SwerveModule {
             angleMotor.getVelocity()
         );
 
-        driveMotor.optimizeBusUtilization(1.0);
-        angleMotor.optimizeBusUtilization(1.0);
-        angleEncoder.optimizeBusUtilization(1.0);
+        driveMotor.optimizeBusUtilization(0.0, 1.0);
+        angleMotor.optimizeBusUtilization(0.0, 1.0);
+        angleEncoder.optimizeBusUtilization(0.0, 1.0);
 
         CANRetrier.retryStatusCode(() -> driveMotor.setPosition(0.0, 0.1), 3);
 
@@ -162,7 +161,7 @@ public class SwerveModuleReal extends SwerveModule {
 
     @Override
     public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop) {
-        desiredState = SwerveModuleState.optimize(desiredState, getAngle());
+        desiredState.optimize(getAngle());;
         setAngle(desiredState);
         setSpeed(desiredState, isOpenLoop);
     }

@@ -2,9 +2,9 @@ package com.igknighters.subsystems.led;
 
 import java.nio.ByteBuffer;
 
-import com.igknighters.util.logging.ProceduralStructGenerator;
-import com.igknighters.util.logging.ProceduralStructGenerator.SchemaBuilder;
-import com.igknighters.util.logging.ProceduralStructGenerator.SchemaBuilder.EnumFieldBuilder;
+import monologue.ProceduralStructGenerator;
+import monologue.ProceduralStructGenerator.SchemaBuilder;
+import monologue.ProceduralStructGenerator.SchemaBuilder.EnumFieldBuilder;
 
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
@@ -49,8 +49,8 @@ public enum LedAnimations implements StructSerializable {
         }
 
         @Override
-        public String getTypeString() {
-            return "struct:LedAnimations";
+        public String getTypeName() {
+            return "LedAnimations";
         }
 
         @Override
@@ -62,6 +62,11 @@ public enum LedAnimations implements StructSerializable {
         public LedAnimations unpack(ByteBuffer bb) {
             return LedAnimations.values()[bb.get()];
         }
+
+        @Override
+        public boolean isImmutable() {
+            return true;
+        };
     };
 
     public sealed interface LedPattern extends StructSerializable {

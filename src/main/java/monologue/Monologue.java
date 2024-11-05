@@ -3,6 +3,7 @@ package monologue;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.DataLogBackgroundWriter;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
@@ -387,7 +388,7 @@ public class Monologue extends GlobalLogged {
     if (!dir.isEmpty()) {
         // hang onto the old datalog and it's thread,
         // `DataLogManager.stop()` nulls both of these out in the manager
-        DataLog oldDataLog = DataLogManager.getLog();
+        DataLogBackgroundWriter oldDataLog = (DataLogBackgroundWriter) DataLogManager.getLog();
         Thread oldDatalogThread = (Thread) datalogThreadHandle.get();
 
         DataLogManager.logNetworkTables(false);

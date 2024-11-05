@@ -6,7 +6,6 @@ import java.util.OptionalInt;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.Kinematics;
-import edu.wpi.first.math.kinematics.WheelPositions;
 import edu.wpi.first.wpilibj.Timer;
 
 public class TwistyPoseEst {
@@ -23,7 +22,7 @@ public class TwistyPoseEst {
 
     private final LinkedList<TimestampedTwist2d> samples = new LinkedList<>();
     private Pose2d rootPose = new Pose2d();
-    private WheelPositions<?> prevWheelPositions;
+    private Object prevWheelPositions;
 
     public void resetPose(Pose2d pose) {
         rootPose = pose;
@@ -97,7 +96,7 @@ public class TwistyPoseEst {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends WheelPositions<T>> void addDriveSample(Kinematics<?, T> kinematics, T wheelPositions, double timestamp, double weight) {
+    public <T> void addDriveSample(Kinematics<?, T> kinematics, T wheelPositions, double timestamp, double weight) {
         if (prevWheelPositions == null) {
             prevWheelPositions = wheelPositions;
             return;

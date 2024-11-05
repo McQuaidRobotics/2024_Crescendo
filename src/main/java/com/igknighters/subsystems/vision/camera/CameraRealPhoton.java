@@ -8,6 +8,7 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.estimation.TargetModel;
+import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.igknighters.constants.FieldConstants;
@@ -49,7 +50,6 @@ public class CameraRealPhoton extends Camera {
         poseEstimator = new PhotonPoseEstimator(
                 FieldConstants.APRIL_TAG_FIELD,
                 PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-                this.camera,
                 this.cameraPose);
         poseEstimator.setTagModel(TargetModel.kAprilTag36h11);
         poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_CAMERA_HEIGHT);
@@ -58,8 +58,8 @@ public class CameraRealPhoton extends Camera {
         BootupLogger.bootupLog("    " + cameraName + " camera initialized (real)");
     }
 
-    private Optional<VisionPoseEstimate> realEvaluatePose() {
-        Optional<EstimatedRobotPose> opt = poseEstimator.update();
+    private Optional<VisionPoseEstimate> realEvaluatePose(PhotonPipelineResult res) {
+        Optional<EstimatedRobotPose> opt = poseEstimator.update(res);
 
         if (!opt.isPresent()) {
             log("poseEst", noPoseEst);
@@ -124,23 +124,24 @@ public class CameraRealPhoton extends Camera {
 
     @Override
     public void periodic() {
-
-        if (previousPoseEst == null) {
-            var eval = realEvaluatePose();
-            if (eval.isPresent()) {
-                previousPoseEst = eval.get();
-                previousPoseTimer = new Timer();
-                previousPoseTimer.start();
+        for (PhotonPipelineResult res : camera.getAllUnreadResults()) {
+            if (previousPoseEst == null) {
+                var eval = realEvaluatePose(res);
+                if (eval.isPresent()) {
+                    previousPoseEst = eval.get();
+                    previousPoseTimer = new Timer();
+                    previousPoseTimer.start();
+                }
+                this.update(
+                    eval.map(est -> Pair.of(est, VisionEstimateFault.empty())),
+                    camera.isConnected()
+                );
+            } else {
+                this.update(
+                    realEvaluatePose(res).map(est -> est.withFault(previousPoseEst, previousPoseTimer, this::resetLastPoseInfo)),
+                    camera.isConnected()
+                );
             }
-            this.update(
-                eval.map(est -> Pair.of(est, VisionEstimateFault.empty())),
-                camera.isConnected()
-            );
-        } else {
-            this.update(realEvaluatePose()
-                .map(est -> est.withFault(previousPoseEst, previousPoseTimer, this::resetLastPoseInfo)),
-            camera.isConnected()
-            );
         }
     }
 }

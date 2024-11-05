@@ -1,6 +1,6 @@
 package com.igknighters.subsystems.stem.wrist;
 
-import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
@@ -21,18 +21,18 @@ import com.igknighters.util.logging.FaultManager;
 
 import edu.wpi.first.math.util.Units;
 
-public class WristRealFused extends Wrist {
+public class WristReal extends Wrist {
     private final TalonFX motor;
     private final CANcoder cancoder;
 
-    private final StatusSignal<Double> motorRots, motorVelo, motorAmps, motorVolts;
-    private final StatusSignal<Double> cancoderRots, cancoderVelo;
+    private final BaseStatusSignal motorRots, motorVelo, motorAmps, motorVolts;
+    private final BaseStatusSignal cancoderRots, cancoderVelo;
 
     private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
     private final MotionMagicVoltage controlReqMotionMagic = new MotionMagicVoltage(0.0).withUpdateFreqHz(0)
         .withEnableFOC(true);
 
-    public WristRealFused() {
+    public WristReal() {
         super(0.0);
         motor = new TalonFX(kWrist.MOTOR_ID, kStem.CANBUS);
         CANRetrier.retryStatusCodeFatal(() -> motor.getConfigurator().apply(motorConfig()), 10);
@@ -55,8 +55,8 @@ public class WristRealFused extends Wrist {
             cancoderRots, cancoderVelo
         );
 
-        cancoder.optimizeBusUtilization(1.0);
-        motor.optimizeBusUtilization(1.0);
+        cancoder.optimizeBusUtilization(0.0, 1.0);
+        motor.optimizeBusUtilization(0.0, 1.0);
 
         super.encoderRadians = Units.rotationsToRadians(cancoderRots.getValueAsDouble());
         super.radians = encoderRadians;

@@ -1,6 +1,6 @@
 package com.igknighters.subsystems.umbrella.shooter;
 
-import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -20,8 +20,8 @@ public class ShooterReal extends Shooter {
 
     private final TalonFX rightMotor = new TalonFX(kShooter.RIGHT_MOTOR_ID, kUmbrella.CANBUS);
     private final TalonFX leftMotor = new TalonFX(kShooter.LEFT_MOTOR_ID, kUmbrella.CANBUS);
-    private final StatusSignal<Double> veloSignalRight, voltSignalRight, currentSignalRight;
-    private final StatusSignal<Double> veloSignalLeft, voltSignalLeft, currentSignalLeft;
+    private final BaseStatusSignal veloSignalRight, voltSignalRight, currentSignalRight;
+    private final BaseStatusSignal veloSignalLeft, voltSignalLeft, currentSignalLeft;
 
     private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
     private final VelocityVoltage controlReq = new VelocityVoltage(0.0).withUpdateFreqHz(0).withEnableFOC(true);
@@ -43,8 +43,8 @@ public class ShooterReal extends Shooter {
                 veloSignalRight, voltSignalRight, currentSignalRight,
                 veloSignalLeft, voltSignalLeft, currentSignalLeft);
 
-        rightMotor.optimizeBusUtilization(1.0);
-        leftMotor.optimizeBusUtilization(1.0);
+        rightMotor.optimizeBusUtilization(0.0, 1.0);
+        leftMotor.optimizeBusUtilization(0.0, 1.0);
 
         BootupLogger.bootupLog("    Shooter initialized (real)");
     }

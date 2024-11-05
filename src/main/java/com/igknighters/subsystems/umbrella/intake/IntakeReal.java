@@ -1,5 +1,6 @@
 package com.igknighters.subsystems.umbrella.intake;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -22,8 +23,8 @@ public class IntakeReal extends Intake {
     private final TalonFX upperMotor = new TalonFX(kIntake.UPPER_MOTOR_ID, kUmbrella.CANBUS);
     private final TalonFX lowerMotor = new TalonFX(kIntake.LOWER_MOTOR_ID, kUmbrella.CANBUS);
 
-    private final StatusSignal<Double> voltUpperSignal, ampUpperSignal;
-    private final StatusSignal<Double> voltLowerSignal, ampLowerSignal;
+    private final BaseStatusSignal voltUpperSignal, ampUpperSignal;
+    private final BaseStatusSignal voltLowerSignal, ampLowerSignal;
     private final StatusSignal<ReverseLimitValue> revLimitSignal;
 
     private final HardwareLimitSwitchConfigs lowerLimitCfg, upperLimitCfg;
@@ -71,8 +72,8 @@ public class IntakeReal extends Intake {
 
         revLimitSignal.setUpdateFrequency(250);
 
-        upperMotor.optimizeBusUtilization(1.0);
-        lowerMotor.optimizeBusUtilization(1.0);
+        upperMotor.optimizeBusUtilization(0.0, 1.0);
+        lowerMotor.optimizeBusUtilization(0.0, 1.0);
 
         BootupLogger.bootupLog("    Intake initialized (real)");
     }
@@ -84,11 +85,6 @@ public class IntakeReal extends Intake {
         cfg.HardwareLimitSwitch.ReverseLimitEnable = true;
 
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-
-        cfg.CurrentLimits.SupplyCurrentLimitEnable = true;
-        cfg.CurrentLimits.SupplyCurrentThreshold = 65.0;
-        cfg.CurrentLimits.SupplyCurrentLimit = 40.0;
-        cfg.CurrentLimits.SupplyTimeThreshold = 0.3;
 
         cfg.Audio.BeepOnConfig = false;
 
@@ -106,11 +102,6 @@ public class IntakeReal extends Intake {
         cfg.HardwareLimitSwitch.ReverseLimitSource = ReverseLimitSourceValue.RemoteTalonFX;
 
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-
-        cfg.CurrentLimits.SupplyCurrentLimitEnable = true;
-        cfg.CurrentLimits.SupplyCurrentThreshold = 65.0;
-        cfg.CurrentLimits.SupplyCurrentLimit = 40.0;
-        cfg.CurrentLimits.SupplyTimeThreshold = 0.3;
 
         cfg.Audio.BeepOnConfig = false;
 

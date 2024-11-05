@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.Kinematics;
 import edu.wpi.first.math.kinematics.Odometry;
-import edu.wpi.first.math.kinematics.WheelPositions;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -16,20 +15,9 @@ import edu.wpi.first.math.numbers.N3;
 /**
  * A fake pose estimator that only uses vision.
  */
-public class VisionOnlyPoseEstimator extends PoseEstimator<VisionOnlyPoseEstimator.FakeWheelPositions> {
-    public static class FakeWheelPositions implements WheelPositions<FakeWheelPositions> {
-        @Override
-        public FakeWheelPositions copy() {
-            return new FakeWheelPositions();
-        }
+public class VisionOnlyPoseEstimator extends PoseEstimator<Double[]> {
 
-        @Override
-        public FakeWheelPositions interpolate(FakeWheelPositions endValue, double t) {
-            return new FakeWheelPositions();
-        }
-    }
-
-    public static class FakeKinematics implements Kinematics<Double, FakeWheelPositions> {
+    public static class FakeKinematics implements Kinematics<Double, Double[]> {
         @Override
         public ChassisSpeeds toChassisSpeeds(Double wheelSpeeds) {
             return new ChassisSpeeds();
@@ -41,14 +29,28 @@ public class VisionOnlyPoseEstimator extends PoseEstimator<VisionOnlyPoseEstimat
         }
 
         @Override
-        public Twist2d toTwist2d(FakeWheelPositions start, FakeWheelPositions end) {
+        public Twist2d toTwist2d(Double[] start, Double[] end) {
             return new Twist2d();
+        }
+
+        @Override
+        public Double[] copy(Double[] positions) {
+            return new Double[0];
+        }
+
+        @Override
+        public void copyInto(Double[] positions, Double[] output) {
+        }
+
+        @Override
+        public Double[] interpolate(Double[] startValue, Double[] endValue, double t) {
+            return new Double[0];
         }
     }
 
-    public static class FakeOdometry extends Odometry<FakeWheelPositions> {
+    public static class FakeOdometry extends Odometry<Double[]> {
         public FakeOdometry() {
-            super(new FakeKinematics(), new Rotation2d(), new FakeWheelPositions(), new Pose2d());
+            super(new FakeKinematics(), new Rotation2d(), new Double[0], new Pose2d());
         }
     }
 

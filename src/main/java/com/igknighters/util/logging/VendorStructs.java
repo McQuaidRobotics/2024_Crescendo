@@ -63,6 +63,7 @@ import com.ctre.phoenix6.configs.VoltageConfigs;
 
 
 import edu.wpi.first.util.struct.Struct;
+import monologue.ProceduralStructGenerator;
 
 public class VendorStructs {
 

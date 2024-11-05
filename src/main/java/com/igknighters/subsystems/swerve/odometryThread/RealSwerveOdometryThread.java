@@ -4,14 +4,12 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.DoubleFunction;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.StatusSignal;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.util.plumbing.Channel.Sender;
 
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
@@ -60,10 +58,10 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
 
     public void addModuleStatusSignals(
         int moduleId,
-        StatusSignal<Double> drivePosition,
-        StatusSignal<Double> driveVelocity,
-        StatusSignal<Double> anglePosition,
-        StatusSignal<Double> angleVelocity
+        BaseStatusSignal drivePosition,
+        BaseStatusSignal driveVelocity,
+        BaseStatusSignal anglePosition,
+        BaseStatusSignal angleVelocity
     ) {
         BaseStatusSignal.setUpdateFrequencyForAll(
             hz,
@@ -80,10 +78,10 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
     }
 
     public void addGyroStatusSignals(
-        StatusSignal<Double> yaw,
-        StatusSignal<Double> yawRate,
-        StatusSignal<Double> xAccel,
-        StatusSignal<Double> yAccel
+        BaseStatusSignal yaw,
+        BaseStatusSignal yawRate,
+        BaseStatusSignal xAccel,
+        BaseStatusSignal yAccel
     ) {
         BaseStatusSignal.setUpdateFrequencyForAll(
             hz,
@@ -173,7 +171,7 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
 
                 swerveDataSender.send(
                     new SwerveDriveSample(
-                        new SwerveDriveWheelPositions(getModulePositions()),
+                        getModulePositions(),
                         getGyroRotation(),
                         getGForce(),
                         Timer.getFPGATimestamp()

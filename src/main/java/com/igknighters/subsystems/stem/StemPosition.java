@@ -75,8 +75,8 @@ public class StemPosition implements StructSerializable {
         }
 
         @Override
-        public String getTypeString() {
-            return "struct:StemPosition";
+        public String getTypeName() {
+            return "StemPosition";
         }
 
         @Override

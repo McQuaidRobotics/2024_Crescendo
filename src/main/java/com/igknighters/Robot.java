@@ -5,6 +5,7 @@ import java.util.function.BiConsumer;
 
 import monologue.LogLocal;
 import monologue.Monologue;
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -39,6 +40,7 @@ import choreo.Choreo;
 import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory.AutoBindings;
 
+@Logged
 public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
 
     private final CommandScheduler scheduler = CommandScheduler.getInstance();

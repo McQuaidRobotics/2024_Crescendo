@@ -338,8 +338,8 @@ public final class ProceduralStructGenerator {
       }
 
       @Override
-      public String getTypeString() {
-        return "struct:" + cls.getSimpleName();
+      public String getTypeName() {
+        return cls.getSimpleName();
       }
 
       @Override
@@ -441,8 +441,8 @@ public final class ProceduralStructGenerator {
       }
 
       @Override
-      public String getTypeString() {
-        return "struct:" + recordClass.getSimpleName();
+      public String getTypeName() {
+        return recordClass.getSimpleName();
       }
 
       @Override
@@ -618,8 +618,8 @@ public final class ProceduralStructGenerator {
       }
 
       @Override
-      public String getTypeString() {
-        return "struct:" + enumClass.getSimpleName();
+      public String getTypeName() {
+        return enumClass.getSimpleName();
       }
 
       @Override
@@ -756,8 +756,8 @@ public final class ProceduralStructGenerator {
       }
 
       @Override
-      public String getTypeString() {
-        return "struct:" + objectClass.getSimpleName();
+      public String getTypeName() {
+        return objectClass.getSimpleName();
       }
 
       @Override

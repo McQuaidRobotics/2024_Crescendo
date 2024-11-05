@@ -37,7 +37,7 @@ public class Stem implements LockFullSubsystem {
             } else {
                 telescope = new TelescopeReal();
             }
-            wrist = new WristRealFused();
+            wrist = new WristReal();
         }
 
         visualizer = new StemVisualizer();

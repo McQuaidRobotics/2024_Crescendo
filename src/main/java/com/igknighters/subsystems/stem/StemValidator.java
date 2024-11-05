@@ -12,7 +12,7 @@ import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.util.geom.Rectangle2d;
-import com.igknighters.util.logging.ProceduralStructGenerator;
+import monologue.ProceduralStructGenerator;
 
 public class StemValidator {
     /**

@@ -1,5 +1,6 @@
 package com.igknighters.subsystems.stem.telescope;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -29,7 +30,7 @@ import monologue.Annotations.Log;
 public class TelescopeRealSunshine extends Telescope {
     private final TalonFX motor;
 
-    private final StatusSignal<Double> motorVolts, motorAmps, motorVelo, motorRots;
+    private final BaseStatusSignal motorVolts, motorAmps, motorVelo, motorRots;
     private final StatusSignal<ReverseLimitValue> reverseLimitSwitch;
 
     private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
@@ -58,7 +59,7 @@ public class TelescopeRealSunshine extends Telescope {
                 motorRots, motorVelo, motorVolts, motorAmps,
                 reverseLimitSwitch);
 
-        motor.optimizeBusUtilization(1.0);
+        motor.optimizeBusUtilization(0.0, 1.0);
     }
 
     private TalonFXConfiguration motorConfig() {

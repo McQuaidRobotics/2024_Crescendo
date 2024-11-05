@@ -1,6 +1,6 @@
 package com.igknighters.subsystems.swerve.gyro;
 
-import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.igknighters.constants.ConstValues;
@@ -18,8 +18,8 @@ import monologue.Annotations.IgnoreLogged;
 public class GyroReal extends Gyro {
 
     private final Pigeon2 gyro;
-    private final StatusSignal<Double> rollSignal, pitchSignal;
-    private final StatusSignal<Double> rollVeloSignal, pitchVeloSignal;
+    private final BaseStatusSignal rollSignal, pitchSignal;
+    private final BaseStatusSignal rollVeloSignal, pitchVeloSignal;
 
     @IgnoreLogged
     private final RealSwerveOdometryThread odoThread;
@@ -49,7 +49,7 @@ public class GyroReal extends Gyro {
             gyro.getAccelerationY()
         );
 
-        gyro.optimizeBusUtilization(1.0);
+        gyro.optimizeBusUtilization(0.0, 1.0);
 
         BootupLogger.bootupLog("    Gyro initialized (real)");
     }

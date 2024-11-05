@@ -3,7 +3,7 @@ package com.igknighters.subsystems.swerve;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kSwerve.kRotationController;
-import com.igknighters.util.logging.ProceduralStructGenerator;
+import monologue.ProceduralStructGenerator;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;

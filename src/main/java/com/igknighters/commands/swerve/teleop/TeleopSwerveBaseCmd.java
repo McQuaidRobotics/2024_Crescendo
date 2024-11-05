@@ -140,8 +140,8 @@ public class TeleopSwerveBaseCmd extends Command implements StructSerializable {
         }
 
         @Override
-        public String getTypeString() {
-            return "struct:" + getTypeClass().getSimpleName();
+        public String getTypeName() {
+            return getTypeClass().getSimpleName();
         }
 
         @Override

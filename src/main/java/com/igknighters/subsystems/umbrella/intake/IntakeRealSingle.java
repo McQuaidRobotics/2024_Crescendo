@@ -1,12 +1,12 @@
 package com.igknighters.subsystems.umbrella.intake;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.signals.ReverseLimitSourceValue;
 import com.ctre.phoenix6.signals.ReverseLimitValue;
 import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.constants.ConstValues.kUmbrella.kIntake;
@@ -21,7 +21,7 @@ public class IntakeRealSingle extends Intake {
 
     private final TalonFX upperMotor = new TalonFX(kIntake.UPPER_MOTOR_ID, kUmbrella.CANBUS);
 
-    private final StatusSignal<Double> voltUpperSignal, ampUpperSignal;
+    private final BaseStatusSignal voltUpperSignal, ampUpperSignal;
     private final StatusSignal<ReverseLimitValue> revLimitSignal;
 
     private final HardwareLimitSwitchConfigs upperLimitCfg;
@@ -53,7 +53,7 @@ public class IntakeRealSingle extends Intake {
 
         revLimitSignal.setUpdateFrequency(250);
 
-        upperMotor.optimizeBusUtilization(1.0);
+        upperMotor.optimizeBusUtilization(0.0, 1.0);
 
         BootupLogger.bootupLog("    Intake initialized (real)");
     }
@@ -65,33 +65,6 @@ public class IntakeRealSingle extends Intake {
         cfg.HardwareLimitSwitch.ReverseLimitEnable = true;
 
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-
-        cfg.CurrentLimits.SupplyCurrentLimitEnable = true;
-        cfg.CurrentLimits.SupplyCurrentThreshold = 65.0;
-        cfg.CurrentLimits.SupplyCurrentLimit = 40.0;
-        cfg.CurrentLimits.SupplyTimeThreshold = 0.3;
-
-        cfg.Audio.BeepOnConfig = false;
-
-        return cfg;
-    }
-
-    public TalonFXConfiguration motorLower() {
-        var cfg = new TalonFXConfiguration();
-
-        cfg.HardwareLimitSwitch.ForwardLimitEnable = false;
-        cfg.HardwareLimitSwitch.ReverseLimitEnable = true;
-
-        cfg.HardwareLimitSwitch.ReverseLimitRemoteSensorID = kIntake.UPPER_MOTOR_ID;
-
-        cfg.HardwareLimitSwitch.ReverseLimitSource = ReverseLimitSourceValue.RemoteTalonFX;
-
-        cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-
-        cfg.CurrentLimits.SupplyCurrentLimitEnable = true;
-        cfg.CurrentLimits.SupplyCurrentThreshold = 65.0;
-        cfg.CurrentLimits.SupplyCurrentLimit = 40.0;
-        cfg.CurrentLimits.SupplyTimeThreshold = 0.3;
 
         cfg.Audio.BeepOnConfig = false;
 

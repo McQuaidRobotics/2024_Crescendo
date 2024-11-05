@@ -1,5 +1,6 @@
 package com.igknighters.subsystems.stem.pivot;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
@@ -35,9 +36,9 @@ public class PivotReal extends Pivot {
 
     private final Pigeon2 gyro;
 
-    private final StatusSignal<Double> motorRots, motorVelo, leaderMotorVolts, followerMotorVolts;
-    private final StatusSignal<Double> leaderMotorAmps, followerMotorAmps;
-    private final StatusSignal<Double> gyroMeasurement;
+    private final BaseStatusSignal motorRots, motorVelo, leaderMotorVolts, followerMotorVolts;
+    private final BaseStatusSignal leaderMotorAmps, followerMotorAmps;
+    private final BaseStatusSignal gyroMeasurement;
     private final StatusSignal<ForwardLimitValue> forwardLimitSwitch;
     private final StatusSignal<ReverseLimitValue> reverseLimitSwitch;
 
@@ -91,9 +92,9 @@ public class PivotReal extends Pivot {
             reverseLimitSwitch, gyroMeasurement
         );
 
-        gyro.optimizeBusUtilization(1.0);
-        leaderMotor.optimizeBusUtilization(1.0);
-        followerMotor.optimizeBusUtilization(1.0);
+        gyro.optimizeBusUtilization(0.0, 1.0);
+        leaderMotor.optimizeBusUtilization(0.0, 1.0);
+        followerMotor.optimizeBusUtilization(0.0, 1.0);
 
         BootupLogger.bootupLog("    Pivot initialized (real)");
     }
