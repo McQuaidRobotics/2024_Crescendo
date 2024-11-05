@@ -8,11 +8,6 @@ import monologue.Annotations.Log;
 public abstract class Driver extends Component {
     @Log protected PartialAnimation[] animations = new PartialAnimation[0];
 
-    @Override
-    public String getOverrideName() {
-        return "Driver";
-    }
-
     /**
      * Sets the animations to be played by the LED strip
      * 

@@ -24,9 +24,9 @@ import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismObject2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
-import monologue.MonologueEntryLayer.MonologueEntry;
+import monologue.MonoEntryLayer.MonologueEntry;
 
-public class MonologueSendableLayer {
+public class MonoSendableLayer {
   private static final ArrayList<SendableContainer> sendables = new ArrayList<>();
 
   static void updateAll() {

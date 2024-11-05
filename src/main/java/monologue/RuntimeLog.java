@@ -4,13 +4,13 @@ import edu.wpi.first.hal.DriverStationJNI;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
 
-class MonologueLog {
+class RuntimeLog {
   private static final StringPublisher entry;
 
   static {
     // we need to make sure we never log network tables through the implicit wpilib logger
     entry = NetworkTableInstance.getDefault().getStringTopic("/MonologueSetup").publish();
-    runtimeLog("Monologue Setup Logger initialized");
+    info("Monologue Setup Logger initialized");
   }
 
   private static class MonologueRuntimeError extends RuntimeException {
@@ -19,11 +19,11 @@ class MonologueLog {
     }
   }
 
-  static void runtimeLog(String message) {
+  static void info(String message) {
     entry.set("[Monologue] " + message);
   }
 
-  static void runtimeWarn(String warning) {
+  static void warn(String warning) {
     if (Monologue.shouldThrowOnWarn()) {
       throw new MonologueRuntimeError("[Monologue] " + warning);
     } else {

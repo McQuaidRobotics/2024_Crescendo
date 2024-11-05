@@ -9,7 +9,7 @@ import edu.wpi.first.util.datalog.*;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.wpilibj.DataLogManager;
 
-class MonologueEntryLayer {
+class MonoEntryLayer {
   private static final HashMap<LogSink, HashMap<String, MonologueEntry<?>>> entries = new HashMap<>() {
     {
       put(LogSink.NT, new HashMap<>());

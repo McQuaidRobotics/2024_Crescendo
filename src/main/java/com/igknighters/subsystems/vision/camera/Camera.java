@@ -147,11 +147,6 @@ public abstract class Camera extends Component {
      */
     public abstract String getName();
 
-    @Override
-    public String getOverrideName() {
-        return getName();
-    }
-
     public record VisionPoseEstimate(
             int cameraId,
             Pose3d pose,

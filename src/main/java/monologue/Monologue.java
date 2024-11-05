@@ -20,19 +20,19 @@ import java.util.function.BooleanSupplier;
  *
  * <p>Monologue is a library that allows for easy logging of objects to NetworkTables and Datalog.
  * It has {@link Annotations} that allow implicit logging of fields and methods on objects that
- * implement the {@link Logged} interface.
+ * implement the {@link LogLocal} interface.
  *
- * <p>Monologue works by creating a tree of objects that implement the {@link Logged} interface and
+ * <p>Monologue works by creating a tree of objects that implement the {@link LogLocal} interface and
  * then logging the fields and methods of those objects to NetworkTables and Datalog based on their
  * annotations. For example let's say the root object is {@code Robot.java}, you would
- * implemenet {@link Logged} on the root object and then call {@link #setupMonologue(Logged, String,
+ * implemenet {@link LogLocal} on the root object and then call {@link #setupMonologue(LogLocal, String,
  * MonologueConfig)} with the root object and a root path (typically "/Robot"). This will recurse
  * through all the fields in {@code RobotContainer.java} and search for more objects that implement
- * {@link Logged} and repeat the process until all fields and methods have been logged.
+ * {@link LogLocal} and repeat the process until all fields and methods have been logged.
  *
  * <p>Monologue has a rich error handling system that will tell you what you did wrong and where you
  * did it wrong. If you would like to run Monologue in whole robot Unit Tests you can use {@link
- * #setupMonologueDisabled(Logged, String, boolean)} to disable logging and only run the error
+ * #setupMonologueDisabled(LogLocal, String, boolean)} to disable logging and only run the error
  * checking.
  * 
  * <p><b>WARNING:</b> Any use of `DatalogManager` before Monologue.setupMonologue()
@@ -68,13 +68,13 @@ public class Monologue extends GlobalLogged {
       boolean allowNonFinalLoggedFields) {
     public MonologueConfig {
       if (optimizeBandwidthSupplier == null) {
-        MonologueLog.runtimeWarn(
+        RuntimeLog.warn(
             "shouldOptimizeBandwidthSupplier cannot be null in MonologueConfig, falling back to false (always log NT)");
 
             optimizeBandwidthSupplier = () -> false;
       }
       if (datalogPrefix == null) {
-        MonologueLog.runtimeWarn(
+        RuntimeLog.warn(
             "datalogPrefix cannot be null in MonologueConfig, falling back to \"NT:\"");
         datalogPrefix = "NT:";
       }
@@ -142,7 +142,7 @@ public class Monologue extends GlobalLogged {
 
     /**
      * Updates the allowNonFinalLoggedFields flag. If true, Monologue will allow non-final fields
-     * containing {@link Logged} objects to be logged. This is not reccomended as it can lead to
+     * containing {@link LogLocal} objects to be logged. This is not reccomended as it can lead to
      * unexpected behavior.
      *
      * @param allowNonFinalLoggedFields The new allowNonFinalLoggedFields flag
@@ -164,12 +164,12 @@ public class Monologue extends GlobalLogged {
    * @param loggable the root Logged object to log
    * @param rootpath the root path to log to\
    * @param config the configuration for the Monologue library
-   * @apiNote Should only be called once, if another {@link Logged} tree needs to be created use
-   *     {@link #logTree(Logged, String)} for additional trees
+   * @apiNote Should only be called once, if another {@link LogLocal} tree needs to be created use
+   *     {@link #logTree(LogLocal, String)} for additional trees
    */
-  public static void setupMonologue(Logged loggable, String rootpath, MonologueConfig config) {
+  public static void setupMonologue(LogLocal loggable, String rootpath, MonologueConfig config) {
     if (HAS_SETUP_BEEN_CALLED) {
-      MonologueLog.runtimeWarn(
+      RuntimeLog.warn(
           "Monologue.setupMonologue() has already been called, further calls will do nothing");
       return;
     }
@@ -185,7 +185,7 @@ public class Monologue extends GlobalLogged {
     HAS_SETUP_BEEN_CALLED = true;
     rootpath = NetworkTable.normalizeKey(rootpath, true);
     Monologue.setRootPath(rootpath);
-    MonologueLog.runtimeLog(
+    RuntimeLog.info(
         "Monologue.setupMonologue() called on "
             + loggable.getClass().getName()
             + " with rootpath "
@@ -203,7 +203,7 @@ public class Monologue extends GlobalLogged {
 
     System.gc();
 
-    MonologueLog.runtimeLog("Monologue.setupMonologue() finished in " + timer.get() + " seconds");
+    RuntimeLog.info("Monologue.setupMonologue() finished in " + timer.get() + " seconds");
   }
 
   /**
@@ -220,9 +220,9 @@ public class Monologue extends GlobalLogged {
    * @param throwOnWarn if true, will throw an exception when a Monologue internal warning is
    *     emitted
    */
-  public static void setupMonologueDisabled(Logged loggable, String rootpath, boolean throwOnWarn) {
+  public static void setupMonologueDisabled(LogLocal loggable, String rootpath, boolean throwOnWarn) {
     if (HAS_SETUP_BEEN_CALLED && !IS_DISABLED) {
-      MonologueLog.runtimeWarn(
+      RuntimeLog.warn(
           "Monologue.setupMonologue() has already been called, disabling after setup will do nothing");
       return;
     }
@@ -231,7 +231,7 @@ public class Monologue extends GlobalLogged {
     IS_DISABLED = true;
     THROW_ON_WARN = throwOnWarn;
 
-    MonologueLog.runtimeLog(
+    RuntimeLog.info(
         "Monologue.setupMonologueDisabled() called on "
             + loggable.getClass().getName()
             + " with rootpath "
@@ -241,38 +241,38 @@ public class Monologue extends GlobalLogged {
     // tests
     logTree(loggable, rootpath);
 
-    Logged.registry.clear();
+    LogLocal.registry.clear();
 
-    MonologueLog.runtimeLog("Monologue.setupMonologueDisabled() finished");
+    RuntimeLog.info("Monologue.setupMonologueDisabled() finished");
   }
 
   /**
-   * Creates a logging tree for the provided {@link Logged} object. Will also recursively check
-   * field values for classes that implement {@link Logged} and log those as well.
+   * Creates a logging tree for the provided {@link LogLocal} object. Will also recursively check
+   * field values for classes that implement {@link LogLocal} and log those as well.
    *
    * @param loggable the obj to scrape
    * @param path the path to log to
    * @throws IllegalStateException If {@link #setupMonologue()} or {@link
    *     #setupMonologueDisabled()} is not called first
    */
-  public static void logTree(Logged loggable, String path) {
+  public static void logTree(LogLocal loggable, String path) {
     if (!hasBeenSetup())
       throw new IllegalStateException(
           "Tried to use Monologue.logTree() before using a Monologue setup method");
 
     if (path == null || path.isEmpty()) {
-      MonologueLog.runtimeWarn("Invalid path for Monologue.logTree(): " + path);
+      RuntimeLog.warn("Invalid path for Monologue.logTree(): " + path);
       return;
     } else if (path == "/") {
-      MonologueLog.runtimeWarn("Root path of / is not allowed for Monologue.logTree()");
+      RuntimeLog.warn("Root path of / is not allowed for Monologue.logTree()");
       return;
     }
-    MonologueLog.runtimeLog(
+    RuntimeLog.info(
         "Monologue.logTree() called on " + loggable.getClass().getName() + " with path " + path);
 
     StaticObjectNode node = new LoggingTree.StaticObjectNode(path, loggable);
     Eval.exploreNodes(Eval.getLoggedClasses(loggable.getClass()), node);
-    Logged.addNode(loggable, node);
+    LogLocal.addNode(loggable, node);
 
     trees.add(node);
 
@@ -287,14 +287,14 @@ public class Monologue extends GlobalLogged {
   public static void updateAll() {
     if (isMonologueDisabled()) return;
     if (!hasBeenSetup())
-      MonologueLog.runtimeWarn("Called Monologue.updateAll before Monologue was setup");
+      RuntimeLog.warn("Called Monologue.updateAll before Monologue was setup");
     boolean newOptimizeBandwidth = config.optimizeBandwidthSupplier.getAsBoolean();
     if (newOptimizeBandwidth != OPTIMIZE_BANDWIDTH) {
-      MonologueLog.runtimeLog("Monologue.updateAll() updated FILE_ONLY flag to " + newOptimizeBandwidth);
+      RuntimeLog.info("Monologue.updateAll() updated FILE_ONLY flag to " + newOptimizeBandwidth);
       log("MonologueOptimizeBandwidth", newOptimizeBandwidth);
     }
     OPTIMIZE_BANDWIDTH = newOptimizeBandwidth;
-    MonologueSendableLayer.updateAll();
+    MonoSendableLayer.updateAll();
     for (StaticObjectNode tree : trees) {
       tree.log(null);
     }
@@ -351,7 +351,7 @@ public class Monologue extends GlobalLogged {
    */
   static boolean isMonologueReady(String key) {
     if (!hasBeenSetup()) {
-      MonologueLog.runtimeWarn("Tried to log \"" + key + "\" before Monologue was setup");
+      RuntimeLog.warn("Tried to log \"" + key + "\" before Monologue was setup");
       return false;
     }
     return true;
@@ -376,7 +376,7 @@ public class Monologue extends GlobalLogged {
         datalogHandle = MethodHandles.privateLookupIn(DataLogManager.class, MethodHandles.lookup())
             .findStaticVarHandle(DataLogManager.class, "m_log", DataLog.class);
     } catch (NoSuchFieldException | IllegalAccessException e) {
-        MonologueLog.runtimeWarn("Failed to get VarHandles for DataLogManager, falling back to old method");
+        RuntimeLog.warn("Failed to get VarHandles for DataLogManager, falling back to old method");
         return;
     }
 
@@ -395,7 +395,7 @@ public class Monologue extends GlobalLogged {
         try {
         oldDatalogThread.join();
         } catch (InterruptedException e) {
-        MonologueLog.runtimeWarn("Failed to join datalog thread");
+        RuntimeLog.warn("Failed to join datalog thread");
         }
         datalogHandle.set(null);
         oldDataLog.setFilename("DELETME");
@@ -410,7 +410,7 @@ public class Monologue extends GlobalLogged {
     DriverStation.startDataLog(dataLog, true);
 
     if (killedDatalog) {
-      MonologueLog.runtimeWarn(
+      RuntimeLog.warn(
           "DatalogManager was used before Monologue.setupMonologue(), this can cause issues with datalog entries"
       );
     }

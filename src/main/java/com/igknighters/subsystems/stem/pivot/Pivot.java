@@ -28,11 +28,6 @@ public abstract class Pivot extends Component {
         this.targetRadians = startingRadians;
     }
 
-    @Override
-    public String getOverrideName() {
-        return "Pivot";
-    }
-
     /**
      * Commands the pivot to move towards a certain angle in radians.
      * 

@@ -19,7 +19,7 @@ import com.igknighters.util.logging.BootupLogger;
 
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import monologue.Logged;
+import monologue.LogLocal;
 
 public class SubsystemResources {
 
@@ -205,8 +205,8 @@ public class SubsystemResources {
             return subsystemsListLockFree.toArray(new LockFreeSubsystem[subsystemsListLockFree.size()]);
         }
 
-        public List<Logged> getLoggableSubsystems() {
-            List<Logged> loggableSubsystems = new ArrayList<>();
+        public List<LogLocal> getLoggableSubsystems() {
+            List<LogLocal> loggableSubsystems = new ArrayList<>();
             loggableSubsystems.addAll(subsystemsListLockFull);
             loggableSubsystems.addAll(subsystemsListLockFree);
             return loggableSubsystems;
@@ -234,24 +234,15 @@ public class SubsystemResources {
         }
     }
 
-    public static interface LockFullSubsystem extends Subsystem, Logged {
-        @Override
-        default String getOverrideName() {
-            return this.getName();
-        }
+    public static interface LockFullSubsystem extends Subsystem, LogLocal {
     }
 
-    public static interface LockFreeSubsystem extends Logged {
+    public static interface LockFreeSubsystem extends LogLocal {
         default void periodic() {}
         default void simulationPeriodic() {}
 
         default String getName() {
             return this.getClass().getSimpleName();
-        }
-
-        @Override
-        default String getOverrideName() {
-            return this.getName();
         }
     }
 }

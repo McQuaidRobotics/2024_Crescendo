@@ -13,11 +13,6 @@ public abstract class Intake extends Component {
     @Log protected double voltsLower = 0.0;
     @Log protected double ampsLower = 0.0;
 
-    @Override
-    public String getOverrideName() {
-        return "Intake";
-    }
-
     /**
      * @return If the exit beam is broken
      */

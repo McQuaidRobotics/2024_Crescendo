@@ -20,11 +20,6 @@ public abstract class Wrist extends Component {
         this.encoderRadians = startingRadians;
     }
 
-    @Override
-    public String getOverrideName() {
-        return "Wrist";
-    }
-
     /**
      * Commands the wrist to move towards a certain angle in radians.
      * 

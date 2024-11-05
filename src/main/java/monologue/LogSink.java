@@ -7,11 +7,12 @@ public enum LogSink {
      */
     NT,
     /**
-     * Logs will be sent to DataLog
+     * Logs will be sent to DataLog only
      */
     DL,
     /**
-     * 
+     * Will behave like {@link #DL} if {@link Monologue#isBandwidthOptimizationEnabled()}
+     * is true, otherwise will behave like {@link #NT}
      */
     OP;
 

@@ -16,10 +16,10 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import monologue.LogSink;
-import monologue.Logged;
+import monologue.LogLocal;
 import monologue.Monologue;
 
-public class Localizer implements Logged {
+public class Localizer implements LogLocal {
 
     private final Channel<VisionPoseEstimate> visionDataChannel = new Channel<>();
     private final Channel<SwerveDriveSample> swerveDataChannel = new Channel<>();

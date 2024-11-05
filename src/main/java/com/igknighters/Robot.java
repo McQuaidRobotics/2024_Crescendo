@@ -3,7 +3,7 @@ package com.igknighters;
 import java.util.HashMap;
 import java.util.function.BiConsumer;
 
-import monologue.Logged;
+import monologue.LogLocal;
 import monologue.Monologue;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -39,7 +39,7 @@ import choreo.Choreo;
 import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory.AutoBindings;
 
-public class Robot extends UnitTestableRobot<Robot> implements Logged {
+public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
 
     private final CommandScheduler scheduler = CommandScheduler.getInstance();
 
@@ -77,8 +77,8 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
         allSubsystems = new AllSubsystems(localizer, robotID.subsystems);
 
-        for (final Logged subsystem : allSubsystems.getLoggableSubsystems()) {
-            Monologue.logTree(subsystem, "/Robot/" + subsystem.getOverrideName());
+        for (final LogLocal subsystem : allSubsystems.getLoggableSubsystems()) {
+            Monologue.logTree(subsystem, "/Robot/" + subsystem.getClass().getSimpleName());
         }
 
         driverController.assignButtons(allSubsystems);

@@ -5,10 +5,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.igknighters.util.plumbing.Channel.Sender;
 
-import monologue.Logged;
+import monologue.LogLocal;
 import monologue.Annotations.Log;
 
-public abstract class SwerveOdometryThread implements Logged {
+public abstract class SwerveOdometryThread implements LogLocal {
     protected final static int MODULE_COUNT = 4;
 
     protected final int hz;

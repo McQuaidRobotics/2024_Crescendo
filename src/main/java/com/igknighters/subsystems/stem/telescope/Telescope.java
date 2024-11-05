@@ -21,11 +21,6 @@ public abstract class Telescope extends Component {
         this.targetMeters = startingMeters;
     }
 
-    @Override
-    public String getOverrideName() {
-        return "Telescope";
-    }
-
     /**
      * Commands the telescope to move towards a certain distance in meters.
      * 

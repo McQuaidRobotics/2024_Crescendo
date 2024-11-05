@@ -12,11 +12,6 @@ public abstract class Gyro extends Component {
     @Log public double rollVelRadsPerSec = 0.0;
     @Log public double yawVelRadsPerSec = 0.0;
 
-    @Override
-    public String getOverrideName() {
-        return "Gyro";
-    }
-
     public double getPitchRads() {
         return pitchRads;
     }

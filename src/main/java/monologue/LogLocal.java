@@ -19,17 +19,16 @@ import edu.wpi.first.util.struct.Struct;
  * 
  * This class also allows for an imperative way to log values with the {@link #log} methods.
  * 
- * Class fields that hold {@code Logged} objects should be final.
- * 
  * @see Monologue
  * @see Annotations.Log
+ * @see Annotations.Log.Once
  */
-public interface Logged {
+public interface LogLocal {
 
-  static final WeakHashMap<Logged, ArrayList<LoggingNode>> registry = new WeakHashMap<>();
+  static final WeakHashMap<Object, ArrayList<LoggingNode>> registry = new WeakHashMap<>();
   static final HashMap<Class<?>, LoggingNode> singletons = new HashMap<>();
 
-  static void addNode(Logged logged, LoggingNode node) {
+  static void addNode(Object logged, LoggingNode node) {
     var lst = getNodes(logged);
     if (!lst.contains(node)) {
       lst.add(node);
@@ -44,21 +43,9 @@ public interface Logged {
     return singletons.containsKey(logged);
   }
 
-  static List<LoggingNode> getNodes(Logged logged) {
+  static List<LoggingNode> getNodes(Object logged) {
     registry.putIfAbsent(logged, new ArrayList<>());
     return registry.get(logged);
-  }
-
-  /**
-   * Normally the name of {@code this} in the object tree is based off the field in the object the reference is stored in.
-   * Overriding this method allows you to specify a different name for the object in the object tree.
-   * 
-   * If the returnd string has a '/' in it, the object will be placed in a subtable.
-   *
-   * @return The name of the object in the object tree.
-   */
-  public default String getOverrideName() {
-    return "";
   }
 
   /**
@@ -602,31 +589,31 @@ public interface Logged {
       Monologue.publishSendable(entryName, value, sink);
     }
 
-      /**
-        * Logs a Sendable using the Monologue machinery.
-        * 
-        * @param entryName The name of the entry to log, this is an absolute path.
-        * @param value The value to log.
-        */
-      public static void publishSendable(String entryName, Field2d value, LogSink sink) {
-        if (!Monologue.hasBeenSetup()) {
-          Monologue.prematureLog(() -> publishSendable(entryName, value, sink));
-          return;
-        }
-        Monologue.publishSendable(entryName, value, sink);
+    /**
+      * Logs a Sendable using the Monologue machinery.
+      * 
+      * @param entryName The name of the entry to log, this is an absolute path.
+      * @param value The value to log.
+      */
+    public static void publishSendable(String entryName, Field2d value, LogSink sink) {
+      if (!Monologue.hasBeenSetup()) {
+        Monologue.prematureLog(() -> publishSendable(entryName, value, sink));
+        return;
       }
+      Monologue.publishSendable(entryName, value, sink);
+    }
 
-      /**
-        * Logs a Sendable using the Monologue machinery.
-        * 
-        * @param entryName The name of the entry to log, this is an absolute path.
-        * @param value The value to log.
-        */
-      public static void publishSendable(String entryName, Mechanism2d value, LogSink sink) {
-        if (!Monologue.hasBeenSetup()) {
-          Monologue.prematureLog(() -> publishSendable(entryName, value, sink));
-          return;
-        }
-        Monologue.publishSendable(entryName, value, sink);
+    /**
+      * Logs a Sendable using the Monologue machinery.
+      * 
+      * @param entryName The name of the entry to log, this is an absolute path.
+      * @param value The value to log.
+      */
+    public static void publishSendable(String entryName, Mechanism2d value, LogSink sink) {
+      if (!Monologue.hasBeenSetup()) {
+        Monologue.prematureLog(() -> publishSendable(entryName, value, sink));
+        return;
       }
+      Monologue.publishSendable(entryName, value, sink);
+    }
 }

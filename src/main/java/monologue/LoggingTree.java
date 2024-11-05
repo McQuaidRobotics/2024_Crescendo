@@ -8,7 +8,7 @@ import java.util.function.Function;
 
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
-import monologue.MonologueEntryLayer.MonologueEntry;
+import monologue.MonoEntryLayer.MonologueEntry;
 
 public class LoggingTree {
   private static class MonologueTriedToLogNull extends NullPointerException {
@@ -62,7 +62,7 @@ public class LoggingTree {
     public void addChild(LoggingNode child) {
       for (LoggingNode node : children) {
         if (node.path.equals(child.path)) {
-          MonologueLog.runtimeWarn("Duplicate path: " + child.path);
+          RuntimeLog.warn("Duplicate path: " + child.path);
           return;
         }
       }
@@ -191,7 +191,7 @@ public class LoggingTree {
       try {
         node.log(obj);
       } catch (MonologueTriedToLogNull e) {
-        MonologueLog.runtimeWarn(err);
+        RuntimeLog.warn(err);
       }
     }
   }
@@ -229,14 +229,14 @@ public class LoggingTree {
     public void log(Object obj) {
       Object o = handle.get(obj);
       if (o == null) {
-        MonologueLog.runtimeWarn(err);
+        RuntimeLog.warn(err);
         return;
       }
       if (!seenTypes.contains(o.getClass())) {
         // explore the new class
       }
-      if (o instanceof Logged && Logged.getNodes((Logged) o).isEmpty()) {
-        Logged.addNode((Logged) o, this);
+      if (o instanceof LogLocal && LogLocal.getNodes((LogLocal) o).isEmpty()) {
+        LogLocal.addNode((LogLocal) o, this);
       }
       for (LoggingNode child : children) {
         child.log(o);
@@ -262,7 +262,7 @@ public class LoggingTree {
     public void log(Object obj) {
       Optional<Object> oo = (Optional<Object>) handle.get(obj);
       if (oo == null) {
-        MonologueLog.runtimeWarn(err);
+        RuntimeLog.warn(err);
         isPresentNode.log(Optional.empty());
         return;
       }
@@ -304,7 +304,7 @@ public class LoggingTree {
     public void log(Object obj) {
       Object[] o = (Object[]) handle.get(obj);
       if (o == null) {
-        MonologueLog.runtimeWarn(err);
+        RuntimeLog.warn(err);
         return;
       }
       for (LoggingNode child : children) {
@@ -328,7 +328,7 @@ public class LoggingTree {
     public void log(Object obj) {
       Object o = handle.get(type);
       if (o == null) {
-        MonologueLog.runtimeWarn(getPath() + " is null");
+        RuntimeLog.warn(getPath() + " is null");
         return;
       }
       for (LoggingNode child : children) {

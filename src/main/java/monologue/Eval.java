@@ -110,7 +110,7 @@ public class Eval {
     ArrayList<Class<?>> result = new ArrayList<Class<?>>();
 
     Class<?> i = type;
-    while (i != stop && Logged.class.isAssignableFrom(i)) {
+    while (i != stop && LogLocal.class.isAssignableFrom(i)) {
       result.add(i);
       i = i.getSuperclass();
     }
@@ -139,12 +139,12 @@ public class Eval {
   }
 
   static boolean isNestedLogged(Field field) {
-    boolean fieldTyLogged = Logged.class.isAssignableFrom(field.getType())
-        || (field.getType().isArray() && Logged.class.isAssignableFrom(field.getType().getComponentType()));
+    boolean fieldTyLogged = LogLocal.class.isAssignableFrom(field.getType())
+        || (field.getType().isArray() && LogLocal.class.isAssignableFrom(field.getType().getComponentType()));
     boolean maybeLoggedAnnotation = field.isAnnotationPresent(MaybeLoggedType.class);
     boolean ignoreLoggedAnnotation = field.isAnnotationPresent(IgnoreLogged.class);
     if (fieldTyLogged && maybeLoggedAnnotation) {
-      MonologueLog.runtimeWarn(
+      RuntimeLog.warn(
           field.getName()
               + " of type "
               + field.getType().getSimpleName()
@@ -158,7 +158,7 @@ public class Eval {
       var privateLookup = MethodHandles.privateLookupIn(field.getDeclaringClass(), lookup);
       return privateLookup.unreflectVarHandle(field);
     } catch (IllegalAccessException e) {
-      MonologueLog.runtimeWarn(
+      RuntimeLog.warn(
           "Could not access field "
               + field.getName()
               + " of type "
@@ -176,7 +176,7 @@ public class Eval {
       var privateLookup = MethodHandles.privateLookupIn(method.getDeclaringClass(), lookup);
       return privateLookup.unreflect(method);
     } catch (IllegalAccessException e) {
-      MonologueLog.runtimeWarn(
+      RuntimeLog.warn(
           "Could not access field "
               + method.getName()
               + " in "
@@ -210,17 +210,17 @@ public class Eval {
       // handle singletons
       if (isNestedLogged && isStatic) {
         Optional<String> singletonKey = singletonKey(field.getType());
-        if (singletonKey.isPresent() && !Logged.singletonAlreadyAdded(field.getType())) {
+        if (singletonKey.isPresent() && !LogLocal.singletonAlreadyAdded(field.getType())) {
           try {
-            Monologue.logTree((Logged) field.get(null), singletonKey.get());
-            Logged.addSingleton(field.getType(), new SingletonNode(singletonKey.get(), field.getType(), handle));
+            Monologue.logTree((LogLocal) field.get(null), singletonKey.get());
+            LogLocal.addSingleton(field.getType(), new SingletonNode(singletonKey.get(), field.getType(), handle));
           } catch (IllegalAccessException e) {
-            MonologueLog.runtimeWarn("Issue with singleton " + field.getType().getSimpleName());
+            RuntimeLog.warn("Issue with singleton " + field.getType().getSimpleName());
           }
         }
         continue;
       } else if (metadata.annotated && isStatic) {
-        MonologueLog.runtimeWarn(
+        RuntimeLog.warn(
             "Static field "
                 + field.getName()
                 + " of type "
@@ -296,7 +296,7 @@ public class Eval {
             obj -> {
               try { return (Object[]) handle.invoke(obj); }
               catch (Throwable e) {
-                MonologueLog.runtimeWarn(err + e.getMessage());
+                RuntimeLog.warn(err + e.getMessage());
                 return null;
               }
             },
@@ -308,7 +308,7 @@ public class Eval {
             obj -> {
               try { return handle.invoke(obj); }
               catch (Throwable e) {
-                MonologueLog.runtimeWarn(err + e.getMessage());
+                RuntimeLog.warn(err + e.getMessage());
                 return null;
               }
             },

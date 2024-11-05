@@ -16,7 +16,7 @@ public class Annotations {
       };
 
   /**
-   * Logs the annotated field/method to NetworkTables if inside a {@link Logged} class.
+   * Logs the annotated field/method to NetworkTables if inside a {@link LogLocal} class.
    *
    * <p>Static fields and methods will emit a warning and not be logged.
    *
@@ -38,7 +38,7 @@ public class Annotations {
     public LogSink sink() default LogSink.NT;
 
     /**
-     * Logs the annotated field/method to NetworkTables if inside a {@link Logged} class.
+     * Logs the annotated field/method to NetworkTables if inside a {@link LogLocal} class.
      *
      * @param key [optional] the key to log the variable as. If empty, the key will be the name of
      *     the field/method
@@ -58,7 +58,7 @@ public class Annotations {
   }
 
   /**
-   * Makes the annotated field containing a {@link Logged} class not be recursed into.
+   * Makes the annotated field containing a {@link LogLocal} class not be recursed into.
    *
    * @apiNote this will also make fields inside the object in the field not be logged
    */
@@ -92,8 +92,8 @@ public class Annotations {
 
   /**
    * Will make Monologue aware that this field could contain an
-   * object that implements {@link Logged} but the type of the field itself
-   * does not implement {@link Logged}.
+   * object that implements {@link LogLocal} but the type of the field itself
+   * does not implement {@link LogLocal}.
    */
   @Documented
   @Retention(RetentionPolicy.RUNTIME)

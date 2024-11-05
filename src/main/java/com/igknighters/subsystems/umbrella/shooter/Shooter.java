@@ -23,11 +23,6 @@ public abstract class Shooter extends Component {
     @Log protected double targetShooterRightRPM = Units.radiansPerSecondToRotationsPerMinute(targetRadiansPerSecondRight);
     @Log protected double targetShooterLeftRPM = Units.radiansPerSecondToRotationsPerMinute(targetRadiansPerSecondLeft);
 
-    @Override
-    public String getOverrideName() {
-        return "Shooter";
-    }
-
     /**
      * @return The rotational speed of the {@code Shooter} flywheel in Rad/S
      */
