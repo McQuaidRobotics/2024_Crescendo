@@ -113,6 +113,7 @@ public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
                     String msg = "[Auto] Trajectory " + traj.name() + " " + (starting ? "Started" : "Finished");
                     System.out.println(msg);
                     Monologue.log("AutoEvent", msg);
+                    Monologue.log("Auto/Trajectory", traj.sampleArray());
                 }
             ),
             "/Choosers"
@@ -123,7 +124,6 @@ public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
             autoChooser.addAutoRoutine("5 Piece Amp Side", routines::fivePieceAmpSide);
             autoChooser.addAutoRoutine("6 Piece Amp Side Far", routines::sixPieceFarAmpSide);
             autoChooser.addAutoRoutine("4 Piece Src Side", routines::fourPieceSourceSide);
-            autoChooser.addAutoRoutine("celtx", routines::celtxAuto);
             // autoChooser.addAutoRoutine("3 Piece Sub Middle", routines::threePieceSubMiddle);
             // autoChooser.addAutoRoutine("rahhh", routines::driveForward);
         }

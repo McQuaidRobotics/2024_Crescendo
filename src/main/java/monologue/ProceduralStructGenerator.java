@@ -8,9 +8,11 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.BaseStream;
 
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
@@ -192,17 +194,21 @@ public final class ProceduralStructGenerator {
       }
     } else {
       for (Field field : clazz.getDeclaredFields()) {
+        Class<?> fieldClass = field.getType();
         if (field.isEnumConstant() || Modifier.isStatic(field.getModifiers())) {
           continue;
         }
-        if (Collection.class.isAssignableFrom(field.getType())
-            || field.getType().isArray()
-            || field.getType() == String.class
-            || field.getType() == Optional.class) {
+        if (Collection.class.isAssignableFrom(fieldClass)
+            || Iterator.class.isAssignableFrom(fieldClass)
+            || Iterable.class.isAssignableFrom(fieldClass)
+            || BaseStream.class.isAssignableFrom(fieldClass)
+            || fieldClass.isArray()
+            || fieldClass == String.class
+            || fieldClass == Optional.class) {
           return false;
         }
-        if (!primitiveTypeMap.containsKey(field.getType())
-            && !isFixedSize(clazz)) {
+        if (!primitiveTypeMap.containsKey(fieldClass)
+            && !isFixedSize(fieldClass)) {
           return false;
         }
       }
@@ -682,12 +688,13 @@ public final class ProceduralStructGenerator {
    * generated from the {@link Object}, the errors encountered will be printed and a no-op {@link
    * Struct} will be returned.
    *
-   * @param <E> The type of the object.
-   * @param enumClass The class of the object.
+   * @param <O> The type of the object.
+   * @param objectClass The class of the object.
+   * @param objectSupplier A supplier for the object.
    * @return The generated struct.
    */
   @SuppressWarnings({ "unchecked", "PMD.AvoidAccessibilityAlteration" })
-  public static <E> Struct<E> genObject(Class<E> objectClass, Supplier<E> objectSupplier) {
+  public static <O> Struct<O> genObject(Class<O> objectClass, Supplier<O> objectSupplier) {
     final SchemaBuilder schemaBuilder = new SchemaBuilder();
     final ArrayList<Struct<?>> nestedStructs = new ArrayList<>();
     final ArrayList<Unpacker<?>> unpackers = new ArrayList<>();
@@ -747,11 +754,12 @@ public final class ProceduralStructGenerator {
       return noopStruct(objectClass);
     }
 
+    final boolean isImmutable = !isInteriorlyMutable(objectClass);
     final int frozenSize = size;
     final String schema = schemaBuilder.build();
     return new Struct<>() {
       @Override
-      public Class<E> getTypeClass() {
+      public Class<O> getTypeClass() {
         return objectClass;
       }
 
@@ -771,7 +779,7 @@ public final class ProceduralStructGenerator {
       }
 
       @Override
-      public void pack(ByteBuffer buffer, E value) {
+      public void pack(ByteBuffer buffer, O value) {
         boolean failed = false;
         int startingPosition = buffer.position();
         for (int i = 0; i < allFields.length; i++) {
@@ -803,9 +811,9 @@ public final class ProceduralStructGenerator {
       }
 
       @Override
-      public E unpack(ByteBuffer buffer) {
+      public O unpack(ByteBuffer buffer) {
         try {
-          E obj = objectSupplier.get();
+          O obj = objectSupplier.get();
           for (int i = 0; i < allFields.length; i++) {
             Object fieldValue = unpackers.get(i).unpack(buffer);
             allFields[i].set(obj, fieldValue);
@@ -824,6 +832,29 @@ public final class ProceduralStructGenerator {
       @Override
       public Struct<?>[] getNested() {
         return nestedStructs.toArray(new Struct<?>[0]);
+      }
+
+      @Override
+      public boolean isCloneable() {
+        return Cloneable.class.isAssignableFrom(objectClass);
+      }
+
+      @Override
+      public O clone(O obj) throws CloneNotSupportedException {
+        if (isCloneable()) {
+          try {
+            return (O) objectClass.getMethod("clone").invoke(obj);
+          } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new CloneNotSupportedException();
+          }
+        } else {
+          throw new CloneNotSupportedException();
+        }
+      }
+
+      @Override
+      public boolean isImmutable() {
+        return isImmutable;
       }
     };
   }

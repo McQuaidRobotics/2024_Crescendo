@@ -3,7 +3,6 @@ package com.igknighters.subsystems.stem.wrist;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.subsystems.Component;
 
-import edu.wpi.first.math.util.Units;
 import monologue.Annotations.Log;
 
 public abstract class Wrist extends Component {
@@ -75,23 +74,4 @@ public abstract class Wrist extends Component {
      * @param volts The specified volts: [-12.0 .. 12.0]
      */
     public abstract void setVoltageOut(double volts);
-
-    private static final double slope = 0.0075789;
-    private static final double offset = 0.32939;
-
-    protected static double mechanismRadsToMotorRots(Double radians) {
-        return (Units.radiansToRotations(radians) - offset) / slope;
-    }
-
-    protected static double mechanismRadsToMotorRads(Double radians) {
-        return Units.rotationsToRadians(mechanismRadsToMotorRots(radians));
-    }
-
-    protected static double motorRotsToMechanismRads(double motorRots) {
-        return Units.rotationsToRadians((slope*motorRots)+offset);
-    }
-
-    protected static double motorRadsToMechanismRads(double motorRads) {
-        return motorRotsToMechanismRads(Units.radiansToRotations(motorRads));
-    }
 }

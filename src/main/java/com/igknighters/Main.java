@@ -1,6 +1,9 @@
 package com.igknighters;
 
+import java.util.ArrayList;
+
 import edu.wpi.first.wpilibj.RobotBase;
+import monologue.ProceduralStructGenerator;
 
 /**
  * 
@@ -47,10 +50,21 @@ import edu.wpi.first.wpilibj.RobotBase;
 ⣿⣿⣿⣿⣿⣿⣷⣿⣿⣿⣿⣿⣿⣿⣿⣾⣷⣿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
  */
 public final class Main {
+  private static final class SubMain {
+    // private final ArrayList<Integer> list = new ArrayList<>();
+    private final int x = 0;
+    private SubMain() {
+    }
+  }
+
+  private final SubMain subMain = new SubMain();
+  // private final ArrayList<Integer> list = new ArrayList<>();
+
   private Main() {
   }
 
   public static void main(String... args) {
-    RobotBase.startRobot(Robot::new);
+    System.out.println(ProceduralStructGenerator.isFixedSize(Main.class));
+    // RobotBase.startRobot(Robot::new);
   }
 }
