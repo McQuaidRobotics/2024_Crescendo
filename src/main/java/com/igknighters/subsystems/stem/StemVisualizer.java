@@ -128,22 +128,22 @@ public class StemVisualizer {
                 MechanismLigament2d leftSide = drivebaseRoot.append(
                                 new MechanismLigament2d(
                                                 "DriveBase Left Side",
-                                                kRobotCollisionGeometry.DRIVE_BASE.getHeight(),
+                                                kRobotCollisionGeometry.DRIVE_BASE.getYWidth(),
                                                 90.0));
                 MechanismLigament2d topSide = leftSide.append(
                                 new MechanismLigament2d(
                                                 "DriveBase Top Side",
-                                                kRobotCollisionGeometry.DRIVE_BASE.getWidth(),
+                                                kRobotCollisionGeometry.DRIVE_BASE.getXWidth(),
                                                 -90.0));
                 MechanismLigament2d rightSide = topSide.append(
                                 new MechanismLigament2d(
                                                 "DriveBase Right Side",
-                                                kRobotCollisionGeometry.DRIVE_BASE.getHeight(),
+                                                kRobotCollisionGeometry.DRIVE_BASE.getYWidth(),
                                                 -90.0));
                 MechanismLigament2d bottomSide = rightSide.append(
                                 new MechanismLigament2d(
                                                 "DriveBase Bottom Side",
-                                                kRobotCollisionGeometry.DRIVE_BASE.getWidth(),
+                                                kRobotCollisionGeometry.DRIVE_BASE.getXWidth(),
                                                 -90.0));
 
                 leftSide.setColor(new Color8Bit(100, 100, 100));
@@ -166,7 +166,7 @@ public class StemVisualizer {
                                 new MechanismLigament2d(
                                                 "MaxBounds Left Bottom Side",
                                                 Units.inchesToMeters(12.0)
-                                                                - ((kRobotCollisionGeometry.DRIVE_BASE.getWidth()
+                                                                - ((kRobotCollisionGeometry.DRIVE_BASE.getXWidth()
                                                                                 - Units.inchesToMeters(26.0)) / 2.0),
                                                 180.0));
                 MechanismLigament2d leftSide = leftBottomSide.append(
@@ -188,7 +188,7 @@ public class StemVisualizer {
                                 new MechanismLigament2d(
                                                 "MaxBounds Right Bottom Side",
                                                 Units.inchesToMeters(12.0)
-                                                                - ((kRobotCollisionGeometry.DRIVE_BASE.getWidth()
+                                                                - ((kRobotCollisionGeometry.DRIVE_BASE.getXWidth()
                                                                                 - Units.inchesToMeters(26.0)) / 2.0),
                                                 -90.0));
 

@@ -27,7 +27,7 @@ public class TeleopSwerveTraditionalCmd extends TeleopSwerveBaseCmd {
                 new Rotation2d(swerve.getYawRads())
         );
 
-        swerve.drive(chassisSpeeds, true);
+        swerve.drive(chassisSpeeds);
     }
 
     public static final TeleopSwerveBaseStruct struct = new TeleopSwerveBaseStruct();

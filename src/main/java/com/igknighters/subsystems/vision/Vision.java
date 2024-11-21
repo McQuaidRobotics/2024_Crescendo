@@ -8,7 +8,6 @@ import com.igknighters.subsystems.vision.camera.Camera;
 import com.igknighters.subsystems.vision.camera.Camera.VisionPoseEstimate;
 import com.igknighters.util.logging.Tracer;
 import com.igknighters.util.plumbing.Channel.Sender;
-import com.igknighters.util.plumbing.Channel.Receiver;
 
 import java.util.HashSet;
 import java.util.List;
@@ -24,11 +23,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import monologue.Monologue;
 
 public class Vision implements LockFreeSubsystem {
-    private static final ChassisSpeeds ZERO_SPEEDS = new ChassisSpeeds();
-
     private final Localizer localizer;
 
-    private final Receiver<ChassisSpeeds> velocityReceiver;
     private final Sender<VisionPoseEstimate> visionSender;
 
     private final Camera[] cameras;
@@ -54,7 +50,6 @@ public class Vision implements LockFreeSubsystem {
                 .getEntry(false);
         cameraPositionFieldVisualizer.accept(false);
 
-        velocityReceiver = localizer.velocityChannel().openReceiver(1);
         visionSender = localizer.visionDataSender();
     }
 
@@ -91,7 +86,7 @@ public class Vision implements LockFreeSubsystem {
                 error *= 2.0;
             }
 
-            ChassisSpeeds velo = velocityReceiver.inspectOrDefault(ZERO_SPEEDS);
+            ChassisSpeeds velo = localizer.speeds();
             if (new Translation2d(velo.vxMetersPerSecond, velo.vyMetersPerSecond).getNorm() > kSwerve.MAX_DRIVE_VELOCITY
                     / 2.0) {
                 error *= 2.0;

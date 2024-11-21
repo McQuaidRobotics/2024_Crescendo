@@ -12,7 +12,7 @@ import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.stem.StemSolvers;
 import com.igknighters.subsystems.stem.StemSolvers.AimSolveStrategy;
 import com.igknighters.subsystems.stem.StemSolvers.StemSolveInput;
-import com.igknighters.util.geom.AllianceFlip;
+import com.igknighters.util.AllianceFlip;
 import com.igknighters.util.plumbing.TunableValues;
 import com.igknighters.util.plumbing.TunableValues.TunableDouble;
 

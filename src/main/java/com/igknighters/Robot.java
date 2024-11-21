@@ -5,7 +5,6 @@ import java.util.function.BiConsumer;
 
 import monologue.LogLocal;
 import monologue.Monologue;
-import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -21,26 +20,23 @@ import com.igknighters.commands.tests.TestManager;
 import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstantHelper;
+import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.RobotConfig;
 import com.igknighters.constants.RobotConfig.RobotID;
 import com.igknighters.controllers.DriverController;
-// import com.igknighters.controllers.OperatorController;
-// import com.igknighters.controllers.TestingController;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
+import com.igknighters.util.AllianceFlip;
+import com.igknighters.util.UnitTestableRobot;
 import com.igknighters.util.can.CANSignalManager;
-import com.igknighters.util.geom.AllianceFlip;
-import com.igknighters.util.geom.GeomUtil;
 import com.igknighters.util.logging.WatchdogSilencer;
 import com.igknighters.util.logging.Tracer;
-import com.igknighters.util.robots.UnitTestableRobot;
 
 import choreo.Choreo;
 import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory.AutoBindings;
 
-@Logged
 public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
 
     private final CommandScheduler scheduler = CommandScheduler.getInstance();
@@ -90,7 +86,7 @@ public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
         if (allSubsystems.swerve.isPresent()) {
             final Swerve swerve = allSubsystems.swerve.get();
 
-            localizer.reset(GeomUtil.POSE2D_CENTER);
+            localizer.reset(FieldConstants.POSE2D_CENTER);
 
             swerve.setDefaultCommand(new TeleopSwerveTraditionalCmd(swerve, driverController));
         }
@@ -124,8 +120,6 @@ public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
             autoChooser.addAutoRoutine("5 Piece Amp Side", routines::fivePieceAmpSide);
             autoChooser.addAutoRoutine("6 Piece Amp Side Far", routines::sixPieceFarAmpSide);
             autoChooser.addAutoRoutine("4 Piece Src Side", routines::fourPieceSourceSide);
-            // autoChooser.addAutoRoutine("3 Piece Sub Middle", routines::threePieceSubMiddle);
-            // autoChooser.addAutoRoutine("rahhh", routines::driveForward);
         }
 
         testManager = new TestManager();
@@ -193,16 +187,17 @@ public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
 
     @Override
     public void testInit() {
-        CANSignalManager.setCharacterizationMode(true);
         testManager.getSelectedTestRoutine().schedule();
     }
 
     @Override
     public void testExit() {
-        CANSignalManager.setCharacterizationMode(false);
         scheduler.cancelAll();
         System.gc();
     }
+
+    @Override
+    public void teleopPeriodic() {}
 
     @Override
     public void simulationPeriodic() {}
@@ -230,10 +225,6 @@ public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
             // used for tests and CI, does not actually log anything but asserts the logging is setup mostly correct
             Monologue.setupMonologueDisabled(this, "/Robot", true);
         }
-
-        // filesystemLogger.addFile("/home/lvuser/FRC_UserProgram.log", "Console", 0.27);
-        // filesystemLogger.addFile("/var/log/dmesg", "Dmesg", 2.2);
-        // filesystemLogger.addFile("/var/log/messages", "Kernel", 1.4);
 
         // logs build data to the datalog
         final String meta = "/BuildData/";

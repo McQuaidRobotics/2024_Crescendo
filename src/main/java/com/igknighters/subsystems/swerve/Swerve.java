@@ -2,9 +2,9 @@ package com.igknighters.subsystems.swerve;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
 
 import java.util.Optional;
@@ -17,17 +17,19 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.subsystems.SubsystemResources.LockFullSubsystem;
+import com.igknighters.subsystems.swerve.control.SwerveSetpoint;
+import com.igknighters.subsystems.swerve.control.SwerveSetpointGenerator;
 import com.igknighters.subsystems.swerve.gyro.Gyro;
 import com.igknighters.subsystems.swerve.gyro.GyroReal;
 import com.igknighters.subsystems.swerve.gyro.GyroSim;
 import com.igknighters.subsystems.swerve.module.SwerveModule;
 import com.igknighters.subsystems.swerve.module.SwerveModuleReal;
 import com.igknighters.subsystems.swerve.module.SwerveModuleSim;
+import com.igknighters.subsystems.swerve.module.SwerveModule.AdvancedSwerveModuleState;
 import com.igknighters.subsystems.swerve.odometryThread.RealSwerveOdometryThread;
 import com.igknighters.subsystems.swerve.odometryThread.SimSwerveOdometryThread;
 import com.igknighters.subsystems.swerve.odometryThread.SwerveOdometryThread;
 import com.igknighters.util.logging.Tracer;
-import com.igknighters.util.plumbing.Channel.Sender;
 import com.igknighters.constants.ConstValues;
 
 /**
@@ -53,11 +55,20 @@ public class Swerve implements LockFullSubsystem {
     private final SwerveOdometryThread odometryThread;
 
     private final SwerveVisualizer visualizer;
-    private final SwerveSetpointProcessor setpointProcessor = new SwerveSetpointProcessor();
-
-    private final Sender<ChassisSpeeds> velocitySender;
+    private final SwerveSetpointGenerator setpointGenerator = new SwerveSetpointGenerator(
+        kSwerve.MODULE_CHASSIS_OFFSETS,
+        DCMotor.getKrakenX60Foc(1).withReduction(kSwerve.DRIVE_GEAR_RATIO),
+        DCMotor.getFalcon500(1).withReduction(kSwerve.ANGLE_GEAR_RATIO),
+        kSwerve.SLIP_CURRENT,
+        65.0,
+        7.0,
+        kSwerve.WHEEL_DIAMETER,
+        1.5,
+        0.0
+    );
 
     private Optional<TeleopSwerveBaseCmd> defaultCommand = Optional.empty();
+    private SwerveSetpoint setpoint = SwerveSetpoint.zeroed();
 
     public Swerve(final Localizer localizer) {
         if (Robot.isReal()) {
@@ -88,19 +99,15 @@ public class Swerve implements LockFullSubsystem {
 
         visualizer = new SwerveVisualizer(swerveMods);
 
-        setpointProcessor.setDisabled(true);
-
         odometryThread.start();
-
-        velocitySender = localizer.velocityChannel().sender();
     }
 
-    public void drive(ChassisSpeeds speeds, boolean isOpenLoop) {
+    public void drive(ChassisSpeeds speeds) {
         log("targetChassisSpeed", speeds);
 
-        setModuleStates(
-            kSwerve.KINEMATICS.toSwerveModuleStates(speeds),
-                isOpenLoop);
+        setpoint = setpointGenerator.generateSetpoint(setpoint, speeds, ConstValues.PERIODIC_TIME);
+
+        setModuleStates(setpoint.moduleStates());
     }
 
     /**
@@ -127,13 +134,11 @@ public class Swerve implements LockFullSubsystem {
         return modulePositions;
     }
 
-    public void setModuleStates(SwerveModuleState[] desiredStates, boolean isOpenLoop) {
-        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, ConstValues.kSwerve.MAX_DRIVE_VELOCITY);
-
+    public void setModuleStates(AdvancedSwerveModuleState[] desiredStates) {
         log("regurgutatedChassisSpeed", kSwerve.KINEMATICS.toChassisSpeeds(desiredStates));
 
         for (SwerveModule module : swerveMods) {
-            module.setDesiredState(desiredStates[module.getModuleNumber()], isOpenLoop);
+            module.setDesiredState(AdvancedSwerveModuleState.fromBase(desiredStates[module.getModuleNumber()]));
         }
     }
 
@@ -160,7 +165,7 @@ public class Swerve implements LockFullSubsystem {
         Tracer.startTrace("SwervePeriodic");
 
         for (SwerveModule module : swerveMods) {
-            Tracer.traceFunc("SwerveModule[" + module.getModuleNumber() + "]", module::periodic);
+            Tracer.traceFunc(module.name, module::periodic);
         }
 
         Tracer.traceFunc("Gyro", gyro::periodic);
@@ -169,9 +174,7 @@ public class Swerve implements LockFullSubsystem {
             log("targetChassisSpeed", ZERO_SPEEDS);
         }
 
-        ChassisSpeeds measuredSpeeds = getChassisSpeed();
-        log("measuredChassisSpeed", measuredSpeeds);
-        velocitySender.send(measuredSpeeds);
+        log("measuredChassisSpeed", getChassisSpeed());
 
         visualizer.update();
 
@@ -180,15 +183,6 @@ public class Swerve implements LockFullSubsystem {
         });
 
         Tracer.endTrace();
-    }
-
-    public static double scope0To360(double angle) {
-        if (angle < 0) {
-            angle = 360 - (Math.abs(angle) % 360);
-        } else {
-            angle %= 360;
-        }
-        return angle;
     }
 
     public void setDefaultCommand(TeleopSwerveBaseCmd defaultCmd) {

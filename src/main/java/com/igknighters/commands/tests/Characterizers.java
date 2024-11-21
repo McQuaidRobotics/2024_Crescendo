@@ -2,8 +2,8 @@ package com.igknighters.commands.tests;
 
 import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.swerve.Swerve;
-import com.igknighters.util.geom.GeomUtil;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class Characterizers {
@@ -34,7 +34,7 @@ public class Characterizers {
     public static Command characterizeSwerve(Swerve swerve) {
         return new FeedForwardCharacterization(
             swerve,
-            volt -> swerve.setVoltageOut(volt, GeomUtil.ROTATION2D_ZERO),
+            volt -> swerve.setVoltageOut(volt, Rotation2d.kZero),
             () -> swerve.getChassisSpeed().vxMetersPerSecond
         ).withName("Swerve Characterization");
     }

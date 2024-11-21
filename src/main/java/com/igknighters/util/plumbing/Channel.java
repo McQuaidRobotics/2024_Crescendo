@@ -1,6 +1,7 @@
 package com.igknighters.util.plumbing;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -11,10 +12,13 @@ import java.lang.ref.WeakReference;
  * A utility implementing broadcast(multi-sender, multi-receiver) type-safe channels for inner and inter thread communication
  */
 public class Channel<T> {
+    private final T[] templateArray;
     private final ArrayList<WeakReference<Receiver<T>>> receivers = new ArrayList<>();
     private final Sender<T> sender = new Sender<>(this);
 
-    public Channel() {}
+    public Channel(T[] template) {
+        templateArray = template;
+    }
 
     /**
      * Returns the sender for this channel
@@ -33,7 +37,7 @@ public class Channel<T> {
      * @return a new receiver for this channel
      */
     public Receiver<T> openReceiver(int bufferSize) {
-        Receiver<T> r = new ReceiverBuffered<>(new WeakReference<>(this), bufferSize, false);
+        Receiver<T> r = new ReceiverBuffered<>(this, makeBuffer(bufferSize), false);
         addReceiver(r);
         return r;
     }
@@ -48,7 +52,7 @@ public class Channel<T> {
     @SuppressWarnings("unchecked")
     public <TSM extends ThreadSafetyMarker> SafetyMarkedReceiver<T, TSM> openReceiver(int bufferSize, TSM safetyMarker) {
         // this allows the type system to enforce our thread safety without needing to define a new class for each safety marker
-        var r = (SafetyMarkedReceiver<T, TSM>) new ReceiverBuffered<>(new WeakReference<>(this), bufferSize, safetyMarker.threadSafe());
+        var r = (SafetyMarkedReceiver<T, TSM>) new ReceiverBuffered<>(this, makeBuffer(bufferSize), safetyMarker.threadSafe());
         addReceiver(r);
         return r;
     }
@@ -68,6 +72,10 @@ public class Channel<T> {
             }
         }
         receivers.add(new WeakReference<>(receiver));
+    }
+
+    T[] makeBuffer(int size) {
+        return Arrays.copyOf(templateArray, size);
     }
 
     /**
@@ -147,9 +155,9 @@ public class Channel<T> {
      * @param <T> The type of the channel
      */
     public static abstract class Receiver<T> {
-        private final WeakReference<Channel<T>> channel;
+        private final Channel<T> channel;
 
-        Receiver(WeakReference<Channel<T>> channel) {
+        Receiver(Channel<T> channel) {
             this.channel = channel;
         }
 
@@ -176,6 +184,11 @@ public class Channel<T> {
          * @return whether the channel has any content
          */
         public abstract boolean hasData();
+
+        /**
+         * @return all received values, removing them from the channel
+         */
+        public abstract T[] recvAll();
 
         /**
          * @return an optional containing the received value, or empty if the channel is
@@ -231,14 +244,14 @@ public class Channel<T> {
          * Closes the receiver, removing it from the channel
          */
         public void close() {
-            Optional.ofNullable(channel.get()).ifPresent(channel -> channel.popReceiver(this));
+            channel.popReceiver(this);
         }
 
         /**
          * Re-opens the receiver, adding it back to the channel
          */
         public void open() {
-            Optional.ofNullable(channel.get()).ifPresent(channel -> channel.addReceiver(this));
+            channel.addReceiver(this);
         }
 
         /**
@@ -248,8 +261,8 @@ public class Channel<T> {
          * @return the forked receiver
          */
         public Receiver<T> fork(int bufferSize) {
-            Receiver<T> r = new ReceiverBuffered<>(channel, bufferSize, false);
-            Optional.ofNullable(channel.get()).ifPresent(channel -> channel.addReceiver(r));
+            Receiver<T> r = new ReceiverBuffered<>(channel, channel.makeBuffer(bufferSize), false);
+            channel.addReceiver(r);
             return r;
         }
 
@@ -262,14 +275,14 @@ public class Channel<T> {
          */
         @SuppressWarnings("unchecked")
         public <TSM extends ThreadSafetyMarker> SafetyMarkedReceiver<T, TSM> fork(int bufferSize, TSM safetyMarker) {
-            var r = (SafetyMarkedReceiver<T, TSM>) new ReceiverBuffered<>(channel, bufferSize, safetyMarker.threadSafe());
-            Optional.ofNullable(channel.get()).ifPresent(channel -> channel.addReceiver(r));
+            var r = (SafetyMarkedReceiver<T, TSM>) new ReceiverBuffered<>(channel, channel.makeBuffer(bufferSize), safetyMarker.threadSafe());
+            channel.addReceiver(r);
             return r;
         }
     }
 
     public static abstract class SafetyMarkedReceiver<T, TSM extends ThreadSafetyMarker> extends Receiver<T> {
-        SafetyMarkedReceiver(WeakReference<Channel<T>> channel) {
+        SafetyMarkedReceiver(Channel<T> channel) {
             super(channel);
         }
     }
@@ -289,17 +302,10 @@ public class Channel<T> {
         /** the index of the oldest data */
         private int oldestIndex = 0;
 
-        @SuppressWarnings("unchecked")
-        public ReceiverBuffered(WeakReference<Channel<T>> channel, int bufferSize, boolean threadSafe) {
+        public ReceiverBuffered(Channel<T> channel, T[] buffer, boolean threadSafe) {
             super(channel);
             lock = threadSafe ? Optional.of(new ReentrantLock(false)) : Optional.empty();
-            if (bufferSize <= 0) {
-                throw new IllegalArgumentException("bufferSize must be positive and non-zero");
-            }
-            buffer = (T[]) new Object[bufferSize];
-            for (int i = 0; i < bufferSize; i++) {
-                buffer[i] = null;
-            }
+            this.buffer = buffer;
         }
 
         @Override
@@ -331,6 +337,29 @@ public class Channel<T> {
             try {
                 return buffer[oldestIndex] != null;
             } finally {
+                lock.ifPresent(Lock::unlock);
+            }
+        }
+
+        @Override
+        public T[] recvAll() {
+            lock.ifPresent(Lock::lock);
+            try {
+                if (oldestIndex == newestIndex) {
+                    return Arrays.copyOf(buffer, 0);
+                } else if (oldestIndex < newestIndex) {
+                    return Arrays.copyOfRange(buffer, oldestIndex, newestIndex);
+                } else {
+                    T[] tail = Arrays.copyOfRange(buffer, oldestIndex, buffer.length);
+                    T[] head = Arrays.copyOfRange(buffer, 0, newestIndex);
+                    T[] result = Arrays.copyOf(tail, tail.length + head.length);
+                    System.arraycopy(head, 0, result, tail.length, head.length);
+                    return head;
+                }
+            } finally {
+                newestIndex = 0;
+                oldestIndex = 0;
+                Arrays.fill(buffer, null);
                 lock.ifPresent(Lock::unlock);
             }
         }

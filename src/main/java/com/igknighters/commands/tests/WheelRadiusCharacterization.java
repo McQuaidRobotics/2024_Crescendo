@@ -79,7 +79,7 @@ public class WheelRadiusCharacterization extends Command {
     public void execute() {
         // Run drive at velocity
         outputSpeed.omegaRadiansPerSecond = omegaLimiter.calculate(omegaDirection.value * characterizationSpeed.value());
-        swerve.drive(outputSpeed, false);
+        swerve.drive(outputSpeed);
 
         // Get yaw and wheel positions
         accumGyroYawRads += MathUtil.angleModulus(gyroYawRadsSupplier.getAsDouble() - lastGyroYawRads);

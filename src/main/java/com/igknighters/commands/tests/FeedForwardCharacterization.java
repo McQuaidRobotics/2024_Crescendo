@@ -15,8 +15,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import com.igknighters.util.PolynomialRegression;
-
 public class FeedForwardCharacterization extends Command {
   private static final double START_DELAY_SECS = 2.0;
   private static final double RAMP_VOLTS_PER_SEC = 0.1;
@@ -85,17 +83,17 @@ public class FeedForwardCharacterization extends Command {
         return;
       }
 
-      PolynomialRegression regression =
-          new PolynomialRegression(
-              velocityData.stream().mapToDouble(Double::doubleValue).toArray(),
-              voltageData.stream().mapToDouble(Double::doubleValue).toArray(),
-              1);
+      // PolynomialRegression regression =
+      //     new PolynomialRegression(
+      //         velocityData.stream().mapToDouble(Double::doubleValue).toArray(),
+      //         voltageData.stream().mapToDouble(Double::doubleValue).toArray(),
+      //         1);
 
-      System.out.println("FF Characterization Results:");
-      System.out.println("\tCount=" + Integer.toString(velocityData.size()) + "");
-      System.out.println(String.format("\tR2=%.5f", regression.R2()));
-      System.out.println(String.format("\tkS=%.5f", regression.beta(0)));
-      System.out.println(String.format("\tkV=%.5f", regression.beta(1)));
+      // System.out.println("FF Characterization Results:");
+      // System.out.println("\tCount=" + Integer.toString(velocityData.size()) + "");
+      // System.out.println(String.format("\tR2=%.5f", regression.R2()));
+      // System.out.println(String.format("\tkS=%.5f", regression.beta(0)));
+      // System.out.println(String.format("\tkV=%.5f", regression.beta(1)));
     }
   }
 }

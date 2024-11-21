@@ -65,6 +65,6 @@ public class AutoController implements BiConsumer<Pose2d, SwerveSample> {
             pose.getRotation()
         );
 
-        swerve.drive(out, false);
+        swerve.drive(out);
     }
 }

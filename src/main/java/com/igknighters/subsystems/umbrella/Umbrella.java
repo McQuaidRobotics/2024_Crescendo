@@ -10,10 +10,10 @@ import com.igknighters.subsystems.SubsystemResources.LockFullSubsystem;
 import com.igknighters.subsystems.umbrella.intake.*;
 import com.igknighters.subsystems.umbrella.shooter.*;
 import com.igknighters.util.GamepieceSimulator;
-import com.igknighters.util.geom.GeomUtil;
 import com.igknighters.util.logging.Tracer;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -172,7 +172,7 @@ public class Umbrella implements LockFullSubsystem {
             localizer::pose,
             this::isIntaking,
             notes -> {
-                Pose2d[] notePoses = notes.stream().map(p -> new Pose2d(p, GeomUtil.ROTATION2D_ZERO)).toArray(Pose2d[]::new);
+                Pose2d[] notePoses = notes.stream().map(p -> new Pose2d(p, Rotation2d.kZero)).toArray(Pose2d[]::new);
                 noteSender.accept(notePoses);
             },
             List.of(
@@ -181,21 +181,21 @@ public class Umbrella implements LockFullSubsystem {
                         Units.inchesToMeters(24.0),
                         Units.inchesToMeters(0.0)
                     ),
-                    GeomUtil.ROTATION2D_ZERO
+                    Rotation2d.kZero
                 ),
                 new Transform2d(
                     new Translation2d(
                         Units.inchesToMeters(24.0),
                         Units.inchesToMeters(-7.0)
                     ),
-                    GeomUtil.ROTATION2D_ZERO
+                    Rotation2d.kZero
                 ),
                 new Transform2d(
                     new Translation2d(
                         Units.inchesToMeters(24.0),
                         Units.inchesToMeters(7.0)
                     ),
-                    GeomUtil.ROTATION2D_ZERO
+                    Rotation2d.kZero
                 )
             )
         ).onTrue(

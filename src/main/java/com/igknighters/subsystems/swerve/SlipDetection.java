@@ -3,7 +3,6 @@ package com.igknighters.subsystems.swerve;
 // import java.util.function.IntFunction;
 
 import com.igknighters.constants.ConstValues.kSwerve;
-import com.igknighters.util.geom.GeomUtil;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -23,7 +22,7 @@ public class SlipDetection implements LogLocal {
         Translation2d position
     ) implements StructSerializable {
         public static ModuleData zeroed() {
-            return new ModuleData(0, 0, GeomUtil.ROTATION2D_ZERO, GeomUtil.TRANSLATION2D_ZERO);
+            return new ModuleData(0, 0, Rotation2d.kZero, Translation2d.kZero);
         }
 
         @SuppressWarnings("unused")
@@ -39,10 +38,10 @@ public class SlipDetection implements LogLocal {
     };
     @Log
     private final SwerveModulePosition[] lastPositions = new SwerveModulePosition[] {
-        new SwerveModulePosition(0, GeomUtil.ROTATION2D_ZERO),
-        new SwerveModulePosition(0, GeomUtil.ROTATION2D_ZERO),
-        new SwerveModulePosition(0, GeomUtil.ROTATION2D_ZERO),
-        new SwerveModulePosition(0, GeomUtil.ROTATION2D_ZERO)
+        new SwerveModulePosition(0, Rotation2d.kZero),
+        new SwerveModulePosition(0, Rotation2d.kZero),
+        new SwerveModulePosition(0, Rotation2d.kZero),
+        new SwerveModulePosition(0, Rotation2d.kZero)
     };
 
     @Log.Once

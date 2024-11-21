@@ -1,4 +1,4 @@
-package com.igknighters.util.robots;
+package com.igknighters.util;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;

@@ -1,8 +1,10 @@
-package com.igknighters.subsystems.swerve;
+package com.igknighters.subsystems.swerve.control;
 
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kSwerve.kRotationController;
+import com.igknighters.subsystems.swerve.Swerve;
+
 import monologue.ProceduralStructGenerator;
 
 import edu.wpi.first.math.MathUtil;

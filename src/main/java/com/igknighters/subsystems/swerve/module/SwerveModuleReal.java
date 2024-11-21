@@ -1,9 +1,7 @@
 package com.igknighters.subsystems.swerve.module;
 
-import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.VelocityVoltage;
-import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
@@ -15,7 +13,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.RobotController;
 import monologue.Annotations.IgnoreLogged;
 
 import com.igknighters.constants.ConstValues.kSwerve;
@@ -29,8 +26,7 @@ import com.igknighters.util.logging.BootupLogger;
 public class SwerveModuleReal extends SwerveModule {
     private final TalonFX driveMotor;
     private final BaseStatusSignal driveVoltSignal, driveAmpSignal;
-    private final ControlRequest driveMotorClosedReq;
-    private final ControlRequest driveMotorOpenReq;
+    private final VelocityVoltage driveMotorClosedReq;
 
     private final TalonFX angleMotor;
     private final BaseStatusSignal angleVoltSignal, angleAmpSignal;
@@ -50,6 +46,7 @@ public class SwerveModuleReal extends SwerveModule {
     private Rotation2d lastAngle = new Rotation2d();
 
     public SwerveModuleReal(final SwerveModuleConstants moduleConstants, boolean isPro, final RealSwerveOdometryThread odoThread) {
+        super("SwerveModule[" + moduleConstants.getModuleId() + "]");
         this.odoThread = odoThread;
 
         this.isPro = isPro;
@@ -96,7 +93,6 @@ public class SwerveModuleReal extends SwerveModule {
 
         log("isPro", isPro);
 
-        driveMotorOpenReq = new VoltageOut(0).withEnableFOC(isPro).withUpdateFreqHz(0);
         driveMotorClosedReq = new VelocityVoltage(0).withEnableFOC(isPro).withUpdateFreqHz(0);
 
         BootupLogger.bootupLog(
@@ -160,10 +156,10 @@ public class SwerveModuleReal extends SwerveModule {
     }
 
     @Override
-    public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop) {
-        desiredState.optimize(getAngle());;
+    public void setDesiredState(AdvancedSwerveModuleState desiredState) {
+        desiredState.optimize(getAngle());
         setAngle(desiredState);
-        setSpeed(desiredState, isOpenLoop);
+        setSpeed(desiredState);
     }
 
     private void setAngle(SwerveModuleState desiredState) {
@@ -176,16 +172,13 @@ public class SwerveModuleReal extends SwerveModule {
         lastAngle = angle;
     }
 
-    private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop) {
+    private void setSpeed(AdvancedSwerveModuleState desiredState) {
         super.targetDriveVeloMPS = desiredState.speedMetersPerSecond;
-        if (isOpenLoop) {
-            double percentOutput = desiredState.speedMetersPerSecond / kSwerve.MAX_DRIVE_VELOCITY;
-            driveMotor.setControl(((VoltageOut) driveMotorOpenReq).withOutput(percentOutput * RobotController.getBatteryVoltage()));
-        } else {
-            double rps = (desiredState.speedMetersPerSecond / kSwerve.WHEEL_CIRCUMFERENCE) * kSwerve.DRIVE_GEAR_RATIO;
-            log("DriveRPS", rps);
-            driveMotor.setControl(((VelocityVoltage) driveMotorClosedReq).withVelocity(rps));
-        }
+        double rps = (desiredState.speedMetersPerSecond / kSwerve.WHEEL_CIRCUMFERENCE) * kSwerve.DRIVE_GEAR_RATIO;
+        log("DriveRPS", rps);
+        driveMotor.setControl(
+            driveMotorClosedReq.withVelocity(rps)
+            .withAcceleration(desiredState.driveAccelerationFF));
     }
 
     public SwerveModuleState getCurrentState() {

@@ -4,43 +4,43 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 import com.igknighters.Localizer;
-import com.igknighters.subsystems.swerve.RotationalController;
 import com.igknighters.subsystems.swerve.Swerve;
-import com.igknighters.util.geom.AllianceFlip;
-import com.igknighters.util.geom.GeomUtil;
+import com.igknighters.subsystems.swerve.control.RotationalController;
+import com.igknighters.util.AllianceFlip;
 
 public class SwerveCommands {
-    public static Command commandXDrives(final Swerve swerve) {
-        return swerve.runOnce(() -> {
-            SwerveModuleState[] newModuleStates = {
-                    new SwerveModuleState(0.0, Rotation2d.fromDegrees(270)),
-                    new SwerveModuleState(0.0, Rotation2d.fromDegrees(180)),
-                    new SwerveModuleState(0.0, Rotation2d.fromDegrees(90)),
-                    new SwerveModuleState(0.0, Rotation2d.fromDegrees(0))
-            };
-            swerve.setModuleStates(newModuleStates, false);
-        }).andThen(new WaitCommand(0.2)).withName("commandXDrives");
+    /**
+     * Gets the angle between two points
+     * 
+     * @param currentTrans The current translation
+     * @param pose The pose to get the angle to
+     * @param angleOffet An offset to add to the angle
+     * @return The angle between the two points
+     */
+    public static Rotation2d rotationRelativeToPose(Translation2d currentTrans, Translation2d pose) {
+        double angleBetween = Math.atan2(
+                pose.getY() - currentTrans.getY(),
+                pose.getX() - currentTrans.getX());
+        return Rotation2d.fromRadians(angleBetween);
     }
 
     public static Command commandStopDrives(final Swerve swerve) {
-        return swerve.runOnce(() -> swerve.drive(new ChassisSpeeds(), true)).withName("commandStopDrives");
+        return swerve.runOnce(() -> swerve.drive(new ChassisSpeeds())).withName("commandStopDrives");
     }
 
     public static Command orientGyro(Swerve swerve, Localizer localizer) {
         return swerve.runOnce(() -> {
             if (AllianceFlip.isBlue()) {
-                swerve.setYaw(GeomUtil.ROTATION2D_ZERO);
-                var pose = new Pose2d(localizer.pose().getTranslation(), GeomUtil.ROTATION2D_ZERO);
+                swerve.setYaw(Rotation2d.kZero);
+                var pose = new Pose2d(localizer.pose().getTranslation(), Rotation2d.kZero);
                 localizer.reset(pose);
             } else {
-                swerve.setYaw(GeomUtil.ROTATION2D_PI);
-                var pose = new Pose2d(localizer.pose().getTranslation(), GeomUtil.ROTATION2D_PI);
+                swerve.setYaw(Rotation2d.kPi);
+                var pose = new Pose2d(localizer.pose().getTranslation(), Rotation2d.kPi);
                 localizer.reset(pose);
             }
         });
@@ -67,7 +67,7 @@ public class SwerveCommands {
         @Override
         public void execute() {
             velo.omegaRadiansPerSecond = rotController.calculate(getTarget().getRadians(), 0.0);
-            swerve.drive(velo, false);
+            swerve.drive(velo);
         }
 
         @Override
@@ -85,8 +85,8 @@ public class SwerveCommands {
         return new PointTowardsCommand(swerve) {
             @Override
             Rotation2d getTarget() {
-                return GeomUtil.rotationRelativeToPose(
-                        GeomUtil.TRANSLATION2D_ZERO, target);
+                return rotationRelativeToPose(
+                        Translation2d.kZero, target);
             }
         };
     }
@@ -102,7 +102,7 @@ public class SwerveCommands {
 
     public static Command driveChassisSpeed(Swerve swerve, final ChassisSpeeds speeds) {
         return Commands.run(
-            () -> swerve.drive(speeds, false),
+            () -> swerve.drive(speeds),
             swerve
         );
     }

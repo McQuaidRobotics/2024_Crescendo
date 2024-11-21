@@ -12,7 +12,10 @@ import com.igknighters.subsystems.vision.camera.Camera;
 import com.igknighters.subsystems.vision.camera.Camera.CameraConfig;
 import com.igknighters.util.LerpTable;
 import com.igknighters.util.LerpTable.LerpTableEntry;
-import com.igknighters.util.geom.Rectangle2d;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rectangle2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -74,14 +77,15 @@ public final class ConstValues {
         public static final double EXTENSION_MAX = 14.0;
 
         public static final Rectangle2d DRIVE_BASE = new Rectangle2d(
-                0.0,
-                0.0,
+                new Pose2d(),
                 FRAME_WIDTH + (BUMPER_THICKNESS * 2),
                 BUMPER_HEIGHT);
 
         public static final Rectangle2d BOUNDS = new Rectangle2d(
-                (-EXTENSION_MAX * Conv.INCHES_TO_METERS) + BUMPER_THICKNESS,
-                0.0,
+                new Pose2d(new Translation2d(
+                    (-EXTENSION_MAX * Conv.INCHES_TO_METERS) + BUMPER_THICKNESS,
+                    0.0
+                ), Rotation2d.kZero),
                 FRAME_WIDTH + ((EXTENSION_MAX * 2) * Conv.INCHES_TO_METERS),
                 48.0 * Conv.INCHES_TO_METERS);
 
@@ -204,6 +208,8 @@ public final class ConstValues {
         public static final double ANGLE_GEAR_RATIO = SwerveGearRatios.ANGLE;
 
         public static final double DRIVE_GEAR_RATIO = SwerveGearRatios.L3_DRIVE_KRAKEN;
+
+        public static final double WHEEL_COF = 1.5;
 
         /**
          * Not every motor can output the max speed at all times, add a buffer to make

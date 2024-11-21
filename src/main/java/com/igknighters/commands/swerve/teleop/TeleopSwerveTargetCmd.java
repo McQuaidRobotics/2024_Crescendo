@@ -1,9 +1,8 @@
 package com.igknighters.commands.swerve.teleop;
 
-import com.igknighters.subsystems.swerve.RotationalController;
 import com.igknighters.subsystems.swerve.Swerve;
-import com.igknighters.util.geom.AllianceFlip;
-import com.igknighters.util.geom.GeomUtil;
+import com.igknighters.subsystems.swerve.control.RotationalController;
+import com.igknighters.util.AllianceFlip;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -13,6 +12,7 @@ import edu.wpi.first.math.util.Units;
 import java.util.function.Supplier;
 
 import com.igknighters.Localizer;
+import com.igknighters.commands.swerve.SwerveCommands;
 import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kUmbrella;
@@ -20,7 +20,7 @@ import com.igknighters.controllers.ControllerBase;
 
 public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
 
-    private static final Rotation2d offset = GeomUtil.ROTATION2D_PI.plus(Rotation2d.fromDegrees(1.0));
+    private static final Rotation2d offset = Rotation2d.kPi.plus(Rotation2d.fromDegrees(1.0));
 
     private final Supplier<Translation2d> translationSupplier;
     private final Translation2d target;
@@ -81,12 +81,12 @@ public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
         Rotation2d targetAngle;
 
         if (movementComp) {
-            targetAngle = GeomUtil.rotationRelativeToPose(
+            targetAngle = SwerveCommands.rotationRelativeToPose(
                 lookaheadTranslation,
                 adjustedTarget
             ).plus(offset);
         } else {
-            targetAngle = GeomUtil.rotationRelativeToPose(
+            targetAngle = SwerveCommands.rotationRelativeToPose(
                 currentTranslation,
                 targetTranslation
             ).plus(offset);
@@ -94,7 +94,7 @@ public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
 
         desiredChassisSpeeds.omegaRadiansPerSecond = rotController.calculate(targetAngle.getRadians(), Units.degreesToRadians(0.3));
 
-        swerve.drive(desiredChassisSpeeds, false);
+        swerve.drive(desiredChassisSpeeds);
     }
 
     public static final TeleopSwerveBaseStruct struct = new TeleopSwerveBaseStruct();

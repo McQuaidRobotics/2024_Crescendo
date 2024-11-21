@@ -40,6 +40,7 @@ public class SwerveModuleSim extends SwerveModule {
     public final int moduleNumber;
 
     public SwerveModuleSim(final SwerveModuleConstants moduleConstants, SimSwerveOdometryThread odoThread) {
+        super("SwerveModule[" + moduleConstants.getModuleId() + "]");
         this.moduleNumber = moduleConstants.getModuleId().num;
 
         // just to test the consts
@@ -65,11 +66,11 @@ public class SwerveModuleSim extends SwerveModule {
         return driveRotationsToMeters(radians / (2.0 * Math.PI));
     }
 
-    public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop) {
+    public void setDesiredState(AdvancedSwerveModuleState desiredState) {
         gotDirectionsLastCycle = true;
         desiredState.optimize(getAngle());
         setAngle(desiredState);
-        setSpeed(desiredState, isOpenLoop);
+        setSpeed(desiredState);
     }
 
     public SwerveModulePosition getCurrentPosition() {
@@ -108,7 +109,7 @@ public class SwerveModuleSim extends SwerveModule {
         super.angleAbsoluteRads = angle.getRadians();
     }
 
-    private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop) {
+    private void setSpeed(SwerveModuleState desiredState) {
         super.targetDriveVeloMPS = desiredState.speedMetersPerSecond;
 
         desiredState.speedMetersPerSecond *= Math.cos(angleFeedback.getError());

@@ -12,7 +12,7 @@ import com.igknighters.subsystems.stem.Stem;
 import com.igknighters.subsystems.stem.StemPosition;
 import com.igknighters.subsystems.swerve.Swerve;
 import com.igknighters.subsystems.umbrella.Umbrella;
-import com.igknighters.util.geom.AllianceFlip;
+import com.igknighters.util.AllianceFlip;
 import com.igknighters.util.plumbing.TunableValues;
 import com.igknighters.util.plumbing.TunableValues.TunableDouble;
 

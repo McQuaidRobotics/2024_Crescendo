@@ -6,9 +6,29 @@ import com.igknighters.subsystems.swerve.Swerve;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.util.struct.Struct;
 import monologue.Annotations.Log;
 
 public abstract class SwerveModule extends Component {
+    public static final class AdvancedSwerveModuleState extends SwerveModuleState {
+        public double steerVelocityFF;
+        public double driveAccelerationFF;
+
+        public AdvancedSwerveModuleState(double speedMetersPerSecond, Rotation2d angle, double steerVelocityFF,
+                double driveAccelerationFF) {
+            super(speedMetersPerSecond, angle);
+            this.steerVelocityFF = steerVelocityFF;
+            this.driveAccelerationFF = driveAccelerationFF;
+        }
+
+        //todo: implement custom struct
+        public static final Struct<SwerveModuleState> struct = SwerveModuleState.struct;
+
+        public static AdvancedSwerveModuleState fromBase(SwerveModuleState base) {
+            return new AdvancedSwerveModuleState(base.speedMetersPerSecond, base.angle, 0.0, 0.0);
+        }
+    }
+
     @Log
     public double driveVeloMPS = 0.0;
     @Log
@@ -30,13 +50,19 @@ public abstract class SwerveModule extends Component {
     @Log
     public double angleAmps = 0.0;
 
+    public final String name;
+
+    protected SwerveModule(String name) {
+        this.name = name;
+    }
+
     /**
      * @param desiredState The state that the module should assume, angle and
      *                     velocity.
      * @param isOpenLoop   Whether the module speed assumed should be reached via
      *                     open or closed loop control.
      */
-    public abstract void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop);
+    public abstract void setDesiredState(AdvancedSwerveModuleState desiredState);
 
     /**
      * @return The velocity/angle of the module.

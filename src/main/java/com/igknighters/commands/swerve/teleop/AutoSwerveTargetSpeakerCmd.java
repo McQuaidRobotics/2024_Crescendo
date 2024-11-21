@@ -1,9 +1,8 @@
 package com.igknighters.commands.swerve.teleop;
 
-import com.igknighters.subsystems.swerve.RotationalController;
 import com.igknighters.subsystems.swerve.Swerve;
-import com.igknighters.util.geom.AllianceFlip;
-import com.igknighters.util.geom.GeomUtil;
+import com.igknighters.subsystems.swerve.control.RotationalController;
+import com.igknighters.util.AllianceFlip;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -15,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 import java.util.function.Supplier;
 
+import com.igknighters.commands.swerve.SwerveCommands;
 import com.igknighters.constants.FieldConstants;
 
 public class AutoSwerveTargetSpeakerCmd extends Command {
@@ -44,10 +44,10 @@ public class AutoSwerveTargetSpeakerCmd extends Command {
         Translation2d speaker = FieldConstants.SPEAKER.toTranslation2d();
         Translation2d targetTranslation = AllianceFlip.isBlue() ? speaker : AllianceFlip.flipTranslation(speaker);
 
-        Rotation2d targetAngle = GeomUtil.rotationRelativeToPose(
+        Rotation2d targetAngle = SwerveCommands.rotationRelativeToPose(
                 poseSupplier.get().getTranslation(),
                 targetTranslation
-        ).plus(GeomUtil.ROTATION2D_PI);
+        ).plus(Rotation2d.kPi);
         double rotVelo = rotController.calculate(targetAngle.getRadians(), Units.degreesToRadians(1.5));
 
         desiredChassisSpeeds.omegaRadiansPerSecond = rotVelo;
@@ -60,7 +60,7 @@ public class AutoSwerveTargetSpeakerCmd extends Command {
             isDone = true;
         }
 
-        swerve.drive(desiredChassisSpeeds, false);
+        swerve.drive(desiredChassisSpeeds);
     }
 
     @Override
@@ -70,6 +70,6 @@ public class AutoSwerveTargetSpeakerCmd extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        swerve.drive(new ChassisSpeeds(), false);
+        swerve.drive(new ChassisSpeeds());
     }
 }

@@ -1,5 +1,11 @@
 package monologue;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -8,9 +14,12 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.BaseStream;
 
@@ -175,6 +184,112 @@ public final class ProceduralStructGenerator {
     }
   }
 
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ ElementType.FIELD, ElementType.RECORD_COMPONENT })
+  @Documented
+  public @interface IgnoreStructField {
+  }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ ElementType.FIELD, ElementType.RECORD_COMPONENT })
+  @Documented
+  public @interface FixedSizeArray {
+    int size();
+  }
+
+  private static OptionalInt arraySize(AnnotatedElement field) {
+    return Optional.ofNullable(field.getAnnotation(FixedSizeArray.class))
+        .map(FixedSizeArray::size)
+        .map(OptionalInt::of)
+        .orElse(OptionalInt.empty());
+  }
+
+  private static boolean shouldIgnore(AnnotatedElement field) {
+    return field.isAnnotationPresent(IgnoreStructField.class);
+  }
+
+  private record StructField(
+      String name,
+      String type,
+      int size,
+      boolean immutable,
+      Set<Struct<?>> structsToLoad,
+      Unpacker<?> unpacker,
+      Packer<?> packer) {
+
+    public static StructField fromField(Field field) {
+      return StructField.fromNameAndClass(field.getName(), field.getType(), arraySize(field),
+          Modifier.isFinal(field.getModifiers()));
+    }
+
+    public static StructField fromRecordComponent(RecordComponent component) {
+      return StructField.fromNameAndClass(component.getName(), component.getType(), arraySize(component), true);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static StructField fromNameAndClass(String name, Class<?> clazz, OptionalInt arraySize, boolean isFinal) {
+      if (!isFixedSize(clazz, arraySize)) {
+        return null;
+      }
+      if (clazz.isArray() && arraySize.isPresent()) {
+        final Class<?> componentType = clazz.getComponentType();
+        final int size = arraySize.getAsInt();
+        final StructField componentField = fromNameAndClass(componentType.getSimpleName(), componentType,
+            OptionalInt.empty(), false);
+        return new StructField(
+            name + "[" + size + "]",
+            componentField.type,
+            componentField.size * size,
+            isFinal,
+            componentField.structsToLoad,
+            buffer -> {
+              Object[] array = new Object[size];
+              for (int i = 0; i < size; i++) {
+                array[i] = componentField.unpacker.unpack(buffer);
+              }
+              return array;
+            },
+            (buffer, value) -> {
+              for (Object obj : (Object[]) value) {
+                ((Packer<Object>) componentField.packer).pack(buffer, obj);
+              }
+              return buffer;
+            });
+      } else if (primitiveTypeMap.containsKey(clazz)) {
+        PrimType<?> primType = primitiveTypeMap.get(clazz);
+        return new StructField(
+            name,
+            primType.name,
+            primType.size,
+            isFinal,
+            Set.of(),
+            primType.unpacker,
+            primType.packer);
+      } else {
+        Struct<?> struct = null;
+        if (customStructTypeMap.containsKey(clazz)) {
+          struct = customStructTypeMap.get(clazz);
+        } else if (StructSerializable.class.isAssignableFrom(clazz)) {
+          struct = extractClassStructDynamic(clazz).orElse(null);
+        }
+        if (struct == null) {
+          RuntimeLog.warn("Could not structify field: " + name);
+          return null;
+        }
+        Set<Struct<?>> structsToLoad = new HashSet<>(Set.of(struct.getNested()));
+        structsToLoad.add(struct);
+        return new StructField(
+            name,
+            struct.getTypeName(),
+            struct.getSize(),
+            struct.isImmutable() && isFinal,
+            structsToLoad,
+            struct::unpack,
+            Packer.fromStruct(struct));
+      }
+    }
+  }
+
   /**
    * Introspects a class to determine if it's a fixed size.
    * 
@@ -183,12 +298,17 @@ public final class ProceduralStructGenerator {
    * @param clazz The class to introspect.
    * @return Whether the class is fixed size.
    */
-  public static boolean isFixedSize(Class<?> clazz) {
+  public static boolean isFixedSize(Class<?> clazz, OptionalInt arraySize) {
     if (clazz.isArray()) {
-      return false;
+      if (arraySize.isEmpty()) {
+        return false;
+      } else {
+        Class<?> componentType = clazz.getComponentType();
+        return isFixedSize(componentType, OptionalInt.empty());
+      }
     } else if (clazz.isRecord()) {
       for (RecordComponent component : clazz.getRecordComponents()) {
-        if (!isFixedSize(component.getType())) {
+        if (!isFixedSize(component.getType(), arraySize(component))) {
           return false;
         }
       }
@@ -208,7 +328,7 @@ public final class ProceduralStructGenerator {
           return false;
         }
         if (!primitiveTypeMap.containsKey(fieldClass)
-            && !isFixedSize(fieldClass)) {
+            && !isFixedSize(fieldClass, arraySize(field))) {
           return false;
         }
       }
@@ -310,8 +430,8 @@ public final class ProceduralStructGenerator {
      * @param type The type of the field.
      * @return The builder for chaining.
      */
-    public SchemaBuilder addField(String name, String type) {
-      m_builder.append(type).append(' ').append(name).append(';');
+    public SchemaBuilder addField(StructField field) {
+      m_builder.append(field.type).append(' ').append(field.name).append(';');
       return this;
     }
 
@@ -369,6 +489,81 @@ public final class ProceduralStructGenerator {
     };
   }
 
+  private static abstract class ProcStruct<T> implements Struct<T> {
+    protected final Class<T> typeClass;
+    protected final List<StructField> fields;
+    private final String schema;
+
+    // stored values so we never recompute them
+    private final int size;
+    private final boolean isImmutable;
+    private final Struct<?>[] nested;
+
+    public ProcStruct(Class<T> typeClass, List<StructField> fields, String schema) {
+      this.typeClass = typeClass;
+      this.fields = fields;
+      this.schema = schema;
+
+      this.size = fields.stream().mapToInt(StructField::size).sum();
+      this.isImmutable = fields.stream().allMatch(StructField::immutable);
+      this.nested = fields.stream()
+          .map(StructField::structsToLoad)
+          .flatMap(Collection::stream)
+          .toArray(Struct<?>[]::new);
+
+      ProceduralStructGenerator.customStructTypeMap.put(typeClass, this);
+    }
+
+    @Override
+    public Class<T> getTypeClass() {
+      return typeClass;
+    }
+
+    @Override
+    public String getTypeName() {
+      return typeClass.getSimpleName();
+    }
+
+    @Override
+    public String getSchema() {
+      return schema;
+    }
+
+    @Override
+    public int getSize() {
+      return size;
+    }
+
+    @Override
+    public boolean isCloneable() {
+      return Cloneable.class.isAssignableFrom(typeClass);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public T clone(T obj) throws CloneNotSupportedException {
+      if (isCloneable()) {
+        try {
+          return (T) typeClass.getMethod("clone").invoke(obj);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+          throw new CloneNotSupportedException();
+        }
+      } else {
+        throw new CloneNotSupportedException();
+      }
+    }
+
+    @Override
+    public boolean isImmutable() {
+      return isImmutable;
+    }
+
+    @Override
+    public Struct<?>[] getNested() {
+      return nested;
+    }
+  }
+
   /**
    * Generates a {@link Struct} for the given {@link Record} class. If a {@link Struct} cannot be
    * generated from the {@link Record}, the errors encountered will be printed and a no-op {@link
@@ -382,91 +577,28 @@ public final class ProceduralStructGenerator {
   public static <R extends Record> Struct<R> genRecord(final Class<R> recordClass) {
     final RecordComponent[] components = recordClass.getRecordComponents();
     final SchemaBuilder schemaBuilder = new SchemaBuilder();
-    final ArrayList<Struct<?>> nestedStructs = new ArrayList<>();
-    final ArrayList<Unpacker<?>> unpackers = new ArrayList<>();
-    final ArrayList<Packer<?>> packers = new ArrayList<>();
-
-    int size = 0;
-    boolean failed = false;
+    final ArrayList<StructField> fields = new ArrayList<>();
 
     for (final RecordComponent component : components) {
-      final Class<?> type = component.getType();
-      final String name = component.getName();
-      component.getAccessor().setAccessible(true);
-
-      if (primitiveTypeMap.containsKey(type)) {
-        PrimType<?> primType = primitiveTypeMap.get(type);
-        schemaBuilder.addField(name, primType.name);
-        size += primType.size;
-        unpackers.add(primType.unpacker);
-        packers.add(primType.packer);
-      } else {
-        Struct<?> struct;
-        if (customStructTypeMap.containsKey(type)) {
-          struct = customStructTypeMap.get(type);
-        } else if (StructSerializable.class.isAssignableFrom(type)) {
-          var optStruct = extractClassStructDynamic(type);
-          if (optStruct.isPresent()) {
-            struct = optStruct.get();
-          } else {
-            System.err.println(
-                "Could not structify record component: "
-                    + recordClass.getSimpleName()
-                    + "#"
-                    + name
-                    + "\n    Could not extract struct from marked class: "
-                    + type.getName());
-            failed = true;
-            continue;
-          }
-        } else {
-          System.err.println(
-              "Could not structify record component: " + recordClass.getSimpleName() + "#" + name);
-          failed = true;
-          continue;
-        }
-        schemaBuilder.addField(name, struct.getTypeString().replace("struct:", ""));
-        size += struct.getSize();
-        nestedStructs.add(struct);
-        nestedStructs.addAll(List.of(struct.getNested()));
-        unpackers.add(struct::unpack);
-        packers.add(Packer.fromStruct(struct));
+      if (shouldIgnore(component)) {
+        continue;
       }
+      component.getAccessor().setAccessible(true);
+      fields.add(StructField.fromRecordComponent(component));
     }
 
-    if (failed) {
+    if (fields.stream().anyMatch(f -> f == null)) {
       return noopStruct(recordClass);
     }
+    fields.forEach(schemaBuilder::addField);
 
-    final int frozenSize = size;
-    final String schema = schemaBuilder.build();
-    return new Struct<>() {
-      @Override
-      public Class<R> getTypeClass() {
-        return recordClass;
-      }
-
-      @Override
-      public String getTypeName() {
-        return recordClass.getSimpleName();
-      }
-
-      @Override
-      public String getSchema() {
-        return schema;
-      }
-
-      @Override
-      public int getSize() {
-        return frozenSize;
-      }
-
+    return new ProcStruct<>(recordClass, fields, schemaBuilder.build()) {
       @Override
       public void pack(ByteBuffer buffer, R value) {
         boolean failed = false;
         int startingPosition = buffer.position();
         for (int i = 0; i < components.length; i++) {
-          Packer<Object> packer = (Packer<Object>) packers.get(i);
+          Packer<Object> packer = (Packer<Object>) fields.get(i).packer();
           try {
             Object componentValue = components[i].getAccessor().invoke(value);
             if (componentValue == null) {
@@ -476,22 +608,16 @@ public final class ProceduralStructGenerator {
           } catch (IllegalAccessException
               | IllegalArgumentException
               | InvocationTargetException e) {
-            System.err.println(
-                "Could not pack record component: "
-                    + recordClass.getSimpleName()
-                    + "#"
-                    + components[i].getName()
-                    + "\n    "
-                    + e.getMessage());
+            RuntimeLog.warn("Could not pack record component: "
+                + recordClass.getSimpleName() + "#"
+                + components[i].getName()
+                + "\n    " + e.getMessage());
             failed = true;
             break;
           }
         }
         if (failed) {
-          buffer.position(startingPosition);
-          for (int i = 0; i < frozenSize; i++) {
-            buffer.put((byte) 0);
-          }
+          buffer.put(startingPosition, new byte[this.getSize()]);
         }
       }
 
@@ -501,7 +627,7 @@ public final class ProceduralStructGenerator {
           Object[] args = new Object[components.length];
           Class<?>[] argTypes = new Class<?>[components.length];
           for (int i = 0; i < components.length; i++) {
-            args[i] = unpackers.get(i).unpack(buffer);
+            args[i] = fields.get(i).unpacker().unpack(buffer);
             argTypes[i] = components[i].getType();
           }
           return recordClass.getConstructor(argTypes).newInstance(args);
@@ -517,11 +643,6 @@ public final class ProceduralStructGenerator {
                   + e.getMessage());
           return null;
         }
-      }
-
-      @Override
-      public Struct<?>[] getNested() {
-        return nestedStructs.toArray(new Struct<?>[0]);
       }
     };
   }
@@ -542,19 +663,15 @@ public final class ProceduralStructGenerator {
     final SchemaBuilder schemaBuilder = new SchemaBuilder();
     final SchemaBuilder.EnumFieldBuilder enumFieldBuilder = new SchemaBuilder.EnumFieldBuilder("variant");
     final HashMap<Integer, E> enumMap = new HashMap<>();
-    final ArrayList<Packer<?>> packers = new ArrayList<>();
+    final ArrayList<StructField> fields = new ArrayList<>();
 
     if (enumVariants == null || enumVariants.length == 0) {
-      System.err.println(
+      RuntimeLog.warn(
           "Could not structify enum: "
               + enumClass.getSimpleName()
-              + "\n    "
-              + "Enum has no constants");
+              + "\n    Enum has no constants");
       return noopStruct(enumClass);
     }
-
-    int size = 0;
-    boolean failed = false;
 
     for (final E constant : enumVariants) {
       final String name = constant.name();
@@ -564,87 +681,40 @@ public final class ProceduralStructGenerator {
       enumMap.put(ordinal, constant);
     }
     schemaBuilder.addEnumField(enumFieldBuilder);
-    size += 1;
+    fields.add(
+        new StructField(
+            "variant",
+            "int8",
+            1,
+            true,
+            Set.of(),
+            ByteBuffer::get,
+            (buffer, value) -> buffer.put((byte) ((Enum<?>) value).ordinal())));
 
     final List<Field> enumFields = List.of(allEnumFields).stream()
-        .filter(f -> !f.isEnumConstant() && !Modifier.isStatic(f.getModifiers()))
+        .filter(f -> !f.isEnumConstant() && !Modifier.isStatic(f.getModifiers()) && !shouldIgnore(f))
         .toList();
 
     for (final Field field : enumFields) {
-      final Class<?> type = field.getType();
-      final String name = field.getName();
       field.setAccessible(true);
-
-      if (primitiveTypeMap.containsKey(type)) {
-        PrimType<?> primType = primitiveTypeMap.get(type);
-        schemaBuilder.addField(name, primType.name);
-        size += primType.size;
-        packers.add(primType.packer);
-      } else {
-        Struct<?> struct;
-        if (customStructTypeMap.containsKey(type)) {
-          struct = customStructTypeMap.get(type);
-        } else if (StructSerializable.class.isAssignableFrom(type)) {
-          var optStruct = extractClassStructDynamic(type);
-          if (optStruct.isPresent()) {
-            struct = optStruct.get();
-          } else {
-            System.err.println(
-                "Could not structify record component: "
-                    + enumClass.getSimpleName()
-                    + "#"
-                    + name
-                    + "\n    Could not extract struct from marked class: "
-                    + type.getName());
-            failed = true;
-            continue;
-          }
-        } else {
-          System.err.println(
-              "Could not structify record component: " + enumClass.getSimpleName() + "#" + name);
-          failed = true;
-          continue;
-        }
-        schemaBuilder.addField(name, struct.getTypeString().replace("struct:", ""));
-        size += struct.getSize();
-        packers.add(Packer.fromStruct(struct));
-      }
+      fields.add(StructField.fromField(field));
     }
-
-    if (failed) {
+    if (fields.stream().anyMatch(f -> f == null)) {
       return noopStruct(enumClass);
     }
+    for (int i = 1; i < fields.size(); i++) {
+      // do this to skip the variant field
+      schemaBuilder.addField(fields.get(i));
+    }
 
-    final int frozenSize = size;
-    final String schema = schemaBuilder.build();
-    return new Struct<>() {
-      @Override
-      public Class<E> getTypeClass() {
-        return enumClass;
-      }
-
-      @Override
-      public String getTypeName() {
-        return enumClass.getSimpleName();
-      }
-
-      @Override
-      public String getSchema() {
-        return schema;
-      }
-
-      @Override
-      public int getSize() {
-        return frozenSize;
-      }
-
+    return new ProcStruct<>(enumClass, fields, schemaBuilder.build()) {
       @Override
       public void pack(ByteBuffer buffer, E value) {
         boolean failed = false;
         int startingPosition = buffer.position();
         buffer.put((byte) value.ordinal());
         for (int i = 0; i < enumFields.size(); i++) {
-          Packer<Object> packer = (Packer<Object>) packers.get(i);
+          Packer<Object> packer = (Packer<Object>) fields.get(i + 1).packer();
           Field field = enumFields.get(i);
           try {
             Object fieldValue = field.get(value);
@@ -665,14 +735,11 @@ public final class ProceduralStructGenerator {
           }
         }
         if (failed) {
-          buffer.position(startingPosition);
-          for (int i = 0; i < frozenSize; i++) {
-            buffer.put((byte) 0);
-          }
+          buffer.put(startingPosition, new byte[this.getSize()]);
         }
       }
 
-      final byte[] m_spongeBuffer = new byte[frozenSize - 1];
+      final byte[] m_spongeBuffer = new byte[this.getSize() - 1];
 
       @Override
       public E unpack(ByteBuffer buffer) {
@@ -680,6 +747,14 @@ public final class ProceduralStructGenerator {
         buffer.get(m_spongeBuffer);
         return enumMap.getOrDefault(ordinal, null);
       }
+
+      public boolean isCloneable() {
+        return true;
+      };
+
+      public E clone(E obj) throws CloneNotSupportedException {
+        return obj;
+      };
     };
   }
 
@@ -696,94 +771,29 @@ public final class ProceduralStructGenerator {
   @SuppressWarnings({ "unchecked", "PMD.AvoidAccessibilityAlteration" })
   public static <O> Struct<O> genObject(Class<O> objectClass, Supplier<O> objectSupplier) {
     final SchemaBuilder schemaBuilder = new SchemaBuilder();
-    final ArrayList<Struct<?>> nestedStructs = new ArrayList<>();
-    final ArrayList<Unpacker<?>> unpackers = new ArrayList<>();
-    final ArrayList<Packer<?>> packers = new ArrayList<>();
-
     final Field[] allFields = objectClass.getDeclaredFields();
-
-    int size = 0;
-    boolean failed = false;
+    final ArrayList<StructField> fields = new ArrayList<>(allFields.length);
 
     for (final Field field : allFields) {
-      final Class<?> type = field.getType();
-      final String name = field.getName();
-      field.setAccessible(true);
-
-      if (primitiveTypeMap.containsKey(type)) {
-        PrimType<?> primType = primitiveTypeMap.get(type);
-        schemaBuilder.addField(name, primType.name);
-        size += primType.size;
-        unpackers.add(primType.unpacker);
-        packers.add(primType.packer);
-      } else {
-        Struct<?> struct;
-        if (customStructTypeMap.containsKey(type)) {
-          struct = customStructTypeMap.get(type);
-        } else if (StructSerializable.class.isAssignableFrom(type)) {
-          var optStruct = extractClassStructDynamic(type);
-          if (optStruct.isPresent()) {
-            struct = optStruct.get();
-          } else {
-            System.err.println(
-                "Could not structify object field: "
-                    + objectClass.getSimpleName()
-                    + "#"
-                    + name
-                    + "\n    Could not extract struct from marked class: "
-                    + type.getName());
-            failed = true;
-            continue;
-          }
-        } else {
-          System.err.println(
-              "Could not structify object field: " + objectClass.getSimpleName() + "#" + name);
-          failed = true;
-          continue;
-        }
-        schemaBuilder.addField(name, struct.getTypeString().replace("struct:", ""));
-        size += struct.getSize();
-        nestedStructs.add(struct);
-        nestedStructs.addAll(List.of(struct.getNested()));
-        unpackers.add(struct::unpack);
-        packers.add(Packer.fromStruct(struct));
+      if (shouldIgnore(field)) {
+        continue;
       }
+      field.setAccessible(true);
+      fields.add(StructField.fromField(field));
     }
 
-    if (failed) {
+    if (fields.stream().anyMatch(f -> f == null)) {
       return noopStruct(objectClass);
     }
+    fields.forEach(schemaBuilder::addField);
 
-    final boolean isImmutable = !isInteriorlyMutable(objectClass);
-    final int frozenSize = size;
-    final String schema = schemaBuilder.build();
-    return new Struct<>() {
-      @Override
-      public Class<O> getTypeClass() {
-        return objectClass;
-      }
-
-      @Override
-      public String getTypeName() {
-        return objectClass.getSimpleName();
-      }
-
-      @Override
-      public String getSchema() {
-        return schema;
-      }
-
-      @Override
-      public int getSize() {
-        return frozenSize;
-      }
-
+    return new ProcStruct<>(objectClass, fields, schemaBuilder.build()) {
       @Override
       public void pack(ByteBuffer buffer, O value) {
         boolean failed = false;
         int startingPosition = buffer.position();
         for (int i = 0; i < allFields.length; i++) {
-          Packer<Object> packer = (Packer<Object>) packers.get(i);
+          Packer<Object> packer = (Packer<Object>) fields.get(i).packer();
           try {
             Object fieldValue = allFields[i].get(value);
             if (fieldValue == null) {
@@ -794,19 +804,14 @@ public final class ProceduralStructGenerator {
             System.err.println(
                 "Could not pack object field: "
                     + objectClass.getSimpleName()
-                    + "#"
-                    + allFields[i].getName()
-                    + "\n    "
-                    + e.getMessage());
+                    + "#" + allFields[i].getName()
+                    + "\n    " + e.getMessage());
             failed = true;
             break;
           }
         }
         if (failed) {
-          buffer.position(startingPosition);
-          for (int i = 0; i < frozenSize; i++) {
-            buffer.put((byte) 0);
-          }
+          buffer.put(startingPosition, new byte[this.getSize()]);
         }
       }
 
@@ -815,7 +820,7 @@ public final class ProceduralStructGenerator {
         try {
           O obj = objectSupplier.get();
           for (int i = 0; i < allFields.length; i++) {
-            Object fieldValue = unpackers.get(i).unpack(buffer);
+            Object fieldValue = fields.get(i).unpacker().unpack(buffer);
             allFields[i].set(obj, fieldValue);
           }
           return obj;
@@ -823,38 +828,9 @@ public final class ProceduralStructGenerator {
           System.err.println(
               "Could not unpack object: "
                   + objectClass.getSimpleName()
-                  + "\n    "
-                  + e.getMessage());
+                  + "\n    " + e.getMessage());
           return null;
         }
-      }
-
-      @Override
-      public Struct<?>[] getNested() {
-        return nestedStructs.toArray(new Struct<?>[0]);
-      }
-
-      @Override
-      public boolean isCloneable() {
-        return Cloneable.class.isAssignableFrom(objectClass);
-      }
-
-      @Override
-      public O clone(O obj) throws CloneNotSupportedException {
-        if (isCloneable()) {
-          try {
-            return (O) objectClass.getMethod("clone").invoke(obj);
-          } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            throw new CloneNotSupportedException();
-          }
-        } else {
-          throw new CloneNotSupportedException();
-        }
-      }
-
-      @Override
-      public boolean isImmutable() {
-        return isImmutable;
       }
     };
   }

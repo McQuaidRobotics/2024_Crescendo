@@ -131,8 +131,6 @@ public class VendorStructs {
         static {
             STATUS_CODE_STRUCT = ProceduralStructGenerator.genEnum(StatusCode.class);
             SPN_VALUE_STRUCT = ProceduralStructGenerator.genEnum(SpnValue.class);
-            ProceduralStructGenerator.addCustomStruct(StatusCode.class, STATUS_CODE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(SpnValue.class, SPN_VALUE_STRUCT, true);
 
             ABSOLUTE_SENSOR_RANGE_VALUE_STRUCT = ProceduralStructGenerator.genEnum(AbsoluteSensorRangeValue.class);
             APPLIED_ROTOR_POLARITY_VALUE_STRUCT = ProceduralStructGenerator.genEnum(AppliedRotorPolarityValue.class);
@@ -164,36 +162,6 @@ public class VendorStructs {
             SENSOR_DIRECTION_VALUE_STRUCT = ProceduralStructGenerator.genEnum(SensorDirectionValue.class);
             STATIC_FEEDFORWARD_SIGN_VALUE_STRUCT = ProceduralStructGenerator.genEnum(StaticFeedforwardSignValue.class);
             SYSTEM_STATE_VALUE_STRUCT = ProceduralStructGenerator.genEnum(System_StateValue.class);
-            ProceduralStructGenerator.addCustomStruct(AbsoluteSensorRangeValue.class, ABSOLUTE_SENSOR_RANGE_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(AppliedRotorPolarityValue.class, APPLIED_ROTOR_POLARITY_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(BridgeOutputValue.class, BRIDGE_OUTPUT_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(ControlModeValue.class, CONTROL_MODE_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(DeviceEnableValue.class, DEVICE_ENABLE_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(DifferentialControlModeValue.class, DIFFERENTIAL_CONTROL_MODE_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(DifferentialSensorSourceValue.class, DIFFERENTIAL_SENSOR_SOURCE_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(FeedbackSensorSourceValue.class, FEEDBACK_SENSOR_SOURCE_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(ForwardLimitSourceValue.class, FORWARD_LIMIT_SOURCE_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(ForwardLimitTypeValue.class, FORWARD_LIMIT_TYPE_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(FrcLockValue.class, FRC_LOCK_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(GravityTypeValue.class, GRAVITY_TYPE_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(InvertedValue.class, INVERTED_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(IsPROLicensedValue.class, IS_PRO_LICENSED_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(Led1OffColorValue.class, LED_1_OFF_COLOR_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(Led1OnColorValue.class, LED_1_ON_COLOR_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(Led2OffColorValue.class, LED_2_OFF_COLOR_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(Led2OnColorValue.class, LED_2_ON_COLOR_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(Licensing_IsSeasonPassedValue.class, LICENSING_IS_SEASON_PASSED_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(MagnetHealthValue.class, MAGNET_HEALTH_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(MotionMagicIsRunningValue.class, MOTION_MAGIC_IS_RUNNING_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(MotorTypeValue.class, MOTOR_TYPE_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(NeutralModeValue.class, NEUTRAL_MODE_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(ReverseLimitSourceValue.class, REVERSE_LIMIT_SOURCE_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(ReverseLimitTypeValue.class, REVERSE_LIMIT_TYPE_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(ReverseLimitValue.class, REVERSE_LIMIT_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(RobotEnableValue.class, ROBOT_ENABLE_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(SensorDirectionValue.class, SENSOR_DIRECTION_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(StaticFeedforwardSignValue.class, STATIC_FEEDFORWARD_SIGN_VALUE_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(System_StateValue.class, SYSTEM_STATE_VALUE_STRUCT, true);
 
             AUDIO_CONFIGS_STRUCT = ProceduralStructGenerator.genObject(AudioConfigs.class, AudioConfigs::new);
             CLOSED_LOOP_GENERAL_CONFIGS_STRUCT = ProceduralStructGenerator.genObject(ClosedLoopGeneralConfigs.class, ClosedLoopGeneralConfigs::new);
@@ -217,35 +185,10 @@ public class VendorStructs {
             SOFTWARE_LIMIT_SWITCH_CONFIGS_STRUCT = ProceduralStructGenerator.genObject(SoftwareLimitSwitchConfigs.class, SoftwareLimitSwitchConfigs::new);
             TORQUE_CURRENT_CONFIGS_STRUCT = ProceduralStructGenerator.genObject(TorqueCurrentConfigs.class, TorqueCurrentConfigs::new);
             VOLTAGE_CONFIGS_STRUCT = ProceduralStructGenerator.genObject(VoltageConfigs.class, VoltageConfigs::new);
-            ProceduralStructGenerator.addCustomStruct(AudioConfigs.class, AUDIO_CONFIGS_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(ClosedLoopGeneralConfigs.class, CLOSED_LOOP_GENERAL_CONFIGS_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(ClosedLoopRampsConfigs.class, CLOSED_LOOP_RAMPS_CONFIGS_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(CurrentLimitsConfigs.class, CURRENT_LIMITS_CONFIGS_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(CustomParamsConfigs.class, CUSTOM_PARAMS_CONFIGS_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(DifferentialConstantsConfigs.class, DIFFERENTIAL_CONSTANTS_CONFIGS_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(DifferentialSensorsConfigs.class, DIFFERENTIAL_SENSORS_CONFIGS_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(FeedbackConfigs.class, FEEDBACK_CONFIGS_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(GyroTrimConfigs.class, GYRO_TRIM_CONFIGS_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(HardwareLimitSwitchConfigs.class, HARDWARE_LIMIT_SWITCH_CONFIGS_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(MagnetSensorConfigs.class, MAGNET_SENSOR_CONFIGS_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(MotionMagicConfigs.class, MOTION_MAGIC_CONFIGS_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(MotorOutputConfigs.class, MOTOR_OUTPUT_CONFIGS_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(MountPoseConfigs.class, MOUNT_POSE_CONFIGS_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(OpenLoopRampsConfigs.class, OPEN_LOOP_RAMPS_CONFIGS_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(Pigeon2FeaturesConfigs.class, PIGEON_2_FEATURES_CONFIGS_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(Slot0Configs.class, SLOT_0_CONFIGS_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(Slot1Configs.class, SLOT_1_CONFIGS_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(Slot2Configs.class, SLOT_2_CONFIGS_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(SoftwareLimitSwitchConfigs.class, SOFTWARE_LIMIT_SWITCH_CONFIGS_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(TorqueCurrentConfigs.class, TORQUE_CURRENT_CONFIGS_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(VoltageConfigs.class, VOLTAGE_CONFIGS_STRUCT, true);
 
             TALON_FX_CONFIG_STRUCT = ProceduralStructGenerator.genObject(TalonFXConfiguration.class, TalonFXConfiguration::new);
             CAN_CODER_CONFIG_STRUCT = ProceduralStructGenerator.genObject(CANcoderConfiguration.class, CANcoderConfiguration::new);
             PIGEON_2_CONFIG_STRUCT = ProceduralStructGenerator.genObject(Pigeon2Configuration.class, Pigeon2Configuration::new);
-            ProceduralStructGenerator.addCustomStruct(TalonFXConfiguration.class, TALON_FX_CONFIG_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(CANcoderConfiguration.class, CAN_CODER_CONFIG_STRUCT, true);
-            ProceduralStructGenerator.addCustomStruct(Pigeon2Configuration.class, PIGEON_2_CONFIG_STRUCT, true);
         }
     }
 }
