@@ -399,7 +399,9 @@ class GlobalLogged {
       return value;
     }
     Class<R> clazz = (Class<R>) value.getClass();
-    Struct<R> struct = ProceduralStructGenerator.extractClassStruct(clazz).get();
+    Struct<R> struct = ProceduralStructGenerator.extractClassStruct(clazz).orElseThrow(
+        () -> new IllegalArgumentException("Class " + clazz.getName() + " does not have a struct.")
+    );
     MonoEntryLayer.MonologueEntry.create(entryName, struct, clazz, sink).log(value);
 
     return value;

@@ -1,6 +1,5 @@
 package com.igknighters.subsystems.stem.pivot;
 
-import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
@@ -25,6 +24,7 @@ import com.igknighters.constants.HardwareIndex.StemHW;
 import com.igknighters.util.can.CANRetrier;
 import com.igknighters.util.can.CANSignalManager;
 import com.igknighters.util.logging.BootupLogger;
+import com.igknighters.util.logging.CharacterizationLogger;
 import com.igknighters.util.logging.FaultManager;
 
 public class PivotReal extends Pivot {
@@ -36,14 +36,16 @@ public class PivotReal extends Pivot {
 
     private final Pigeon2 gyro;
 
-    private final BaseStatusSignal motorRots, motorVelo, leaderMotorVolts, followerMotorVolts;
-    private final BaseStatusSignal leaderMotorAmps, followerMotorAmps;
-    private final BaseStatusSignal gyroMeasurement;
+    private final StatusSignal<?> motorRots, motorVelo, leaderMotorVolts, followerMotorVolts;
+    private final StatusSignal<?> leaderMotorAmps, followerMotorAmps;
+    private final StatusSignal<?> gyroMeasurement;
     private final StatusSignal<ForwardLimitValue> forwardLimitSwitch;
     private final StatusSignal<ReverseLimitValue> reverseLimitSwitch;
 
     private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
     private final MotionMagicVoltage controlReqMotionMagic = new MotionMagicVoltage(0.0).withUpdateFreqHz(0);
+
+    private final CharacterizationLogger characterizationLogger;
 
     private boolean homedThisCycle = false;
     private boolean hasBeenEnabled = false;
@@ -90,6 +92,11 @@ public class PivotReal extends Pivot {
             motorRots, motorVelo, leaderMotorVolts, followerMotorVolts,
             leaderMotorAmps, followerMotorAmps, forwardLimitSwitch,
             reverseLimitSwitch, gyroMeasurement
+        );
+
+        characterizationLogger = new CharacterizationLogger(
+            ConstValues.kCharacterization.MechanismId.PIVOT,
+            motorRots, motorVelo, leaderMotorVolts
         );
 
         gyro.optimizeBusUtilization(0.0, 1.0);
@@ -214,6 +221,7 @@ public class PivotReal extends Pivot {
 
         log("SeededPivot", homedThisCycle);
         homedThisCycle = false;
-    }
 
+        characterizationLogger.log();
+    }
 }

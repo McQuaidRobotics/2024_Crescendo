@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class Stem implements LockFullSubsystem {
 
@@ -257,5 +258,16 @@ public class Stem implements LockFullSubsystem {
         );
 
         Tracer.endTrace();
+    }
+
+    public SysIdRoutine pivotSysidRoutine() {
+        return new SysIdRoutine(
+            new SysIdRoutine.Config(),
+            new SysIdRoutine.Mechanism(
+                v -> pivot.setVoltageOut(v.baseUnitMagnitude()),
+                l -> {},
+                this
+            )
+        );
     }
 }

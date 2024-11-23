@@ -65,6 +65,26 @@ public final class ConstValues {
     public static final double PERIODIC_TIME = 0.02; // 20ms
     public static final int PDH_CAN_ID = 61;
 
+    public static final class kCharacterization {
+        public static final int FREQUENCY = 750;
+
+        public static enum MechanismId {
+            PIVOT("Pivot"),
+            WRIST("Wrist"),
+            TELESCOPE("Telescope"),
+            SHOOTER("Shooter"),
+            SWERVE_ROTATION("Swerve/Rotation"),
+            SWERVE_VELOCITY("Swerve/Velocity"),
+            SWERVE_STEER("Swerve/Steer");
+
+            public final String name;
+
+            private MechanismId(String name) {
+                this.name = name;
+            }
+        }
+    }
+
     public static final class kRobotCollisionGeometry {
         public static final double BUMPER_THICKNESS = 2.8 * Conv.INCHES_TO_METERS;
         public static final double BUMPER_HEIGHT = 5.75 * Conv.INCHES_TO_METERS;

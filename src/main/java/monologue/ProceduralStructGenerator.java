@@ -152,6 +152,7 @@ public final class ProceduralStructGenerator {
       var possibleField = Optional.ofNullable(clazz.getDeclaredField("struct"));
       return possibleField.flatMap(
           field -> {
+            field.setAccessible(true);
             if (Struct.class.isAssignableFrom(field.getType())) {
               try {
                 return Optional.ofNullable((Struct<T>) field.get(null));
@@ -562,6 +563,13 @@ public final class ProceduralStructGenerator {
     public Struct<?>[] getNested() {
       return nested;
     }
+
+    @Override
+    public String toString() {
+        return this.getTypeName()
+        + "<" + this.getSize() + ">"
+        + " {" + this.schema + "}";
+    }
   }
 
   /**
@@ -771,13 +779,13 @@ public final class ProceduralStructGenerator {
   @SuppressWarnings({ "unchecked", "PMD.AvoidAccessibilityAlteration" })
   public static <O> Struct<O> genObject(Class<O> objectClass, Supplier<O> objectSupplier) {
     final SchemaBuilder schemaBuilder = new SchemaBuilder();
-    final Field[] allFields = objectClass.getDeclaredFields();
+    final Field[] allFields = List.of(objectClass.getDeclaredFields())
+        .stream()
+        .filter(f -> !shouldIgnore(f) && !Modifier.isStatic(f.getModifiers()))
+        .toArray(Field[]::new);
     final ArrayList<StructField> fields = new ArrayList<>(allFields.length);
 
     for (final Field field : allFields) {
-      if (shouldIgnore(field)) {
-        continue;
-      }
       field.setAccessible(true);
       fields.add(StructField.fromField(field));
     }

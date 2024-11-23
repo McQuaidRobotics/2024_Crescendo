@@ -1,11 +1,22 @@
 package com.igknighters.subsystems.swerve.control;
 
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.util.struct.StructSerializable;
+import monologue.ProceduralStructGenerator;
+import monologue.ProceduralStructGenerator.FixedSizeArray;
+import monologue.ProceduralStructGenerator.IgnoreStructField;
 
 class SPGCalcs {
     private static final double kEpsilon = 1E-8;
     private static final int MAX_STEER_ITERATIONS = 8;
     private static final int MAX_DRIVE_ITERATIONS = 10;
+    static final int NUM_MODULES = 4;
 
     static double unwrapAngle(double ref, double angle) {
         double diff = angle - ref;
@@ -134,5 +145,131 @@ class SPGCalcs {
      */
     static boolean flipHeading(double prevToGoal) {
         return Math.abs(prevToGoal) > Math.PI / 2.0;
+    }
+
+    private static final Struct<LocalVectors> structVectors;
+    private static final Struct<LocalVars> structVars;
+    static {
+        final var structVectorsProc = ProceduralStructGenerator.genObject(LocalVectors.class, LocalVectors::new);
+        structVectors = new Struct<SPGCalcs.LocalVectors>() {
+            @Override
+            public String getSchema() {
+                return "float64 vx;float64 vy;float64 cos;float64 sin;";
+            }
+
+            @Override
+            public int getSize() {
+                return 32;
+            }
+
+            @Override
+            public Class<LocalVectors> getTypeClass() {
+                return LocalVectors.class;
+            }
+
+            @Override
+            public String getTypeName() {
+                return "LocalVectors";
+            }
+
+            @Override
+            public void pack(ByteBuffer bb, LocalVectors value) {
+                bb.putDouble(value.vx);
+                bb.putDouble(value.vy);
+                bb.putDouble(value.cos);
+                bb.putDouble(value.sin);
+            }
+
+            @Override
+            public LocalVectors unpack(ByteBuffer bb) {
+                return structVectorsProc.unpack(bb);
+            }
+
+            @Override
+            public String toString() {
+                return this.getTypeName()
+                + "<" + this.getSize() + ">"
+                + " {" + this.getSchema() + "}";
+            }
+        };
+        structVars = ProceduralStructGenerator.genObject(LocalVars.class, LocalVars::new);
+        System.out.println(structVectors);
+        System.out.println(structVars);
+    }
+
+    static final class LocalVectors implements StructSerializable {
+        public double vx, vy, cos, sin;
+
+        public LocalVectors() {}
+
+        public void reset() {
+            vx = vy = cos = sin = 0.0;
+        }
+
+        public void applyModuleState(SwerveModuleState state) {
+            cos = state.angle.getCos();
+            sin = state.angle.getSin();
+            vx = cos * state.speedMetersPerSecond;
+            vy = sin * state.speedMetersPerSecond;
+            if (state.speedMetersPerSecond < 0.0) {
+                applyRotation(Rotation2d.k180deg.getCos(), Rotation2d.k180deg.getSin());
+            }
+        }
+
+        public LocalVectors applyRotation(double otherCos, double otherSin) {
+            double newCos = cos * otherCos - sin * otherSin;
+            double newSin = cos * otherSin + sin * otherCos;
+            cos = newCos;
+            sin = newSin;
+
+            return this;
+        }
+
+        public double radians() {
+            return Math.atan2(sin, cos);
+        }
+
+        public static final Struct<LocalVectors> struct = structVectors;
+    }
+
+    static final class LocalVars implements StructSerializable {
+        @FixedSizeArray(size = NUM_MODULES)
+        public LocalVectors[] prev;
+        @FixedSizeArray(size = NUM_MODULES)
+        public LocalVectors[] desired;
+        public boolean needToSteer = true, allModulesShouldFlip = true;
+        public double minS, dt;
+        public double dx, dy, dtheta;
+        public ChassisSpeeds prevSpeeds, desiredSpeeds;
+        @FixedSizeArray(size = NUM_MODULES)
+        public SwerveModuleState[] prevModuleStates;
+        @FixedSizeArray(size = NUM_MODULES)
+        public SwerveModuleState[] desiredModuleStates;
+        @IgnoreStructField
+        public Rotation2d[] steeringOverride;
+
+        public LocalVars() {
+            desiredSpeeds = prevSpeeds = new ChassisSpeeds();
+            prev = new LocalVectors[NUM_MODULES];
+            desired = new LocalVectors[NUM_MODULES];
+            steeringOverride = new Rotation2d[NUM_MODULES];
+            for (int i = 0; i < NUM_MODULES; i++) {
+                prev[i] = new LocalVectors();
+                desired[i] = new LocalVectors();
+            }
+        }
+
+        public LocalVars reset() {
+            needToSteer = allModulesShouldFlip = true;
+            Arrays.fill(steeringOverride, null);
+            for (int i = 0; i < NUM_MODULES; i++) {
+                prev[i].reset();
+                desired[i].reset();
+            }
+
+            return this;
+        }
+
+        public static final Struct<LocalVars> struct = structVars;
     }
 }

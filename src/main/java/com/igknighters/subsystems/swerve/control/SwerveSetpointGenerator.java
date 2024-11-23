@@ -1,7 +1,5 @@
 package com.igknighters.subsystems.swerve.control;
 
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-
 import static com.igknighters.subsystems.swerve.control.SPGCalcs.*;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -10,15 +8,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.RobotController;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import monologue.LogLocal;
 
-import com.ctre.phoenix6.swerve.jni.SwerveJNI.ModuleState;
-import com.igknighters.constants.RobotConfig;
 import com.igknighters.subsystems.swerve.module.SwerveModule.AdvancedSwerveModuleState;
 
 /**
@@ -29,10 +21,10 @@ import com.igknighters.subsystems.swerve.module.SwerveModule.AdvancedSwerveModul
  * kinematic constraints on module rotation and wheel velocity/torque, as well as preventing any
  * forces acting on a module's wheel from exceeding the force of friction.
  */
-public class SwerveSetpointGenerator {
+public class SwerveSetpointGenerator implements LogLocal {
     private static final ChassisSpeeds ZERO_SPEEDS = new ChassisSpeeds();
 
-    private static final int NUM_MODULES = 4;
+    private static final int NUM_MODULES = SPGCalcs.NUM_MODULES;
 
     private final SwerveDriveKinematics kinematics;
     private final Translation2d[] moduleLocations;
@@ -44,7 +36,7 @@ public class SwerveSetpointGenerator {
         moiKgMetersSquared,
         wheelRadiusMeters,
         wheelFrictionForce,
-        maxTorqueFriction,
+        // maxTorqueFriction,
         torqueLoss;
 
     public SwerveSetpointGenerator(
@@ -73,75 +65,8 @@ public class SwerveSetpointGenerator {
         this.maxDriveVelocityMPS = driveMotor.freeSpeedRadPerSec * wheelRadiusMeters;
 
         wheelFrictionForce = wheelCoF * ((massKg / 4) * 9.81);
-        maxTorqueFriction = this.wheelFrictionForce * wheelRadiusMeters;
+        // maxTorqueFriction = this.wheelFrictionForce * wheelRadiusMeters;
         this.torqueLoss = torqueLoss;
-    }
-
-    private static final class LocalVectors {
-        public double vx, vy, cos, sin;
-
-        public LocalVectors() {}
-
-        public void reset() {
-            vx = vy = cos = sin = 0.0;
-        }
-
-        public void applyModuleState(SwerveModuleState state) {
-            cos = state.angle.getCos();
-            sin = state.angle.getSin();
-            vx = cos * state.speedMetersPerSecond;
-            vy = sin * state.speedMetersPerSecond;
-            if (state.speedMetersPerSecond < 0.0) {
-                applyRotation(Rotation2d.k180deg.getCos(), Rotation2d.k180deg.getSin());
-            }
-        }
-
-        public LocalVectors applyRotation(double otherCos, double otherSin) {
-            double newCos = cos * otherCos - sin * otherSin;
-            double newSin = cos * otherSin + sin * otherCos;
-            cos = newCos;
-            sin = newSin;
-
-            return this;
-        }
-
-        public double radians() {
-            return Math.atan2(sin, cos);
-        }
-    }
-
-    private static final class LocalVars {
-        public LocalVectors[] prev, desired;
-        public boolean needToSteer = true, allModulesShouldFlip = true;
-        public double minS, dt;
-        public double dx, dy, dtheta;
-        public ChassisSpeeds prevSpeeds, desiredSpeeds;
-        public SwerveModuleState[] prevModuleStates, desiredModuleStates;
-        public Rotation2d[] steeringOverride;
-
-        @SuppressWarnings("unchecked")
-        public LocalVars() {
-            prevSpeeds = ZERO_SPEEDS;
-            desiredSpeeds = ZERO_SPEEDS;
-            prev = new LocalVectors[NUM_MODULES];
-            desired = new LocalVectors[NUM_MODULES];
-            for (int i = 0; i < NUM_MODULES; i++) {
-                prev[i] = new LocalVectors();
-                desired[i] = new LocalVectors();
-            }
-            steeringOverride = new Rotation2d[NUM_MODULES];
-        }
-
-        public LocalVars reset() {
-            needToSteer = allModulesShouldFlip = true;
-            Arrays.fill(steeringOverride, null);
-            for (int i = 0; i < NUM_MODULES; i++) {
-                prev[i].reset();
-                desired[i].reset();
-            }
-
-            return this;
-        }
     }
 
     // alot of work was done to reduce allocations in this hot loop,
@@ -162,13 +87,6 @@ public class SwerveSetpointGenerator {
      *     desiredState quickly.
      */
     public SwerveSetpoint generateSetpoint(final SwerveSetpoint prevSetpoint, ChassisSpeeds desiredRobotRelativeSpeeds, double dt) {
-        AdvancedSwerveModuleState[] output = new AdvancedSwerveModuleState[] {
-            new AdvancedSwerveModuleState(0, Rotation2d.kZero, 0, 0),
-            new AdvancedSwerveModuleState(0, Rotation2d.kZero, 0, 0),
-            new AdvancedSwerveModuleState(0, Rotation2d.kZero, 0, 0),
-            new AdvancedSwerveModuleState(0, Rotation2d.kZero, 0, 0)
-        };
-
         // https://github.com/wpilibsuite/allwpilib/issues/7332
         SwerveModuleState[] desiredModuleStates = kinematics.toSwerveModuleStates(desiredRobotRelativeSpeeds);
         // Make sure desiredState respects velocity limits.
@@ -189,18 +107,26 @@ public class SwerveSetpointGenerator {
                 - prevSetpoint.chassisSpeeds().omegaRadiansPerSecond;
         vars.minS = 1.0;
 
-        checkNeedToSteer(vars);
-        makeVectors(vars);
+        log("beginningVars", vars);
 
-        if (vars.allModulesShouldFlip
-                && !epsilonEquals(prevSetpoint.chassisSpeeds(), ZERO_SPEEDS)
-                && !epsilonEquals(desiredRobotRelativeSpeeds, ZERO_SPEEDS)) {
-            // It will (likely) be faster to stop the robot, rotate the modules in place to the complement
-            // of the desired angle, and accelerate again.
-            return generateSetpoint(prevSetpoint, ZERO_SPEEDS, dt);
-        }
+        checkNeedToSteer(vars);
+        log("postCheckNeedToSteer", vars);
+        makeVectors(vars);
+        log("pastMakeVectors", vars);
+
+        // if (vars.allModulesShouldFlip
+        //         && !epsilonEquals(prevSetpoint.chassisSpeeds(), ZERO_SPEEDS)
+        //         && !epsilonEquals(desiredRobotRelativeSpeeds, ZERO_SPEEDS)) {
+        //     // It will (likely) be faster to stop the robot, rotate the modules in place to the complement
+        //     // of the desired angle, and accelerate again.
+        //     return generateSetpoint(prevSetpoint, ZERO_SPEEDS, dt);
+        // }
 
         solveSteering(vars);
+        log("postSolveSteering", vars);
+
+        solveDriving(vars);
+        log("postSolveDriving", vars);
 
         ChassisSpeeds retSpeeds = new ChassisSpeeds(
                 vars.prevSpeeds.vxMetersPerSecond + vars.minS * vars.dx,
@@ -228,10 +154,12 @@ public class SwerveSetpointGenerator {
             );
         }
 
-        return new SwerveSetpoint(
+        log("finalVars", vars);
+
+        return log("output", new SwerveSetpoint(
             retSpeeds,
             outputStates
-        );
+        ));
     }
 
     private static void checkNeedToSteer(LocalVars vars) {
