@@ -172,7 +172,7 @@ out/
 *-window.json
 
 # Build data
-src/main/java/com/igknighters/BuildConstants.java
+src/main/java/igknighters/BuildConstants.java
 ctre_sim/
 *.wpilog
 simgui*
