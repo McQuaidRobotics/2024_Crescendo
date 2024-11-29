@@ -2,6 +2,7 @@ package igknighters.subsystems.vision;
 
 import igknighters.Localizer;
 import igknighters.SimCtx;
+import igknighters.constants.RobotConfig;
 import igknighters.constants.ConstValues.kSwerve;
 import igknighters.constants.ConstValues.kVision;
 import igknighters.subsystems.SubsystemResources.LockFreeSubsystem;
@@ -36,7 +37,7 @@ public class Vision implements LockFreeSubsystem {
 
     public Vision(final Localizer localizer, final SimCtx simRobot) {
         this.localizer = localizer;
-        this.cameras = List.of(kVision.CAMERA_CONFIGS)
+        this.cameras = List.of(kVision.CameraConfigs.forRobot(RobotConfig.getRobotID()))
                 .stream()
                 .map(Camera::create)
                 .toArray(Camera[]::new);

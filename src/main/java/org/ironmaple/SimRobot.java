@@ -1,5 +1,7 @@
 package org.ironmaple;
 
+import static edu.wpi.first.units.Units.Volts;
+
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.ironmaple.SimArena.SimulationTiming;
@@ -9,7 +11,6 @@ import org.ironmaple.utils.RuntimeLog;
 import org.ironmaple.utils.mathutils.GeometryConvertor;
 
 import edu.wpi.first.math.geometry.Rectangle2d;
-import edu.wpi.first.units.measure.Voltage;
 
 public class SimRobot {
     private final SimArena arena;
@@ -21,6 +22,7 @@ public class SimRobot {
 
     public <T extends SimDriveTrain, C extends DriveTrainSimulationConfig<T, C>> SimRobot(SimArena arena, C drivetrainConfig, int gamePieceStorageCapacity) {
         this.arena = arena;
+        arena.robots.add(this);
         this.driveTrain = SimDriveTrain.createDriveTrainSimulation(this, drivetrainConfig);
         arena.withWorld(world -> world.addBody(driveTrain.chassis));
         this.gamePieceStorage = new SimIndexer(gamePieceStorageCapacity);
@@ -28,9 +30,9 @@ public class SimRobot {
 
     void simTick() {
         driveTrain.simTick();
-        final Voltage batVolts = battery.getBatteryVoltage();
+        // final Voltage batVolts = battery.getBatteryVoltage();
         for (var mechanism : mechanisms) {
-            mechanism.update(batVolts);
+            mechanism.update(Volts.of(12.0));
         }
     }
 

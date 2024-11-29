@@ -6,7 +6,6 @@ import static edu.wpi.first.units.Units.NewtonMeters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import java.util.Random;
@@ -28,6 +27,10 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Torque;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.util.struct.StructSerializable;
+import monologue.Monologue;
+import monologue.ProceduralStructGenerator;
 
 public class SimMechanism {
     private static final double kMotorEfficiency = 0.85;
@@ -121,7 +124,11 @@ public class SimMechanism {
      * 
      * <p> All measures in this record are immutable.
      */
-    public record MechanismOutputs(Angle angle, AngularVelocity velocity, AngularAcceleration acceleration) {
+    public record MechanismOutputs(
+        Angle position,
+        AngularVelocity velocity,
+        AngularAcceleration acceleration) implements StructSerializable {
+
         public static MechanismOutputs of(Angle angle, AngularVelocity velocity, AngularAcceleration acceleration) {
             return new MechanismOutputs(angle, velocity, acceleration);
         }
@@ -130,9 +137,11 @@ public class SimMechanism {
             return new MechanismOutputs(Rad.zero(), RadPS.zero(), RadPS2.zero());
         }
 
-        private MechanismOutputs times(double scalar) {
-            return new MechanismOutputs(angle.times(scalar), velocity.times(scalar), acceleration.times(scalar));
+        public MechanismOutputs times(double scalar) {
+            return new MechanismOutputs(position.times(scalar), velocity.times(scalar), acceleration.times(scalar));
         }
+
+        public static final Struct<MechanismOutputs> struct = ProceduralStructGenerator.genRecord(MechanismOutputs.class);
     }
 
     /**
@@ -144,7 +153,7 @@ public class SimMechanism {
         Torque torque,
         Voltage statorVoltage,
         Voltage supplyVoltage,
-        Current statorCurrent) {
+        Current statorCurrent) implements StructSerializable {
 
         public Current supplyCurrent() {
             // https://www.chiefdelphi.com/t/current-limiting-talonfx-values/374780/10;
@@ -158,6 +167,8 @@ public class SimMechanism {
         public static MechanismInputs zero() {
             return new MechanismInputs(NewtonMeters.zero(), Volts.zero(), Volts.zero(), Amps.zero());
         }
+
+        public static final Struct<MechanismInputs> struct = ProceduralStructGenerator.genRecord(MechanismInputs.class);
     }
 
     private final String name;
@@ -246,8 +257,7 @@ public class SimMechanism {
      * @return the voltage to apply to the motor
      */
     protected Voltage getControllerVoltage(Voltage supplyVoltage) {
-        MechanismOutputs outputs = controller.sensorBeforeGearbox() ? outputs().times(gearRatio.getReduction()) : outputs();
-        return controller.run(Seconds.of(timing.dt), supplyVoltage, outputs);
+        return controller.run(timing.dt, supplyVoltage, outputs());
     }
 
     protected Torque getMotorTorque(Voltage voltage) {
@@ -285,6 +295,15 @@ public class SimMechanism {
         }
     }
 
+    public void overrideOutputs(MechanismOutputs outputs) {
+        try {
+            ioLock.writeLock().lock();
+            this.outputs = outputs;
+        } finally {
+            ioLock.writeLock().unlock();
+        }
+    }
+
     /**
      * Gets the name of the mechanism.
      * 
@@ -298,13 +317,15 @@ public class SimMechanism {
      * Updates the state of the mechanism.
      */
     void update(final Voltage supplyVoltage) {
-        final Time dt = Seconds.of(timing.dt);
+        final Time dt = timing.dt;
 
         // run the motor controller loop
         final Voltage voltage = getControllerVoltage(supplyVoltage);
 
+        Monologue.log("/MapleSim/Mechanisms/"+name+"/ControlVolts", voltage.in(Volts));
+
         // calculate the torque acting on the mechanism
-        final Torque enviroment = dynamics.enviroment(outputs().angle(), outputs().velocity());
+        final Torque enviroment = dynamics.enviroment(outputs().position(), outputs().velocity());
         final Torque motorTorque = getMotorTorque(voltage).times(gearRatio.getReduction());
         final Torque outputTorque = applyAntiTorque(enviroment.plus(motorTorque));
 
@@ -315,7 +336,7 @@ public class SimMechanism {
             / rotorInertia.plus(dynamics.extraInertia()).in(KilogramSquareMeters)
         ).times(1.0 + (noise * RAND.nextGaussian()));
         final AngularVelocity velocity = outputs().velocity().plus(acceleration.times(dt));
-        final Angle angle = outputs().angle().plus(velocity.times(dt));
+        final Angle angle = outputs().position().plus(velocity.times(dt));
 
         try {
             ioLock.writeLock().lock();
@@ -334,6 +355,8 @@ public class SimMechanism {
                 Amps.of(motor.getCurrent(outputs.velocity.in(RadPS), voltage.in(Volts)))
             );
         } finally {
+            Monologue.log("/MapleSim/Mechanisms/"+name+"/Out", outputs);
+            Monologue.log("/MapleSim/Mechanisms/"+name+"/In", inputs);
             ioLock.writeLock().unlock();
         }
     }

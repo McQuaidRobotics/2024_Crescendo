@@ -1,6 +1,6 @@
 {
  "name":"S2toC2",
- "version":1,
+ "version":"v2025.0.0",
  "snapshot":{
   "waypoints":[
     {"x":4.0, "y":5.45, "heading":-0.024, "intervals":33, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},

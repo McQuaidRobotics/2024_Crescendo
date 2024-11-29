@@ -39,25 +39,19 @@ public class SwerveModuleSim extends SwerveModule {
             kSteerMotor.kD,
             ConstValues.PERIODIC_TIME);
 
-    public final int moduleNumber;
+    public final int moduleId;
 
-    public SwerveModuleSim(final SwerveModuleConstants moduleConstants, SimSwerveOdometryThread odoThread, SimDriveTrainSwerveModule sim) {
-        super("SwerveModule[" + moduleConstants.getModuleId() + "]");
-        this.moduleNumber = moduleConstants.getModuleId().num;
-
-        // just to test the consts
-        moduleConstants.getDriveMotorID();
-        moduleConstants.getAngleMotorID();
-        moduleConstants.getCancoderID();
-        moduleConstants.getModuleChassisPose();
+    public SwerveModuleSim(final int moduleId, SimSwerveOdometryThread odoThread, SimDriveTrainSwerveModule sim) {
+        super("SwerveModule[" + moduleId + "]");
+        this.moduleId = moduleId;
 
         angleFeedback.enableContinuousInput(-Math.PI, Math.PI);
 
         super.angleAbsoluteRads = Units.rotationsToRadians(Math.random());
 
-        odoThread.addModulePositionSupplier(moduleNumber, this::getCurrentPosition);
+        odoThread.addModulePositionSupplier(moduleId, this::getCurrentPosition);
 
-        BootupLogger.bootupLog("    SwerveModule[" + this.moduleNumber + "] initialized (sim)");
+        BootupLogger.bootupLog("    SwerveModule[" + this.moduleId + "] initialized (sim)");
     }
 
     private double driveRotationsToMeters(double rotations) {
@@ -87,8 +81,9 @@ public class SwerveModuleSim extends SwerveModule {
                 getAngle());
     }
 
-    public int getModuleNumber() {
-        return this.moduleNumber;
+    @Override
+    public int getModuleId() {
+        return this.moduleId;
     }
 
     private Rotation2d getAngle() {

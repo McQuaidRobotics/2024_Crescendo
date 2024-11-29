@@ -41,7 +41,7 @@ public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
     private final CommandScheduler scheduler = CommandScheduler.getInstance();
 
     public final Localizer localizer = new Localizer();
-    public final SimCtx simCtx = new SimCtx(isSimulation());
+    public final SimCtx simCtx = new SimCtx(localizer, isSimulation());
 
     private final DriverController driverController;
 
@@ -133,6 +133,7 @@ public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
 
     @Override
     public void robotPeriodic() {
+        Tracer.traceFunc("SimCtx", simCtx::update);
         Tracer.traceFunc("CANSignalRefresh", CANSignalManager::refreshSignals);
         Tracer.traceFunc("Localizer", localizer::update);
         Tracer.traceFunc("CommandScheduler", scheduler::run);

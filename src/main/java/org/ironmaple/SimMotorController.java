@@ -14,17 +14,13 @@ public interface SimMotorController {
      * @param dt the time step, this will not be different inbetween invocations
      *     of this method on the same instance
      * @param supply the supply voltage
-     * @param state the current state of the mechanism
+     * @param state the current state of the mechanism,
+     *    this is the state <b>at the rotor</b>.
+     *    If you wish to scale these states based on the gearbox ratio,
+     *    you can do `state.times(gearboxRatio)`.
      * @return the output voltage
      */
     Voltage run(Time dt, Voltage supply, MechanismOutputs state);
-
-    /**
-     * Tells the mechanism if the sensor is before the gearbox
-     * or after the gearbox.
-     * @return true if the sensor is before the gearbox, false otherwise
-     */
-    boolean sensorBeforeGearbox();
 
     boolean brakeEnabled();
 
@@ -33,11 +29,6 @@ public interface SimMotorController {
             @Override
             public Voltage run(Time dt, Voltage supply, MechanismOutputs state) {
                 return Volts.of(0);
-            }
-
-            @Override
-            public boolean sensorBeforeGearbox() {
-                return true;
             }
 
             @Override

@@ -2,6 +2,7 @@ package igknighters.subsystems.swerve;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -11,6 +12,7 @@ import java.util.Optional;
 
 import org.ironmaple.SimDriveTrainSwerve;
 import org.ironmaple.SimDriveTrainSwerveModule;
+import org.ironmaple.SimRobot;
 
 import igknighters.Localizer;
 import igknighters.Robot;
@@ -27,7 +29,7 @@ import igknighters.subsystems.swerve.gyro.Gyro;
 import igknighters.subsystems.swerve.gyro.GyroReal;
 import igknighters.subsystems.swerve.gyro.GyroSim;
 import igknighters.subsystems.swerve.module.SwerveModule;
-import igknighters.subsystems.swerve.module.SwerveModuleReal;
+import igknighters.subsystems.swerve.module.SwerveModuleOmni;
 import igknighters.subsystems.swerve.module.SwerveModuleSim;
 import igknighters.subsystems.swerve.module.SwerveModule.AdvancedSwerveModuleState;
 import igknighters.subsystems.swerve.odometryThread.RealSwerveOdometryThread;
@@ -77,34 +79,34 @@ public class Swerve implements LockFullSubsystem {
     private SwerveSetpoint setpoint = SwerveSetpoint.zeroed();
 
     public Swerve(final Localizer localizer, final SimCtx simCtx) {
-        if (Robot.isReal()) {
-            sim = Optional.empty();
-            final RealSwerveOdometryThread ot = new RealSwerveOdometryThread(
-                250,
-                rots -> (rots / kSwerve.DRIVE_GEAR_RATIO) * kSwerve.WHEEL_CIRCUMFERENCE,
-                localizer.swerveDataSender()
-            );
-            swerveMods = new SwerveModule[] {
-                    new SwerveModuleReal(ConstValues.kSwerve.kMod0.CONSTANTS, true, ot),
-                    new SwerveModuleReal(ConstValues.kSwerve.kMod1.CONSTANTS, true, ot),
-                    new SwerveModuleReal(ConstValues.kSwerve.kMod2.CONSTANTS, true, ot),
-                    new SwerveModuleReal(ConstValues.kSwerve.kMod3.CONSTANTS, true, ot)
-            };
-            gyro = new GyroReal(ot);
-            odometryThread = ot;
-        } else {
-            sim = Optional.of((SimDriveTrainSwerve) simCtx.robot().getDriveTrain());
-            final SimDriveTrainSwerveModule[] simMods = sim.get().getModules();
-            final SimSwerveOdometryThread ot = new SimSwerveOdometryThread(250, localizer.swerveDataSender());
-            swerveMods = new SwerveModule[] {
-                    new SwerveModuleSim(ConstValues.kSwerve.kMod0.CONSTANTS, ot, simMods[0]),
-                    new SwerveModuleSim(ConstValues.kSwerve.kMod1.CONSTANTS, ot, simMods[1]),
-                    new SwerveModuleSim(ConstValues.kSwerve.kMod2.CONSTANTS, ot, simMods[2]),
-                    new SwerveModuleSim(ConstValues.kSwerve.kMod3.CONSTANTS, ot, simMods[3]),
-            };
-            gyro = new GyroSim(this::getChassisSpeed, ot);
-            odometryThread = ot;
-        }
+        // sim = Optional.of((SimDriveTrainSwerve) simCtx.robot().getDriveTrain());
+        // final SimDriveTrainSwerveModule[] simMods = sim.get().getModules();
+        // final SimSwerveOdometryThread ot = new SimSwerveOdometryThread(250, localizer.swerveDataSender());
+        // swerveMods = new SwerveModule[] {
+        //         new SwerveModuleSim(0, ot, simMods[0]),
+        //         new SwerveModuleSim(1, ot, simMods[1]),
+        //         new SwerveModuleSim(2, ot, simMods[2]),
+        //         new SwerveModuleSim(3, ot, simMods[3]),
+        // };
+        // gyro = new GyroSim(this::getChassisSpeed, ot);
+        // odometryThread = ot;
+
+        sim = Optional.ofNullable(simCtx.robot())
+            .map(SimRobot::getDriveTrain)
+            .map(SimDriveTrainSwerve.class::cast);
+        final RealSwerveOdometryThread ot = new RealSwerveOdometryThread(
+            250,
+            rots -> (rots / kSwerve.DRIVE_GEAR_RATIO) * kSwerve.WHEEL_CIRCUMFERENCE,
+            localizer.swerveDataSender()
+        );
+        swerveMods = new SwerveModule[] {
+                new SwerveModuleOmni(0, ot, simCtx),
+                new SwerveModuleOmni(1, ot, simCtx),
+                new SwerveModuleOmni(2, ot, simCtx),
+                new SwerveModuleOmni(3, ot, simCtx)
+        };
+        gyro = new GyroReal(ot, simCtx);
+        odometryThread = ot;
 
         visualizer = new SwerveVisualizer(swerveMods);
 
@@ -114,7 +116,7 @@ public class Swerve implements LockFullSubsystem {
     public void drive(ChassisSpeeds speeds) {
         log("targetChassisSpeed", speeds);
 
-        setpoint = setpointGenerator.generateSetpoint(setpoint, speeds, ConstValues.PERIODIC_TIME);
+        setpoint = setpointGenerator.generateSimpleSetpoint(setpoint, speeds, ConstValues.PERIODIC_TIME);
 
         setModuleStates(setpoint.moduleStates());
     }
@@ -138,7 +140,7 @@ public class Swerve implements LockFullSubsystem {
     public SwerveModulePosition[] getModulePositions() {
         SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
         for (SwerveModule module : swerveMods) {
-            modulePositions[module.getModuleNumber()] = module.getCurrentPosition();
+            modulePositions[module.getModuleId()] = module.getCurrentPosition();
         }
         return modulePositions;
     }
@@ -147,14 +149,14 @@ public class Swerve implements LockFullSubsystem {
         log("regurgutatedChassisSpeed", kSwerve.KINEMATICS.toChassisSpeeds(desiredStates));
 
         for (SwerveModule module : swerveMods) {
-            module.setDesiredState(desiredStates[module.getModuleNumber()]);
+            module.setDesiredState(desiredStates[module.getModuleId()]);
         }
     }
 
     public SwerveModuleState[] getModuleStates() {
         SwerveModuleState[] states = new SwerveModuleState[4];
         for (SwerveModule module : swerveMods) {
-            states[module.getModuleNumber()] = module.getCurrentState();
+            states[module.getModuleId()] = module.getCurrentState();
         }
         return states;
     }

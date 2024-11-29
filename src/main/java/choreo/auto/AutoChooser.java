@@ -83,7 +83,7 @@ public class AutoChooser {
    * you need to disable the robot to update it.
    */
   public void update() {
-    if (DriverStation.isDisabled()) {
+    if (DriverStation.isDisabled() && DriverStation.isDSAttached()) {
       String selectStr = selected.get();
       if (selectStr.equals(lastAutoRoutineName)) return;
       if (!autoRoutines.containsKey(selectStr)) {

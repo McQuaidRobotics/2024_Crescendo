@@ -70,12 +70,12 @@ public class SwerveVisualizer {
 
         moduleVisual = new ModuleVisualizer[this.modules.length];
         for (int i = 0; i < modules.length; i++) {
-            moduleVisual[i] = new ModuleVisualizer(modules[i].getModuleNumber());
+            moduleVisual[i] = new ModuleVisualizer(modules[i].getModuleId());
             moduleVisual[i]
                     .getMechanism()
                     .initSendable(
                             getBuilder(
-                                    "SwerveModules/Module[" + modules[i].getModuleNumber() + "]"));
+                                    "SwerveModules/Module[" + modules[i].getModuleId() + "]"));
         }
 
     }

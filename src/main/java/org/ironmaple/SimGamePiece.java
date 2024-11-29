@@ -1,5 +1,7 @@
 package org.ironmaple;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -180,7 +182,7 @@ public class SimGamePiece {
 
             @Override
             public void tick(SimGamePiece gp, SimArena arena) {
-                double dt = arena.timing.dt;
+                double dt = arena.timing.dt.in(Seconds);
                 velocity = dynamics.calculate(dt, velocity);
                 Twist3d twist = new Twist3d(
                         dt * velocity.getVX(),

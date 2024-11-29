@@ -44,9 +44,16 @@ public class Localizer implements LogLocal {
     private double latestVisionTimestamp = 0;
 
     private final Field2d field;
-    public static record NamedPositions(String name, Pose2d[] positions) {}
+    public static record NamedPositions(String name, Pose2d[] positions) {
+        public NamedPositions(String name, Pose2d positions) {
+            this(name, new Pose2d[] { positions });
+        }
+    }
     private final Channel<NamedPositions> namedPositionsChannel = new Channel<>(new NamedPositions[0]);
-    private final Receiver<NamedPositions> namedPositionsReceiver = namedPositionsChannel.openReceiver(24, ThreadSafetyMarker.SEQUENTIAL);
+    private final Receiver<NamedPositions> namedPositionsReceiver = namedPositionsChannel.openReceiver(24, ThreadSafetyMarker.CONCURRENT);
+
+    private final Channel<Pose2d> poseResetsChannel = new Channel<>(new Pose2d[0]);
+    private final Sender<Pose2d> poseResetsSender = poseResetsChannel.sender();
 
     public Localizer() {
         poseEstimator = new TwistyPoseEst();
@@ -69,8 +76,13 @@ public class Localizer implements LogLocal {
         return namedPositionsChannel.sender();
     }
 
+    public Receiver<Pose2d> poseResetsReceiver() {
+        return poseResetsChannel.openReceiver(8, ThreadSafetyMarker.CONCURRENT);
+    }
+
     public void reset(Pose2d pose) {
         poseEstimator.resetPose(pose);
+        poseResetsSender.send(pose);
     }
 
     public void update() {

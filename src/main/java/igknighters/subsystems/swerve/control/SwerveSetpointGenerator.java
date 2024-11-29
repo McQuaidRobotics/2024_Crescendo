@@ -162,6 +162,18 @@ public class SwerveSetpointGenerator implements LogLocal {
         ));
     }
 
+    public SwerveSetpoint generateSimpleSetpoint(final SwerveSetpoint prevSetpoint, ChassisSpeeds desiredRobotRelativeSpeeds, double dt) {
+        AdvancedSwerveModuleState[] outputStates = new AdvancedSwerveModuleState[NUM_MODULES];
+        SwerveModuleState[] desiredModuleStates = kinematics.toSwerveModuleStates(desiredRobotRelativeSpeeds);
+        SwerveDriveKinematics.desaturateWheelSpeeds(desiredModuleStates, maxDriveVelocityMPS);
+        for (int m = 0; m < NUM_MODULES; m++) {
+            desiredModuleStates[m].optimize(prevSetpoint.moduleStates()[m].angle);
+            outputStates[m] = AdvancedSwerveModuleState.fromBase(desiredModuleStates[m]);
+        }
+
+        return new SwerveSetpoint(kinematics.toChassisSpeeds(desiredModuleStates), outputStates);
+    }
+
     private static void checkNeedToSteer(LocalVars vars) {
         if (epsilonEquals(vars.desiredSpeeds, ZERO_SPEEDS)) {
             vars.needToSteer = false;

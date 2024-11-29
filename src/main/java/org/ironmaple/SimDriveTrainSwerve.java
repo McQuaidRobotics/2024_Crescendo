@@ -3,6 +3,8 @@ package org.ironmaple;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+
 import org.dyn4j.geometry.Vector2;
 import org.ironmaple.SimArena.SimulationTiming;
 import org.ironmaple.configs.SwerveConfig;
@@ -17,8 +19,8 @@ public class SimDriveTrainSwerve extends SimDriveTrain {
     protected final Translation2d[] moduleTranslations;
     protected final SwerveDriveKinematics kinematics;
     private final double gravityForceOnEachModule;
-    @SuppressWarnings("unused")
     private final SwerveConfig config;
+    private final SimRobot robot;
 
     /**
      *
@@ -32,6 +34,7 @@ public class SimDriveTrainSwerve extends SimDriveTrain {
      */
     public SimDriveTrainSwerve(SimRobot robot, SwerveConfig config) {
         super(config);
+        this.robot = robot;
         this.timing = robot.timing();
         this.config = config;
         this.moduleTranslations = config.moduleTranslations;
@@ -45,6 +48,9 @@ public class SimDriveTrainSwerve extends SimDriveTrain {
 
         this.gravityForceOnEachModule = (config.robotMassKg * 9.8) / moduleSimulations.length;
 
+        chassis.setLinearDamping(1.5);
+        chassis.setAngularDamping(1.5);
+
         RuntimeLog.debug("created swerve drive simulation");
     }
 
@@ -52,14 +58,14 @@ public class SimDriveTrainSwerve extends SimDriveTrain {
     protected void simTick() {
         simulateModulePropellingForces();
 
-        gyroSimulation.updateSimulationSubTick(chassis.getAngularVelocity());
+        gyroSimulation.updateSimulationSubTick(RadiansPerSecond.of(chassis.getAngularVelocity()));
     }
 
     private void simulateModulePropellingForces() {
         for (int i = 0; i < moduleSimulations.length; i++) {
             final Vector2 moduleWorldPosition = chassis.getWorldPoint(GeometryConvertor.toDyn4jVector2(moduleTranslations[i]));
-            final Vector2 moduleForce = moduleSimulations[i].updateSimulationSubTickGetModuleForce(
-                    gravityForceOnEachModule
+            final Vector2 moduleForce = moduleSimulations[i].moduleForce(
+                gravityForceOnEachModule
             );
             chassis.applyForce(moduleForce, moduleWorldPosition);
         }
@@ -71,5 +77,10 @@ public class SimDriveTrainSwerve extends SimDriveTrain {
 
     public SimGyro getGyro() {
         return this.gyroSimulation;
+    }
+
+    public SimDriveTrainSwerve withSetModuleControllers(int moduleId, SimMotorController driveController, SimMotorController steerController) {
+        moduleSimulations[moduleId] = new SimDriveTrainSwerveModule(robot, config, moduleId, driveController, steerController);
+        return this;
     }
 }

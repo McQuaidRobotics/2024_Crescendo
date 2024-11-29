@@ -14,10 +14,14 @@ import org.ironmaple.configs.SwerveModuleConfig.WheelCof;
 import org.ironmaple.seasonspecific.Crescendo;
 import org.ironmaple.utils.GearRatio;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import igknighters.Localizer.NamedPositions;
 import igknighters.constants.ConstValues;
 import igknighters.constants.ConstValues.kSwerve;
+import igknighters.util.plumbing.Channel.Receiver;
+import igknighters.util.plumbing.Channel.Sender;
 
 /**
  * An object containing sim-specific objects and configurations.
@@ -32,16 +36,19 @@ public class SimCtx {
     private final SimArena arena;
     private final SimRobot simRobot;
 
+    private final Sender<NamedPositions> poseSender;
+    private final Receiver<Pose2d> resetReceiver;
+
     private final MechanismConfig driveMotorCfg = new MechanismConfig(DCMotor.getKrakenX60Foc(1))
             .withFriction(Volts.of(kSwerve.kDriveMotor.kS))
             .withGearRatio(GearRatio.reduction(kSwerve.DRIVE_GEAR_RATIO))
-            .withNoise(0.03)
-            .withRotorInertia(KilogramSquareMeters.of(0.025));
-    private final MechanismConfig steerMotorCfg = new MechanismConfig(DCMotor.getKrakenX60Foc(1))
-            .withFriction(Volts.of(0.25))
+            .withNoise(0.00)
+            .withRotorInertia(KilogramSquareMeters.of(1.0));
+    private final MechanismConfig steerMotorCfg = new MechanismConfig(DCMotor.getFalcon500Foc(1))
+            .withFriction(Volts.of(1.2))
             .withGearRatio(GearRatio.reduction(kSwerve.STEER_GEAR_RATIO))
-            .withNoise(0.05)
-            .withRotorInertia(KilogramSquareMeters.of(0.005));
+            .withNoise(0.00)
+            .withRotorInertia(KilogramSquareMeters.of(0.1));
     private final SwerveModuleConfig moduleCfg = new SwerveModuleConfig(
         driveMotorCfg,
         steerMotorCfg,
@@ -58,8 +65,10 @@ public class SimCtx {
         GyroConfig.ofPigeon2()
     );
 
-    public SimCtx(boolean isSim) {
+    public SimCtx(Localizer localizer, boolean isSim) {
         isSimulation = isSim;
+        poseSender = localizer.namedPositionsSender();
+        resetReceiver = localizer.poseResetsReceiver();
         if (isSimulation) {
             arena = new Crescendo.CrescendoSimArena(Seconds.of(ConstValues.PERIODIC_TIME), 5);
             simRobot = new SimRobot(arena, swerveConfig, 1);
@@ -79,5 +88,16 @@ public class SimCtx {
 
     public SimRobot robot() {
         return simRobot;
+    }
+
+    public void update() {
+        if (isSimulation) {
+            if (resetReceiver.hasData()) {
+                final var poses = resetReceiver.recvAll();
+                robot().getDriveTrain().setChassisWorldPose(poses[poses.length - 1], true);
+            }
+            arena.simulationPeriodic();
+            poseSender.send(new NamedPositions("SimRobot", simRobot.getDriveTrain().getChassisWorldPose()));
+        }
     }
 }

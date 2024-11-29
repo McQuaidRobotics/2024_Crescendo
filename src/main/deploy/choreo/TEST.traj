@@ -1,6 +1,6 @@
 {
  "name":"TEST",
- "version":1,
+ "version":"v2025.0.0",
  "snapshot":{
   "waypoints":[
     {"x":1.245659589767456, "y":5.5926337242126465, "heading":0.0, "intervals":27, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},

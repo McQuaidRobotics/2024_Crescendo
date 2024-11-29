@@ -5,6 +5,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Force;
+import monologue.Monologue;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Newtons;
@@ -28,6 +29,8 @@ public class SimDriveTrainSwerveModule {
             wheelRadiusMeters;
 
     private final SimulationTiming timing;
+
+    private final int moduleId;
 
     /**
      *
@@ -82,6 +85,7 @@ public class SimDriveTrainSwerveModule {
         robot.addMechanism(steerMotor);
         wheelsCoefficientOfFriction = config.swerveModuleConfig.tireCoefficientOfFriction;
         wheelRadiusMeters = config.swerveModuleConfig.wheelsRadiusMeters;
+        this.moduleId = moduleId;
 
         RuntimeLog.debug("Created a swerve module simulation");
     }
@@ -100,23 +104,28 @@ public class SimDriveTrainSwerveModule {
     public SwerveModuleState state() {
         return new SwerveModuleState(
             driveMotor.outputs().velocity().in(RadiansPerSecond) * wheelRadiusMeters,
-            new Rotation2d(steerMotor.outputs().angle())
+            new Rotation2d(steerMotor.outputs().position())
         );
     }
 
-    Vector2 updateSimulationSubTickGetModuleForce(double gravityForceOnModuleNewtons) {
-        Force driveMotorAppliedForce = driveMotor.inputs().torque().divide(Meters.of(wheelRadiusMeters));
-        Force gripForce = Newtons.of(gravityForceOnModuleNewtons * wheelsCoefficientOfFriction);
-        Angle steerMotorAppliedAngle = steerMotor.outputs().angle();
+    protected Vector2 moduleForce(final double gravityForceOnModuleNewtons) {
+        final Force driveMotorAppliedForce = driveMotor.inputs().torque().divide(Meters.of(wheelRadiusMeters));
+        final Force gripForce = Newtons.of(gravityForceOnModuleNewtons * wheelsCoefficientOfFriction);
+        final Angle steerMotorAngle = steerMotor.outputs().position();
 
-        boolean isSkidding = MeasureMath.abs(driveMotorAppliedForce).gt(gripForce);
-        Force propellingForce;
+        final boolean isSkidding = MeasureMath.abs(driveMotorAppliedForce).gt(gripForce);
+        final Force propellingForce;
         if (isSkidding) {
             propellingForce = gripForce.times(MeasureMath.signum(driveMotorAppliedForce));
         } else {
             propellingForce = driveMotorAppliedForce;
         }
 
-        return Vector2.create(propellingForce.in(Newtons), steerMotorAppliedAngle.in(Radians));
+        Monologue.log(moduleId+"ModuleForce", propellingForce.baseUnitMagnitude());
+
+        return Vector2.create(
+            propellingForce.in(Newtons),
+            steerMotorAngle.in(Radians)
+        );
     }
 }

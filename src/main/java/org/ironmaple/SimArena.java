@@ -4,12 +4,15 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.IterativeRobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static edu.wpi.first.units.Units.Seconds;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -30,14 +33,14 @@ import org.ironmaple.utils.mathutils.GeometryConvertor;
 
 public abstract class SimArena {
     public static final class SimulationTiming {
-        public final double period;
+        public final Time period;
         public final int ticksPerPeriod;
-        public final double dt;
+        public final Time dt;
 
         private SimulationTiming(double robotPeriodSeconds, int simulationSubTicksPerPeriod) {
-            this.period = robotPeriodSeconds;
+            this.period = Seconds.of(robotPeriodSeconds);
             this.ticksPerPeriod = simulationSubTicksPerPeriod;
-            this.dt = period / ((double) ticksPerPeriod);
+            this.dt = Seconds.of(robotPeriodSeconds / ((double) ticksPerPeriod));
         }
     }
 
@@ -128,7 +131,7 @@ public abstract class SimArena {
         for (final SimGamePiece gamePiece : gamePieces)
             gamePiece.simulationSubTick();
 
-        withWorld(world -> world.update(timing.dt));
+        withWorld(world -> world.update(timing.dt.in(Seconds)));
     }
 
     /**

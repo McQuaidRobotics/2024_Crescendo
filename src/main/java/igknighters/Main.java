@@ -1,6 +1,5 @@
 package igknighters;
 
-import edu.wpi.first.hal.HAL;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -48,16 +47,6 @@ import edu.wpi.first.wpilibj.RobotBase;
 ⣿⣿⣿⣿⣿⣿⣷⣿⣿⣿⣿⣿⣿⣿⣿⣾⣷⣿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
  */
 public final class Main {
-  static {
-    // parts of constvalues depends on the HAL being initialized
-    // for retrieving the robot serial, considering statrting
-    // the HAL is the first thing `RobotBase.startRobot` does
-    // this shouldn't really change any behavior
-    if (!HAL.initialize(500, 0)) {
-      throw new IllegalStateException("Failed to initialize HAL. Terminating");
-    }
-  }
-
   private Main() {
   }
 

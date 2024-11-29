@@ -39,13 +39,12 @@ public class AutoRoutines extends AutoCommands {
     }
 
     private Command resetOdometry(AutoTrajectory traj, AutoRoutine routine) {
-        var optPose = traj.getInitialPose();
-        if (optPose.isEmpty()) {
+        if (traj.getInitialPose().isEmpty()) {
             routine.kill();
-            return Commands.print("Killed loop due to lack of startung pose");
+            return Commands.print("Killed loop due to lack of starting pose");
         }
-        var pose = optPose.get();
         return loggedCmd(swerve.runOnce(() -> {
+            var pose =  traj.getInitialPose().get();
             localizer.reset(pose);
             swerve.setYaw(pose.getRotation());
         }).withName("ResetOdometry"));

@@ -4,9 +4,8 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import igknighters.constants.ConstValues.kStem.kTelescope;
+import igknighters.constants.RobotConfig.RobotID;
 import igknighters.subsystems.stem.StemSolvers.AimSolveStrategy;
-import igknighters.subsystems.swerve.module.SwerveModuleConstants;
-import igknighters.subsystems.swerve.module.SwerveModuleConstants.ModuleId;
 import igknighters.subsystems.vision.camera.Camera;
 import igknighters.subsystems.vision.camera.Camera.CameraConfig;
 import igknighters.util.LerpTable;
@@ -151,7 +150,7 @@ public final class ConstValues {
         public static final double MAX_Z_DELTA = 0.2;
         public static final double MAX_ANGLE_DELTA = 5.0 * Conv.DEGREES_TO_RADIANS;
 
-        private static enum CameraConfigs {
+        public static enum CameraConfigs {
             CRASH(
                     new CameraConfig[] {
                             Camera.createConfig(
@@ -186,15 +185,14 @@ public final class ConstValues {
             private CameraConfigs(CameraConfig[] cameras) {
                 this.cameras = cameras;
             }
-        }
 
-        /**
-         * The cameras used for vision.
-         */
-        public final static CameraConfig[] CAMERA_CONFIGS = switch (RobotConfig.getRobotID()) {
-            case CRASH -> CameraConfigs.CRASH.cameras;
-            default -> CameraConfigs.BURN.cameras;
-        };
+            public static CameraConfig[] forRobot(RobotID id) {
+                return switch (RobotConfig.getRobotID()) {
+                    case CRASH -> CameraConfigs.CRASH.cameras;
+                    default -> CameraConfigs.BURN.cameras;
+                };
+            }
+        }
     }
 
     public static final class kSwerve {
@@ -225,7 +223,8 @@ public final class ConstValues {
         public static final double DRIVEBASE_RADIUS = 0.39;
         public static final double DRIVEBASE_CIRCUMFERENCE = DRIVEBASE_RADIUS * TAU;
 
-        public static final double STEER_GEAR_RATIO = SwerveGearRatios.ANGLE;
+        public static final double STEER_GEAR_RATIO = 1.0;
+        // public static final double STEER_GEAR_RATIO = SwerveGearRatios.ANGLE;
 
         public static final double DRIVE_GEAR_RATIO = SwerveGearRatios.L3_DRIVE_KRAKEN;
 
@@ -298,77 +297,25 @@ public final class ConstValues {
                 new LerpTableEntry(0.7, 0.4),
                 new LerpTableEntry(1.0, 1.0));
 
-        public static final class kMod0 {
-            public static final ModuleId MODULE = ModuleId.m0;
-            public static final int DRIVE_MOTOR_ID = 1;
-            public static final int ANGLE_MOTOR_ID = 2;
-            public static final int CANCODER_ID = 21;
+        public static final double[] CRASH_ROTATION_OFFSETS = new double[] {
+            -0.1015,
+            0.42529,
+            -0.4182,
+            -0.1086
+        };
 
-            public static final double ROTATION_OFFSET = switch (RobotConfig.getRobotID()) {
-                case CRASH -> -0.1015;
-                case BURN -> 0.0824;
-                default -> 0.0;
-            };
-
-            public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0, -TRACK_WIDTH / 2.0);
-            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(kMod0.class);
-        }
-
-        public static final class kMod1 {
-            public static final ModuleId MODULE = ModuleId.m1;
-            public static final int DRIVE_MOTOR_ID = 3;
-            public static final int ANGLE_MOTOR_ID = 4;
-            public static final int CANCODER_ID = 22;
-
-            public final static double ROTATION_OFFSET = switch (RobotConfig.getRobotID()) {
-                case CRASH -> 0.42529;
-                case BURN -> 0.10595;
-                default -> 0.0;
-            };
-
-            public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0,
-                    -TRACK_WIDTH / 2.0);
-            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(kMod1.class);
-        }
-
-        public static final class kMod2 {
-            public static final ModuleId MODULE = ModuleId.m2;
-            public static final int DRIVE_MOTOR_ID = 5;
-            public static final int ANGLE_MOTOR_ID = 6;
-            public static final int CANCODER_ID = 23;
-
-            public static final double ROTATION_OFFSET = switch (RobotConfig.getRobotID()) {
-                case CRASH -> -0.4182;
-                case BURN -> -0.21533;
-                default -> 0.0;
-            };
-
-            public static final Translation2d CHASSIS_OFFSET = new Translation2d(-TRACK_WIDTH / 2.0, TRACK_WIDTH / 2.0);
-            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(kMod2.class);
-        }
-
-        public static final class kMod3 {
-            public static final ModuleId MODULE = ModuleId.m3;
-            public static final int DRIVE_MOTOR_ID = 7;
-            public static final int ANGLE_MOTOR_ID = 8;
-            public static final int CANCODER_ID = 24;
-
-            public static final double ROTATION_OFFSET = switch (RobotConfig.getRobotID()) {
-                case CRASH -> -0.1086;
-                case BURN -> -0.398925;
-                default -> 0.0;
-            };
-
-            public static final Translation2d CHASSIS_OFFSET = new Translation2d(TRACK_WIDTH / 2.0,
-                    TRACK_WIDTH / 2.0);
-            public static final SwerveModuleConstants CONSTANTS = new SwerveModuleConstants(kMod3.class);
-        }
+        public static final double[] BURN_ROTATION_OFFSETS = new double[] {
+            0.0824,
+            0.10595,
+            -0.21533,
+            -0.398925
+        };
 
         public static final Translation2d[] MODULE_CHASSIS_OFFSETS = new Translation2d[] {
-                kMod0.CHASSIS_OFFSET,
-                kMod1.CHASSIS_OFFSET,
-                kMod2.CHASSIS_OFFSET,
-                kMod3.CHASSIS_OFFSET
+                new Translation2d(TRACK_WIDTH / 2.0, -TRACK_WIDTH / 2.0),
+                new Translation2d(-TRACK_WIDTH / 2.0, -TRACK_WIDTH / 2.0),
+                new Translation2d(-TRACK_WIDTH / 2.0, TRACK_WIDTH / 2.0),
+                new Translation2d(TRACK_WIDTH / 2.0, TRACK_WIDTH / 2.0)
         };
 
         public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(

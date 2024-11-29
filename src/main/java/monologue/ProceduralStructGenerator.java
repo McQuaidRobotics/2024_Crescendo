@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.BaseStream;
 
+import edu.wpi.first.units.Measure;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
 
@@ -256,6 +257,16 @@ public final class ProceduralStructGenerator {
               }
               return buffer;
             });
+      } else if (Measure.class.isAssignableFrom(clazz)) {
+        return new StructField(
+            name,
+            "float64",
+            Double.BYTES,
+            isFinal,
+            Set.of(),
+            buffer -> {throw new UnsupportedOperationException("Cannot unpack Measure");},
+            (buffer, value) -> buffer.putDouble(((Measure<?>) value).baseUnitMagnitude())
+        );
       } else if (primitiveTypeMap.containsKey(clazz)) {
         PrimType<?> primType = primitiveTypeMap.get(clazz);
         return new StructField(
