@@ -2,15 +2,15 @@ package igknighters.util.sim;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.ironmaple.SimMotorController;
-import org.ironmaple.SimMechanism.MechanismOutputs;
+import sham.ShamMotorController;
+import sham.ShamMechanism.MechanismOutputs;
 
 import com.ctre.phoenix6.sim.TalonFXSimState;
 
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
 
-public class TalonFxSimController implements SimMotorController {
+public class TalonFxSimController implements ShamMotorController {
     private final TalonFXSimState simState;
     private final AtomicBoolean brakeEnabled = new AtomicBoolean(false);
 

@@ -5,8 +5,8 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 
-import org.ironmaple.SimDriveTrainSwerve;
-import org.ironmaple.utils.GearRatio;
+import sham.ShamDriveTrainSwerve;
+import sham.utils.GearRatio;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 
@@ -42,8 +42,6 @@ public class SwerveModuleOmni extends SwerveModule {
     @IgnoreLogged
     private final RealSwerveOdometryThread odoThread;
 
-    private Rotation2d lastAngle = new Rotation2d();
-
     public SwerveModuleOmni(final int moduleId, final RealSwerveOdometryThread odoThread, final SimCtx simCtx) {
         super("SwerveModule[" + moduleId + "]");
         this.odoThread = odoThread;
@@ -60,7 +58,7 @@ public class SwerveModuleOmni extends SwerveModule {
         CANRetrier.retryStatusCode(() -> steerEncoder.getConfigurator().apply(cancoderConfig(rotationOffset), 1.0), 5);
 
         if (simCtx.isActive()) {
-            ((SimDriveTrainSwerve) simCtx.robot().getDriveTrain())
+            ((ShamDriveTrainSwerve) simCtx.robot().getDriveTrain())
                 .withSetModuleControllers(
                     moduleId,
                     new TalonFxSimController(driveMotor.getSimState()).withBrakeEnabled(true),
@@ -108,19 +106,18 @@ public class SwerveModuleOmni extends SwerveModule {
 
     @Override
     public void setDesiredState(AdvancedSwerveModuleState desiredState) {
-        desiredState.optimize(getAngle());
         setAngle(desiredState);
         setSpeed(desiredState);
     }
 
     private void setAngle(SwerveModuleState desiredState) {
-        Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (kSwerve.MAX_DRIVE_VELOCITY * 0.01))
-                ? lastAngle
-                : desiredState.angle;
-        super.targetAngleAbsoluteRads = angle.getRadians();
+        super.targetSteerAbsoluteRads = desiredState.angle.getRadians();
 
-        steerMotor.setControl(angleMotorReq.withPosition(angle.getRotations()));
-        lastAngle = angle;
+        if (Math.abs(desiredState.speedMetersPerSecond) <= (kSwerve.MAX_DRIVE_VELOCITY * 0.01)) {
+            return;
+        }
+
+        steerMotor.setControl(angleMotorReq.withPosition(desiredState.angle.getRotations()));
     }
 
     private void setSpeed(AdvancedSwerveModuleState desiredState) {
@@ -145,7 +142,7 @@ public class SwerveModuleOmni extends SwerveModule {
     }
 
     private Rotation2d getAngle() {
-        return Rotation2d.fromRadians(super.angleAbsoluteRads);
+        return Rotation2d.fromRadians(super.steerAbsoluteRads);
     }
 
     private double driveRotationsToMeters(double rotations) {
@@ -154,10 +151,10 @@ public class SwerveModuleOmni extends SwerveModule {
 
     @Override
     public void periodic() {
-        super.angleAbsoluteRads = Units.rotationsToRadians(angleAbsoluteSignal.getValueAsDouble());
-        super.angleVeloRadPS = Units.rotationsToRadians(angleAbsoluteVeloSignal.getValueAsDouble());
-        super.angleVolts = angleVoltSignal.getValueAsDouble();
-        super.angleAmps = angleAmpSignal.getValueAsDouble();
+        super.steerAbsoluteRads = Units.rotationsToRadians(angleAbsoluteSignal.getValueAsDouble());
+        super.steerVeloRadPS = Units.rotationsToRadians(angleAbsoluteVeloSignal.getValueAsDouble());
+        super.steerVolts = angleVoltSignal.getValueAsDouble();
+        super.steerAmps = angleAmpSignal.getValueAsDouble();
 
         super.drivePositionMeters = driveRotationsToMeters(odoThread.getModulePosition(moduleId));
         super.driveVeloMPS = driveRotationsToMeters(odoThread.getModuleVelocity(moduleId));

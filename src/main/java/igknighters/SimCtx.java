@@ -4,15 +4,15 @@ import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
-import org.ironmaple.SimArena;
-import org.ironmaple.SimRobot;
-import org.ironmaple.configs.GyroConfig;
-import org.ironmaple.configs.MechanismConfig;
-import org.ironmaple.configs.SwerveConfig;
-import org.ironmaple.configs.SwerveModuleConfig;
-import org.ironmaple.configs.SwerveModuleConfig.WheelCof;
-import org.ironmaple.seasonspecific.Crescendo;
-import org.ironmaple.utils.GearRatio;
+import sham.ShamArena;
+import sham.ShamRobot;
+import sham.configs.ShamGyroConfig;
+import sham.configs.ShamMechanismConfig;
+import sham.configs.ShamSwerveConfig;
+import sham.configs.ShamSwerveModuleConfig;
+import sham.configs.ShamSwerveModuleConfig.WheelCof;
+import sham.seasonspecific.Crescendo;
+import sham.utils.GearRatio;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -33,36 +33,36 @@ public class SimCtx {
     private final boolean isSimulation;
 
     // all fields below this point will be null if isSimulation is false
-    private final SimArena arena;
-    private final SimRobot simRobot;
+    private final ShamArena arena;
+    private final ShamRobot simRobot;
 
     private final Sender<NamedPositions> poseSender;
     private final Receiver<Pose2d> resetReceiver;
 
-    private final MechanismConfig driveMotorCfg = new MechanismConfig(DCMotor.getKrakenX60Foc(1))
+    private final ShamMechanismConfig driveMotorCfg = new ShamMechanismConfig(DCMotor.getKrakenX60Foc(1))
             .withFriction(Volts.of(kSwerve.kDriveMotor.kS))
             .withGearRatio(GearRatio.reduction(kSwerve.DRIVE_GEAR_RATIO))
             .withNoise(0.00)
             .withRotorInertia(KilogramSquareMeters.of(1.0));
-    private final MechanismConfig steerMotorCfg = new MechanismConfig(DCMotor.getFalcon500Foc(1))
+    private final ShamMechanismConfig steerMotorCfg = new ShamMechanismConfig(DCMotor.getFalcon500Foc(1))
             .withFriction(Volts.of(1.2))
             .withGearRatio(GearRatio.reduction(kSwerve.STEER_GEAR_RATIO))
             .withNoise(0.00)
             .withRotorInertia(KilogramSquareMeters.of(0.1));
-    private final SwerveModuleConfig moduleCfg = new SwerveModuleConfig(
+    private final ShamSwerveModuleConfig moduleCfg = new ShamSwerveModuleConfig(
         driveMotorCfg,
         steerMotorCfg,
         WheelCof.BLACK_NITRILE.cof,
         kSwerve.WHEEL_DIAMETER / 2.0
     );
-    private final SwerveConfig swerveConfig = new SwerveConfig(
+    private final ShamSwerveConfig swerveConfig = new ShamSwerveConfig(
         60.0,
         6.0,
         Units.inchesToMeters(30.5),
         Units.inchesToMeters(30.5),
         kSwerve.MODULE_CHASSIS_OFFSETS,
         moduleCfg,
-        GyroConfig.ofPigeon2()
+        ShamGyroConfig.ofPigeon2()
     );
 
     public SimCtx(Localizer localizer, boolean isSim) {
@@ -71,7 +71,7 @@ public class SimCtx {
         resetReceiver = localizer.poseResetsReceiver();
         if (isSimulation) {
             arena = new Crescendo.CrescendoSimArena(Seconds.of(ConstValues.PERIODIC_TIME), 5);
-            simRobot = new SimRobot(arena, swerveConfig, 1);
+            simRobot = new ShamRobot(arena, swerveConfig, 1);
         } else {
             arena = null;
             simRobot = null;
@@ -82,11 +82,11 @@ public class SimCtx {
         return isSimulation;
     }
 
-    public SimArena arena () {
+    public ShamArena arena () {
         return arena;
     }
 
-    public SimRobot robot() {
+    public ShamRobot robot() {
         return simRobot;
     }
 

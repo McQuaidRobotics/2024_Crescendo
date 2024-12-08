@@ -2,7 +2,6 @@ package igknighters.subsystems.swerve;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -10,9 +9,9 @@ import edu.wpi.first.wpilibj.DriverStation;
 
 import java.util.Optional;
 
-import org.ironmaple.SimDriveTrainSwerve;
-import org.ironmaple.SimDriveTrainSwerveModule;
-import org.ironmaple.SimRobot;
+import sham.ShamDriveTrainSwerve;
+import sham.ShamDriveTrainSwerveModule;
+import sham.ShamRobot;
 
 import igknighters.Localizer;
 import igknighters.Robot;
@@ -73,40 +72,42 @@ public class Swerve implements LockFullSubsystem {
         0.0
     );
 
-    private final Optional<SimDriveTrainSwerve> sim;
+    private final Optional<ShamDriveTrainSwerve> sim;
 
     private Optional<TeleopSwerveBaseCmd> defaultCommand = Optional.empty();
     private SwerveSetpoint setpoint = SwerveSetpoint.zeroed();
 
     public Swerve(final Localizer localizer, final SimCtx simCtx) {
-        // sim = Optional.of((SimDriveTrainSwerve) simCtx.robot().getDriveTrain());
-        // final SimDriveTrainSwerveModule[] simMods = sim.get().getModules();
-        // final SimSwerveOdometryThread ot = new SimSwerveOdometryThread(250, localizer.swerveDataSender());
-        // swerveMods = new SwerveModule[] {
-        //         new SwerveModuleSim(0, ot, simMods[0]),
-        //         new SwerveModuleSim(1, ot, simMods[1]),
-        //         new SwerveModuleSim(2, ot, simMods[2]),
-        //         new SwerveModuleSim(3, ot, simMods[3]),
-        // };
-        // gyro = new GyroSim(this::getChassisSpeed, ot);
-        // odometryThread = ot;
-
-        sim = Optional.ofNullable(simCtx.robot())
-            .map(SimRobot::getDriveTrain)
-            .map(SimDriveTrainSwerve.class::cast);
-        final RealSwerveOdometryThread ot = new RealSwerveOdometryThread(
-            250,
-            rots -> (rots / kSwerve.DRIVE_GEAR_RATIO) * kSwerve.WHEEL_CIRCUMFERENCE,
-            localizer.swerveDataSender()
-        );
-        swerveMods = new SwerveModule[] {
-                new SwerveModuleOmni(0, ot, simCtx),
-                new SwerveModuleOmni(1, ot, simCtx),
-                new SwerveModuleOmni(2, ot, simCtx),
-                new SwerveModuleOmni(3, ot, simCtx)
-        };
-        gyro = new GyroReal(ot, simCtx);
-        odometryThread = ot;
+        if (Robot.isSimulation()) {
+            sim = Optional.of((ShamDriveTrainSwerve) simCtx.robot().getDriveTrain());
+            final ShamDriveTrainSwerveModule[] simMods = sim.get().getModules();
+            final SimSwerveOdometryThread ot = new SimSwerveOdometryThread(250, localizer.swerveDataSender());
+            swerveMods = new SwerveModule[] {
+                    new SwerveModuleSim(0, ot, simMods[0]),
+                    new SwerveModuleSim(1, ot, simMods[1]),
+                    new SwerveModuleSim(2, ot, simMods[2]),
+                    new SwerveModuleSim(3, ot, simMods[3]),
+            };
+            gyro = new GyroSim(this::getChassisSpeed, ot);
+            odometryThread = ot;
+        } else {
+            sim = Optional.ofNullable(simCtx.robot())
+                .map(ShamRobot::getDriveTrain)
+                .map(ShamDriveTrainSwerve.class::cast);
+            final RealSwerveOdometryThread ot = new RealSwerveOdometryThread(
+                250,
+                rots -> (rots / kSwerve.DRIVE_GEAR_RATIO) * kSwerve.WHEEL_CIRCUMFERENCE,
+                localizer.swerveDataSender()
+            );
+            swerveMods = new SwerveModule[] {
+                    new SwerveModuleOmni(0, ot, simCtx),
+                    new SwerveModuleOmni(1, ot, simCtx),
+                    new SwerveModuleOmni(2, ot, simCtx),
+                    new SwerveModuleOmni(3, ot, simCtx)
+            };
+            gyro = new GyroReal(ot, simCtx);
+            odometryThread = ot;
+        }
 
         visualizer = new SwerveVisualizer(swerveMods);
 

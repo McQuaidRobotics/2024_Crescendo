@@ -1,6 +1,7 @@
 package igknighters;
 
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 
 import monologue.LogLocal;
@@ -37,6 +38,8 @@ import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory.AutoBindings;
 
 public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
+
+    private static final AtomicInteger loopCount = new AtomicInteger(0);
 
     private final CommandScheduler scheduler = CommandScheduler.getInstance();
 
@@ -133,6 +136,7 @@ public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
 
     @Override
     public void robotPeriodic() {
+        loopCount.incrementAndGet();
         Tracer.traceFunc("SimCtx", simCtx::update);
         Tracer.traceFunc("CANSignalRefresh", CANSignalManager::refreshSignals);
         Tracer.traceFunc("Localizer", localizer::update);
@@ -256,6 +260,10 @@ public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
                 (Command command) -> {
                     logCommandFunction.accept(command, false);
                 });
+    }
+
+    public static int loopCount() {
+        return loopCount.get();
     }
 
     public static boolean isDemo() {

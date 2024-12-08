@@ -47,15 +47,15 @@ public abstract class SwerveModule extends Component {
     @Log
     public double driveAmps = 0.0;
     @Log
-    public double angleVeloRadPS = 0.0;
+    public double steerVeloRadPS = 0.0;
     @Log
-    public double angleAbsoluteRads = 0.0;
+    public double steerAbsoluteRads = 0.0;
     @Log
-    public double targetAngleAbsoluteRads = 0.0;
+    public double targetSteerAbsoluteRads = 0.0;
     @Log
-    public double angleVolts = 0.0;
+    public double steerVolts = 0.0;
     @Log
-    public double angleAmps = 0.0;
+    public double steerAmps = 0.0;
 
     public final String name;
 

@@ -2,9 +2,9 @@ package igknighters.util.sim;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.ironmaple.SimMotorController;
-import org.ironmaple.SimMechanism.MechanismOutputs;
-import org.ironmaple.utils.GearRatio;
+import sham.ShamMotorController;
+import sham.ShamMechanism.MechanismOutputs;
+import sham.utils.GearRatio;
 
 import com.ctre.phoenix6.signals.MagnetHealthValue;
 import com.ctre.phoenix6.sim.CANcoderSimState;
@@ -13,7 +13,7 @@ import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
 
-public class FusedTalonFxSimController implements SimMotorController {
+public class FusedTalonFxSimController implements ShamMotorController {
     private final TalonFXSimState talonSimState;
     private final CANcoderSimState cancoderSimState;
     private final GearRatio rotorToSensor;
