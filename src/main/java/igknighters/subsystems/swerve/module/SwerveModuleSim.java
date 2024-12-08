@@ -1,6 +1,6 @@
 package igknighters.subsystems.swerve.module;
 
-import sham.ShamDriveTrainSwerveModule;
+import sham.ShamSwerveModule;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -43,7 +43,7 @@ public class SwerveModuleSim extends SwerveModule {
 
     public final int moduleId;
 
-    public SwerveModuleSim(final int moduleId, SimSwerveOdometryThread odoThread, ShamDriveTrainSwerveModule sim) {
+    public SwerveModuleSim(final int moduleId, SimSwerveOdometryThread odoThread, ShamSwerveModule sim) {
         super("SwerveModule[" + moduleId + "]");
         this.moduleId = moduleId;
 

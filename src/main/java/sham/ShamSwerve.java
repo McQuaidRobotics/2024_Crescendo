@@ -12,15 +12,15 @@ import sham.utils.RuntimeLog;
 import sham.utils.mathutils.GeometryConvertor;
 
 
-public class ShamDriveTrainSwerve extends ShamDriveTrain {
+public class ShamSwerve extends ShamDriveTrain {
     protected final ShamEnvTiming timing;
-    protected final ShamDriveTrainSwerveModule[] moduleSimulations;
+    protected final ShamSwerveModule[] moduleSimulations;
     protected final ShamGyro gyroSimulation;
     protected final Translation2d[] moduleTranslations;
     protected final SwerveDriveKinematics kinematics;
     private final double gravityForceOnEachModule;
     private final ShamSwerveConfig config;
-    private final ShamRobot robot;
+    private final ShamRobot<ShamSwerve> robot;
 
     /**
      *
@@ -32,15 +32,15 @@ public class ShamDriveTrainSwerve extends ShamDriveTrain {
      *
      * @param config a {@link ShamSwerveConfig} instance containing the configurations of * this drivetrain
      */
-    public ShamDriveTrainSwerve(ShamRobot robot, ShamSwerveConfig config) {
+    ShamSwerve(ShamRobot<ShamSwerve> robot, ShamSwerveConfig config) {
         super(config);
         this.robot = robot;
         this.timing = robot.timing();
         this.config = config;
         this.moduleTranslations = config.moduleTranslations;
-        this.moduleSimulations = new ShamDriveTrainSwerveModule[config.moduleTranslations.length];
+        this.moduleSimulations = new ShamSwerveModule[config.moduleTranslations.length];
         for (int i = 0; i < moduleSimulations.length; i++) {
-            moduleSimulations[i] = new ShamDriveTrainSwerveModule(robot, config, i, ShamMotorController.none(), ShamMotorController.none());
+            moduleSimulations[i] = new ShamSwerveModule(robot, config, i, ShamMotorController.none(), ShamMotorController.none());
         }
         this.gyroSimulation = new ShamGyro(timing, config.gyroConfig);
 
@@ -71,7 +71,7 @@ public class ShamDriveTrainSwerve extends ShamDriveTrain {
         }
     }
 
-    public ShamDriveTrainSwerveModule[] getModules() {
+    public ShamSwerveModule[] getModules() {
         return moduleSimulations;
     }
 
@@ -79,8 +79,8 @@ public class ShamDriveTrainSwerve extends ShamDriveTrain {
         return this.gyroSimulation;
     }
 
-    public ShamDriveTrainSwerve withSetModuleControllers(int moduleId, ShamMotorController driveController, ShamMotorController steerController) {
-        moduleSimulations[moduleId] = new ShamDriveTrainSwerveModule(robot, config, moduleId, driveController, steerController);
+    public ShamSwerve withSetModuleControllers(int moduleId, ShamMotorController driveController, ShamMotorController steerController) {
+        moduleSimulations[moduleId] = new ShamSwerveModule(robot, config, moduleId, driveController, steerController);
         return this;
     }
 }

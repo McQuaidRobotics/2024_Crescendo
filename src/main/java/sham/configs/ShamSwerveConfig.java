@@ -4,7 +4,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import java.util.Arrays;
 import java.util.OptionalDouble;
 
-import sham.ShamDriveTrainSwerve;
+import sham.ShamSwerve;
 
 /**
  *
@@ -14,7 +14,7 @@ import sham.ShamDriveTrainSwerve;
  * <p>This class is used to hold all the parameters necessary for simulating a swerve drivetrain, allowing for realistic
  * performance testing and evaluation.
  */
-public class ShamSwerveConfig extends ShamDriveTrainConfig<ShamDriveTrainSwerve, ShamSwerveConfig> {
+public class ShamSwerveConfig extends ShamDriveTrainConfig<ShamSwerve, ShamSwerveConfig> {
     public ShamSwerveModuleConfig swerveModuleConfig;
     public ShamGyroConfig gyroConfig;
     public Translation2d[] moduleTranslations;

@@ -9,8 +9,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 
 import java.util.Optional;
 
-import sham.ShamDriveTrainSwerve;
-import sham.ShamDriveTrainSwerveModule;
+import sham.ShamSwerve;
+import sham.ShamSwerveModule;
 import sham.ShamRobot;
 
 import igknighters.Localizer;
@@ -72,15 +72,15 @@ public class Swerve implements LockFullSubsystem {
         0.0
     );
 
-    private final Optional<ShamDriveTrainSwerve> sim;
+    private final Optional<ShamSwerve> sim;
 
     private Optional<TeleopSwerveBaseCmd> defaultCommand = Optional.empty();
     private SwerveSetpoint setpoint = SwerveSetpoint.zeroed();
 
     public Swerve(final Localizer localizer, final SimCtx simCtx) {
         if (Robot.isSimulation()) {
-            sim = Optional.of((ShamDriveTrainSwerve) simCtx.robot().getDriveTrain());
-            final ShamDriveTrainSwerveModule[] simMods = sim.get().getModules();
+            sim = Optional.of((ShamSwerve) simCtx.robot().getDriveTrain());
+            final ShamSwerveModule[] simMods = sim.get().getModules();
             final SimSwerveOdometryThread ot = new SimSwerveOdometryThread(250, localizer.swerveDataSender());
             swerveMods = new SwerveModule[] {
                     new SwerveModuleSim(0, ot, simMods[0]),
@@ -93,7 +93,7 @@ public class Swerve implements LockFullSubsystem {
         } else {
             sim = Optional.ofNullable(simCtx.robot())
                 .map(ShamRobot::getDriveTrain)
-                .map(ShamDriveTrainSwerve.class::cast);
+                .map(ShamSwerve.class::cast);
             final RealSwerveOdometryThread ot = new RealSwerveOdometryThread(
                 250,
                 rots -> (rots / kSwerve.DRIVE_GEAR_RATIO) * kSwerve.WHEEL_CIRCUMFERENCE,

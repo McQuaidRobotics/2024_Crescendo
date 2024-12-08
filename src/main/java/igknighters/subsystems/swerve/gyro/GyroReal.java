@@ -2,7 +2,7 @@ package igknighters.subsystems.swerve.gyro;
 
 import java.util.function.BiConsumer;
 
-import sham.ShamDriveTrainSwerve;
+import sham.ShamSwerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
@@ -64,7 +64,7 @@ public class GyroReal extends Gyro {
                 state.addYaw(rate.times(time));
                 state.setAngularVelocityZ(rate);
             };
-            ((ShamDriveTrainSwerve) simCtx.robot().getDriveTrain())
+            ((ShamSwerve) simCtx.robot().getDriveTrain())
                     .getGyro().setYawVeloConsumer(simapplier);
         }
 

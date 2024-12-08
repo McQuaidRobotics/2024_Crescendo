@@ -22,7 +22,7 @@ import sham.configs.ShamSwerveModuleConfig;
 import sham.utils.RuntimeLog;
 import sham.utils.mathutils.MeasureMath;
 
-public class ShamDriveTrainSwerveModule {
+public class ShamSwerveModule {
     private final ShamMechanism driveMotor;
     private final ShamMechanism steerMotor;
     public final double wheelsCoefficientOfFriction,
@@ -54,7 +54,7 @@ public class ShamDriveTrainSwerveModule {
      *     {@link Units#inchesToMeters(double)}.
      * @param steerRotationalInertia the rotational inertia of the steering mechanism
      */
-    ShamDriveTrainSwerveModule(ShamRobot robot, ShamSwerveConfig config, int moduleId, ShamMotorController driveController, ShamMotorController steerController) {
+    ShamSwerveModule(ShamRobot<ShamSwerve> robot, ShamSwerveConfig config, int moduleId, ShamMotorController driveController, ShamMotorController steerController) {
         final ShamSwerveModuleConfig moduleConfig = config.swerveModuleConfig;
         timing = robot.timing();
         driveMotor = new ShamMechanism(

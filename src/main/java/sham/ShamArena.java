@@ -47,7 +47,7 @@ public abstract class ShamArena {
     protected final ReentrantLock worldLock = new ReentrantLock();
     protected final World<Body> physicsWorld = new World<>();
     protected final Set<ShamGamePiece> gamePieces = ConcurrentHashMap.newKeySet();
-    protected final Set<ShamRobot> robots = ConcurrentHashMap.newKeySet();
+    protected final Set<ShamRobot<?>> robots = ConcurrentHashMap.newKeySet();
     public final ShamEnvTiming timing;
 
     /**
@@ -125,7 +125,7 @@ public abstract class ShamArena {
     }
 
     private void simulationSubTick() {
-        for (final ShamRobot otherRobot : robots)
+        for (final ShamRobot<?> otherRobot : robots)
             otherRobot.simTick();
 
         for (final ShamGamePiece gamePiece : gamePieces)

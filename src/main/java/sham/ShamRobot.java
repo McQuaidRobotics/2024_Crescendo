@@ -24,19 +24,19 @@ import edu.wpi.first.math.geometry.Rectangle2d;
  * <li> A collection of {@link ShamMechanism} objects that represent the robot's mechanisms.
  * </ul>
  */
-public class ShamRobot {
+public class ShamRobot<DrvTrn extends ShamDriveTrain> {
     private final ShamArena arena;
-    private final ShamDriveTrain driveTrain;
+    private final DrvTrn driveTrain;
     // may move towards multi indexers soon
     private final ShamIndexer gamePieceStorage;
     private final ShamBattery battery = new ShamBattery();
     private final ConcurrentLinkedQueue<ShamIntake> intakes = new ConcurrentLinkedQueue<>();
     private final ConcurrentLinkedQueue<ShamMechanism> mechanisms = new ConcurrentLinkedQueue<>();
 
-    public <T extends ShamDriveTrain, C extends ShamDriveTrainConfig<T, C>> ShamRobot(ShamArena arena, C drivetrainConfig, int gamePieceStorageCapacity) {
+    public <C extends ShamDriveTrainConfig<DrvTrn, C>> ShamRobot(ShamArena arena, C drivetrainConfig, int gamePieceStorageCapacity) {
         this.arena = arena;
         arena.robots.add(this);
-        this.driveTrain = ShamDriveTrain.createDriveTrainSimulation(this, drivetrainConfig);
+        this.driveTrain = ShamDriveTrain.createDriveTrain(this, drivetrainConfig);
         arena.withWorld(world -> world.addBody(driveTrain.chassis));
         this.gamePieceStorage = new ShamIndexer(gamePieceStorageCapacity);
     }
@@ -92,16 +92,9 @@ public class ShamRobot {
     }
 
     /**
-     * Returns the {@link ShamDriveTrain} subclass correlated
-     * with the {@link ShamDriveTrainConfig} used to create this {@link ShamRobot}.
-     * 
-     * If you need the specific type of the {@link ShamDriveTrain} subclass, you
-     * have to cast the return value to the specific subclass.
-     * 
-     * @return the {@link ShamDriveTrain} subclass correlated with the
-     *        {@link ShamDriveTrainConfig} used to create this {@link ShamRobot}.
+     * Returns the {@link ShamDriveTrain} object that represents the robot's drivetrain.
      */
-    public ShamDriveTrain getDriveTrain() {
+    public DrvTrn getDriveTrain() {
         return driveTrain;
     }
 

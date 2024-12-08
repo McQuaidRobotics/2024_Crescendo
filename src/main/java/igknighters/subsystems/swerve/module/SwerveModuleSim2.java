@@ -4,7 +4,7 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
-import sham.ShamDriveTrainSwerveModule;
+import sham.ShamSwerveModule;
 import sham.ShamMechanism.MechanismOutputs;
 
 import edu.wpi.first.math.MathUtil;
@@ -42,7 +42,7 @@ public class SwerveModuleSim2 extends SwerveModule {
     private Voltage driveAppliedVoltage = Volts.zero();
     private Voltage steerAppliedVoltage = Volts.zero();
 
-    public SwerveModuleSim2(final int moduleId, SimSwerveOdometryThread odoThread, ShamDriveTrainSwerveModule sim) {
+    public SwerveModuleSim2(final int moduleId, SimSwerveOdometryThread odoThread, ShamSwerveModule sim) {
         super("SwerveModule[" + moduleId + "]");
         this.moduleId = moduleId;
 

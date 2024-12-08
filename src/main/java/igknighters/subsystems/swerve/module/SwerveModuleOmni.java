@@ -5,7 +5,7 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 
-import sham.ShamDriveTrainSwerve;
+import sham.ShamSwerve;
 import sham.utils.GearRatio;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -58,7 +58,7 @@ public class SwerveModuleOmni extends SwerveModule {
         CANRetrier.retryStatusCode(() -> steerEncoder.getConfigurator().apply(cancoderConfig(rotationOffset), 1.0), 5);
 
         if (simCtx.isActive()) {
-            ((ShamDriveTrainSwerve) simCtx.robot().getDriveTrain())
+            ((ShamSwerve) simCtx.robot().getDriveTrain())
                 .withSetModuleControllers(
                     moduleId,
                     new TalonFxSimController(driveMotor.getSimState()).withBrakeEnabled(true),

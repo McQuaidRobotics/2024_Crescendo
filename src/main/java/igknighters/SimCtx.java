@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import sham.ShamArena;
+import sham.ShamSwerve;
 import sham.ShamRobot;
 import sham.configs.ShamGyroConfig;
 import sham.configs.ShamMechanismConfig;
@@ -34,7 +35,7 @@ public class SimCtx {
 
     // all fields below this point will be null if isSimulation is false
     private final ShamArena arena;
-    private final ShamRobot simRobot;
+    private final ShamRobot<ShamSwerve> simRobot;
 
     private final Sender<NamedPositions> poseSender;
     private final Receiver<Pose2d> resetReceiver;
@@ -71,7 +72,7 @@ public class SimCtx {
         resetReceiver = localizer.poseResetsReceiver();
         if (isSimulation) {
             arena = new Crescendo.CrescendoSimArena(Seconds.of(ConstValues.PERIODIC_TIME), 5);
-            simRobot = new ShamRobot(arena, swerveConfig, 1);
+            simRobot = new ShamRobot<>(arena, swerveConfig, 1);
         } else {
             arena = null;
             simRobot = null;
@@ -86,7 +87,7 @@ public class SimCtx {
         return arena;
     }
 
-    public ShamRobot robot() {
+    public ShamRobot<ShamSwerve> robot() {
         return simRobot;
     }
 

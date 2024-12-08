@@ -94,7 +94,7 @@ public abstract class ShamDriveTrain {
      * Gets the Actual Pose of the Drivetrain in the Simulation World.
      *
      * <p><strong>Note:</strong> Do not use this method to simulate odometry! For a more realistic odometry simulation,
-     * use a {@link ShamDriveTrainSwerve} together with a
+     * use a {@link ShamSwerve} together with a
      * {@link edu.wpi.first.math.estimator.SwerveDrivePoseEstimator}.
      *
      * @return a {@link Pose2d} object yielding the current world pose of the robot in the simulation
@@ -133,10 +133,10 @@ public abstract class ShamDriveTrain {
      * @return the created drivetrain simulation
      */
     @SuppressWarnings("unchecked")
-    public static <T extends ShamDriveTrain, C extends ShamDriveTrainConfig<T, C>> T createDriveTrainSimulation(ShamRobot robot, C config) {
+    public static <T extends ShamDriveTrain, C extends ShamDriveTrainConfig<T, C>> T createDriveTrain(ShamRobot<T> robot, C config) {
         // Don't forget to update this method when adding new drivetrain configurations
         if (config instanceof ShamSwerveConfig) {
-            return (T) new ShamDriveTrainSwerve(robot, (ShamSwerveConfig) config);
+            return (T) new ShamSwerve((ShamRobot<ShamSwerve>) robot, (ShamSwerveConfig) config);
         }
         throw new IllegalArgumentException("Unknown drivetrain configuration");
     }
