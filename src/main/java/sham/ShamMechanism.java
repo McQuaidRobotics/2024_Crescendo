@@ -50,17 +50,17 @@ public class ShamMechanism {
      * be aware the order of calculations between mechanisms is not guaranteed.
      * For example, if an inverse pendulum mechanism could have extra load depending
      * on the drive mechanism's acceleration, the drive mechanism should be calculated
-     * first in the same timeslot but this can not be promised.
+     * first in the same time slot but this can not be promised.
      */
     public interface MechanismDynamics {
-        Torque enviroment(Angle angle, AngularVelocity velocity);
+        Torque environment(Angle angle, AngularVelocity velocity);
         MomentOfInertia extraInertia();
 
-        static MechanismDynamics of(Torque enviroment) {
+        static MechanismDynamics of(Torque environment) {
             return new MechanismDynamics() {
                 @Override
-                public Torque enviroment(Angle angle, AngularVelocity velocity) {
-                    return enviroment;
+                public Torque environment(Angle angle, AngularVelocity velocity) {
+                    return environment;
                 }
 
                 @Override
@@ -77,7 +77,7 @@ public class ShamMechanism {
 
     /**
      * A record to define the friction of a mechanism.
-     * The only way to obtain this value is to empiracally measure it.
+     * The only way to obtain this value is to empirically measure it.
      * This record allows defining separate static and kinetic friction values
      * but it is perfectly valid to use the same value for both.
      * 
@@ -228,25 +228,25 @@ public class ShamMechanism {
      */
     protected Torque applyAntiTorque(Torque torque) {
         boolean isMoving = MeasureMath.abs(outputs.velocity()).gt(RadPS.zero());
-        Torque anitTorque = isMoving ? friction.kineticFriction() : friction.staticFriction();
+        Torque antiTorque = isMoving ? friction.kineticFriction() : friction.staticFriction();
         if (MeasureMath.abs(torque).lt(NewtonMeters.of(0.01))) {
-            anitTorque = anitTorque.plus(getBrakingTorque());
+            antiTorque = antiTorque.plus(getBrakingTorque());
         }
         // ensure that friction opposes the motion
         if (outputs.velocity.gt(RadPS.zero())) {
-            return torque.minus(anitTorque);
+            return torque.minus(antiTorque);
         } else if (outputs.velocity.lt(RadPS.zero())) {
-            return torque.plus(anitTorque);
+            return torque.plus(antiTorque);
         } else /* if (!isMoving) */ {
-            // conteract torque but don't invoke movement in the opposite direction
-            if (anitTorque.gt(MeasureMath.abs(torque))) {
+            // counteract torque but don't invoke movement in the opposite direction
+            if (antiTorque.gt(MeasureMath.abs(torque))) {
                 // friction is greater than the applied torque,
                 // so the mechanism should not move
                 return torque.times(0.0);
             } else if (torque.gt(NewtonMeters.zero())) {
-                return torque.minus(anitTorque);
+                return torque.minus(antiTorque);
             } else {
-                return torque.plus(anitTorque);
+                return torque.plus(antiTorque);
             }
         }
     }
@@ -261,7 +261,7 @@ public class ShamMechanism {
     }
 
     protected Torque getMotorTorque(Voltage voltage) {
-        // TODO: check if getMotorTorque should be passed the current velocity or 0
+        // TODO: check if current check should be passed the current velocity or 0
         double current = motor.getCurrent(outputs().velocity().in(RadPS), voltage.in(Volts));
         double torque = motor.getTorque(current);
         return NewtonMeters.of(torque);
@@ -327,9 +327,9 @@ public class ShamMechanism {
         Monologue.log("/MapleSim/Mechanisms/"+name+"/ControlVolts", voltage.in(Volts));
 
         // calculate the torque acting on the mechanism
-        final Torque enviroment = dynamics.enviroment(outputs().position(), outputs().velocity());
+        final Torque environment = dynamics.environment(outputs().position(), outputs().velocity());
         final Torque motorTorque = getMotorTorque(voltage).times(gearRatio.getReduction());
-        final Torque outputTorque = applyAntiTorque(enviroment.plus(motorTorque));
+        final Torque outputTorque = applyAntiTorque(environment.plus(motorTorque));
 
         // calculate the displacement, velocity, and acceleration of the mechanism
         // https://openstax.org/books/university-physics-volume-1/pages/10-7-newtons-second-law-for-rotation

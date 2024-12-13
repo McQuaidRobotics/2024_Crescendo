@@ -74,11 +74,11 @@ public class ShamGyro {
      * @param actualAngularVelocityRadPerSec the actual angular velocity in radians per second, usually obtained from
      *     {@link ShamDriveTrain#getAngularVelocity()}
      */
-    public void updateSimulationSubTick(AngularVelocity actualangularVelocity) {
-        AngularVelocity dTheta = actualangularVelocity
+    public void updateSimulationSubTick(AngularVelocity actualAngularVelocity) {
+        AngularVelocity dTheta = actualAngularVelocity
                 .plus(averageDriftingMotionless)
-                .plus(getDriftingDueToImpact(actualangularVelocity))
-                .plus(actualangularVelocity
+                .plus(getDriftingDueToImpact(actualAngularVelocity))
+                .plus(actualAngularVelocity
                         .times(MapleCommonMath.generateRandomNormal(0.0, veloStdDev))
                 );
 

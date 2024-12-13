@@ -34,7 +34,7 @@ public class ShamGyroConfig {
         /*
          * user manual of pigeon 2:
          * https://store.ctr-electronics.com/content/user-manual/Pigeon2%20User's%20Guide.pdf
-         * */
+         */
         return new ShamGyroConfig(0.5, 0.02);
     }
 

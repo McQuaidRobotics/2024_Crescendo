@@ -37,9 +37,9 @@ import edu.wpi.first.math.geometry.Twist3d;
  */
 public class ShamGamePiece {
     /**
-     * Represents a reactangular prism volume in 3d space.
+     * Represents a rectangular prism volume in 3d space.
      * 
-     * <p> For implementation simplicity the volume supports yaw scewing but not roll or pitch.
+     * <p> For implementation simplicity the volume supports yaw skewing but not roll or pitch.
      */
     public record GamePieceTarget(Rectangle2d area, Pair<Double, Double> heightRange) {
         public GamePieceTarget(Translation3d first, Translation3d second) {
