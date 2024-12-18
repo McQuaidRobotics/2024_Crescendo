@@ -1,61 +1,55 @@
 package com.igknighters.subsystems.swerve.gyro;
 
-import java.util.function.Supplier;
-
-import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.igknighters.GlobalState;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.HardwareIndex.SwerveHW;
-import com.igknighters.util.BootupLogger;
-import com.igknighters.util.FaultManager;
+import com.igknighters.subsystems.swerve.odometryThread.RealSwerveOdometryThread;
 import com.igknighters.util.can.CANRetrier;
 import com.igknighters.util.can.CANSignalManager;
+import com.igknighters.util.logging.BootupLogger;
+import com.igknighters.util.logging.FaultManager;
 
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
+import monologue.Annotations.IgnoreLogged;
 
 public class GyroReal extends Gyro {
 
     private final Pigeon2 gyro;
-    private final StatusSignal<Double> rollSignal, pitchSignal, yawSignal;
-    private final StatusSignal<Double> rollVeloSignal, pitchVeloSignal, yawVeloSignal;
-    private final StatusSignal<Double> xAccel, yAccel;
+    private final StatusSignal<Double> rollSignal, pitchSignal;
+    private final StatusSignal<Double> rollVeloSignal, pitchVeloSignal;
 
-    public GyroReal() {
+    @IgnoreLogged
+    private final RealSwerveOdometryThread odoThread;
+
+    public GyroReal(RealSwerveOdometryThread odoThread) {
+        this.odoThread = odoThread;
+
         gyro = new Pigeon2(ConstValues.kSwerve.PIGEON_ID, ConstValues.kSwerve.CANBUS);
         CANRetrier.retryStatusCode(() -> gyro.getConfigurator().apply(new Pigeon2Configuration()), 5);
 
         rollSignal = gyro.getRoll();
         pitchSignal = gyro.getPitch();
-        yawSignal = gyro.getYaw();
 
-        pitchVeloSignal = gyro.getAngularVelocityXDevice();
-        rollVeloSignal = gyro.getAngularVelocityYDevice();
-        yawVeloSignal = gyro.getAngularVelocityZDevice();
+        pitchVeloSignal = gyro.getAngularVelocityXWorld();
+        rollVeloSignal = gyro.getAngularVelocityYWorld();
 
-        xAccel = gyro.getAccelerationX();
-        yAccel = gyro.getAccelerationY();
 
         CANSignalManager.registerSignals(
                 kSwerve.CANBUS,
-                rollSignal, pitchSignal, yawSignal,
-                rollVeloSignal, pitchVeloSignal, yawVeloSignal,
-                xAccel, yAccel);
+                rollSignal, pitchSignal,
+                rollVeloSignal, pitchVeloSignal);
+
+        odoThread.addGyroStatusSignals(
+            gyro.getYaw(),
+            gyro.getAngularVelocityZWorld(),
+            gyro.getAccelerationX(),
+            gyro.getAccelerationY()
+        );
 
         gyro.optimizeBusUtilization(1.0);
-
-        Supplier<Rotation3d> sup = () -> {
-            return new Rotation3d(
-                    Math.toRadians(BaseStatusSignal.getLatencyCompensatedValue(rollSignal, rollVeloSignal)),
-                    Math.toRadians(BaseStatusSignal.getLatencyCompensatedValue(pitchSignal, pitchVeloSignal)),
-                    Math.toRadians(yawSignal.getValue()));
-        };
-        GlobalState.setGyroRotSupplier(sup);
 
         BootupLogger.bootupLog("    Gyro initialized (real)");
     }
@@ -81,26 +75,17 @@ public class GyroReal extends Gyro {
     }
 
     @Override
-    public void setVoltageOut(double volts) {
-        DriverStation.reportError("\"GyroSim.setVoltageOut\" is not a supported operation", false);
-    }
-
-    @Override
     public void periodic() {
         FaultManager.captureFault(
                 SwerveHW.Pigeon2,
-                rollSignal, pitchSignal, yawSignal,
-                rollVeloSignal, pitchVeloSignal, yawVeloSignal,
-                xAccel, yAccel);
+                rollSignal, pitchSignal,
+                rollVeloSignal, pitchVeloSignal);
 
-        super.pitchRads = Units.degreesToRadians(pitchSignal.getValue());
-        super.pitchVelRadsPerSec = Units.degreesToRadians(pitchVeloSignal.getValue());
-        super.rollRads = Units.degreesToRadians(rollSignal.getValue());
-        super.rollVelRadsPerSec = Units.degreesToRadians(rollVeloSignal.getValue());
-        super.yawRads = Units.degreesToRadians(yawSignal.getValue());
-        super.yawVelRadsPerSec = Units.degreesToRadians(yawVeloSignal.getValue());
-
-        log("XAccel", xAccel.getValue());
-        log("YAccel", yAccel.getValue());
+        super.pitchRads = Units.degreesToRadians(pitchSignal.getValueAsDouble());
+        super.pitchVelRadsPerSec = Units.degreesToRadians(pitchVeloSignal.getValueAsDouble());
+        super.rollRads = Units.degreesToRadians(rollSignal.getValueAsDouble());
+        super.rollVelRadsPerSec = Units.degreesToRadians(rollVeloSignal.getValueAsDouble());
+        super.yawRads = odoThread.getGyroYaw();
+        super.yawVelRadsPerSec = odoThread.getGyroYawRate();
     }
 }

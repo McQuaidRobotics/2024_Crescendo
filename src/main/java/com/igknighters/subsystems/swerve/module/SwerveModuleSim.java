@@ -10,17 +10,17 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
-import monologue.MonoDashboard;
 
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kSwerve.kAngleMotor;
 import com.igknighters.constants.ConstValues.kSwerve.kDriveMotor;
-import com.igknighters.util.BootupLogger;
+import com.igknighters.subsystems.swerve.odometryThread.SimSwerveOdometryThread;
+import com.igknighters.util.logging.BootupLogger;
 
 public class SwerveModuleSim extends SwerveModule {
-    private FlywheelSim driveSim = new FlywheelSim(DCMotor.getFalcon500(1), kSwerve.DRIVE_GEAR_RATIO, 0.025);
-    private FlywheelSim angleSim = new FlywheelSim(DCMotor.getFalcon500(1), kSwerve.ANGLE_GEAR_RATIO, 0.004);
+    private final FlywheelSim driveSim = new FlywheelSim(DCMotor.getFalcon500(1), kSwerve.DRIVE_GEAR_RATIO, 0.025);
+    private final FlywheelSim angleSim = new FlywheelSim(DCMotor.getFalcon500(1), kSwerve.ANGLE_GEAR_RATIO, 0.004);
 
     private boolean gotDirectionsLastCycle = false;
 
@@ -37,19 +37,20 @@ public class SwerveModuleSim extends SwerveModule {
 
     public final int moduleNumber;
 
-    public SwerveModuleSim(final SwerveModuleConstants moduleConstants) {
+    public SwerveModuleSim(final SwerveModuleConstants moduleConstants, SimSwerveOdometryThread odoThread) {
         this.moduleNumber = moduleConstants.getModuleId().num;
 
         // just to test the consts
         moduleConstants.getDriveMotorID();
         moduleConstants.getAngleMotorID();
         moduleConstants.getCancoderID();
-        MonoDashboard.put("SwerveModuleOffset[" + moduleNumber + "]", moduleConstants.getRotationOffset());
         moduleConstants.getModuleChassisPose();
 
         angleFeedback.enableContinuousInput(-Math.PI, Math.PI);
 
         super.angleAbsoluteRads = Units.rotationsToRadians(Math.random());
+
+        odoThread.addModulePositionSupplier(moduleNumber, this::getCurrentPosition);
 
         BootupLogger.bootupLog("    SwerveModule[" + this.moduleNumber + "] initialized (sim)");
     }
@@ -153,10 +154,9 @@ public class SwerveModuleSim extends SwerveModule {
     }
 
     @Override
-    public void setVoltageOut(double volts) {
-    }
-
-    @Override
     public void setVoltageOut(double volts, Rotation2d angle) {
+        super.driveVolts = volts;
+        super.angleAbsoluteRads = angle.getRadians();
+        super.targetAngleAbsoluteRads = angle.getRadians();
     }
 }

@@ -1,9 +1,8 @@
 package com.igknighters.subsystems.vision.camera;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotBase;
+import com.igknighters.Robot;
 import edu.wpi.first.wpilibj.Timer;
-import monologue.Logged;
 import monologue.Annotations.Log;
 
 import java.util.ArrayList;
@@ -23,15 +22,16 @@ import edu.wpi.first.util.struct.StructSerializable;
 import com.igknighters.constants.FieldConstants;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kVision;
+import com.igknighters.subsystems.Component;
 
-public abstract class Camera implements Logged {
-    @Log.NT
+public abstract class Camera extends Component {
+    @Log
     protected VisionPoseEstimate latestPoseEst;
-    @Log.NT
+    @Log
     protected VisionEstimateFault latestFault;
-    @Log.NT
+    @Log
     protected boolean isPresent = false;
-    @Log.NT
+    @Log
     protected boolean isConnected = false;
 
     protected Camera(int id) {
@@ -85,11 +85,11 @@ public abstract class Camera implements Logged {
      * @return The camera
      */
     public static Camera create(CameraConfig config) {
-        if (RobotBase.isSimulation()) {
+        if (Robot.isSimulation()) {
             return new CameraDisabled(config.cameraName, config.id, config.cameraPose);
         } else {
             try {
-                return new CameraReal(config.cameraName, config.id, config.cameraPose);
+                return new CameraRealPhoton(config.cameraName, config.id, config.cameraPose);
             } catch (Exception e) {
                 DriverStation.reportError(e.getMessage(), e.getStackTrace());
                 return new CameraDisabled(config.cameraName, config.id, config.cameraPose);
@@ -148,19 +148,18 @@ public abstract class Camera implements Logged {
     public abstract String getName();
 
     @Override
-    public String getPath() {
+    public String getOverrideName() {
         return getName();
     }
-
-    public abstract void periodic();
 
     public record VisionPoseEstimate(
             int cameraId,
             Pose3d pose,
             double timestamp,
             List<Integer> apriltags,
-            double ambiguity,
-            double maxDistance) implements StructSerializable {
+            double trust,
+            double maxDistance
+        ) implements StructSerializable {
 
         public double distanceFrom(VisionPoseEstimate other) {
             return pose.getTranslation().getDistance(other.pose.getTranslation());
@@ -184,11 +183,13 @@ public abstract class Camera implements Logged {
             boolean oob = simplePose.getX() < 0.0
                     || simplePose.getX() > FieldConstants.FIELD_LENGTH
                     || simplePose.getY() < 0.0
-                    || simplePose.getY() > FieldConstants.FIELD_WIDTH;
+                    || simplePose.getY() > FieldConstants.FIELD_WIDTH
+                    || Double.isNaN(simplePose.getX())
+                    || Double.isNaN(simplePose.getY());
             VisionEstimateFault fault = new VisionEstimateFault(
                     oob,
                     maxDistance > 6.0,
-                    ambiguity > kVision.AMBIGUITY_CUTOFF,
+                    trust > kVision.AMBIGUITY_CUTOFF,
                     this.distanceFrom(last) > jitterTimer.get() * kSwerve.MAX_DRIVE_VELOCITY,
                     this.apriltags.isEmpty(),
                     Math.abs(pose.getTranslation().getZ()) > kVision.MAX_Z_DELTA,
@@ -201,6 +202,10 @@ public abstract class Camera implements Logged {
             }
 
             return new Pair<>(this, fault);
+        }
+
+        public VisionPoseEstimate withError(double newError) {
+            return new VisionPoseEstimate(cameraId, pose, timestamp, apriltags, newError, maxDistance);
         }
 
         public static class VisionPoseEstimateStruct implements Struct<VisionPoseEstimate> {
@@ -231,14 +236,10 @@ public abstract class Camera implements Logged {
 
             @Override
             public void pack(ByteBuffer bb, VisionPoseEstimate value) {
-                // MonoDashboard.put("idk" + value.cameraId(), value.pose);
                 bb.putInt(value.cameraId);
                 Pose3d.struct.pack(bb, value.pose);
                 bb.putDouble(value.timestamp);
-                // for (int i = 0; i < AprilTags.APRILTAGS.length; i++) {
-                // bb.put(value.apriltags.contains(i) ? (byte) 1 : (byte) 0);
-                // }
-                bb.putDouble(value.ambiguity);
+                bb.putDouble(value.trust);
                 bb.putDouble(value.maxDistance);
             }
 
@@ -247,11 +248,6 @@ public abstract class Camera implements Logged {
                 int cameraId = bb.getInt();
                 Pose3d pose = Pose3d.struct.unpack(bb);
                 double timestamp = bb.getDouble();
-                // ArrayList<Integer> apriltags = new ArrayList<>();
-                // for (int i = 0; i < 16; i++) {
-                // if (bb.get() == 1)
-                // apriltags.add(i);
-                // }
                 double ambiguity = bb.getDouble();
                 double maxDistance = bb.getDouble();
                 return new VisionPoseEstimate(cameraId, pose, timestamp, new ArrayList<Integer>(), ambiguity,
@@ -303,7 +299,7 @@ public abstract class Camera implements Logged {
                         + "bool infeasibleZValue; "
                         + "bool infeasiblePitchValue; "
                         + "bool infeasibleRollValue; "
-                        + "bool isDisabled; ";
+                        + "bool isDisabled;";
             }
 
             @Override

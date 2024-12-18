@@ -1,10 +1,11 @@
 package com.igknighters.subsystems.swerve.gyro;
 
 import com.igknighters.constants.ConstValues;
-import com.igknighters.util.BootupLogger;
+import com.igknighters.subsystems.swerve.odometryThread.SimSwerveOdometryThread;
+import com.igknighters.util.logging.BootupLogger;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.DriverStation;
 
 import java.util.function.Supplier;
 
@@ -12,8 +13,10 @@ public class GyroSim extends Gyro {
 
     private final Supplier<ChassisSpeeds> chassisSpeedSupplier;
 
-    public GyroSim(Supplier<ChassisSpeeds> chassisSpeedSupplier) {
+    public GyroSim(Supplier<ChassisSpeeds> chassisSpeedSupplier, SimSwerveOdometryThread odoThread) {
         this.chassisSpeedSupplier = chassisSpeedSupplier;
+
+        odoThread.addRotationSupplier(() -> Rotation2d.fromRadians(this.getYawRads()));
 
         BootupLogger.bootupLog("    Gyro initialized (sim)");
     }
@@ -36,11 +39,6 @@ public class GyroSim extends Gyro {
     @Override
     public void setYawRads(double yawRads) {
         super.yawRads = yawRads;
-    }
-
-    @Override
-    public void setVoltageOut(double volts) {
-        DriverStation.reportError("\"GyroSim.setVoltageOut\" is not a supported operation", false);
     }
 
     @Override

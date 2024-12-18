@@ -5,19 +5,14 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.RobotController;
 
 public class WristDisabled extends Wrist {
-    final double slewRate = (4.3 / 50.0) * 0.75;
+    final double slewRate = (4.3 / 50.0) * 0.5;
 
     public WristDisabled() {
         super(StemPosition.STARTING.wristRads);
     }
 
     @Override
-    public double getWristRadians() {
-        return super.radians;
-    }
-
-    @Override
-    public void setWristRadians(double radians) {
+    public void gotoPosition(double radians) {
         super.targetRadians = radians;
         super.radians = super.radians + MathUtil.clamp(radians - super.radians, -slewRate, slewRate);
     }

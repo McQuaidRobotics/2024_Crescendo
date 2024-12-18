@@ -1,46 +1,22 @@
 package com.igknighters;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.igknighters.commands.autos.Autos;
-import com.igknighters.constants.ConstValues;
-import com.igknighters.constants.RobotSetup;
-import com.igknighters.constants.RobotSetup.RobotID;
-import com.igknighters.util.RobotExtension.Robo;
-import com.pathplanner.lib.commands.PathPlannerAuto;
+import java.util.Optional;
+
+import choreo.Choreo;
+import choreo.auto.AutoRoutine;
+import choreo.auto.AutoTrajectory;
+import choreo.trajectory.SwerveSample;
+import choreo.trajectory.Trajectory;
+
+import com.igknighters.constants.RobotConfig.RobotID;
+import com.igknighters.subsystems.swerve.Swerve;
 
 import edu.wpi.first.hal.AllianceStationID;
-import edu.wpi.first.hal.HAL;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
 public class RobotTest {
-
-    @BeforeEach
-    protected void startSim() {
-        GlobalState.setUnitTest(true);
-        assert HAL.initialize(500, 0);
-        DriverStationSim.setDsAttached(true);
-    }
-
-    @AfterEach
-    protected void teardownSim() {
-        HAL.exitMain();
-        HAL.shutdown();
-        GlobalState.restoreDefaultState();
-        var cmdScheduler = CommandScheduler.getInstance();
-        cmdScheduler.cancelAll();
-        cmdScheduler.getActiveButtonLoop().clear();
-        cmdScheduler.getDefaultButtonLoop().clear();
-        cmdScheduler.clearComposedCommands();
-        cmdScheduler.unregisterAllSubsystems();
-    }
 
     @Test
     public void testRobotSetup() {
@@ -49,50 +25,62 @@ public class RobotTest {
                 continue;
             }
 
-            RobotSetup.testOverrideRobotID(id);
-
-            com.igknighters.constants.ConstantHelper.applyRoboConst(ConstValues.class);
-
-            new RobotContainer();
-
-            CommandScheduler.getInstance().getActiveButtonLoop().clear();
-            CommandScheduler.getInstance().getDefaultButtonLoop().clear();
+            new Robot(id).close();
 
             System.gc();
         }
     }
 
     @Test
-    public void testAuto(@Robo Robot robot) {
-        RobotSetup.testOverrideRobotID(RobotID.SIM_CRASH);
-        Pose2d desiredEndPose = new Pose2d(
-                new Translation2d(3.0, 7.0),
-                new Rotation2d());
+    public void testAuto() {
+        final Robot robot = new Robot(RobotID.UNIT_TEST);
+
+        final Optional<Trajectory<SwerveSample>> optTraj = Choreo.loadTrajectory("TEST");
+        final Trajectory<SwerveSample> traj = optTraj.orElseThrow();
 
         DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
 
-        // meters
         final double translationTolerance = 0.2;
 
-        Autos.setAutoOverrideTest(new ProxyCommand(() -> new PathPlannerAuto("1 Meter Auto")));
+        Swerve swerve = robot.allSubsystems.swerve.get();
+        robot.localizer.reset(traj.getInitialPose(false));
+        swerve.setYaw(traj.getInitialPose(false).getRotation());
+
+        robot.autoChooser.addAutoRoutine(
+            "TestAuto",
+            factory -> {
+                AutoRoutine routine = factory.newRoutine("TestAutoLoop");
+                AutoTrajectory aTraj = factory.trajectory(traj, routine);
+
+                routine.enabled().onTrue(aTraj.cmd());
+
+                return routine;
+            }
+        );
+        // robot.autoChooser.choose("TestAuto");
+
         DriverStationSim.setAutonomous(true);
         DriverStationSim.setEnabled(true);
 
         robot.withAutonomousPeriodicTest(robo -> {
-            boolean isFinished = GlobalState.getLocalizedPose()
+            boolean isFinished = robo.localizer.pose()
                     .getTranslation()
-                    .getDistance(desiredEndPose.getTranslation()) < translationTolerance;
+                    .getDistance(traj.getFinalPose(false).getTranslation()) < translationTolerance;
 
             if (isFinished) {
                 robo.finishUnitTestRobot();
-            } else if (robo.getElapsedTime() > 2.5) {
+            } else if (robo.getElapsedTime() > 1.5) {
                 throw new RuntimeException(
                         "Auto took to long, ended at "
-                                + GlobalState.getLocalizedPose().toString());
+                                + robo.localizer.pose().toString());
             }
         });
 
         robot.runTest(3);
+
+        robot.close();
+
+        System.gc();
     }
 
     // @Test

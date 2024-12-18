@@ -3,26 +3,44 @@ package com.igknighters.subsystems.swerve;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kSwerve.kRotationController;
+import com.igknighters.util.logging.ProceduralStructGenerator;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.util.struct.StructSerializable;
 
 public class RotationalController {
+    private final Swerve swerve;
+
     private double positionError = 0, prevError = 0, velocityError = 0;
 
-    private TrapezoidProfile profile = new TrapezoidProfile(
+    private final TrapezoidProfile profile = new TrapezoidProfile(
             new TrapezoidProfile.Constraints(
                     kSwerve.MAX_ANGULAR_VELOCITY * kRotationController.CONSTRAINT_SCALAR,
                     kSwerve.MAX_ANGULAR_ACCELERATION * kRotationController.CONSTRAINT_SCALAR));
     private TrapezoidProfile.State goalState = new TrapezoidProfile.State();
     private TrapezoidProfile.State setpointState = new TrapezoidProfile.State();
 
-    public double calculate(double measurement, double target, double deadband) {
+    public RotationalController(Swerve swerve) {
+        this.swerve = swerve;
+    }
+
+    // OBJ_COUNT: 4
+    public double calculate(double target, double deadband) {
+        double measurement = MathUtil.angleModulus(swerve.getYawRads());
+
         if (Math.abs(measurement - target) < deadband) {
+            var output = new RotationalControllerOutput(
+                target, measurement, true,
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            swerve.log("RotationalControllerOutput", output);
             return 0.0;
         }
 
-        goalState = new TrapezoidProfile.State(target, 0.0);
+        // set fields individually to prevent new object
+        goalState.position = target;
+        goalState.velocity = 0.0;
 
         double goalMinDistance = MathUtil.angleModulus(goalState.position - measurement);
         double setpointMinDistance = MathUtil.angleModulus(setpointState.position - measurement);
@@ -38,18 +56,40 @@ public class RotationalController {
 
         velocityError = (positionError - prevError) / ConstValues.PERIODIC_TIME;
 
-        return (kRotationController.kP * positionError)
+        double rotVelo = (kRotationController.kP * positionError)
                 + (kRotationController.kD * velocityError);
+
+        var output = new RotationalControllerOutput(
+            target, measurement, false,
+            goalMinDistance, setpointMinDistance,
+            setpointState.velocity, setpointState.position,
+            positionError, velocityError, rotVelo
+        );
+
+        swerve.log("RotationalControllerOutput", output);
+
+        return rotVelo;
     }
 
-    public double calculate(double measurement, double target) {
-        return calculate(measurement, target, kRotationController.DEADBAND);
-    }
-
-    public void reset(double measuredPosition, double measuredVelocity) {
+    public void reset() {
         positionError = 0;
         prevError = 0;
         velocityError = 0;
-        setpointState = new TrapezoidProfile.State(measuredPosition, measuredVelocity);
+        setpointState = new TrapezoidProfile.State(swerve.getYawRads(), swerve.getChassisSpeed().omegaRadiansPerSecond);
+    }
+
+    public static record RotationalControllerOutput (
+        double target,
+        double measurement,
+        boolean deadband,
+        double goalMinDistance,
+        double setpointMinDistance,
+        double setpointStateVelocity,
+        double setpointStatePosition,
+        double positionError,
+        double velocityError,
+        double rotationalVelocity
+    ) implements StructSerializable {
+        public static final Struct<RotationalControllerOutput> struct = ProceduralStructGenerator.genRecord(RotationalControllerOutput.class);
     }
 }

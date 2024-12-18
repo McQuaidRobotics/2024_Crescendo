@@ -34,12 +34,6 @@ public class ShooterDisabled extends Shooter {
     }
 
     @Override
-    public void stopMechanism() {
-        targetRadPerSec = 0.0;
-        currentRadPerSec = 0.0;
-    }
-
-    @Override
     public void periodic() {
         double maxDiff = slewRateRate * ConstValues.PERIODIC_TIME;
         double diff = MathUtil.clamp(

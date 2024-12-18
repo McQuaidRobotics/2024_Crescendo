@@ -4,6 +4,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
@@ -13,10 +14,10 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kWrist;
 import com.igknighters.constants.HardwareIndex.StemHW;
-import com.igknighters.util.BootupLogger;
-import com.igknighters.util.FaultManager;
 import com.igknighters.util.can.CANRetrier;
 import com.igknighters.util.can.CANSignalManager;
+import com.igknighters.util.logging.BootupLogger;
+import com.igknighters.util.logging.FaultManager;
 
 import edu.wpi.first.math.util.Units;
 
@@ -26,6 +27,10 @@ public class WristRealFused extends Wrist {
 
     private final StatusSignal<Double> motorRots, motorVelo, motorAmps, motorVolts;
     private final StatusSignal<Double> cancoderRots, cancoderVelo;
+
+    private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
+    private final MotionMagicVoltage controlReqMotionMagic = new MotionMagicVoltage(0.0).withUpdateFreqHz(0)
+        .withEnableFOC(true);
 
     public WristRealFused() {
         super(0.0);
@@ -53,7 +58,7 @@ public class WristRealFused extends Wrist {
         cancoder.optimizeBusUtilization(1.0);
         motor.optimizeBusUtilization(1.0);
 
-        super.encoderRadians = Units.rotationsToRadians(cancoderRots.getValue());
+        super.encoderRadians = Units.rotationsToRadians(cancoderRots.getValueAsDouble());
         super.radians = encoderRadians;
         super.targetRadians = encoderRadians;
 
@@ -93,20 +98,19 @@ public class WristRealFused extends Wrist {
     }
 
     @Override
-    public void setWristRadians(double targetRadians) {
+    public void gotoPosition(double targetRadians) {
         super.targetRadians = targetRadians;
-        this.motor.setControl(new MotionMagicVoltage(Units.radiansToRotations(targetRadians)));
-    }
-
-    @Override
-    public double getWristRadians() {
-        return super.radians;
+        this.motor.setControl(
+            controlReqMotionMagic.withPosition(Units.radiansToRotations(targetRadians))
+        );
     }
 
     @Override
     public void setVoltageOut(double volts) {
         super.targetRadians = 0.0;
-        motor.setVoltage(volts);
+        motor.setControl(
+            controlReqVolts.withOutput(volts)
+        );
     }
 
     @Override
@@ -128,10 +132,10 @@ public class WristRealFused extends Wrist {
                 StemHW.WristEncoder,
                 cancoderRots);
 
-        super.radians = Units.rotationsToRadians(motorRots.getValue());
-        super.radiansPerSecond = Units.rotationsToRadians(cancoderVelo.getValue());
-        super.encoderRadians = Units.rotationsToRadians(cancoderRots.getValue());
-        super.amps = motorAmps.getValue();
-        super.volts = motorVolts.getValue();
+        super.radians = Units.rotationsToRadians(motorRots.getValueAsDouble());
+        super.radiansPerSecond = Units.rotationsToRadians(cancoderVelo.getValueAsDouble());
+        super.encoderRadians = Units.rotationsToRadians(cancoderRots.getValueAsDouble());
+        super.amps = motorAmps.getValueAsDouble();
+        super.volts = motorVolts.getValueAsDouble();
     }
 }

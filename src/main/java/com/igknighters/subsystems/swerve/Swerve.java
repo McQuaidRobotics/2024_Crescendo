@@ -1,31 +1,34 @@
 package com.igknighters.subsystems.swerve;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import monologue.Logged;
 
-import com.igknighters.GlobalState;
+import java.util.Optional;
+
+import com.igknighters.Localizer;
+import com.igknighters.Robot;
+import com.igknighters.commands.swerve.teleop.TeleopSwerveBaseCmd;
+
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+
 import com.igknighters.constants.ConstValues.kSwerve;
+import com.igknighters.subsystems.SubsystemResources.LockFullSubsystem;
 import com.igknighters.subsystems.swerve.gyro.Gyro;
 import com.igknighters.subsystems.swerve.gyro.GyroReal;
 import com.igknighters.subsystems.swerve.gyro.GyroSim;
 import com.igknighters.subsystems.swerve.module.SwerveModule;
 import com.igknighters.subsystems.swerve.module.SwerveModuleReal;
 import com.igknighters.subsystems.swerve.module.SwerveModuleSim;
-import com.igknighters.util.Tracer;
+import com.igknighters.subsystems.swerve.odometryThread.RealSwerveOdometryThread;
+import com.igknighters.subsystems.swerve.odometryThread.SimSwerveOdometryThread;
+import com.igknighters.subsystems.swerve.odometryThread.SwerveOdometryThread;
+import com.igknighters.util.logging.Tracer;
+import com.igknighters.util.plumbing.Channel.Sender;
 import com.igknighters.constants.ConstValues;
-import com.igknighters.constants.FieldConstants;
 
 /**
  * This is the subsystem for our swerve drivetrain.
@@ -36,62 +39,67 @@ import com.igknighters.constants.FieldConstants;
  * reading the Gyro.
  * 
  * The Swerve subsystem is also responsible for updating the robot's pose and
- * submitting data to the GlobalState.
+ * submitting data to the Localizer.
  * 
  * {@link https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html}
  * 
  * The coordinate system used in this code is the field coordinate system.
  */
-public class Swerve extends SubsystemBase implements Logged {
+public class Swerve implements LockFullSubsystem {
+    private static final ChassisSpeeds ZERO_SPEEDS = new ChassisSpeeds();
+
     private final Gyro gyro;
     private final SwerveModule[] swerveMods;
+    private final SwerveOdometryThread odometryThread;
+
     private final SwerveVisualizer visualizer;
     private final SwerveSetpointProcessor setpointProcessor = new SwerveSetpointProcessor();
 
-    private RotationalController rotController = new RotationalController();
+    private final Sender<ChassisSpeeds> velocitySender;
 
-    public Swerve() {
+    private Optional<TeleopSwerveBaseCmd> defaultCommand = Optional.empty();
 
-        if (RobotBase.isReal()) {
+    public Swerve(final Localizer localizer) {
+        if (Robot.isReal()) {
+            RealSwerveOdometryThread ot = new RealSwerveOdometryThread(
+                250,
+                rots -> (rots / kSwerve.DRIVE_GEAR_RATIO) * kSwerve.WHEEL_CIRCUMFERENCE,
+                localizer.swerveDataSender()
+            );
             swerveMods = new SwerveModule[] {
-                    new SwerveModuleReal(ConstValues.kSwerve.kMod0.CONSTANTS, false),
-                    new SwerveModuleReal(ConstValues.kSwerve.kMod1.CONSTANTS, false),
-                    new SwerveModuleReal(ConstValues.kSwerve.kMod2.CONSTANTS, false),
-                    new SwerveModuleReal(ConstValues.kSwerve.kMod3.CONSTANTS, false)
+                    new SwerveModuleReal(ConstValues.kSwerve.kMod0.CONSTANTS, true, ot),
+                    new SwerveModuleReal(ConstValues.kSwerve.kMod1.CONSTANTS, true, ot),
+                    new SwerveModuleReal(ConstValues.kSwerve.kMod2.CONSTANTS, true, ot),
+                    new SwerveModuleReal(ConstValues.kSwerve.kMod3.CONSTANTS, true, ot)
             };
-            gyro = new GyroReal();
+            gyro = new GyroReal(ot);
+            odometryThread = ot;
         } else {
+            SimSwerveOdometryThread ot = new SimSwerveOdometryThread(250, localizer.swerveDataSender());
             swerveMods = new SwerveModule[] {
-                    new SwerveModuleSim(ConstValues.kSwerve.kMod0.CONSTANTS),
-                    new SwerveModuleSim(ConstValues.kSwerve.kMod1.CONSTANTS),
-                    new SwerveModuleSim(ConstValues.kSwerve.kMod2.CONSTANTS),
-                    new SwerveModuleSim(ConstValues.kSwerve.kMod3.CONSTANTS)
+                    new SwerveModuleSim(ConstValues.kSwerve.kMod0.CONSTANTS, ot),
+                    new SwerveModuleSim(ConstValues.kSwerve.kMod1.CONSTANTS, ot),
+                    new SwerveModuleSim(ConstValues.kSwerve.kMod2.CONSTANTS, ot),
+                    new SwerveModuleSim(ConstValues.kSwerve.kMod3.CONSTANTS, ot)
             };
-            gyro = new GyroSim(this::getChassisSpeed);
+            gyro = new GyroSim(this::getChassisSpeed, ot);
+            odometryThread = ot;
         }
 
-        GlobalState.setLocalizer(
-                new SwerveDrivePoseEstimator(
-                        kSwerve.SWERVE_KINEMATICS,
-                        getYawWrappedRot(),
-                        getModulePositions(),
-                        new Pose2d(
-                                new Translation2d(
-                                        FieldConstants.FIELD_LENGTH / 2.0,
-                                        FieldConstants.FIELD_WIDTH / 2.0),
-                                new Rotation2d())),
-                GlobalState.LocalizerType.Hybrid);
-
-        visualizer = new SwerveVisualizer(this, swerveMods);
+        visualizer = new SwerveVisualizer(swerveMods);
 
         setpointProcessor.setDisabled(true);
+
+        odometryThread.start();
+
+        velocitySender = localizer.velocityChannel().sender();
     }
 
     public void drive(ChassisSpeeds speeds, boolean isOpenLoop) {
         log("targetChassisSpeed", speeds);
 
         setModuleStates(
-                kSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(speeds),
+            kSwerve.KINEMATICS.toSwerveModuleStates(speeds),
                 isOpenLoop);
     }
 
@@ -105,33 +113,10 @@ public class Swerve extends SubsystemBase implements Logged {
     }
 
     /**
-     * @return The gyro yaw value in degrees, wrapped to 0-360, as a Rotation2d
-     */
-    public Rotation2d getYawWrappedRot() {
-        return Rotation2d.fromDegrees(
-                scope0To360(
-                        Units.radiansToDegrees(this.getYawRads())));
-    }
-
-    /**
      * @return The raw gyro yaw value in radians
      */
     public double getYawRads() {
         return gyro.getYawRads();
-    }
-
-    /**
-     * @return The raw gyro pitch value in radians
-     */
-    public double getPitchRads() {
-        return gyro.getPitchRads();
-    }
-
-    /**
-     * @return The raw gyro roll value in radians
-     */
-    public double getRollRads() {
-        return gyro.getRollRads();
     }
 
     public SwerveModulePosition[] getModulePositions() {
@@ -144,6 +129,8 @@ public class Swerve extends SubsystemBase implements Logged {
 
     public void setModuleStates(SwerveModuleState[] desiredStates, boolean isOpenLoop) {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, ConstValues.kSwerve.MAX_DRIVE_VELOCITY);
+
+        log("regurgutatedChassisSpeed", kSwerve.KINEMATICS.toChassisSpeeds(desiredStates));
 
         for (SwerveModule module : swerveMods) {
             module.setDesiredState(desiredStates[module.getModuleNumber()], isOpenLoop);
@@ -159,40 +146,13 @@ public class Swerve extends SubsystemBase implements Logged {
     }
 
     public ChassisSpeeds getChassisSpeed() {
-        return kSwerve.SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
+        return kSwerve.KINEMATICS.toChassisSpeeds(getModuleStates());
     }
 
-    public Pose2d getPose() {
-        return GlobalState.getLocalizedPose();
-    }
-
-    public void resetOdometry(Pose2d pose) {
-        setYaw(pose.getRotation());
-        GlobalState.resetSwerveLocalization(pose.getRotation(), pose, getModulePositions());
-    }
-
-    public double rotVeloForRotation(Rotation2d wantedAngle, double deadband) {
-        return rotController.calculate(getYawRads(), wantedAngle.getRadians(), deadband);
-    }
-
-    public double rotVeloForRotation(Rotation2d wantedAngle) {
-        return rotController.calculate(getYawRads(), wantedAngle.getRadians());
-    }
-
-    public void resetRotController() {
-        rotController.reset(MathUtil.angleModulus(getYawRads()), getChassisSpeed().omegaRadiansPerSecond);
-    }
-
-    public Rotation2d rotationRelativeToPose(Rotation2d wantedAngleOffet, Translation2d pose) {
-        return rotationRelativeToPose(getPose().getTranslation(), wantedAngleOffet, pose);
-    }
-
-    public Rotation2d rotationRelativeToPose(Translation2d currentTrans, Rotation2d wantedAngleOffet, Translation2d pose) {
-        double angleBetween = Math.atan2(
-                pose.getY() - currentTrans.getY(),
-                pose.getX() - currentTrans.getX());
-        return Rotation2d.fromRadians(angleBetween)
-                .plus(wantedAngleOffet);
+    public void setVoltageOut(double voltage, Rotation2d angle) {
+        for (SwerveModule module : swerveMods) {
+            module.setVoltageOut(voltage, angle);
+        }
     }
 
     @Override
@@ -205,13 +165,19 @@ public class Swerve extends SubsystemBase implements Logged {
 
         Tracer.traceFunc("Gyro", gyro::periodic);
 
-        visualizer.update(GlobalState.submitSwerveData(getYawWrappedRot(), getModulePositions()));
-
         if (DriverStation.isDisabled()) {
-            log("targetChassisSpeed", new ChassisSpeeds());
+            log("targetChassisSpeed", ZERO_SPEEDS);
         }
 
-        GlobalState.setVelocity(getChassisSpeed());
+        ChassisSpeeds measuredSpeeds = getChassisSpeed();
+        log("measuredChassisSpeed", measuredSpeeds);
+        velocitySender.send(measuredSpeeds);
+
+        visualizer.update();
+
+        defaultCommand.ifPresent(cmd -> {
+            log("Commanded", cmd);
+        });
 
         Tracer.endTrace();
     }
@@ -223,5 +189,10 @@ public class Swerve extends SubsystemBase implements Logged {
             angle %= 360;
         }
         return angle;
+    }
+
+    public void setDefaultCommand(TeleopSwerveBaseCmd defaultCmd) {
+        defaultCommand = Optional.of(defaultCmd);
+        CommandScheduler.getInstance().setDefaultCommand(this, defaultCmd);
     }
 }

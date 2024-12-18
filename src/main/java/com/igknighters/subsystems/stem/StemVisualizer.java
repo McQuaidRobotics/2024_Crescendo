@@ -1,11 +1,9 @@
 package com.igknighters.subsystems.stem;
 
-import java.util.HashMap;
-
+import com.igknighters.Robot;
 import com.igknighters.constants.ConstValues.kRobotCollisionGeometry;
 import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kTelescope;
-import com.igknighters.util.Channels.Receiver;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -14,12 +12,9 @@ import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
-import monologue.MonoDashboard;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 
 public class StemVisualizer {
-        public static record StemVisualizerDot(String name, Translation2d position) {
-        };
 
         private final Mechanism2d mechanism;
         private final MechanismRoot2d rootCurrent, rootSetpoint;
@@ -32,8 +27,6 @@ public class StemVisualizer {
         private final Translation2d pivotOrigin = new Translation2d(0.5, 0.5);
 
         private final double wristOffset = 90;
-
-        private final HashMap<String, MechanismRoot2d> dots = new HashMap<>();
 
         public StemVisualizer() {
                 mechanism = new Mechanism2d(2.0, 2.0);
@@ -71,17 +64,14 @@ public class StemVisualizer {
                 drawUmbrella(wristSetpoint, true);
                 drawMaxBounds();
 
-                Receiver.reactor(
-                                "StemVisualizerDots",
-                                StemVisualizerDot.class,
-                                this::addDot);
-
-                var table = NetworkTableInstance.getDefault()
-                                .getTable("Visualizers")
-                                .getSubTable("Stem");
-                var builder = new SendableBuilderImpl();
-                builder.setTable(table);
-                mechanism.initSendable(builder);
+                if (Robot.isDebug()) {
+                    var table = NetworkTableInstance.getDefault()
+                        .getTable("Visualizers")
+                        .getSubTable("Stem");
+                    var builder = new SendableBuilderImpl();
+                    builder.setTable(table);
+                    mechanism.initSendable(builder);
+                }
         }
 
         private void drawUmbrella(MechanismLigament2d wristRoot, boolean isSetpoint) {
@@ -215,23 +205,6 @@ public class StemVisualizer {
                 rightBottomSide.setLineWeight(2.0);
         }
 
-        public void addDot(StemVisualizerDot dot) {
-                Translation2d drivebaseOrigin = pivotOrigin.minus(kRobotCollisionGeometry.PIVOT_LOCATION);
-                Translation2d pose = dot.position.plus(drivebaseOrigin);
-                if (dots.containsKey(dot.name)) {
-                        dots.get(dot.name).setPosition(pose.getX() - 0.01, pose.getY());
-                } else {
-                        dots.put(dot.name, mechanism.getRoot(dot.name, pose.getX() - 0.01, pose.getY()));
-                        dots.get(dot.name).append(
-                                        new MechanismLigament2d(
-                                                        dot.name + " Dot",
-                                                        0.02,
-                                                        0.0,
-                                                        2.0,
-                                                        new Color8Bit(255, 255, 255)));
-                }
-        }
-
         public void updateCurrent(StemPosition currentPose) {
                 telescopeCurrent.setAngle(Units.radiansToDegrees(currentPose.pivotRads));
                 telescopeCurrent.setLength(currentPose.telescopeMeters);
@@ -245,8 +218,6 @@ public class StemVisualizer {
                 telescopeCurrent.setColor(new Color8Bit(red, green, 0));
 
                 wristCurrent.setAngle(-Units.radiansToDegrees(currentPose.wristRads) + wristOffset);
-
-                MonoDashboard.put("Robot/Stem/Stem Position Valid", StemValidator.validatePosition(currentPose).name());
         }
 
         public void updateSetpoint(StemPosition desiredPose) {

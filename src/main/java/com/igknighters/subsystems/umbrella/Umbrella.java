@@ -1,35 +1,41 @@
 package com.igknighters.subsystems.umbrella;
 
+import java.util.List;
+import java.util.function.Consumer;
+
+import com.igknighters.Localizer;
+import com.igknighters.Robot;
 import com.igknighters.constants.ConstValues.kUmbrella.kShooter;
+import com.igknighters.subsystems.SubsystemResources.LockFullSubsystem;
 import com.igknighters.subsystems.umbrella.intake.*;
 import com.igknighters.subsystems.umbrella.shooter.*;
-import com.igknighters.util.Tracer;
+import com.igknighters.util.GamepieceSimulator;
+import com.igknighters.util.geom.GeomUtil;
+import com.igknighters.util.logging.Tracer;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import monologue.Logged;
+import edu.wpi.first.wpilibj2.command.Commands;
 
-public class Umbrella extends SubsystemBase implements Logged {
-
-    public static enum ShooterSpinupReason {
-        None,
-        Idle,
-        AutoAimSpeaker,
-        ManualAimSpeaker,
-        Amp
-    }
-
+/**
+ * 
+ */
+public class Umbrella implements LockFullSubsystem {
     private final Intake intake;
     private final Shooter shooter;
-    private ShooterSpinupReason spinupReason = ShooterSpinupReason.None;
 
     public Umbrella() {
-        if (RobotBase.isSimulation()) {
+        if (Robot.isSimulation()) {
             intake = new IntakeSim();
             shooter = new ShooterDisabled();
         } else {
-            intake = new IntakeReal();
+            if (Robot.isSunlight()) {
+                intake = new IntakeRealSingleCurrent();
+            } else {
+                intake = new IntakeRealSingle();
+            }
             shooter = new ShooterReal();
         }
     }
@@ -78,6 +84,13 @@ public class Umbrella extends SubsystemBase implements Logged {
      */
     public double getShooterTargetSpeed() {
         return shooter.getTargetSpeed();
+    }
+
+    /**
+     * @return If the {@code Intake} is running inwards
+     */
+    public boolean isIntaking() {
+        return intake.getVoltageOut() < 0.0;
     }
 
     /**
@@ -141,13 +154,53 @@ public class Umbrella extends SubsystemBase implements Logged {
         shooter.setSpeed(0.0);
     }
 
-    public void pushSpinupReason(ShooterSpinupReason reason) {
-        spinupReason = reason;
-    }
+    /**
+     * Sets up the simulation for intaking notes in simulation
+     * 
+     * @param localizer The {@link Localizer} to use for the simulation
+     */
+    public void setupSimNoteDetection(Localizer localizer) {
+        if (!Robot.isSimulation() || !(intake instanceof IntakeSim)) {
+            return;
+        }
 
-    public ShooterSpinupReason popSpinupReason() {
-        var reason = spinupReason;
-        spinupReason = ShooterSpinupReason.None;
-        return reason;
+        IntakeSim intakeSim = (IntakeSim) intake;
+        var s = localizer.namedPositionsSender();
+        Consumer<Pose2d[]> noteSender = poses -> s.send(new Localizer.NamedPositions("Notes", poses));
+
+        GamepieceSimulator.setupGamepieceAcquisitionSim(
+            localizer::pose,
+            this::isIntaking,
+            notes -> {
+                Pose2d[] notePoses = notes.stream().map(p -> new Pose2d(p, GeomUtil.ROTATION2D_ZERO)).toArray(Pose2d[]::new);
+                noteSender.accept(notePoses);
+            },
+            List.of(
+                new Transform2d(
+                    new Translation2d(
+                        Units.inchesToMeters(24.0),
+                        Units.inchesToMeters(0.0)
+                    ),
+                    GeomUtil.ROTATION2D_ZERO
+                ),
+                new Transform2d(
+                    new Translation2d(
+                        Units.inchesToMeters(24.0),
+                        Units.inchesToMeters(-7.0)
+                    ),
+                    GeomUtil.ROTATION2D_ZERO
+                ),
+                new Transform2d(
+                    new Translation2d(
+                        Units.inchesToMeters(24.0),
+                        Units.inchesToMeters(7.0)
+                    ),
+                    GeomUtil.ROTATION2D_ZERO
+                )
+            )
+        ).onTrue(
+            Commands.runOnce(() -> intakeSim.setExitBeam(true))
+                .withName("SetExitBeamTrue")
+        );
     }
 }

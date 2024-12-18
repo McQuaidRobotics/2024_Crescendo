@@ -9,29 +9,29 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import monologue.Annotations.Log;
 
 public abstract class SwerveModule extends Component {
-    @Log.NT
+    @Log
     public double driveVeloMPS = 0.0;
-    @Log.NT
+    @Log
     public double targetDriveVeloMPS = 0.0;
-    @Log.NT
+    @Log
     public double drivePositionMeters = 0.0;
-    @Log.NT
+    @Log
     public double driveVolts = 0.0;
-    @Log.NT
+    @Log
     public double driveAmps = 0.0;
-    @Log.NT
+    @Log
     public double angleVeloRadPS = 0.0;
-    @Log.NT
+    @Log
     public double angleAbsoluteRads = 0.0;
-    @Log.NT
+    @Log
     public double targetAngleAbsoluteRads = 0.0;
-    @Log.NT
+    @Log
     public double angleVolts = 0.0;
-    @Log.NT
+    @Log
     public double angleAmps = 0.0;
 
     @Override
-    public String getPath() {
+    public String getOverrideName() {
         return "SwerveModule";
     }
 

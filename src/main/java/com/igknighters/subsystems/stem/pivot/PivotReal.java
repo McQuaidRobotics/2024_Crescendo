@@ -4,7 +4,6 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -22,11 +21,10 @@ import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstValues.kStem;
 import com.igknighters.constants.ConstValues.kStem.kPivot;
 import com.igknighters.constants.HardwareIndex.StemHW;
-import com.igknighters.util.BootupLogger;
-import com.igknighters.util.FaultManager;
-import com.igknighters.util.Channels.Receiver;
 import com.igknighters.util.can.CANRetrier;
 import com.igknighters.util.can.CANSignalManager;
+import com.igknighters.util.logging.BootupLogger;
+import com.igknighters.util.logging.FaultManager;
 
 public class PivotReal extends Pivot {
 
@@ -44,10 +42,10 @@ public class PivotReal extends Pivot {
     private final StatusSignal<ReverseLimitValue> reverseLimitSwitch;
 
     private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
-    private final NeutralOut controlReqNeutral = new NeutralOut().withUpdateFreqHz(0);
-    private final MotionMagicVoltage controlReqMotionMagic = new MotionMagicVoltage(0.0);
+    private final MotionMagicVoltage controlReqMotionMagic = new MotionMagicVoltage(0.0).withUpdateFreqHz(0);
 
-    private final Receiver<Boolean> homeChannel = Receiver.buffered("HomePivot", 1, Boolean.class);
+    private boolean homedThisCycle = false;
+    private boolean hasBeenEnabled = false;
 
     private double mechRadiansToMotorRots(Double mechRads) {
         return Units.radiansToRotations(Math.PI - mechRads) * kPivot.MOTOR_TO_MECHANISM_RATIO;
@@ -70,12 +68,12 @@ public class PivotReal extends Pivot {
         CANRetrier.retryStatusCodeFatal(() -> followerMotor.setControl(new Follower(leaderMotor.getDeviceID(), true)),
                 10);
 
-        double startingRads = Units.degreesToRadians(gyroMeasurement.getValue());
+        double startingRads = Units.degreesToRadians(gyroMeasurement.getValueAsDouble());
         super.gyroRadians = startingRads;
         super.radians = startingRads;
         super.targetRadians = startingRads;
 
-        seedPivot();
+        home();
 
         motorRots = leaderMotor.getRotorPosition();
         motorVelo = leaderMotor.getRotorVelocity();
@@ -134,7 +132,7 @@ public class PivotReal extends Pivot {
     }
 
     @Override
-    public void setPivotRadians(double radians) {
+    public void gotoPosition(double radians) {
         super.targetRadians = radians;
         this.leaderMotor.setControl(controlReqMotionMagic.withPosition(mechRadiansToMotorRots(radians)));
     }
@@ -145,24 +143,15 @@ public class PivotReal extends Pivot {
         this.leaderMotor.setControl(controlReqVolts.withOutput(volts));
     }
 
-    @Override
-    public void stopMechanism() {
-        super.targetRadians = super.radians;
-        this.leaderMotor.setControl(controlReqNeutral);
-    }
-
-    @Override
-    public double getPivotRadians() {
-        return super.radians;
-    }
-
     private double getPivotRadiansPigeon() {
         return super.gyroRadians;
     }
 
-    private void seedPivot() {
-        leaderMotor.setPosition(mechRadiansToMotorRots(getPivotRadiansPigeon()));
+    @Override
+    public void home() {
+        leaderMotor.setPosition(mechRadiansToMotorRots(getPivotRadiansPigeon()), 0.01);
         super.radians = getPivotRadiansPigeon();
+        homedThisCycle = true;
     }
 
     @Override
@@ -196,32 +185,34 @@ public class PivotReal extends Pivot {
             gyroMeasurement
         );
 
-        super.radians = motorRotsToMechRadians(motorRots.getValue());
-        super.radiansPerSecond = -Units.rotationsToRadians(motorVelo.getValue()) / kPivot.MOTOR_TO_MECHANISM_RATIO;
-        super.leftVolts = leaderMotorVolts.getValue();
-        super.rightVolts = followerMotorVolts.getValue();
-        super.leftAmps = leaderMotorAmps.getValue();
-        super.rightAmps = followerMotorAmps.getValue();
+        super.radians = motorRotsToMechRadians(motorRots.getValueAsDouble());
+        super.radiansPerSecond = -Units.rotationsToRadians(motorVelo.getValueAsDouble()) / kPivot.MOTOR_TO_MECHANISM_RATIO;
+        super.leftVolts = leaderMotorVolts.getValueAsDouble();
+        super.rightVolts = followerMotorVolts.getValueAsDouble();
+        super.leftAmps = leaderMotorAmps.getValueAsDouble();
+        super.rightAmps = followerMotorAmps.getValueAsDouble();
 
         super.isLimitFwdSwitchHit = forwardLimitSwitch.getValue() == ForwardLimitValue.Open;
         super.isLimitRevSwitchHit = reverseLimitSwitch.getValue() == ReverseLimitValue.Open;
 
-        double newGyroRadians = Units.degreesToRadians(gyroMeasurement.getValue() + 90.0);
+        double newGyroRadians = Units.degreesToRadians(gyroMeasurement.getValueAsDouble() + 90.0);
         super.gyroRadiansPerSecondAbs = Math.abs(super.gyroRadians - newGyroRadians) / ConstValues.PERIODIC_TIME;
         super.gyroRadians = newGyroRadians;
 
-        if ((Math.abs(super.radiansPerSecond) < 0.01
-                && Math.abs(super.gyroRadiansPerSecondAbs) < 0.01
-                && Units.radiansToDegrees(super.gyroRadians) > 20.0
-                && DriverStation.isDisabled())
-                || homeChannel.hasData()
-        ) {
-            homeChannel.tryRecv();
-            seedPivot();
-            log("SeededPivot", true);
-        } else {
-            log("SeededPivot", false);
+        if (DriverStation.isEnabled()) {
+            hasBeenEnabled = true;
         }
+
+        if (Math.abs(super.radiansPerSecond) < 0.01
+                && Math.abs(super.gyroRadiansPerSecondAbs) < 0.01
+                && (Units.radiansToDegrees(super.gyroRadians) > 20.0 || !hasBeenEnabled)
+                && DriverStation.isDisabled()
+        ) {
+            home();
+        }
+
+        log("SeededPivot", homedThisCycle);
+        homedThisCycle = false;
     }
 
 }

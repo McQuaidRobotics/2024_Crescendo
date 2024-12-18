@@ -3,15 +3,16 @@ package com.igknighters.subsystems.umbrella.intake;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.ReverseLimitSourceValue;
 import com.ctre.phoenix6.signals.ReverseLimitValue;
 import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.constants.ConstValues.kUmbrella.kIntake;
-import com.igknighters.util.BootupLogger;
-import com.igknighters.util.FaultManager;
 import com.igknighters.util.can.CANSignalManager;
+import com.igknighters.util.logging.BootupLogger;
+import com.igknighters.util.logging.FaultManager;
 import com.igknighters.constants.HardwareIndex.UmbrellaHW;
 
 import monologue.Annotations.Log;
@@ -20,12 +21,16 @@ public class IntakeReal extends Intake {
 
     private final TalonFX upperMotor = new TalonFX(kIntake.UPPER_MOTOR_ID, kUmbrella.CANBUS);
     private final TalonFX lowerMotor = new TalonFX(kIntake.LOWER_MOTOR_ID, kUmbrella.CANBUS);
+
     private final StatusSignal<Double> voltUpperSignal, ampUpperSignal;
     private final StatusSignal<Double> voltLowerSignal, ampLowerSignal;
     private final StatusSignal<ReverseLimitValue> revLimitSignal;
+
     private final HardwareLimitSwitchConfigs lowerLimitCfg, upperLimitCfg;
-    @Log.NT
-    private boolean wasBeamBroken = false;
+
+    private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
+
+    @Log private boolean wasBeamBroken = false;
 
     public IntakeReal() {
         FaultManager.captureFault(
@@ -117,11 +122,11 @@ public class IntakeReal extends Intake {
         super.voltsLower = volts;
         super.voltsUpper = volts * kIntake.UPPER_DIFF;
         if (super.exitBeamBroken) {
-            lowerMotor.setVoltage(0.0);
-            upperMotor.setVoltage(0.0);
+            lowerMotor.setControl(controlReqVolts.withOutput(0.0));
+            upperMotor.setControl(controlReqVolts.withOutput(0.0));
         } else {
-            lowerMotor.setVoltage(volts);
-            upperMotor.setVoltage(volts * kIntake.UPPER_DIFF);
+            lowerMotor.setControl(controlReqVolts.withOutput(volts));
+            upperMotor.setControl(controlReqVolts.withOutput(volts * kIntake.UPPER_DIFF));
         }
     }
 
@@ -133,8 +138,8 @@ public class IntakeReal extends Intake {
         }
         super.voltsLower = volts;
         super.voltsUpper = volts * kIntake.UPPER_DIFF;
-        lowerMotor.setVoltage(volts);
-        upperMotor.setVoltage(volts * kIntake.UPPER_DIFF);
+        lowerMotor.setControl(controlReqVolts.withOutput(volts));
+        upperMotor.setControl(controlReqVolts.withOutput(volts * kIntake.UPPER_DIFF));
     }
 
     @Override
@@ -156,10 +161,10 @@ public class IntakeReal extends Intake {
         revLimitSignal.refresh();
 
         super.exitBeamBroken = revLimitSignal.getValue().equals(ReverseLimitValue.ClosedToGround);
-        super.voltsUpper = voltUpperSignal.getValue();
-        super.ampsUpper = ampUpperSignal.getValue();
-        super.voltsLower = voltLowerSignal.getValue();
-        super.ampsLower = ampLowerSignal.getValue();
+        super.voltsUpper = voltUpperSignal.getValueAsDouble();
+        super.ampsUpper = ampUpperSignal.getValueAsDouble();
+        super.voltsLower = voltLowerSignal.getValueAsDouble();
+        super.ampsLower = ampLowerSignal.getValueAsDouble();
 
         if (super.exitBeamBroken && !wasBeamBroken) {
             this.setVoltageOut(0.0);

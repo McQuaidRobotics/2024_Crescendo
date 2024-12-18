@@ -2,7 +2,6 @@ package com.igknighters.subsystems.swerve.module;
 
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
-import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -18,23 +17,23 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
+import monologue.Annotations.IgnoreLogged;
 
 import com.igknighters.constants.ConstValues.kSwerve;
 import com.igknighters.constants.ConstValues.kSwerve.kAngleMotor;
 import com.igknighters.constants.ConstValues.kSwerve.kDriveMotor;
-import com.igknighters.util.BootupLogger;
+import com.igknighters.subsystems.swerve.odometryThread.RealSwerveOdometryThread;
 import com.igknighters.util.can.CANRetrier;
 import com.igknighters.util.can.CANSignalManager;
+import com.igknighters.util.logging.BootupLogger;
 
 public class SwerveModuleReal extends SwerveModule {
     private final TalonFX driveMotor;
-    private final StatusSignal<Double> drivePositionSignal, driveVelocitySignal;
     private final StatusSignal<Double> driveVoltSignal, driveAmpSignal;
     private final ControlRequest driveMotorClosedReq;
     private final ControlRequest driveMotorOpenReq;
 
     private final TalonFX angleMotor;
-    private final StatusSignal<Double> anglePositionSignal, angleVelocitySignal;
     private final StatusSignal<Double> angleVoltSignal, angleAmpSignal;
     private final PositionDutyCycle angleMotorReq = new PositionDutyCycle(0)
             .withUpdateFreqHz(0);
@@ -46,9 +45,14 @@ public class SwerveModuleReal extends SwerveModule {
     private final double rotationOffset;
     private final boolean isPro;
 
+    @IgnoreLogged
+    private final RealSwerveOdometryThread odoThread;
+
     private Rotation2d lastAngle = new Rotation2d();
 
-    public SwerveModuleReal(final SwerveModuleConstants moduleConstants, boolean isPro) {
+    public SwerveModuleReal(final SwerveModuleConstants moduleConstants, boolean isPro, final RealSwerveOdometryThread odoThread) {
+        this.odoThread = odoThread;
+
         this.isPro = isPro;
         this.moduleNumber = moduleConstants.getModuleId().num;
         this.rotationOffset = moduleConstants.getRotationOffset();
@@ -61,13 +65,9 @@ public class SwerveModuleReal extends SwerveModule {
         CANRetrier.retryStatusCode(() -> angleMotor.getConfigurator().apply(angleMotorConfig(), 1.0), 5);
         CANRetrier.retryStatusCode(() -> angleEncoder.getConfigurator().apply(cancoderConfig(), 1.0), 5);
 
-        drivePositionSignal = driveMotor.getPosition();
-        driveVelocitySignal = driveMotor.getVelocity();
         driveVoltSignal = driveMotor.getMotorVoltage();
         driveAmpSignal = driveMotor.getTorqueCurrent();
 
-        anglePositionSignal = angleMotor.getPosition();
-        angleVelocitySignal = angleMotor.getVelocity();
         angleVoltSignal = angleMotor.getMotorVoltage();
         angleAmpSignal = angleMotor.getTorqueCurrent();
 
@@ -76,11 +76,17 @@ public class SwerveModuleReal extends SwerveModule {
 
         CANSignalManager.registerSignals(
             kSwerve.CANBUS,
-            drivePositionSignal, driveVelocitySignal,
             driveVoltSignal, driveAmpSignal,
-            anglePositionSignal, angleVelocitySignal,
             angleVoltSignal, angleAmpSignal,
             angleAbsoluteSignal, angleAbsoluteVeloSignal
+        );
+
+        odoThread.addModuleStatusSignals(
+            moduleNumber,
+            driveMotor.getPosition(),
+            driveMotor.getVelocity(),
+            angleMotor.getPosition(),
+            angleMotor.getVelocity()
         );
 
         driveMotor.optimizeBusUtilization(1.0);
@@ -92,12 +98,7 @@ public class SwerveModuleReal extends SwerveModule {
         log("isPro", isPro);
 
         driveMotorOpenReq = new VoltageOut(0).withEnableFOC(isPro).withUpdateFreqHz(0);
-        // if (isPro) {
-        //     driveMotorClosedReq = new VelocityTorqueCurrentFOC(0).withUpdateFreqHz(0);
-        // } else {
-        //     driveMotorClosedReq = new VelocityVoltage(0).withUpdateFreqHz(0);
-        // }
-        driveMotorClosedReq = new VelocityVoltage(0).withUpdateFreqHz(0);
+        driveMotorClosedReq = new VelocityVoltage(0).withEnableFOC(isPro).withUpdateFreqHz(0);
 
         BootupLogger.bootupLog(
                 "    SwerveModule[" + this.moduleNumber + "] initialized ("
@@ -184,11 +185,7 @@ public class SwerveModuleReal extends SwerveModule {
         } else {
             double rps = (desiredState.speedMetersPerSecond / kSwerve.WHEEL_CIRCUMFERENCE) * kSwerve.DRIVE_GEAR_RATIO;
             log("DriveRPS", rps);
-            if (isPro) {
-                driveMotor.setControl(((VelocityTorqueCurrentFOC) driveMotorClosedReq).withVelocity(rps));
-            } else {
-                driveMotor.setControl(((VelocityVoltage) driveMotorClosedReq).withVelocity(rps));
-            }
+            driveMotor.setControl(((VelocityVoltage) driveMotorClosedReq).withVelocity(rps));
         }
     }
 
@@ -215,20 +212,15 @@ public class SwerveModuleReal extends SwerveModule {
 
     @Override
     public void periodic() {
-        super.angleAbsoluteRads = Units.rotationsToRadians(angleAbsoluteSignal.getValue());
-        super.angleVeloRadPS = Units.rotationsToRadians(angleAbsoluteVeloSignal.getValue());
-        super.angleVolts = angleVoltSignal.getValue();
-        super.angleAmps = angleAmpSignal.getValue();
+        super.angleAbsoluteRads = Units.rotationsToRadians(angleAbsoluteSignal.getValueAsDouble());
+        super.angleVeloRadPS = Units.rotationsToRadians(angleAbsoluteVeloSignal.getValueAsDouble());
+        super.angleVolts = angleVoltSignal.getValueAsDouble();
+        super.angleAmps = angleAmpSignal.getValueAsDouble();
 
-        super.drivePositionMeters = driveRotationsToMeters(drivePositionSignal.getValue());
-        super.driveVeloMPS = driveRotationsToMeters(driveVelocitySignal.getValue());
-        super.driveVolts = driveVoltSignal.getValue();
-        super.driveAmps = driveAmpSignal.getValue();
-    }
-
-    @Override
-    public void setVoltageOut(double volts) {
-        driveMotor.setVoltage(volts);
+        super.drivePositionMeters = driveRotationsToMeters(odoThread.getModulePosition(moduleNumber));
+        super.driveVeloMPS = driveRotationsToMeters(odoThread.getModuleVelocity(moduleNumber));
+        super.driveVolts = driveVoltSignal.getValueAsDouble();
+        super.driveAmps = driveAmpSignal.getValueAsDouble();
     }
 
     @Override
