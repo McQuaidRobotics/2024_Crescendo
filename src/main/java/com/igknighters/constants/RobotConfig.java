@@ -21,7 +21,7 @@ public class RobotConfig {
         SIM_CRASH(Subsystems.all(), RobotConstID.CRASH),
         SIM_BURN(Subsystems.none(), RobotConstID.BURN),
 
-        TestBoard("testBoard(crash)", Subsystems.list(Subsystems.Umbrella), RobotConstID.CRASH),
+        TestBoard("testBoard(crash)", Subsystems.none(), RobotConstID.CRASH),
 
         UNIT_TEST(Subsystems.all(), RobotConstID.CRASH),
 
