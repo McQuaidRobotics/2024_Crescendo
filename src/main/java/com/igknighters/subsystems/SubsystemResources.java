@@ -8,11 +8,8 @@ import java.util.function.Supplier;
 
 import com.igknighters.Localizer;
 import com.igknighters.subsystems.led.Led;
-import com.igknighters.subsystems.stem.Stem;
 
 import com.igknighters.subsystems.swerve.Swerve;
-
-import com.igknighters.subsystems.umbrella.Umbrella;
 
 import com.igknighters.subsystems.vision.Vision;
 import com.igknighters.util.logging.BootupLogger;
@@ -28,11 +25,7 @@ public class SubsystemResources {
      */
     public enum Subsystems {
 
-        Stem("Stem"),
-
         Swerve("Swerve"),
-
-        Umbrella("Umbrella"),
 
         Vision("Vision"),
 
@@ -98,11 +91,7 @@ public class SubsystemResources {
         private List<LockFullSubsystem> subsystemsListLockFull = new ArrayList<>();
         private List<LockFreeSubsystem> subsystemsListLockFree = new ArrayList<>();
 
-        public final Optional<Stem> stem;
-
         public final Optional<Swerve> swerve;
-
-        public final Optional<Umbrella> umbrella;
 
         public final Optional<Vision> vision;
 
@@ -117,22 +106,10 @@ public class SubsystemResources {
 
             List<Subsystems> enabledSubsystems = List.of(subsystems);
 
-            if (enabledSubsystems.contains(Subsystems.Stem)) {
-                stem = createSubsystem(Stem::new);
-            } else {
-                stem = Optional.empty();
-            }
-
             if (enabledSubsystems.contains(Subsystems.Swerve)) {
                 swerve = createSubsystem(Swerve::new, localizer);
             } else {
                 swerve = Optional.empty();
-            }
-
-            if (enabledSubsystems.contains(Subsystems.Umbrella)) {
-                umbrella = createSubsystem(Umbrella::new);
-            } else {
-                umbrella = Optional.empty();
             }
 
             if (enabledSubsystems.contains(Subsystems.Vision)) {
@@ -214,15 +191,7 @@ public class SubsystemResources {
 
         public boolean hasAllSubsystems() {
 
-            if (!stem.isPresent()) {
-                return false;
-            }
-
             if (!swerve.isPresent()) {
-                return false;
-            }
-
-            if (!umbrella.isPresent()) {
                 return false;
             }
 

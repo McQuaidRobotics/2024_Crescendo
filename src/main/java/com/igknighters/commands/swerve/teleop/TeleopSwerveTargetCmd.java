@@ -13,9 +13,7 @@ import edu.wpi.first.math.util.Units;
 import java.util.function.Supplier;
 
 import com.igknighters.Localizer;
-import com.igknighters.constants.ConstValues.kControls;
 import com.igknighters.constants.ConstValues.kSwerve;
-import com.igknighters.constants.ConstValues.kUmbrella;
 import com.igknighters.controllers.ControllerBase;
 
 public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
@@ -27,6 +25,8 @@ public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
     private final boolean movementComp;
     private final RotationalController rotController;
     private final double speedMult;
+    private final double lookaheadTime = 0.3;
+    private final double projectileVelo = 20.0;
 
     public TeleopSwerveTargetCmd(Swerve swerve, ControllerBase controller, Localizer localizer, Translation2d target, boolean movementComp, double speedScalar) {
         this(swerve, controller, localizer::translation, target, movementComp, speedScalar);
@@ -70,12 +70,12 @@ public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
         double distance = currentTranslation.getDistance(targetTranslation);
 
         Translation2d adjustedTarget = new Translation2d(
-                targetTranslation.getX() - (avgChassisSpeeds.vxMetersPerSecond * (distance / kUmbrella.NOTE_VELO)),
-                targetTranslation.getY() - (avgChassisSpeeds.vyMetersPerSecond * (distance / kUmbrella.NOTE_VELO)));
+                targetTranslation.getX() - (avgChassisSpeeds.vxMetersPerSecond * (distance / projectileVelo)),
+                targetTranslation.getY() - (avgChassisSpeeds.vyMetersPerSecond * (distance / projectileVelo)));
 
         Translation2d lookaheadTranslation = currentTranslation.plus(new Translation2d(
-                avgChassisSpeeds.vxMetersPerSecond * kControls.SOTM_LOOKAHEAD_TIME,
-                avgChassisSpeeds.vyMetersPerSecond * kControls.SOTM_LOOKAHEAD_TIME
+                avgChassisSpeeds.vxMetersPerSecond * lookaheadTime,
+                avgChassisSpeeds.vyMetersPerSecond * lookaheadTime
             ));
 
         Rotation2d targetAngle;

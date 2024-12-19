@@ -13,21 +13,16 @@ import monologue.Monologue.MonologueConfig;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.igknighters.commands.autos.AutoController;
-import com.igknighters.commands.autos.AutoRoutines;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveTraditionalCmd;
 import com.igknighters.commands.tests.Characterizers;
 import com.igknighters.commands.tests.TestManager;
-import com.igknighters.commands.umbrella.UmbrellaCommands;
 import com.igknighters.constants.ConstValues;
 import com.igknighters.constants.ConstantHelper;
 import com.igknighters.constants.RobotConfig;
 import com.igknighters.constants.RobotConfig.RobotID;
 import com.igknighters.controllers.DriverController;
-// import com.igknighters.controllers.OperatorController;
-// import com.igknighters.controllers.TestingController;
 import com.igknighters.subsystems.SubsystemResources.AllSubsystems;
 import com.igknighters.subsystems.swerve.Swerve;
-import com.igknighters.subsystems.umbrella.Umbrella;
 import com.igknighters.util.can.CANSignalManager;
 import com.igknighters.util.geom.AllianceFlip;
 import com.igknighters.util.geom.GeomUtil;
@@ -93,13 +88,6 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
             swerve.setDefaultCommand(new TeleopSwerveTraditionalCmd(swerve, driverController));
         }
 
-        if (allSubsystems.umbrella.isPresent()) {
-            final Umbrella umbrella = allSubsystems.umbrella.get();
-            umbrella.setDefaultCommand(UmbrellaCommands.idleShooter(umbrella, UmbrellaCommands::defaultIdleRPM));
-
-            umbrella.setupSimNoteDetection(localizer);
-        }
-
         autoChooser = new AutoChooser(
             Choreo.createAutoFactory(
                 allSubsystems.swerve.isPresent() ? allSubsystems.swerve.get() : new Subsystem() {},
@@ -117,13 +105,6 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
         );
 
         if (allSubsystems.hasAllSubsystems()) {
-            final var routines = new AutoRoutines(allSubsystems, localizer);
-            autoChooser.addAutoRoutine("5 Piece Amp Side", routines::fivePieceAmpSide);
-            autoChooser.addAutoRoutine("6 Piece Amp Side Far", routines::sixPieceFarAmpSide);
-            autoChooser.addAutoRoutine("4 Piece Src Side", routines::fourPieceSourceSide);
-            autoChooser.addAutoRoutine("celtx", routines::celtxAuto);
-            // autoChooser.addAutoRoutine("3 Piece Sub Middle", routines::threePieceSubMiddle);
-            // autoChooser.addAutoRoutine("rahhh", routines::driveForward);
         }
 
         testManager = new TestManager();
@@ -132,18 +113,6 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
             testManager.addTestRoutine(
                 "Characterize Swerve",
                 Characterizers.characterizeSwerve(allSubsystems.swerve.get())
-            );
-            testManager.addTestRoutine(
-                "Characterize Pivot",
-                Characterizers.characterizePivot(allSubsystems.stem.get())
-            );
-            testManager.addTestRoutine(
-                "Characterize Wrist",
-                Characterizers.characterizeWrist(allSubsystems.stem.get())
-            );
-            testManager.addTestRoutine(
-                "Characterize Telescope",
-                Characterizers.characterizeTelescope(allSubsystems.stem.get())
             );
         }
 
