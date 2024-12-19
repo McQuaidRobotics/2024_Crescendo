@@ -4,6 +4,10 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.util.struct.StructSerializable;
+import monologue.procstruct.ProceduralStructGenerator;
+import monologue.procstruct.ProceduralStructGenerator.IgnoreStructField;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
@@ -25,20 +29,22 @@ import sham.utils.mathutils.MeasureMath;
  * <p>The Simulation is basically an indefinite integral of the angular velocity during each simulation sub ticks. Above
  * that, it also musicales the measurement inaccuracy of the gyro, drifting in no-motion and drifting due to impacts.
  */
-public class ShamGyro {
+public class ShamGyro implements StructSerializable {
     /* The threshold of instantaneous angular acceleration at which the chassis is considered to experience an "impact." */
     private static final AngularAcceleration START_DRIFTING = RadiansPerSecondPerSecond.of(500);
     /* The amount of drift, in radians, that the gyro experiences as a result of each multiple of the angular acceleration threshold. */
     private static final Angle DRIFT_DUE_TO_IMPACT_COEFFICIENT = Radians.of(1);
 
+    @IgnoreStructField
     private final ShamEnvTiming timing;
+    @IgnoreStructField
+    private BiConsumer<Time, AngularVelocity> yawVeloConsumer;
 
     private final double veloStdDev;
 
     private final AngularVelocity averageDriftingMotionless;
 
     private AngularVelocity lastAngularVelocity = RadiansPerSecond.of(0);
-    private BiConsumer<Time, AngularVelocity> yawVeloConsumer;
 
     /**
      *
@@ -54,7 +60,7 @@ public class ShamGyro {
     public ShamGyro(ShamEnvTiming timing, ShamGyroConfig gyroConfig) {
         this.timing = timing;
         this.averageDriftingMotionless = Degrees.of(gyroConfig.averageDriftingIn30SecsMotionlessDeg)
-                .divide(Seconds.of(30.0));
+                .div(Seconds.of(30.0));
         this.veloStdDev = gyroConfig.velocityMeasurementStandardDeviationPercent;
 
         RuntimeLog.debug("Created a swerve module simulation");
@@ -85,19 +91,21 @@ public class ShamGyro {
         lastAngularVelocity = dTheta;
 
         if (yawVeloConsumer != null) {
-            yawVeloConsumer.accept(timing.dt, lastAngularVelocity);
+            yawVeloConsumer.accept(timing.dt(), lastAngularVelocity);
         }
     }
 
     private AngularVelocity getDriftingDueToImpact(AngularVelocity actualAngularVelocity) {
-        AngularAcceleration angularAcceleration = actualAngularVelocity.minus(lastAngularVelocity).divide(timing.dt);
+        AngularAcceleration angularAcceleration = actualAngularVelocity.minus(lastAngularVelocity).div(timing.dt());
         if (MeasureMath.abs(angularAcceleration).gt(START_DRIFTING)) {
             return DRIFT_DUE_TO_IMPACT_COEFFICIENT
                     .times(MeasureMath.signum(angularAcceleration))
-                    .times(angularAcceleration.divide(START_DRIFTING))
-                    .divide(timing.dt);
+                    .times(angularAcceleration.div(START_DRIFTING))
+                    .div(timing.dt());
         } else {
             return RadiansPerSecond.of(0);
         }
     }
+
+    public static final Struct<ShamGyro> struct = ProceduralStructGenerator.genObjectNoUnpack(ShamGyro.class);
 }

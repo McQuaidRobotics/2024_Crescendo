@@ -2,6 +2,7 @@ package sham;
 
 import static edu.wpi.first.units.Units.Seconds;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -29,13 +30,16 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Twist3d;
+import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.util.struct.StructSerializable;
+import monologue.procstruct.ProceduralStructGenerator;
 
 /**
  * A base class used for all gamepieces in the simulation.
  * 
  * Used to keep continuity between the different states gamepieces can be in.
  */
-public class ShamGamePiece {
+public class ShamGamePiece implements StructSerializable{
     /**
      * Represents a rectangular prism volume in 3d space.
      * 
@@ -182,7 +186,7 @@ public class ShamGamePiece {
 
             @Override
             public void tick(ShamGamePiece gp, ShamArena arena) {
-                double dt = arena.timing.dt.in(Seconds);
+                double dt = arena.timing.dt().in(Seconds);
                 velocity = dynamics.calculate(dt, velocity);
                 Twist3d twist = new Twist3d(
                         dt * velocity.getVX(),
@@ -234,7 +238,7 @@ public class ShamGamePiece {
      * <li>{@link #HELD}: The game piece is being held by a robot.
      * </ul>
      */
-    public enum GamePieceState {
+    public enum GamePieceState implements StructSerializable {
         /**
          * The game piece is not in play.
          */
@@ -255,6 +259,8 @@ public class ShamGamePiece {
         public boolean isInState(ShamGamePiece gp) {
             return gp.isInState(this);
         }
+
+        public static final Struct<GamePieceState> struct = ProceduralStructGenerator.genEnum(GamePieceState.class);
     }
 
     /**
@@ -300,8 +306,8 @@ public class ShamGamePiece {
         }
     }
 
-    protected final GamePieceVariant variant;
     protected final ShamArena arena;
+    protected final GamePieceVariant variant;
     protected GamePieceStateData state = new GamePieceStateData.Limbo();
     protected boolean userControlled = false;
 
@@ -510,5 +516,41 @@ public class ShamGamePiece {
                 return poses -> poses.toArray(new Pose3d[0]);
             }
         };
+    }
+
+    public static final ShameGamePieceStruct struct = new ShameGamePieceStruct();
+
+    public static final class ShameGamePieceStruct implements Struct<ShamGamePiece> {
+        @Override
+        public String getSchema() {
+            return "Pose3d pose;char type[16];GamePieceState state";
+        }
+
+        @Override
+        public int getSize() {
+            return 16 + Pose3d.struct.getSize() + GamePieceState.struct.getSize();
+        }
+
+        @Override
+        public Class<ShamGamePiece> getTypeClass() {
+            return ShamGamePiece.class;
+        }
+
+        @Override
+        public String getTypeName() {
+            return "ShamGamePiece";
+        }
+
+        @Override
+        public void pack(ByteBuffer bb, ShamGamePiece value) {
+            Pose3d.struct.pack(bb, value.pose());
+            bb.put(ProceduralStructGenerator.fixedSizeString(value.variant.type, 16));
+            GamePieceState.struct.pack(bb, value.state());
+        }
+
+        @Override
+        public ShamGamePiece unpack(ByteBuffer bb) {
+            throw new UnsupportedOperationException("Unpacking ShamGamePiece is not supported");
+        }
     }
 }

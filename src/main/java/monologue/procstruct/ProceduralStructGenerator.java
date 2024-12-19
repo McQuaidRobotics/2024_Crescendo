@@ -1,4 +1,4 @@
-package monologue;
+package monologue.procstruct;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -11,7 +11,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.RecordComponent;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,6 +28,7 @@ import java.util.stream.BaseStream;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
+import monologue.RuntimeLog;
 
 /** A utility class for procedurally generating {@link Struct}s from records and enums. */
 public final class ProceduralStructGenerator {
@@ -148,7 +151,7 @@ public final class ProceduralStructGenerator {
    */
   @SuppressWarnings("unchecked")
   public static <T extends StructSerializable> Optional<Struct<T>> extractClassStruct(
-      Class<? extends T> clazz) {
+      Class<T> clazz) {
     try {
       var possibleField = Optional.ofNullable(clazz.getDeclaredField("struct"));
       return possibleField.flatMap(
@@ -184,6 +187,28 @@ public final class ProceduralStructGenerator {
     } else {
       return Optional.empty();
     }
+  }
+
+  /**
+   * Returns a byte array of the given size with the given string at the beginning. If the string is
+   * longer than the size, it will be truncated. If the string is shorter than the size, the rest of
+   * the array will be filled with spaces.
+   * 
+   * <p> The byte array is encoded in US-ASCII.
+   * 
+   * @param str The string to put in the byte array.
+   * @param size The size of the byte array.
+   * @return The byte array.
+   */
+  public static byte[] fixedSizeString(String str, int size) {
+    // get the ascii value for a space character
+    byte[] bytes = new byte[size];
+    Charset charset = Charset.forName("us-ascii");
+    byte whitespace = charset.encode(" ").get();
+    byte[] strBytes = str.getBytes(charset);
+    Arrays.fill(bytes, whitespace);
+    System.arraycopy(strBytes, 0, bytes, 0, Math.min(strBytes.length, size));
+    return bytes;
   }
 
   @Retention(RetentionPolicy.RUNTIME)
@@ -288,7 +313,14 @@ public final class ProceduralStructGenerator {
           RuntimeLog.warn("Could not structify field: " + name);
           return null;
         }
-        Set<Struct<?>> structsToLoad = new HashSet<>(Set.of(struct.getNested()));
+        Set<Struct<?>> structsToLoad = new HashSet<>();
+        for (Struct<?> nestedStruct : struct.getNested()) {
+          // `Set.of` crashes on duplicate elements
+          if (structsToLoad.contains(nestedStruct)) {
+            continue;
+          }
+          structsToLoad.add(nestedStruct);
+        }
         structsToLoad.add(struct);
         return new StructField(
             name,
@@ -796,6 +828,13 @@ public final class ProceduralStructGenerator {
         .toArray(Field[]::new);
     final ArrayList<StructField> fields = new ArrayList<>(allFields.length);
 
+    final Optional<Struct<?>> parentStruct;
+    if (StructSerializable.class.isAssignableFrom(objectClass.getSuperclass())) {
+      parentStruct = extractClassStructDynamic(objectClass.getSuperclass());
+    } else {
+      parentStruct = Optional.empty();
+    }
+
     for (final Field field : allFields) {
       field.setAccessible(true);
       fields.add(StructField.fromField(field));
@@ -806,7 +845,23 @@ public final class ProceduralStructGenerator {
     }
     fields.forEach(schemaBuilder::addField);
 
-    return new ProcStruct<>(objectClass, fields, schemaBuilder.build()) {
+    parentStruct.ifPresent(
+        struct -> {
+          fields.add(
+            new StructField(
+              "parent",
+              struct.getTypeName(),
+              struct.getSize(),
+              struct.isImmutable(),
+              Set.of(struct.getNested()),
+              buffer -> struct.unpack(buffer),
+              Packer.fromStruct(struct)
+            )
+          );
+        }
+    );
+
+    return new ProcStruct<>(objectClass, fields, schemaBuilder.build() + parentStruct.map(Struct::getSchema).orElse("")) {
       @Override
       public void pack(ByteBuffer buffer, O value) {
         boolean failed = false;
@@ -852,5 +907,19 @@ public final class ProceduralStructGenerator {
         }
       }
     };
+  }
+
+    /**
+   * Generates a {@link Struct} for the given {@link Object} class. If a {@link Struct} cannot be
+   * generated from the {@link Object}, the errors encountered will be printed and a no-op {@link
+   * Struct} will be returned.
+   *
+   * @param <O> The type of the object.
+   * @param objectClass The class of the object.
+   * @return The generated struct.
+   */
+  @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
+  public static <O> Struct<O> genObjectNoUnpack(Class<O> objectClass) {
+    return genObject(objectClass, null);
   }
 }

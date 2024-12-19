@@ -1,12 +1,16 @@
 package sham;
 
+import edu.wpi.first.epilogue.logging.DataLogger;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.util.struct.StructSerializable;
 import edu.wpi.first.wpilibj.IterativeRobotBase;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import monologue.procstruct.ProceduralStructGenerator;
+
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,23 +31,23 @@ import org.dyn4j.geometry.MassType;
 import org.dyn4j.world.PhysicsWorld;
 import org.dyn4j.world.World;
 import sham.ShamGamePiece.GamePieceVariant;
+import sham.utils.FrcBody;
 import sham.utils.ProjectileUtil;
+import sham.utils.RuntimeLog;
+import sham.utils.FrcBody.FrcBodySnapshot;
 import sham.utils.mathutils.GeometryConvertor;
 
 
 public abstract class ShamArena {
-    public static final class ShamEnvTiming {
-        public final Time period;
-        public final int ticksPerPeriod;
-        public final Time dt;
-
+    public record ShamEnvTiming(Time period, int ticksPerPeriod, Time dt) implements StructSerializable {
         private ShamEnvTiming(double robotPeriodSeconds, int simulationSubTicksPerPeriod) {
-            this.period = Seconds.of(robotPeriodSeconds);
-            this.ticksPerPeriod = simulationSubTicksPerPeriod;
-            this.dt = Seconds.of(robotPeriodSeconds / ((double) ticksPerPeriod));
+            this(Seconds.of(robotPeriodSeconds), simulationSubTicksPerPeriod, Seconds.of(robotPeriodSeconds / ((double) simulationSubTicksPerPeriod)));
         }
+
+        public static final Struct<ShamEnvTiming> struct = ProceduralStructGenerator.genRecord(ShamEnvTiming.class);
     }
 
+    protected final DataLogger logger = RuntimeLog.loggerFor("Arena");
     protected final ReentrantLock worldLock = new ReentrantLock();
     protected final World<Body> physicsWorld = new World<>();
     protected final Set<ShamGamePiece> gamePieces = ConcurrentHashMap.newKeySet();
@@ -69,9 +73,13 @@ public abstract class ShamArena {
     protected ShamArena(FieldMap obstaclesMap, double period, int ticksPerPeriod) {
         this.timing = new ShamEnvTiming(period, ticksPerPeriod);
         this.physicsWorld.setGravity(PhysicsWorld.ZERO_GRAVITY);
-        for (Body obstacle : obstaclesMap.obstacles) {
+        for (FrcBody obstacle : obstaclesMap.obstacles) {
             this.physicsWorld.addBody(obstacle);
         }
+        FrcBodySnapshot[] obstacleSnapshot = obstaclesMap.obstacles.stream()
+            .map(FrcBody::snapshot)
+            .toArray(FrcBodySnapshot[]::new);
+        logger.log("Obstacles", obstacleSnapshot, FrcBodySnapshot.struct);
     }
 
     void withWorld(Consumer<World<Body>> worldModifier) {
@@ -100,6 +108,7 @@ public abstract class ShamArena {
      * @return the game piece that was created and registered
      */
     public ShamGamePiece createGamePiece(GamePieceVariant variant) {
+        RuntimeLog.debug("Creating a game piece of variant " + variant);
         ShamGamePiece gamePiece = new ShamGamePiece(variant, this);
         this.gamePieces.add(gamePiece);
         return gamePiece.userControlled();
@@ -120,8 +129,7 @@ public abstract class ShamArena {
             simulationSubTick();
         }
 
-        SmartDashboard.putNumber(
-                "MapleArenaSimulation/Dyn4jEngineCPUTimeMS", (System.nanoTime() - t0) / 1000000.0);
+        logger.log("Dyn4jEngineCPUTimeMS", (System.nanoTime() - t0) / 1000000.0);
     }
 
     private void simulationSubTick() {
@@ -210,7 +218,7 @@ public abstract class ShamArena {
      * subclass of this class to store the field map for that specific season's game.
      */
     public static class FieldMap {
-        private final List<Body> obstacles = new ArrayList<>();
+        private final List<FrcBody> obstacles = new ArrayList<>();
 
         protected void addBorderLine(Translation2d startingPoint, Translation2d endingPoint) {
             addCustomObstacle(
@@ -226,15 +234,15 @@ public abstract class ShamArena {
         }
 
         protected void addCustomObstacle(Convex shape, Pose2d absolutePositionOnField) {
-            final Body obstacle = createObstacle(shape);
+            final FrcBody obstacle = createObstacle(shape);
 
             obstacle.getTransform().set(GeometryConvertor.toDyn4jTransform(absolutePositionOnField));
 
             obstacles.add(obstacle);
         }
 
-        private static Body createObstacle(Convex shape) {
-            final Body obstacle = new Body();
+        private static FrcBody createObstacle(Convex shape) {
+            final FrcBody obstacle = new FrcBody();
             obstacle.setMass(MassType.INFINITE);
             final BodyFixture fixture = obstacle.addFixture(shape);
             fixture.setFriction(0.6);

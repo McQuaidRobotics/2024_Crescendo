@@ -19,8 +19,8 @@ public class TimeSensitiveLogger {
         return (long) (seconds * 1_000_000);
     }
 
-    public void log(double value, double timestamp) {
-        logEntry.append(value, secondsToMicros(timestamp));
+    public void log(double value, double timestampSeconds) {
+        logEntry.append(value, secondsToMicros(timestampSeconds));
     }
 
     public void log(TimestampedDouble value) {

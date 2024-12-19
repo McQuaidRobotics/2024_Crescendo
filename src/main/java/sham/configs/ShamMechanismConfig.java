@@ -5,20 +5,30 @@ import sham.ShamMechanism.HardLimits;
 import sham.ShamMechanism.MechanismDynamics;
 
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Volts;
 
 import sham.utils.GearRatio;
 
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.MomentOfInertia;
+import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.util.struct.StructSerializable;
+import monologue.procstruct.ProceduralStructGenerator;
+import monologue.procstruct.ProceduralStructGenerator.IgnoreStructField;
 
-public class ShamMechanismConfig {
+public class ShamMechanismConfig implements StructSerializable {
     public DCMotor motor;
     public MomentOfInertia rotorInertia;
     public GearRatio gearRatio;
     public Friction friction;
+    @IgnoreStructField
     public MechanismDynamics dynamics;
     public HardLimits limits;
+    public Velocity<VoltageUnit> voltageRamp;
     public double noise;
 
     public ShamMechanismConfig(
@@ -28,6 +38,7 @@ public class ShamMechanismConfig {
             Friction friction,
             MechanismDynamics dynamics,
             HardLimits limits,
+            Velocity<VoltageUnit> voltageRamp,
             double noise) {
         this.motor = motor;
         this.rotorInertia = rotorInertia;
@@ -35,6 +46,7 @@ public class ShamMechanismConfig {
         this.friction = friction;
         this.dynamics = dynamics;
         this.limits = limits;
+        this.voltageRamp = voltageRamp;
         this.noise = noise;
     }
 
@@ -45,6 +57,7 @@ public class ShamMechanismConfig {
         this.friction = Friction.zero();
         this.dynamics = MechanismDynamics.zero();
         this.limits = HardLimits.unbounded();
+        this.voltageRamp = Volts.of(600.0).per(Second);
         this.noise = 0.0;
     }
 
@@ -63,8 +76,8 @@ public class ShamMechanismConfig {
         return this;
     }
 
-    public ShamMechanismConfig withFriction(Voltage frictionVolts) {
-        this.friction = Friction.of(motor, frictionVolts);
+    public ShamMechanismConfig withFriction(Voltage staticFrictionVolts, Voltage kineticFrictionVoltage) {
+        this.friction = Friction.of(motor, staticFrictionVolts, kineticFrictionVoltage);
         return this;
     }
 
@@ -78,8 +91,15 @@ public class ShamMechanismConfig {
         return this;
     }
 
+    public ShamMechanismConfig withVoltageRamp(Velocity<VoltageUnit> voltageRamp) {
+        this.voltageRamp = voltageRamp;
+        return this;
+    }
+
     public ShamMechanismConfig withNoise(double noise) {
         this.noise = noise;
         return this;
     }
+
+    public static final Struct<ShamMechanismConfig> struct = ProceduralStructGenerator.genObjectNoUnpack(ShamMechanismConfig.class);
 }

@@ -1,14 +1,17 @@
 package sham;
 
+import edu.wpi.first.epilogue.logging.DataLogger;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.util.struct.Struct;
+import monologue.procstruct.ProceduralStructGenerator;
 
-import org.dyn4j.dynamics.Body;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Vector2;
 import sham.configs.ShamDriveTrainConfig;
 import sham.configs.ShamSwerveConfig;
+import sham.utils.FrcBody;
 import sham.utils.mathutils.GeometryConvertor;
 
 /**
@@ -22,17 +25,18 @@ import sham.utils.mathutils.GeometryConvertor;
  *
  * <p>It also provides APIs to obtain the status (position, velocity etc.) in WPILib geometry classes.
  */
-public abstract class ShamDriveTrain {
+public class ShamDriveTrain {
     /**
      * https://en.wikipedia.org/wiki/Friction#Coefficient_of_friction
      */
-    public static final double kBumberCoF = 0.65;
+    public static final double kBumperCoF = 0.65;
     /**
      * https://simple.wikipedia.org/wiki/Coefficient_of_restitution
      */
-    public static final double kBumperCoR = 0.08;
+    public static final double kBumperCoR = 0.005;
 
-    protected final Body chassis = new Body();
+    protected final DataLogger logger;
+    protected final FrcBody chassis = new FrcBody();
 
     /**
      *
@@ -49,13 +53,16 @@ public abstract class ShamDriveTrain {
      * @param config a {@link ShamDriveTrainConfig} instance containing the configurations of this drivetrain
      * @param initialPoseOnField the initial pose of the drivetrain in the simulation world
      */
-    protected ShamDriveTrain(ShamDriveTrainConfig<?, ?> config) {
+    @SuppressWarnings("unchecked")
+    protected ShamDriveTrain(DataLogger logger, ShamDriveTrainConfig<?, ?> config) {
+        this.logger = logger;
+        logger.log("config", config, (Struct<ShamDriveTrainConfig<?, ?>>) ProceduralStructGenerator
+                .extractClassStructDynamic(config.getClass()).get());
         chassis.addFixture(
-            Geometry.createRectangle(config.bumperLengthXMeters, config.bumperWidthYMeters),
-            0.0, // zero density; mass is set explicitly
-            kBumberCoF,
-            kBumperCoR
-        );
+                Geometry.createRectangle(config.bumperLengthXMeters, config.bumperWidthYMeters),
+                0.0, // zero density; mass is set explicitly
+                kBumperCoF,
+                kBumperCoR);
 
         chassis.setMass(new Mass(new Vector2(), config.robotMassKg, config.robotMoI));
     }
@@ -121,7 +128,9 @@ public abstract class ShamDriveTrain {
      *
      * <p>It is responsible for applying the propelling forces to the robot during each sub-tick of the simulation.
      */
-    protected abstract void simTick();
+    protected void simTick() {
+        logger.log("chassis", chassis.snapshot(), FrcBody.FrcBodySnapshot.struct);
+    }
 
     /**
      * Creates a drivetrain simulation with the given configuration and initial pose on the field.
@@ -133,7 +142,8 @@ public abstract class ShamDriveTrain {
      * @return the created drivetrain simulation
      */
     @SuppressWarnings("unchecked")
-    public static <T extends ShamDriveTrain, C extends ShamDriveTrainConfig<T, C>> T createDriveTrain(ShamRobot<T> robot, C config) {
+    public static <T extends ShamDriveTrain, C extends ShamDriveTrainConfig<T, C>> T createDriveTrain(
+            ShamRobot<T> robot, C config) {
         // Don't forget to update this method when adding new drivetrain configurations
         if (config instanceof ShamSwerveConfig) {
             return (T) new ShamSwerve((ShamRobot<ShamSwerve>) robot, (ShamSwerveConfig) config);

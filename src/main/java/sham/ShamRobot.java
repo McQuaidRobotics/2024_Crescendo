@@ -9,7 +9,7 @@ import sham.ShamGamePiece.GamePieceVariant;
 import sham.configs.ShamDriveTrainConfig;
 import sham.utils.RuntimeLog;
 import sham.utils.mathutils.GeometryConvertor;
-
+import edu.wpi.first.epilogue.logging.DataLogger;
 import edu.wpi.first.math.geometry.Rectangle2d;
 
 /**
@@ -32,9 +32,11 @@ public class ShamRobot<DrvTrn extends ShamDriveTrain> {
     private final ShamBattery battery = new ShamBattery();
     private final ConcurrentLinkedQueue<ShamIntake> intakes = new ConcurrentLinkedQueue<>();
     private final ConcurrentLinkedQueue<ShamMechanism> mechanisms = new ConcurrentLinkedQueue<>();
+    final DataLogger logger;
 
-    public <C extends ShamDriveTrainConfig<DrvTrn, C>> ShamRobot(ShamArena arena, C drivetrainConfig, int gamePieceStorageCapacity) {
+    public <C extends ShamDriveTrainConfig<DrvTrn, C>> ShamRobot(ShamArena arena, String name, C drivetrainConfig, int gamePieceStorageCapacity) {
         this.arena = arena;
+        logger = arena.logger.getSubLogger(name + "Robot");
         arena.robots.add(this);
         this.driveTrain = ShamDriveTrain.createDriveTrain(this, drivetrainConfig);
         arena.withWorld(world -> world.addBody(driveTrain.chassis));
@@ -89,6 +91,12 @@ public class ShamRobot<DrvTrn extends ShamDriveTrain> {
         mechanisms.add(mechanism);
         battery.addMechanism(mechanism);
         RuntimeLog.debug("Added SimMechanism to SimRobot");
+    }
+
+    void removeMechanism(ShamMechanism mechanism) {
+        mechanisms.remove(mechanism);
+        battery.removeMechanism(mechanism);
+        RuntimeLog.debug("Removed SimMechanism from SimRobot");
     }
 
     /**

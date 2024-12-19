@@ -1,6 +1,10 @@
 package sham.configs;
 
-public class ShamGyroConfig {
+import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.util.struct.StructSerializable;
+import monologue.procstruct.ProceduralStructGenerator;
+
+public class ShamGyroConfig implements StructSerializable {
     public double averageDriftingIn30SecsMotionlessDeg;
     public double velocityMeasurementStandardDeviationPercent;
 
@@ -48,4 +52,6 @@ public class ShamGyroConfig {
     public static ShamGyroConfig ofNavX2() {
         return new ShamGyroConfig(2, 0.04);
     }
+
+    public static final Struct<ShamGyroConfig> struct = ProceduralStructGenerator.genObjectNoUnpack(ShamGyroConfig.class);
 }

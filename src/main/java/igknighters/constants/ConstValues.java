@@ -101,9 +101,8 @@ public final class ConstValues {
 
         public static final Rectangle2d BOUNDS = new Rectangle2d(
                 new Pose2d(new Translation2d(
-                    (-EXTENSION_MAX * Conv.INCHES_TO_METERS) + BUMPER_THICKNESS,
-                    0.0
-                ), Rotation2d.kZero),
+                        (-EXTENSION_MAX * Conv.INCHES_TO_METERS) + BUMPER_THICKNESS,
+                        0.0), Rotation2d.kZero),
                 FRAME_WIDTH + ((EXTENSION_MAX * 2) * Conv.INCHES_TO_METERS),
                 48.0 * Conv.INCHES_TO_METERS);
 
@@ -121,7 +120,8 @@ public final class ConstValues {
 
         public static final double STATIONARY_AIM_AT_PIVOT_RADIANS = 40.0 * Conv.DEGREES_TO_RADIANS;
         public static final double STATIONARY_PASS_PIVOT_RADIANS = 60.0 * Conv.DEGREES_TO_RADIANS;
-        public static final double STATIONARY_PASS_TELESCOPE_METERS = kTelescope.MIN_METERS + (0.0 * Conv.INCHES_TO_METERS);
+        public static final double STATIONARY_PASS_TELESCOPE_METERS = kTelescope.MIN_METERS
+                + (0.0 * Conv.INCHES_TO_METERS);
         public static final double STATIONARY_WRIST_ANGLE = 71.0 * Conv.DEGREES_TO_RADIANS;
         public static final double MAX_HEIGHT_AIM_AT_PIVOT_RADIANS = 86.0 * Conv.DEGREES_TO_RADIANS;
         public static final double MAX_HEIGHT_AIM_AT_TELESCOPE_METERS = kTelescope.MAX_METERS;
@@ -131,12 +131,10 @@ public final class ConstValues {
         public static final double SOTM_LOOKAHEAD_TIME = 0.275;
 
         public static final Translation2d PASS_LAND_LOCATION = new Translation2d(
-            1.0, 7.0
-        );
+                1.0, 7.0);
 
         public static final Translation2d PASS_SHOOT_FROM_LOCATION = new Translation2d(
-            10.0, 0.7
-        );
+                10.0, 0.7);
     }
 
     public static final class kLed {
@@ -207,7 +205,7 @@ public final class ConstValues {
             static final double L3_DRIVE_KRAKEN = (50.0 / 16.0) * (16.0 / 28.0) * (45.0 / 15.0);
             static final double L4_DRIVE = 5.14;
 
-            static final double ANGLE = 150.0 / 7.0;
+            static final double STEER = 150.0 / 7.0;
         }
 
         public static final int PIGEON_ID = 33;
@@ -216,15 +214,15 @@ public final class ConstValues {
 
         /* Drivetrain Constants */
         public static final double TRACK_WIDTH = 0.551942;
-        public static final double WHEEL_DIAMETER = 4.0 * Conv.INCHES_TO_METERS;
+        public static final double WHEEL_RADIUS = 2.0 * Conv.INCHES_TO_METERS;
+        public static final double WHEEL_DIAMETER = WHEEL_RADIUS * 2.0;
         public static final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
         // public static final double DRIVEBASE_RADIUS = Math.sqrt(Math.pow(TRACK_WIDTH
         // / 2.0, 2) + Math.pow(WHEEL_BASE / 2.0, 2));
         public static final double DRIVEBASE_RADIUS = 0.39;
         public static final double DRIVEBASE_CIRCUMFERENCE = DRIVEBASE_RADIUS * TAU;
 
-        public static final double STEER_GEAR_RATIO = 1.0;
-        // public static final double STEER_GEAR_RATIO = SwerveGearRatios.ANGLE;
+        public static final double STEER_GEAR_RATIO = SwerveGearRatios.STEER;
 
         public static final double DRIVE_GEAR_RATIO = SwerveGearRatios.L3_DRIVE_KRAKEN;
 
@@ -243,7 +241,6 @@ public final class ConstValues {
 
         public static final double MAX_DRIVE_VELOCITY = ((Motors.KrakenX60Foc.FREE_SPEED / TAU) / DRIVE_GEAR_RATIO)
                 * WHEEL_CIRCUMFERENCE * MOTOR_CLOSED_LOOP_OUTPUT_SCALAR;
-        public static final double MAX_DRIVE_ACCELERATION = MAX_DRIVE_VELOCITY / ACCELERATION_TIME;
 
         public static final double MAX_ANGULAR_VELOCITY = MAX_DRIVE_VELOCITY / DRIVEBASE_RADIUS;
         public static final double MAX_ANGULAR_ACCELERATION = MAX_ANGULAR_VELOCITY / ACCELERATION_TIME;
@@ -266,7 +263,8 @@ public final class ConstValues {
             public static final double kD = 0.0;
 
             public static final double kS = 0.15;
-            public static final double kV = 0.0;
+            public static final double kV = 12.0
+                    / (kSwerve.MAX_DRIVE_VELOCITY / (kSwerve.WHEEL_CIRCUMFERENCE / kSwerve.DRIVE_GEAR_RATIO));
         }
 
         public static final class kSteerMotor {
@@ -298,17 +296,17 @@ public final class ConstValues {
                 new LerpTableEntry(1.0, 1.0));
 
         public static final double[] CRASH_ROTATION_OFFSETS = new double[] {
-            -0.1015,
-            0.42529,
-            -0.4182,
-            -0.1086
+                -0.1015,
+                0.42529,
+                -0.4182,
+                -0.1086
         };
 
         public static final double[] BURN_ROTATION_OFFSETS = new double[] {
-            0.0824,
-            0.10595,
-            -0.21533,
-            -0.398925
+                0.0824,
+                0.10595,
+                -0.21533,
+                -0.398925
         };
 
         public static final Translation2d[] MODULE_CHASSIS_OFFSETS = new Translation2d[] {
@@ -328,11 +326,13 @@ public final class ConstValues {
             public static final double kI = 0.0;
             public static final double kD = 0.0;
         }
+
         public static final class kRotation {
             public static final double kP = 3.0;
             public static final double kI = 0.0;
             public static final double kD = 0.0;
         }
+
         public static final double AUTO_SHOOTER_RPM = 6000.0;
     }
 

@@ -2,6 +2,7 @@ package sham.utils.geometry;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import java.nio.ByteBuffer;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,8 +14,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.Interpolatable;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.util.struct.StructSerializable;
 
-public class Velocity2d implements Interpolatable<Velocity2d> {
+public class Velocity2d implements Interpolatable<Velocity2d>, StructSerializable {
     private final double m_vx;
     private final double m_vy;
 
@@ -223,5 +226,47 @@ public class Velocity2d implements Interpolatable<Velocity2d> {
         return new Velocity2d(
                 MathUtil.interpolate(this.getVX(), endValue.getVX(), t),
                 MathUtil.interpolate(this.getVY(), endValue.getVY(), t));
+    }
+
+    public static final Velocity2dStruct struct = new Velocity2dStruct();
+
+    public static class Velocity2dStruct implements Struct<Velocity2d> {
+        @Override
+        public Class<Velocity2d> getTypeClass() {
+            return Velocity2d.class;
+        }
+
+        @Override
+        public String getTypeName() {
+            return "Velocity2d";
+        }
+
+        @Override
+        public int getSize() {
+            return kSizeDouble * 2;
+        }
+
+        @Override
+        public String getSchema() {
+            return "double x;double y";
+        }
+
+        @Override
+        public Velocity2d unpack(ByteBuffer bb) {
+            double vx = bb.getDouble();
+            double vy = bb.getDouble();
+            return new Velocity2d(vx, vy);
+        }
+
+        @Override
+        public void pack(ByteBuffer bb, Velocity2d value) {
+            bb.putDouble(value.getVX());
+            bb.putDouble(value.getVY());
+        }
+
+        @Override
+        public boolean isImmutable() {
+            return true;
+        }
     }
 }

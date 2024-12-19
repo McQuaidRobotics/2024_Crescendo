@@ -1,11 +1,21 @@
 package sham.utils.mathutils;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.Force;
+import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.units.measure.MomentOfInertia;
+import edu.wpi.first.units.measure.Torque;
+
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Kilograms;
+import static edu.wpi.first.units.Units.NewtonMeters;
+import static edu.wpi.first.units.Units.Newtons;
 
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Rotation;
@@ -72,5 +82,17 @@ public class GeometryConvertor {
 
     public static Velocity2d getChassisSpeedsTranslationalComponent(ChassisSpeeds chassisSpeeds) {
         return new Velocity2d(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
+    }
+
+    public static Torque toWpilibUnit(org.dyn4j.dynamics.Torque torque) {
+        return NewtonMeters.of(torque.getTorque());
+    }
+
+    public static Force toWpilibUnit(org.dyn4j.dynamics.Force force) {
+        return Newtons.of(force.getForce().getMagnitude());
+    }
+
+    public static Pair<Mass, MomentOfInertia> toWpilibUnit(org.dyn4j.geometry.Mass mass) {
+        return Pair.of(Kilograms.of(mass.getMass()), KilogramSquareMeters.of(mass.getInertia()));
     }
 }

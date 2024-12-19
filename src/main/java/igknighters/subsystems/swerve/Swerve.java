@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import java.util.Optional;
 
 import sham.ShamSwerve;
-import sham.ShamSwerveModule;
 import sham.ShamRobot;
 
 import igknighters.Localizer;
@@ -29,7 +28,7 @@ import igknighters.subsystems.swerve.gyro.GyroReal;
 import igknighters.subsystems.swerve.gyro.GyroSim;
 import igknighters.subsystems.swerve.module.SwerveModule;
 import igknighters.subsystems.swerve.module.SwerveModuleOmni;
-import igknighters.subsystems.swerve.module.SwerveModuleSim;
+import igknighters.subsystems.swerve.module.SwerveModuleSim2;
 import igknighters.subsystems.swerve.module.SwerveModule.AdvancedSwerveModuleState;
 import igknighters.subsystems.swerve.odometryThread.RealSwerveOdometryThread;
 import igknighters.subsystems.swerve.odometryThread.SimSwerveOdometryThread;
@@ -80,13 +79,12 @@ public class Swerve implements LockFullSubsystem {
     public Swerve(final Localizer localizer, final SimCtx simCtx) {
         if (Robot.isSimulation()) {
             sim = Optional.of((ShamSwerve) simCtx.robot().getDriveTrain());
-            final ShamSwerveModule[] simMods = sim.get().getModules();
             final SimSwerveOdometryThread ot = new SimSwerveOdometryThread(250, localizer.swerveDataSender());
             swerveMods = new SwerveModule[] {
-                    new SwerveModuleSim(0, ot, simMods[0]),
-                    new SwerveModuleSim(1, ot, simMods[1]),
-                    new SwerveModuleSim(2, ot, simMods[2]),
-                    new SwerveModuleSim(3, ot, simMods[3]),
+                    new SwerveModuleSim2(0, ot, sim.get()),
+                    new SwerveModuleSim2(1, ot, sim.get()),
+                    new SwerveModuleSim2(2, ot, sim.get()),
+                    new SwerveModuleSim2(3, ot, sim.get()),
             };
             gyro = new GyroSim(this::getChassisSpeed, ot);
             odometryThread = ot;

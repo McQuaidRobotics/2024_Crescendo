@@ -1,13 +1,12 @@
 package igknighters.subsystems.swerve.control;
 
 import igknighters.subsystems.swerve.module.SwerveModule.AdvancedSwerveModuleState;
-
+import monologue.procstruct.ProceduralStructGenerator;
+import monologue.procstruct.ProceduralStructGenerator.FixedSizeArray;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
-import monologue.ProceduralStructGenerator;
-import monologue.ProceduralStructGenerator.FixedSizeArray;
 
 public record SwerveSetpoint(
     ChassisSpeeds chassisSpeeds,

@@ -4,7 +4,7 @@ import edu.wpi.first.hal.DriverStationJNI;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
 
-class RuntimeLog {
+public class RuntimeLog {
   private static final StringPublisher entry;
 
   static {
@@ -19,11 +19,11 @@ class RuntimeLog {
     }
   }
 
-  static void info(String message) {
+  public static void info(String message) {
     entry.set("[Monologue] " + message);
   }
 
-  static void warn(String warning) {
+  public static void warn(String warning) {
     if (Monologue.shouldThrowOnWarn()) {
       throw new MonologueRuntimeError("[Monologue] " + warning);
     } else {

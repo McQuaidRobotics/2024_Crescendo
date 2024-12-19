@@ -201,6 +201,8 @@ public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
         WatchdogSilencer.silence(this, "m_watchdog");
         WatchdogSilencer.silence(scheduler, "m_watchdog");
 
+        DriverStation.silenceJoystickConnectionWarning(true);
+
         // turn off auto logging for signal logger, doesnt get us any info we need
         if (isReal()) {
             SignalLogger.enableAutoLogging(false);

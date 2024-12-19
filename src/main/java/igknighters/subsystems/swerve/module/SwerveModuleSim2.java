@@ -2,25 +2,27 @@ package igknighters.subsystems.swerve.module;
 
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
-import sham.ShamSwerveModule;
+import sham.ShamMotorController;
+import sham.ShamSwerve;
 import sham.ShamMechanism.MechanismOutputs;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
-import igknighters.constants.ConstValues;
 import igknighters.constants.ConstValues.kSwerve;
 import igknighters.constants.ConstValues.kSwerve.kSteerMotor;
 import igknighters.constants.ConstValues.kSwerve.kDriveMotor;
@@ -33,6 +35,7 @@ public class SwerveModuleSim2 extends SwerveModule {
 
     private final PIDController driveFeedback;
     private final PIDController steerFeedback;
+    private final SimpleMotorFeedforward driveFeedforward;
 
     public final int moduleId;
 
@@ -42,7 +45,8 @@ public class SwerveModuleSim2 extends SwerveModule {
     private Voltage driveAppliedVoltage = Volts.zero();
     private Voltage steerAppliedVoltage = Volts.zero();
 
-    public SwerveModuleSim2(final int moduleId, SimSwerveOdometryThread odoThread, ShamSwerveModule sim) {
+
+    public SwerveModuleSim2(final int moduleId, SimSwerveOdometryThread odoThread, ShamSwerve sim) {
         super("SwerveModule[" + moduleId + "]");
         this.moduleId = moduleId;
 
@@ -52,26 +56,74 @@ public class SwerveModuleSim2 extends SwerveModule {
             kDriveMotor.kP,
             kDriveMotor.kI,
             kDriveMotor.kD,
-            ConstValues.PERIODIC_TIME
+            sim.timing().dt().in(Seconds)
+        );
+        driveFeedforward = new SimpleMotorFeedforward(
+            kDriveMotor.kS,
+            kDriveMotor.kV,
+            0.0,
+            sim.timing().dt().in(Seconds)
         );
 
         steerFeedback = new PIDController(
             kSteerMotor.kP,
             kSteerMotor.kI,
             kSteerMotor.kD,
-            ConstValues.PERIODIC_TIME
+            sim.timing().dt().in(Seconds)
         );
-        steerFeedback.enableContinuousInput(-Math.PI, Math.PI);
+        steerFeedback.enableContinuousInput(-0.5, 0.5);
+
+        ShamMotorController driveController = new ShamMotorController() {
+            @Override
+            public boolean brakeEnabled() {
+                return true;
+            }
+
+            @Override
+            public Voltage run(Time dt, Voltage supply, MechanismOutputs state) {
+                driveState = state.times(kSwerve.DRIVE_GEAR_RATIO);
+
+                double velocityRadPerSec = targetDriveVeloMPS / (kSwerve.WHEEL_DIAMETER / 2);
+                var feedback = driveFeedback.calculate(
+                    driveState.velocity().in(RotationsPerSecond),
+                    Units.radiansToRotations(velocityRadPerSec)
+                );
+                var feedforward = driveFeedforward.calculate(
+                    RotationsPerSecond.of(driveState.velocity().in(RotationsPerSecond)),
+                    RotationsPerSecond.of(Units.radiansToRotations(velocityRadPerSec))
+                );
+                var output = MathUtil.clamp(
+                    feedback + feedforward.in(Volts),
+                    -RobotController.getBatteryVoltage(),
+                    RobotController.getBatteryVoltage()
+                );
+
+                return Volts.of(output);
+            }
+        };
+
+        ShamMotorController steerController = new ShamMotorController() {
+            @Override
+            public boolean brakeEnabled() {
+                return false;
+            }
+
+            @Override
+            public Voltage run(Time dt, Voltage supply, MechanismOutputs state) {
+                steerState = state;
+
+                var feedback = MathUtil.clamp(
+                    steerFeedback.calculate(steerState.position().in(Rotations), Units.radiansToRotations(targetSteerAbsoluteRads)),
+                    -1.0,
+                    1.0);
+
+                return Volts.of(feedback * RobotController.getBatteryVoltage());
+            }
+        };
+
+        sim.withSetModuleControllers(moduleId, driveController, steerController);
 
         BootupLogger.bootupLog("    SwerveModule[" + this.moduleId + "] initialized (sim)");
-    }
-
-    private double driveRotationsToMeters(double rotations) {
-        return rotations * kSwerve.WHEEL_CIRCUMFERENCE;
-    }
-
-    private double driveRadiansToMeters(double radians) {
-        return driveRotationsToMeters(radians / (2.0 * Math.PI));
     }
 
     public void setDesiredState(AdvancedSwerveModuleState desiredState) {
@@ -83,14 +135,14 @@ public class SwerveModuleSim2 extends SwerveModule {
     public SwerveModulePosition getCurrentPosition() {
         return new SwerveModulePosition(
                 super.drivePositionMeters,
-                Rotation2d.fromRadians(steerState.position().in(Radians))
+                new Rotation2d(steerState.position())
         );
     }
 
     public SwerveModuleState getCurrentState() {
         return new SwerveModuleState(
                 super.driveVeloMPS,
-                Rotation2d.fromRadians(steerState.position().in(Radians))
+                new Rotation2d(steerState.position())
         );
     }
 
@@ -104,34 +156,16 @@ public class SwerveModuleSim2 extends SwerveModule {
                 ? new Rotation2d(super.steerAbsoluteRads)
                 : desiredState.angle;
         super.targetSteerAbsoluteRads = angle.getRadians();
-
-        var feedback = MathUtil.clamp(
-                steerFeedback.calculate(steerState.position().in(Radians), angle.getRadians()),
-                -RobotController.getBatteryVoltage(),
-                RobotController.getBatteryVoltage());
-
-        steerAppliedVoltage = Volts.of(feedback);
     }
 
     private void setSpeed(SwerveModuleState desiredState) {
         super.targetDriveVeloMPS = desiredState.speedMetersPerSecond;
-
-        desiredState.speedMetersPerSecond *= Math.cos(steerFeedback.getError());
-
-        double velocityRadPerSec = desiredState.speedMetersPerSecond / (kSwerve.WHEEL_DIAMETER / 2);
-        var feedback = MathUtil.clamp(
-                driveFeedback.calculate(driveState.velocity().in(RadiansPerSecond), velocityRadPerSec),
-                -1.0 * RobotController.getBatteryVoltage(),
-                RobotController.getBatteryVoltage());
-
-        driveAppliedVoltage = Volts.of(feedback);
     }
 
     @Override
     public void periodic() {
         if (DriverStation.isDisabled() || !gotDirectionsLastCycle) {
-            driveAppliedVoltage = Volts.zero();
-            steerAppliedVoltage = Volts.zero();
+            targetDriveVeloMPS = 0.0;
         }
         log("gotDirectionsLastCycle", gotDirectionsLastCycle);
         gotDirectionsLastCycle = false;
@@ -154,6 +188,12 @@ public class SwerveModuleSim2 extends SwerveModule {
 
         // super.driveVeloMPS = driveRotationsToMeters(driveSim.getAngularVelocityRPM() / 60.0);
         // super.driveAmps = driveSim.getCurrentDrawAmps();
+
+        super.drivePositionMeters = driveState.position().in(Radians) * (kSwerve.WHEEL_DIAMETER / 2);
+        super.driveVeloMPS = driveState.velocity().in(RadiansPerSecond) * (kSwerve.WHEEL_DIAMETER / 2);
+
+        super.steerAbsoluteRads = steerState.position().in(Radians);
+        super.steerVeloRadPS = steerState.velocity().in(RadiansPerSecond);
 
         super.driveVolts = driveAppliedVoltage.in(Volts);
         super.steerVolts = steerAppliedVoltage.in(Volts);

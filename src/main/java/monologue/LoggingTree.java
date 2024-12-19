@@ -9,6 +9,7 @@ import java.util.function.Function;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
 import monologue.MonoEntryLayer.MonologueEntry;
+import monologue.procstruct.ProceduralStructGenerator;
 
 public class LoggingTree {
   private static class MonologueTriedToLogNull extends NullPointerException {

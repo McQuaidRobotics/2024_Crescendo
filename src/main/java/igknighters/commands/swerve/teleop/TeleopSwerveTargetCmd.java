@@ -55,11 +55,18 @@ public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
         Translation2d vt = orientForUser(getTranslation())
                 .times(kSwerve.MAX_DRIVE_VELOCITY * speedMult);
 
-        ChassisSpeeds desiredChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                vt.getX(),
-                vt.getY(),
-                0.0,
-                new Rotation2d(swerve.getYawRads()));
+        // ChassisSpeeds desiredChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+        //         vt.getX(),
+        //         vt.getY(),
+        //         0.0,
+        //         new Rotation2d(swerve.getYawRads())
+        // );
+        ChassisSpeeds desiredChassisSpeeds = new ChassisSpeeds(
+            vt.getX(),
+            vt.getY(),
+            0.0
+        );
+        desiredChassisSpeeds.toRobotRelativeSpeeds(new Rotation2d(swerve.getYawRads()));
         ChassisSpeeds currentChassisSpeeds = swerve.getChassisSpeed();
 
         ChassisSpeeds avgChassisSpeeds = new ChassisSpeeds(

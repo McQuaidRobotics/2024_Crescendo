@@ -1,11 +1,15 @@
 package sham.utils;
 
+import java.nio.ByteBuffer;
+
+import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.util.struct.StructSerializable;
+
 /**
  * A type safe way of representing gear ratios
  * keeping the context of the gear ratio in mind.
  */
-public sealed interface GearRatio {
-
+public sealed interface GearRatio extends StructSerializable {
     /**
      * Get the reduction of the gear ratio.
      * 
@@ -60,6 +64,8 @@ public sealed interface GearRatio {
         public double getReduction() {
             return reduction;
         }
+
+        public static final GearRatioStruct struct = new GearRatioStruct();
     }
 
     /**
@@ -70,6 +76,8 @@ public sealed interface GearRatio {
         public double getReduction() {
             return 1.0 / overdrive;
         }
+
+        public static final GearRatioStruct struct = new GearRatioStruct();
     }
 
     /**
@@ -95,4 +103,43 @@ public sealed interface GearRatio {
     public static Overdrive overdrive(double overdrive) {
         return new Overdrive(overdrive);
     }
+
+    public static final GearRatioStruct struct = new GearRatioStruct();
+
+    public static final class GearRatioStruct implements Struct<GearRatio> {
+        @Override
+        public String getSchema() {
+            return "float64 reduction";
+        }
+
+        @Override
+        public int getSize() {
+            return Double.BYTES;
+        }
+
+        @Override
+        public Class<GearRatio> getTypeClass() {
+            return GearRatio.class;
+        }
+
+        @Override
+        public String getTypeName() {
+            return "GearRatio";
+        }
+
+        @Override
+        public void pack(ByteBuffer bb, GearRatio value) {
+            bb.putDouble(value.getReduction());
+        }
+
+        @Override
+        public GearRatio unpack(ByteBuffer bb) {
+            return new Reduction(bb.getDouble());
+        }
+
+        @Override
+        public boolean isImmutable() {
+            return true;
+        }
+    } 
 }

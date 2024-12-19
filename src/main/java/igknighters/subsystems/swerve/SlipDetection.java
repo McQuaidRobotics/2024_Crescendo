@@ -11,8 +11,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
 import monologue.LogLocal;
-import monologue.ProceduralStructGenerator;
 import monologue.Annotations.Log;
+import monologue.procstruct.ProceduralStructGenerator;
 
 public class SlipDetection implements LogLocal {
     private static record ModuleData (

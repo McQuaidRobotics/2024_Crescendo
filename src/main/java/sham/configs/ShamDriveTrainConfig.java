@@ -1,5 +1,8 @@
 package sham.configs;
 
+import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.util.struct.StructSerializable;
+import monologue.procstruct.ProceduralStructGenerator;
 import sham.ShamDriveTrain;
 
 /**
@@ -10,7 +13,7 @@ import sham.ShamDriveTrain;
  * <p>This class is used to hold all the parameters necessary for simulating a drive drivetrain, allowing for realistic
  * performance testing and evaluation.
  */
-public class ShamDriveTrainConfig<T extends ShamDriveTrain, S extends ShamDriveTrainConfig<T, S>> {
+public class ShamDriveTrainConfig<T extends ShamDriveTrain, S extends ShamDriveTrainConfig<T, S>> implements StructSerializable {
     public double robotMassKg, robotMoI, bumperLengthXMeters, bumperWidthYMeters;
 
     /**
@@ -98,4 +101,9 @@ public class ShamDriveTrainConfig<T extends ShamDriveTrain, S extends ShamDriveT
     public double getDensity() {
         return robotMassKg / (bumperLengthXMeters * bumperWidthYMeters);
     }
+
+    @SuppressWarnings("rawtypes")
+    public static final Struct<ShamDriveTrainConfig> struct = ProceduralStructGenerator.genObjectNoUnpack(
+        ShamDriveTrainConfig.class
+    );
 }

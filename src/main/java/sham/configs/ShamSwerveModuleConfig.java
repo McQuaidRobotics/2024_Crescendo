@@ -1,6 +1,10 @@
 package sham.configs;
 
-public class ShamSwerveModuleConfig {
+import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.util.struct.StructSerializable;
+import monologue.procstruct.ProceduralStructGenerator;
+
+public class ShamSwerveModuleConfig implements StructSerializable {
     public ShamMechanismConfig driveConfig;
     public ShamMechanismConfig steerConfig;
     public double tireCoefficientOfFriction;
@@ -32,6 +36,8 @@ public class ShamSwerveModuleConfig {
             this.cof = cof;
         }
     }
+
+    public static final Struct<ShamSwerveModuleConfig> struct = ProceduralStructGenerator.genObjectNoUnpack(ShamSwerveModuleConfig.class);
 
     // /**
     //  * creates a <a href="https://www.swervedrivespecialties.com/collections/kits/products/mk4-swerve-module">SDS Mark4

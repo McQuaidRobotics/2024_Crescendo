@@ -132,7 +132,7 @@ public class SwerveSetpointGenerator implements LogLocal {
                 vars.prevSpeeds.vxMetersPerSecond + vars.minS * vars.dx,
                 vars.prevSpeeds.vyMetersPerSecond + vars.minS * vars.dy,
                 vars.prevSpeeds.omegaRadiansPerSecond + vars.minS * vars.dtheta);
-        retSpeeds = ChassisSpeeds.discretize(retSpeeds, dt);
+        retSpeeds.discretize(dt);
 
         double chassisAccelX = (retSpeeds.vxMetersPerSecond - vars.prevSpeeds.vxMetersPerSecond) / dt;
         double chassisAccelY = (retSpeeds.vyMetersPerSecond - vars.prevSpeeds.vyMetersPerSecond) / dt;

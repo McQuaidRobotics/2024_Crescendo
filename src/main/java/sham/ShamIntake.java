@@ -25,9 +25,7 @@ public class ShamIntake {
     private AtomicBoolean intakeRunning = new AtomicBoolean(false);
 
     /**
-     *
-     *
-     * <h2>Creates an Intake Simulation with a Specific Shape.</h2>
+     *Creates an Intake Simulation with a Specific Shape.
      *
      * <p>This constructor initializes an intake with a custom shape that is used when the intake is
      * fully extended.

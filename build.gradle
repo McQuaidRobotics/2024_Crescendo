@@ -1,11 +1,11 @@
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2025.1.1-beta-1"
+    id "edu.wpi.first.GradleRIO" version "2025.1.1-beta-2"
     id "com.peterabeles.gversion" version "1.10"
     id "java-library"
 }
 
-ext.wpilibVersion = "2025.1.1-beta-1"
+ext.wpilibVersion = "2025.1.1-beta-2"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -127,7 +127,7 @@ tasks.withType(JavaCompile) {
 project.compileJava.dependsOn(createVersionFile)
 gversion {
     srcDir       = "src/main/java/"
-    classPackage = "com.igknighters"
+    classPackage = "igknighters"
     className    = "BuildConstants"
     dateFormat   = "yyyy-MM-dd HH:mm:ss z"
     timeZone     = "America/New_York"
