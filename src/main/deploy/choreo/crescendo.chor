@@ -1,6 +1,6 @@
 {
  "name":"crescendo",
- "version":"v2025.0.0",
+ "version":1,
  "type":"Swerve",
  "variables":{
   "expressions":{},

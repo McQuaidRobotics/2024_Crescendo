@@ -5,8 +5,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 
 import monologue.LogLocal;
+import monologue.LogSink;
 import monologue.Monologue;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.PubSubOption;
+import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -27,15 +32,15 @@ import igknighters.controllers.DriverController;
 import igknighters.subsystems.SubsystemResources.AllSubsystems;
 import igknighters.subsystems.swerve.Swerve;
 import igknighters.subsystems.umbrella.Umbrella;
-import igknighters.util.AllianceFlip;
 import igknighters.util.UnitTestableRobot;
 import igknighters.util.can.CANSignalManager;
 import igknighters.util.logging.WatchdogSilencer;
 import igknighters.util.logging.Tracer;
 
-import choreo.Choreo;
 import choreo.auto.AutoChooser;
+import choreo.auto.AutoFactory;
 import choreo.auto.AutoFactory.AutoBindings;
+import choreo.trajectory.SwerveSample;
 
 public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
 
@@ -50,7 +55,7 @@ public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
 
     public final AllSubsystems allSubsystems;
 
-    public final AutoChooser autoChooser;
+    public final AutoChooser autoChooser = new AutoChooser();
     public final TestManager testManager;
 
 
@@ -86,29 +91,32 @@ public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
             umbrella.setupSimNoteDetection(localizer);
         }
 
-        autoChooser = new AutoChooser(
-            Choreo.createAutoFactory(
-                allSubsystems.swerve.isPresent() ? allSubsystems.swerve.get() : new Subsystem() {},
-                localizer::pose,
-                new AutoController(allSubsystems.swerve),
-                AllianceFlip::isRed,
-                new AutoBindings(),
-                (traj, starting) -> {
-                    String msg = "[Auto] Trajectory " + traj.name() + " " + (starting ? "Started" : "Finished");
-                    System.out.println(msg);
-                    Monologue.log("AutoEvent", msg);
-                    Monologue.log("Auto/Trajectory", traj.sampleArray());
+        final AutoFactory autoFactory = new AutoFactory(
+            localizer::pose,
+            localizer::reset,
+            new AutoController(allSubsystems.swerve, localizer),
+            true,
+            allSubsystems.swerve.isPresent() ? allSubsystems.swerve.get() : new Subsystem() {},
+            new AutoBindings(),
+            (traj, starting) -> {
+                String msg = "[Auto] Trajectory " + traj.name() + " " + (starting ? "Started" : "Finished");
+                System.out.println(msg);
+                Monologue.log("AutoEvent", msg);
+                if (starting) {
+                    Monologue.log("Auto/Trajectory", traj.samples().toArray(SwerveSample[]::new));
+                } else {
+                    Monologue.log("Auto/Trajectory", new SwerveSample[0]);
                 }
-            ),
-            "/Choosers"
+            }
         );
 
         if (allSubsystems.hasAllSubsystems()) {
-            final var routines = new AutoRoutines(allSubsystems, localizer);
-            autoChooser.addAutoRoutine("5 Piece Amp Side", routines::fivePieceAmpSide);
-            autoChooser.addAutoRoutine("6 Piece Amp Side Far", routines::sixPieceFarAmpSide);
-            autoChooser.addAutoRoutine("4 Piece Src Side", routines::fourPieceSourceSide);
+            final var routines = new AutoRoutines(allSubsystems, localizer, autoFactory);
+            autoChooser.addRoutine("5 Piece Amp Side", routines::fivePieceAmpSide);
+            autoChooser.addRoutine("6 Piece Amp Side Far", routines::sixPieceFarAmpSide);
+            autoChooser.addRoutine("4 Piece Src Side", routines::fourPieceSourceSide);
         }
+        setupAutoChooser();
 
         testManager = new TestManager();
 
@@ -143,7 +151,6 @@ public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
         Tracer.traceFunc("CommandScheduler", scheduler::run);
         Tracer.traceFunc("Monologue", Monologue::updateAll);
         Tracer.traceFunc("Choosers", () -> {
-            autoChooser.update();
             testManager.update();
         });
     }
@@ -164,7 +171,7 @@ public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
 
     @Override
     public void autonomousInit() {
-        Command autoCmd = autoChooser.getSelectedAutoRoutine().cmd();
+        Command autoCmd = autoChooser.selectedCommand();
         String msg = "---- Starting auto command: " + autoCmd.getName() + " ----";
         if (isDebug()) System.out.println(msg);
         Monologue.log("AutoEvent", msg);
@@ -262,6 +269,33 @@ public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
                 (Command command) -> {
                     logCommandFunction.accept(command, false);
                 });
+    }
+
+    private void setupAutoChooser() {
+        // Monologue.publishSendable("/Choosers/AutoChooser", autoChooser, LogSink.NT);
+        // final StringSubscriber sub = NetworkTableInstance.getDefault()
+        //         .getStringTopic("/Choosers/AutoChooser/selected")
+        //         .subscribe(
+        //             "", 
+        //             PubSubOption.excludeSelf(true),
+        //             PubSubOption.pollStorage(1),
+        //             PubSubOption.disableLocal(true),
+        //             PubSubOption.periodic(0.5),
+        //             PubSubOption.sendAll(true),
+        //             PubSubOption.keepDuplicates(false)
+        //         );
+        // this.addPeriodic(
+        //     () -> {
+        //         var queue = sub.readQueueValues();
+        //         if (queue.length > 0) {
+        //             System.out.println("AutoChooser selected: " + queue[0]);
+        //             autoChooser.select(queue[0]);
+        //         }
+        //     },
+        //     kDefaultPeriod,
+        //     0.01
+        // );
+        SmartDashboard.putData("/Choosers/AutoChooser", autoChooser);
     }
 
     public static int loopCount() {

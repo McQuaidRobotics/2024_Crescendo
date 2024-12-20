@@ -1,6 +1,6 @@
 {
  "name":"M5toM4",
- "version":"v2025.0.0",
+ "version":1,
  "snapshot":{
   "waypoints":[
     {"x":7.9, "y":1.1, "heading":-0.825, "intervals":31, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
@@ -27,6 +27,7 @@
   }
  },
  "trajectory":{
+  "sampleType":"Swerve",
   "waypoints":[0.0,0.9425026613167872,1.8021018821266277],
   "samples":[
     {"t":0.0, "x":7.9, "y":1.1, "heading":-0.825, "vx":0.0, "vy":0.0, "omega":0.0, "ax":-4.403813963593693, "ay":1.4734144977732542, "alpha":1.0084260374502738, "fx":[-72.52012938069787,-75.69040634603954,-77.1277952340044,-74.29213095709173], "fy":[31.77850518122529,23.258112730863314,17.87282304066498,27.339995152845923]},

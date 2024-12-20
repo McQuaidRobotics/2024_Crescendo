@@ -1,6 +1,6 @@
 {
  "name":"M3toS2",
- "version":"v2025.0.0",
+ "version":1,
  "snapshot":{
   "waypoints":[
     {"x":7.8, "y":4.0, "heading":0.27, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":true},
@@ -27,6 +27,7 @@
   }
  },
  "trajectory":{
+  "sampleType":"Swerve",
   "waypoints":[0.0,1.9386072891178692],
   "samples":[
     {"t":0.0, "x":7.8, "y":4.0, "heading":0.27, "vx":0.0, "vy":0.0, "omega":0.0, "ax":-4.618030450902584, "ay":0.2533947667648858, "alpha":-1.7328794724394176, "fx":[-79.16471831115295,-77.42098984246485,-78.66469092810779,-78.95510746183517], "fy":[-2.420190354417892,16.733683143158032,9.381345925465192,-6.454148793833067]},

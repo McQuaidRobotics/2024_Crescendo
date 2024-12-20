@@ -1,6 +1,6 @@
 {
  "name":"SRCtoM5",
- "version":"v2025.0.0",
+ "version":1,
  "snapshot":{
   "waypoints":[
     {"x":1.47, "y":3.75, "heading":0.0, "intervals":41, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
@@ -27,6 +27,7 @@
   }
  },
  "trajectory":{
+  "sampleType":"Swerve",
   "waypoints":[0.0,1.2052916511786085,2.553402918401261],
   "samples":[
     {"t":0.0, "x":1.47, "y":3.75, "heading":0.0, "vx":0.0, "vy":0.0, "omega":0.0, "ax":3.9271378565494297, "ay":-2.469509260844646, "alpha":-1.2012259855494958, "fx":[66.04037385125237,71.22089062600455,68.19757083820963,61.73912983487976], "fy":[-43.68764414433187,-34.58758594966194,-40.18807101991669,-49.55928264061018]},

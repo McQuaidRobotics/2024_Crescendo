@@ -1,6 +1,6 @@
 {
  "name":"M2toS1",
- "version":"v2025.0.0",
+ "version":1,
  "snapshot":{
   "waypoints":[
     {"x":7.9, "y":5.6, "heading":0.385, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":true},
@@ -27,6 +27,7 @@
   }
  },
  "trajectory":{
+  "sampleType":"Swerve",
   "waypoints":[0.0,1.810165438675939],
   "samples":[
     {"t":0.0, "x":7.9, "y":5.6, "heading":0.385, "vx":0.0, "vy":0.0, "omega":0.0, "ax":-4.1434542546325055, "ay":1.9959855671620672, "alpha":-2.304811232779598, "fx":[-70.85322580473598,-62.15638018121936,-71.6807982810895,-77.22548103475637], "fy":[35.35881983251079,49.100187928256425,33.732174328119605,17.613391495338607]},

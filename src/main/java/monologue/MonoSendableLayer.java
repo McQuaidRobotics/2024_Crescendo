@@ -35,6 +35,11 @@ public class MonoSendableLayer {
     }
   }
 
+  static void addSendableContainer(SendableContainer container) {
+    container.postConstants();
+    sendables.add(container);
+  }
+
   static class SendableContainer {
     final ArrayList<Runnable> updates = new ArrayList<>();
     final ArrayList<Runnable> constants = new ArrayList<>();
@@ -56,9 +61,7 @@ public class MonoSendableLayer {
       updates.forEach(Runnable::run);
     }
 
-    void refreshConstants() {
-      if (sink != LogSink.OP)
-        return;
+    void postConstants() {
       constants.forEach(Runnable::run);
     }
   }
@@ -72,6 +75,10 @@ public class MonoSendableLayer {
       this.path = path;
       this.sendable = new SendableContainer(sink);
       this.sink = sink;
+    }
+
+    void finish() {
+      addSendableContainer(sendable);
     }
 
     @Override
@@ -122,6 +129,7 @@ public class MonoSendableLayer {
 
     @Override
     public void addBooleanProperty(String key, BooleanSupplier getter, BooleanConsumer _setter) {
+      if (getter == null) return;
       sendable.addUpdatable(
           new Runnable() {
             MonologueEntry<Boolean> entry = MonologueEntry.create(path + "/" + key, Boolean.class, sink);
@@ -134,6 +142,7 @@ public class MonoSendableLayer {
 
     @Override
     public void addBooleanArrayProperty(String key, Supplier<boolean[]> getter, Consumer<boolean[]> _setter) {
+      if (getter == null) return;
       sendable.addUpdatable(
           new Runnable() {
             MonologueEntry<boolean[]> entry = MonologueEntry.create(path + "/" + key, boolean[].class, sink);
@@ -170,6 +179,7 @@ public class MonoSendableLayer {
 
     @Override
     public void addIntegerProperty(String key, LongSupplier getter, LongConsumer _setter) {
+      if (getter == null) return;
       sendable.addUpdatable(
           new Runnable() {
             MonologueEntry<Long> entry = MonologueEntry.create(path + "/" + key, Long.class, sink);
@@ -182,6 +192,7 @@ public class MonoSendableLayer {
 
     @Override
     public void addIntegerArrayProperty(String key, Supplier<long[]> getter, Consumer<long[]> _setter) {
+      if (getter == null) return;
       sendable.addUpdatable(
           new Runnable() {
             MonologueEntry<long[]> entry = MonologueEntry.create(path + "/" + key, long[].class, sink);
@@ -218,6 +229,7 @@ public class MonoSendableLayer {
 
     @Override
     public void addDoubleProperty(String key, DoubleSupplier getter, DoubleConsumer _setter) {
+      if (getter == null) return;
       sendable.addUpdatable(
           new Runnable() {
             MonologueEntry<Double> entry = MonologueEntry.create(path + "/" + key, Double.class, sink);
@@ -230,6 +242,7 @@ public class MonoSendableLayer {
 
     @Override
     public void addDoubleArrayProperty(String key, Supplier<double[]> getter, Consumer<double[]> _setter) {
+      if (getter == null) return;
       sendable.addUpdatable(
           new Runnable() {
             MonologueEntry<double[]> entry = MonologueEntry.create(path + "/" + key, double[].class, sink);
@@ -266,6 +279,7 @@ public class MonoSendableLayer {
 
     @Override
     public void addFloatProperty(String key, FloatSupplier getter, FloatConsumer _setter) {
+      if (getter == null) return;
       sendable.addUpdatable(
           new Runnable() {
             MonologueEntry<Float> entry = MonologueEntry.create(path + "/" + key, Float.class, sink);
@@ -278,6 +292,7 @@ public class MonoSendableLayer {
 
     @Override
     public void addFloatArrayProperty(String key, Supplier<float[]> getter, Consumer<float[]> _setter) {
+      if (getter == null) return;
       sendable.addUpdatable(
           new Runnable() {
             MonologueEntry<float[]> entry = MonologueEntry.create(path + "/" + key, float[].class, sink);
@@ -314,6 +329,7 @@ public class MonoSendableLayer {
 
     @Override
     public void addStringProperty(String key, Supplier<String> getter, Consumer<String> _setter) {
+      if (getter == null) return;
       sendable.addUpdatable(
           new Runnable() {
             MonologueEntry<String> entry = MonologueEntry.create(path + "/" + key, String.class, sink);
@@ -326,6 +342,7 @@ public class MonoSendableLayer {
 
     @Override
     public void addStringArrayProperty(String key, Supplier<String[]> getter, Consumer<String[]> _setter) {
+      if (getter == null) return;
       sendable.addUpdatable(
           new Runnable() {
             MonologueEntry<String[]> entry = MonologueEntry.create(path + "/" + key, String[].class, sink);
@@ -362,6 +379,7 @@ public class MonoSendableLayer {
 
     @Override
     public void addRawProperty(String key, String typeString, Supplier<byte[]> getter, Consumer<byte[]> setter) {
+      if (getter == null) return;
       sendable.addUpdatable(
           new Runnable() {
             MonologueEntry<byte[]> entry = MonologueEntry.create(path + "/" + key, byte[].class, sink);
@@ -463,7 +481,7 @@ public class MonoSendableLayer {
             };
           });
 
-      sendables.add(sendable);
+      addSendableContainer(sendable);
     }
 
     public static void addMechanism2dLigament(String path, MechanismLigament2d ligament, SendableContainer sendable,
@@ -553,6 +571,7 @@ public class MonoSendableLayer {
             };
           });
 
+      addSendableContainer(sendable);
     }
   }
 }

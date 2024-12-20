@@ -2,16 +2,10 @@ package monologue;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.util.datalog.DataLog;
-import edu.wpi.first.util.datalog.DataLogBackgroundWriter;
 import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import monologue.LoggingTree.StaticObjectNode;
 
-import java.io.File;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
 import java.util.ArrayList;
 import java.util.function.BooleanSupplier;
 
@@ -40,10 +34,6 @@ import java.util.function.BooleanSupplier;
  * is undefined behavior and can result in a crash.
  */
 public class Monologue extends GlobalLogged {
-  static {
-    monologifyDatalog();
-  }
-
   /** The Monologue library wide OPTIMIZE_BANDWIDTH flag, is used to divert logging */
   private static boolean OPTIMIZE_BANDWIDTH = true;
 
@@ -356,64 +346,5 @@ public class Monologue extends GlobalLogged {
       return false;
     }
     return true;
-  }
-
-  private static void monologifyDatalog() {
-    // Until 2027, pushing data to nt includes overhead on compute and bandwidth that can be undesirable in certain contexts.
-    // Being able to hotswap from nt to datalog is useful for saving resources on the field,
-    // one downside however with current implementation is that fields sent to datalog via nt are prefixed with "NT:"
-    // by default, this is not a huge issue but it can be annoying to deal with.
-    //
-    // To get around this Monologue wants to be in complete control of the datalog without making it a hassel for users.
-    // This code allows Monologue to make the path data is logged while sending to network and sending to file the same.
-    // The only leaky part of this workaround is that user created log entries that are initialized before Monologue.setupMonologue()
-    // will report errors after the log is closed and reopened.
-
-    VarHandle datalogThreadHandle;
-    VarHandle datalogHandle;
-    try {
-        datalogThreadHandle = MethodHandles.privateLookupIn(DataLogManager.class, MethodHandles.lookup())
-            .findStaticVarHandle(DataLogManager.class, "m_thread", Thread.class);
-        datalogHandle = MethodHandles.privateLookupIn(DataLogManager.class, MethodHandles.lookup())
-            .findStaticVarHandle(DataLogManager.class, "m_log", DataLog.class);
-    } catch (NoSuchFieldException | IllegalAccessException e) {
-        RuntimeLog.warn("Failed to get VarHandles for DataLogManager, falling back to old method");
-        return;
-    }
-
-    boolean killedDatalog = false;
-
-    String dir = DataLogManager.getLogDir();
-    // if dir is empty no datalog is running
-    if (!dir.isEmpty()) {
-        // hang onto the old datalog and it's thread,
-        // `DataLogManager.stop()` nulls both of these out in the manager
-        DataLogBackgroundWriter oldDataLog = (DataLogBackgroundWriter) DataLogManager.getLog();
-        Thread oldDatalogThread = (Thread) datalogThreadHandle.get();
-
-        DataLogManager.logNetworkTables(false);
-        DataLogManager.stop();
-        try {
-        oldDatalogThread.join();
-        } catch (InterruptedException e) {
-        RuntimeLog.warn("Failed to join datalog thread");
-        }
-        datalogHandle.set(null);
-        oldDataLog.setFilename("DELETME");
-        oldDataLog.close();
-        new File(dir + "/DELETME").delete();
-        killedDatalog = true;
-    }
-
-    DataLogManager.logNetworkTables(false);
-    DataLog dataLog = DataLogManager.getLog();
-    NetworkTableInstance.getDefault().startConnectionDataLog(dataLog, "NTConnection");
-    DriverStation.startDataLog(dataLog, true);
-
-    if (killedDatalog) {
-      RuntimeLog.warn(
-          "DatalogManager was used before Monologue.setupMonologue(), this can cause issues with datalog entries"
-      );
-    }
   }
 }

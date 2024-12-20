@@ -1,6 +1,6 @@
 {
  "name":"AMPtoC1",
- "version":"v2025.0.0",
+ "version":1,
  "snapshot":{
   "waypoints":[
     {"x":1.47, "y":7.35, "heading":0.0, "intervals":17, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
@@ -25,6 +25,7 @@
   }
  },
  "trajectory":{
+  "sampleType":"Swerve",
   "waypoints":[0.0,0.829494320516138],
   "samples":[
     {"t":0.0, "x":1.4700000000000006, "y":7.350000000000002, "heading":0.0, "vx":0.0, "vy":0.0, "omega":0.0, "ax":6.011832113146546, "ay":-2.0456585911063727, "alpha":-5.622628938727956e-6, "fx":[74.99032631034443,74.99034468685021,74.99033838264668,74.99032000702628], "fy":[-25.51713388141026,-25.51707981282099,-25.51709818941568,-25.517152256941134]},

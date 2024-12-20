@@ -1,6 +1,6 @@
 {
  "name":"C2toSUB",
- "version":"v2025.0.0",
+ "version":1,
  "snapshot":{
   "waypoints":[
     {"x":2.2, "y":5.55, "heading":0.0, "intervals":17, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
@@ -25,6 +25,7 @@
   }
  },
  "trajectory":{
+  "sampleType":"Swerve",
   "waypoints":[0.0,0.851911748057756],
   "samples":[
     {"t":0.0, "x":2.2, "y":5.550000000000003, "heading":0.0, "vx":0.0, "vy":0.0, "omega":0.0, "ax":-4.6487696964103495, "ay":-0.27710768678935865, "alpha":7.312286507682464e-6, "fx":[-79.07424490792374,-79.07424024956143,-79.07423990553627,-79.07424456382117], "fy":[-4.713481050472229,-4.71355922090346,-4.713563878904429,-4.713485709120317]},

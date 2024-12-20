@@ -1,6 +1,6 @@
 {
  "name":"M4toS3",
- "version":"v2025.0.0",
+ "version":1,
  "snapshot":{
   "waypoints":[
     {"x":7.9, "y":1.93, "heading":0.76, "intervals":53, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
@@ -27,6 +27,7 @@
   }
  },
  "trajectory":{
+  "sampleType":"Swerve",
   "waypoints":[0.0,1.9515066424691203],
   "samples":[
     {"t":0.0, "x":7.9, "y":1.93, "heading":0.76, "vx":0.0, "vy":0.0, "omega":0.0, "ax":-4.570048845746613, "ay":-0.4878811522106062, "alpha":-2.351023013827414, "fx":[-78.33651649780707,-78.57457517381948,-78.94666473543882,-75.08313663663019], "fy":[-11.431257628596702,9.87005750348442,-6.440571720753696,-25.19310337056496]},

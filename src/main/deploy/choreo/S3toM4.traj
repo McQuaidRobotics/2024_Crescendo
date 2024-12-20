@@ -1,6 +1,6 @@
 {
  "name":"S3toM4",
- "version":"v2025.0.0",
+ "version":1,
  "snapshot":{
   "waypoints":[
     {"x":3.6, "y":2.25, "heading":-0.747, "intervals":53, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
@@ -27,6 +27,7 @@
   }
  },
  "trajectory":{
+  "sampleType":"Swerve",
   "waypoints":[0.0,1.95138631795531],
   "samples":[
     {"t":0.0, "x":3.6, "y":2.25, "heading":-0.7469999999999999, "vx":0.0, "vy":0.0, "omega":0.0, "ax":4.436715030448169, "ay":-1.2811711213426096, "alpha":1.8790002624000677, "fx":[78.78276860014029,74.40365586495808,71.60856875405139,77.07401963219128], "fy":[-8.013053880554397,-27.069893924117192,-33.832944105469124,-18.25352488566207]},

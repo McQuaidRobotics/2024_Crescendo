@@ -515,6 +515,7 @@ class GlobalLogged {
     entryName = NetworkTable.normalizeKey(entryName, true);
     var builder = new MonoSendableLayer.Builder(entryName, sink);
     value.initSendable(builder);
+    builder.finish();
   }
 
     /**

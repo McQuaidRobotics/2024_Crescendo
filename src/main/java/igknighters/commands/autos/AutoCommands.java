@@ -160,7 +160,7 @@ public class AutoCommands {
         );
     }
 
-    protected Command autoShootBegining() {
+    protected Command autoShootBeginning() {
         return loggedCmd(
             Commands.parallel(
                 new AutoSwerveTargetSpeakerCmd(swerve, visionPoseSupplierWithFallback)

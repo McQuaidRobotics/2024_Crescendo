@@ -1,8 +1,9 @@
 package igknighters.commands.autos;
 
 import java.util.Optional;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
+import igknighters.Localizer;
 import igknighters.constants.ConstValues.kAuto;
 import igknighters.subsystems.swerve.Swerve;
 
@@ -11,8 +12,9 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
-public class AutoController implements BiConsumer<Pose2d, SwerveSample> {
+public class AutoController implements Consumer<SwerveSample> {
     private final Swerve swerve;
+    private final Localizer localizer;
     private final boolean enabled;
     private final PIDController xController = new PIDController(
         kAuto.kTranslation.kP,
@@ -30,7 +32,8 @@ public class AutoController implements BiConsumer<Pose2d, SwerveSample> {
         kAuto.kRotation.kD
     );
 
-    public AutoController(Optional<Swerve> swerve) {
+    public AutoController(Optional<Swerve> swerve, Localizer localizer) {
+        this.localizer = localizer;
         if (swerve.isEmpty()) {
             this.swerve = null;
             this.enabled = false;
@@ -45,10 +48,11 @@ public class AutoController implements BiConsumer<Pose2d, SwerveSample> {
     }
 
     @Override
-    public void accept(Pose2d pose, SwerveSample referenceState) {
+    public void accept(SwerveSample referenceState) {
         if (!enabled) {
             return;
         }
+        Pose2d pose = localizer.pose();
         double xFF = referenceState.vx;
         double yFF = referenceState.vy;
         double rotationFF = referenceState.omega;
