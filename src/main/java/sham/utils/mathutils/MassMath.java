@@ -25,8 +25,7 @@ public class MassMath {
             final LinearAcceleration xAccel = accelerationDueToForce(force.x());
             final LinearAcceleration yAccel = accelerationDueToForce(force.y());
             final AngularAcceleration omegaAccel = accelerationDueToTorque(
-                    times(forcePosition.x(), force.y())
-                    .minus(times(forcePosition.y(), force.x()))
+                force.cross(forcePosition, Torque.class, MeasureMath::times)
             );
             return new Pair<>(new XY<>(xAccel, yAccel), omegaAccel);
         }

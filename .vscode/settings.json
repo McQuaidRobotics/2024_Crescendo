@@ -20,5 +20,8 @@
       "PATH": "C:\\Users\\Public\\wpilib\\2024\\jdk\\bin;${env:PATH}"
   },
   "java.import.gradle.java.home": "C:\\Users\\Public\\wpilib\\2024\\jdk",
-  "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m -Xlog:disable"
+  "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m -Xlog:disable",
+  "cSpell.words": [
+    "mathutils"
+  ]
 }

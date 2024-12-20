@@ -44,12 +44,12 @@ public class SimCtx {
             .withFriction(Volts.of(0.2), Volts.of(0.175))
             .withGearRatio(GearRatio.reduction(kSwerve.DRIVE_GEAR_RATIO))
             .withNoise(0.00)
-            .withRotorInertia(KilogramSquareMeters.of(0.8));
+            .withRotorInertia(KilogramSquareMeters.of(0.003));
     private final ShamMechanismConfig steerMotorCfg = new ShamMechanismConfig(DCMotor.getFalcon500Foc(1))
             .withFriction(Volts.of(1.0), Volts.of(1.0))
             .withGearRatio(GearRatio.reduction(kSwerve.STEER_GEAR_RATIO))
             .withNoise(0.00)
-            .withRotorInertia(KilogramSquareMeters.of(0.25));
+            .withRotorInertia(KilogramSquareMeters.of(0.02));
     private final ShamSwerveModuleConfig moduleCfg = new ShamSwerveModuleConfig(
         driveMotorCfg,
         steerMotorCfg,

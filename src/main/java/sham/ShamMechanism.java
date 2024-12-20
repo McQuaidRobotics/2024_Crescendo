@@ -59,8 +59,13 @@ public class ShamMechanism {
      * first in the same time slot but this can not be promised.
      */
     public interface MechanismDynamics {
-        Torque environment(Angle angle, AngularVelocity velocity);
-        MomentOfInertia extraInertia();
+        default Torque environment(Angle angle, AngularVelocity velocity) {
+            return NewtonMeters.zero();
+        }
+
+        default MomentOfInertia extraInertia() {
+            return KilogramSquareMeters.zero();
+        }
 
         static MechanismDynamics of(Torque environment) {
             return new MechanismDynamics() {
@@ -424,7 +429,6 @@ public class ShamMechanism {
         logger.log("Update/outputTorque", outputTorque);
 
         // calculate the displacement, velocity, and acceleration of the mechanism
-        // https://openstax.org/books/university-physics-volume-1/pages/10-7-newtons-second-law-for-rotation
         final AngularAcceleration acceleration = div(outputTorque, inertia)
             .times(1.0 + (noise * RAND.nextGaussian()));
         final AngularVelocity velocity = MeasureMath.nudgeZero(

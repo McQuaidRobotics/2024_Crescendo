@@ -82,7 +82,7 @@ public class ShamSwerve extends ShamDriveTrain {
                     .getWorldPoint(GeometryConvertor.toDyn4jVector2(
                         module.translation().rotateBy(chassisRotation))
                     );
-            // chassis.applyForce(module.force().rotate(chassisRotation.getRadians()), moduleWorldPosition);
+            chassis.applyForce(module.force(chassisRotation), moduleWorldPosition);
         }
 
         // sum up all the acceleration due to friction from each module
@@ -142,7 +142,7 @@ public class ShamSwerve extends ShamDriveTrain {
         final Force xFrictionForce = chassisMass.forceDueToAcceleration(xFrictionAccel);
         final Force yFrictionForce = chassisMass.forceDueToAcceleration(yFrictionAccel);
         final Torque angularFrictionTorque = chassisMass.torqueDueToAcceleration(angularFrictionAccel);
-        // chassis.applyForce(new Vector2(xFrictionForce.in(Newtons), yFrictionForce.in(Newtons)));
+        chassis.applyForce(new Vector2(xFrictionForce.in(Newtons), yFrictionForce.in(Newtons)));
         chassis.applyTorque(angularFrictionTorque.in(NewtonMeters));
     }
 
@@ -156,7 +156,7 @@ public class ShamSwerve extends ShamDriveTrain {
 
     public ShamSwerve withSetModuleControllers(int moduleId, ShamMotorController driveController,
             ShamMotorController steerController) {
-        moduleSimulations[moduleId].teardown();;
+        moduleSimulations[moduleId].teardown();
         moduleSimulations[moduleId] = new ShamSwerveModule(
             robot,
             config,

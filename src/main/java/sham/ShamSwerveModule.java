@@ -7,10 +7,17 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Force;
+import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.units.measure.MomentOfInertia;
 
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Newtons;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static sham.utils.mathutils.MeasureMath.times;
 
 import org.dyn4j.geometry.Vector2;
 import sham.ShamArena.ShamEnvTiming;
@@ -21,6 +28,7 @@ import sham.configs.ShamSwerveConfig;
 import sham.configs.ShamSwerveModuleConfig;
 import sham.utils.RuntimeLog;
 import sham.utils.geometry.Velocity2d;
+import sham.utils.mathutils.MassMath.PhysicsMass;
 import sham.utils.mathutils.MeasureMath;
 import sham.utils.mathutils.MeasureMath.XY;
 
@@ -34,18 +42,20 @@ public class ShamSwerveModule {
     private final Translation2d translation;
     private final int moduleId;
     protected final DataLogger logger;
+    private final PhysicsMass chassisMass;
 
     private final ShamEnvTiming timing;
 
+    private MomentOfInertia driveRotorLoad = KilogramSquareMeters.zero();
+
     ShamSwerveModule(
-        ShamRobot<ShamSwerve> robot,
-        ShamSwerveConfig config,
-        DataLogger logger,
-        int moduleId,
-        Force gravityForce,
-        ShamMotorController driveController,
-        ShamMotorController steerController
-    ) {
+            ShamRobot<ShamSwerve> robot,
+            ShamSwerveConfig config,
+            DataLogger logger,
+            int moduleId,
+            Force gravityForce,
+            ShamMotorController driveController,
+            ShamMotorController steerController) {
         this.logger = logger.getSubLogger("SwerveModule" + moduleId);
         this.robot = robot;
         final ShamSwerveModuleConfig moduleConfig = config.swerveModuleConfig;
@@ -53,34 +63,41 @@ public class ShamSwerveModule {
         this.gravityForce = gravityForce;
         translation = config.moduleTranslations[moduleId];
         driveMech = new ShamMechanism(
-            "SwerveModuleDriveMotor" + moduleId,
-            moduleConfig.driveConfig.motor,
-            driveController,
-            moduleConfig.driveConfig.rotorInertia,
-            moduleConfig.driveConfig.gearRatio,
-            moduleConfig.driveConfig.friction,
-            MechanismDynamics.zero(),
-            moduleConfig.driveConfig.limits,
-            moduleConfig.driveConfig.noise,
-            timing
-        );
+                "SwerveModuleDriveMotor" + moduleId,
+                moduleConfig.driveConfig.motor,
+                driveController,
+                moduleConfig.driveConfig.rotorInertia,
+                moduleConfig.driveConfig.gearRatio,
+                moduleConfig.driveConfig.friction,
+                new MechanismDynamics() {
+                    @Override
+                    public MomentOfInertia extraInertia() {
+                        return driveRotorLoad;
+                    }
+                },
+                moduleConfig.driveConfig.limits,
+                moduleConfig.driveConfig.noise,
+                timing);
         steerMech = new ShamMechanism(
-            "SwerveModuleSteerMotor" + moduleId,
-            moduleConfig.steerConfig.motor,
-            steerController,
-            moduleConfig.steerConfig.rotorInertia,
-            moduleConfig.steerConfig.gearRatio,
-            moduleConfig.steerConfig.friction,
-            MechanismDynamics.zero(),
-            moduleConfig.steerConfig.limits,
-            moduleConfig.steerConfig.noise,
-            timing
-        );
+                "SwerveModuleSteerMotor" + moduleId,
+                moduleConfig.steerConfig.motor,
+                steerController,
+                moduleConfig.steerConfig.rotorInertia,
+                moduleConfig.steerConfig.gearRatio,
+                moduleConfig.steerConfig.friction,
+                MechanismDynamics.zero(),
+                moduleConfig.steerConfig.limits,
+                moduleConfig.steerConfig.noise,
+                timing);
         robot.addMechanism(driveMech);
         robot.addMechanism(steerMech);
         wheelsCoefficientOfFriction = config.swerveModuleConfig.tireCoefficientOfFriction;
         wheelRadius = Meters.of(config.swerveModuleConfig.wheelsRadiusMeters);
         this.moduleId = moduleId;
+        this.chassisMass = new PhysicsMass(
+            Kilograms.of(config.robotMassKg / 4.0),
+            KilogramSquareMeters.of(config.robotMoI / 4.0)
+        );
 
         RuntimeLog.debug("Created a swerve module simulation");
     }
@@ -98,9 +115,8 @@ public class ShamSwerveModule {
 
     public SwerveModuleState state() {
         return new SwerveModuleState(
-            driveMech.outputs().velocity().in(RadiansPerSecond) * wheelRadius.in(Meters),
-            new Rotation2d(steerMech.outputs().position())
-        );
+                driveMech.outputs().velocity().in(RadiansPerSecond) * wheelRadius.in(Meters),
+                new Rotation2d(steerMech.outputs().position()));
     }
 
     protected void teardown() {
@@ -116,9 +132,10 @@ public class ShamSwerveModule {
         return moduleId;
     }
 
-    protected Vector2 force() {
+    protected Vector2 force(final Rotation2d robotHeading) {
+        final Rotation2d steerMechAngle = new Rotation2d(steerMech.outputs().position())
+                .plus(robotHeading);
         final Force gripForce = gravityForce.times(wheelsCoefficientOfFriction);
-        final Rotation2d steerMechAngle = new Rotation2d(steerMech.outputs().position());
         final Force driveMechAppliedForce = driveMech.inputs().torque().div(wheelRadius);
 
         final boolean isSkidding = MeasureMath.abs(driveMechAppliedForce).gt(gripForce);
@@ -132,9 +149,32 @@ public class ShamSwerveModule {
         logger.log("isSkidding", isSkidding);
         logger.log("propellingForce", propellingForce);
 
-        return Vector2.create(
-            propellingForce.in(Newtons),
-            steerMechAngle.getRadians()
+        final XY<Force> forces = new XY<Force>(
+            propellingForce.times(steerMechAngle.getCos()),
+            propellingForce.times(steerMechAngle.getSin())
+        );
+        final XY<Distance> forcePosition = XY.of(translation.rotateBy(robotHeading));
+        final var pack = chassisMass.accelerationsDueToForce(forces, forcePosition);
+        final LinearAcceleration tangentialAccel = MeasureMath.abs(times(pack.getSecond(), Meters.of(translation.getNorm())));
+        final LinearAcceleration totalAccel = new XY<>(pack.getFirst().magnitude(), tangentialAccel).magnitude();
+        // final LinearAcceleration totalAccel = pack.getFirst().magnitude();
+
+        logger.log("RotorInertia/tangentialAccel", tangentialAccel);
+        logger.log("RotorInertia/totalAccel", totalAccel);
+
+        if (MeasureMath.abs(totalAccel).gt(MetersPerSecondPerSecond.zero())) {
+            final Mass mass = forces.magnitude().div(totalAccel);
+            final MomentOfInertia moi = MeasureMath.abs(times(mass, wheelRadius.times(wheelRadius)));
+
+            driveRotorLoad = moi;
+
+            logger.log("RotorInertia/mass", mass);
+            logger.log("RotorInertia/moi", moi);
+        }
+
+        return new Vector2(
+            forces.x().in(Newtons),
+            forces.y().in(Newtons)
         );
     }
 
@@ -143,17 +183,14 @@ public class ShamSwerveModule {
 
         final double tangentialVelocity = chassisSpeeds.omegaRadiansPerSecond * translation().getNorm();
         final Velocity2d tangentialVelocityVector = new Velocity2d(
-            robotHeading.getCos() * tangentialVelocity,
-            robotHeading.getSin() * tangentialVelocity
-        );
+                robotHeading.getCos() * tangentialVelocity,
+                robotHeading.getSin() * tangentialVelocity);
         final Velocity2d moduleWorldVelocity = new Velocity2d(
-            chassisSpeeds.vxMetersPerSecond,
-            chassisSpeeds.vyMetersPerSecond
-        );
+                chassisSpeeds.vxMetersPerSecond,
+                chassisSpeeds.vyMetersPerSecond);
         final Velocity2d moduleDriveVelocity = new Velocity2d(
-            driveMech.outputs().velocity().in(RadiansPerSecond) * wheelRadius.in(Meters),
-            new Rotation2d(steerMech.outputs().position()).plus(robotHeading)
-        );
+                driveMech.outputs().velocity().in(RadiansPerSecond) * wheelRadius.in(Meters),
+                new Rotation2d(steerMech.outputs().position()).plus(robotHeading));
         final Velocity2d unwantedVelocity = moduleWorldVelocity
                 .plus(tangentialVelocityVector)
                 .minus(moduleDriveVelocity);
@@ -165,8 +202,8 @@ public class ShamSwerveModule {
         logger.log("unwantedVelocity", unwantedVelocity, Velocity2d.struct);
 
         return new XY<Force>(
-            gripForce.times(-Math.signum(unwantedVelocity.getVX())),
-            gripForce.times(-Math.signum(unwantedVelocity.getVY()))
+                gripForce.times(-Math.signum(unwantedVelocity.getVX())),
+                gripForce.times(-Math.signum(unwantedVelocity.getVY()))
         );
     }
 }

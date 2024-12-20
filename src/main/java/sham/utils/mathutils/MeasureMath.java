@@ -1,5 +1,7 @@
 package sham.utils.mathutils;
 
+import java.util.function.BiFunction;
+
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
@@ -9,6 +11,7 @@ import static edu.wpi.first.units.Units.Newtons;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.DistanceUnit;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Unit;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -17,6 +20,7 @@ import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
+import edu.wpi.first.units.measure.Mult;
 import edu.wpi.first.units.measure.Torque;
 import edu.wpi.first.util.struct.Struct;
 import monologue.procstruct.ProceduralStructGenerator;
@@ -64,6 +68,17 @@ public class MeasureMath {
             return new XY<>(Meters.of(t.getX()), Meters.of(t.getY()));
         }
 
+        public <UN extends Unit, N extends Measure<UN>, R extends Measure<?>> N cross(XY<R> rhs, Class<N> cls, BiFunction<M, R, N> f) {
+            var a = f.apply(x, rhs.y);
+            var b = f.apply(y, rhs.x);
+            return cls.cast(a.minus(b));
+        }
+
+        @SuppressWarnings("unchecked")
+        public M magnitude() {
+            return (M) x.unit().ofBaseUnits(Math.hypot(x.baseUnitMagnitude(), y.baseUnitMagnitude()));
+        }
+
         @SuppressWarnings("rawtypes")
         public static final Struct<XY> struct = ProceduralStructGenerator.genRecord(XY.class);
     }
@@ -72,6 +87,11 @@ public class MeasureMath {
         return NewtonMeters.of(d.in(Meters) * f.in(Newtons));
     }
 
+    public static Torque times(Force f, Distance d) {
+        return NewtonMeters.of(d.in(Meters) * f.in(Newtons));
+    }
+
+    // https://openstax.org/books/university-physics-volume-1/pages/10-7-newtons-second-law-for-rotation
     public static AngularAcceleration div(Torque t, MomentOfInertia moi) {
         return RadiansPerSecondPerSecond.of(t.in(NewtonMeters) / moi.in(KilogramSquareMeters));
     }
@@ -82,5 +102,13 @@ public class MeasureMath {
 
     public static Torque times(AngularAcceleration a, MomentOfInertia moi) {
         return NewtonMeters.of(moi.in(KilogramSquareMeters) * a.in(RadiansPerSecondPerSecond));
+    }
+
+    public static LinearAcceleration times(AngularAcceleration a, Distance d) {
+        return MetersPerSecondPerSecond.of(a.in(RadiansPerSecondPerSecond) * d.in(Meters));
+    }
+
+    public static MomentOfInertia times(Mass m, Mult<DistanceUnit, DistanceUnit> d) {
+        return KilogramSquareMeters.of(m.in(Kilograms) * d.baseUnitMagnitude());
     }
 }
