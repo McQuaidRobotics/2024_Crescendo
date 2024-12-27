@@ -11,7 +11,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -277,9 +276,7 @@ public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
                 .getStringTopic("/Choosers/AutoChooser/selected")
                 .subscribe(
                     "", 
-                    PubSubOption.excludeSelf(true),
                     PubSubOption.pollStorage(1),
-                    PubSubOption.disableLocal(true),
                     PubSubOption.periodic(0.5),
                     PubSubOption.sendAll(true),
                     PubSubOption.keepDuplicates(false)

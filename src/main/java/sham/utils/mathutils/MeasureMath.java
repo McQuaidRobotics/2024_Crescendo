@@ -79,6 +79,24 @@ public class MeasureMath {
             return (M) x.unit().ofBaseUnits(Math.hypot(x.baseUnitMagnitude(), y.baseUnitMagnitude()));
         }
 
+        @SuppressWarnings("unchecked")
+        public XY<M> normalize() {
+            M mag = magnitude();
+            return new XY<>((M) x.div(mag), (M) y.div(mag));
+        }
+
+        @SuppressWarnings("unchecked")
+        public XY<M> times(M scalar) {
+            return new XY<>((M) x.times(scalar), (M) y.times(scalar));
+        }
+
+        public XY<M> desaturate(M maxMagnitude) {
+            if (magnitude().baseUnitMagnitude() <= maxMagnitude.baseUnitMagnitude()) {
+                return this;
+            }
+            return normalize().times(maxMagnitude);
+        }
+
         @SuppressWarnings("rawtypes")
         public static final Struct<XY> struct = ProceduralStructGenerator.genRecord(XY.class);
     }
@@ -110,5 +128,9 @@ public class MeasureMath {
 
     public static MomentOfInertia times(Mass m, Mult<DistanceUnit, DistanceUnit> d) {
         return KilogramSquareMeters.of(m.in(Kilograms) * d.baseUnitMagnitude());
+    }
+
+    public static Mass div(MomentOfInertia moi, Mult<DistanceUnit, DistanceUnit> d) {
+        return Kilograms.of(moi.in(KilogramSquareMeters) / d.baseUnitMagnitude());
     }
 }

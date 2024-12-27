@@ -21,11 +21,11 @@ public class MassMath {
             return div(torque, moi);
         }
 
-        public Pair<XY<LinearAcceleration>, AngularAcceleration> accelerationsDueToForce(XY<Force> force, XY<Distance> forcePosition) {
-            final LinearAcceleration xAccel = accelerationDueToForce(force.x());
-            final LinearAcceleration yAccel = accelerationDueToForce(force.y());
+        public Pair<XY<LinearAcceleration>, AngularAcceleration> accelerationsDueToForce(XY<Force> forces, XY<Distance> forcePosition) {
+            final LinearAcceleration xAccel = accelerationDueToForce(forces.x());
+            final LinearAcceleration yAccel = accelerationDueToForce(forces.y());
             final AngularAcceleration omegaAccel = accelerationDueToTorque(
-                force.cross(forcePosition, Torque.class, MeasureMath::times)
+                forces.cross(forcePosition, Torque.class, MeasureMath::times)
             );
             return new Pair<>(new XY<>(xAccel, yAccel), omegaAccel);
         }
@@ -43,6 +43,13 @@ public class MassMath {
             final Force yForce = forceDueToAcceleration(acceleration.y());
             final Torque omegaForce = times(forcePosition.x(), yForce)
                     .minus(times(forcePosition.y(), xForce));
+            return new Pair<>(new XY<>(xForce, yForce), omegaForce);
+        }
+
+        public Pair<XY<Force>, Torque> forcesDueToOffsetForces(XY<Force> forces, XY<Distance> forcePosition) {
+            final Force xForce = forces.x();
+            final Force yForce = forces.y();
+            final Torque omegaForce = forces.cross(forcePosition, Torque.class, MeasureMath::times);
             return new Pair<>(new XY<>(xForce, yForce), omegaForce);
         }
     }

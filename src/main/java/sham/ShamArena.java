@@ -129,7 +129,7 @@ public abstract class ShamArena {
             simulationSubTick();
         }
 
-        logger.log("Dyn4jEngineCPUTimeMS", (System.nanoTime() - t0) / 1000000.0);
+        logger.log("UpdateTime", (System.nanoTime() - t0) / 1000000.0);
     }
 
     private void simulationSubTick() {
@@ -139,7 +139,7 @@ public abstract class ShamArena {
         for (final ShamGamePiece gamePiece : gamePieces)
             gamePiece.simulationSubTick();
 
-        withWorld(world -> world.update(timing.dt.in(Seconds)));
+        withWorld(world -> world.updatev(timing.dt.in(Seconds)));
     }
 
     /**

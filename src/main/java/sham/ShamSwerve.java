@@ -1,6 +1,7 @@
 package sham;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -8,13 +9,18 @@ import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Torque;
 import igknighters.util.plumbing.TunableValues;
 import igknighters.util.plumbing.TunableValues.TunableDouble;
 
+import static sham.utils.mathutils.MeasureMath.times;
+import static sham.utils.mathutils.MeasureMath.div;
+
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Kilograms;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.NewtonMeters;
@@ -28,7 +34,6 @@ import org.dyn4j.geometry.Vector2;
 import sham.ShamArena.ShamEnvTiming;
 import sham.configs.ShamSwerveConfig;
 import sham.utils.RuntimeLog;
-import sham.utils.mathutils.GeometryConvertor;
 import sham.utils.mathutils.MeasureMath;
 import sham.utils.mathutils.MassMath.PhysicsMass;
 import sham.utils.mathutils.MeasureMath.XY;
@@ -42,7 +47,11 @@ public class ShamSwerve extends ShamDriveTrain {
     private final PhysicsMass chassisMass;
     private final SwerveDriveKinematics kinematics;
 
-    private MomentOfInertia rotorInertia = KilogramSquareMeters.of(0.02);
+    private MomentOfInertia rotorInertia;;
+    private final MomentOfInertia rotorInertiaWhenTranslating;
+    private final MomentOfInertia rotorInertiaWhenRotating;
+
+    private static final TunableDouble chassisRotationDegrees = TunableValues.getDouble("chassisRotationDegrees", 0.0);
 
     /**
      * Creates a Swerve Drive Simulation.
@@ -68,30 +77,33 @@ public class ShamSwerve extends ShamDriveTrain {
         this.chassisMass = new PhysicsMass(Kilograms.of(config.robotMassKg), KilogramSquareMeters.of(config.robotMoI));
         this.kinematics = new SwerveDriveKinematics(config.moduleTranslations);
 
+        // pre-calculate the rotor inertia for the chassis when translating and rotating
+        // to interpolate between them based on the propulsion forces
+        final Distance wheelRadius = Meters.of(config.swerveModuleConfig.wheelsRadiusMeters);
+        final Distance wheelBase = XY.of(config.moduleTranslations[0]).magnitude();
+        final Mass rotationalMass = div(chassisMass.moi(), wheelBase.times(wheelBase)).div(moduleSimulations.length);
+        this.rotorInertiaWhenTranslating = times(chassisMass.mass().div(moduleSimulations.length),
+                wheelRadius.times(wheelRadius));
+        this.rotorInertiaWhenRotating = times(rotationalMass, wheelRadius.times(wheelRadius));
+        this.rotorInertia = rotorInertiaWhenTranslating;
+
         RuntimeLog.debug("created swerve drive simulation");
     }
 
     @Override
     protected void simTick() {
-        simulateModules();
+        simulateModulePropulsion();
+        simulateModuleFriction();
         gyroSimulation.updateSimulationSubTick(RadiansPerSecond.of(chassis.getAngularVelocity()));
         super.simTick();
     }
 
-    private void simulateModules() {
-        TunableDouble chassisDegrees = TunableValues.getDouble("ChassisDegrees", 0.0);
-        final Rotation2d chassisRotation = Rotation2d.fromDegrees(chassisDegrees.value());
+    private void simulateModuleFriction() {
+        // final Rotation2d chassisRotation = getChassisWorldPose().getRotation();
         final ChassisSpeeds chassisSpeeds = this.getChassisWorldSpeeds();
 
-        // apply propulsion forces to chassis
-        LinearAcceleration xPropulsionAccel = MetersPerSecondPerSecond.zero();
-        LinearAcceleration yPropulsionAccel = MetersPerSecondPerSecond.zero();
-        AngularAcceleration angularPropulsionAccel = RadiansPerSecondPerSecond.zero();
-        for (final ShamSwerveModule module : moduleSimulations) {
-            final XY<Distance> forcePosition = XY.of(module.translation().rotateBy(chassisRotation));
-            final XY<Force> propulsion = module.force(chassisRotation);
-            logger.log("Propulsion/module" + module.id() + "/propulsion", propulsion, XY.struct);
-        }
+        // fix for debug rotation
+        final Rotation2d chassisRotation = Rotation2d.fromDegrees(chassisRotationDegrees.value());
 
         // sum up all the acceleration due to friction from each module
         LinearAcceleration xFrictionAccel = MetersPerSecondPerSecond.zero();
@@ -99,12 +111,10 @@ public class ShamSwerve extends ShamDriveTrain {
         AngularAcceleration angularFrictionAccel = RadiansPerSecondPerSecond.zero();
         for (int i = 0; i < moduleSimulations.length; i++) {
             final XY<Force> frictionForce = moduleSimulations[i].friction(
-                chassisSpeeds,
-                chassisRotation
-            );
+                    chassisSpeeds,
+                    chassisRotation);
             final var pack = chassisMass.accelerationsDueToForce(
-                frictionForce, XY.of(moduleSimulations[i].translation())
-            );
+                    frictionForce, XY.of(moduleSimulations[i].translation()));
             xFrictionAccel = xFrictionAccel.plus(pack.getFirst().x());
             yFrictionAccel = yFrictionAccel.plus(pack.getFirst().y());
             angularFrictionAccel = angularFrictionAccel.plus(pack.getSecond());
@@ -116,25 +126,25 @@ public class ShamSwerve extends ShamDriveTrain {
 
         // clamp the friction acceleration to prevent the robot from accelerating in the opposite direction
         final ChassisSpeeds wheelSpeeds = kinematics.toChassisSpeeds(
-            Arrays.stream(moduleSimulations).map(ShamSwerveModule::state).toArray(SwerveModuleState[]::new)
+                Arrays.stream(moduleSimulations)
+                    .map(ShamSwerveModule::state)
+                    .toArray(SwerveModuleState[]::new)
         );
+        wheelSpeeds.toFieldRelativeSpeeds(chassisRotation);
         final ChassisSpeeds unwantedSpeeds = wheelSpeeds.minus(chassisSpeeds);
 
         logger.log("Friction/wheelSpeeds", wheelSpeeds, ChassisSpeeds.struct);
         logger.log("Friction/unwantedSpeeds", unwantedSpeeds, ChassisSpeeds.struct);
 
         final LinearAcceleration xAccelNeededToStop = MeasureMath.negate(
-            MetersPerSecond.of(unwantedSpeeds.vxMetersPerSecond))
-            .div(timing.dt()
-        );
+                MetersPerSecond.of(unwantedSpeeds.vxMetersPerSecond))
+                .div(timing.dt());
         final LinearAcceleration yAccelNeededToStop = MeasureMath.negate(
-            MetersPerSecond.of(unwantedSpeeds.vyMetersPerSecond))
-            .div(timing.dt()
-        );
+                MetersPerSecond.of(unwantedSpeeds.vyMetersPerSecond))
+                .div(timing.dt());
         final AngularAcceleration angularAccelNeededToStop = MeasureMath.negate(
-            RadiansPerSecond.of(unwantedSpeeds.omegaRadiansPerSecond))
-            .div(timing.dt()
-        );
+                RadiansPerSecond.of(unwantedSpeeds.omegaRadiansPerSecond))
+                .div(timing.dt());
         xFrictionAccel = MeasureMath.clamp(xFrictionAccel, xAccelNeededToStop);
         yFrictionAccel = MeasureMath.clamp(yFrictionAccel, yAccelNeededToStop);
         // angularFrictionAccel = MeasureMath.clamp(angularFrictionAccel, angularAccelNeededToStop);
@@ -151,7 +161,65 @@ public class ShamSwerve extends ShamDriveTrain {
         final Force yFrictionForce = chassisMass.forceDueToAcceleration(yFrictionAccel);
         final Torque angularFrictionTorque = chassisMass.torqueDueToAcceleration(angularFrictionAccel);
         chassis.applyForce(new Vector2(xFrictionForce.in(Newtons), yFrictionForce.in(Newtons)));
-        chassis.applyTorque(angularFrictionTorque.in(NewtonMeters));
+        // chassis.applyTorque(angularFrictionTorque.in(NewtonMeters));
+    }
+
+    private void simulateModulePropulsion() {
+        // final Rotation2d chassisRotation = getChassisWorldPose().getRotation();
+        final Rotation2d chassisRotation = Rotation2d.fromDegrees(chassisRotationDegrees.value());
+
+        // apply propulsion forces to chassis
+        Force propulsionForceTotal = Newtons.zero();
+        Force propulsionForceX = Newtons.zero();
+        Force propulsionForceY = Newtons.zero();
+        Torque propulsionTorque = NewtonMeters.zero();
+        for (final ShamSwerveModule module : moduleSimulations) {
+            final XY<Distance> forcePosition = XY.of(module.translation().rotateBy(chassisRotation));
+            final XY<Force> propulsion = module.force(chassisRotation);
+
+            propulsionForceTotal = propulsionForceTotal.plus(propulsion.magnitude());
+
+            final var pack = chassisMass.forcesDueToOffsetForces(propulsion, forcePosition);
+            propulsionForceX = propulsionForceX.plus(pack.getFirst().x());
+            propulsionForceY = propulsionForceY.plus(pack.getFirst().y());
+            propulsionTorque = propulsionTorque.plus(pack.getSecond());
+
+            logger.log("Propulsion/module" + module.id() + "/forces", pack.getFirst(), XY.struct);
+            logger.log("Propulsion/module" + module.id() + "/torque", pack.getSecond());
+        }
+
+        // The rotor inertia can very depending on how the modules are driving the chassis.
+        // How the propulsion impacts the chassis determines how the rotor inertia is calculated.
+        // Figure out what proportion of the propulsion force is in the x and y axis versus the yaw axis.
+        // This will determine how the rotor inertia is calculated.
+        final double propulsionForceXMag = propulsionForceX.in(Newtons);
+        final double propulsionForceYMag = propulsionForceY.in(Newtons);
+        final double propulsionForceTotalMag = propulsionForceTotal.in(Newtons);
+        if (Math.abs(propulsionForceTotalMag) > 1e-3) {
+            final double xPropulsionRatio = propulsionForceXMag / propulsionForceTotalMag;
+            final double yPropulsionRatio = propulsionForceYMag / propulsionForceTotalMag;
+            final double translationRatio = Math.hypot(xPropulsionRatio, yPropulsionRatio);
+
+            logger.log("RotorInertia/xPropulsionRatio", xPropulsionRatio);
+            logger.log("RotorInertia/yPropulsionRatio", yPropulsionRatio);
+            logger.log("RotorInertia/translationRatio", translationRatio);
+
+            // Calculate the rotor inertia based on the propulsion ratios
+            this.rotorInertia = rotorInertiaWhenTranslating.times(translationRatio)
+                    .plus(rotorInertiaWhenRotating.times(1 - translationRatio));
+        } else {
+            this.rotorInertia = rotorInertiaWhenTranslating;
+
+            logger.log("RotorInertia/xPropulsionRatio", 0.0);
+            logger.log("RotorInertia/yPropulsionRatio", 0.0);
+            logger.log("RotorInertia/translationRatio", 0.0);
+        }
+
+        logger.log("Propulsion/propulsionTorque", propulsionTorque);
+        logger.log("Propulsion/propulsionForce", new XY<>(propulsionForceX, propulsionForceY), XY.struct);
+
+        // chassis.applyTorque(propulsionTorque.in(NewtonMeters));
+        // chassis.applyForce(new Vector2(propulsionForceX.in(Newtons), propulsionForceY.in(Newtons)));
     }
 
     public ShamSwerveModule[] getModules() {
@@ -166,15 +234,14 @@ public class ShamSwerve extends ShamDriveTrain {
             ShamMotorController steerController) {
         moduleSimulations[moduleId].teardown();
         moduleSimulations[moduleId] = new ShamSwerveModule(
-            robot,
-            config,
-            logger,
-            moduleId,
-            Newtons.of(config.robotMassKg * 9.8).div(moduleSimulations.length),
-            () -> rotorInertia,
-            driveController,
-            steerController
-        );
+                robot,
+                config,
+                logger,
+                moduleId,
+                Newtons.of(config.robotMassKg * 9.8).div(moduleSimulations.length),
+                () -> rotorInertia,
+                driveController,
+                steerController);
         return this;
     }
 

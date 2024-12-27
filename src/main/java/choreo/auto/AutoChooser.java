@@ -9,11 +9,13 @@ import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -44,21 +46,15 @@ public class AutoChooser implements Sendable {
   private final HashMap<String, Supplier<Command>> autoRoutines =
       new HashMap<>(Map.of(NONE_NAME, Commands::none));
 
-  private int allianceId = -1;
   private String selected = NONE_NAME;
   private String[] options = new String[] {NONE_NAME};
 
-  private String activeCommandName = NONE_NAME;
-  private Command activeCommand = Commands.none();
+  private Optional<Alliance> allianceAtGeneration = Optional.empty();
+  private String nameAtGeneration = NONE_NAME;
+  private Command generatedCommand = Commands.none();
 
   /** Constructs a new {@link AutoChooser}. */
   public AutoChooser() {}
-
-  private int fetchAllianceId() {
-    return DriverStation.getAlliance()
-      .map(alliance -> alliance.ordinal())
-      .orElse(-1);
-  }
 
   /**
    * Select a new option in the chooser.
@@ -73,42 +69,37 @@ public class AutoChooser implements Sendable {
   }
 
   private String select(String selectStr, boolean force) {
-    selected = selectStr;
-    if (selected.equals(activeCommandName) && fetchAllianceId() == allianceId) {
+    this.selected = selectStr;
+    if (selected.equals(nameAtGeneration)
+        && allianceAtGeneration.equals(DriverStation.getAlliance())) {
       // early return if the selected auto matches the active auto
-      return activeCommandName;
+      return nameAtGeneration;
     }
-    boolean dsValid = DriverStation.isDisabled()
-        && DriverStation.isDSAttached()
-        && fetchAllianceId() != -1;
+    boolean dsValid = DriverStation.isDisabled() && DriverStation.getAlliance().isPresent();
     if (dsValid || force) {
       if (!autoRoutines.containsKey(selected) && !selected.equals(NONE_NAME)) {
-        selected = NONE_NAME;
         selectedNonexistentAuto.set(true);
       } else {
         selectedNonexistentAuto.set(false);
       }
-      allianceId = fetchAllianceId();
-      activeCommandName = selected;
-      activeCommand = autoRoutines.get(activeCommandName)
-          .get().withName(activeCommandName);
+      allianceAtGeneration = DriverStation.getAlliance();
+      nameAtGeneration = selected;
+      generatedCommand = autoRoutines.get(nameAtGeneration).get().withName(nameAtGeneration);
     } else {
-      allianceId = -1;
-      activeCommandName = NONE_NAME;
-      activeCommand = Commands.none();
+      allianceAtGeneration = Optional.empty();
+      nameAtGeneration = NONE_NAME;
+      generatedCommand = Commands.none();
     }
-    return activeCommandName;
+    return nameAtGeneration;
   }
 
   /**
    * Add an AutoRoutine to the chooser.
    *
-   * <p>The options of the chooser are actually a function that takes an {@link AutoFactory} and
-   * returns a {@link AutoRoutine}. These functions can be static, a lambda or belong to a local
-   * variable.
-   *
    * <p>This is done to load AutoRoutines when and only when they are selected, in order to save
    * memory and file loading time for unused AutoRoutines.
+   *
+   * <p>The generators are only run when the DriverStation is disabled and the alliance is known.
    *
    * <p>One way to keep this clean is to make an `Autos` class that all of your subsystems/resources
    * are <a href="https://en.wikipedia.org/wiki/Dependency_injection">dependency injected</a> into.
@@ -144,6 +135,8 @@ public class AutoChooser implements Sendable {
    * <p>This is done to load autonomous commands when and only when they are selected, in order to
    * save memory and file loading time for unused autonomous commands.
    *
+   * <p>The generators are only run when the DriverStation is disabled and the alliance is known.
+   *
    * <h3>Example:</h3>
    *
    * <pre><code>
@@ -168,8 +161,8 @@ public class AutoChooser implements Sendable {
   }
 
   /**
-   * Gets a Command that schedules the selected auto routine. This Command finishes immediately as
-   * it simply schedules another Command. This Command can directly be bound to a trigger, like so:
+   * Gets a Command that schedules the selected auto routine. This Command shares the lifetime of
+   * the scheduled Command. This Command can directly be bound to a trigger, like so:
    *
    * <pre><code>
    *     AutoChooser chooser = ...;
@@ -194,19 +187,20 @@ public class AutoChooser implements Sendable {
    * @return The currently selected command.
    */
   public Command selectedCommand() {
-    if (RobotBase.isSimulation()) {
+    if (RobotBase.isSimulation() && nameAtGeneration == NONE_NAME) {
       select(selected, true);
     }
-    return activeCommand;
+    return generatedCommand;
   }
 
   @Override
   public void initSendable(SendableBuilder builder) {
     builder.setSmartDashboardType("String Chooser");
     builder.publishConstBoolean(".controllable", true);
+    builder.publishConstInteger(".instance", 0);
     builder.publishConstString("default", NONE_NAME);
     builder.addStringArrayProperty("options", () -> options, null);
     builder.addStringProperty("selected", null, this::select);
-    builder.addStringProperty("active", () -> select(selected), null);
+    builder.addStringProperty("active", () -> select(this.selected), null);
   }
 }

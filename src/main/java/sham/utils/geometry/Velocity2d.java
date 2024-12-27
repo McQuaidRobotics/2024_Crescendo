@@ -12,6 +12,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.Interpolatable;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.util.struct.Struct;
@@ -67,6 +68,16 @@ public class Velocity2d implements Interpolatable<Velocity2d>, StructSerializabl
      */
     public Velocity2d(Vector<N2> vector) {
         this(vector.get(0), vector.get(1));
+    }
+
+    /**
+     * Constructs a Velocity2d from the xy components of the provided {@link ChassisSpeeds}.
+     * 
+     * @param chassisSpeeds The chassis speeds to extract the velocity from.
+     * @return The velocity of the chassis.
+     */
+    public Velocity2d(ChassisSpeeds chassisSpeeds) {
+        this(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
     }
 
     /**

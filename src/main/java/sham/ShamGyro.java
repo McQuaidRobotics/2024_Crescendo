@@ -17,7 +17,7 @@ import java.util.function.BiConsumer;
 import sham.ShamArena.ShamEnvTiming;
 import sham.configs.ShamGyroConfig;
 import sham.utils.RuntimeLog;
-import sham.utils.mathutils.MapleCommonMath;
+import sham.utils.mathutils.ShamCommonMath;
 import sham.utils.mathutils.MeasureMath;
 
 /**
@@ -85,7 +85,7 @@ public class ShamGyro {
                 .plus(averageDriftingMotionless)
                 .plus(getDriftingDueToImpact(actualAngularVelocity))
                 .plus(actualAngularVelocity
-                        .times(MapleCommonMath.generateRandomNormal(0.0, veloStdDev))
+                        .times(ShamCommonMath.generateRandomNormal(0.0, veloStdDev))
                 );
 
         lastAngularVelocity = dTheta;

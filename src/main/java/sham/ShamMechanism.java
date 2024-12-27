@@ -413,6 +413,7 @@ public class ShamMechanism {
         final Time dt = timing.dt();
 
         final MomentOfInertia inertia = rotorInertia.plus(dynamics.extraInertia());
+        logger.log("Update/inertia", inertia);
 
         // run the motor controller loop
         final Voltage voltage = getControllerVoltage(supplyVoltage);

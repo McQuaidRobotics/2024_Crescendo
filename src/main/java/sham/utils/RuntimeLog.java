@@ -12,29 +12,29 @@ public class RuntimeLog {
 
     static {
         // we need to make sure we never log network tables through the implicit wpilib logger
-        entry = NetworkTableInstance.getDefault().getStringTopic("/MapleSim/Runtime").publish();
-        debug("MapleSim Runtime Logger Initialized");
-        diagnostics = new NTDataLogger(NetworkTableInstance.getDefault()).getSubLogger("/MapleSim");
-        debug("MapleSim Diagnostics Logger Initialized");
+        entry = NetworkTableInstance.getDefault().getStringTopic("/Sham/Runtime").publish();
+        debug("Sham Runtime Logger Initialized");
+        diagnostics = new NTDataLogger(NetworkTableInstance.getDefault()).getSubLogger("/Sham");
+        debug("Sham Diagnostics Logger Initialized");
     }
 
     public static void debug(String debug) {
-        entry.set("[MAPLESIM] (DEBUG) " + debug);
+        entry.set("[SHAM] (DEBUG) " + debug);
     }
 
     public static void info(String info) {
-        entry.set("[MAPLESIM] (INFO) " + info);
-        System.out.println("[MAPLESIM] " + info);
+        entry.set("[SHAM] (INFO) " + info);
+        System.out.println("[SHAM] " + info);
     }
 
     public static void warn(String warning) {
-        entry.set("[MAPLESIM] (WARNING) " + warning);
-        DriverStationJNI.sendError(false, 1, false, "[MAPLESIM] " + warning, "", "", true);
+        entry.set("[SHAM] (WARNING) " + warning);
+        DriverStationJNI.sendError(false, 1, false, "[SHAM] " + warning, "", "", true);
     }
 
     public static void error(String error) {
-        entry.set("[MAPLESIM] (ERROR) " + error);
-        DriverStationJNI.sendError(true, 1, false, "[MAPLESIM] " + error, "", "", true);
+        entry.set("[SHAM] (ERROR) " + error);
+        DriverStationJNI.sendError(true, 1, false, "[SHAM] " + error, "", "", true);
     }
 
     public static DataLogger loggerFor(String subPath) {
