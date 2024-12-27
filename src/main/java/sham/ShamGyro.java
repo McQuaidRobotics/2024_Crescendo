@@ -1,13 +1,10 @@
 package sham;
 
+import edu.wpi.first.epilogue.logging.DataLogger;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.util.struct.Struct;
-import edu.wpi.first.util.struct.StructSerializable;
-import monologue.procstruct.ProceduralStructGenerator;
-import monologue.procstruct.ProceduralStructGenerator.IgnoreStructField;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
@@ -29,15 +26,15 @@ import sham.utils.mathutils.MeasureMath;
  * <p>The Simulation is basically an indefinite integral of the angular velocity during each simulation sub ticks. Above
  * that, it also musicales the measurement inaccuracy of the gyro, drifting in no-motion and drifting due to impacts.
  */
-public class ShamGyro implements StructSerializable {
+public class ShamGyro {
     /* The threshold of instantaneous angular acceleration at which the chassis is considered to experience an "impact." */
     private static final AngularAcceleration START_DRIFTING = RadiansPerSecondPerSecond.of(500);
     /* The amount of drift, in radians, that the gyro experiences as a result of each multiple of the angular acceleration threshold. */
     private static final Angle DRIFT_DUE_TO_IMPACT_COEFFICIENT = Radians.of(1);
 
-    @IgnoreStructField
+    private final DataLogger logger;
+
     private final ShamEnvTiming timing;
-    @IgnoreStructField
     private BiConsumer<Time, AngularVelocity> yawVeloConsumer;
 
     private final double veloStdDev;
@@ -57,11 +54,14 @@ public class ShamGyro implements StructSerializable {
      * @param veloStdDev the standard deviation of the velocity measurement,
      *     typically around 0.05
      */
-    public ShamGyro(ShamEnvTiming timing, ShamGyroConfig gyroConfig) {
+    public ShamGyro(ShamEnvTiming timing, ShamGyroConfig gyroConfig, DataLogger logger) {
+        this.logger = logger.getSubLogger("Gyro");
         this.timing = timing;
         this.averageDriftingMotionless = Degrees.of(gyroConfig.averageDriftingIn30SecsMotionlessDeg)
                 .div(Seconds.of(30.0));
         this.veloStdDev = gyroConfig.velocityMeasurementStandardDeviationPercent;
+
+        this.logger.log("config", gyroConfig, ShamGyroConfig.struct);
 
         RuntimeLog.debug("Created a swerve module simulation");
     }
@@ -90,6 +90,8 @@ public class ShamGyro implements StructSerializable {
 
         lastAngularVelocity = dTheta;
 
+        logger.log("deltaTheta", dTheta);
+
         if (yawVeloConsumer != null) {
             yawVeloConsumer.accept(timing.dt(), lastAngularVelocity);
         }
@@ -106,6 +108,4 @@ public class ShamGyro implements StructSerializable {
             return RadiansPerSecond.of(0);
         }
     }
-
-    public static final Struct<ShamGyro> struct = ProceduralStructGenerator.genObjectNoUnpack(ShamGyro.class);
 }

@@ -272,30 +272,29 @@ public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
     }
 
     private void setupAutoChooser() {
-        // Monologue.publishSendable("/Choosers/AutoChooser", autoChooser, LogSink.NT);
-        // final StringSubscriber sub = NetworkTableInstance.getDefault()
-        //         .getStringTopic("/Choosers/AutoChooser/selected")
-        //         .subscribe(
-        //             "", 
-        //             PubSubOption.excludeSelf(true),
-        //             PubSubOption.pollStorage(1),
-        //             PubSubOption.disableLocal(true),
-        //             PubSubOption.periodic(0.5),
-        //             PubSubOption.sendAll(true),
-        //             PubSubOption.keepDuplicates(false)
-        //         );
-        // this.addPeriodic(
-        //     () -> {
-        //         var queue = sub.readQueueValues();
-        //         if (queue.length > 0) {
-        //             System.out.println("AutoChooser selected: " + queue[0]);
-        //             autoChooser.select(queue[0]);
-        //         }
-        //     },
-        //     kDefaultPeriod,
-        //     0.01
-        // );
-        SmartDashboard.putData("/Choosers/AutoChooser", autoChooser);
+        Monologue.publishSendable("/Choosers/AutoChooser", autoChooser, LogSink.NT);
+        final StringSubscriber sub = NetworkTableInstance.getDefault()
+                .getStringTopic("/Choosers/AutoChooser/selected")
+                .subscribe(
+                    "", 
+                    PubSubOption.excludeSelf(true),
+                    PubSubOption.pollStorage(1),
+                    PubSubOption.disableLocal(true),
+                    PubSubOption.periodic(0.5),
+                    PubSubOption.sendAll(true),
+                    PubSubOption.keepDuplicates(false)
+                );
+        this.addPeriodic(
+            () -> {
+                var queue = sub.readQueueValues();
+                if (queue.length > 0) {
+                    System.out.println("AutoChooser selected: " + queue[0]);
+                    autoChooser.select(queue[0]);
+                }
+            },
+            kDefaultPeriod,
+            0.01
+        );
     }
 
     public static int loopCount() {

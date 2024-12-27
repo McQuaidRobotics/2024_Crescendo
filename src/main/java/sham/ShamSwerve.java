@@ -5,9 +5,13 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.AngularAcceleration;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Torque;
+import igknighters.util.plumbing.TunableValues;
+import igknighters.util.plumbing.TunableValues.TunableDouble;
 
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Kilograms;
@@ -38,6 +42,8 @@ public class ShamSwerve extends ShamDriveTrain {
     private final PhysicsMass chassisMass;
     private final SwerveDriveKinematics kinematics;
 
+    private MomentOfInertia rotorInertia = KilogramSquareMeters.of(0.02);
+
     /**
      * Creates a Swerve Drive Simulation.
      *
@@ -55,9 +61,9 @@ public class ShamSwerve extends ShamDriveTrain {
         final Force gravityForceOnEachModule = Newtons.of(config.robotMassKg * 9.8).div(moduleSimulations.length);
         for (int i = 0; i < moduleSimulations.length; i++) {
             moduleSimulations[i] = new ShamSwerveModule(robot, config, logger, i, gravityForceOnEachModule,
-                    ShamMotorController.none(), ShamMotorController.none());
+                    () -> rotorInertia, ShamMotorController.none(), ShamMotorController.none());
         }
-        this.gyroSimulation = new ShamGyro(timing, config.gyroConfig);
+        this.gyroSimulation = new ShamGyro(timing, config.gyroConfig, logger);
 
         this.chassisMass = new PhysicsMass(Kilograms.of(config.robotMassKg), KilogramSquareMeters.of(config.robotMoI));
         this.kinematics = new SwerveDriveKinematics(config.moduleTranslations);
@@ -73,16 +79,18 @@ public class ShamSwerve extends ShamDriveTrain {
     }
 
     private void simulateModules() {
-        final Rotation2d chassisRotation = getChassisWorldPose().getRotation();
+        TunableDouble chassisDegrees = TunableValues.getDouble("ChassisDegrees", 0.0);
+        final Rotation2d chassisRotation = Rotation2d.fromDegrees(chassisDegrees.value());
         final ChassisSpeeds chassisSpeeds = this.getChassisWorldSpeeds();
 
         // apply propulsion forces to chassis
+        LinearAcceleration xPropulsionAccel = MetersPerSecondPerSecond.zero();
+        LinearAcceleration yPropulsionAccel = MetersPerSecondPerSecond.zero();
+        AngularAcceleration angularPropulsionAccel = RadiansPerSecondPerSecond.zero();
         for (final ShamSwerveModule module : moduleSimulations) {
-            final Vector2 moduleWorldPosition = chassis
-                    .getWorldPoint(GeometryConvertor.toDyn4jVector2(
-                        module.translation().rotateBy(chassisRotation))
-                    );
-            chassis.applyForce(module.force(chassisRotation), moduleWorldPosition);
+            final XY<Distance> forcePosition = XY.of(module.translation().rotateBy(chassisRotation));
+            final XY<Force> propulsion = module.force(chassisRotation);
+            logger.log("Propulsion/module" + module.id() + "/propulsion", propulsion, XY.struct);
         }
 
         // sum up all the acceleration due to friction from each module
@@ -163,6 +171,7 @@ public class ShamSwerve extends ShamDriveTrain {
             logger,
             moduleId,
             Newtons.of(config.robotMassKg * 9.8).div(moduleSimulations.length),
+            () -> rotorInertia,
             driveController,
             steerController
         );

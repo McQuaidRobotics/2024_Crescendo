@@ -25,21 +25,21 @@ class GlobalLogged {
   }
 
   /**
-    * Logs a boolean using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    */
+   * Logs a boolean using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   */
   public static boolean log(String entryName, boolean value) {
     return log(entryName, value, LogSink.NT);
   }
   /**
-    * Logs a boolean using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    * @param sink The log sink to use.
-    */
+   * Logs a boolean using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   * @param sink The log sink to use.
+   */
   public static boolean log(String entryName, boolean value, LogSink sink) {
     if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
       String entryNameFinal = entryName;
@@ -52,21 +52,21 @@ class GlobalLogged {
   }
 
   /**
-    * Logs a int using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    */
+   * Logs a int using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   */
   public static int log(String entryName, int value) {
     return log(entryName, value, LogSink.NT);
   }
   /**
-    * Logs a int using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    * @param sink The log sink to use.
-    */
+   * Logs a int using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   * @param sink The log sink to use.
+   */
   public static int log(String entryName, int value, LogSink sink) {
     if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
       String entryNameFinal = entryName;
@@ -79,21 +79,21 @@ class GlobalLogged {
   }
 
   /**
-    * Logs a long using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    */
+   * Logs a long using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   */
   public static long log(String entryName, long value) {
     return log(entryName, value, LogSink.NT);
   }
   /**
-    * Logs a long using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    * @param sink The log sink to use.
-    */
+   * Logs a long using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   * @param sink The log sink to use.
+   */
   public static long log(String entryName, long value, LogSink sink) {
     if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
       String entryNameFinal = entryName;
@@ -106,21 +106,21 @@ class GlobalLogged {
   }
 
   /**
-    * Logs a float using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    */
+   * Logs a float using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   */
   public static float log(String entryName, float value) {
     return log(entryName, value, LogSink.NT);
   }
   /**
-    * Logs a float using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    * @param sink The log sink to use.
-    */
+   * Logs a float using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   * @param sink The log sink to use.
+   */
   public static float log(String entryName, float value, LogSink sink) {
     if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
       String entryNameFinal = entryName;
@@ -133,21 +133,21 @@ class GlobalLogged {
   }
 
   /**
-    * Logs a double using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    */
+   * Logs a double using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   */
   public static double log(String entryName, double value) {
     return log(entryName, value, LogSink.NT);
   }
   /**
-    * Logs a double using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    * @param sink The log sink to use.
-    */
+   * Logs a double using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   * @param sink The log sink to use.
+   */
   public static double log(String entryName, double value, LogSink sink) {
     if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
       String entryNameFinal = entryName;
@@ -160,21 +160,21 @@ class GlobalLogged {
   }
 
   /**
-    * Logs a String using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    */
+   * Logs a String using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   */
   public static String log(String entryName, String value) {
     return log(entryName, value, LogSink.NT);
   }
   /**
-    * Logs a String using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    * @param sink The log sink to use.
-    */
+   * Logs a String using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   * @param sink The log sink to use.
+   */
   public static String log(String entryName, String value, LogSink sink) {
     if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
       String entryNameFinal = entryName;
@@ -187,21 +187,21 @@ class GlobalLogged {
   }
 
   /**
-    * Logs a byte[] using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    */
+   * Logs a byte[] using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   */
   public static byte[] log(String entryName, byte[] value) {
     return log(entryName, value, LogSink.NT);
   }
   /**
-    * Logs a byte[] using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    * @param sink The log sink to use.
-    */
+   * Logs a byte[] using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   * @param sink The log sink to use.
+   */
   public static byte[] log(String entryName, byte[] value, LogSink sink) {
     if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
       String entryNameFinal = entryName;
@@ -214,21 +214,21 @@ class GlobalLogged {
   }
 
   /**
-    * Logs a boolean[] using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    */
+   * Logs a boolean[] using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   */
   public static boolean[] log(String entryName, boolean[] value) {
     return log(entryName, value, LogSink.NT);
   }
   /**
-    * Logs a boolean[] using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    * @param sink The log sink to use.
-    */
+   * Logs a boolean[] using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   * @param sink The log sink to use.
+   */
   public static boolean[] log(String entryName, boolean[] value, LogSink sink) {
     if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
       String entryNameFinal = entryName;
@@ -241,21 +241,21 @@ class GlobalLogged {
   }
 
   /**
-    * Logs a int[] using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    */
+   * Logs a int[] using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   */
   public static int[] log(String entryName, int[] value) {
     return log(entryName, value, LogSink.NT);
   }
   /**
-    * Logs a int[] using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    * @param sink The log sink to use.
-    */
+   * Logs a int[] using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   * @param sink The log sink to use.
+   */
   public static int[] log(String entryName, int[] value, LogSink sink) {
     if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
       String entryNameFinal = entryName;
@@ -268,21 +268,21 @@ class GlobalLogged {
   }
 
   /**
-    * Logs a long[] using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    */
+   * Logs a long[] using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   */
   public static long[] log(String entryName, long[] value) {
     return log(entryName, value, LogSink.NT);
   }
   /**
-    * Logs a long[] using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    * @param sink The log sink to use.
-    */
+   * Logs a long[] using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   * @param sink The log sink to use.
+   */
   public static long[] log(String entryName, long[] value, LogSink sink) {
     if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
       String entryNameFinal = entryName;
@@ -295,21 +295,21 @@ class GlobalLogged {
   }
 
   /**
-    * Logs a float[] using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    */
+   * Logs a float[] using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   */
   public static float[] log(String entryName, float[] value) {
     return log(entryName, value, LogSink.NT);
   }
   /**
-    * Logs a float[] using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    * @param sink The log sink to use.
-    */
+   * Logs a float[] using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   * @param sink The log sink to use.
+   */
   public static float[] log(String entryName, float[] value, LogSink sink) {
     if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
       String entryNameFinal = entryName;
@@ -322,21 +322,21 @@ class GlobalLogged {
   }
 
   /**
-    * Logs a double[] using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    */
+   * Logs a double[] using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   */
   public static double[] log(String entryName, double[] value) {
     return log(entryName, value, LogSink.NT);
   }
   /**
-    * Logs a double[] using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    * @param sink The log sink to use.
-    */
+   * Logs a double[] using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   * @param sink The log sink to use.
+   */
   public static double[] log(String entryName, double[] value, LogSink sink) {
     if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
       String entryNameFinal = entryName;
@@ -349,21 +349,21 @@ class GlobalLogged {
   }
 
   /**
-    * Logs a String[] using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    */
+   * Logs a String[] using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   */
   public static String[] log(String entryName, String[] value) {
     return log(entryName, value, LogSink.NT);
   }
   /**
-    * Logs a String[] using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    * @param sink The log sink to use.
-    */
+   * Logs a String[] using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   * @param sink The log sink to use.
+   */
   public static String[] log(String entryName, String[] value, LogSink sink) {
     if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
       String entryNameFinal = entryName;
@@ -377,21 +377,21 @@ class GlobalLogged {
 
 
   /**
-    * Logs a Serializable Struct using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    */
+   * Logs a Serializable Struct using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   */
   public static <R extends StructSerializable> R log(String entryName, R value) {
     return log(entryName, value, LogSink.NT);
   }
   /**
-    * Logs a Serializable Struct using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    * @param sink The log sink to use.
-    */
+   * Logs a Serializable Struct using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   * @param sink The log sink to use.
+   */
   @SuppressWarnings("unchecked")
   public static <R extends StructSerializable> R log(String entryName, R value, LogSink sink) {
     if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
@@ -409,21 +409,21 @@ class GlobalLogged {
   }
 
   /**
-    * Logs an array of Serializable Structs using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    */
+   * Logs an array of Serializable Structs using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   */
   public static <R extends StructSerializable> R[] log(String entryName, R[] value) {
     return log(entryName, value, LogSink.NT);
   }
   /**
-    * Logs an array of Serializable Structs using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    * @param sink The log sink to use.
-    */
+   * Logs an array of Serializable Structs using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   * @param sink The log sink to use.
+   */
   @SuppressWarnings("unchecked")
   public static <R extends StructSerializable> R[] log(String entryName, R[] value, LogSink sink) {
     if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
@@ -439,23 +439,23 @@ class GlobalLogged {
   }
 
   /**
-    * Logs a Serializable Struct using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param struct The struct type to log.
-    * @param value The value to log.
-    */
+   * Logs a Serializable Struct using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param struct The struct type to log.
+   * @param value The value to log.
+   */
   public static <R> R log(String entryName, Struct<R> struct, R value) {
     return log(entryName, struct, value, LogSink.NT);
   }
   /**
-    * Logs a Serializable Struct using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param struct The struct type to log.
-    * @param value The value to log.
-    * @param sink The log sink to use.
-    */
+   * Logs a Serializable Struct using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param struct The struct type to log.
+   * @param value The value to log.
+   * @param sink The log sink to use.
+   */
   @SuppressWarnings("unchecked")
   public static <R> R log(String entryName, Struct<R> struct, R value, LogSink sink) {
     if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
@@ -470,23 +470,23 @@ class GlobalLogged {
   }
 
   /**
-    * Logs an array of Serializable Structs using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param struct The struct type to log.
-    * @param value The value to log.
-    */
+   * Logs an array of Serializable Structs using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param struct The struct type to log.
+   * @param value The value to log.
+   */
   public static <R> R[] log(String entryName, Struct<R> struct, R[] value) {
     return log(entryName, struct, value, LogSink.NT);
   }
   /**
-    * Logs an array of Serializable Structs using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param struct The struct type to log.
-    * @param value The value to log.
-    * @param sink The log sink to use.
-    */
+   * Logs an array of Serializable Structs using the Monologue machinery.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param struct The struct type to log.
+   * @param value The value to log.
+   * @param sink The log sink to use.
+   */
   @SuppressWarnings("unchecked")
   public static <R> R[] log(String entryName, Struct<R> struct, R[] value, LogSink sink) {
     if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
@@ -505,11 +505,14 @@ class GlobalLogged {
   }
 
   /**
-    * Logs a Sendable using the Monologue machinery.
-    * 
-    * @param entryName The name of the entry to log, this is an absolute path.
-    * @param value The value to log.
-    */
+   * Logs a Sendable using the Monologue machinery.
+   *
+   * <p> Monologue only supports data going 1 way, from the robot to the driver station. This means
+   * that Sendables that are updated by the driver station will not be updated on the robot.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   */
   public static void publishSendable(String entryName, Sendable value, LogSink sink) {
     if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) return;
     entryName = NetworkTable.normalizeKey(entryName, true);
@@ -518,27 +521,33 @@ class GlobalLogged {
     builder.finish();
   }
 
-    /**
-      * Logs a Sendable using the Monologue machinery.
-      * 
-      * @param entryName The name of the entry to log, this is an absolute path.
-      * @param value The value to log.
-      */
-    public static void publishSendable(String entryName, Field2d value, LogSink sink) {
-      if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) return;
-      entryName = NetworkTable.normalizeKey(entryName, true);
-      NtSendableCompat.addField2d(entryName, value, sink);
-    }
+  /**
+   * Logs a Sendable using the Monologue machinery.
+   * 
+   * <p> This method is used to log a Sendable that is a Field2d.
+   * Field2d is an {@code NTSendable} which require specialized code to log to Datalog.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   */
+  public static void publishSendable(String entryName, Field2d value, LogSink sink) {
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) return;
+    entryName = NetworkTable.normalizeKey(entryName, true);
+    NtSendableCompat.addField2d(entryName, value, sink);
+  }
 
-    /**
-      * Logs a Sendable using the Monologue machinery.
-      * 
-      * @param entryName The name of the entry to log, this is an absolute path.
-      * @param value The value to log.
-      */
-    public static void publishSendable(String entryName, Mechanism2d value, LogSink sink) {
-      if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) return;
-      entryName = NetworkTable.normalizeKey(entryName, true);
-      NtSendableCompat.addMechanism2d(entryName, value, sink);
-    }
+  /**
+   * Logs a Sendable using the Monologue machinery.
+   * 
+   * <p> This method is used to log a Sendable that is a Mechanism2d.
+   * Mechanism2d is an {@code NTSendable} which require specialized code to log to Datalog.
+   * 
+   * @param entryName The name of the entry to log, this is an absolute path.
+   * @param value The value to log.
+   */
+  public static void publishSendable(String entryName, Mechanism2d value, LogSink sink) {
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) return;
+    entryName = NetworkTable.normalizeKey(entryName, true);
+    NtSendableCompat.addMechanism2d(entryName, value, sink);
+  }
 }

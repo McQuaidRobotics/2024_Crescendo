@@ -9,6 +9,7 @@ import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.HashMap;
@@ -43,8 +44,7 @@ public class AutoChooser implements Sendable {
   private final HashMap<String, Supplier<Command>> autoRoutines =
       new HashMap<>(Map.of(NONE_NAME, Commands::none));
 
-  // private final StringEntry selected, active;
-  // private final StringArrayEntry options;
+  private int allianceId = -1;
   private String selected = NONE_NAME;
   private String[] options = new String[] {NONE_NAME};
 
@@ -53,6 +53,12 @@ public class AutoChooser implements Sendable {
 
   /** Constructs a new {@link AutoChooser}. */
   public AutoChooser() {}
+
+  private int fetchAllianceId() {
+    return DriverStation.getAlliance()
+      .map(alliance -> alliance.ordinal())
+      .orElse(-1);
+  }
 
   /**
    * Select a new option in the chooser.
@@ -63,19 +69,33 @@ public class AutoChooser implements Sendable {
    * @return The name of the selected option.
    */
   public String select(String selectStr) {
+    return select(selectStr, false);
+  }
+
+  private String select(String selectStr, boolean force) {
     selected = selectStr;
-    if (selected.equals(activeCommandName)) return activeCommandName;
-    if (DriverStation.isDisabled()
+    if (selected.equals(activeCommandName) && fetchAllianceId() == allianceId) {
+      // early return if the selected auto matches the active auto
+      return activeCommandName;
+    }
+    boolean dsValid = DriverStation.isDisabled()
         && DriverStation.isDSAttached()
-        && DriverStation.getAlliance().isPresent()) {
+        && fetchAllianceId() != -1;
+    if (dsValid || force) {
       if (!autoRoutines.containsKey(selected) && !selected.equals(NONE_NAME)) {
         selected = NONE_NAME;
         selectedNonexistentAuto.set(true);
       } else {
         selectedNonexistentAuto.set(false);
       }
+      allianceId = fetchAllianceId();
       activeCommandName = selected;
-      activeCommand = autoRoutines.get(activeCommandName).get();
+      activeCommand = autoRoutines.get(activeCommandName)
+          .get().withName(activeCommandName);
+    } else {
+      allianceId = -1;
+      activeCommandName = NONE_NAME;
+      activeCommand = Commands.none();
     }
     return activeCommandName;
   }
@@ -162,7 +182,7 @@ public class AutoChooser implements Sendable {
    * @return A command that runs the selected {@link AutoRoutine}
    */
   public Command selectedCommandScheduler() {
-    return Commands.defer(() -> activeCommand.asProxy(), Set.of());
+    return Commands.defer(() -> selectedCommand().asProxy(), Set.of());
   }
 
   /**
@@ -174,7 +194,10 @@ public class AutoChooser implements Sendable {
    * @return The currently selected command.
    */
   public Command selectedCommand() {
-    return activeCommand.withName(activeCommandName);
+    if (RobotBase.isSimulation()) {
+      select(selected, true);
+    }
+    return activeCommand;
   }
 
   @Override
