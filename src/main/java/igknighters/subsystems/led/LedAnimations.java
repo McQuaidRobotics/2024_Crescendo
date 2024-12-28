@@ -4,9 +4,9 @@ import java.nio.ByteBuffer;
 
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
-import monologue.procstruct.ProceduralStructGenerator;
-import monologue.procstruct.ProceduralStructGenerator.SchemaBuilder;
-import monologue.procstruct.ProceduralStructGenerator.SchemaBuilder.EnumFieldBuilder;
+import monologue.ProceduralStructGenerator;
+import monologue.ProceduralStructGenerator.SchemaBuilder;
+import monologue.ProceduralStructGenerator.SchemaBuilder.EnumFieldBuilder;
 
 public enum LedAnimations implements StructSerializable {
     DISABLED(new LedPattern.Strobe(255, 0, 0, 0, 0.0)),

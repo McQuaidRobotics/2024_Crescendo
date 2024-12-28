@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import java.util.Optional;
 
 import sham.ShamSwerve;
-import sham.ShamRobot;
 
 import igknighters.Localizer;
 import igknighters.Robot;
@@ -25,9 +24,9 @@ import igknighters.subsystems.swerve.control.SwerveSetpoint;
 import igknighters.subsystems.swerve.control.SwerveSetpointGenerator;
 import igknighters.subsystems.swerve.gyro.Gyro;
 import igknighters.subsystems.swerve.gyro.GyroReal;
-import igknighters.subsystems.swerve.gyro.GyroSim;
+import igknighters.subsystems.swerve.gyro.GyroSim2;
 import igknighters.subsystems.swerve.module.SwerveModule;
-import igknighters.subsystems.swerve.module.SwerveModuleOmni;
+import igknighters.subsystems.swerve.module.SwerveModuleReal;
 import igknighters.subsystems.swerve.module.SwerveModuleSim2;
 import igknighters.subsystems.swerve.module.SwerveModule.AdvancedSwerveModuleState;
 import igknighters.subsystems.swerve.odometryThread.RealSwerveOdometryThread;
@@ -86,24 +85,22 @@ public class Swerve implements LockFullSubsystem {
                     new SwerveModuleSim2(2, ot, sim.get()),
                     new SwerveModuleSim2(3, ot, sim.get()),
             };
-            gyro = new GyroSim(this::getChassisSpeed, ot);
+            gyro = new GyroSim2(sim.get().getGyro(), ot);
             odometryThread = ot;
         } else {
-            sim = Optional.ofNullable(simCtx.robot())
-                .map(ShamRobot::getDriveTrain)
-                .map(ShamSwerve.class::cast);
+            sim = Optional.empty();
             final RealSwerveOdometryThread ot = new RealSwerveOdometryThread(
                 250,
                 rots -> (rots / kSwerve.DRIVE_GEAR_RATIO) * kSwerve.WHEEL_CIRCUMFERENCE,
                 localizer.swerveDataSender()
             );
             swerveMods = new SwerveModule[] {
-                    new SwerveModuleOmni(0, ot, simCtx),
-                    new SwerveModuleOmni(1, ot, simCtx),
-                    new SwerveModuleOmni(2, ot, simCtx),
-                    new SwerveModuleOmni(3, ot, simCtx)
+                    new SwerveModuleReal(0, ot),
+                    new SwerveModuleReal(1, ot),
+                    new SwerveModuleReal(2, ot),
+                    new SwerveModuleReal(3, ot)
             };
-            gyro = new GyroReal(ot, simCtx);
+            gyro = new GyroReal(ot);
             odometryThread = ot;
         }
 

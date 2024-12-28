@@ -23,7 +23,7 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Mult;
 import edu.wpi.first.units.measure.Torque;
 import edu.wpi.first.util.struct.Struct;
-import monologue.procstruct.ProceduralStructGenerator;
+import monologue.ProceduralStructGenerator;
 
 public class MeasureMath {
     @SuppressWarnings("unchecked")

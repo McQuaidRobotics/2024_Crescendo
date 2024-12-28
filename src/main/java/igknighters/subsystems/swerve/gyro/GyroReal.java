@@ -1,15 +1,9 @@
 package igknighters.subsystems.swerve.gyro;
 
-import java.util.function.BiConsumer;
-
-import sham.ShamSwerve;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.ctre.phoenix6.sim.Pigeon2SimState;
 
-import igknighters.SimCtx;
 import igknighters.constants.ConstValues;
 import igknighters.constants.ConstValues.kSwerve;
 import igknighters.constants.HardwareIndex.SwerveHW;
@@ -20,8 +14,6 @@ import igknighters.util.logging.BootupLogger;
 import igknighters.util.logging.FaultManager;
 
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Time;
 import monologue.Annotations.IgnoreLogged;
 
 public class GyroReal extends Gyro {
@@ -33,7 +25,7 @@ public class GyroReal extends Gyro {
     @IgnoreLogged
     private final RealSwerveOdometryThread odoThread;
 
-    public GyroReal(RealSwerveOdometryThread odoThread, SimCtx simCtx) {
+    public GyroReal(RealSwerveOdometryThread odoThread) {
         this.odoThread = odoThread;
 
         gyro = new Pigeon2(ConstValues.kSwerve.PIGEON_ID, ConstValues.kSwerve.CANBUS);
@@ -57,16 +49,6 @@ public class GyroReal extends Gyro {
                 gyro.getAccelerationY());
 
         gyro.optimizeBusUtilization(0.0, 1.0);
-
-        if (simCtx.isActive()) {
-            BiConsumer<Time, AngularVelocity> simapplier = (time, rate) -> {
-                Pigeon2SimState state = gyro.getSimState();
-                state.addYaw(rate.times(time));
-                state.setAngularVelocityZ(rate);
-            };
-            ((ShamSwerve) simCtx.robot().getDriveTrain())
-                    .getGyro().setYawVeloConsumer(simapplier);
-        }
 
         BootupLogger.bootupLog("    Gyro initialized (real)");
     }

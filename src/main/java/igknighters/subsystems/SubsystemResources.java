@@ -18,30 +18,29 @@ import igknighters.subsystems.umbrella.Umbrella;
 
 import igknighters.subsystems.vision.Vision;
 import igknighters.util.logging.BootupLogger;
-
+import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.util.struct.StructSerializable;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import monologue.LogLocal;
+import monologue.Logged;
+import monologue.ProceduralStructGenerator;
+import monologue.Annotations.Log;
+import monologue.Annotations.OptionalLogged;
+import monologue.ProceduralStructGenerator.IgnoreStructField;
 
 public class SubsystemResources {
 
     /**
      * a way to pass around data about enabled subsystems
      */
-    public enum Subsystems {
-
+    public enum Subsystems implements StructSerializable {
         Stem("Stem"),
-
         Swerve("Swerve"),
-
         Umbrella("Umbrella"),
-
         Vision("Vision"),
+        Led("Led");
 
-        Led("Led"),
-
-        ;
-
+        @IgnoreStructField
         public final String name;
 
         Subsystems(String name) {
@@ -93,21 +92,33 @@ public class SubsystemResources {
             }
             return false;
         }
+
+        public static final Struct<Subsystems> struct = ProceduralStructGenerator.genEnum(Subsystems.class);
     }
 
-    public static class AllSubsystems {
-        private Subsystems[] subsystems;
+    public static class AllSubsystems implements Logged {
         private List<LockFullSubsystem> subsystemsListLockFull = new ArrayList<>();
         private List<LockFreeSubsystem> subsystemsListLockFree = new ArrayList<>();
+        private Subsystems[] subsystems;
 
+        @Log(key = "Stem")
+        @OptionalLogged(type = Stem.class)
         public final Optional<Stem> stem;
 
+        @Log(key = "Swerve")
+        @OptionalLogged(type = Swerve.class)
         public final Optional<Swerve> swerve;
 
+        @Log(key = "Umbrella")
+        @OptionalLogged(type = Umbrella.class)
         public final Optional<Umbrella> umbrella;
 
+        @Log(key = "Vision")
+        @OptionalLogged(type = Vision.class)
         public final Optional<Vision> vision;
 
+        @Log(key = "Led")
+        @OptionalLogged(type = Led.class)
         public final Optional<Led> led;
 
         public AllSubsystems(Localizer localizer, SimCtx simCtx, Subsystems... subsystems) {
@@ -220,13 +231,6 @@ public class SubsystemResources {
             return subsystemsListLockFree.toArray(new LockFreeSubsystem[subsystemsListLockFree.size()]);
         }
 
-        public List<LogLocal> getLoggableSubsystems() {
-            List<LogLocal> loggableSubsystems = new ArrayList<>();
-            loggableSubsystems.addAll(subsystemsListLockFull);
-            loggableSubsystems.addAll(subsystemsListLockFree);
-            return loggableSubsystems;
-        }
-
         public boolean hasAllSubsystems() {
 
             if (!stem.isPresent()) {
@@ -249,10 +253,10 @@ public class SubsystemResources {
         }
     }
 
-    public static interface LockFullSubsystem extends Subsystem, LogLocal {
+    public static interface LockFullSubsystem extends Subsystem, Logged {
     }
 
-    public static interface LockFreeSubsystem extends LogLocal {
+    public static interface LockFreeSubsystem extends Logged {
         default void periodic() {}
         default void simulationPeriodic() {}
 

@@ -23,7 +23,7 @@ import edu.wpi.first.util.struct.Struct;
  * @see Annotations.Log
  * @see Annotations.Log.Once
  */
-public interface LogLocal {
+public interface Logged {
 
   static final WeakHashMap<Object, ArrayList<LoggingNode>> registry = new WeakHashMap<>();
   static final HashMap<Class<?>, LoggingNode> singletons = new HashMap<>();

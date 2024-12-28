@@ -9,9 +9,11 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Force;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.MomentOfInertia;
 
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import sham.ShamArena.ShamEnvTiming;
@@ -146,10 +148,18 @@ public class ShamSwerveModule {
     protected XY<Force> friction(ChassisSpeeds chassisSpeeds, Rotation2d robotHeading) {
         final Force gripForce = gravityForce.times(wheelsCoefficientOfFriction);
 
-        final double tangentialVelocity = chassisSpeeds.omegaRadiansPerSecond * translation().getNorm();
+
+        final Distance drivebaseRadius = Meters.of(translation.getNorm());
+        final LinearVelocity tangentialVelocity = MetersPerSecond.of(
+            chassisSpeeds.omegaRadiansPerSecond * drivebaseRadius.in(Meters)
+        );
+        final Rotation2d tangentialAngle = translation.getAngle()
+            .rotateBy(robotHeading)
+            .rotateBy(Rotation2d.kCCW_90deg);
         final Velocity2d tangentialVelocityVector = new Velocity2d(
-                robotHeading.getCos() * tangentialVelocity,
-                robotHeading.getSin() * tangentialVelocity);
+                tangentialVelocity.times(tangentialAngle.getCos()),
+                tangentialVelocity.times(tangentialAngle.getSin())
+        );
         final Velocity2d moduleWorldVelocity = new Velocity2d(
                 chassisSpeeds.vxMetersPerSecond,
                 chassisSpeeds.vyMetersPerSecond);

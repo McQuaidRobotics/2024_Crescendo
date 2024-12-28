@@ -10,7 +10,7 @@ import edu.wpi.first.util.struct.StructSerializable;
 public record SwerveDriveSample(
     SwerveModulePosition[] modulePositions,
     Rotation2d gyroYaw,
-    double gforce,
+    double acceleration,
     double timestamp
 ) implements StructSerializable, Cloneable{
 
@@ -26,7 +26,7 @@ public record SwerveDriveSample(
         return new SwerveDriveSample(
             newModulePositions,
             new Rotation2d(gyroYaw.getCos(), gyroYaw.getSin()),
-            gforce,
+            acceleration,
             timestamp
         );
     }
@@ -83,7 +83,7 @@ public record SwerveDriveSample(
         @Override
         public void pack(ByteBuffer bb, SwerveDriveSample value) {
             Rotation2d.struct.pack(bb, value.gyroYaw);
-            bb.putDouble(value.gforce);
+            bb.putDouble(value.acceleration);
             bb.putDouble(value.timestamp);
             for (SwerveModulePosition module : value.modulePositions) {
                 SwerveModulePosition.struct.pack(bb, module);

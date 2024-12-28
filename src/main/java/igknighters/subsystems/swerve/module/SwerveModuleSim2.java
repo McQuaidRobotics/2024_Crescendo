@@ -83,7 +83,7 @@ public class SwerveModuleSim2 extends SwerveModule {
             public Voltage run(Time dt, Voltage supply, MechanismOutputs state) {
                 driveState = state.times(kSwerve.DRIVE_GEAR_RATIO);
 
-                double velocityRadPerSec = targetDriveVeloMPS / (kSwerve.WHEEL_DIAMETER / 2);
+                double velocityRadPerSec = (targetDriveVeloMPS / kSwerve.WHEEL_RADIUS) * kSwerve.DRIVE_GEAR_RATIO;
                 var feedback = driveFeedback.calculate(
                     driveState.velocity().in(RotationsPerSecond),
                     Units.radiansToRotations(velocityRadPerSec)
@@ -189,8 +189,8 @@ public class SwerveModuleSim2 extends SwerveModule {
         // super.driveVeloMPS = driveRotationsToMeters(driveSim.getAngularVelocityRPM() / 60.0);
         // super.driveAmps = driveSim.getCurrentDrawAmps();
 
-        super.drivePositionMeters = driveState.position().in(Radians) * (kSwerve.WHEEL_DIAMETER / 2);
-        super.driveVeloMPS = driveState.velocity().in(RadiansPerSecond) * (kSwerve.WHEEL_DIAMETER / 2);
+        super.drivePositionMeters = driveState.position().div(kSwerve.DRIVE_GEAR_RATIO).in(Rotations) * kSwerve.WHEEL_CIRCUMFERENCE;
+        super.driveVeloMPS = driveState.velocity().div(kSwerve.DRIVE_GEAR_RATIO).in(RotationsPerSecond) * kSwerve.WHEEL_CIRCUMFERENCE;
 
         super.steerAbsoluteRads = steerState.position().in(Radians);
         super.steerVeloRadPS = steerState.velocity().in(RadiansPerSecond);

@@ -13,7 +13,7 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Torque;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
-import monologue.procstruct.ProceduralStructGenerator;
+import monologue.ProceduralStructGenerator;
 import sham.utils.geometry.Velocity2d;
 import sham.utils.mathutils.GeometryConvertor;
 
@@ -43,7 +43,7 @@ public class FrcBody extends Body {
             GeometryConvertor.toWpilibUnit(getMass()).getFirst(),
             GeometryConvertor.toWpilibUnit(getMass()).getSecond(),
             new Velocity2d(getLinearVelocity().x, getLinearVelocity().y),
-            RadiansPerSecond.of(getAngularVelocity()),
+            RadiansPerSecond.of(-getAngularVelocity()),
             getLinearDamping(),
             getAngularDamping(),
             getGravityScale(),

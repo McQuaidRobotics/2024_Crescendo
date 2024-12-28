@@ -1,15 +1,19 @@
 package sham;
 
 import edu.wpi.first.epilogue.logging.DataLogger;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
+import edu.wpi.first.math.geometry.Twist2d;
+// import edu.wpi.first.units.measure.Angle;
+// import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
+// import static edu.wpi.first.units.Units.RadiansPerSecond;
+// import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
 import java.util.function.BiConsumer;
@@ -18,42 +22,27 @@ import sham.ShamArena.ShamEnvTiming;
 import sham.configs.ShamGyroConfig;
 import sham.utils.RuntimeLog;
 import sham.utils.mathutils.ShamCommonMath;
-import sham.utils.mathutils.MeasureMath;
+import sham.utils.mathutils.MeasureMath.XY;
+// import sham.utils.mathutils.MeasureMath;
 
-/**
- * Simulation for a IMU module used as gyro.
- *
- * <p>The Simulation is basically an indefinite integral of the angular velocity during each simulation sub ticks. Above
- * that, it also musicales the measurement inaccuracy of the gyro, drifting in no-motion and drifting due to impacts.
- */
+
 public class ShamGyro {
-    /* The threshold of instantaneous angular acceleration at which the chassis is considered to experience an "impact." */
-    private static final AngularAcceleration START_DRIFTING = RadiansPerSecondPerSecond.of(500);
-    /* The amount of drift, in radians, that the gyro experiences as a result of each multiple of the angular acceleration threshold. */
-    private static final Angle DRIFT_DUE_TO_IMPACT_COEFFICIENT = Radians.of(1);
+    // /* The threshold of instantaneous angular acceleration at which the chassis is considered to experience an "impact." */
+    // private static final AngularAcceleration START_DRIFTING = RadiansPerSecondPerSecond.of(500);
+    // /* The amount of drift, in radians, that the gyro experiences as a result of each multiple of the angular acceleration threshold. */
+    // private static final Angle DRIFT_DUE_TO_IMPACT_COEFFICIENT = Radians.of(1);
 
     private final DataLogger logger;
 
     private final ShamEnvTiming timing;
-    private BiConsumer<Time, AngularVelocity> yawVeloConsumer;
+    private BiConsumer<AngularVelocity, XY<LinearAcceleration>> updateConsumer;
 
     private final double veloStdDev;
 
     private final AngularVelocity averageDriftingMotionless;
 
-    private AngularVelocity lastAngularVelocity = RadiansPerSecond.of(0);
+    private Twist2d lastTwist = new Twist2d();
 
-    /**
-     *
-     *
-     * <h2>Creates a Gyro Simulation.</h2>
-     *
-     * @param averageDriftingIn30SecsMotionlessDeg the average amount of drift, in degrees, the gyro experiences
-     *     if it remains motionless for 30 seconds on a vibrating platform. This value can often be found in the user
-     *     manual.
-     * @param veloStdDev the standard deviation of the velocity measurement,
-     *     typically around 0.05
-     */
     public ShamGyro(ShamEnvTiming timing, ShamGyroConfig gyroConfig, DataLogger logger) {
         this.logger = logger.getSubLogger("Gyro");
         this.timing = timing;
@@ -66,8 +55,12 @@ public class ShamGyro {
         RuntimeLog.debug("Created a swerve module simulation");
     }
 
-    public void setYawVeloConsumer(BiConsumer<Time, AngularVelocity> yawVeloConsumer) {
-        this.yawVeloConsumer = yawVeloConsumer;
+    public void setUpdateConsumer(BiConsumer<AngularVelocity, XY<LinearAcceleration>> updateConsumer) {
+        this.updateConsumer = updateConsumer;
+    }
+
+    public Time getDt() {
+        return timing.dt();
     }
 
     /**
@@ -80,32 +73,46 @@ public class ShamGyro {
      * @param actualAngularVelocityRadPerSec the actual angular velocity in radians per second, usually obtained from
      *     {@link ShamDriveTrain#getAngularVelocity()}
      */
-    public void updateSimulationSubTick(AngularVelocity actualAngularVelocity) {
-        AngularVelocity dTheta = actualAngularVelocity
+    public void updateSimulationSubTick(Twist2d twistThisTick) {
+        AngularVelocity actualAngularVelocity = Radians.of(twistThisTick.dtheta)
+            .div(timing.dt());
+
+        AngularVelocity omegaV = actualAngularVelocity
                 .plus(averageDriftingMotionless)
-                .plus(getDriftingDueToImpact(actualAngularVelocity))
+                // .plus(getDriftingDueToImpact(actualAngularVelocity))
                 .plus(actualAngularVelocity
                         .times(ShamCommonMath.generateRandomNormal(0.0, veloStdDev))
                 );
 
-        lastAngularVelocity = dTheta;
+        LinearVelocity lastXV = Meters.of(lastTwist.dx).div(timing.dt());
+        LinearVelocity lastYV = Meters.of(lastTwist.dy).div(timing.dt());
+        LinearVelocity xV = Meters.of(twistThisTick.dx).div(timing.dt());
+        LinearVelocity yV = Meters.of(twistThisTick.dy).div(timing.dt());
 
-        logger.log("deltaTheta", dTheta);
+        LinearAcceleration xA = xV.minus(lastXV).div(timing.dt());
+        LinearAcceleration yA = yV.minus(lastYV).div(timing.dt());
 
-        if (yawVeloConsumer != null) {
-            yawVeloConsumer.accept(timing.dt(), lastAngularVelocity);
+        logger.log("omegaV", omegaV);
+        logger.log("xA", xA);
+        logger.log("yA", yA);
+
+        if (updateConsumer != null) {
+            updateConsumer.accept(omegaV, new XY<>(xA, yA));
         }
     }
 
-    private AngularVelocity getDriftingDueToImpact(AngularVelocity actualAngularVelocity) {
-        AngularAcceleration angularAcceleration = actualAngularVelocity.minus(lastAngularVelocity).div(timing.dt());
-        if (MeasureMath.abs(angularAcceleration).gt(START_DRIFTING)) {
-            return DRIFT_DUE_TO_IMPACT_COEFFICIENT
-                    .times(MeasureMath.signum(angularAcceleration))
-                    .times(angularAcceleration.div(START_DRIFTING))
-                    .div(timing.dt());
-        } else {
-            return RadiansPerSecond.of(0);
-        }
-    }
+    // private AngularVelocity getDriftingDueToImpact(AngularVelocity actualAngularVelocity) {
+    //     AngularVelocity lastAngularVelocity = RadiansPerSecond.of(
+    //         lastTwist.dtheta * timing.dt().in(Seconds)
+    //     );
+    //     AngularAcceleration angularAcceleration = actualAngularVelocity.minus(lastAngularVelocity).div(timing.dt());
+    //     if (MeasureMath.abs(angularAcceleration).gt(START_DRIFTING)) {
+    //         return DRIFT_DUE_TO_IMPACT_COEFFICIENT
+    //                 .times(MeasureMath.signum(angularAcceleration))
+    //                 .times(angularAcceleration.div(START_DRIFTING))
+    //                 .div(timing.dt());
+    //     } else {
+    //         return RadiansPerSecond.of(0);
+    //     }
+    // }
 }

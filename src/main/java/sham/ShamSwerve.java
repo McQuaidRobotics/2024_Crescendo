@@ -1,7 +1,6 @@
 package sham;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -12,8 +11,6 @@ import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Torque;
-import igknighters.util.plumbing.TunableValues;
-import igknighters.util.plumbing.TunableValues.TunableDouble;
 
 import static sham.utils.mathutils.MeasureMath.times;
 import static sham.utils.mathutils.MeasureMath.div;
@@ -51,8 +48,6 @@ public class ShamSwerve extends ShamDriveTrain {
     private final MomentOfInertia rotorInertiaWhenTranslating;
     private final MomentOfInertia rotorInertiaWhenRotating;
 
-    private static final TunableDouble chassisRotationDegrees = TunableValues.getDouble("chassisRotationDegrees", 0.0);
-
     /**
      * Creates a Swerve Drive Simulation.
      *
@@ -62,7 +57,7 @@ public class ShamSwerve extends ShamDriveTrain {
      * @param config a {@link ShamSwerveConfig} instance containing the configurations of * this drivetrain
      */
     ShamSwerve(ShamRobot<ShamSwerve> robot, ShamSwerveConfig config) {
-        super(robot.logger.getSubLogger("Swerve"), config);
+        super(robot.logger.getSubLogger("Swerve"), config, robot.timing());
         this.robot = robot;
         this.timing = robot.timing();
         this.config = config;
@@ -94,16 +89,13 @@ public class ShamSwerve extends ShamDriveTrain {
     protected void simTick() {
         simulateModulePropulsion();
         simulateModuleFriction();
-        gyroSimulation.updateSimulationSubTick(RadiansPerSecond.of(chassis.getAngularVelocity()));
+        gyroSimulation.updateSimulationSubTick(this.getTickTwist());
         super.simTick();
     }
 
     private void simulateModuleFriction() {
-        // final Rotation2d chassisRotation = getChassisWorldPose().getRotation();
+        final Rotation2d chassisRotation = getChassisWorldPose().getRotation();
         final ChassisSpeeds chassisSpeeds = this.getChassisWorldSpeeds();
-
-        // fix for debug rotation
-        final Rotation2d chassisRotation = Rotation2d.fromDegrees(chassisRotationDegrees.value());
 
         // sum up all the acceleration due to friction from each module
         LinearAcceleration xFrictionAccel = MetersPerSecondPerSecond.zero();
@@ -114,7 +106,7 @@ public class ShamSwerve extends ShamDriveTrain {
                     chassisSpeeds,
                     chassisRotation);
             final var pack = chassisMass.accelerationsDueToForce(
-                    frictionForce, XY.of(moduleSimulations[i].translation()));
+                    frictionForce, XY.of(moduleSimulations[i].translation().rotateBy(chassisRotation)));
             xFrictionAccel = xFrictionAccel.plus(pack.getFirst().x());
             yFrictionAccel = yFrictionAccel.plus(pack.getFirst().y());
             angularFrictionAccel = angularFrictionAccel.plus(pack.getSecond());
@@ -145,9 +137,11 @@ public class ShamSwerve extends ShamDriveTrain {
         final AngularAcceleration angularAccelNeededToStop = MeasureMath.negate(
                 RadiansPerSecond.of(unwantedSpeeds.omegaRadiansPerSecond))
                 .div(timing.dt());
+        logger.log("Friction/xFrictionAccelPreClamp", xFrictionAccel);
+        logger.log("Friction/yFrictionAccelPreClamp", yFrictionAccel);
         xFrictionAccel = MeasureMath.clamp(xFrictionAccel, xAccelNeededToStop);
         yFrictionAccel = MeasureMath.clamp(yFrictionAccel, yAccelNeededToStop);
-        // angularFrictionAccel = MeasureMath.clamp(angularFrictionAccel, angularAccelNeededToStop);
+        angularFrictionAccel = MeasureMath.clamp(angularFrictionAccel, angularAccelNeededToStop);
 
         logger.log("Friction/xAccelNeededToStop", xAccelNeededToStop);
         logger.log("Friction/yAccelNeededToStop", yAccelNeededToStop);
@@ -161,12 +155,11 @@ public class ShamSwerve extends ShamDriveTrain {
         final Force yFrictionForce = chassisMass.forceDueToAcceleration(yFrictionAccel);
         final Torque angularFrictionTorque = chassisMass.torqueDueToAcceleration(angularFrictionAccel);
         chassis.applyForce(new Vector2(xFrictionForce.in(Newtons), yFrictionForce.in(Newtons)));
-        // chassis.applyTorque(angularFrictionTorque.in(NewtonMeters));
+        chassis.applyTorque(angularFrictionTorque.in(NewtonMeters));
     }
 
     private void simulateModulePropulsion() {
-        // final Rotation2d chassisRotation = getChassisWorldPose().getRotation();
-        final Rotation2d chassisRotation = Rotation2d.fromDegrees(chassisRotationDegrees.value());
+        final Rotation2d chassisRotation = getChassisWorldPose().getRotation();
 
         // apply propulsion forces to chassis
         Force propulsionForceTotal = Newtons.zero();
@@ -218,8 +211,8 @@ public class ShamSwerve extends ShamDriveTrain {
         logger.log("Propulsion/propulsionTorque", propulsionTorque);
         logger.log("Propulsion/propulsionForce", new XY<>(propulsionForceX, propulsionForceY), XY.struct);
 
-        // chassis.applyTorque(propulsionTorque.in(NewtonMeters));
-        // chassis.applyForce(new Vector2(propulsionForceX.in(Newtons), propulsionForceY.in(Newtons)));
+        chassis.applyForce(new Vector2(propulsionForceX.in(Newtons), propulsionForceY.in(Newtons)));
+        chassis.applyTorque(propulsionTorque.in(NewtonMeters));
     }
 
     public ShamSwerveModule[] getModules() {

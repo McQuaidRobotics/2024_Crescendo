@@ -4,7 +4,7 @@ import edu.wpi.first.hal.DriverStationJNI;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
 
-public class RuntimeLog {
+class RuntimeLog {
   private static final StringPublisher entry;
 
   static {

@@ -9,7 +9,7 @@ import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
 import edu.wpi.first.wpilibj.IterativeRobotBase;
-import monologue.procstruct.ProceduralStructGenerator;
+import monologue.ProceduralStructGenerator;
 
 import java.util.List;
 import java.util.Set;

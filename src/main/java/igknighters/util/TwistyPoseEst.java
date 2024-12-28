@@ -91,7 +91,8 @@ public class TwistyPoseEst {
     }
 
     private final TreeMap<Double, TimestampedTwist2d> samples = new TreeMap<>();
-    private Pose2d rootPose = new Pose2d();
+    private Pose2d rootPose = Pose2d.kZero;
+    private Rotation2d lastGyroAngle = Rotation2d.kZero;
     private Object prevWheelPositions;
 
     public void resetPose(Pose2d pose) {
@@ -152,9 +153,10 @@ public class TwistyPoseEst {
             new TimestampedTwist2d(
                 twist.dx * weight,
                 twist.dy * weight,
-                twist.dtheta * weight,
+                lastGyroAngle.minus(gyroAngle).getRadians(),
                 timestamp
         ));
+        lastGyroAngle = gyroAngle;
         prevWheelPositions = wheelPositions;
     }
 

@@ -2,13 +2,18 @@ package sham;
 
 import edu.wpi.first.epilogue.logging.DataLogger;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.util.struct.Struct;
-import monologue.procstruct.ProceduralStructGenerator;
+import monologue.ProceduralStructGenerator;
+
+import static edu.wpi.first.units.Units.Seconds;
 
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Vector2;
+
+import sham.ShamArena.ShamEnvTiming;
 import sham.configs.ShamDriveTrainConfig;
 import sham.configs.ShamSwerveConfig;
 import sham.utils.FrcBody;
@@ -37,6 +42,7 @@ public class ShamDriveTrain {
 
     protected final DataLogger logger;
     protected final FrcBody chassis = new FrcBody();
+    private final ShamEnvTiming timing;
 
     /**
      *
@@ -54,7 +60,8 @@ public class ShamDriveTrain {
      * @param initialPoseOnField the initial pose of the drivetrain in the simulation world
      */
     @SuppressWarnings("unchecked")
-    protected ShamDriveTrain(DataLogger logger, ShamDriveTrainConfig<?, ?> config) {
+    protected ShamDriveTrain(DataLogger logger, ShamDriveTrainConfig<?, ?> config, ShamEnvTiming timing) {
+        this.timing = timing;
         this.logger = logger;
         logger.log("config", config, (Struct<ShamDriveTrainConfig<?, ?>>) ProceduralStructGenerator
                 .extractClassStructDynamic(config.getClass()).get());
@@ -116,7 +123,13 @@ public class ShamDriveTrain {
      * @return the actual chassis speeds in the simulation world, <strong>Field-Relative</strong>
      */
     public ChassisSpeeds getChassisWorldSpeeds() {
-        return GeometryConvertor.toWpilibChassisSpeeds(chassis.getLinearVelocity(), chassis.getAngularVelocity());
+        return GeometryConvertor.toWpilibChassisSpeeds(chassis.getLinearVelocity(), -chassis.getAngularVelocity());
+    }
+
+    public Twist2d getTickTwist() {
+        Vector2 dXY = chassis.getChangeInPosition();
+        double dTheta = -chassis.getAngularVelocity() * timing.dt().in(Seconds);
+        return new Twist2d(dXY.x, dXY.y, dTheta);
     }
 
     /**

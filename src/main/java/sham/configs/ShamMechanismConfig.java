@@ -17,8 +17,8 @@ import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
-import monologue.procstruct.ProceduralStructGenerator;
-import monologue.procstruct.ProceduralStructGenerator.IgnoreStructField;
+import monologue.ProceduralStructGenerator;
+import monologue.ProceduralStructGenerator.IgnoreStructField;
 
 public class ShamMechanismConfig implements StructSerializable {
     public DCMotor motor;

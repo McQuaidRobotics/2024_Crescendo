@@ -133,7 +133,7 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
         );
     }
 
-    private double getGForce() {
+    private double getAcceleration() {
         return Math.hypot(
             signals[(MODULE_COUNT * 4) + 2].getValueAsDouble(),
             signals[(MODULE_COUNT * 4) + 3].getValueAsDouble()
@@ -173,7 +173,7 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
                     new SwerveDriveSample(
                         getModulePositions(),
                         getGyroRotation(),
-                        getGForce(),
+                        getAcceleration(),
                         Timer.getFPGATimestamp()
                     )
                 );

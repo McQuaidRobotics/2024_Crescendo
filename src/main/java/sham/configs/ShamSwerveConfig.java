@@ -2,8 +2,8 @@ package sham.configs;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.util.struct.Struct;
-import monologue.procstruct.ProceduralStructGenerator;
-import monologue.procstruct.ProceduralStructGenerator.FixedSizeArray;
+import monologue.ProceduralStructGenerator;
+import monologue.ProceduralStructGenerator.FixedSizeArray;
 
 import java.util.Arrays;
 import java.util.OptionalDouble;

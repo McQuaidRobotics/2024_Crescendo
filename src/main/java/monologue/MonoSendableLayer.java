@@ -24,7 +24,10 @@ import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismObject2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
+import monologue.MonoEntryLayer.MonologueBooleanEntry;
+import monologue.MonoEntryLayer.MonologueDoubleEntry;
 import monologue.MonoEntryLayer.MonologueEntry;
+import monologue.MonoEntryLayer.MonologueLongEntry;
 
 public class MonoSendableLayer {
   private static final ArrayList<SendableContainer> sendables = new ArrayList<>();
@@ -132,10 +135,10 @@ public class MonoSendableLayer {
       if (getter == null) return;
       sendable.addUpdatable(
           new Runnable() {
-            MonologueEntry<Boolean> entry = MonologueEntry.create(path + "/" + key, Boolean.class, sink);
+            MonologueBooleanEntry entry = MonologueEntry.createBoolean(path + "/" + key, sink);
 
             public void run() {
-              entry.log(getter.getAsBoolean());
+              entry.logBoolean(getter.getAsBoolean());
             };
           });
     }
@@ -157,10 +160,10 @@ public class MonoSendableLayer {
     public void publishConstBoolean(String key, boolean value) {
       sendable.addConstant(
           new Runnable() {
-            MonologueEntry<Boolean> entry = MonologueEntry.create(path + "/" + key, Boolean.class, sink);
+            MonologueBooleanEntry entry = MonologueEntry.createBoolean(path + "/" + key, sink);
 
             public void run() {
-              entry.log(value);
+              entry.logBoolean(value);
             };
           });
     }
@@ -182,10 +185,10 @@ public class MonoSendableLayer {
       if (getter == null) return;
       sendable.addUpdatable(
           new Runnable() {
-            MonologueEntry<Long> entry = MonologueEntry.create(path + "/" + key, Long.class, sink);
+            MonologueLongEntry entry = MonologueEntry.createLong(path + "/" + key, sink);
 
             public void run() {
-              entry.log(getter.getAsLong());
+              entry.logLong(getter.getAsLong());
             };
           });
     }
@@ -207,10 +210,10 @@ public class MonoSendableLayer {
     public void publishConstInteger(String key, long value) {
       sendable.addConstant(
           new Runnable() {
-            MonologueEntry<Long> entry = MonologueEntry.create(path + "/" + key, Long.class, sink);
+            MonologueLongEntry entry = MonologueEntry.createLong(path + "/" + key, sink);
 
             public void run() {
-              entry.log(value);
+              entry.logLong(value);
             };
           });
     }
@@ -232,10 +235,10 @@ public class MonoSendableLayer {
       if (getter == null) return;
       sendable.addUpdatable(
           new Runnable() {
-            MonologueEntry<Double> entry = MonologueEntry.create(path + "/" + key, Double.class, sink);
+            MonologueDoubleEntry entry = MonologueEntry.createDouble(path + "/" + key, sink);
 
             public void run() {
-              entry.log(getter.getAsDouble());
+              entry.logDouble(getter.getAsDouble());
             };
           });
     }
@@ -257,10 +260,10 @@ public class MonoSendableLayer {
     public void publishConstDouble(String key, double value) {
       sendable.addConstant(
           new Runnable() {
-            MonologueEntry<Double> entry = MonologueEntry.create(path + "/" + key, Double.class, sink);
+            MonologueDoubleEntry entry = MonologueEntry.createDouble(path + "/" + key, sink);
 
             public void run() {
-              entry.log(value);
+              entry.logDouble(value);
             };
           });
     }
@@ -282,10 +285,10 @@ public class MonoSendableLayer {
       if (getter == null) return;
       sendable.addUpdatable(
           new Runnable() {
-            MonologueEntry<Float> entry = MonologueEntry.create(path + "/" + key, Float.class, sink);
+            MonologueDoubleEntry entry = MonologueEntry.createDouble(path + "/" + key, sink);
 
             public void run() {
-              entry.log(getter.getAsFloat());
+              entry.logDouble(getter.getAsFloat());
             };
           });
     }
@@ -307,10 +310,10 @@ public class MonoSendableLayer {
     public void publishConstFloat(String key, float value) {
       sendable.addConstant(
           new Runnable() {
-            MonologueEntry<Float> entry = MonologueEntry.create(path + "/" + key, Float.class, sink);
+            MonologueDoubleEntry entry = MonologueEntry.createDouble(path + "/" + key, sink);
 
             public void run() {
-              entry.log(value);
+              entry.logDouble(value);
             };
           });
     }
@@ -493,16 +496,16 @@ public class MonoSendableLayer {
 
       sendable.addUpdatable(
           new Runnable() {
-            MonologueEntry<Double> angleEntry = MonologueEntry.create(path + "/angle", Double.class, sink);
+            MonologueDoubleEntry angleEntry = MonologueEntry.createDouble(path + "/angle", sink);
             MonologueEntry<String> colorEntry = MonologueEntry.create(path + "/color", String.class, sink);
-            MonologueEntry<Double> lengthEntry = MonologueEntry.create(path + "/length", Double.class, sink);
-            MonologueEntry<Double> weightEntry = MonologueEntry.create(path + "/weight", Double.class, sink);
+            MonologueDoubleEntry lengthEntry = MonologueEntry.createDouble(path + "/length", sink);
+            MonologueDoubleEntry weightEntry = MonologueEntry.createDouble(path + "/weight", sink);
 
             public void run() {
-              angleEntry.log(angle);
+              angleEntry.logDouble(angle);
               colorEntry.log(color);
-              lengthEntry.log(length);
-              weightEntry.log(weight);
+              lengthEntry.logDouble(length);
+              weightEntry.logDouble(weight);
             };
           });
     }
@@ -513,12 +516,12 @@ public class MonoSendableLayer {
 
       sendable.addUpdatable(
           new Runnable() {
-            MonologueEntry<Double> xEntry = MonologueEntry.create(path + "/x", Double.class, sink);
-            MonologueEntry<Double> yEntry = MonologueEntry.create(path + "/y", Double.class, sink);
+            MonologueDoubleEntry xEntry = MonologueEntry.createDouble(path + "/x", sink);
+            MonologueDoubleEntry yEntry = MonologueEntry.createDouble(path + "/y", sink);
 
             public void run() {
-              xEntry.log(x);
-              yEntry.log(y);
+              xEntry.logDouble(x);
+              yEntry.logDouble(y);
             };
           });
     }

@@ -10,11 +10,11 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 // import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
-import monologue.LogLocal;
+import monologue.Logged;
+import monologue.ProceduralStructGenerator;
 import monologue.Annotations.Log;
-import monologue.procstruct.ProceduralStructGenerator;
 
-public class SlipDetection implements LogLocal {
+public class SlipDetection implements Logged {
     private static record ModuleData (
         double mps,
         double distance,

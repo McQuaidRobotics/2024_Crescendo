@@ -3,9 +3,12 @@ package monologue;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
+import java.util.function.LongConsumer;
 
 import edu.wpi.first.networktables.*;
 import edu.wpi.first.util.datalog.*;
+import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.wpilibj.DataLogManager;
 
@@ -20,6 +23,7 @@ class MonoEntryLayer {
 
   public static interface MonologueEntry<T> {
     public void log(T value);
+    public LogSink sink();
 
     @SuppressWarnings("unchecked")
     public static <T> MonologueEntry<T> create(String path, Class<T> clazz, LogSink sink) {
@@ -39,14 +43,14 @@ class MonoEntryLayer {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> MonologueEntry<T> create(String path, Struct<T> struct, Class<T> clazz, LogSink sink) {
+    public static <T> MonologueEntry<T> create(String path, Struct<T> struct, LogSink sink) {
       var map = entries.get(sink);
       if (!map.containsKey(path)) {
         String cleanPath = NetworkTable.normalizeKey(path, true);
         var e = switch (sink) {
-          case NT -> new MonologueNtEntry<>(cleanPath, Optional.of(struct), clazz);
-          case DL -> new MonologueFileEntry<>(cleanPath, Optional.of(struct), clazz);
-          case OP -> new MonologueOptimizedEntry<>(cleanPath, Optional.of(struct), clazz);
+          case NT -> new MonologueNtEntry<>(cleanPath, Optional.of(struct), struct.getTypeClass());
+          case DL -> new MonologueFileEntry<>(cleanPath, Optional.of(struct), struct.getTypeClass());
+          case OP -> new MonologueOptimizedEntry<>(cleanPath, Optional.of(struct), struct.getTypeClass());
         };
         map.put(path, e);
         return e;
@@ -56,7 +60,7 @@ class MonoEntryLayer {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> MonologueEntry<T> createStructArray(String path, Struct<?> struct, Class<T> clazz, LogSink sink) {
+    public static <T> MonologueEntry<T[]> create(String path, Struct<T> struct, Class<T[]> clazz, LogSink sink) {
       var map = entries.get(sink);
       if (!map.containsKey(path)) {
         String cleanPath = NetworkTable.normalizeKey(path, true);
@@ -68,7 +72,40 @@ class MonoEntryLayer {
         map.put(path, e);
         return e;
       } else {
-        return (MonologueEntry<T>) map.get(path);
+        return (MonologueEntry<T[]>) map.get(path);
+      }
+    }
+
+    public static MonologueDoubleEntry createDouble(String path, LogSink sink) {
+      var map = entries.get(sink);
+      if (!map.containsKey(path)) {
+        MonologueDoubleEntry e = new MonologueDoubleEntry(path, sink);
+        map.put(path, e);
+        return e;
+      } else {
+        return (MonologueDoubleEntry) map.get(path);
+      }
+    }
+
+    public static MonologueBooleanEntry createBoolean(String path, LogSink sink) {
+      var map = entries.get(sink);
+      if (!map.containsKey(path)) {
+        MonologueBooleanEntry e = new MonologueBooleanEntry(path, sink);
+        map.put(path, e);
+        return e;
+      } else {
+        return (MonologueBooleanEntry) map.get(path);
+      }
+    }
+
+    public static MonologueLongEntry createLong(String path, LogSink sink) {
+      var map = entries.get(sink);
+      if (!map.containsKey(path)) {
+        MonologueLongEntry e = new MonologueLongEntry(path, sink);
+        map.put(path, e);
+        return e;
+      } else {
+        return (MonologueLongEntry) map.get(path);
       }
     }
   }
@@ -139,6 +176,11 @@ class MonoEntryLayer {
     public void log(T value) {
       fileLog.accept(value);
     }
+
+    @Override
+    public LogSink sink() {
+      return LogSink.DL;
+    }
   }
 
   private static class MonologueNtEntry<T> implements MonologueEntry<T> {
@@ -207,6 +249,11 @@ class MonoEntryLayer {
     public void log(T value) {
       ntLog.accept(value);
     }
+
+    @Override
+    public LogSink sink() {
+      return LogSink.NT;
+    }
   }
 
   private static class MonologueOptimizedEntry<T> implements MonologueEntry<T> {
@@ -225,6 +272,179 @@ class MonoEntryLayer {
       } else {
         ntEntry.log(value);
       }
+    }
+
+    @Override
+    public LogSink sink() {
+      return LogSink.OP;
+    }
+  }
+
+  public static class MonologueDoubleEntry implements MonologueEntry<Double> {
+    private final LogSink sink;
+    private final DoubleConsumer fileLog;
+    private final DoubleConsumer ntLog;
+
+    public MonologueDoubleEntry(String path, LogSink sink) {
+      this.sink = sink;
+      fileLog = new DoubleConsumer() {
+        private Optional<DoubleLogEntry> entry = Optional.empty();
+
+        @Override
+        public void accept(double value) {
+          if (entry.isEmpty()) {
+            entry = Optional.of(new DoubleLogEntry(DataLogManager.getLog(), path));
+          }
+          entry.get().append(value);
+        }
+      };
+      ntLog = new DoubleConsumer() {
+        private Optional<DoublePublisher> entry = Optional.empty();
+
+        @Override
+        public void accept(double value) {
+          if (entry.isEmpty()) {
+            entry = Optional.of(NetworkTableInstance.getDefault().getDoubleTopic(path).publish());
+          }
+          entry.get().set(value);
+        }
+      };
+    }
+
+    public void logDouble(double value) {
+      switch (sink) {
+        case NT -> ntLog.accept(value);
+        case DL -> fileLog.accept(value);
+        case OP -> {
+          if (Monologue.isBandwidthOptimizationEnabled()) {
+            fileLog.accept(value);
+          } else {
+            ntLog.accept(value);
+          }
+        }
+      }
+    }
+
+    @Override
+    public void log(Double value) {
+      logDouble(value);
+    }
+
+    @Override
+    public LogSink sink() {
+      return sink;
+    }
+  }
+
+  public static class MonologueBooleanEntry implements MonologueEntry<Boolean> {
+    private final LogSink sink;
+    private final BooleanConsumer fileLog;
+    private final BooleanConsumer ntLog;
+
+    public MonologueBooleanEntry(String path, LogSink sink) {
+      this.sink = sink;
+      fileLog = new BooleanConsumer() {
+        private Optional<BooleanLogEntry> entry = Optional.empty();
+
+        @Override
+        public void accept(boolean value) {
+          if (entry.isEmpty()) {
+            entry = Optional.of(new BooleanLogEntry(DataLogManager.getLog(), path));
+          }
+          entry.get().append(value);
+        }
+      };
+      ntLog = new BooleanConsumer() {
+        private Optional<BooleanPublisher> entry = Optional.empty();
+
+        @Override
+        public void accept(boolean value) {
+          if (entry.isEmpty()) {
+            entry = Optional.of(NetworkTableInstance.getDefault().getBooleanTopic(path).publish());
+          }
+          entry.get().set(value);
+        }
+      };
+    }
+
+    public void logBoolean(boolean value) {
+      switch (sink) {
+        case NT -> ntLog.accept(value);
+        case DL -> fileLog.accept(value);
+        case OP -> {
+          if (Monologue.isBandwidthOptimizationEnabled()) {
+            fileLog.accept(value);
+          } else {
+            ntLog.accept(value);
+          }
+        }
+      }
+    }
+
+    @Override
+    public void log(Boolean value) {
+      logBoolean(value);
+    }
+
+    @Override
+    public LogSink sink() {
+      return sink;
+    }
+  }
+
+  public static class MonologueLongEntry implements MonologueEntry<Long> {
+    private final LogSink sink;
+    private final LongConsumer fileLog;
+    private final LongConsumer ntLog;
+
+    public MonologueLongEntry(String path, LogSink sink) {
+      this.sink = sink;
+      fileLog = new LongConsumer() {
+        private Optional<IntegerLogEntry> entry = Optional.empty();
+
+        @Override
+        public void accept(long value) {
+          if (entry.isEmpty()) {
+            entry = Optional.of(new IntegerLogEntry(DataLogManager.getLog(), path));
+          }
+          entry.get().append(value);
+        }
+      };
+      ntLog = new LongConsumer() {
+        private Optional<IntegerPublisher> entry = Optional.empty();
+
+        @Override
+        public void accept(long value) {
+          if (entry.isEmpty()) {
+            entry = Optional.of(NetworkTableInstance.getDefault().getIntegerTopic(path).publish());
+          }
+          entry.get().set(value);
+        }
+      };
+    }
+
+    public void logLong(long value) {
+      switch (sink) {
+        case NT -> ntLog.accept(value);
+        case DL -> fileLog.accept(value);
+        case OP -> {
+          if (Monologue.isBandwidthOptimizationEnabled()) {
+            fileLog.accept(value);
+          } else {
+            ntLog.accept(value);
+          }
+        }
+      }
+    }
+
+    @Override
+    public void log(Long value) {
+      logLong(value);
+    }
+
+    @Override
+    public LogSink sink() {
+      return sink;
     }
   }
 }

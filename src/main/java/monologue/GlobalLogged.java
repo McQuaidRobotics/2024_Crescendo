@@ -5,7 +5,6 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import monologue.MonoSendableLayer.NtSendableCompat;
-import monologue.procstruct.ProceduralStructGenerator;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
 
@@ -46,7 +45,7 @@ class GlobalLogged {
       Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, value, sink));
       return value;
     }
-    MonoEntryLayer.MonologueEntry.create(entryName, boolean.class, sink).log(value);
+    MonoEntryLayer.MonologueEntry.createBoolean(entryName, sink).logBoolean(value);
 
     return value;
   }
@@ -73,7 +72,7 @@ class GlobalLogged {
       Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, value, sink));
       return value;
     }
-    MonoEntryLayer.MonologueEntry.create(entryName, int.class, sink).log(value);
+    MonoEntryLayer.MonologueEntry.createLong(entryName, sink).logLong(value);
 
     return value;
   }
@@ -100,7 +99,7 @@ class GlobalLogged {
       Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, value, sink));
       return value;
     }
-    MonoEntryLayer.MonologueEntry.create(entryName, long.class, sink).log(value);
+    MonoEntryLayer.MonologueEntry.createLong(entryName, sink).logLong(value);
 
     return value;
   }
@@ -127,7 +126,7 @@ class GlobalLogged {
       Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, value, sink));
       return value;
     }
-    MonoEntryLayer.MonologueEntry.create(entryName, float.class, sink).log(value);
+    MonoEntryLayer.MonologueEntry.createDouble(entryName, sink).logDouble(value);
 
     return value;
   }
@@ -154,7 +153,7 @@ class GlobalLogged {
       Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, value, sink));
       return value;
     }
-    MonoEntryLayer.MonologueEntry.create(entryName, double.class, sink).log(value);
+    MonoEntryLayer.MonologueEntry.createDouble(entryName, sink).logDouble(value);
 
     return value;
   }
@@ -403,7 +402,7 @@ class GlobalLogged {
     Struct<R> struct = ProceduralStructGenerator.extractClassStruct(clazz).orElseThrow(
         () -> new IllegalArgumentException("Class " + clazz.getName() + " does not have a struct.")
     );
-    MonoEntryLayer.MonologueEntry.create(entryName, struct, clazz, sink).log(value);
+    MonoEntryLayer.MonologueEntry.create(entryName, struct, sink).log(value);
 
     return value;
   }
@@ -433,7 +432,7 @@ class GlobalLogged {
     }
     Class<R[]> clazz = (Class<R[]>) value.getClass();
     Struct<R> struct = (Struct<R>) ProceduralStructGenerator.extractClassStructDynamic(clazz.getComponentType()).get();
-    MonoEntryLayer.MonologueEntry.createStructArray(entryName, struct, clazz, sink).log(value);
+    MonoEntryLayer.MonologueEntry.create(entryName, struct, clazz, sink).log(value);
 
     return value;
   }
@@ -456,15 +455,13 @@ class GlobalLogged {
    * @param value The value to log.
    * @param sink The log sink to use.
    */
-  @SuppressWarnings("unchecked")
   public static <R> R log(String entryName, Struct<R> struct, R value, LogSink sink) {
     if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
       String entryNameFinal = entryName;
       Monologue.prematureLog(() -> GlobalLogged.log(entryNameFinal, struct, value, sink));
       return value;
     }
-    Class<R> clazz = (Class<R>) value.getClass();
-    MonoEntryLayer.MonologueEntry.create(entryName, struct, clazz, sink).log(value);
+    MonoEntryLayer.MonologueEntry.create(entryName, struct, sink).log(value);
 
     return value;
   }
@@ -495,7 +492,7 @@ class GlobalLogged {
       return value;
     }
     Class<R[]> clazz = (Class<R[]>) value.getClass();
-    MonoEntryLayer.MonologueEntry.createStructArray(entryName, struct, clazz, sink).log(value);
+    MonoEntryLayer.MonologueEntry.create(entryName, struct, clazz, sink).log(value);
 
     return value;
   }

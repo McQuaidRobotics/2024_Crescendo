@@ -16,8 +16,12 @@ import monologue.Annotations.FlattenedLogged;
 import monologue.Annotations.IgnoreLogged;
 import monologue.Annotations.Log;
 import monologue.Annotations.MaybeLoggedType;
+import monologue.Annotations.OptionalLogged;
 import monologue.Annotations.SingletonLogged;
 import monologue.LoggingTree.*;
+import monologue.Primatives.BooleanVarHandle;
+import monologue.Primatives.DoubleVarHandle;
+import monologue.Primatives.LongVarHandle;
 
 public class Eval {
   /**
@@ -101,7 +105,7 @@ public class Eval {
         Log.Once anno = element.getAnnotation(Log.Once.class);
         return new LogMetadata(true, anno.sink(), true, anno.key().isEmpty() ? name : anno.key());
       } else {
-        return new LogMetadata(false, null, false, "");
+        return new LogMetadata(false, LogSink.OP, false, name);
       }
     }
   }
@@ -110,7 +114,7 @@ public class Eval {
     ArrayList<Class<?>> result = new ArrayList<Class<?>>();
 
     Class<?> i = type;
-    while (i != stop && LogLocal.class.isAssignableFrom(i)) {
+    while (i != stop && Logged.class.isAssignableFrom(i)) {
       result.add(i);
       i = i.getSuperclass();
     }
@@ -139,10 +143,13 @@ public class Eval {
   }
 
   static boolean isNestedLogged(Field field) {
-    boolean fieldTyLogged = LogLocal.class.isAssignableFrom(field.getType())
-        || (field.getType().isArray() && LogLocal.class.isAssignableFrom(field.getType().getComponentType()));
-    boolean maybeLoggedAnnotation = field.isAnnotationPresent(MaybeLoggedType.class);
-    boolean ignoreLoggedAnnotation = field.isAnnotationPresent(IgnoreLogged.class);
+    final boolean optional = Optional.class.isAssignableFrom(field.getType());
+    final boolean optionalAnnotated = field.isAnnotationPresent(OptionalLogged.class);
+    final Class<?> type = optional && optionalAnnotated ? field.getAnnotation(OptionalLogged.class).type() : field.getType();
+    final boolean fieldTyLogged = Logged.class.isAssignableFrom(type)
+        || (type.isArray() && Logged.class.isAssignableFrom(type.getComponentType()));
+    final boolean maybeLoggedAnnotation = field.isAnnotationPresent(MaybeLoggedType.class);
+    final boolean ignoreLoggedAnnotation = field.isAnnotationPresent(IgnoreLogged.class);
     if (fieldTyLogged && maybeLoggedAnnotation) {
       RuntimeLog.warn(
           field.getName()
@@ -199,7 +206,12 @@ public class Eval {
       final boolean isStatic = Modifier.isStatic(field.getModifiers());
       final boolean isArray = field.getType().isArray();
       final LogMetadata metadata = LogMetadata.from(field);
+      final boolean optional = Optional.class.isAssignableFrom(field.getType());
+      final boolean optionalAnnotated = field.isAnnotationPresent(OptionalLogged.class);
       if (!isNestedLogged && !isValidLiteralType) {
+        continue;
+      }
+      if ((optional && !isNestedLogged) || (optional && !optionalAnnotated)) {
         continue;
       }
       final VarHandle handle = getHandle(field, lookup);
@@ -210,10 +222,10 @@ public class Eval {
       // handle singletons
       if (isNestedLogged && isStatic) {
         Optional<String> singletonKey = singletonKey(field.getType());
-        if (singletonKey.isPresent() && !LogLocal.singletonAlreadyAdded(field.getType())) {
+        if (singletonKey.isPresent() && !Logged.singletonAlreadyAdded(field.getType())) {
           try {
-            Monologue.logTree((LogLocal) field.get(null), singletonKey.get());
-            LogLocal.addSingleton(field.getType(), new SingletonNode(singletonKey.get(), field.getType(), handle));
+            Monologue.logTree((Logged) field.get(null), singletonKey.get());
+            Logged.addSingleton(field.getType(), new SingletonNode(singletonKey.get(), field.getType(), handle));
           } catch (IllegalAccessException e) {
             RuntimeLog.warn("Issue with singleton " + field.getType().getSimpleName());
           }
@@ -231,29 +243,77 @@ public class Eval {
         continue;
       }
 
+      final Class<?> type;
+      if (optional && optionalAnnotated) {
+        type = field.getAnnotation(OptionalLogged.class).type();
+      } else {
+        type = field.getType();
+      }
+
       if (isArray && isNestedLogged) {
-        
+        ComposableNode node = new ObjectArrayNode(
+          rootPath + metadata.relativePath,
+          handle::get
+        );
+        rootNode.addChild(exploreNodes(getLoggedClasses(type.getComponentType()), node));
       } else if (isNestedLogged) {
         boolean isFlattened = field.isAnnotationPresent(FlattenedLogged.class);
-        String suffix = isFlattened ? "" : "/" + field.getName();
-        ComposableNode node = new ObjectNode(
-          rootPath + suffix,
-          handle
-        );
-        rootNode.addChild(exploreNodes(getLoggedClasses(field.getType()), node));
+        String relativePath = isFlattened ? "" : metadata.relativePath;
+        final ObjectNode node;
+        if (optional) {
+          node = new OptionalNode(
+            rootPath + relativePath,
+            metadata.sink,
+            handle::get,
+            type
+          );
+        } else {
+          node = new ObjectNode(
+            rootPath + relativePath,
+            handle::get,
+            type
+          );
+        }
+        rootNode.addChild(exploreNodes(getLoggedClasses(type), node));
       } else if (isValidLiteralType) {
         if (!metadata.annotated || overloadedAnno(field)) {
           continue;
         }
-        boolean isFinal = Modifier.isFinal(field.getModifiers());
-        boolean isPrimitive = field.getType().isPrimitive();
+        final boolean isFinal = Modifier.isFinal(field.getModifiers());
+        final boolean isPrimitive = type.isPrimitive();
         LoggingNode node;
-        if (field.getType().isArray()) {
+        if (type.isArray()) {
           node = new ValueArrayNode(
               rootPath + metadata.relativePath,
               metadata.sink,
               obj -> (Object[]) handle.get(obj),
-              field.getType());
+              type);
+        } else if (
+          type == double.class
+          || type == Double.TYPE
+          || type == float.class
+          || type == Float.TYPE) {
+          node = new DoubleValueNode(
+            rootPath + metadata.relativePath,
+            metadata.sink,
+            new DoubleVarHandle(handle)::get
+          );
+        } else if (
+          (type == long.class
+          || type == Long.TYPE
+          || type == int.class
+          || type == Integer.TYPE)) {
+          node = new LongValueNode(
+            rootPath + metadata.relativePath,
+            metadata.sink,
+            new LongVarHandle(handle)::get
+          );
+        } else if (type == boolean.class || type == Boolean.TYPE) {
+          node = new BooleanValueNode(
+            rootPath + metadata.relativePath,
+            metadata.sink,
+            new BooleanVarHandle(handle)::get
+          );
         } else {
           node = new ValueNode(
               rootPath + metadata.relativePath,

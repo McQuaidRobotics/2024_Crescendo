@@ -9,7 +9,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.RobotController;
-import monologue.LogLocal;
+import monologue.Logged;
 
 import igknighters.subsystems.swerve.module.SwerveModule.AdvancedSwerveModuleState;
 
@@ -21,7 +21,7 @@ import igknighters.subsystems.swerve.module.SwerveModule.AdvancedSwerveModuleSta
  * kinematic constraints on module rotation and wheel velocity/torque, as well as preventing any
  * forces acting on a module's wheel from exceeding the force of friction.
  */
-public class SwerveSetpointGenerator implements LogLocal {
+public class SwerveSetpointGenerator implements Logged {
     private static final ChassisSpeeds ZERO_SPEEDS = new ChassisSpeeds();
 
     private static final int NUM_MODULES = SPGCalcs.NUM_MODULES;

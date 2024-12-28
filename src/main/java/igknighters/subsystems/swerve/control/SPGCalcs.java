@@ -8,9 +8,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
-import monologue.procstruct.ProceduralStructGenerator;
-import monologue.procstruct.ProceduralStructGenerator.FixedSizeArray;
-import monologue.procstruct.ProceduralStructGenerator.IgnoreStructField;
+import monologue.ProceduralStructGenerator;
+import monologue.ProceduralStructGenerator.FixedSizeArray;
+import monologue.ProceduralStructGenerator.IgnoreStructField;
 
 class SPGCalcs {
     private static final double kEpsilon = 1E-8;

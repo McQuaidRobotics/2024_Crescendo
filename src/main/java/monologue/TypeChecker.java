@@ -45,4 +45,11 @@ class TypeChecker {
     Class<?> et = type.isArray() ? type.getComponentType() : type;
     return isValidLiteralType(et) || isValidExtendableType(et);
   }
+
+  static enum TypeRoutes {
+    DOUBLE,
+    INTEGER,
+    BOOLEAN,
+    OBJECT
+  }
 }

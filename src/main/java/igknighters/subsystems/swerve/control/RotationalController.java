@@ -4,7 +4,7 @@ import igknighters.constants.ConstValues;
 import igknighters.constants.ConstValues.kSwerve;
 import igknighters.constants.ConstValues.kSwerve.kRotationController;
 import igknighters.subsystems.swerve.Swerve;
-import monologue.procstruct.ProceduralStructGenerator;
+import monologue.ProceduralStructGenerator;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.util.struct.Struct;

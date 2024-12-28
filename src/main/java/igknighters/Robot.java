@@ -4,9 +4,10 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 
-import monologue.LogLocal;
+import monologue.Logged;
 import monologue.LogSink;
 import monologue.Monologue;
+import monologue.Annotations.FlattenedLogged;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.networktables.StringSubscriber;
@@ -41,7 +42,7 @@ import choreo.auto.AutoFactory;
 import choreo.auto.AutoFactory.AutoBindings;
 import choreo.trajectory.SwerveSample;
 
-public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
+public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
     private static final AtomicInteger loopCount = new AtomicInteger(0);
 
@@ -52,6 +53,7 @@ public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
 
     private final DriverController driverController;
 
+    @FlattenedLogged
     public final AllSubsystems allSubsystems;
 
     public final AutoChooser autoChooser = new AutoChooser();
@@ -68,10 +70,6 @@ public class Robot extends UnitTestableRobot<Robot> implements LogLocal {
         driverController = new DriverController(0, localizer);
 
         allSubsystems = new AllSubsystems(localizer, simCtx, RobotConfig.getRobotID().subsystems);
-
-        for (final LogLocal subsystem : allSubsystems.getLoggableSubsystems()) {
-            Monologue.logTree(subsystem, "/Robot/" + subsystem.getClass().getSimpleName());
-        }
 
         driverController.assignButtons(allSubsystems);
 

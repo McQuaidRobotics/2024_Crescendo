@@ -4,45 +4,45 @@ import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-
-import sham.ShamSwerve;
-import sham.utils.GearRatio;
-
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import monologue.Annotations.IgnoreLogged;
-import igknighters.SimCtx;
 import igknighters.constants.ConstValues.kSwerve;
+import igknighters.constants.ConstValues.kSwerve.kSteerMotor;
+import igknighters.constants.ConstValues.kSwerve.kDriveMotor;
 import igknighters.subsystems.swerve.odometryThread.RealSwerveOdometryThread;
 import igknighters.util.can.CANRetrier;
 import igknighters.util.can.CANSignalManager;
 import igknighters.util.logging.BootupLogger;
-import igknighters.util.sim.FusedTalonFxSimController;
-import igknighters.util.sim.TalonFxSimController;
 
-public class SwerveModuleOmni extends SwerveModule {
+public class SwerveModuleReal extends SwerveModule {
     private final TalonFX driveMotor;
     private final BaseStatusSignal driveVoltSignal, driveAmpSignal;
-    private final VelocityVoltage driveMotorClosedReq = new VelocityVoltage(0).withEnableFOC(true).withUpdateFreqHz(0);
+    private final VelocityVoltage driveMotorClosedReq;
 
     private final TalonFX steerMotor;
-    private final BaseStatusSignal angleVoltSignal, angleAmpSignal;
-    private final PositionDutyCycle angleMotorReq = new PositionDutyCycle(0)
+    private final BaseStatusSignal steerVoltSignal, steerAmpSignal;
+    private final PositionDutyCycle steerMotorReq = new PositionDutyCycle(0)
             .withUpdateFreqHz(0);
 
     private final CANcoder steerEncoder;
-    private final BaseStatusSignal angleAbsoluteSignal, angleAbsoluteVeloSignal;
+    private final BaseStatusSignal steerAbsoluteSignal, steerAbsoluteVeloSignal;
 
     public final int moduleId;
 
     @IgnoreLogged
     private final RealSwerveOdometryThread odoThread;
 
-    public SwerveModuleOmni(final int moduleId, final RealSwerveOdometryThread odoThread, final SimCtx simCtx) {
+    private Rotation2d lastAngle = new Rotation2d();
+
+    public SwerveModuleReal(final int moduleId, final RealSwerveOdometryThread odoThread) {
         super("SwerveModule[" + moduleId + "]");
         this.odoThread = odoThread;
 
@@ -57,29 +57,20 @@ public class SwerveModuleOmni extends SwerveModule {
         CANRetrier.retryStatusCode(() -> steerMotor.getConfigurator().apply(steerMotorConfig(steerEncoder.getDeviceID()), 1.0), 5);
         CANRetrier.retryStatusCode(() -> steerEncoder.getConfigurator().apply(cancoderConfig(rotationOffset), 1.0), 5);
 
-        if (simCtx.isActive()) {
-            ((ShamSwerve) simCtx.robot().getDriveTrain())
-                .withSetModuleControllers(
-                    moduleId,
-                    new TalonFxSimController(driveMotor.getSimState()).withBrakeEnabled(true),
-                    new FusedTalonFxSimController(steerMotor.getSimState(), steerEncoder.getSimState(), GearRatio.reduction(kSwerve.STEER_GEAR_RATIO))
-                );
-        }
-
         driveVoltSignal = driveMotor.getMotorVoltage();
         driveAmpSignal = driveMotor.getTorqueCurrent();
 
-        angleVoltSignal = steerMotor.getMotorVoltage();
-        angleAmpSignal = steerMotor.getTorqueCurrent();
+        steerVoltSignal = steerMotor.getMotorVoltage();
+        steerAmpSignal = steerMotor.getTorqueCurrent();
 
-        angleAbsoluteSignal = steerEncoder.getAbsolutePosition();
-        angleAbsoluteVeloSignal = steerEncoder.getVelocity();
+        steerAbsoluteSignal = steerEncoder.getAbsolutePosition();
+        steerAbsoluteVeloSignal = steerEncoder.getVelocity();
 
         CANSignalManager.registerSignals(
             kSwerve.CANBUS,
             driveVoltSignal, driveAmpSignal,
-            angleVoltSignal, angleAmpSignal,
-            angleAbsoluteSignal, angleAbsoluteVeloSignal
+            steerVoltSignal, steerAmpSignal,
+            steerAbsoluteSignal, steerAbsoluteVeloSignal
         );
 
         odoThread.addModuleStatusSignals(
@@ -96,28 +87,76 @@ public class SwerveModuleOmni extends SwerveModule {
 
         CANRetrier.retryStatusCode(() -> driveMotor.setPosition(0.0, 0.1), 3);
 
-        BootupLogger.bootupLog("    SwerveModule[" + this.moduleId + "] initialized (omni)");
+        driveMotorClosedReq = new VelocityVoltage(0).withEnableFOC(true).withUpdateFreqHz(0);
+
+        BootupLogger.bootupLog("    SwerveModule[" + this.moduleId + "]");
     }
 
-    @Override
+    protected TalonFXConfiguration driveMotorConfig() {
+        var cfg = new TalonFXConfiguration();
+
+        cfg.MotorOutput.Inverted = kSwerve.DRIVE_MOTOR_INVERT;
+        cfg.MotorOutput.NeutralMode = kSwerve.DRIVE_NEUTRAL_MODE;
+
+        cfg.Slot0.kP = kDriveMotor.kP;
+        cfg.Slot0.kI = kDriveMotor.kI;
+        cfg.Slot0.kD = kDriveMotor.kD;
+        cfg.Slot0.kV = 12.0
+                / (kSwerve.MAX_DRIVE_VELOCITY / (kSwerve.WHEEL_CIRCUMFERENCE / kSwerve.DRIVE_GEAR_RATIO));
+        cfg.Slot0.kS = kDriveMotor.kS;
+
+        cfg.CurrentLimits.StatorCurrentLimitEnable = true;
+        cfg.CurrentLimits.StatorCurrentLimit = kSwerve.SLIP_CURRENT;
+        cfg.TorqueCurrent.PeakForwardTorqueCurrent = kSwerve.SLIP_CURRENT;
+        cfg.TorqueCurrent.PeakReverseTorqueCurrent = -kSwerve.SLIP_CURRENT;
+
+        return cfg;
+    }
+
+    protected TalonFXConfiguration steerMotorConfig(int encoderId) {
+        var cfg = new TalonFXConfiguration();
+
+        cfg.MotorOutput.Inverted = kSwerve.ANGLE_MOTOR_INVERT;
+        cfg.MotorOutput.NeutralMode = kSwerve.ANGLE_NEUTRAL_MODE;
+
+        cfg.Slot0.kP = kSteerMotor.kP;
+        cfg.Slot0.kI = kSteerMotor.kI;
+        cfg.Slot0.kD = kSteerMotor.kD;
+
+        cfg.Feedback.FeedbackRemoteSensorID = encoderId;
+        cfg.Feedback.RotorToSensorRatio = kSwerve.STEER_GEAR_RATIO;
+        cfg.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+        cfg.ClosedLoopGeneral.ContinuousWrap = true;
+
+        return cfg;
+    }
+
+    protected CANcoderConfiguration cancoderConfig(double rotationOffset) {
+        var canCoderConfig = new CANcoderConfiguration();
+        canCoderConfig.MagnetSensor.MagnetOffset = rotationOffset;
+
+        return canCoderConfig;
+    }
+
     public int getModuleId() {
         return this.moduleId;
     }
 
     @Override
     public void setDesiredState(AdvancedSwerveModuleState desiredState) {
+        desiredState.optimize(getAngle());
         setAngle(desiredState);
         setSpeed(desiredState);
     }
 
     private void setAngle(SwerveModuleState desiredState) {
-        super.targetSteerAbsoluteRads = desiredState.angle.getRadians();
+        Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (kSwerve.MAX_DRIVE_VELOCITY * 0.01))
+                ? lastAngle
+                : desiredState.angle;
+        super.targetSteerAbsoluteRads = angle.getRadians();
 
-        if (Math.abs(desiredState.speedMetersPerSecond) <= (kSwerve.MAX_DRIVE_VELOCITY * 0.01)) {
-            return;
-        }
-
-        steerMotor.setControl(angleMotorReq.withPosition(desiredState.angle.getRotations()));
+        steerMotor.setControl(steerMotorReq.withPosition(angle.getRotations()));
+        lastAngle = angle;
     }
 
     private void setSpeed(AdvancedSwerveModuleState desiredState) {
@@ -125,7 +164,8 @@ public class SwerveModuleOmni extends SwerveModule {
         double rps = (desiredState.speedMetersPerSecond / kSwerve.WHEEL_CIRCUMFERENCE) * kSwerve.DRIVE_GEAR_RATIO;
         log("DriveRPS", rps);
         driveMotor.setControl(
-            driveMotorClosedReq.withVelocity(rps));
+            driveMotorClosedReq.withVelocity(rps)
+            .withAcceleration(desiredState.driveAccelerationFF));
     }
 
     public SwerveModuleState getCurrentState() {
@@ -151,10 +191,10 @@ public class SwerveModuleOmni extends SwerveModule {
 
     @Override
     public void periodic() {
-        super.steerAbsoluteRads = Units.rotationsToRadians(angleAbsoluteSignal.getValueAsDouble());
-        super.steerVeloRadPS = Units.rotationsToRadians(angleAbsoluteVeloSignal.getValueAsDouble());
-        super.steerVolts = angleVoltSignal.getValueAsDouble();
-        super.steerAmps = angleAmpSignal.getValueAsDouble();
+        super.steerAbsoluteRads = Units.rotationsToRadians(steerAbsoluteSignal.getValueAsDouble());
+        super.steerVeloRadPS = Units.rotationsToRadians(steerAbsoluteVeloSignal.getValueAsDouble());
+        super.steerVolts = steerVoltSignal.getValueAsDouble();
+        super.steerAmps = steerAmpSignal.getValueAsDouble();
 
         super.drivePositionMeters = driveRotationsToMeters(odoThread.getModulePosition(moduleId));
         super.driveVeloMPS = driveRotationsToMeters(odoThread.getModuleVelocity(moduleId));

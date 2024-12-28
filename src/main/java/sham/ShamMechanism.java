@@ -35,7 +35,7 @@ import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
-import monologue.procstruct.ProceduralStructGenerator;
+import monologue.ProceduralStructGenerator;
 
 public class ShamMechanism {
     private static final double kMotorEfficiency = 0.85;
@@ -456,6 +456,7 @@ public class ShamMechanism {
             );
         } finally {
             logger.log("Update/outputs", outputs, MechanismOutputs.struct);
+            logger.log("Update/motorOutputs", motorOutputs(), MechanismOutputs.struct);
             logger.log("Update/inputs", inputs, MechanismInputs.struct);
             ioLock.writeLock().unlock();
         }

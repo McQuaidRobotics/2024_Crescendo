@@ -2,7 +2,7 @@ package sham.configs;
 
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
-import monologue.procstruct.ProceduralStructGenerator;
+import monologue.ProceduralStructGenerator;
 
 public class ShamGyroConfig implements StructSerializable {
     public double averageDriftingIn30SecsMotionlessDeg;

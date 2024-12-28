@@ -1,4 +1,4 @@
-package monologue.procstruct;
+package monologue;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -25,10 +25,10 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.BaseStream;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
-import monologue.RuntimeLog;
 
 /** A utility class for procedurally generating {@link Struct}s from records and enums. */
 public final class ProceduralStructGenerator {
@@ -57,6 +57,16 @@ public final class ProceduralStructGenerator {
     }
   }
 
+  private static class DoublePacker implements Packer<Double> {
+    public ByteBuffer packDouble(ByteBuffer buffer, double value) {
+      return buffer.putDouble(value);
+    }
+
+    public ByteBuffer pack(ByteBuffer buffer, Double value) {
+      return packDouble(buffer, value);
+    }
+  }
+
   private record PrimType<T>(String name, int size, Unpacker<T> unpacker, Packer<T> packer) {
   }
 
@@ -78,14 +88,26 @@ public final class ProceduralStructGenerator {
   // Add primitive types to the map
   static {
     addPrimType(
-        Integer.class, int.class, "int32", Integer.BYTES, ByteBuffer::getInt, ByteBuffer::putInt);
+        Long.class,
+        long.class,
+        "int64",
+        Long.BYTES,
+        ByteBuffer::getLong,
+        ByteBuffer::putLong);
+    addPrimType(
+        Integer.class,
+        int.class,
+        "int32",
+        Integer.BYTES,
+        ByteBuffer::getInt,
+        ByteBuffer::putInt);
     addPrimType(
         Double.class,
         double.class,
         "float64",
         Double.BYTES,
         ByteBuffer::getDouble,
-        ByteBuffer::putDouble);
+        new DoublePacker());
     addPrimType(
         Float.class,
         float.class,
@@ -107,11 +129,26 @@ public final class ProceduralStructGenerator {
         Character.BYTES,
         ByteBuffer::getChar,
         ByteBuffer::putChar);
-    addPrimType(Byte.class, byte.class, "uint8", Byte.BYTES, ByteBuffer::get, ByteBuffer::put);
     addPrimType(
-        Short.class, short.class, "int16", Short.BYTES, ByteBuffer::getShort, ByteBuffer::putShort);
+      Byte.class,
+      byte.class,
+      "uint8", Byte.BYTES,
+      ByteBuffer::get,
+      ByteBuffer::put);
     addPrimType(
-        Long.class, long.class, "int64", Long.BYTES, ByteBuffer::getLong, ByteBuffer::putLong);
+        Short.class,
+        short.class,
+        "int16",
+        Short.BYTES,
+        ByteBuffer::getShort,
+        ByteBuffer::putShort);
+    addPrimType(
+        Long.class,
+        long.class,
+        "int64",
+        Long.BYTES,
+        ByteBuffer::getLong,
+        ByteBuffer::putLong);
   }
 
   /**
@@ -649,6 +686,22 @@ public final class ProceduralStructGenerator {
         boolean failed = false;
         int startingPosition = buffer.position();
         for (int i = 0; i < components.length; i++) {
+          if (fields.get(i).packer() instanceof DoublePacker doublePacker) {
+            try {
+              double d = (double) components[i].getAccessor().invoke(value);
+              doublePacker.packDouble(buffer, d);
+              continue;
+            } catch (IllegalAccessException
+                | IllegalArgumentException
+                | InvocationTargetException e) {
+              RuntimeLog.warn("Could not pack record component: "
+                  + recordClass.getSimpleName() + "#"
+                  + components[i].getName()
+                  + "\n    " + e.getMessage());
+              failed = true;
+              break;
+            }
+          }
           Packer<Object> packer = (Packer<Object>) fields.get(i).packer();
           try {
             Object componentValue = components[i].getAccessor().invoke(value);
@@ -806,6 +859,10 @@ public final class ProceduralStructGenerator {
       public E clone(E obj) throws CloneNotSupportedException {
         return obj;
       };
+
+      public boolean isImmutable() {
+        return true;
+      };
     };
   }
 
@@ -867,6 +924,20 @@ public final class ProceduralStructGenerator {
         boolean failed = false;
         int startingPosition = buffer.position();
         for (int i = 0; i < allFields.length; i++) {
+          if (fields.get(i).packer() instanceof DoublePacker doublePacker) {
+            try {
+              doublePacker.packDouble(buffer, allFields[i].getDouble(value));
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+              System.err.println(
+                  "Could not pack object field: "
+                      + objectClass.getSimpleName()
+                      + "#" + allFields[i].getName()
+                      + "\n    " + e.getMessage());
+              failed = true;
+              break;
+            }
+            continue;
+          }
           Packer<Object> packer = (Packer<Object>) fields.get(i).packer();
           try {
             Object fieldValue = allFields[i].get(value);
@@ -921,5 +992,27 @@ public final class ProceduralStructGenerator {
   @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
   public static <O> Struct<O> genObjectNoUnpack(Class<O> objectClass) {
     return genObject(objectClass, null);
+  }
+
+  public static class SerdePair<A, B> extends Pair<A, B> {
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ ElementType.FIELD, ElementType.RECORD_COMPONENT })
+    @Documented
+    public @interface SerdePairHint {
+      Class<?> a();
+      Class<?> b();
+    }
+
+    private SerdePair(A a, B b) {
+      super(a, b);
+    }
+
+    public static <A extends StructSerializable, B extends StructSerializable> SerdePair<A, B> of(A a, B b) {
+      return new SerdePair<>(a, b);
+    }
+
+    public static <A extends Measure<?>, B extends Measure<?>> SerdePair<A, B> ofMeasure(A a, B b) {
+      return new SerdePair<>(a, b);
+    }
   }
 }

@@ -15,19 +15,19 @@ import java.util.function.BooleanSupplier;
  *
  * <p>Monologue is a library that allows for easy logging of objects to NetworkTables and Datalog.
  * It has {@link Annotations} that allow implicit logging of fields and methods on objects that
- * implement the {@link LogLocal} interface.
+ * implement the {@link Logged} interface.
  *
- * <p>Monologue works by creating a tree of objects that implement the {@link LogLocal} interface and
+ * <p>Monologue works by creating a tree of objects that implement the {@link Logged} interface and
  * then logging the fields and methods of those objects to NetworkTables and Datalog based on their
  * annotations. For example let's say the root object is {@code Robot.java}, you would
- * implemenet {@link LogLocal} on the root object and then call {@link #setupMonologue(LogLocal, String,
+ * implemenet {@link Logged} on the root object and then call {@link #setupMonologue(Logged, String,
  * MonologueConfig)} with the root object and a root path (typically "/Robot"). This will recurse
  * through all the fields in {@code RobotContainer.java} and search for more objects that implement
- * {@link LogLocal} and repeat the process until all fields and methods have been logged.
+ * {@link Logged} and repeat the process until all fields and methods have been logged.
  *
  * <p>Monologue has a rich error handling system that will tell you what you did wrong and where you
  * did it wrong. If you would like to run Monologue in whole robot Unit Tests you can use {@link
- * #setupMonologueDisabled(LogLocal, String, boolean)} to disable logging and only run the error
+ * #setupMonologueDisabled(Logged, String, boolean)} to disable logging and only run the error
  * checking.
  * 
  * <p><b>WARNING:</b> Any use of `DatalogManager` before Monologue.setupMonologue()
@@ -133,7 +133,7 @@ public class Monologue extends GlobalLogged {
 
     /**
      * Updates the allowNonFinalLoggedFields flag. If true, Monologue will allow non-final fields
-     * containing {@link LogLocal} objects to be logged. This is not reccomended as it can lead to
+     * containing {@link Logged} objects to be logged. This is not reccomended as it can lead to
      * unexpected behavior.
      *
      * @param allowNonFinalLoggedFields The new allowNonFinalLoggedFields flag
@@ -155,10 +155,10 @@ public class Monologue extends GlobalLogged {
    * @param loggable the root Logged object to log
    * @param rootpath the root path to log to\
    * @param config the configuration for the Monologue library
-   * @apiNote Should only be called once, if another {@link LogLocal} tree needs to be created use
-   *     {@link #logTree(LogLocal, String)} for additional trees
+   * @apiNote Should only be called once, if another {@link Logged} tree needs to be created use
+   *     {@link #logTree(Logged, String)} for additional trees
    */
-  public static void setupMonologue(LogLocal loggable, String rootpath, MonologueConfig config) {
+  public static void setupMonologue(Logged loggable, String rootpath, MonologueConfig config) {
     if (HAS_SETUP_BEEN_CALLED) {
       RuntimeLog.warn(
           "Monologue.setupMonologue() has already been called, further calls will do nothing");
@@ -211,7 +211,7 @@ public class Monologue extends GlobalLogged {
    * @param throwOnWarn if true, will throw an exception when a Monologue internal warning is
    *     emitted
    */
-  public static void setupMonologueDisabled(LogLocal loggable, String rootpath, boolean throwOnWarn) {
+  public static void setupMonologueDisabled(Logged loggable, String rootpath, boolean throwOnWarn) {
     if (HAS_SETUP_BEEN_CALLED && !IS_DISABLED) {
       RuntimeLog.warn(
           "Monologue.setupMonologue() has already been called, disabling after setup will do nothing");
@@ -232,21 +232,21 @@ public class Monologue extends GlobalLogged {
     // tests
     logTree(loggable, rootpath);
 
-    LogLocal.registry.clear();
+    Logged.registry.clear();
 
     RuntimeLog.info("Monologue.setupMonologueDisabled() finished");
   }
 
   /**
-   * Creates a logging tree for the provided {@link LogLocal} object. Will also recursively check
-   * field values for classes that implement {@link LogLocal} and log those as well.
+   * Creates a logging tree for the provided {@link Logged} object. Will also recursively check
+   * field values for classes that implement {@link Logged} and log those as well.
    *
    * @param loggable the obj to scrape
    * @param path the path to log to
    * @throws IllegalStateException If {@link #setupMonologue()} or {@link
    *     #setupMonologueDisabled()} is not called first
    */
-  public static void logTree(LogLocal loggable, String path) {
+  public static void logTree(Logged loggable, String path) {
     if (!hasBeenSetup())
       throw new IllegalStateException(
           "Tried to use Monologue.logTree() before using a Monologue setup method");
@@ -263,7 +263,7 @@ public class Monologue extends GlobalLogged {
 
     StaticObjectNode node = new LoggingTree.StaticObjectNode(path, loggable);
     Eval.exploreNodes(Eval.getLoggedClasses(loggable.getClass()), node);
-    LogLocal.addNode(loggable, node);
+    Logged.addNode(loggable, node);
 
     trees.add(node);
 

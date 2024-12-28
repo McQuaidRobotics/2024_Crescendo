@@ -8,7 +8,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
 import monologue.Monologue;
-import monologue.procstruct.ProceduralStructGenerator;
+import monologue.ProceduralStructGenerator;
 import igknighters.constants.ConstValues.kRobotCollisionGeometry;
 import igknighters.constants.ConstValues.kStem;
 import igknighters.constants.ConstValues.kStem.kPivot;
