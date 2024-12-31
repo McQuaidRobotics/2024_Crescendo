@@ -142,7 +142,7 @@ public final class ConstValues {
     }
 
     public static final class kVision {
-        public static final double AMBIGUITY_CUTOFF = 0.15;
+        public static final double ROOT_TRUST = 0.75;
 
         public static final double MAX_Z_DELTA = 0.2;
         public static final double MAX_ANGLE_DELTA = 5.0 * Conv.DEGREES_TO_RADIANS;
@@ -184,6 +184,7 @@ public final class ConstValues {
             public static CameraConfig[] forRobot(RobotID id) {
                 return switch (RobotConfig.getRobotID()) {
                     case CRASH -> CameraConfigs.CRASH.cameras;
+                    case SIM_CRASH -> CameraConfigs.CRASH.cameras;
                     default -> CameraConfigs.BURN.cameras;
                 };
             }

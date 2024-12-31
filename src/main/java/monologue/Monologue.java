@@ -53,7 +53,6 @@ public class Monologue extends GlobalLogged {
    */
   public static record MonologueConfig(
       BooleanSupplier optimizeBandwidthSupplier,
-      boolean lazyLogging,
       String datalogPrefix,
       boolean throwOnWarn,
       boolean allowNonFinalLoggedFields) {
@@ -72,7 +71,7 @@ public class Monologue extends GlobalLogged {
     }
 
     public MonologueConfig() {
-      this(() -> false, false, "NT:", false, false);
+      this(() -> false, "NT:", false, false);
     }
 
     /**
@@ -83,7 +82,7 @@ public class Monologue extends GlobalLogged {
      */
     public MonologueConfig withOptimizeBandwidth(BooleanSupplier optimizeBandwidth) {
       return new MonologueConfig(
-        optimizeBandwidth, lazyLogging, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
+        optimizeBandwidth, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
     }
 
     /**
@@ -94,7 +93,7 @@ public class Monologue extends GlobalLogged {
      */
     public MonologueConfig withOptimizeBandwidth(boolean optimizeBandwidth) {
       return new MonologueConfig(
-          () -> optimizeBandwidth, lazyLogging, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
+          () -> optimizeBandwidth, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
     }
 
     /**
@@ -105,7 +104,7 @@ public class Monologue extends GlobalLogged {
      */
     public MonologueConfig withLazyLogging(boolean lazyLogging) {
       return new MonologueConfig(
-          optimizeBandwidthSupplier, lazyLogging, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
+          optimizeBandwidthSupplier, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
     }
 
     /**
@@ -116,7 +115,7 @@ public class Monologue extends GlobalLogged {
      */
     public MonologueConfig withDatalogPrefix(String datalogPrefix) {
       return new MonologueConfig(
-          optimizeBandwidthSupplier, lazyLogging, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
+          optimizeBandwidthSupplier, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
     }
 
     /**
@@ -128,7 +127,7 @@ public class Monologue extends GlobalLogged {
      */
     public MonologueConfig withThrowOnWarning(boolean throwOnWarn) {
       return new MonologueConfig(
-          optimizeBandwidthSupplier, lazyLogging, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
+          optimizeBandwidthSupplier, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
     }
 
     /**
@@ -141,7 +140,7 @@ public class Monologue extends GlobalLogged {
      */
     public MonologueConfig withAllowNonFinalLoggedFields(boolean allowNonFinalLoggedFields) {
       return new MonologueConfig(
-          optimizeBandwidthSupplier, lazyLogging, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
+          optimizeBandwidthSupplier, datalogPrefix, throwOnWarn, allowNonFinalLoggedFields);
     }
   }
 
@@ -191,6 +190,7 @@ public class Monologue extends GlobalLogged {
     logTree(loggable, rootpath);
 
     prematureCalls.forEach(Runnable::run);
+    prematureCalls.clear();
 
     System.gc();
 

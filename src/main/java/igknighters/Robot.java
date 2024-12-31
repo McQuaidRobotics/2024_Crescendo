@@ -8,6 +8,7 @@ import monologue.Logged;
 import monologue.LogSink;
 import monologue.Monologue;
 import monologue.Annotations.FlattenedLogged;
+import monologue.Annotations.Log;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.networktables.StringSubscriber;
@@ -22,7 +23,6 @@ import igknighters.commands.autos.AutoController;
 import igknighters.commands.autos.AutoRoutines;
 import igknighters.commands.swerve.teleop.TeleopSwerveTraditionalCmd;
 import igknighters.commands.tests.Characterizers;
-import igknighters.commands.tests.Idk;
 import igknighters.commands.tests.TestManager;
 import igknighters.commands.umbrella.UmbrellaCommands;
 import igknighters.constants.ConstValues;
@@ -48,6 +48,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
     private final CommandScheduler scheduler = CommandScheduler.getInstance();
 
+    @Log(key = "Localizer")
     public final Localizer localizer = new Localizer();
     public final SimCtx simCtx = new SimCtx(localizer, isSimulation());
 
@@ -162,9 +163,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
     public void disabledPeriodic() {}
 
     @Override
-    public void teleopInit() {
-        new Idk().schedule();
-    }
+    public void teleopInit() {}
 
     @Override
     public void autonomousInit() {

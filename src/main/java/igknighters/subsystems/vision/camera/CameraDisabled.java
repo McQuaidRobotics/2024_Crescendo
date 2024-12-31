@@ -5,9 +5,6 @@ import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 
-import org.photonvision.simulation.PhotonCameraSim;
-import org.photonvision.targeting.PhotonTrackedTarget;
-
 import igknighters.subsystems.vision.Vision.VisionUpdateFaults;
 import igknighters.subsystems.vision.Vision.VisionUpdate;
 import igknighters.util.logging.BootupLogger;

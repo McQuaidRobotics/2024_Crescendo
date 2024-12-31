@@ -22,13 +22,13 @@ import edu.wpi.first.math.geometry.Transform3d;
  * An abstraction for a photon camera.
  */
 public class CameraRealPhoton extends Camera {
-    private final PhotonCamera camera;
-    private final Transform3d cameraPose;
+    protected final PhotonCamera camera;
+    protected final Transform3d cameraPose;
     private final PhotonPoseEstimator poseEstimator;
 
-    private Optional<VisionUpdate> previousUpdate;
-    private ArrayList<Integer> seenTags;
-    private ArrayList<VisionUpdate> updates;
+    private Optional<VisionUpdate> previousUpdate = Optional.empty();
+    private ArrayList<Integer> seenTags = new ArrayList<>();
+    private ArrayList<VisionUpdate> updates = new ArrayList<>();
 
     public CameraRealPhoton(String cameraName, Transform3d cameraPose) {
         this.camera = new PhotonCamera(cameraName);

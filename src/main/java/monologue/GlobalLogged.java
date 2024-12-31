@@ -511,7 +511,11 @@ class GlobalLogged {
    * @param value The value to log.
    */
   public static void publishSendable(String entryName, Sendable value, LogSink sink) {
-    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) return;
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
+      String entryNameFinal = entryName;
+      Monologue.prematureLog(() -> GlobalLogged.publishSendable(entryNameFinal, value, sink));
+      return;
+    }
     entryName = NetworkTable.normalizeKey(entryName, true);
     var builder = new MonoSendableLayer.Builder(entryName, sink);
     value.initSendable(builder);
@@ -528,7 +532,11 @@ class GlobalLogged {
    * @param value The value to log.
    */
   public static void publishSendable(String entryName, Field2d value, LogSink sink) {
-    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) return;
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
+      String entryNameFinal = entryName;
+      Monologue.prematureLog(() -> GlobalLogged.publishSendable(entryNameFinal, value, sink));
+      return;
+    }
     entryName = NetworkTable.normalizeKey(entryName, true);
     NtSendableCompat.addField2d(entryName, value, sink);
   }
@@ -543,7 +551,11 @@ class GlobalLogged {
    * @param value The value to log.
    */
   public static void publishSendable(String entryName, Mechanism2d value, LogSink sink) {
-    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) return;
+    if (!Monologue.hasBeenSetup() || Monologue.isMonologueDisabled()) {
+      String entryNameFinal = entryName;
+      Monologue.prematureLog(() -> GlobalLogged.publishSendable(entryNameFinal, value, sink));
+      return;
+    }
     entryName = NetworkTable.normalizeKey(entryName, true);
     NtSendableCompat.addMechanism2d(entryName, value, sink);
   }

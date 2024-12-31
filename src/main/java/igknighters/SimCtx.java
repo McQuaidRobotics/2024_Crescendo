@@ -4,6 +4,10 @@ import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
+import org.photonvision.estimation.TargetModel;
+import org.photonvision.simulation.VisionSystemSim;
+import org.photonvision.simulation.VisionTargetSim;
+
 import sham.ShamArena;
 import sham.ShamSwerve;
 import sham.ShamRobot;
@@ -20,9 +24,12 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import igknighters.Localizer.NamedPositions;
 import igknighters.constants.ConstValues;
+import igknighters.constants.FieldConstants;
 import igknighters.constants.ConstValues.kSwerve;
 import igknighters.util.plumbing.Channel.Receiver;
 import igknighters.util.plumbing.Channel.Sender;
+import monologue.LogSink;
+import monologue.Monologue;
 
 /**
  * An object containing sim-specific objects and configurations.
@@ -36,6 +43,14 @@ public class SimCtx {
     // all fields below this point will be null if isSimulation is false
     private final ShamArena arena;
     private final ShamRobot<ShamSwerve> simRobot;
+
+    private final VisionSystemSim aprilTagSim;
+    private final VisionSystemSim objectDetectionSim;
+    private final TargetModel gpTargetModel = new TargetModel(
+        Units.inchesToMeters(14.0),
+        Units.inchesToMeters(14.0),
+        Units.inchesToMeters(2.0)
+    );
 
     private final Sender<NamedPositions> poseSender;
     private final Receiver<Pose2d> resetReceiver;
@@ -73,9 +88,15 @@ public class SimCtx {
         if (isSimulation) {
             arena = new Crescendo.CrescendoSimArena(Seconds.of(ConstValues.PERIODIC_TIME), 5);
             simRobot = new ShamRobot<>(arena, "User", swerveConfig, 1);
+            aprilTagSim = new VisionSystemSim("AprilTags");
+            aprilTagSim.addAprilTags(FieldConstants.APRIL_TAG_FIELD);
+            objectDetectionSim = new VisionSystemSim("ObjectDetection");
+            Monologue.publishSendable("visionSimField", aprilTagSim.getDebugField(), LogSink.NT);
         } else {
             arena = null;
             simRobot = null;
+            aprilTagSim = null;
+            objectDetectionSim = null;
         }
     }
 
@@ -91,6 +112,14 @@ public class SimCtx {
         return simRobot;
     }
 
+    public VisionSystemSim aprilTagSim() {
+        return aprilTagSim;
+    }
+
+    public VisionSystemSim objectDetectionSim() {
+        return objectDetectionSim;
+    }
+
     public void update() {
         if (isSimulation) {
             if (resetReceiver.hasData()) {
@@ -98,7 +127,15 @@ public class SimCtx {
                 robot().getDriveTrain().setChassisWorldPose(poses[poses.length - 1], true);
             }
             arena.simulationPeriodic();
-            poseSender.send(new NamedPositions("SimRobot", simRobot.getDriveTrain().getChassisWorldPose()));
+            final Pose2d robotPose = simRobot.getDriveTrain().getChassisWorldPose();
+            poseSender.send(new NamedPositions("SimRobot", robotPose));
+            aprilTagSim.update(robotPose);
+            objectDetectionSim.update(robotPose);
+            objectDetectionSim.clearVisionTargets();
+            final var objectTargets = arena.gamePieces()
+                .map(gp -> new VisionTargetSim(gp.pose(), gpTargetModel))
+                .toArray(VisionTargetSim[]::new);
+            objectDetectionSim.addVisionTargets("gamepieces", objectTargets);
         }
     }
 }

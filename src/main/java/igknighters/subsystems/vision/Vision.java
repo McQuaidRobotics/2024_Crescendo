@@ -9,8 +9,8 @@ import igknighters.constants.ConstValues.kVision;
 import igknighters.constants.FieldConstants;
 import igknighters.subsystems.SubsystemResources.LockFreeSubsystem;
 import igknighters.subsystems.vision.camera.Camera;
-import igknighters.subsystems.vision.camera.CameraDisabled;
 import igknighters.subsystems.vision.camera.CameraRealPhoton;
+import igknighters.subsystems.vision.camera.CameraSimPhoton;
 import igknighters.subsystems.vision.camera.Camera.CameraConfig;
 import igknighters.util.logging.Tracer;
 import igknighters.util.plumbing.Channel.Sender;
@@ -25,22 +25,20 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.networktables.BooleanEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
 import monologue.ProceduralStructGenerator;
+import monologue.Annotations.IgnoreLogged;
 
 public class Vision implements LockFreeSubsystem {
+    @IgnoreLogged
     private final Localizer localizer;
 
     private final Sender<VisionSample> visionSender;
 
     private final Camera[] cameras;
 
-    private final BooleanEntry cameraPositionFieldVisualizer;
-
-    private HashSet<Integer> seenTags = new HashSet<>();
+    private final HashSet<Integer> seenTags = new HashSet<>();
 
     public record VisionUpdateFaults(
         boolean extremeJitter,
@@ -114,15 +112,15 @@ public class Vision implements LockFreeSubsystem {
             VisionUpdateFaults faults
         ) implements StructSerializable {
 
-            private static final VisionUpdate kEmpty = new VisionUpdate(
-                Pose3d.kZero,
-                0.0,
-                VisionUpdateFaults.empty()
-            );
+        private static final VisionUpdate kEmpty = new VisionUpdate(
+            Pose3d.kZero,
+            0.0,
+            VisionUpdateFaults.empty()
+        );
 
-            public static VisionUpdate empty() {
-                return kEmpty;
-            }
+        public static VisionUpdate empty() {
+            return kEmpty;
+        }
 
         public static final Struct<VisionUpdate> struct = ProceduralStructGenerator.genRecord(VisionUpdate.class);
     }
@@ -136,26 +134,21 @@ public class Vision implements LockFreeSubsystem {
         public static final Struct<VisionSample> struct = ProceduralStructGenerator.genRecord(VisionSample.class);
     }
 
-    private Camera makeCamera(CameraConfig config) {
+    private Camera makeCamera(CameraConfig config, SimCtx simCtx) {
         if (Robot.isSimulation()) {
-            return new CameraDisabled(config.cameraName(), config.cameraPose());
+            return new CameraSimPhoton(config.cameraName(), config.cameraPose(), simCtx);
         } else {
             return new CameraRealPhoton(config.cameraName(), config.cameraPose());
         }
     }
 
-    public Vision(final Localizer localizer, final SimCtx simRobot) {
+    public Vision(final Localizer localizer, final SimCtx simCtx) {
         this.localizer = localizer;
-        this.cameras = List.of(kVision.CameraConfigs.forRobot(RobotConfig.getRobotID()))
-                .stream()
-                .map(this::makeCamera)
-                .toArray(Camera[]::new);
-
-        cameraPositionFieldVisualizer = NetworkTableInstance.getDefault()
-                .getTable("Visualizers")
-                .getBooleanTopic("CamerasOnField")
-                .getEntry(false);
-        cameraPositionFieldVisualizer.accept(false);
+        final var configs = kVision.CameraConfigs.forRobot(RobotConfig.getRobotID());
+        this.cameras = new Camera[configs.length];
+        for (int i = 0; i < configs.length; i++) {
+            this.cameras[i] = makeCamera(configs[i], simCtx);
+        }
 
         visionSender = localizer.visionDataSender();
     }
@@ -163,6 +156,7 @@ public class Vision implements LockFreeSubsystem {
     private Optional<VisionSample> gaugeTrust(final VisionUpdate update) {
         final VisionUpdateFaults faults = update.faults();
 
+        // These are "fatal" faults that should always invalidate the update
         if (
             faults.noTags
             || (faults.sketchyTags && faults.singleTag)
@@ -171,15 +165,19 @@ public class Vision implements LockFreeSubsystem {
             return Optional.empty();
         }
 
+        double trust = kVision.ROOT_TRUST;
 
-        double error = 0.02;
-
+        // If the average distance of the tags is too far away reduce the trust
         if (faults.outOfRange()) {
-            error *= 2.0;
+            trust /= 2.0;
         }
 
+        // If any tags seen are sketchy reduce the trust
+        // If the only tag seen is sketchy massively reduce the trust
         if (faults.singleTag || faults.sketchyTags) {
-            error *= 2.0;
+            trust /= 3.0;
+        } else if (faults.sketchyTags) {
+            trust /= 1.5;
         }
 
         // Completely arbitrary values for the velocity thresholds.
@@ -188,10 +186,10 @@ public class Vision implements LockFreeSubsystem {
         ChassisSpeeds velo = localizer.speeds();
         if (new Translation2d(velo.vxMetersPerSecond, velo.vyMetersPerSecond).getNorm() > kSwerve.MAX_DRIVE_VELOCITY
                 / 2.0) {
-            error *= 2.0;
+            trust /= 2.0;
         }
         if (velo.omegaRadiansPerSecond > kSwerve.MAX_ANGULAR_VELOCITY / 3.0) {
-            error *= 2.0;
+            trust /= 2.0;
         }
 
         // If the vision rotation varies significantly from the gyro rotation reduce the trust
@@ -200,10 +198,14 @@ public class Vision implements LockFreeSubsystem {
             MathUtil.angleModulus(rotation.getRadians())
             - MathUtil.angleModulus(update.pose().getRotation().toRotation2d().getRadians())
             ) > Math.toRadians(5.0)) {
-            error *= 2.0;
+            trust /= 2.0;
         }
 
-        return Optional.of(new VisionSample(update.pose().toPose2d(), update.timestamp(), error));
+        if (faults.infeasibleZValue || faults.infeasiblePitchValue || faults.infeasibleRollValue) {
+            trust /= 2.0;
+        }
+
+        return Optional.of(new VisionSample(update.pose().toPose2d(), update.timestamp(), trust));
     }
 
     @Override
