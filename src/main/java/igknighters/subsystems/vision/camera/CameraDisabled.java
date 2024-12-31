@@ -8,6 +8,8 @@ import edu.wpi.first.math.geometry.Transform3d;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import igknighters.subsystems.vision.Vision.VisionUpdateFaults;
+import igknighters.subsystems.vision.Vision.VisionUpdate;
 import igknighters.util.logging.BootupLogger;
 
 import java.util.List;
@@ -16,47 +18,34 @@ import java.util.function.Function;
 
 @SuppressWarnings("unused")
 public class CameraDisabled extends Camera {
-    private final Integer id;
-    private final Transform3d cameraPose;
+    private final Transform3d cameraTransform;
     private final String cameraName;
 
-    public CameraDisabled(String cameraName, Integer id, Transform3d cameraPose) {
-        super(id);
-        this.id = id;
-        this.cameraPose = cameraPose;
+    public CameraDisabled(String cameraName, Transform3d cameraTransform) {
+        this.cameraTransform = cameraTransform;
         this.cameraName = cameraName;
-
-        this.update(
-            Optional.of(
-                Pair.of(
-                    VisionPoseEstimate.empty(id),
-                    getFaults()
-                )
-            ),
-            false
-        );
 
         BootupLogger.bootupLog("    " + cameraName + " camera initialized (disabled)");
     }
 
     @Override
-    public VisionEstimateFault getFaults() {
-        return new VisionEstimateFault(false, false, false, false, false, false, false, false, true);
+    public List<VisionUpdate> flushUpdates() {
+        return List.of();
     }
 
     @Override
     public Transform3d getRobotToCameraTransform3d() {
-        return cameraPose;
-    }
-
-    @Override
-    public Integer getId() {
-        return id;
+        return cameraTransform;
     }
 
     @Override
     public String getName() {
         return cameraName;
+    }
+
+    @Override
+    public List<Integer> getSeenTags() {
+        return List.of();
     }
 
     @Override

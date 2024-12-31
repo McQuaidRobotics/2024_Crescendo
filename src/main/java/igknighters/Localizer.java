@@ -5,7 +5,7 @@ import java.util.List;
 import igknighters.constants.FieldConstants;
 import igknighters.constants.ConstValues.kSwerve;
 import igknighters.subsystems.swerve.odometryThread.SwerveDriveSample;
-import igknighters.subsystems.vision.camera.Camera.VisionPoseEstimate;
+import igknighters.subsystems.vision.Vision.VisionSample;
 import igknighters.util.TwistyPoseEst;
 import igknighters.util.logging.Tracer;
 import igknighters.util.plumbing.Channel;
@@ -26,11 +26,11 @@ import monologue.Annotations.Log;
 
 public class Localizer implements Logged {
 
-    private final Channel<VisionPoseEstimate> visionDataChannel = new Channel<>(new VisionPoseEstimate[0]);
+    private final Channel<VisionSample> visionDataChannel = new Channel<>(new VisionSample[0]);
     private final Channel<SwerveDriveSample> swerveDataChannel = new Channel<>(new SwerveDriveSample[0]);
 
-    private final Receiver<VisionPoseEstimate> visionDataReceiver = visionDataChannel.openReceiver(8, ThreadSafetyMarker.CONCURRENT);
-    private final Receiver<SwerveDriveSample> swerveDataReveiver = swerveDataChannel.openReceiver(32, ThreadSafetyMarker.CONCURRENT);
+    private final Receiver<VisionSample> visionDataReceiver = visionDataChannel.openReceiver(8, ThreadSafetyMarker.CONCURRENT);
+    private final Receiver<SwerveDriveSample> swerveDataReceiver = swerveDataChannel.openReceiver(32, ThreadSafetyMarker.CONCURRENT);
 
     private final TwistyPoseEst poseEstimator;
 
@@ -64,7 +64,7 @@ public class Localizer implements Logged {
         Monologue.publishSendable("/Visualizers/Field", field, LogSink.NT);
     }
 
-    public Sender<VisionPoseEstimate> visionDataSender() {
+    public Sender<VisionSample> visionDataSender() {
         return visionDataChannel.sender();
     }
 
@@ -87,7 +87,7 @@ public class Localizer implements Logged {
 
     public void update() {
         Tracer.startTrace("SwerveSamples");
-        final SwerveDriveSample[] swerveSamples = log("swerveSamples", swerveDataReveiver.recvAll());
+        final SwerveDriveSample[] swerveSamples = log("swerveSamples", swerveDataReceiver.recvAll());
         for (final SwerveDriveSample sample : swerveSamples) {
             poseEstimator.addDriveSample(
                 kSwerve.KINEMATICS,
@@ -99,12 +99,12 @@ public class Localizer implements Logged {
         }
         Tracer.endTrace();
         Tracer.startTrace("VisionSamples");
-        final List<VisionPoseEstimate> unsortedVisionSamples = List.of(log("visionSamples", visionDataReceiver.recvAll()));
-        final List<VisionPoseEstimate> visionSamples = unsortedVisionSamples.stream()
+        final List<VisionSample> unsortedVisionSamples = List.of(log("visionSamples", visionDataReceiver.recvAll()));
+        final List<VisionSample> visionSamples = unsortedVisionSamples.stream()
             .sorted((a, b) -> Double.compare(a.timestamp(), b.timestamp()))
             .toList();
-        for (final VisionPoseEstimate sample : visionSamples) {
-            latestVisionPose = sample.pose().toPose2d();
+        for (final VisionSample sample : visionSamples) {
+            latestVisionPose = sample.pose();
             latestVisionTimestamp = sample.timestamp();
             poseEstimator.addVisionSample(
                 latestVisionPose,

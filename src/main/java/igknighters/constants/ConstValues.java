@@ -6,7 +6,6 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import igknighters.constants.ConstValues.kStem.kTelescope;
 import igknighters.constants.RobotConfig.RobotID;
 import igknighters.subsystems.stem.StemSolvers.AimSolveStrategy;
-import igknighters.subsystems.vision.camera.Camera;
 import igknighters.subsystems.vision.camera.Camera.CameraConfig;
 import igknighters.util.LerpTable;
 import igknighters.util.LerpTable.LerpTableEntry;
@@ -151,9 +150,8 @@ public final class ConstValues {
         public static enum CameraConfigs {
             CRASH(
                     new CameraConfig[] {
-                            Camera.createConfig(
+                            new CameraConfig(
                                     "photon_module_1",
-                                    0,
                                     new Transform3d(
                                             new Translation3d(
                                                     -11.3 * Conv.INCHES_TO_METERS,
@@ -163,9 +161,8 @@ public final class ConstValues {
                                                     0.0,
                                                     -20.0 * Conv.DEGREES_TO_RADIANS,
                                                     Math.PI))),
-                            Camera.createConfig(
+                            new CameraConfig(
                                     "photon_module_2",
-                                    1,
                                     new Transform3d(
                                             new Translation3d(
                                                     -11.3 * Conv.INCHES_TO_METERS,

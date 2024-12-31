@@ -253,9 +253,16 @@ public class SubsystemResources {
         }
     }
 
+    /**
+     * @see Subsystem
+     */
     public static interface LockFullSubsystem extends Subsystem, Logged {
     }
 
+    /**
+     * A subsystem that does not act as a locking resource
+     * when using commands
+     */
     public static interface LockFreeSubsystem extends Logged {
         default void periodic() {}
         default void simulationPeriodic() {}
