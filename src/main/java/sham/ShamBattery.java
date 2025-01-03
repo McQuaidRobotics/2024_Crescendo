@@ -21,7 +21,7 @@ public class ShamBattery {
     public void addMechanism(ShamMechanism simMechanism) {
         this.electricalAppliances.put(
             simMechanism,
-            () -> simMechanism.inputs().supplyCurrent()
+            () -> simMechanism.variables().supplyCurrent()
         );
     }
 

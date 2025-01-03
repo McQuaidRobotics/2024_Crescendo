@@ -18,8 +18,8 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import sham.ShamArena.ShamEnvTiming;
 import sham.ShamMechanism.MechanismDynamics;
-import sham.ShamMechanism.MechanismInputs;
-import sham.ShamMechanism.MechanismOutputs;
+import sham.ShamMechanism.MechanismVariables;
+import sham.ShamMechanism.MechanismState;
 import sham.configs.ShamSwerveConfig;
 import sham.configs.ShamSwerveModuleConfig;
 import sham.utils.RuntimeLog;
@@ -94,18 +94,18 @@ public class ShamSwerveModule {
     public record ModuleMotorPair<T>(T drive, T steer) {
     }
 
-    public ModuleMotorPair<MechanismInputs> inputs() {
-        return new ModuleMotorPair<>(driveMech.inputs(), steerMech.inputs());
+    public ModuleMotorPair<MechanismVariables> inputs() {
+        return new ModuleMotorPair<>(driveMech.variables(), steerMech.variables());
     }
 
-    public ModuleMotorPair<MechanismOutputs> outputs() {
-        return new ModuleMotorPair<>(driveMech.outputs(), steerMech.outputs());
+    public ModuleMotorPair<MechanismState> outputs() {
+        return new ModuleMotorPair<>(driveMech.state(), steerMech.state());
     }
 
     public SwerveModuleState state() {
         return new SwerveModuleState(
-                driveMech.outputs().velocity().in(RadiansPerSecond) * wheelRadius.in(Meters),
-                new Rotation2d(steerMech.outputs().position()));
+                driveMech.state().velocity().in(RadiansPerSecond) * wheelRadius.in(Meters),
+                new Rotation2d(steerMech.state().position()));
     }
 
     protected void teardown() {
@@ -122,11 +122,11 @@ public class ShamSwerveModule {
     }
 
     protected XY<Force> force(final Rotation2d robotHeading) {
-        final Rotation2d steerMechAngle = new Rotation2d(steerMech.outputs().position())
+        final Rotation2d steerMechAngle = new Rotation2d(steerMech.state().position())
                 .plus(robotHeading);
         logger.log("worldAngle", steerMechAngle, Rotation2d.struct);
         final Force gripForce = gravityForce.times(wheelsCoefficientOfFriction);
-        final Force driveMechAppliedForce = driveMech.inputs().torque().div(wheelRadius);
+        final Force driveMechAppliedForce = driveMech.variables().torque().div(wheelRadius);
 
         final boolean isSkidding = MeasureMath.abs(driveMechAppliedForce).gt(gripForce);
         final Force propellingForce;
@@ -164,8 +164,8 @@ public class ShamSwerveModule {
                 chassisSpeeds.vxMetersPerSecond,
                 chassisSpeeds.vyMetersPerSecond);
         final Velocity2d moduleDriveVelocity = new Velocity2d(
-                driveMech.outputs().velocity().in(RadiansPerSecond) * wheelRadius.in(Meters),
-                new Rotation2d(steerMech.outputs().position()).plus(robotHeading));
+                driveMech.state().velocity().in(RadiansPerSecond) * wheelRadius.in(Meters),
+                new Rotation2d(steerMech.state().position()).plus(robotHeading));
         final Velocity2d unwantedVelocity = moduleWorldVelocity
                 .plus(tangentialVelocityVector)
                 .minus(moduleDriveVelocity);

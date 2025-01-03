@@ -8,13 +8,21 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.NewtonMeters;
 import static edu.wpi.first.units.Units.Newtons;
+import static edu.wpi.first.units.Units.Radian;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Second;
 
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.AccelerationUnit;
+import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.DistanceUnit;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Unit;
+import edu.wpi.first.units.VelocityUnit;
+import edu.wpi.first.units.measure.Acceleration;
 import edu.wpi.first.units.measure.AngularAcceleration;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.units.measure.LinearAcceleration;
@@ -22,6 +30,7 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Mult;
 import edu.wpi.first.units.measure.Torque;
+import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.util.struct.Struct;
 import monologue.ProceduralStructGenerator;
 
@@ -132,5 +141,14 @@ public class MeasureMath {
 
     public static Mass div(MomentOfInertia moi, Mult<DistanceUnit, DistanceUnit> d) {
         return Kilograms.of(moi.in(KilogramSquareMeters) / d.baseUnitMagnitude());
+    }
+
+    public static Velocity<AngleUnit> genericize(AngularVelocity av) {
+        return VelocityUnit.combine(Radian, Second).of(av.in(RadiansPerSecond));
+    }
+
+    public static Acceleration<AngleUnit> genericize(AngularAcceleration aa) {
+        return AccelerationUnit.combine(VelocityUnit.combine(Radian, Second), Second)
+            .of(aa.in(RadiansPerSecondPerSecond));
     }
 }

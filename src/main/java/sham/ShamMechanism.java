@@ -14,11 +14,12 @@ import java.util.Random;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import sham.ShamArena.ShamEnvTiming;
+import sham.ShamMotorController.ControllerOutput;
+import sham.utils.DCMotor2;
 import sham.utils.GearRatio;
 import sham.utils.RuntimeLog;
 import sham.utils.mathutils.MeasureMath;
 import edu.wpi.first.epilogue.logging.DataLogger;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.AngularAccelerationUnit;
@@ -34,7 +35,6 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotController;
 import monologue.ProceduralStructGenerator;
 
 public class ShamMechanism {
@@ -59,7 +59,7 @@ public class ShamMechanism {
      * first in the same time slot but this can not be promised.
      */
     public interface MechanismDynamics {
-        default Torque environment(Angle angle, AngularVelocity velocity) {
+        default Torque environment(MechanismState state) {
             return NewtonMeters.zero();
         }
 
@@ -70,7 +70,7 @@ public class ShamMechanism {
         static MechanismDynamics of(Torque environment) {
             return new MechanismDynamics() {
                 @Override
-                public Torque environment(Angle angle, AngularVelocity velocity) {
+                public Torque environment(MechanismState state) {
                     return environment;
                 }
 
@@ -87,7 +87,7 @@ public class ShamMechanism {
     }
 
     /**
-     * A record to define the friction of a mechanism.
+     * Defines the friction of a mechanism.
      * The only way to obtain this value is to empirically measure it.
      * This record allows defining separate static and kinetic friction values
      * but it is perfectly valid to use the same value for both.
@@ -105,10 +105,24 @@ public class ShamMechanism {
             return new Friction(staticFriction, kineticFriction);
         }
 
+        /**
+         * Constructs a {@link Friction} object with the same value for both static and kinetic friction.
+         *
+         * @param universalFriction the value to use for both static and kinetic friction
+         * @return a {@link Friction} object with the same value for both static and kinetic friction
+         */
         public static Friction of(Torque universalFriction) {
             return new Friction(universalFriction, universalFriction);
         }
 
+        /**
+         * Constructs a {@link Friction} object using a {@link DCMotor} object and voltage friction constants.
+         * 
+         * @param motor the motor to use for the friction calculation
+         * @param staticVoltage the voltage to use for the static friction calculation
+         * @param kineticVoltage the voltage to use for the kinetic friction calculation
+         * @return a {@link Friction} object using the given motor and voltage constants
+         */
         public static Friction of(DCMotor motor, Voltage staticVoltage, Voltage kineticVoltage) {
             Torque staticTorque = NewtonMeters.of(
                 motor.getTorque(motor.getCurrent(0.0, staticVoltage.in(Volts))));
@@ -128,76 +142,88 @@ public class ShamMechanism {
         public static final Struct<Friction> struct = ProceduralStructGenerator.genRecord(Friction.class);
     }
 
+    /**
+     * Defines the mechanical positional limits of the mechanism.
+     * 
+     * @see #unbounded() HardLimits.unbounded() for a mechanism with no limits
+     */
     public record HardLimits(Angle minAngle, Angle maxAngle) implements StructSerializable {
         public static HardLimits of(Angle minAngle, Angle maxAngle) {
             return new HardLimits(minAngle, maxAngle);
         }
 
+        /**
+         * Constructs a {@link HardLimits} object with no limits.
+         * 
+         * @return a {@link HardLimits} object with no limits
+         */
         public static HardLimits unbounded() {
-            return new HardLimits(Rad.of(-1_000_000_000_000.0), Rad.of(1_000_000_000_000.0));
+            return new HardLimits(Rad.of(Double.NEGATIVE_INFINITY), Rad.of(Double.POSITIVE_INFINITY));
         }
 
         public static final Struct<HardLimits> struct = ProceduralStructGenerator.genRecord(HardLimits.class);
     }
 
     /**
-     * A record to define the output of a mechanism.
-     * 
-     * <p> All measures in this record are immutable.
+     * Defines the state of a mechanism.
      */
-    public record MechanismOutputs(
+    public record MechanismState(
         Angle position,
         AngularVelocity velocity,
-        AngularAcceleration acceleration) implements StructSerializable {
+        AngularAcceleration acceleration
+    ) implements StructSerializable {
 
-        public static MechanismOutputs of(Angle angle, AngularVelocity velocity, AngularAcceleration acceleration) {
-            return new MechanismOutputs(angle, velocity, acceleration);
+        public static MechanismState of(Angle angle, AngularVelocity velocity, AngularAcceleration acceleration) {
+            return new MechanismState(angle, velocity, acceleration);
         }
 
-        public static MechanismOutputs zero() {
-            return new MechanismOutputs(Rad.zero(), RadPS.zero(), RadPS2.zero());
+        public static MechanismState zero() {
+            return new MechanismState(Rad.zero(), RadPS.zero(), RadPS2.zero());
         }
 
-        public MechanismOutputs times(double scalar) {
-            return new MechanismOutputs(position.times(scalar), velocity.times(scalar), acceleration.times(scalar));
+        public MechanismState times(double scalar) {
+            return new MechanismState(position.times(scalar), velocity.times(scalar), acceleration.times(scalar));
         }
 
-        public static final Struct<MechanismOutputs> struct = ProceduralStructGenerator.genRecord(MechanismOutputs.class);
+        public MechanismState div(double scalar) {
+            return times(1.0 / scalar);
+        }
+
+        public static final Struct<MechanismState> struct = ProceduralStructGenerator.genRecord(MechanismState.class);
     }
 
     /**
-     * A record to define the inputs of a mechanism.
-     * 
-     * <p> All measures in this record are immutable.
+     * Defines some variables of a mechanism in the current time step.
      */
-    public record MechanismInputs(
+    public record MechanismVariables(
         Torque torque,
         Voltage statorVoltage,
         Voltage supplyVoltage,
-        Current statorCurrent) implements StructSerializable {
+        Current statorCurrent
+    ) implements StructSerializable {
 
         public Current supplyCurrent() {
             // https://www.chiefdelphi.com/t/current-limiting-talonfx-values/374780/10;
             return statorCurrent.times(statorVoltage.div(supplyVoltage)).div(kMotorEfficiency);
         }
 
-        public static MechanismInputs of(Torque torque, Voltage voltage, Voltage supplyVoltage, Current statorCurrent) {
-            return new MechanismInputs(torque, voltage, supplyVoltage, statorCurrent);
+        public static MechanismVariables of(Torque torque, Voltage voltage, Voltage supplyVoltage, Current statorCurrent) {
+            return new MechanismVariables(torque, voltage, supplyVoltage, statorCurrent);
         }
 
-        public static MechanismInputs zero() {
-            return new MechanismInputs(NewtonMeters.zero(), Volts.zero(), Volts.zero(), Amps.zero());
+        public static MechanismVariables zero() {
+            return new MechanismVariables(NewtonMeters.zero(), Volts.zero(), Volts.zero(), Amps.zero());
         }
 
-        public static final Struct<MechanismInputs> struct = ProceduralStructGenerator.genRecord(MechanismInputs.class);
+        public static final Struct<MechanismVariables> struct = ProceduralStructGenerator.genRecord(MechanismVariables.class);
     }
 
-    private final String name;
     private final DataLogger logger;
+    private final String name;
     private final MechanismDynamics dynamics;
     private final Friction friction;
     private final GearRatio gearRatio;
-    private final DCMotor motor;
+    private final DCMotor2 motor;
     private final ShamMotorController controller;
     private final ShamEnvTiming timing;
     private final MomentOfInertia rotorInertia;
@@ -205,8 +231,8 @@ public class ShamMechanism {
     private final double noise;
 
     private final ReentrantReadWriteLock ioLock = new ReentrantReadWriteLock();
-    private MechanismOutputs outputs = MechanismOutputs.zero();
-    private MechanismInputs inputs = MechanismInputs.zero();
+    private MechanismState state = MechanismState.zero();
+    private MechanismVariables variables = MechanismVariables.zero();
 
     public ShamMechanism(
         String name,
@@ -224,7 +250,7 @@ public class ShamMechanism {
         this.dynamics = dynamics;
         this.friction = friction;
         this.gearRatio = gearRatio;
-        this.motor = motor;
+        this.motor = new DCMotor2(motor);
         this.controller = controller;
         this.timing = timing;
         this.rotorInertia = rotorInertia;
@@ -242,19 +268,86 @@ public class ShamMechanism {
         logger.log("noise", noise);
     }
 
-    protected Torque getBrakingTorque() {
+    /**
+     * Gets the current state of the mechanism.
+     * 
+     * @return the current state of the mechanism
+     */
+    public MechanismState state() {
+        try {
+            ioLock.readLock().lock();
+            return state;
+        } finally {
+            ioLock.readLock().unlock();
+        }
+    }
+
+    /**
+     * Gets the current state of the motor driving the mechanism.
+     * 
+     * @return the current state of the mechanism
+     */
+    public MechanismState motorState() {
+        return state().times(gearRatio.getReduction());
+    }
+
+    public void setState(MechanismState state) {
+        try {
+            ioLock.writeLock().lock();
+            this.state = state;
+        } finally {
+            ioLock.writeLock().unlock();
+        }
+    }
+
+    public MechanismVariables variables() {
+        try {
+            ioLock.readLock().lock();
+            return variables;
+        } finally {
+            ioLock.readLock().unlock();
+        }
+    }
+
+    public MechanismVariables motorVariables() {
+        var v = variables();
+        return MechanismVariables.of(
+            v.torque.div(gearRatio.getReduction()),
+            v.statorVoltage,
+            v.supplyVoltage,
+            v.statorCurrent
+        );
+    }
+
+    /**
+     * Gets the name of the mechanism.
+     * 
+     * @return the name of the mechanism
+     */
+    public String name() {
+        return name;
+    }
+
+    /**
+     * Gets the torque applied by the motor when "braking" is enabled.
+     * 
+     * <p> This value is before any gear reduction is applied.
+     * 
+     * @return the torque applied by the motor when "braking" is enabled.
+     */
+    protected Torque getMotorBrakingTorque() {
         if (!controller.brakeEnabled()) {
             logger.log("Update/braking", false);
             logger.log("Update/brakingTorque", 0.0);
             logger.log("Update/brakingCurrent", 0.0);
             return NewtonMeters.zero();
         }
-        double current = motor.getCurrent(outputs.velocity().in(RadPS), Volts.zero().in(Volts));
-        double torque = motor.getTorque(current);
+        Current current = motor.getCurrent(motorState().velocity(), Volts.zero());
+        Torque torque = motor.getTorque(current);
         logger.log("Update/braking", true);
         logger.log("Update/brakingTorque", torque);
         logger.log("Update/brakingCurrent", current);
-        return NewtonMeters.of(torque);
+        return torque.times(gearRatio.getReduction());
     }
 
     /**
@@ -264,14 +357,14 @@ public class ShamMechanism {
      * @param torque the torque to apply to the mechanism
      * @return the torque after friction has been applied
      */
-    protected Torque antiTorque(Torque motor, Torque environment, MomentOfInertia inertia) {
-        AngularVelocity velocity = outputs().velocity();
+    protected Torque calculateResistanceTorque(Torque motorOutput, Torque environment, MomentOfInertia inertia) {
+        AngularVelocity velocity = state().velocity();
         boolean isMoving = MeasureMath.abs(velocity).gt(RadPS.zero());
         logger.log("Update/moving", isMoving);
         Torque frictionTorque = isMoving ? friction.kineticFriction() : friction.staticFriction();
         Torque brakingTorque = NewtonMeters.zero();
-        if (MeasureMath.abs(motor).lt(NewtonMeters.of(0.01))) {
-            brakingTorque = getBrakingTorque();
+        if (MeasureMath.abs(motorOutput).lt(NewtonMeters.of(0.01))) {
+            brakingTorque = getMotorBrakingTorque();
         }
         // ensure that friction/braking opposes the motion
         Torque antiTorque = frictionTorque.plus(brakingTorque)
@@ -280,7 +373,7 @@ public class ShamMechanism {
         logger.log("Update/frictionTorque", frictionTorque);
         logger.log("Update/desiredAntiTorque", antiTorque);
 
-        final AngularAcceleration unburdenedAccel = div(motor.plus(environment), inertia);
+        final AngularAcceleration unburdenedAccel = div(motorOutput.plus(environment), inertia);
         final AngularAcceleration burdenAccel = div(antiTorque, inertia);
         final AngularAcceleration imposedAccel = unburdenedAccel.plus(burdenAccel);
         logger.log("Update/unburdenedAccel", unburdenedAccel);
@@ -327,83 +420,22 @@ public class ShamMechanism {
         }
     }
 
-    /**
-     * Gets the motors output voltage based on the current state of the mechanism.
-     * 
-     * @return the voltage to apply to the motor
-     */
-    protected Voltage getControllerVoltage(Voltage supplyVoltage) {
-        Voltage rv = controller.run(timing.dt(), supplyVoltage, outputs());
-        Voltage v = MeasureMath.clamp(rv, RobotController.getMeasureBatteryVoltage().times(-1.0), RobotController.getMeasureBatteryVoltage());
+    protected Current getMotorCurrent(Voltage supplyVoltage) {
+        ControllerOutput co = controller.run(timing.dt(), supplyVoltage, motorState());
         if (DriverStation.isDisabled()) {
-            return Volts.zero();
+            return Amps.zero();
         }
-        return v;
-    }
-
-    protected Torque getMotorTorque(Voltage voltage) {
-        if (voltage.isNear(Volts.zero(), Volts.of(0.01))) {
-            return NewtonMeters.zero();
+        if (co instanceof ControllerOutput.VoltageOutput vo) {
+            Voltage voltage = vo.voltage();
+            if (voltage.isNear(Volts.zero(), Volts.of(0.01))) {
+                return Amps.zero();
+            }
+            return motor.getCurrent(motorState().velocity(), voltage);
+        } else if (co instanceof ControllerOutput.CurrentOutput io) {
+            return io.current();
+        } else {
+            return Amps.zero();
         }
-        double current = motor.getCurrent(motorOutputs().velocity().in(RadPS), voltage.in(Volts));
-        logger.log("Update/current", current);
-        double torque = motor.getTorque(MathUtil.clamp(current, -80.0, 80.0));
-        return NewtonMeters.of(torque).times(gearRatio.getReduction());
-    }
-
-    /**
-     * Gets the current state of the mechanism.
-     * 
-     * @return the current state of the mechanism
-     */
-    public MechanismOutputs outputs() {
-        try {
-            ioLock.readLock().lock();
-            return outputs;
-        } finally {
-            ioLock.readLock().unlock();
-        }
-    }
-
-    /**
-     * Gets the current state of the motor driving the mechanism.
-     * 
-     * @return the current state of the mechanism
-     */
-    public MechanismOutputs motorOutputs() {
-        try {
-            ioLock.readLock().lock();
-            return outputs.times(gearRatio.getReduction());
-        } finally {
-            ioLock.readLock().unlock();
-        }
-    }
-
-    public MechanismInputs inputs() {
-        try {
-            ioLock.readLock().lock();
-            return inputs;
-        } finally {
-            ioLock.readLock().unlock();
-        }
-    }
-
-    public void overrideOutputs(MechanismOutputs outputs) {
-        try {
-            ioLock.writeLock().lock();
-            this.outputs = outputs;
-        } finally {
-            ioLock.writeLock().unlock();
-        }
-    }
-
-    /**
-     * Gets the name of the mechanism.
-     * 
-     * @return the name of the mechanism
-     */
-    public String name() {
-        return name;
     }
 
     /**
@@ -415,17 +447,17 @@ public class ShamMechanism {
         final MomentOfInertia inertia = rotorInertia.plus(dynamics.extraInertia());
         logger.log("Update/inertia", inertia);
 
-        // run the motor controller loop
-        final Voltage voltage = getControllerVoltage(supplyVoltage);
-        logger.log("Update/voltage", voltage);
-
         // calculate the torque acting on the mechanism
-        final Torque environment = dynamics.environment(outputs().position(), outputs().velocity());
-        final Torque motorTorque = getMotorTorque(voltage);
-        final Torque antiTorque = antiTorque(motorTorque, environment, inertia);
-        final Torque outputTorque = motorTorque.plus(antiTorque);
-        logger.log("Update/environmentTorque", environment);
+        final Current motorCurrent = getMotorCurrent(supplyVoltage);
+        final Torque motorTorque = motor.getTorque(motorCurrent);
+        final Torque mechanismTorque = motorTorque.times(gearRatio.getReduction());
+        final Torque environment = dynamics.environment(state());
+        final Torque antiTorque = calculateResistanceTorque(mechanismTorque, environment, inertia);
+        final Torque outputTorque = mechanismTorque.plus(antiTorque);
+        logger.log("Update/motorCurrent", motorCurrent);
         logger.log("Update/motorTorque", motorTorque);
+        logger.log("Update/mechanismTorque", mechanismTorque);
+        logger.log("Update/environmentTorque", environment);
         logger.log("Update/antiTorque", antiTorque);
         logger.log("Update/outputTorque", outputTorque);
 
@@ -433,31 +465,33 @@ public class ShamMechanism {
         final AngularAcceleration acceleration = div(outputTorque, inertia)
             .times(1.0 + (noise * RAND.nextGaussian()));
         final AngularVelocity velocity = MeasureMath.nudgeZero(
-            outputs().velocity().plus(acceleration.times(dt)),
+            state().velocity().plus(acceleration.times(dt)),
             RotationsPerSecond.of(0.001)
         );
-        final Angle angle = outputs().position().plus(velocity.times(dt));
+        final Angle angle = state().position().plus(velocity.times(dt));
 
         try {
             ioLock.writeLock().lock();
             // apply hard limits
             // then update the state accordingly
             if (angle.lt(limits.minAngle())) {
-                outputs = MechanismOutputs.of(limits.minAngle(), RadPS.zero(), RadPS2.zero());
+                state = MechanismState.of(limits.minAngle(), RadPS.zero(), RadPS2.zero());
             } else if (angle.gt(limits.maxAngle())) {
-                outputs = MechanismOutputs.of(limits.maxAngle(), RadPS.zero(), RadPS2.zero());
+                state = MechanismState.of(limits.maxAngle(), RadPS.zero(), RadPS2.zero());
             } else {
-                outputs = MechanismOutputs.of(angle, velocity, acceleration);
+                state = MechanismState.of(angle, velocity, acceleration);
             }
-            // capture the "inputs"
-            inputs = MechanismInputs.of(
-                motorTorque, voltage, supplyVoltage,
-                Amps.of(motor.getCurrent(outputs.velocity.in(RadPS), voltage.in(Volts)))
+            // capture the "variables"
+            variables = MechanismVariables.of(
+                mechanismTorque,
+                motor.getVoltage(motorTorque, motorState().velocity()),
+                supplyVoltage,
+                motorCurrent
             );
         } finally {
-            logger.log("Update/outputs", outputs, MechanismOutputs.struct);
-            logger.log("Update/motorOutputs", motorOutputs(), MechanismOutputs.struct);
-            logger.log("Update/inputs", inputs, MechanismInputs.struct);
+            logger.log("Update/state", state, MechanismState.struct);
+            logger.log("Update/motorState", motorState(), MechanismState.struct);
+            logger.log("Update/variables", variables, MechanismVariables.struct);
             ioLock.writeLock().unlock();
         }
     }
