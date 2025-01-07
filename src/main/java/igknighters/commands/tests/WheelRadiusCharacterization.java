@@ -1,10 +1,3 @@
-// Copyright (c) 2024 FRC 6328
-// http://github.com/Mechanical-Advantage
-//
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file at
-// the root directory of this project.
-
 package igknighters.commands.tests;
 
 import edu.wpi.first.math.MathUtil;
@@ -18,6 +11,7 @@ import java.util.Arrays;
 
 import igknighters.constants.ConstValues.kSwerve;
 import igknighters.subsystems.swerve.Swerve;
+import igknighters.util.Speeds;
 import igknighters.util.plumbing.TunableValues;
 import igknighters.util.plumbing.TunableValues.TunableDouble;
 
@@ -79,7 +73,7 @@ public class WheelRadiusCharacterization extends Command {
     public void execute() {
         // Run drive at velocity
         outputSpeed.omegaRadiansPerSecond = omegaLimiter.calculate(omegaDirection.value * characterizationSpeed.value());
-        swerve.drive(outputSpeed);
+        swerve.drive(Speeds.fromRobotRelative(outputSpeed));
 
         // Get yaw and wheel positions
         accumGyroYawRads += MathUtil.angleModulus(gyroYawRadsSupplier.getAsDouble() - lastGyroYawRads);

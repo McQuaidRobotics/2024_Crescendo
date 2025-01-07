@@ -27,11 +27,14 @@ import igknighters.subsystems.swerve.gyro.GyroReal;
 import igknighters.subsystems.swerve.gyro.GyroSim2;
 import igknighters.subsystems.swerve.module.SwerveModule;
 import igknighters.subsystems.swerve.module.SwerveModuleReal;
-import igknighters.subsystems.swerve.module.SwerveModuleSim2;
+import igknighters.subsystems.swerve.module.SwerveModuleSim3;
 import igknighters.subsystems.swerve.module.SwerveModule.AdvancedSwerveModuleState;
 import igknighters.subsystems.swerve.odometryThread.RealSwerveOdometryThread;
 import igknighters.subsystems.swerve.odometryThread.SimSwerveOdometryThread;
 import igknighters.subsystems.swerve.odometryThread.SwerveOdometryThread;
+import igknighters.util.Speeds;
+import igknighters.util.Speeds.FieldSpeeds;
+import igknighters.util.Speeds.RobotSpeeds;
 import igknighters.util.logging.Tracer;
 import igknighters.constants.ConstValues;
 
@@ -80,10 +83,10 @@ public class Swerve implements LockFullSubsystem {
             sim = Optional.of((ShamSwerve) simCtx.robot().getDriveTrain());
             final SimSwerveOdometryThread ot = new SimSwerveOdometryThread(250, localizer.swerveDataSender());
             swerveMods = new SwerveModule[] {
-                    new SwerveModuleSim2(0, ot, sim.get()),
-                    new SwerveModuleSim2(1, ot, sim.get()),
-                    new SwerveModuleSim2(2, ot, sim.get()),
-                    new SwerveModuleSim2(3, ot, sim.get()),
+                    new SwerveModuleSim3(0, ot, sim.get()),
+                    new SwerveModuleSim3(1, ot, sim.get()),
+                    new SwerveModuleSim3(2, ot, sim.get()),
+                    new SwerveModuleSim3(3, ot, sim.get()),
             };
             gyro = new GyroSim2(sim.get().getGyro(), ot);
             odometryThread = ot;
@@ -109,10 +112,10 @@ public class Swerve implements LockFullSubsystem {
         odometryThread.start();
     }
 
-    public void drive(ChassisSpeeds speeds) {
+    public void drive(Speeds speeds) {
         log("targetChassisSpeed", speeds);
 
-        setpoint = setpointGenerator.generateSimpleSetpoint(setpoint, speeds, ConstValues.PERIODIC_TIME);
+        setpoint = setpointGenerator.generateSimpleSetpoint(setpoint, speeds.asRobotRelative(getYaw()), ConstValues.PERIODIC_TIME);
 
         setModuleStates(setpoint.moduleStates());
     }
@@ -131,6 +134,10 @@ public class Swerve implements LockFullSubsystem {
      */
     public double getYawRads() {
         return gyro.getYawRads();
+    }
+
+    public Rotation2d getYaw() {
+        return Rotation2d.fromRadians(getYawRads());
     }
 
     public SwerveModulePosition[] getModulePositions() {
@@ -157,8 +164,12 @@ public class Swerve implements LockFullSubsystem {
         return states;
     }
 
-    public ChassisSpeeds getChassisSpeed() {
-        return kSwerve.KINEMATICS.toChassisSpeeds(getModuleStates());
+    public RobotSpeeds getRobotSpeeds() {
+        return Speeds.fromRobotRelative(kSwerve.KINEMATICS.toChassisSpeeds(getModuleStates()));
+    }
+
+    public FieldSpeeds getFieldSpeeds() {
+        return getRobotSpeeds().asFieldRelative(getYaw());
     }
 
     public void setVoltageOut(double voltage, Rotation2d angle) {
@@ -181,7 +192,7 @@ public class Swerve implements LockFullSubsystem {
             log("targetChassisSpeed", ZERO_SPEEDS);
         }
 
-        log("measuredChassisSpeed", getChassisSpeed());
+        log("measuredChassisSpeed", getRobotSpeeds());
 
         visualizer.update();
 

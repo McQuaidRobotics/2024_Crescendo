@@ -21,6 +21,8 @@ public class DCMotor2 extends DCMotor {
   public static final DCMotorProto proto = new DCMotorProto();
   public static final DCMotorStruct struct = new DCMotorStruct();
 
+  public final int numMotors;
+
   public DCMotor2(
       double nominalVoltageVolts,
       double stallTorqueNewtonMeters,
@@ -30,9 +32,10 @@ public class DCMotor2 extends DCMotor {
       int numMotors) {
     super(nominalVoltageVolts, stallTorqueNewtonMeters, stallCurrentAmps, freeCurrentAmps, freeSpeedRadPerSec,
         numMotors);
+    this.numMotors = numMotors;
   }
 
-  public DCMotor2(DCMotor motor) {
+  public DCMotor2(DCMotor motor, int numMotors) {
     super(
       motor.nominalVoltageVolts,
       motor.stallTorqueNewtonMeters,
@@ -41,6 +44,7 @@ public class DCMotor2 extends DCMotor {
       motor.freeSpeedRadPerSec,
       1
     );
+    this.numMotors = numMotors;
   }
 
   /**

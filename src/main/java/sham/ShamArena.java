@@ -1,6 +1,6 @@
 package sham;
 
-import edu.wpi.first.epilogue.logging.DataLogger;
+import edu.wpi.first.epilogue.logging.EpilogueBackend;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -47,7 +47,7 @@ public abstract class ShamArena {
         public static final Struct<ShamEnvTiming> struct = ProceduralStructGenerator.genRecord(ShamEnvTiming.class);
     }
 
-    protected final DataLogger logger = RuntimeLog.loggerFor("Arena");
+    protected final EpilogueBackend logger = RuntimeLog.loggerFor("Arena");
     protected final ReentrantLock worldLock = new ReentrantLock();
     protected final World<Body> physicsWorld = new World<>();
     protected final Set<ShamGamePiece> gamePieces = ConcurrentHashMap.newKeySet();

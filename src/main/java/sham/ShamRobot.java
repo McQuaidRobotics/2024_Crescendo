@@ -9,7 +9,7 @@ import sham.ShamGamePiece.GamePieceVariant;
 import sham.configs.ShamDriveTrainConfig;
 import sham.utils.RuntimeLog;
 import sham.utils.mathutils.GeometryConvertor;
-import edu.wpi.first.epilogue.logging.DataLogger;
+import edu.wpi.first.epilogue.logging.EpilogueBackend;
 import edu.wpi.first.math.geometry.Rectangle2d;
 
 /**
@@ -32,11 +32,11 @@ public class ShamRobot<DrvTrn extends ShamDriveTrain> {
     private final ShamBattery battery = new ShamBattery();
     private final ConcurrentLinkedQueue<ShamIntake> intakes = new ConcurrentLinkedQueue<>();
     private final ConcurrentLinkedQueue<ShamMechanism> mechanisms = new ConcurrentLinkedQueue<>();
-    final DataLogger logger;
+    final EpilogueBackend logger;
 
     public <C extends ShamDriveTrainConfig<DrvTrn, C>> ShamRobot(ShamArena arena, String name, C drivetrainConfig, int gamePieceStorageCapacity) {
         this.arena = arena;
-        logger = arena.logger.getSubLogger(name + "Robot");
+        logger = arena.logger.getNested(name + "Robot");
         arena.robots.add(this);
         this.driveTrain = ShamDriveTrain.createDriveTrain(this, drivetrainConfig);
         arena.withWorld(world -> world.addBody(driveTrain.chassis));

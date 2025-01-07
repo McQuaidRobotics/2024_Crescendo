@@ -35,7 +35,7 @@ public class Characterizers {
         return new FeedForwardCharacterization(
             swerve,
             volt -> swerve.setVoltageOut(volt, Rotation2d.kZero),
-            () -> swerve.getChassisSpeed().vxMetersPerSecond
+            () -> swerve.getRobotSpeeds().vx()
         ).withName("Swerve Characterization");
     }
 }

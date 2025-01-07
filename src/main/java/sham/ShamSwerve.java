@@ -57,7 +57,7 @@ public class ShamSwerve extends ShamDriveTrain {
      * @param config a {@link ShamSwerveConfig} instance containing the configurations of * this drivetrain
      */
     ShamSwerve(ShamRobot<ShamSwerve> robot, ShamSwerveConfig config) {
-        super(robot.logger.getSubLogger("Swerve"), config, robot.timing());
+        super(robot.logger.getNested("Swerve"), config, robot.timing());
         this.robot = robot;
         this.timing = robot.timing();
         this.config = config;
@@ -89,7 +89,10 @@ public class ShamSwerve extends ShamDriveTrain {
     protected void simTick() {
         simulateModulePropulsion();
         simulateModuleFriction();
-        gyroSimulation.updateSimulationSubTick(this.getTickTwist());
+        gyroSimulation.updateSimulationSubTick(
+            this.getChassisWorldPose().getRotation().getMeasure(),
+            this.getTickTwist()
+        );
         super.simTick();
     }
 
@@ -117,12 +120,13 @@ public class ShamSwerve extends ShamDriveTrain {
         }
 
         // clamp the friction acceleration to prevent the robot from accelerating in the opposite direction
-        final ChassisSpeeds wheelSpeeds = kinematics.toChassisSpeeds(
+        final ChassisSpeeds wheelSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(kinematics.toChassisSpeeds(
                 Arrays.stream(moduleSimulations)
                     .map(ShamSwerveModule::state)
                     .toArray(SwerveModuleState[]::new)
+            ),
+            chassisRotation
         );
-        wheelSpeeds.toFieldRelativeSpeeds(chassisRotation);
         final ChassisSpeeds unwantedSpeeds = wheelSpeeds.minus(chassisSpeeds);
 
         logger.log("Friction/wheelSpeeds", wheelSpeeds, ChassisSpeeds.struct);

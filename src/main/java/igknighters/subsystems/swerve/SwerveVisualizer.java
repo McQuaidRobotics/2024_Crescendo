@@ -47,7 +47,7 @@ public class SwerveVisualizer {
 
             var percent = (state.speedMetersPerSecond / kSwerve.MAX_DRIVE_VELOCITY);
 
-            var length = percent * (MAX_LENGTH * 0.9) + (MAX_LENGTH * 0.1);
+            var length = percent * (MAX_LENGTH * 0.9) + Math.copySign(MAX_LENGTH * 0.1, percent);
             moduleLig.setLength(length);
 
             var color = new Color8Bit(
@@ -80,9 +80,9 @@ public class SwerveVisualizer {
 
     }
 
-    private SendableBuilderImpl getBuilder(String subtable) {
+    private SendableBuilderImpl getBuilder(String subTable) {
         var builder = new SendableBuilderImpl();
-        builder.setTable(table.getSubTable(subtable));
+        builder.setTable(table.getSubTable(subTable));
         return builder;
     }
 

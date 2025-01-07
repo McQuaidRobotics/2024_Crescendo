@@ -199,6 +199,7 @@ public final class ConstValues {
         private static final class SwerveGearRatios {
             static final double L1_DRIVE = 8.14;
             static final double L2_DRIVE = (50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0);
+            static final double L2_DRIVE_KRAKEN = (50.0 / 16.0) * (17.0 / 27.0) * (45.0 / 15.0);
             static final double L3_DRIVE = (50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0);
             static final double L3_DRIVE_KRAKEN = (50.0 / 16.0) * (16.0 / 28.0) * (45.0 / 15.0);
             static final double L4_DRIVE = 5.14;
@@ -222,7 +223,7 @@ public final class ConstValues {
 
         public static final double STEER_GEAR_RATIO = SwerveGearRatios.STEER;
 
-        public static final double DRIVE_GEAR_RATIO = SwerveGearRatios.L3_DRIVE_KRAKEN;
+        public static final double DRIVE_GEAR_RATIO = SwerveGearRatios.L2_DRIVE_KRAKEN;
 
         public static final double WHEEL_COF = 1.5;
 
@@ -269,6 +270,8 @@ public final class ConstValues {
             public static final double kP = 11.0;
             public static final double kI = 0.0;
             public static final double kD = 0.0;
+
+            public static final double kS = 0.7;
         }
 
         public static final class kRotationController {

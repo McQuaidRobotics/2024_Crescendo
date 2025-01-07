@@ -6,11 +6,10 @@ import java.util.function.Consumer;
 import igknighters.Localizer;
 import igknighters.constants.ConstValues.kAuto;
 import igknighters.subsystems.swerve.Swerve;
-
+import igknighters.util.Speeds;
 import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public class AutoController implements Consumer<SwerveSample> {
     private final Swerve swerve;
@@ -62,12 +61,11 @@ public class AutoController implements Consumer<SwerveSample> {
         double rotationFeedback = rController.calculate(pose.getRotation().getRadians(),
             referenceState.heading);
 
-        ChassisSpeeds out = ChassisSpeeds.fromFieldRelativeSpeeds(
+        Speeds out = Speeds.fromFieldRelative(
             xFF + xFeedback,
             yFF + yFeedback,
-            rotationFF + rotationFeedback,
-            pose.getRotation()
-        );
+            rotationFF + rotationFeedback
+        ).asRobotRelative(pose.getRotation());
 
         swerve.drive(out);
     }

@@ -17,6 +17,7 @@ import sham.configs.ShamSwerveConfig;
 import sham.configs.ShamSwerveModuleConfig;
 import sham.configs.ShamSwerveModuleConfig.WheelCof;
 import sham.seasonspecific.Crescendo;
+import sham.utils.DCMotor2;
 import sham.utils.GearRatio;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -26,6 +27,8 @@ import igknighters.Localizer.NamedPositions;
 import igknighters.constants.ConstValues;
 import igknighters.constants.FieldConstants;
 import igknighters.constants.ConstValues.kSwerve;
+import igknighters.constants.ConstValues.kSwerve.kDriveMotor;
+import igknighters.constants.ConstValues.kSwerve.kSteerMotor;
 import igknighters.util.plumbing.Channel.Receiver;
 import igknighters.util.plumbing.Channel.Sender;
 import monologue.LogSink;
@@ -55,13 +58,17 @@ public class SimCtx {
     private final Sender<NamedPositions> poseSender;
     private final Receiver<Pose2d> resetReceiver;
 
-    private final ShamMechanismConfig driveMotorCfg = new ShamMechanismConfig(DCMotor.getKrakenX60Foc(1))
-            .withFriction(Volts.of(0.2), Volts.of(0.175))
+    private final ShamMechanismConfig driveMotorCfg = new ShamMechanismConfig(
+                new DCMotor2(DCMotor.getKrakenX60Foc(1), 1)
+            )
+            .withFriction(Volts.of(kDriveMotor.kS), Volts.of(kDriveMotor.kS * 0.8))
             .withGearRatio(GearRatio.reduction(kSwerve.DRIVE_GEAR_RATIO))
             .withNoise(0.00)
             .withRotorInertia(KilogramSquareMeters.of(0.003));
-    private final ShamMechanismConfig steerMotorCfg = new ShamMechanismConfig(DCMotor.getFalcon500Foc(1))
-            .withFriction(Volts.of(1.0), Volts.of(1.0))
+    private final ShamMechanismConfig steerMotorCfg = new ShamMechanismConfig(
+                new DCMotor2(DCMotor.getFalcon500Foc(1), 1)
+            )
+            .withFriction(Volts.of(kSteerMotor.kS), Volts.of(kSteerMotor.kS * 0.8))
             .withGearRatio(GearRatio.reduction(kSwerve.STEER_GEAR_RATIO))
             .withNoise(0.00)
             .withRotorInertia(KilogramSquareMeters.of(0.02));

@@ -3,12 +3,12 @@ package igknighters.commands.swerve.teleop;
 import igknighters.subsystems.swerve.Swerve;
 import igknighters.subsystems.swerve.control.RotationalController;
 import igknighters.util.AllianceFlip;
-
+import igknighters.util.Speeds;
+import igknighters.util.Speeds.RobotSpeeds;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -23,7 +23,6 @@ public class AutoSwerveTargetSpeakerCmd extends Command {
     private final Supplier<Pose2d> poseSupplier;
     private final RotationalController rotController;
     private boolean isDone = false;
-    ChassisSpeeds desiredChassisSpeeds = new ChassisSpeeds();
 
     public AutoSwerveTargetSpeakerCmd(Swerve swerve, Supplier<Pose2d> poseSupplier) {
         addRequirements(swerve);
@@ -36,7 +35,6 @@ public class AutoSwerveTargetSpeakerCmd extends Command {
     public void initialize() {
         rotController.reset();
         isDone = false;
-        desiredChassisSpeeds.omegaRadiansPerSecond = 0.0;
     }
 
     @Override
@@ -50,8 +48,6 @@ public class AutoSwerveTargetSpeakerCmd extends Command {
         ).plus(Rotation2d.kPi);
         double rotVelo = rotController.calculate(targetAngle.getRadians(), Units.degreesToRadians(1.5));
 
-        desiredChassisSpeeds.omegaRadiansPerSecond = rotVelo;
-
         if (Math.abs(rotVelo) < 0.01
             && Math.abs(
                 MathUtil.angleModulus(targetAngle.getRadians())
@@ -60,7 +56,7 @@ public class AutoSwerveTargetSpeakerCmd extends Command {
             isDone = true;
         }
 
-        swerve.drive(desiredChassisSpeeds);
+        swerve.drive(Speeds.fromRobotRelative(0.0, 0.0, rotVelo));
     }
 
     @Override
@@ -70,6 +66,6 @@ public class AutoSwerveTargetSpeakerCmd extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        swerve.drive(new ChassisSpeeds());
+        swerve.drive(RobotSpeeds.kZero);
     }
 }

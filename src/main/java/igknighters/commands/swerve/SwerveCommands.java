@@ -3,7 +3,6 @@ package igknighters.commands.swerve;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
@@ -11,6 +10,8 @@ import igknighters.Localizer;
 import igknighters.subsystems.swerve.Swerve;
 import igknighters.subsystems.swerve.control.RotationalController;
 import igknighters.util.AllianceFlip;
+import igknighters.util.Speeds;
+import igknighters.util.Speeds.RobotSpeeds;
 
 public class SwerveCommands {
     /**
@@ -29,7 +30,7 @@ public class SwerveCommands {
     }
 
     public static Command commandStopDrives(final Swerve swerve) {
-        return swerve.runOnce(() -> swerve.drive(new ChassisSpeeds())).withName("commandStopDrives");
+        return swerve.runOnce(() -> swerve.drive(RobotSpeeds.kZero)).withName("commandStopDrives");
     }
 
     public static Command orientGyro(Swerve swerve, Localizer localizer) {
@@ -49,7 +50,7 @@ public class SwerveCommands {
     private static abstract class PointTowardsCommand extends Command {
         private final Swerve swerve;
         private final RotationalController rotController;
-        private ChassisSpeeds velo = new ChassisSpeeds();
+        private double velo = 0.0;
 
         public PointTowardsCommand(Swerve swerve) {
             this.swerve = swerve;
@@ -66,13 +67,13 @@ public class SwerveCommands {
 
         @Override
         public void execute() {
-            velo.omegaRadiansPerSecond = rotController.calculate(getTarget().getRadians(), 0.0);
-            swerve.drive(velo);
+            velo = rotController.calculate(getTarget().getRadians(), 0.0);
+            swerve.drive(Speeds.fromFieldRelative(0.0, 0.0, velo));
         }
 
         @Override
         public boolean isFinished() {
-            return Math.abs(velo.omegaRadiansPerSecond) < 0.05;
+            return Math.abs(velo) < 0.05;
         }
 
         @Override
@@ -100,7 +101,7 @@ public class SwerveCommands {
         };
     }
 
-    public static Command driveChassisSpeed(Swerve swerve, final ChassisSpeeds speeds) {
+    public static Command driveChassisSpeed(Swerve swerve, final Speeds speeds) {
         return Commands.run(
             () -> swerve.drive(speeds),
             swerve

@@ -2,6 +2,7 @@ package igknighters.util;
 
 import java.util.TreeMap;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -21,7 +22,7 @@ public class TwistyPoseEst {
         @Override
         public boolean equals(Object obj) {
             if (obj instanceof TimestampedTwist2d other) {
-                return super.equals(obj) && timestamp == other.timestamp;
+                return super.equals(obj) && MathUtil.isNear(other.timestamp, timestamp, 1E-9);
             }
             return false;
         }
@@ -92,7 +93,6 @@ public class TwistyPoseEst {
 
     private final TreeMap<Double, TimestampedTwist2d> samples = new TreeMap<>();
     private Pose2d rootPose = Pose2d.kZero;
-    private Rotation2d lastGyroAngle = Rotation2d.kZero;
     private Object prevWheelPositions;
 
     public void resetPose(Pose2d pose) {
@@ -100,7 +100,7 @@ public class TwistyPoseEst {
         samples.clear();
     }
 
-    private Pose2d poseAtTimestamp(double timestamp) {
+    private PrimitivePose poseAtTimestampPrimitive(double timestamp) {
         PrimitivePose pose = new PrimitivePose(rootPose);
         for (TimestampedTwist2d sample : samples.values()) {
             if (sample.timestamp > timestamp) {
@@ -108,7 +108,16 @@ public class TwistyPoseEst {
             }
             pose.twistBy(sample);
         }
-        return pose.toPose2d();
+        return pose;
+    }
+
+    private Pose2d poseAtTimestamp(double timestamp) {
+        return poseAtTimestampPrimitive(timestamp).toPose2d();
+    }
+
+    private double rotationAtTimestamp(double timestamp) {
+        var pp = poseAtTimestampPrimitive(timestamp);
+        return Math.atan2(pp.sin, pp.cos);
     }
 
     public void prune(double maxAge) {
@@ -132,7 +141,7 @@ public class TwistyPoseEst {
             new TimestampedTwist2d(
                 twist.dx * weight,
                 twist.dy * weight,
-                twist.dtheta * weight,
+                twist.dtheta * weight * 0.01,
                 timestamp
             )
         );
@@ -153,10 +162,10 @@ public class TwistyPoseEst {
             new TimestampedTwist2d(
                 twist.dx * weight,
                 twist.dy * weight,
-                lastGyroAngle.minus(gyroAngle).getRadians(),
+                gyroAngle.minus(Rotation2d.fromRadians(rotationAtTimestamp(Timer.getFPGATimestamp())))
+                    .getRadians(),
                 timestamp
         ));
-        lastGyroAngle = gyroAngle;
         prevWheelPositions = wheelPositions;
     }
 

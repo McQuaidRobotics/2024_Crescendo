@@ -85,7 +85,7 @@ public class AutoCommands {
                 AimSolveStrategy.STATIONARY_PIVOT_TELESCOPE_EXTEND,
                 false,
                 () -> traj.getFinalPose().orElseThrow(),
-                swerve::getChassisSpeed
+                swerve::getFieldSpeeds
             ).withName("AimStem")
         );
     }
@@ -97,7 +97,7 @@ public class AutoCommands {
                 AimSolveStrategy.STATIONARY_PIVOT_TELESCOPE_EXTEND,
                 false,
                 visionPoseSupplierWithFallback,
-                swerve::getChassisSpeed
+                swerve::getFieldSpeeds
             ).withName("AimVision")
         );
     }
@@ -130,7 +130,7 @@ public class AutoCommands {
                     AimSolveStrategy.STATIONARY_PIVOT_TELESCOPE_EXTEND,
                     true,
                     visionPoseSupplierWithFallback,
-                    swerve::getChassisSpeed
+                    swerve::getFieldSpeeds
                 ).finallyDo(() -> logAutoEvent("Stem Targeting", "Done")),
                 UmbrellaCommands.waitUntilSpunUp(umbrella, kControls.AUTO_SHOOTER_RPM)
             ).andThen(
@@ -150,7 +150,7 @@ public class AutoCommands {
                     AimSolveStrategy.STATIONARY_PIVOT_TELESCOPE_EXTEND,
                     true,
                     visionPoseSupplierWithFallback,
-                    swerve::getChassisSpeed
+                    swerve::getFieldSpeeds
                 ).finallyDo(() -> logAutoEvent("Stem Targeting", "Done"))
             ).andThen(
                 feedShooter()
@@ -170,7 +170,7 @@ public class AutoCommands {
                     AimSolveStrategy.STATIONARY_PIVOT,
                     true,
                     visionPoseSupplierWithFallback,
-                    swerve::getChassisSpeed
+                    swerve::getFieldSpeeds
                 ).finallyDo(() -> logAutoEvent("Stem Targeting", "Done")),
                 UmbrellaCommands.waitUntilSpunUp(umbrella, kControls.AUTO_SHOOTER_RPM, 0.4)
             ).andThen(

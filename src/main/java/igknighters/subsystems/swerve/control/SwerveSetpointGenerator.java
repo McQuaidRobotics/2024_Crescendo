@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj.RobotController;
 import monologue.Logged;
 
 import igknighters.subsystems.swerve.module.SwerveModule.AdvancedSwerveModuleState;
+import igknighters.util.Speeds;
+import igknighters.util.Speeds.RobotSpeeds;
 
 /**
  * Swerve setpoint generatoR that has been passed around so many times its hard to keep track,
@@ -95,16 +97,16 @@ public class SwerveSetpointGenerator implements Logged {
 
         final LocalVars vars = VARS_TEMPLATE.reset();
         vars.dt = dt;
-        vars.prevSpeeds = prevSetpoint.chassisSpeeds();
+        vars.prevSpeeds = prevSetpoint.speeds().toWpilib();
         vars.desiredSpeeds = desiredRobotRelativeSpeeds;
         vars.desiredModuleStates = desiredModuleStates;
         vars.prevModuleStates = prevSetpoint.moduleStates();
         vars.dx = desiredRobotRelativeSpeeds.vxMetersPerSecond
-                - prevSetpoint.chassisSpeeds().vxMetersPerSecond;
+                - prevSetpoint.speeds().vx();
         vars.dy = desiredRobotRelativeSpeeds.vyMetersPerSecond
-                - prevSetpoint.chassisSpeeds().vyMetersPerSecond;
+                - prevSetpoint.speeds().vy();
         vars.dtheta = desiredRobotRelativeSpeeds.omegaRadiansPerSecond
-                - prevSetpoint.chassisSpeeds().omegaRadiansPerSecond;
+                - prevSetpoint.speeds().omega();
         vars.minS = 1.0;
 
         log("beginningVars", vars);
@@ -128,11 +130,12 @@ public class SwerveSetpointGenerator implements Logged {
         solveDriving(vars);
         log("postSolveDriving", vars);
 
-        ChassisSpeeds retSpeeds = new ChassisSpeeds(
+        ChassisSpeeds retSpeeds = ChassisSpeeds.discretize(new ChassisSpeeds(
                 vars.prevSpeeds.vxMetersPerSecond + vars.minS * vars.dx,
                 vars.prevSpeeds.vyMetersPerSecond + vars.minS * vars.dy,
-                vars.prevSpeeds.omegaRadiansPerSecond + vars.minS * vars.dtheta);
-        retSpeeds.discretize(dt);
+                vars.prevSpeeds.omegaRadiansPerSecond + vars.minS * vars.dtheta),
+                dt
+        );
 
         double chassisAccelX = (retSpeeds.vxMetersPerSecond - vars.prevSpeeds.vxMetersPerSecond) / dt;
         double chassisAccelY = (retSpeeds.vyMetersPerSecond - vars.prevSpeeds.vyMetersPerSecond) / dt;
@@ -157,21 +160,21 @@ public class SwerveSetpointGenerator implements Logged {
         log("finalVars", vars);
 
         return log("output", new SwerveSetpoint(
-            retSpeeds,
+            Speeds.fromRobotRelative(retSpeeds),
             outputStates
         ));
     }
 
-    public SwerveSetpoint generateSimpleSetpoint(final SwerveSetpoint prevSetpoint, ChassisSpeeds desiredRobotRelativeSpeeds, double dt) {
+    public SwerveSetpoint generateSimpleSetpoint(final SwerveSetpoint prevSetpoint, RobotSpeeds desiredRobotRelativeSpeeds, double dt) {
         AdvancedSwerveModuleState[] outputStates = new AdvancedSwerveModuleState[NUM_MODULES];
-        SwerveModuleState[] desiredModuleStates = kinematics.toSwerveModuleStates(desiredRobotRelativeSpeeds);
+        SwerveModuleState[] desiredModuleStates = kinematics.toSwerveModuleStates(desiredRobotRelativeSpeeds.toWpilib());
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredModuleStates, maxDriveVelocityMPS);
         for (int m = 0; m < NUM_MODULES; m++) {
             desiredModuleStates[m].optimize(prevSetpoint.moduleStates()[m].angle);
             outputStates[m] = AdvancedSwerveModuleState.fromBase(desiredModuleStates[m]);
         }
 
-        return new SwerveSetpoint(kinematics.toChassisSpeeds(desiredModuleStates), outputStates);
+        return new SwerveSetpoint(Speeds.fromRobotRelative(kinematics.toChassisSpeeds(desiredModuleStates)), outputStates);
     }
 
     private static void checkNeedToSteer(LocalVars vars) {

@@ -2,7 +2,6 @@ package igknighters.controllers;
 
 import igknighters.Localizer;
 import igknighters.Robot;
-import igknighters.commands.Emotes;
 import igknighters.commands.HigherOrderCommands;
 import igknighters.commands.led.LedCommands;
 import igknighters.commands.stem.StemCommands;
@@ -155,9 +154,7 @@ public class DriverController extends ControllerBase {
         }, Subsystems.Stem, Subsystems.Umbrella, Subsystems.Swerve);
 
         /// CENTER BUTTONS
-        this.Back.binding = new Binding(Subsystems.all(), (trig, allss) -> {
-            trig.onTrue(Emotes.bopYourHead(allss));
-        });
+        // this.Back.binding = 
 
         this.Start.binding = new Binding(Subsystems.Swerve, (trig, allss) -> {
                 trig.onTrue(SwerveCommands.orientGyro(allss.swerve.get(), localizer));
@@ -233,14 +230,8 @@ public class DriverController extends ControllerBase {
                 }).withName("StopAll"));
         }, Subsystems.Stem, Subsystems.Umbrella); 
 
-        if (Robot.isDemo()) {
-            this.DPU.binding = new Binding((trig, allss) -> {
-                trig.onTrue(Emotes.yes(allss));
-            }, Subsystems.Stem, Subsystems.Umbrella);
-        } else {
-            this.DPU.binding = new Binding((trig, allss) -> {
-                trig.onTrue(StemCommands.holdAt(allss.stem.get(), StemPosition.STARTING));
-            }, Subsystems.Stem);
-        }
+        this.DPU.binding = new Binding((trig, allss) -> {
+            trig.onTrue(StemCommands.holdAt(allss.stem.get(), StemPosition.STARTING));
+        }, Subsystems.Stem);
     }
 }

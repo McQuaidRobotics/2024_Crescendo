@@ -2,7 +2,7 @@ package sham;
 
 import java.util.function.Supplier;
 
-import edu.wpi.first.epilogue.logging.DataLogger;
+import edu.wpi.first.epilogue.logging.EpilogueBackend;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -36,20 +36,20 @@ public class ShamSwerveModule {
     private final Distance wheelRadius;
     private final Translation2d translation;
     private final int moduleId;
-    protected final DataLogger logger;
+    protected final EpilogueBackend logger;
 
     private final ShamEnvTiming timing;
 
     ShamSwerveModule(
             ShamRobot<ShamSwerve> robot,
             ShamSwerveConfig config,
-            DataLogger logger,
+            EpilogueBackend logger,
             int moduleId,
             Force gravityForce,
             Supplier<MomentOfInertia> rotorInertia,
             ShamMotorController driveController,
             ShamMotorController steerController) {
-        this.logger = logger.getSubLogger("SwerveModule" + moduleId);
+        this.logger = logger.getNested("SwerveModule" + moduleId);
         this.robot = robot;
         final ShamSwerveModuleConfig moduleConfig = config.swerveModuleConfig;
         timing = robot.timing();

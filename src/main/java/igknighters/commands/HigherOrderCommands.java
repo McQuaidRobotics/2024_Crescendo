@@ -59,7 +59,12 @@ public class HigherOrderCommands {
                     true,
                     0.25
                 ),
-                StemCommands.aimAtSpeaker(stem, false, localizer::pose, swerve::getChassisSpeed)).withName("Aim");
+                StemCommands.aimAtSpeaker(
+                    stem,
+                    false,
+                    localizer::pose,
+                    swerve::getFieldSpeeds
+                )).withName("Aim");
     }
 
     public static Command aimNotePass(

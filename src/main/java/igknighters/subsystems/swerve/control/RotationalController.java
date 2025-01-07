@@ -75,7 +75,7 @@ public class RotationalController {
         positionError = 0;
         prevError = 0;
         velocityError = 0;
-        setpointState = new TrapezoidProfile.State(swerve.getYawRads(), swerve.getChassisSpeed().omegaRadiansPerSecond);
+        setpointState = new TrapezoidProfile.State(swerve.getYawRads(), swerve.getRobotSpeeds().omega());
     }
 
     public static record RotationalControllerOutput (

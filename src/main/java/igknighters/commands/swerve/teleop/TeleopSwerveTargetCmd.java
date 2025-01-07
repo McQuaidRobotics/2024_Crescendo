@@ -3,10 +3,10 @@ package igknighters.commands.swerve.teleop;
 import igknighters.subsystems.swerve.Swerve;
 import igknighters.subsystems.swerve.control.RotationalController;
 import igknighters.util.AllianceFlip;
-
+import igknighters.util.Speeds;
+import igknighters.util.Speeds.FieldSpeeds;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 
 import java.util.function.Supplier;
@@ -55,34 +55,20 @@ public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
         Translation2d vt = orientForUser(getTranslation())
                 .times(kSwerve.MAX_DRIVE_VELOCITY * speedMult);
 
-        // ChassisSpeeds desiredChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-        //         vt.getX(),
-        //         vt.getY(),
-        //         0.0,
-        //         new Rotation2d(swerve.getYawRads())
-        // );
-        ChassisSpeeds desiredChassisSpeeds = new ChassisSpeeds(
-            vt.getX(),
-            vt.getY(),
-            0.0
-        );
-        desiredChassisSpeeds.toRobotRelativeSpeeds(new Rotation2d(swerve.getYawRads()));
-        ChassisSpeeds currentChassisSpeeds = swerve.getChassisSpeed();
+        FieldSpeeds currentChassisSpeeds = swerve.getFieldSpeeds();
 
-        ChassisSpeeds avgChassisSpeeds = new ChassisSpeeds(
-                (desiredChassisSpeeds.vxMetersPerSecond + currentChassisSpeeds.vxMetersPerSecond) / 2.0,
-                (desiredChassisSpeeds.vyMetersPerSecond + currentChassisSpeeds.vyMetersPerSecond) / 2.0,
-                0.0);
+        double heuristicVX = (vt.getX() + currentChassisSpeeds.vx()) / 2.0;
+        double heuristicVY = (vt.getY() + currentChassisSpeeds.vy()) / 2.0;
 
         double distance = currentTranslation.getDistance(targetTranslation);
 
         Translation2d adjustedTarget = new Translation2d(
-                targetTranslation.getX() - (avgChassisSpeeds.vxMetersPerSecond * (distance / kUmbrella.NOTE_VELO)),
-                targetTranslation.getY() - (avgChassisSpeeds.vyMetersPerSecond * (distance / kUmbrella.NOTE_VELO)));
+                targetTranslation.getX() - (heuristicVX * (distance / kUmbrella.NOTE_VELO)),
+                targetTranslation.getY() - (heuristicVY * (distance / kUmbrella.NOTE_VELO)));
 
         Translation2d lookaheadTranslation = currentTranslation.plus(new Translation2d(
-                avgChassisSpeeds.vxMetersPerSecond * kControls.SOTM_LOOKAHEAD_TIME,
-                avgChassisSpeeds.vyMetersPerSecond * kControls.SOTM_LOOKAHEAD_TIME
+                heuristicVX * kControls.SOTM_LOOKAHEAD_TIME,
+                heuristicVY * kControls.SOTM_LOOKAHEAD_TIME
             ));
 
         Rotation2d targetAngle;
@@ -99,9 +85,9 @@ public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
             ).plus(offset);
         }
 
-        desiredChassisSpeeds.omegaRadiansPerSecond = rotController.calculate(targetAngle.getRadians(), Units.degreesToRadians(0.3));
+        double omega = rotController.calculate(targetAngle.getRadians(), Units.degreesToRadians(0.3));
 
-        swerve.drive(desiredChassisSpeeds);
+        swerve.drive(Speeds.fromFieldRelative(vt.getX(), vt.getY(), omega));
     }
 
     public static final TeleopSwerveBaseStruct struct = new TeleopSwerveBaseStruct();

@@ -1,13 +1,14 @@
 package sham;
 
-import edu.wpi.first.epilogue.logging.DataLogger;
+import edu.wpi.first.epilogue.logging.EpilogueBackend;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.units.measure.Angle;
 // import edu.wpi.first.units.measure.Angle;
 // import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Time;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
@@ -32,10 +33,10 @@ public class ShamGyro {
     // /* The amount of drift, in radians, that the gyro experiences as a result of each multiple of the angular acceleration threshold. */
     // private static final Angle DRIFT_DUE_TO_IMPACT_COEFFICIENT = Radians.of(1);
 
-    private final DataLogger logger;
+    private final EpilogueBackend logger;
 
     private final ShamEnvTiming timing;
-    private BiConsumer<AngularVelocity, XY<LinearAcceleration>> updateConsumer;
+    private BiConsumer<Pair<Angle, AngularVelocity>, XY<LinearAcceleration>> updateConsumer;
 
     private final double veloStdDev;
 
@@ -43,8 +44,8 @@ public class ShamGyro {
 
     private Twist2d lastTwist = new Twist2d();
 
-    public ShamGyro(ShamEnvTiming timing, ShamGyroConfig gyroConfig, DataLogger logger) {
-        this.logger = logger.getSubLogger("Gyro");
+    public ShamGyro(ShamEnvTiming timing, ShamGyroConfig gyroConfig, EpilogueBackend logger) {
+        this.logger = logger.getNested("Gyro");
         this.timing = timing;
         this.averageDriftingMotionless = Degrees.of(gyroConfig.averageDriftingIn30SecsMotionlessDeg)
                 .div(Seconds.of(30.0));
@@ -55,12 +56,8 @@ public class ShamGyro {
         RuntimeLog.debug("Created a swerve module simulation");
     }
 
-    public void setUpdateConsumer(BiConsumer<AngularVelocity, XY<LinearAcceleration>> updateConsumer) {
+    public void setUpdateConsumer(BiConsumer<Pair<Angle, AngularVelocity>, XY<LinearAcceleration>> updateConsumer) {
         this.updateConsumer = updateConsumer;
-    }
-
-    public Time getDt() {
-        return timing.dt();
     }
 
     /**
@@ -73,7 +70,7 @@ public class ShamGyro {
      * @param actualAngularVelocityRadPerSec the actual angular velocity in radians per second, usually obtained from
      *     {@link ShamDriveTrain#getAngularVelocity()}
      */
-    public void updateSimulationSubTick(Twist2d twistThisTick) {
+    public void updateSimulationSubTick(Angle angleThisTick, Twist2d twistThisTick) {
         AngularVelocity actualAngularVelocity = Radians.of(twistThisTick.dtheta)
             .div(timing.dt());
 
@@ -97,7 +94,7 @@ public class ShamGyro {
         logger.log("yA", yA);
 
         if (updateConsumer != null) {
-            updateConsumer.accept(omegaV, new XY<>(xA, yA));
+            updateConsumer.accept(Pair.of(angleThisTick, omegaV), new XY<>(xA, yA));
         }
     }
 

@@ -1,6 +1,6 @@
 package sham;
 
-import edu.wpi.first.epilogue.logging.DataLogger;
+import edu.wpi.first.epilogue.logging.EpilogueBackend;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -40,7 +40,7 @@ public class ShamDriveTrain {
      */
     public static final double kBumperCoR = 0.005;
 
-    protected final DataLogger logger;
+    protected final EpilogueBackend logger;
     protected final FrcBody chassis = new FrcBody();
     private final ShamEnvTiming timing;
 
@@ -60,7 +60,7 @@ public class ShamDriveTrain {
      * @param initialPoseOnField the initial pose of the drivetrain in the simulation world
      */
     @SuppressWarnings("unchecked")
-    protected ShamDriveTrain(DataLogger logger, ShamDriveTrainConfig<?, ?> config, ShamEnvTiming timing) {
+    protected ShamDriveTrain(EpilogueBackend logger, ShamDriveTrainConfig<?, ?> config, ShamEnvTiming timing) {
         this.timing = timing;
         this.logger = logger;
         logger.log("config", config, (Struct<ShamDriveTrainConfig<?, ?>>) ProceduralStructGenerator

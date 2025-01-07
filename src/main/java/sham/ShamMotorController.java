@@ -5,9 +5,12 @@ import static edu.wpi.first.units.Units.Volts;
 
 import sham.ShamMechanism.MechanismState;
 import sham.ShamMotorController.ControllerOutput.VoltageOutput;
+import sham.utils.DCMotor2;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.util.struct.Struct;
+import monologue.ProceduralStructGenerator;
 
 /**
  * An interface to represent a motor controller in the simulation.
@@ -15,12 +18,30 @@ import edu.wpi.first.units.measure.Voltage;
  */
 public interface ShamMotorController {
     public sealed interface ControllerOutput {
+        public enum ControllerOutputTypes {
+            VOLTAGE, CURRENT;
+
+            public static final Struct<ControllerOutputTypes> struct = ProceduralStructGenerator.genEnum(ControllerOutputTypes.class);
+        }
+
+        public ControllerOutputTypes type();
+
         public record VoltageOutput(Voltage voltage) implements ControllerOutput {
+            @Override
+            public ControllerOutputTypes type() {
+                return ControllerOutputTypes.VOLTAGE;
+            }
+
             public static VoltageOutput of(double voltage) {
                 return new VoltageOutput(Volts.of(voltage));
             }
         }
         public record CurrentOutput(Current current) implements ControllerOutput {
+            @Override
+            public ControllerOutputTypes type() {
+                return ControllerOutputTypes.CURRENT;
+            }
+
             public static CurrentOutput of(double current) {
                 return new CurrentOutput(Amps.of(current));
             }
@@ -68,6 +89,8 @@ public interface ShamMotorController {
      */
     boolean brakeEnabled();
 
+    default void configureMotorModel(DCMotor2 motor) {}
+
     /**
      * Returns a motor controller that does nothing.
      * 
@@ -83,6 +106,10 @@ public interface ShamMotorController {
             @Override
             public boolean brakeEnabled() {
                 return false;
+            }
+
+            @Override
+            public void configureMotorModel(DCMotor2 motor) {
             }
         };
     }

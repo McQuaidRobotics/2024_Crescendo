@@ -8,9 +8,9 @@ import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 
+import sham.utils.DCMotor2;
 import sham.utils.GearRatio;
 
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Velocity;
@@ -21,7 +21,7 @@ import monologue.ProceduralStructGenerator;
 import monologue.ProceduralStructGenerator.IgnoreStructField;
 
 public class ShamMechanismConfig implements StructSerializable {
-    public DCMotor motor;
+    public DCMotor2 motor;
     public MomentOfInertia rotorInertia;
     public GearRatio gearRatio;
     public Friction friction;
@@ -32,7 +32,8 @@ public class ShamMechanismConfig implements StructSerializable {
     public double noise;
 
     public ShamMechanismConfig(
-            DCMotor motor,
+            DCMotor2 motor,
+            int motorCount,
             MomentOfInertia rotorInertia,
             GearRatio gearRatio,
             Friction friction,
@@ -50,7 +51,7 @@ public class ShamMechanismConfig implements StructSerializable {
         this.noise = noise;
     }
 
-    public ShamMechanismConfig(DCMotor motor) {
+    public ShamMechanismConfig(DCMotor2 motor) {
         this.motor = motor;
         this.rotorInertia = KilogramSquareMeters.of(0.01);
         this.gearRatio = GearRatio.reduction(1.0);

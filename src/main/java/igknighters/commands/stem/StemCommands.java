@@ -13,13 +13,13 @@ import igknighters.subsystems.stem.StemSolvers;
 import igknighters.subsystems.stem.StemSolvers.AimSolveStrategy;
 import igknighters.subsystems.stem.StemSolvers.StemSolveInput;
 import igknighters.util.AllianceFlip;
+import igknighters.util.Speeds.FieldSpeeds;
 import igknighters.util.plumbing.TunableValues;
 import igknighters.util.plumbing.TunableValues.TunableDouble;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import monologue.Monologue;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -32,7 +32,7 @@ public class StemCommands {
         private final Stem stem;
         private final AimSolveStrategy aimStrategy;
         private final Supplier<Pose2d> poseSupplier;
-        private final Supplier<ChassisSpeeds> velocitySupplier;
+        private final Supplier<FieldSpeeds> velocitySupplier;
         private final boolean canFinish;
 
         private Translation2d targetTranslation;
@@ -43,7 +43,7 @@ public class StemCommands {
             AimSolveStrategy aimStrategy,
             boolean canFinish,
             Supplier<Pose2d> poseSupplier,
-            Supplier<ChassisSpeeds> velocitySupplier
+            Supplier<FieldSpeeds> velocitySupplier
         ) {
             addRequirements(stem);
             this.stem = stem;
@@ -61,20 +61,20 @@ public class StemCommands {
 
         @Override
         public void execute() {
-            ChassisSpeeds currentChassisSpeed = velocitySupplier.get();
+            FieldSpeeds currentChassisSpeed = velocitySupplier.get();
             Pose2d currentPose = poseSupplier.get();
 
             double targetDistance = currentPose.getTranslation().getDistance(targetTranslation);
 
             Translation2d adjustedTarget = new Translation2d(
                     targetTranslation.getX()
-                            - (currentChassisSpeed.vxMetersPerSecond * (targetDistance / kUmbrella.NOTE_VELO)),
+                            - (currentChassisSpeed.vx() * (targetDistance / kUmbrella.NOTE_VELO)),
                     targetTranslation.getY()
-                            - (currentChassisSpeed.vyMetersPerSecond * (targetDistance / kUmbrella.NOTE_VELO)));
+                            - (currentChassisSpeed.vy() * (targetDistance / kUmbrella.NOTE_VELO)));
 
             Translation2d lookaheadTranslation = currentPose.getTranslation().plus(new Translation2d(
-                currentChassisSpeed.vxMetersPerSecond * kControls.SOTM_LOOKAHEAD_TIME,
-                currentChassisSpeed.vyMetersPerSecond * kControls.SOTM_LOOKAHEAD_TIME
+                currentChassisSpeed.vx() * kControls.SOTM_LOOKAHEAD_TIME,
+                currentChassisSpeed.vy() * kControls.SOTM_LOOKAHEAD_TIME
             ));
 
             double distance = lookaheadTranslation.getDistance(adjustedTarget);
@@ -231,7 +231,7 @@ public class StemCommands {
      * @param poseSupplier Localizer
      * @return A command to be scheduled
      */
-    public static Command aimAtSpeaker(Stem stem, boolean canFinish, Supplier<Pose2d> poseSupplier, Supplier<ChassisSpeeds> veloSupplier) {
+    public static Command aimAtSpeaker(Stem stem, boolean canFinish, Supplier<Pose2d> poseSupplier, Supplier<FieldSpeeds> veloSupplier) {
         return aimAtSpeaker(stem, kControls.DEFAULT_AIM_STRATEGY, canFinish, poseSupplier, veloSupplier);
     }
 
@@ -245,7 +245,7 @@ public class StemCommands {
      * @param poseSupplier Localizer
      * @return A command to be scheduled
      */
-    public static Command aimAtSpeaker(Stem stem, AimSolveStrategy aimStrategy, boolean canFinish, Supplier<Pose2d> poseSupplier, Supplier<ChassisSpeeds> veloSupplier) {
+    public static Command aimAtSpeaker(Stem stem, AimSolveStrategy aimStrategy, boolean canFinish, Supplier<Pose2d> poseSupplier, Supplier<FieldSpeeds> veloSupplier) {
         return new AimAtSpeakerCommand(stem, aimStrategy, canFinish, poseSupplier, veloSupplier)
                 .withName("AimAtSpeaker(" + aimStrategy.name() + ")");
     }

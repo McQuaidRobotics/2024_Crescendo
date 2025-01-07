@@ -19,7 +19,7 @@ import sham.utils.DCMotor2;
 import sham.utils.GearRatio;
 import sham.utils.RuntimeLog;
 import sham.utils.mathutils.MeasureMath;
-import edu.wpi.first.epilogue.logging.DataLogger;
+import edu.wpi.first.epilogue.logging.EpilogueBackend;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.AngularAccelerationUnit;
@@ -218,7 +218,7 @@ public class ShamMechanism {
         public static final Struct<MechanismVariables> struct = ProceduralStructGenerator.genRecord(MechanismVariables.class);
     }
 
-    private final DataLogger logger;
+    private final EpilogueBackend logger;
     private final String name;
     private final MechanismDynamics dynamics;
     private final Friction friction;
@@ -236,7 +236,7 @@ public class ShamMechanism {
 
     public ShamMechanism(
         String name,
-        DCMotor motor,
+        DCMotor2 motor,
         ShamMotorController controller,
         MomentOfInertia rotorInertia,
         GearRatio gearRatio,
@@ -250,13 +250,15 @@ public class ShamMechanism {
         this.dynamics = dynamics;
         this.friction = friction;
         this.gearRatio = gearRatio;
-        this.motor = new DCMotor2(motor);
+        this.motor = motor;
         this.controller = controller;
         this.timing = timing;
         this.rotorInertia = rotorInertia;
         this.name = name;
         this.limits = limits;
         this.noise = noise;
+
+        controller.configureMotorModel(this.motor);
 
         logger.log("dynamics", dynamics.getClass().getSimpleName());
         logger.log("friction", friction, Friction.struct);

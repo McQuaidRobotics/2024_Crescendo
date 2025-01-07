@@ -88,12 +88,12 @@ public class SwerveModuleSim2 extends SwerveModule {
                     driveState.velocity().in(RotationsPerSecond),
                     Units.radiansToRotations(velocityRadPerSec)
                 );
-                var feedforward = driveFeedforward.calculate(
-                    RotationsPerSecond.of(driveState.velocity().in(RotationsPerSecond)),
-                    RotationsPerSecond.of(Units.radiansToRotations(velocityRadPerSec))
+                var feedforward = driveFeedforward.calculateWithVelocities(
+                    driveState.velocity().in(RotationsPerSecond),
+                    Units.radiansToRotations(velocityRadPerSec)
                 );
                 var output = MathUtil.clamp(
-                    feedback + feedforward.in(Volts),
+                    feedback + feedforward,
                     -RobotController.getBatteryVoltage(),
                     RobotController.getBatteryVoltage()
                 );
