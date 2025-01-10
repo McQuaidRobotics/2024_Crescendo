@@ -1,17 +1,26 @@
 package sham.utils;
 
+import static edu.wpi.first.units.Units.Amp;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.NewtonMeters;
+import static edu.wpi.first.units.Units.Ohms;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Volt;
 import static edu.wpi.first.units.Units.Volts;
 import static edu.wpi.first.units.Units.Watts;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.proto.DCMotorProto;
 import edu.wpi.first.math.system.plant.struct.DCMotorStruct;
+import edu.wpi.first.units.AngularVelocityUnit;
+import edu.wpi.first.units.CurrentUnit;
+import edu.wpi.first.units.TorqueUnit;
+import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Per;
 import edu.wpi.first.units.measure.Power;
+import edu.wpi.first.units.measure.Resistance;
 import edu.wpi.first.units.measure.Torque;
 import edu.wpi.first.units.measure.Voltage;
 import sham.utils.mathutils.MeasureMath;
@@ -52,14 +61,68 @@ public class DCMotorExt extends DCMotor {
   }
 
   /**
+   * @return The torque when stalled at 12v.
+   */
+  public Torque stallTorque() {
+    return NewtonMeters.of(stallTorqueNewtonMeters);
+  }
+
+  /**
+   * @return Stator current draw when stalled at 12v.
+   */
+  public Current stallCurrent() {
+    return Amps.of(stallCurrentAmps);
+  }
+
+  /**
+   * @return Stator current draw under load at 12v.
+   */
+  public Current freeCurrent() {
+    return Amps.of(freeCurrentAmps);
+  }
+
+  /**
+   * @return Angular velocity under no load at 12v.
+   */
+  public AngularVelocity freeSpeed() {
+    return RadiansPerSecond.of(freeSpeedRadPerSec);
+  }
+
+  /**
+   * @return Motor internal resistance.
+   */
+  public Resistance internalResistance() {
+    return Ohms.of(rOhms);
+  }
+
+  public Per<AngularVelocityUnit, VoltageUnit> kV() {
+    return RadiansPerSecond.per(Volt).ofNative(KvRadPerSecPerVolt);
+  }
+
+  public Per<TorqueUnit, CurrentUnit> kT() {
+    return NewtonMeters.per(Amp).ofNative(KtNMPerAmp);
+  }
+
+  /**
    * Calculate current drawn by motor with given speed and input voltage.
    *
    * @param speed The current angular velocity of the motor.
    * @param voltageInputVolts The voltage being applied to the motor.
-   * @return The estimated current.
+   * @return The current drawn by the motor
    */
   public Current getCurrent(AngularVelocity speed, Voltage voltageInput) {
     return Amps.of(super.getCurrent(speed.in(RadiansPerSecond), voltageInput.in(Volts)));
+  }
+
+  /**
+   * Calculate torque produced by motor with given speed and input voltage.
+   *
+   * @param speed The current angular velocity of the motor.
+   * @param voltageInputVolts The voltage being applied to the motor.
+   * @return The output torque.
+   */
+  public Torque getTorque(AngularVelocity speed, Voltage voltageInput) {
+    return getTorque(getCurrent(speed, voltageInput));
   }
 
   /**
@@ -214,12 +277,13 @@ public class DCMotorExt extends DCMotor {
    *
    * @param speed The current angular velocity of the motor.
    * @param voltageInput The voltage applied to the motor.
-   * @param current The current drawn by the motor.
+   * @param statorCurrent The current drawn by the motor.
    * @return The supply current of the motor.
    */
-  public Current getSupplyCurrent(AngularVelocity speed, Voltage voltageInput, Current current) {
-    Power statorPower = voltageInput.times(current).times(getSpeedPercent(speed));
-    Power losses = getLosses(speed, voltageInput, current);
+  public Current getSupplyCurrent(
+      AngularVelocity speed, Voltage voltageInput, Current statorCurrent) {
+    Power statorPower = voltageInput.times(statorCurrent).times(getSpeedPercent(speed));
+    Power losses = getLosses(speed, voltageInput, statorCurrent);
     return statorPower.plus(losses).div(voltageInput);
   }
 
@@ -239,11 +303,11 @@ public class DCMotorExt extends DCMotor {
    *
    * @param speed The current angular velocity of the motor.
    * @param voltageInput The voltage applied to the motor.
-   * @param current The current drawn by the motor.
+   * @param statorCurrent The current drawn by the motor.
    * @return The losses of the motor.
    */
-  public Power getOutputPower(AngularVelocity speed, Current current) {
-    Torque torque = getTorque(current);
+  public Power getOutputPower(AngularVelocity speed, Current statorCurrent) {
+    Torque torque = getTorque(statorCurrent);
     return Watts.of(speed.in(RadiansPerSecond) * torque.in(NewtonMeters));
   }
 
@@ -252,12 +316,12 @@ public class DCMotorExt extends DCMotor {
    *
    * @param speed The current angular velocity of the motor.
    * @param voltageInput The voltage applied to the motor.
-   * @param current The current drawn by the motor.
+   * @param statorCurrent The current drawn by the motor.
    * @return The losses of the motor.
    */
-  public Power getLosses(AngularVelocity speed, Voltage voltageInput, Current current) {
+  public Power getLosses(AngularVelocity speed, Voltage voltageInput, Current statorCurrent) {
     Power passiveLoss = getFreeCurrent(speed).times(voltageInput);
-    Power resistiveLoss = Watts.of(rOhms * Math.pow(current.in(Amps), 2.0));
+    Power resistiveLoss = Watts.of(rOhms * Math.pow(statorCurrent.in(Amps), 2.0));
     return passiveLoss.plus(resistiveLoss);
   }
 
@@ -266,12 +330,12 @@ public class DCMotorExt extends DCMotor {
    *
    * @param speed The current angular velocity of the motor.
    * @param voltageInput The voltage applied to the motor.
-   * @param current The current drawn by the motor.
+   * @param statorCurrent The current drawn by the motor.
    * @return The efficiency of the motor.
    */
-  public double getEfficiency(AngularVelocity speed, Voltage voltageInput, Current current) {
-    Power output = getOutputPower(speed, current);
-    Power losses = getLosses(speed, voltageInput, current);
+  public double getEfficiency(AngularVelocity speed, Voltage voltageInput, Current statorCurrent) {
+    Power output = getOutputPower(speed, statorCurrent);
+    Power losses = getLosses(speed, voltageInput, statorCurrent);
     return output.in(Watts) / (output.in(Watts) + losses.in(Watts));
   }
 }

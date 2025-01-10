@@ -37,13 +37,17 @@ public class FrcBody extends Body {
         ProceduralStructGenerator.genRecord(FrcBodySnapshot.class);
   }
 
+  public double getInvertedAngularVelocity() {
+    return -super.getAngularVelocity();
+  }
+
   public FrcBodySnapshot snapshot() {
     return new FrcBodySnapshot(
         GeometryConvertor.toWpilibPose2d(getTransform()),
         GeometryConvertor.toWpilibUnit(getMass()).getFirst(),
         GeometryConvertor.toWpilibUnit(getMass()).getSecond(),
         new Velocity2d(getLinearVelocity().x, getLinearVelocity().y),
-        RadiansPerSecond.of(-getAngularVelocity()),
+        RadiansPerSecond.of(getInvertedAngularVelocity()),
         getLinearDamping(),
         getAngularDamping(),
         getGravityScale(),

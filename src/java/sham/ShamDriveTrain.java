@@ -125,25 +125,16 @@ public class ShamDriveTrain {
    */
   public ChassisSpeeds getChassisWorldSpeeds() {
     return GeometryConvertor.toWpilibChassisSpeeds(
-        chassis.getLinearVelocity(), -chassis.getAngularVelocity());
+        chassis.getLinearVelocity(), chassis.getInvertedAngularVelocity());
   }
 
-  public Twist2d getTickTwist() {
+  protected Twist2d getTickTwist() {
     Vector2 dXY = chassis.getChangeInPosition();
-    double dTheta = -chassis.getAngularVelocity() * timing.dt().in(Seconds);
+    double dTheta = chassis.getInvertedAngularVelocity() * timing.dt().in(Seconds);
     return new Twist2d(dXY.x, dXY.y, dTheta);
   }
 
-  /**
-   * Abstract Simulation Sub-Tick Method.
-   *
-   * <p>This method is called every time the simulation world is updated.
-   *
-   * <p>It is implemented in the sub-classes of {@link ShamDriveTrain}.
-   *
-   * <p>It is responsible for applying the propelling forces to the robot during each sub-tick of
-   * the simulation.
-   */
+  /** A tick method that is called on every update to the simulation world. */
   protected void simTick() {
     logger.log("chassis", chassis.snapshot(), FrcBody.FrcBodySnapshot.struct);
   }
