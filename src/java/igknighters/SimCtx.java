@@ -27,7 +27,7 @@ import sham.configs.ShamSwerveConfig;
 import sham.configs.ShamSwerveModuleConfig;
 import sham.configs.ShamSwerveModuleConfig.WheelCof;
 import sham.seasonspecific.Crescendo;
-import sham.utils.DCMotor2;
+import sham.utils.DCMotorExt;
 import sham.utils.GearRatio;
 
 /**
@@ -53,13 +53,13 @@ public class SimCtx {
   private final Receiver<Pose2d> resetReceiver;
 
   private final ShamMechanismConfig driveMotorCfg =
-      new ShamMechanismConfig(new DCMotor2(DCMotor.getKrakenX60Foc(1), 1))
+      new ShamMechanismConfig(new DCMotorExt(DCMotor.getKrakenX60Foc(1), 1))
           .withFriction(Volts.of(kDriveMotor.kS), Volts.of(kDriveMotor.kS * 0.8))
           .withGearRatio(GearRatio.reduction(kSwerve.DRIVE_GEAR_RATIO))
           .withNoise(0.00)
           .withRotorInertia(KilogramSquareMeters.of(0.003));
   private final ShamMechanismConfig steerMotorCfg =
-      new ShamMechanismConfig(new DCMotor2(DCMotor.getFalcon500Foc(1), 1))
+      new ShamMechanismConfig(new DCMotorExt(DCMotor.getFalcon500Foc(1), 1))
           .withFriction(Volts.of(kSteerMotor.kS), Volts.of(kSteerMotor.kS * 0.8))
           .withGearRatio(GearRatio.reduction(kSwerve.STEER_GEAR_RATIO))
           .withNoise(0.00)

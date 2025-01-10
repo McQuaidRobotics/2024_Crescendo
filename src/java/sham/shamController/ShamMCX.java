@@ -31,7 +31,7 @@ import sham.ShamMotorController;
 import sham.ShamMotorController.ControllerOutput.CurrentOutput;
 import sham.ShamMotorController.ControllerOutput.VoltageOutput;
 import sham.shamController.UnitSafeControl.TrapezoidProfile.State;
-import sham.utils.DCMotor2;
+import sham.utils.DCMotorExt;
 import sham.utils.RuntimeLog;
 import sham.utils.mathutils.MeasureMath;
 
@@ -140,7 +140,7 @@ public class ShamMCX implements ShamMotorController {
 
   private final EpilogueBackend logger;
 
-  private DCMotor2 motor = null;
+  private DCMotorExt motor = null;
   private int numMotors = 0;
   private CurrentLimits currentLimits = CurrentLimits.base();
   private Time timeOverSupplyLimit = Seconds.of(0.0);
@@ -184,7 +184,7 @@ public class ShamMCX implements ShamMotorController {
   }
 
   @Override
-  public void configureMotorModel(DCMotor2 motor) {
+  public void configureMotorModel(DCMotorExt motor) {
     this.motor = motor;
     this.numMotors = motor.numMotors;
   }

@@ -10,7 +10,7 @@ import edu.wpi.first.util.struct.Struct;
 import monologue.ProceduralStructGenerator;
 import sham.ShamMechanism.MechanismState;
 import sham.ShamMotorController.ControllerOutput.VoltageOutput;
-import sham.utils.DCMotor2;
+import sham.utils.DCMotorExt;
 
 /**
  * An interface to represent a motor controller in the simulation. This can be used to allow
@@ -91,7 +91,7 @@ public interface ShamMotorController {
    */
   boolean brakeEnabled();
 
-  default void configureMotorModel(DCMotor2 motor) {}
+  default void configureMotorModel(DCMotorExt motor) {}
 
   /**
    * Returns a motor controller that does nothing.
@@ -111,7 +111,7 @@ public interface ShamMotorController {
       }
 
       @Override
-      public void configureMotorModel(DCMotor2 motor) {}
+      public void configureMotorModel(DCMotorExt motor) {}
     };
   }
 }

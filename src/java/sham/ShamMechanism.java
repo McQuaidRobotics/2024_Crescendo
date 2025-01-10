@@ -31,7 +31,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import monologue.ProceduralStructGenerator;
 import sham.ShamArena.ShamEnvTiming;
 import sham.ShamMotorController.ControllerOutput;
-import sham.utils.DCMotor2;
+import sham.utils.DCMotorExt;
 import sham.utils.GearRatio;
 import sham.utils.RuntimeLog;
 import sham.utils.mathutils.MeasureMath;
@@ -221,7 +221,7 @@ public class ShamMechanism {
   private final MechanismDynamics dynamics;
   private final Friction friction;
   private final GearRatio gearRatio;
-  private final DCMotor2 motor;
+  private final DCMotorExt motor;
   private final ShamMotorController controller;
   private final ShamEnvTiming timing;
   private final MomentOfInertia rotorInertia;
@@ -234,7 +234,7 @@ public class ShamMechanism {
 
   public ShamMechanism(
       String name,
-      DCMotor2 motor,
+      DCMotorExt motor,
       ShamMotorController controller,
       MomentOfInertia rotorInertia,
       GearRatio gearRatio,

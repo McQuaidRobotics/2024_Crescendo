@@ -16,14 +16,14 @@ import edu.wpi.first.units.measure.Torque;
 import edu.wpi.first.units.measure.Voltage;
 import sham.utils.mathutils.MeasureMath;
 
-public class DCMotor2 extends DCMotor {
+public class DCMotorExt extends DCMotor {
 
   public static final DCMotorProto proto = new DCMotorProto();
   public static final DCMotorStruct struct = new DCMotorStruct();
 
   public final int numMotors;
 
-  public DCMotor2(
+  public DCMotorExt(
       double nominalVoltageVolts,
       double stallTorqueNewtonMeters,
       double stallCurrentAmps,
@@ -40,7 +40,7 @@ public class DCMotor2 extends DCMotor {
     this.numMotors = numMotors;
   }
 
-  public DCMotor2(DCMotor motor, int numMotors) {
+  public DCMotorExt(DCMotor motor, int numMotors) {
     super(
         motor.nominalVoltageVolts,
         motor.stallTorqueNewtonMeters,

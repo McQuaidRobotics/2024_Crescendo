@@ -15,11 +15,11 @@ import monologue.ProceduralStructGenerator.IgnoreStructField;
 import sham.ShamMechanism.Friction;
 import sham.ShamMechanism.HardLimits;
 import sham.ShamMechanism.MechanismDynamics;
-import sham.utils.DCMotor2;
+import sham.utils.DCMotorExt;
 import sham.utils.GearRatio;
 
 public class ShamMechanismConfig implements StructSerializable {
-  public DCMotor2 motor;
+  public DCMotorExt motor;
   public MomentOfInertia rotorInertia;
   public GearRatio gearRatio;
   public Friction friction;
@@ -29,7 +29,7 @@ public class ShamMechanismConfig implements StructSerializable {
   public double noise;
 
   public ShamMechanismConfig(
-      DCMotor2 motor,
+      DCMotorExt motor,
       int motorCount,
       MomentOfInertia rotorInertia,
       GearRatio gearRatio,
@@ -48,7 +48,7 @@ public class ShamMechanismConfig implements StructSerializable {
     this.noise = noise;
   }
 
-  public ShamMechanismConfig(DCMotor2 motor) {
+  public ShamMechanismConfig(DCMotorExt motor) {
     this.motor = motor;
     this.rotorInertia = KilogramSquareMeters.of(0.01);
     this.gearRatio = GearRatio.reduction(1.0);
