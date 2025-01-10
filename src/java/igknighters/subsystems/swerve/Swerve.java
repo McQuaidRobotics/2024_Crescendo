@@ -1,7 +1,6 @@
 package igknighters.subsystems.swerve;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -13,7 +12,7 @@ import igknighters.SimCtx;
 import igknighters.commands.swerve.teleop.TeleopSwerveBaseCmd;
 import igknighters.constants.ConstValues;
 import igknighters.constants.ConstValues.kSwerve;
-import igknighters.subsystems.SubsystemResources.LockFullSubsystem;
+import igknighters.subsystems.Subsystems.ExclusiveSubsystem;
 import igknighters.subsystems.swerve.control.SwerveSetpoint;
 import igknighters.subsystems.swerve.control.SwerveSetpointGenerator;
 import igknighters.subsystems.swerve.gyro.Gyro;
@@ -47,9 +46,7 @@ import sham.ShamSwerve;
  *
  * <p>The coordinate system used in this code is the field coordinate system.
  */
-public class Swerve implements LockFullSubsystem {
-  private static final ChassisSpeeds ZERO_SPEEDS = new ChassisSpeeds();
-
+public class Swerve implements ExclusiveSubsystem {
   private final Gyro gyro;
   private final SwerveModule[] swerveMods;
   private final SwerveOdometryThread odometryThread;
@@ -110,11 +107,11 @@ public class Swerve implements LockFullSubsystem {
   }
 
   public void drive(Speeds speeds) {
-    log("targetChassisSpeed", speeds);
+    RobotSpeeds robotSpeeds = speeds.asRobotRelative(getYaw());
+    log("targetSpeed", robotSpeeds);
 
     setpoint =
-        setpointGenerator.generateSimpleSetpoint(
-            setpoint, speeds.asRobotRelative(getYaw()), ConstValues.PERIODIC_TIME);
+        setpointGenerator.generateSimpleSetpoint(setpoint, robotSpeeds, ConstValues.PERIODIC_TIME);
 
     setModuleStates(setpoint.moduleStates());
   }
@@ -148,7 +145,7 @@ public class Swerve implements LockFullSubsystem {
   }
 
   public void setModuleStates(AdvancedSwerveModuleState[] desiredStates) {
-    log("regurgutatedChassisSpeed", kSwerve.KINEMATICS.toChassisSpeeds(desiredStates));
+    log("regurgitatedSpeed", Speeds.fromRobotRelative(kSwerve.KINEMATICS.toChassisSpeeds(desiredStates)));
 
     for (SwerveModule module : swerveMods) {
       module.setDesiredState(desiredStates[module.getModuleId()]);
@@ -188,10 +185,10 @@ public class Swerve implements LockFullSubsystem {
     Tracer.traceFunc("Gyro", gyro::periodic);
 
     if (DriverStation.isDisabled()) {
-      log("targetChassisSpeed", ZERO_SPEEDS);
+      log("targetSpeed", RobotSpeeds.kZero);
     }
 
-    log("measuredChassisSpeed", getRobotSpeeds());
+    log("measuredSpeed", getRobotSpeeds());
 
     visualizer.update();
 

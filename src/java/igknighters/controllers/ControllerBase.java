@@ -4,186 +4,106 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import igknighters.Robot;
-import igknighters.subsystems.SubsystemResources.AllSubsystems;
-import igknighters.subsystems.SubsystemResources.Subsystems;
 import igknighters.util.logging.BootupLogger;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.DoubleSupplier;
 
 public class ControllerBase {
+  static {
+    DriverStation.silenceJoystickConnectionWarning(true);
+  }
 
   private final CommandXboxController controller;
-  private boolean madeController;
-
-  protected class TriggerBindingTuple {
-    public final Trigger trigger;
-    public Binding binding;
-
-    public TriggerBindingTuple(Trigger trigger, Binding binding) {
-      this.trigger = trigger;
-      this.binding = binding;
-    }
-  }
-
-  protected static class Binding {
-    private static final Binding EMPTY = new Binding((trig, allss) -> {});
-
-    public final List<Subsystems> subsystemArray;
-    public final BiConsumer<Trigger, AllSubsystems> action;
-    private boolean isBound = false;
-
-    public Binding(Subsystems[] subsystemArray, BiConsumer<Trigger, AllSubsystems> action) {
-      this.subsystemArray = Arrays.asList(subsystemArray);
-      this.action = action;
-    }
-
-    public Binding(Subsystems subsystem, BiConsumer<Trigger, AllSubsystems> action) {
-      this.subsystemArray = List.of(subsystem);
-      this.action = action;
-    }
-
-    public Binding(BiConsumer<Trigger, AllSubsystems> action, Subsystems... subsystemArray) {
-      this.subsystemArray = Arrays.asList(subsystemArray);
-      this.action = action;
-    }
-
-    public boolean hasDeps(HashSet<Subsystems> enabledSubsystems) {
-      for (Subsystems subsystem : subsystemArray) {
-        if (!enabledSubsystems.contains(subsystem)) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    public void assign(Trigger trigger, AllSubsystems subsystems) {
-      action.accept(trigger, subsystems);
-      isBound = true;
-    }
-
-    public boolean isBound() {
-      return isBound;
-    }
-
-    public static Binding empty() {
-      return EMPTY;
-    }
-  }
 
   /** Button: 1 */
-  protected final TriggerBindingTuple A;
+  protected final Trigger A;
 
   /** Button: 2 */
-  protected final TriggerBindingTuple B;
+  protected final Trigger B;
 
   /** Button: 3 */
-  protected final TriggerBindingTuple X;
+  protected final Trigger X;
 
   /** Button: 4 */
-  protected final TriggerBindingTuple Y;
+  protected final Trigger Y;
 
   /** Left Center; Button: 7 */
-  protected final TriggerBindingTuple Back;
+  protected final Trigger Back;
 
   /** Right Center; Button: 8 */
-  protected final TriggerBindingTuple Start;
+  protected final Trigger Start;
 
   /** Left Bumper; Button: 5 */
-  protected final TriggerBindingTuple LB;
+  protected final Trigger LB;
 
   /** Right Bumper; Button: 6 */
-  protected final TriggerBindingTuple RB;
+  protected final Trigger RB;
 
   /** Left Stick; Button: 9 */
-  protected final TriggerBindingTuple LS;
+  protected final Trigger LS;
 
   /** Right Stick; Button: 10 */
-  protected final TriggerBindingTuple RS;
+  protected final Trigger RS;
 
   /** Left Trigger; Axis: 2 */
-  protected final TriggerBindingTuple LT;
+  protected final Trigger LT;
 
   /** Right Trigger; Axis: 3 */
-  protected final TriggerBindingTuple RT;
+  protected final Trigger RT;
 
   /** DPad Up; Degrees: 0 */
-  protected final TriggerBindingTuple DPU;
+  protected final Trigger DPU;
 
   /** DPad Right; Degrees: 90 */
-  protected final TriggerBindingTuple DPR;
+  protected final Trigger DPR;
 
   /** DPad Down; Degrees: 180 */
-  protected final TriggerBindingTuple DPD;
+  protected final Trigger DPD;
 
   /** DPad Left; Degrees: 270 */
-  protected final TriggerBindingTuple DPL;
+  protected final Trigger DPL;
 
   /** for button idx (nice for sim) {@link edu.wpi.first.wpilibj.XboxController.Button} */
   protected ControllerBase(int port, boolean makeController) {
-    DriverStation.silenceJoystickConnectionWarning(Robot.isDebug());
-    this.madeController = makeController;
-    if (madeController) {
+    if (makeController) {
       controller = new CommandXboxController(port);
       BootupLogger.bootupLog("Controller " + port + " initialized");
+      A = controller.a();
+      B = controller.b();
+      X = controller.x();
+      Y = controller.y();
+      LB = controller.leftBumper();
+      RB = controller.rightBumper();
+      Back = controller.back();
+      Start = controller.start();
+      LS = controller.leftStick();
+      RS = controller.rightStick();
+      LT = controller.leftTrigger(0.25);
+      RT = controller.rightTrigger(0.25);
+      DPR = controller.povRight();
+      DPD = controller.povDown();
+      DPL = controller.povLeft();
+      DPU = controller.povUp();
     } else {
       controller = null;
       BootupLogger.bootupLog("Controller " + port + " not initialized");
       final Trigger t = new Trigger(() -> false);
-      A = new TriggerBindingTuple(t, Binding.empty());
-      B = new TriggerBindingTuple(t, Binding.empty());
-      X = new TriggerBindingTuple(t, Binding.empty());
-      Y = new TriggerBindingTuple(t, Binding.empty());
-      LB = new TriggerBindingTuple(t, Binding.empty());
-      RB = new TriggerBindingTuple(t, Binding.empty());
-      Back = new TriggerBindingTuple(t, Binding.empty());
-      Start = new TriggerBindingTuple(t, Binding.empty());
-      LS = new TriggerBindingTuple(t, Binding.empty());
-      RS = new TriggerBindingTuple(t, Binding.empty());
-      LT = new TriggerBindingTuple(t, Binding.empty());
-      RT = new TriggerBindingTuple(t, Binding.empty());
-      DPR = new TriggerBindingTuple(t, Binding.empty());
-      DPD = new TriggerBindingTuple(t, Binding.empty());
-      DPL = new TriggerBindingTuple(t, Binding.empty());
-      DPU = new TriggerBindingTuple(t, Binding.empty());
+      A = t;
+      B = t;
+      X = t;
+      Y = t;
+      LB = t;
+      RB = t;
+      Back = t;
+      Start = t;
+      LS = t;
+      RS = t;
+      LT = t;
+      RT = t;
+      DPR = t;
+      DPD = t;
+      DPL = t;
+      DPU = t;
       return;
-    }
-    A = new TriggerBindingTuple(controller.a(), Binding.empty());
-    B = new TriggerBindingTuple(controller.b(), Binding.empty());
-    X = new TriggerBindingTuple(controller.x(), Binding.empty());
-    Y = new TriggerBindingTuple(controller.y(), Binding.empty());
-    LB = new TriggerBindingTuple(controller.leftBumper(), Binding.empty());
-    RB = new TriggerBindingTuple(controller.rightBumper(), Binding.empty());
-    Back = new TriggerBindingTuple(controller.back(), Binding.empty());
-    Start = new TriggerBindingTuple(controller.start(), Binding.empty());
-    LS = new TriggerBindingTuple(controller.leftStick(), Binding.empty());
-    RS = new TriggerBindingTuple(controller.rightStick(), Binding.empty());
-    LT = new TriggerBindingTuple(controller.leftTrigger(0.25), Binding.empty());
-    RT = new TriggerBindingTuple(controller.rightTrigger(0.25), Binding.empty());
-    DPR = new TriggerBindingTuple(controller.povRight(), Binding.empty());
-    DPD = new TriggerBindingTuple(controller.povDown(), Binding.empty());
-    DPL = new TriggerBindingTuple(controller.povLeft(), Binding.empty());
-    DPU = new TriggerBindingTuple(controller.povUp(), Binding.empty());
-  }
-
-  public void assignButtons(AllSubsystems subsystems) {
-    if (!madeController) {
-      return;
-    }
-    HashSet<Subsystems> subsystemSet =
-        new HashSet<Subsystems>(Arrays.asList(subsystems.getEnabledSubsystemEnums()));
-    TriggerBindingTuple[] tuples =
-        new TriggerBindingTuple[] {
-          A, B, X, Y, LB, RB, Back, Start, LS, RS, LT, RT, DPR, DPD, DPL, DPU
-        };
-    for (int i = 0; i < tuples.length; i++) {
-      TriggerBindingTuple tuple = tuples[i];
-      if (tuple.binding.hasDeps(subsystemSet)) {
-        tuple.binding.assign(tuple.trigger, subsystems);
-      }
     }
   }
 
@@ -285,14 +205,7 @@ public class ControllerBase {
    * @param suppressWarning if true will not print warning even if bound to a command
    */
   public DoubleSupplier rightTrigger(boolean suppressWarning) {
-    if (RT.binding.isBound() && !suppressWarning) {
-      return () -> {
-        DriverStation.reportError("WARNING: Right Trigger is bound to a command", false);
-        return controller.getRightTriggerAxis();
-      };
-    } else {
-      return controller::getRightTriggerAxis;
-    }
+    return controller::getRightTriggerAxis;
   }
 
   /**
@@ -301,14 +214,7 @@ public class ControllerBase {
    * @param suppressWarning if true will not print warning even if bound to a command
    */
   public DoubleSupplier leftTrigger(boolean suppressWarning) {
-    if (LT.binding.isBound() && !suppressWarning) {
-      return () -> {
-        DriverStation.reportError("WARNING: Left Trigger is bound to a command", false);
-        return controller.getLeftTriggerAxis();
-      };
-    } else {
-      return controller::getLeftTriggerAxis;
-    }
+    return controller::getLeftTriggerAxis;
   }
 
   /**

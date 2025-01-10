@@ -1,104 +1,54 @@
 package igknighters.controllers;
 
 import edu.wpi.first.wpilibj2.command.Commands;
-import igknighters.commands.ShotMetricTesting;
-import igknighters.subsystems.SubsystemResources.Subsystems;
-import igknighters.subsystems.stem.Stem;
+import igknighters.commands.led.LedCommands;
+import igknighters.subsystems.Subsystems;
+import igknighters.subsystems.led.LedAnimations;
 
 public class OperatorController extends ControllerBase {
   public double frozenWristRadsOffset = 0.0;
 
-  public OperatorController(int port) {
+  public OperatorController(int port, Subsystems subsystems) {
     super(port, true);
-    // disregard null safety as it is checked on assignment
+
+    // disregard null safety for subsystems as it is checked on assignment
 
     /// FACE BUTTONS
-    this.A.binding =
-        new Binding(
-            (trig, allss) -> {
-              trig.onTrue(
-                  ShotMetricTesting.shootStraightUp(allss.stem.get(), allss.umbrella.get()));
-            },
-            Subsystems.Stem,
-            Subsystems.Umbrella);
+    this.A.onTrue(Commands.none());
 
-    this.B.binding =
-        new Binding(
-            (trig, allss) -> {
-              trig.onTrue(
-                  ShotMetricTesting.intakeStraightUp(allss.stem.get(), allss.umbrella.get()));
-            },
-            Subsystems.Stem,
-            Subsystems.Umbrella);
+    this.B.onTrue(Commands.none());
 
-    this.X.binding =
-        new Binding(
-            (trig, allss) -> {
-              trig.onTrue(ShotMetricTesting.shootTest(allss.stem.get(), allss.umbrella.get()));
-            },
-            Subsystems.Stem,
-            Subsystems.Umbrella);
+    this.X.onTrue(Commands.none());
 
-    this.Y.binding =
-        new Binding(
-            (trig, allss) -> {
-              trig.onTrue(ShotMetricTesting.intakeTest(allss.stem.get(), allss.umbrella.get()));
-            },
-            Subsystems.Stem,
-            Subsystems.Umbrella);
+    this.Y.onTrue(Commands.none());
 
     /// BUMPER
-    // this.LB.binding =
+    this.RB.onTrue(Commands.none());
 
-    // this.RB.binding =
+    this.LB.onTrue(Commands.none());
 
     /// CENTER BUTTONS
-    // this.Back.binding =
+    this.Back.onTrue(Commands.none());
 
-    // this.Start.binding =
+    this.Start.onTrue(LedCommands.animate(subsystems.led, LedAnimations.Test));
 
     /// STICKS
-    // this.LS.binding =
+    this.LS.onTrue(Commands.none());
 
-    // this.RS.binding =
+    this.RS.onTrue(Commands.none());
 
     /// TRIGGERS
-    // this.LT.binding =
+    this.LT.onTrue(Commands.none());
 
-    // this.RT.binding = DON'T USE!!! OTHER TRIGGERS COMMANDS USES BOTH TRIGGERS!!!
+    this.RT.onTrue(Commands.none());
 
     /// DPAD
-    this.DPR.binding =
-        this.DPR.binding =
-            this.DPL.binding =
-                new Binding(
-                    (trig, allss) -> {
-                      Stem stem = allss.stem.get();
-                      trig.onTrue(
-                          stem.runOnce(
-                                  () -> {
-                                    stem.home();
-                                  })
-                              .withName("HomePivot"));
-                    },
-                    Subsystems.Stem);
+    this.DPR.onTrue(Commands.none());
 
-    // this.DPD.binding =
+    this.DPD.onTrue(Commands.none());
 
-    this.DPL.binding =
-        new Binding(
-            (trig, allss) -> {
-              trig.onTrue(
-                  Commands.runOnce(
-                          () -> {
-                            allss.stem.get().stopMechanisms();
-                            allss.umbrella.get().stopAll();
-                          })
-                      .withName("StopAll"));
-            },
-            Subsystems.Stem,
-            Subsystems.Umbrella);
+    this.DPL.onTrue(Commands.none());
 
-    // this.DPU.binding =
+    this.DPU.onTrue(Commands.none());
   }
 }

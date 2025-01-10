@@ -382,6 +382,12 @@ public class LoggingTree {
       return n;
     }
 
+    protected void updateNodeRegistry(Object o) {
+      if (o instanceof Logged && !Logged.getNodes((Logged) o).contains(this)) {
+        Logged.addNode((Logged) o, this);
+      }
+    }
+
     public void log(Object obj) {
       Object o = getter.apply(obj);
       if (o == null) {
@@ -391,15 +397,14 @@ public class LoggingTree {
       if (!seenTypes.contains(o.getClass())) {
         // explore the new class
       }
-      if (o instanceof Logged && Logged.getNodes((Logged) o).isEmpty()) {
-        Logged.addNode((Logged) o, this);
-      }
+      updateNodeRegistry(o);
       for (LoggingNode child : children) {
         child.log(o);
       }
     }
 
     public void logDirect(Object obj) {
+      updateNodeRegistry(obj);
       for (LoggingNode child : children) {
         child.log(obj);
       }

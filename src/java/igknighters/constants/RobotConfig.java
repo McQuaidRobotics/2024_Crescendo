@@ -2,56 +2,37 @@ package igknighters.constants;
 
 import edu.wpi.first.wpilibj.RobotController;
 import igknighters.Robot;
-import igknighters.subsystems.SubsystemResources.Subsystems;
 import igknighters.util.logging.BootupLogger;
-import java.util.List;
 import java.util.Map;
-import monologue.Monologue;
 
 public class RobotConfig {
 
   public enum RobotID {
-    CRASH(Subsystems.all()),
-    BURN(Subsystems.list(Subsystems.Swerve)),
-    SIM_CRASH(Subsystems.all()),
-    SIM_BURN(Subsystems.none()),
-    TestBoard("testBoard(crash)", Subsystems.list(Subsystems.Umbrella)),
-    UNIT_TEST(Subsystems.all()),
-    Unlabeled("", Subsystems.none());
+    CRASH,
+    BURN,
+    Unlabeled;
 
     public final String name;
-    public final Subsystems[] subsystems;
 
-    RobotID(String name, Subsystems[] subsystems) {
+    RobotID(String name) {
       this.name = name;
-      this.subsystems = subsystems;
     }
 
-    RobotID(Subsystems[] subsystems) {
+    RobotID() {
       this.name = this.name();
-      this.subsystems = subsystems;
-    }
-
-    public boolean isSubsystemEnabled(Subsystems sub) {
-      for (Subsystems enabledSub : subsystems) {
-        if (enabledSub == sub) {
-          return true;
-        }
-      }
-      return false;
     }
   }
 
   /** If there are duplicate serial entries the tests will fail!!!! */
   private static final Map<String, RobotID> serialToID =
       Map.of(
-          "0306adcf", RobotID.TestBoard,
-          "0306adf3", RobotID.TestBoard,
-          "ffffffff", RobotID.SIM_CRASH,
+          "0306adcf", RobotID.CRASH,
+          "0306adf3", RobotID.CRASH,
+          "ffffffff", RobotID.CRASH,
           "aaaaaaaa", RobotID.CRASH,
-          "03260af0", RobotID.BURN,
+          "03260af0", RobotID.CRASH,
           "03260abb", RobotID.CRASH,
-          "0306adb6", RobotID.TestBoard,
+          "0306adb6", RobotID.CRASH,
           "032b4b20", RobotID.CRASH);
 
   private static RobotID currentID = RobotID.Unlabeled;
@@ -75,12 +56,6 @@ public class RobotConfig {
             "Robot ID not found, " + currentSerialNum + " not in serialToID map");
       }
       BootupLogger.bootupLog("Robot Name: " + currentID.name);
-      Monologue.log("RobotConfig/RobotId", currentID.name());
-      Monologue.log(
-          "RobotConfig/EnabledSubsystems",
-          List.of(currentID.subsystems).stream()
-              .map(sub -> sub.name())
-              .reduce("", (acc, sub) -> acc + sub + ", "));
     }
     return currentID;
   }

@@ -56,8 +56,6 @@ public sealed interface Speeds extends StructSerializable {
       return new ChassisSpeeds(vx, vy, omega);
     }
 
-    public static final FieldSpeeds kZero = new FieldSpeeds(0.0, 0.0, 0.0);
-
     public LinearVelocity vxMeasure() {
       return MetersPerSecond.of(vx());
     }
@@ -74,6 +72,10 @@ public sealed interface Speeds extends StructSerializable {
     public FieldSpeeds discretize(double dtSeconds) {
       return Internals.discretizePrim(vx, vy, omega, dtSeconds, FieldSpeeds::new);
     }
+
+    public static final FieldSpeeds kZero = new FieldSpeeds(0.0, 0.0, 0.0);
+
+    public static final SpeedsStruct struct = new SpeedsStruct();
   }
 
   /**

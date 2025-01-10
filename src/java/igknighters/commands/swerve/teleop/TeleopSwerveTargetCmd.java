@@ -7,7 +7,6 @@ import igknighters.Localizer;
 import igknighters.commands.swerve.SwerveCommands;
 import igknighters.constants.ConstValues.kControls;
 import igknighters.constants.ConstValues.kSwerve;
-import igknighters.constants.ConstValues.kUmbrella;
 import igknighters.controllers.ControllerBase;
 import igknighters.subsystems.swerve.Swerve;
 import igknighters.subsystems.swerve.control.RotationalController;
@@ -71,13 +70,6 @@ public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
     double heuristicVX = (vt.getX() + currentChassisSpeeds.vx()) / 2.0;
     double heuristicVY = (vt.getY() + currentChassisSpeeds.vy()) / 2.0;
 
-    double distance = currentTranslation.getDistance(targetTranslation);
-
-    Translation2d adjustedTarget =
-        new Translation2d(
-            targetTranslation.getX() - (heuristicVX * (distance / kUmbrella.NOTE_VELO)),
-            targetTranslation.getY() - (heuristicVY * (distance / kUmbrella.NOTE_VELO)));
-
     Translation2d lookaheadTranslation =
         currentTranslation.plus(
             new Translation2d(
@@ -88,7 +80,7 @@ public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
 
     if (movementComp) {
       targetAngle =
-          SwerveCommands.rotationRelativeToPose(lookaheadTranslation, adjustedTarget).plus(offset);
+          SwerveCommands.rotationRelativeToPose(lookaheadTranslation, targetTranslation).plus(offset);
     } else {
       targetAngle =
           SwerveCommands.rotationRelativeToPose(currentTranslation, targetTranslation).plus(offset);

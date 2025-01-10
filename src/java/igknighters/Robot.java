@@ -1,6 +1,5 @@
 package igknighters;
 
-import choreo.Choreo;
 import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
@@ -9,28 +8,25 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import igknighters.commands.autos.AutoController;
 import igknighters.commands.autos.AutoRoutines;
 import igknighters.commands.swerve.teleop.TeleopSwerveTraditionalCmd;
 import igknighters.commands.tests.Characterizers;
 import igknighters.commands.tests.TestManager;
-import igknighters.commands.umbrella.UmbrellaCommands;
 import igknighters.constants.ConstValues;
 import igknighters.constants.FieldConstants;
-import igknighters.constants.RobotConfig;
 import igknighters.controllers.DriverController;
-import igknighters.subsystems.SubsystemResources.AllSubsystems;
+import igknighters.controllers.OperatorController;
+import igknighters.subsystems.Subsystems;
+import igknighters.subsystems.led.Led;
 import igknighters.subsystems.swerve.Swerve;
-import igknighters.subsystems.umbrella.Umbrella;
+import igknighters.subsystems.vision.Vision;
 import igknighters.util.UnitTestableRobot;
 import igknighters.util.can.CANSignalManager;
 import igknighters.util.logging.Tracer;
 import igknighters.util.logging.WatchdogSilencer;
-import java.io.File;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
@@ -53,8 +49,10 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
   public final SimCtx simCtx = new SimCtx(localizer, isSimulation());
 
   private final DriverController driverController;
+  @SuppressWarnings("unused")
+  private final OperatorController operatorController;
 
-  @FlattenedLogged public final AllSubsystems allSubsystems;
+  @FlattenedLogged public final Subsystems subsystems;
 
   public final AutoChooser autoChooser = new AutoChooser();
   public final TestManager testManager;
@@ -66,39 +64,26 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
     localizer.publishField();
 
-    driverController = new DriverController(0, localizer);
+    subsystems = new Subsystems(
+      new Swerve(localizer, simCtx),
+      new Vision(localizer, simCtx),
+      new Led()
+    );
 
-    allSubsystems = new AllSubsystems(localizer, simCtx, RobotConfig.getRobotID().subsystems);
+    localizer.reset(FieldConstants.POSE2D_CENTER);
 
-    driverController.assignButtons(allSubsystems);
+    driverController = new DriverController(0, localizer, subsystems);
+    operatorController = new OperatorController(1, subsystems);
 
-    if (allSubsystems.swerve.isPresent()) {
-      final Swerve swerve = allSubsystems.swerve.get();
+    subsystems.swerve.setDefaultCommand(new TeleopSwerveTraditionalCmd(subsystems.swerve, driverController));
 
-      localizer.reset(FieldConstants.POSE2D_CENTER);
-
-      swerve.setDefaultCommand(new TeleopSwerveTraditionalCmd(swerve, driverController));
-    }
-
-    if (allSubsystems.umbrella.isPresent()) {
-      final Umbrella umbrella = allSubsystems.umbrella.get();
-      umbrella.setDefaultCommand(
-          UmbrellaCommands.idleShooter(umbrella, UmbrellaCommands::defaultIdleRPM));
-
-      umbrella.setupSimNoteDetection(localizer);
-    }
-
-    Choreo.setChoreoDir(
-        new File(
-            Filesystem.getOperatingDirectory(),
-            "src" + File.separator + "deploy" + File.separator + "choreo"));
     final AutoFactory autoFactory =
         new AutoFactory(
             localizer::pose,
             localizer::reset,
-            new AutoController(allSubsystems.swerve, localizer),
+            new AutoController(subsystems.swerve, localizer),
             true,
-            allSubsystems.swerve.isPresent() ? allSubsystems.swerve.get() : new Subsystem() {},
+            subsystems.swerve,
             (traj, starting) -> {
               String msg =
                   "[Auto] Trajectory " + traj.name() + " " + (starting ? "Started" : "Finished");
@@ -111,26 +96,13 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
               }
             });
 
-    if (allSubsystems.hasAllSubsystems()) {
-      final var routines = new AutoRoutines(allSubsystems, localizer, autoFactory);
-      autoChooser.addRoutine("5 Piece Amp Side", routines::fivePieceAmpSide);
-      autoChooser.addRoutine("6 Piece Amp Side Far", routines::sixPieceFarAmpSide);
-      autoChooser.addRoutine("4 Piece Src Side", routines::fourPieceSourceSide);
-    }
+    final var routines = new AutoRoutines(subsystems, localizer, autoFactory);
+    autoChooser.addRoutine("test", routines::test);
     setupAutoChooser();
 
     testManager = new TestManager();
-
-    if (allSubsystems.hasAllSubsystems()) {
-      testManager.addTestRoutine(
-          "Characterize Swerve", Characterizers.characterizeSwerve(allSubsystems.swerve.get()));
-      testManager.addTestRoutine(
-          "Characterize Pivot", Characterizers.characterizePivot(allSubsystems.stem.get()));
-      testManager.addTestRoutine(
-          "Characterize Wrist", Characterizers.characterizeWrist(allSubsystems.stem.get()));
-      testManager.addTestRoutine(
-          "Characterize Telescope", Characterizers.characterizeTelescope(allSubsystems.stem.get()));
-    }
+    testManager.addTestRoutine(
+      "Characterize Swerve", Characterizers.characterizeSwerve(subsystems.swerve));
 
     System.gc();
   }
@@ -299,9 +271,5 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
   public static boolean isDebug() {
     return ConstValues.DEBUG;
-  }
-
-  public static boolean isSunlight() {
-    return ConstValues.SUNLIGHT;
   }
 }

@@ -15,7 +15,7 @@ import igknighters.constants.ConstValues.kSwerve;
 import igknighters.constants.ConstValues.kVision;
 import igknighters.constants.FieldConstants;
 import igknighters.constants.RobotConfig;
-import igknighters.subsystems.SubsystemResources.LockFreeSubsystem;
+import igknighters.subsystems.Subsystems.SharedSubsystem;
 import igknighters.subsystems.vision.camera.Camera;
 import igknighters.subsystems.vision.camera.Camera.CameraConfig;
 import igknighters.subsystems.vision.camera.CameraRealPhoton;
@@ -28,7 +28,7 @@ import java.util.Optional;
 import monologue.Annotations.IgnoreLogged;
 import monologue.ProceduralStructGenerator;
 
-public class Vision implements LockFreeSubsystem {
+public class Vision implements SharedSubsystem {
   @IgnoreLogged private final Localizer localizer;
 
   private final Sender<VisionSample> visionSender;

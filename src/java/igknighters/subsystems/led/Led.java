@@ -3,14 +3,14 @@ package igknighters.subsystems.led;
 import edu.wpi.first.wpilibj.DriverStation;
 import igknighters.Robot;
 import igknighters.constants.ConstValues.kLed;
-import igknighters.subsystems.SubsystemResources.LockFreeSubsystem;
+import igknighters.subsystems.Subsystems.SharedSubsystem;
 import igknighters.subsystems.led.LedAnimations.PartialAnimation;
 import igknighters.subsystems.led.driver.CandleDriver;
 import igknighters.subsystems.led.driver.Driver;
 import igknighters.subsystems.led.driver.SimDriver;
 import igknighters.util.logging.Tracer;
 
-public class Led implements LockFreeSubsystem {
+public class Led implements SharedSubsystem {
   private final Driver driver;
 
   private int reservedId = 0;

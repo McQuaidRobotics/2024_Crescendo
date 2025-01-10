@@ -7,13 +7,11 @@ import igknighters.Localizer;
 import igknighters.constants.ConstValues.kAuto;
 import igknighters.subsystems.swerve.Swerve;
 import igknighters.util.Speeds;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 public class AutoController implements Consumer<SwerveSample> {
   private final Swerve swerve;
   private final Localizer localizer;
-  private final boolean enabled;
   private final PIDController xController =
       new PIDController(kAuto.kTranslation.kP, kAuto.kTranslation.kI, kAuto.kTranslation.kD);
   private final PIDController yController =
@@ -21,15 +19,9 @@ public class AutoController implements Consumer<SwerveSample> {
   private final PIDController rController =
       new PIDController(kAuto.kRotation.kP, kAuto.kRotation.kI, kAuto.kRotation.kD);
 
-  public AutoController(Optional<Swerve> swerve, Localizer localizer) {
+  public AutoController(Swerve swerve, Localizer localizer) {
     this.localizer = localizer;
-    if (swerve.isEmpty()) {
-      this.swerve = null;
-      this.enabled = false;
-      return;
-    }
-    this.swerve = swerve.get();
-    this.enabled = true;
+    this.swerve = swerve;
     rController.enableContinuousInput(-Math.PI, Math.PI);
     xController.close();
     yController.close();
@@ -38,9 +30,6 @@ public class AutoController implements Consumer<SwerveSample> {
 
   @Override
   public void accept(SwerveSample referenceState) {
-    if (!enabled) {
-      return;
-    }
     Pose2d pose = localizer.pose();
     double xFF = referenceState.vx;
     double yFF = referenceState.vy;
