@@ -17,7 +17,6 @@ import igknighters.constants.ConstValues.kSwerve.kDriveMotor;
 import igknighters.constants.ConstValues.kSwerve.kSteerMotor;
 import igknighters.subsystems.swerve.odometryThread.SimSwerveOdometryThread;
 import igknighters.util.logging.BootupLogger;
-import sham.ShamSwerveModule;
 
 public class SwerveModuleSim extends SwerveModule {
   private static final DCMotor MOTOR = DCMotor.getFalcon500(1);
@@ -37,8 +36,7 @@ public class SwerveModuleSim extends SwerveModule {
 
   public final int moduleId;
 
-  public SwerveModuleSim(
-      final int moduleId, SimSwerveOdometryThread odoThread, ShamSwerveModule sim) {
+  public SwerveModuleSim(final int moduleId, SimSwerveOdometryThread odoThread) {
     super("SwerveModule[" + moduleId + "]");
     this.moduleId = moduleId;
 

@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import igknighters.constants.ConstValues.kControls;
 import igknighters.constants.ConstValues.kStem.kTelescope;
 import igknighters.constants.ConstValues.kUmbrella;
-import igknighters.constants.FieldConstants;
 import igknighters.subsystems.stem.Stem;
 import igknighters.subsystems.stem.StemPosition;
 import igknighters.subsystems.stem.StemSolvers;
@@ -49,7 +48,7 @@ public class StemCommands {
 
     @Override
     public void initialize() {
-      Translation2d speaker = FieldConstants.SPEAKER.toTranslation2d();
+      Translation2d speaker = Translation2d.kZero;
       targetTranslation = AllianceFlip.isBlue() ? speaker : AllianceFlip.flipTranslation(speaker);
     }
 
@@ -86,7 +85,7 @@ public class StemCommands {
                   kControls.STATIONARY_WRIST_ANGLE,
                   kTelescope.MIN_METERS),
               distance,
-              FieldConstants.SPEAKER.getZ(),
+              0.0,
               kUmbrella.NOTE_VELO);
 
       hasFinished = stem.gotoStemPosition(aimStrategy.solve(solveInput));

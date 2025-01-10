@@ -2,6 +2,9 @@
 
 package choreo.util;
 
+import static choreo.util.FieldDimensions.FIELD_LENGTH;
+import static choreo.util.FieldDimensions.FIELD_WIDTH;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -25,10 +28,6 @@ import java.util.function.Supplier;
  * specially handle cases or throw errors if a variant is explicitly not supported.
  */
 public class ChoreoAllianceFlipUtil {
-  /** An alias for {@code Supplier<Optional<Alliance>>} */
-  @FunctionalInterface
-  public interface AllianceSupplier extends Supplier<Optional<Alliance>> {}
-
   /** The flipper to use for flipping coordinates. */
   public static enum Flipper {
     /**
@@ -99,10 +98,11 @@ public class ChoreoAllianceFlipUtil {
           put(2022, new YearInfo(Flipper.ROTATE_AROUND, 16.5811, 8.19912));
           put(2023, new YearInfo(Flipper.MIRRORED, 16.5811, 8.19912));
           put(2024, new YearInfo(Flipper.MIRRORED, 16.5811, 8.19912));
+          put(2025, new YearInfo(Flipper.ROTATE_AROUND, FIELD_LENGTH, FIELD_WIDTH));
         }
       };
 
-  private static YearInfo activeYear = flipperMap.get(2024);
+  private static YearInfo activeYear = flipperMap.get(2025);
 
   /** Default constructor. */
   private ChoreoAllianceFlipUtil() {}

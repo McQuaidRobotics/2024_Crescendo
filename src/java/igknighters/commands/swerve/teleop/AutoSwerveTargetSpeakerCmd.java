@@ -7,7 +7,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import igknighters.commands.swerve.SwerveCommands;
-import igknighters.constants.FieldConstants;
 import igknighters.subsystems.swerve.Swerve;
 import igknighters.subsystems.swerve.control.RotationalController;
 import igknighters.util.AllianceFlip;
@@ -37,7 +36,7 @@ public class AutoSwerveTargetSpeakerCmd extends Command {
 
   @Override
   public void execute() {
-    Translation2d speaker = FieldConstants.SPEAKER.toTranslation2d();
+    Translation2d speaker = Translation2d.kZero;
     Translation2d targetTranslation =
         AllianceFlip.isBlue() ? speaker : AllianceFlip.flipTranslation(speaker);
 

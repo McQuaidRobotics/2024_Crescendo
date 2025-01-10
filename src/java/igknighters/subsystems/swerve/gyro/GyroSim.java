@@ -1,17 +1,17 @@
 package igknighters.subsystems.swerve.gyro;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import igknighters.constants.ConstValues;
 import igknighters.subsystems.swerve.odometryThread.SimSwerveOdometryThread;
+import igknighters.util.Speeds.RobotSpeeds;
 import igknighters.util.logging.BootupLogger;
 import java.util.function.Supplier;
 
 public class GyroSim extends Gyro {
 
-  private final Supplier<ChassisSpeeds> chassisSpeedSupplier;
+  private final Supplier<RobotSpeeds> chassisSpeedSupplier;
 
-  public GyroSim(Supplier<ChassisSpeeds> chassisSpeedSupplier, SimSwerveOdometryThread odoThread) {
+  public GyroSim(Supplier<RobotSpeeds> chassisSpeedSupplier, SimSwerveOdometryThread odoThread) {
     this.chassisSpeedSupplier = chassisSpeedSupplier;
 
     odoThread.addRotationSupplier(() -> Rotation2d.fromRadians(this.getYawRads()));
@@ -42,7 +42,7 @@ public class GyroSim extends Gyro {
   @Override
   public void periodic() {
     var oldYaw = super.yawRads;
-    super.yawRads += chassisSpeedSupplier.get().omegaRadiansPerSecond * ConstValues.PERIODIC_TIME;
+    super.yawRads += chassisSpeedSupplier.get().omega() * ConstValues.PERIODIC_TIME;
     super.yawVelRadsPerSec = (super.yawRads - oldYaw) / ConstValues.PERIODIC_TIME;
   }
 }

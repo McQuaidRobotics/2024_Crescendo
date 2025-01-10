@@ -1,5 +1,6 @@
 package igknighters.commands;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
@@ -11,7 +12,6 @@ import igknighters.commands.umbrella.UmbrellaCommands;
 import igknighters.constants.ConstValues.kControls;
 import igknighters.constants.ConstValues.kStem.kTelescope;
 import igknighters.constants.ConstValues.kStem.kWrist;
-import igknighters.constants.FieldConstants;
 import igknighters.controllers.ControllerBase;
 import igknighters.subsystems.led.Led;
 import igknighters.subsystems.led.LedAnimations;
@@ -46,12 +46,7 @@ public class HigherOrderCommands {
       Swerve swerve, Stem stem, ControllerBase controller, Localizer localizer) {
     return Commands.parallel(
             new TeleopSwerveTargetCmd(
-                swerve,
-                controller,
-                localizer,
-                FieldConstants.SPEAKER.toTranslation2d(),
-                true,
-                0.25),
+                swerve, controller, localizer, new Translation2d(), true, 0.25),
             StemCommands.aimAtSpeaker(stem, false, localizer::pose, swerve::getFieldSpeeds))
         .withName("Aim");
   }

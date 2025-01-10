@@ -1,7 +1,6 @@
 package igknighters;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -48,7 +47,7 @@ public class Localizer implements Logged {
   @Log(key = "visionTimestamp")
   private double latestVisionTimestamp = 0;
 
-  private final Field2d field;
+  final Field2d field;
 
   public static record NamedPositions(String name, Pose2d[] positions) {
     public NamedPositions(String name, Pose2d positions) {
@@ -96,10 +95,8 @@ public class Localizer implements Logged {
 
   public void update() {
     Tracer.startTrace("SwerveSamples");
-    Rotation2d lastGyroYaw = Rotation2d.kZero;
     final SwerveDriveSample[] swerveSamples = log("swerveSamples", swerveDataReceiver.recvAll());
     for (final SwerveDriveSample sample : swerveSamples) {
-      lastGyroYaw = sample.gyroYaw();
       poseEstimator.addDriveSample(
           kSwerve.KINEMATICS, sample.modulePositions(), sample.gyroYaw(), sample.timestamp(), 1.0);
     }
@@ -129,7 +126,6 @@ public class Localizer implements Logged {
 
     latestPose = Tracer.traceFunc("ReadEstPose", poseEstimator::getEstimatedPose);
     field.getRobotObject().setPose(latestPose);
-    field.getObject("WithGyro").setPose(new Pose2d(latestPose.getTranslation(), lastGyroYaw));
 
     Pose2d poseFromABitAgo = poseEstimator.getEstimatedPoseFromPast(0.05);
     Twist2d twist = poseFromABitAgo.log(latestPose);

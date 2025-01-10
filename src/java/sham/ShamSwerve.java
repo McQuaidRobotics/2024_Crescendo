@@ -127,8 +127,7 @@ public class ShamSwerve extends ShamDriveTrain {
       logger.log("Friction/module" + i + "/angularFrictionAccel", pack.getSecond());
     }
 
-    // clamp the friction acceleration to prevent the robot from accelerating in the opposite
-    // direction
+    // figure out how much speed the friction should try and change
     final ChassisSpeeds wheelSpeeds =
         ChassisSpeeds.fromRobotRelativeSpeeds(
             kinematics.toChassisSpeeds(
@@ -141,6 +140,8 @@ public class ShamSwerve extends ShamDriveTrain {
     logger.log("Friction/wheelSpeeds", wheelSpeeds, ChassisSpeeds.struct);
     logger.log("Friction/unwantedSpeeds", unwantedSpeeds, ChassisSpeeds.struct);
 
+    // clamp the friction acceleration to prevent the robot from
+    // accelerating in the opposite direction
     final LinearAcceleration xAccelNeededToStop =
         MeasureMath.negate(MetersPerSecond.of(unwantedSpeeds.vxMetersPerSecond)).div(timing.dt());
     final LinearAcceleration yAccelNeededToStop =

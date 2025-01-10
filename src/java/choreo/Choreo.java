@@ -16,6 +16,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import edu.wpi.first.hal.FRCNetComm.tResourceType;
+import edu.wpi.first.hal.HAL;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import java.io.BufferedReader;
@@ -46,7 +48,7 @@ public final class Choreo {
   private static File CHOREO_DIR = new File(Filesystem.getDeployDirectory(), "choreo");
 
   /** This should only be used for unit testing. */
-  static void setChoreoDir(File choreoDir) {
+  public static void setChoreoDir(File choreoDir) {
     CHOREO_DIR = choreoDir;
   }
 
@@ -55,7 +57,8 @@ public final class Choreo {
    * Trajectory}, {@link Boolean})-&gt;void, where the function consumes a trajectory and a boolean
    * indicating whether the trajectory is starting or finishing.
    *
-   * @param <ST> DifferentialSample or SwerveSample.
+   * @param <ST> {@link choreo.trajectory.DifferentialSample} or {@link
+   *     choreo.trajectory.SwerveSample}
    */
   public interface TrajectoryLogger<ST extends TrajectorySample<ST>>
       extends BiConsumer<Trajectory<ST>, Boolean> {}
@@ -167,12 +170,12 @@ public final class Choreo {
     }
     String sampleType = trajectoryObj.get("sampleType").getAsString();
     if (sampleType.equals("Swerve")) {
-      // HAL.report(tResourceType.kResourceType_ChoreoTrajectory, 1);
+      HAL.report(tResourceType.kResourceType_ChoreoTrajectory, 1);
 
       SwerveSample[] samples = GSON.fromJson(trajectoryObj.get("samples"), SwerveSample[].class);
       return new Trajectory<SwerveSample>(name, List.of(samples), List.of(splits), List.of(events));
     } else if (sampleType.equals("Differential")) {
-      // HAL.report(tResourceType.kResourceType_ChoreoTrajectory, 2);
+      HAL.report(tResourceType.kResourceType_ChoreoTrajectory, 2);
 
       DifferentialSample[] sampleArray =
           GSON.fromJson(trajectoryObj.get("samples"), DifferentialSample[].class);

@@ -15,8 +15,6 @@ import igknighters.constants.ConstValues.kSwerve.kSteerMotor;
 import igknighters.constants.FieldConstants;
 import igknighters.util.plumbing.Channel.Receiver;
 import igknighters.util.plumbing.Channel.Sender;
-import monologue.LogSink;
-import monologue.Monologue;
 import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.simulation.VisionTargetSim;
@@ -84,12 +82,13 @@ public class SimCtx {
     poseSender = localizer.namedPositionsSender();
     resetReceiver = localizer.poseResetsReceiver();
     if (isSimulation) {
-      arena = new Crescendo.CrescendoSimArena(Seconds.of(ConstValues.PERIODIC_TIME), 5);
+      arena =
+          new Crescendo.CrescendoSimArena(
+              localizer.field, Seconds.of(ConstValues.PERIODIC_TIME), 5);
       simRobot = new ShamRobot<>(arena, "User", swerveConfig, 1);
       aprilTagSim = new VisionSystemSim("AprilTags");
       aprilTagSim.addAprilTags(FieldConstants.APRIL_TAG_FIELD);
       objectDetectionSim = new VisionSystemSim("ObjectDetection");
-      Monologue.publishSendable("visionSimField", aprilTagSim.getDebugField(), LogSink.NT);
     } else {
       arena = null;
       simRobot = null;

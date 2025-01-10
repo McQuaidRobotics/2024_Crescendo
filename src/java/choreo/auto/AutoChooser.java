@@ -69,7 +69,7 @@ public class AutoChooser implements Sendable {
   }
 
   private String select(String selectStr, boolean force) {
-    this.selected = selectStr;
+    selected = selectStr;
     if (selected.equals(nameAtGeneration)
         && allianceAtGeneration.equals(DriverStation.getAlliance())) {
       // early return if the selected auto matches the active auto
@@ -78,6 +78,7 @@ public class AutoChooser implements Sendable {
     boolean dsValid = DriverStation.isDisabled() && DriverStation.getAlliance().isPresent();
     if (dsValid || force) {
       if (!autoRoutines.containsKey(selected) && !selected.equals(NONE_NAME)) {
+        selected = NONE_NAME;
         selectedNonexistentAuto.set(true);
       } else {
         selectedNonexistentAuto.set(false);
@@ -197,10 +198,9 @@ public class AutoChooser implements Sendable {
   public void initSendable(SendableBuilder builder) {
     builder.setSmartDashboardType("String Chooser");
     builder.publishConstBoolean(".controllable", true);
-    builder.publishConstInteger(".instance", 0);
     builder.publishConstString("default", NONE_NAME);
     builder.addStringArrayProperty("options", () -> options, null);
     builder.addStringProperty("selected", null, this::select);
-    builder.addStringProperty("active", () -> select(this.selected), null);
+    builder.addStringProperty("active", () -> select(selected), null);
   }
 }

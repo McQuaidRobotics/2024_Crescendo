@@ -11,6 +11,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import java.util.List;
 import org.dyn4j.geometry.Geometry;
 import sham.ShamArena;
@@ -107,8 +108,8 @@ public class Crescendo {
           new Translation2d(13.64, 7),
         };
 
-    public CrescendoSimArena(Time period, int ticksPerPeriod) {
-      super(new CrescendoFieldObstaclesMap(), period.in(Seconds), ticksPerPeriod);
+    public CrescendoSimArena(Field2d fieldVisualizer, Time period, int ticksPerPeriod) {
+      super(fieldVisualizer, new CrescendoFieldObstaclesMap(), period.in(Seconds), ticksPerPeriod);
     }
 
     @Override

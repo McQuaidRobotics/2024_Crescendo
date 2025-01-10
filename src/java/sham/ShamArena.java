@@ -11,6 +11,7 @@ import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
 import edu.wpi.first.wpilibj.IterativeRobotBase;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -53,6 +54,7 @@ public abstract class ShamArena {
   protected final World<Body> physicsWorld = new World<>();
   protected final Set<ShamGamePiece> gamePieces = ConcurrentHashMap.newKeySet();
   protected final Set<ShamRobot<?>> robots = ConcurrentHashMap.newKeySet();
+  protected final Field2d fieldVisualizer;
   public final ShamEnvTiming timing;
 
   /**
@@ -71,7 +73,9 @@ public abstract class ShamArena {
    * @param period the duration of each simulation period in seconds
    * @param ticksPerPeriod the number of sub-ticks to execute in each simulation period
    */
-  protected ShamArena(FieldMap obstaclesMap, double period, int ticksPerPeriod) {
+  protected ShamArena(
+      Field2d fieldVisualizer, FieldMap obstaclesMap, double period, int ticksPerPeriod) {
+    this.fieldVisualizer = fieldVisualizer;
     this.timing = new ShamEnvTiming(period, ticksPerPeriod);
     this.physicsWorld.setGravity(PhysicsWorld.ZERO_GRAVITY);
     for (FrcBody obstacle : obstaclesMap.obstacles) {

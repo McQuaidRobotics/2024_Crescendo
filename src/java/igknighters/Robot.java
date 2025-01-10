@@ -1,14 +1,15 @@
 package igknighters;
 
+import choreo.Choreo;
 import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory;
-import choreo.auto.AutoFactory.AutoBindings;
 import choreo.trajectory.SwerveSample;
 import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -29,6 +30,7 @@ import igknighters.util.UnitTestableRobot;
 import igknighters.util.can.CANSignalManager;
 import igknighters.util.logging.Tracer;
 import igknighters.util.logging.WatchdogSilencer;
+import java.io.File;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
@@ -86,6 +88,10 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
       umbrella.setupSimNoteDetection(localizer);
     }
 
+    Choreo.setChoreoDir(
+        new File(
+            Filesystem.getOperatingDirectory(),
+            "src" + File.separator + "deploy" + File.separator + "choreo"));
     final AutoFactory autoFactory =
         new AutoFactory(
             localizer::pose,
@@ -93,7 +99,6 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
             new AutoController(allSubsystems.swerve, localizer),
             true,
             allSubsystems.swerve.isPresent() ? allSubsystems.swerve.get() : new Subsystem() {},
-            new AutoBindings(),
             (traj, starting) -> {
               String msg =
                   "[Auto] Trajectory " + traj.name() + " " + (starting ? "Started" : "Finished");
