@@ -1,4 +1,4 @@
-package sham.utils.mathutils;
+package wpilibExt;
 
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Kilograms;

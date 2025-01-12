@@ -23,8 +23,8 @@ public class Subsystems implements Logged {
     this.led = led;
     this.vision = vision;
 
-    ExclusiveSubsystem[] lockedResources = { swerve };
-    SharedSubsystem[] locklessResources = { led,  vision };
+    ExclusiveSubsystem[] lockedResources = {swerve};
+    SharedSubsystem[] locklessResources = {led, vision};
 
     CommandScheduler.getInstance().registerSubsystem(lockedResources);
     for (SharedSubsystem subsystem : locklessResources) {

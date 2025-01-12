@@ -11,7 +11,6 @@ import igknighters.constants.FieldConstants;
 import igknighters.subsystems.swerve.odometryThread.SwerveDriveSample;
 import igknighters.subsystems.vision.Vision.VisionSample;
 import igknighters.util.TwistyPoseEst;
-import igknighters.util.logging.Tracer;
 import igknighters.util.plumbing.Channel;
 import igknighters.util.plumbing.Channel.Receiver;
 import igknighters.util.plumbing.Channel.Sender;
@@ -21,6 +20,7 @@ import monologue.Annotations.Log;
 import monologue.LogSink;
 import monologue.Logged;
 import monologue.Monologue;
+import wpilibExt.Tracer;
 
 public class Localizer implements Logged {
 
@@ -66,6 +66,16 @@ public class Localizer implements Logged {
   public Localizer() {
     poseEstimator = new TwistyPoseEst();
     field = new Field2d();
+
+    field
+        .getObject("AprilTags")
+        .setPoses(
+            FieldConstants.APRIL_TAG_FIELD.getTags()
+                .stream()
+                .map(tag -> tag.pose.toPose2d())
+                .toArray(Pose2d[]::new
+        )
+    );
   }
 
   public void publishField() {

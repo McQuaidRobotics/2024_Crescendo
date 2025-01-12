@@ -1,10 +1,10 @@
 package igknighters.util.can;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import igknighters.util.logging.Tracer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import wpilibExt.Tracer;
 
 /**
  * A utility to clump CAN signals together and update them all at once. This has shown a performance

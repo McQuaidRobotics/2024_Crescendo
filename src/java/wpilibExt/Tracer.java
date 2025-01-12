@@ -1,4 +1,4 @@
-package igknighters.util.logging;
+package wpilibExt;
 
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;

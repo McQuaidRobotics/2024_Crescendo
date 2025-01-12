@@ -9,8 +9,8 @@ import static edu.wpi.first.units.Units.NewtonMeters;
 import static edu.wpi.first.units.Units.Newtons;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
-import static sham.utils.mathutils.MeasureMath.div;
-import static sham.utils.mathutils.MeasureMath.times;
+import static wpilibExt.MeasureMath.div;
+import static wpilibExt.MeasureMath.times;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -29,8 +29,8 @@ import sham.ShamArena.ShamEnvTiming;
 import sham.configs.ShamSwerveConfig;
 import sham.utils.RuntimeLog;
 import sham.utils.mathutils.MassMath.PhysicsMass;
-import sham.utils.mathutils.MeasureMath;
-import sham.utils.mathutils.MeasureMath.XY;
+import wpilibExt.MeasureMath;
+import wpilibExt.MeasureMath.XY;
 
 public class ShamSwerve extends ShamDriveTrain {
   protected final ShamEnvTiming timing;

@@ -25,12 +25,12 @@ import igknighters.subsystems.swerve.module.SwerveModuleSim3;
 import igknighters.subsystems.swerve.odometryThread.RealSwerveOdometryThread;
 import igknighters.subsystems.swerve.odometryThread.SimSwerveOdometryThread;
 import igknighters.subsystems.swerve.odometryThread.SwerveOdometryThread;
-import igknighters.util.Speeds;
-import igknighters.util.Speeds.FieldSpeeds;
-import igknighters.util.Speeds.RobotSpeeds;
-import igknighters.util.logging.Tracer;
 import java.util.Optional;
 import sham.ShamSwerve;
+import wpilibExt.Speeds;
+import wpilibExt.Speeds.FieldSpeeds;
+import wpilibExt.Speeds.RobotSpeeds;
+import wpilibExt.Tracer;
 
 /**
  * This is the subsystem for our swerve drivetrain. The Swerve subsystem is composed of 5
@@ -145,7 +145,9 @@ public class Swerve implements ExclusiveSubsystem {
   }
 
   public void setModuleStates(AdvancedSwerveModuleState[] desiredStates) {
-    log("regurgitatedSpeed", Speeds.fromRobotRelative(kSwerve.KINEMATICS.toChassisSpeeds(desiredStates)));
+    log(
+        "regurgitatedSpeed",
+        Speeds.fromRobotRelative(kSwerve.KINEMATICS.toChassisSpeeds(desiredStates)));
 
     for (SwerveModule module : swerveMods) {
       module.setDesiredState(desiredStates[module.getModuleId()]);

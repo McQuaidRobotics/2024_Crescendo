@@ -8,7 +8,7 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
-import static sham.utils.mathutils.MeasureMath.div;
+import static wpilibExt.MeasureMath.div;
 
 import edu.wpi.first.epilogue.logging.EpilogueBackend;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -31,10 +31,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import monologue.ProceduralStructGenerator;
 import sham.ShamArena.ShamEnvTiming;
 import sham.ShamMotorController.ControllerOutput;
-import sham.utils.DCMotorExt;
 import sham.utils.GearRatio;
 import sham.utils.RuntimeLog;
-import sham.utils.mathutils.MeasureMath;
+import wpilibExt.DCMotorExt;
+import wpilibExt.MeasureMath;
 
 public class ShamMechanism {
   private static final double kMotorEfficiency = 0.85;

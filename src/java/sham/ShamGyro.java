@@ -20,8 +20,8 @@ import java.util.function.BiConsumer;
 import sham.ShamArena.ShamEnvTiming;
 import sham.configs.ShamGyroConfig;
 import sham.utils.RuntimeLog;
-import sham.utils.mathutils.MeasureMath.XY;
 import sham.utils.mathutils.ShamCommonMath;
+import wpilibExt.MeasureMath.XY;
 
 // import sham.utils.mathutils.MeasureMath;
 

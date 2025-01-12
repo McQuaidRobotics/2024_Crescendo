@@ -7,11 +7,11 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import igknighters.constants.ConstValues.kSwerve;
 import igknighters.subsystems.swerve.Swerve;
-import igknighters.util.Speeds;
 import igknighters.util.plumbing.TunableValues;
 import igknighters.util.plumbing.TunableValues.TunableDouble;
 import java.util.Arrays;
 import java.util.function.DoubleSupplier;
+import wpilibExt.Speeds;
 
 public class WheelRadiusCharacterization extends Command {
   private static final TunableDouble characterizationSpeed =

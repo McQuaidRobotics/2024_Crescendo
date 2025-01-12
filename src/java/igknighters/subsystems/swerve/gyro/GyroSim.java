@@ -3,9 +3,9 @@ package igknighters.subsystems.swerve.gyro;
 import edu.wpi.first.math.geometry.Rotation2d;
 import igknighters.constants.ConstValues;
 import igknighters.subsystems.swerve.odometryThread.SimSwerveOdometryThread;
-import igknighters.util.Speeds.RobotSpeeds;
 import igknighters.util.logging.BootupLogger;
 import java.util.function.Supplier;
+import wpilibExt.Speeds.RobotSpeeds;
 
 public class GyroSim extends Gyro {
 

@@ -9,8 +9,8 @@ import igknighters.Localizer;
 import igknighters.subsystems.swerve.Swerve;
 import igknighters.subsystems.swerve.control.RotationalController;
 import igknighters.util.AllianceFlip;
-import igknighters.util.Speeds;
-import igknighters.util.Speeds.RobotSpeeds;
+import wpilibExt.Speeds;
+import wpilibExt.Speeds.RobotSpeeds;
 
 public class SwerveCommands {
   /**

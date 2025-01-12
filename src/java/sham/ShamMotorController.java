@@ -10,7 +10,7 @@ import edu.wpi.first.util.struct.Struct;
 import monologue.ProceduralStructGenerator;
 import sham.ShamMechanism.MechanismState;
 import sham.ShamMotorController.ControllerOutput.VoltageOutput;
-import sham.utils.DCMotorExt;
+import wpilibExt.DCMotorExt;
 
 /**
  * An interface to represent a motor controller in the simulation. This can be used to allow

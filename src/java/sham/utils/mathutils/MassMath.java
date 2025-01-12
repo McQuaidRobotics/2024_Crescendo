@@ -1,6 +1,6 @@
 package sham.utils.mathutils;
 
-import static sham.utils.mathutils.MeasureMath.*;
+import static wpilibExt.MeasureMath.*;
 
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -10,6 +10,7 @@ import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Torque;
+import wpilibExt.MeasureMath;
 
 public class MassMath {
   public record PhysicsMass(Mass mass, MomentOfInertia moi) {

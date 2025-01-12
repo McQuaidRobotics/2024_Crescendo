@@ -20,13 +20,13 @@ import igknighters.subsystems.vision.camera.Camera;
 import igknighters.subsystems.vision.camera.Camera.CameraConfig;
 import igknighters.subsystems.vision.camera.CameraRealPhoton;
 import igknighters.subsystems.vision.camera.CameraSimPhoton;
-import igknighters.util.logging.Tracer;
 import igknighters.util.plumbing.Channel.Sender;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import monologue.Annotations.IgnoreLogged;
 import monologue.ProceduralStructGenerator;
+import wpilibExt.Tracer;
 
 public class Vision implements SharedSubsystem {
   @IgnoreLogged private final Localizer localizer;

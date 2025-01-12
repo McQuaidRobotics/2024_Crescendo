@@ -34,6 +34,7 @@ import sham.utils.FrcBody.FrcBodySnapshot;
 import sham.utils.ProjectileUtil;
 import sham.utils.RuntimeLog;
 import sham.utils.mathutils.GeometryConvertor;
+import wpilibExt.Tracer;
 
 public abstract class ShamArena {
   public record ShamEnvTiming(Time period, int ticksPerPeriod, Time dt)
@@ -127,14 +128,13 @@ public abstract class ShamArena {
    * <p>This method should be called ONCE in {@link IterativeRobotBase#simulationPeriodic()}
    */
   public void simulationPeriodic() {
-    final long t0 = System.nanoTime();
-    competitionPeriodic();
+    Tracer.traceFunc("competitionPeriodic", this::competitionPeriodic);
+    Tracer.startTrace("subticks");
     // move through a few sub-periods in each update
     for (int i = 0; i < timing.ticksPerPeriod; i++) {
       simulationSubTick();
     }
-
-    logger.log("UpdateTime", (System.nanoTime() - t0) / 1000000.0);
+    Tracer.endTrace();
   }
 
   private void simulationSubTick() {

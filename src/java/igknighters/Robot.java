@@ -4,6 +4,7 @@ import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
 import com.ctre.phoenix6.SignalLogger;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.networktables.StringSubscriber;
@@ -25,7 +26,6 @@ import igknighters.subsystems.swerve.Swerve;
 import igknighters.subsystems.vision.Vision;
 import igknighters.util.UnitTestableRobot;
 import igknighters.util.can.CANSignalManager;
-import igknighters.util.logging.Tracer;
 import igknighters.util.logging.WatchdogSilencer;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -36,6 +36,7 @@ import monologue.LogSink;
 import monologue.Logged;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
+import wpilibExt.Tracer;
 
 public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
@@ -49,6 +50,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
   public final SimCtx simCtx = new SimCtx(localizer, isSimulation());
 
   private final DriverController driverController;
+
   @SuppressWarnings("unused")
   private final OperatorController operatorController;
 
@@ -64,18 +66,16 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
     localizer.publishField();
 
-    subsystems = new Subsystems(
-      new Swerve(localizer, simCtx),
-      new Vision(localizer, simCtx),
-      new Led()
-    );
+    subsystems =
+        new Subsystems(new Swerve(localizer, simCtx), new Vision(localizer, simCtx), new Led());
 
     localizer.reset(FieldConstants.POSE2D_CENTER);
 
     driverController = new DriverController(0, localizer, subsystems);
     operatorController = new OperatorController(1, subsystems);
 
-    subsystems.swerve.setDefaultCommand(new TeleopSwerveTraditionalCmd(subsystems.swerve, driverController));
+    subsystems.swerve.setDefaultCommand(
+        new TeleopSwerveTraditionalCmd(subsystems.swerve, driverController));
 
     final AutoFactory autoFactory =
         new AutoFactory(
@@ -102,9 +102,11 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
     testManager = new TestManager();
     testManager.addTestRoutine(
-      "Characterize Swerve", Characterizers.characterizeSwerve(subsystems.swerve));
+        "Characterize Swerve", Characterizers.characterizeSwerve(subsystems.swerve));
 
     System.gc();
+
+    Monologue.log("rajhhhhj", DCMotor.getKrakenX60Foc(1).getCurrent(0.0, 0.25));
   }
 
   @Override

@@ -10,9 +10,9 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.RobotController;
 import igknighters.subsystems.swerve.module.SwerveModule.AdvancedSwerveModuleState;
-import igknighters.util.Speeds;
-import igknighters.util.Speeds.RobotSpeeds;
 import monologue.Logged;
+import wpilibExt.Speeds;
+import wpilibExt.Speeds.RobotSpeeds;
 
 /**
  * Swerve setpoint generatoR that has been passed around so many times its hard to keep track, just

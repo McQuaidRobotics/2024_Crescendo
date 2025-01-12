@@ -28,9 +28,9 @@ import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.MassType;
 import sham.utils.ProjectileUtil.ProjectileDynamics;
 import sham.utils.RuntimeLog;
-import sham.utils.geometry.Velocity2d;
-import sham.utils.geometry.Velocity3d;
 import sham.utils.mathutils.GeometryConvertor;
+import wpilibExt.Velocity2d;
+import wpilibExt.Velocity3d;
 
 /**
  * A base class used for all gamepieces in the simulation.

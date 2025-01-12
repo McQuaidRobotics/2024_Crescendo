@@ -10,9 +10,9 @@ import igknighters.commands.swerve.SwerveCommands;
 import igknighters.subsystems.swerve.Swerve;
 import igknighters.subsystems.swerve.control.RotationalController;
 import igknighters.util.AllianceFlip;
-import igknighters.util.Speeds;
-import igknighters.util.Speeds.RobotSpeeds;
 import java.util.function.Supplier;
+import wpilibExt.Speeds;
+import wpilibExt.Speeds.RobotSpeeds;
 
 public class AutoSwerveTargetSpeakerCmd extends Command {
 

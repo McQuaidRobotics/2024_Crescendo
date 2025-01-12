@@ -4,7 +4,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import igknighters.constants.ConstValues.kSwerve;
 import igknighters.controllers.ControllerBase;
 import igknighters.subsystems.swerve.Swerve;
-import igknighters.util.Speeds;
+import wpilibExt.Speeds;
 
 public class TeleopSwerveTraditionalCmd extends TeleopSwerveBaseCmd {
 

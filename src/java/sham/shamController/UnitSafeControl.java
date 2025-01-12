@@ -35,7 +35,7 @@ import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
 import monologue.ProceduralStructGenerator;
-import sham.utils.mathutils.MeasureMath;
+import wpilibExt.MeasureMath;
 
 public class UnitSafeControl {
   /** A PD controller that uses units to ensure that the controller is used correctly. */

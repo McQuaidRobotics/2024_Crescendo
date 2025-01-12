@@ -20,7 +20,7 @@ import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Rotation;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
-import sham.utils.geometry.Velocity2d;
+import wpilibExt.Velocity2d;
 
 /** utils to convert between WPILIB and dyn4j geometry classes */
 public class GeometryConvertor {

@@ -31,9 +31,9 @@ import sham.ShamMotorController;
 import sham.ShamMotorController.ControllerOutput.CurrentOutput;
 import sham.ShamMotorController.ControllerOutput.VoltageOutput;
 import sham.shamController.UnitSafeControl.TrapezoidProfile.State;
-import sham.utils.DCMotorExt;
 import sham.utils.RuntimeLog;
-import sham.utils.mathutils.MeasureMath;
+import wpilibExt.DCMotorExt;
+import wpilibExt.MeasureMath;
 
 public class ShamMCX implements ShamMotorController {
   private static final VelocityUnit<AngleUnit> VU = VelocityUnit.combine(Radians, Seconds);

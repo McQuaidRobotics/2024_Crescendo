@@ -21,9 +21,9 @@ import sham.ShamMechanism.MechanismVariables;
 import sham.configs.ShamSwerveConfig;
 import sham.configs.ShamSwerveModuleConfig;
 import sham.utils.RuntimeLog;
-import sham.utils.geometry.Velocity2d;
-import sham.utils.mathutils.MeasureMath;
-import sham.utils.mathutils.MeasureMath.XY;
+import wpilibExt.MeasureMath;
+import wpilibExt.MeasureMath.XY;
+import wpilibExt.Velocity2d;
 
 public class ShamSwerveModule {
   private final ShamRobot<ShamSwerve> robot;

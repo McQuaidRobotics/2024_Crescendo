@@ -6,8 +6,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import igknighters.Localizer;
 import igknighters.constants.ConstValues.kAuto;
 import igknighters.subsystems.swerve.Swerve;
-import igknighters.util.Speeds;
 import java.util.function.Consumer;
+import wpilibExt.Speeds;
 
 public class AutoController implements Consumer<SwerveSample> {
   private final Swerve swerve;

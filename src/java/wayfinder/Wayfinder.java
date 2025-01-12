@@ -1,5 +1,3 @@
 package wayfinder;
 
-public class Wayfinder {
-  
-}
+public class Wayfinder {}

@@ -8,7 +8,7 @@ import igknighters.subsystems.led.LedAnimations.PartialAnimation;
 import igknighters.subsystems.led.driver.CandleDriver;
 import igknighters.subsystems.led.driver.Driver;
 import igknighters.subsystems.led.driver.SimDriver;
-import igknighters.util.logging.Tracer;
+import wpilibExt.Tracer;
 
 public class Led implements SharedSubsystem {
   private final Driver driver;

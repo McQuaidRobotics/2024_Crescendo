@@ -15,8 +15,8 @@ import monologue.ProceduralStructGenerator.IgnoreStructField;
 import sham.ShamMechanism.Friction;
 import sham.ShamMechanism.HardLimits;
 import sham.ShamMechanism.MechanismDynamics;
-import sham.utils.DCMotorExt;
 import sham.utils.GearRatio;
+import wpilibExt.DCMotorExt;
 
 public class ShamMechanismConfig implements StructSerializable {
   public DCMotorExt motor;

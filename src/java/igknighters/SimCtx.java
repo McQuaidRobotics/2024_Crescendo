@@ -27,8 +27,8 @@ import sham.configs.ShamSwerveConfig;
 import sham.configs.ShamSwerveModuleConfig;
 import sham.configs.ShamSwerveModuleConfig.WheelCof;
 import sham.seasonspecific.Crescendo;
-import sham.utils.DCMotorExt;
 import sham.utils.GearRatio;
+import wpilibExt.DCMotorExt;
 
 /**
  * An object containing sim-specific objects and configurations.

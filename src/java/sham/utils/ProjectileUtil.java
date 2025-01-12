@@ -1,6 +1,6 @@
 package sham.utils;
 
-import sham.utils.geometry.Velocity3d;
+import wpilibExt.Velocity3d;
 
 public class ProjectileUtil {
 

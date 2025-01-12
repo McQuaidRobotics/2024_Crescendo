@@ -11,9 +11,9 @@ import igknighters.controllers.ControllerBase;
 import igknighters.subsystems.swerve.Swerve;
 import igknighters.subsystems.swerve.control.RotationalController;
 import igknighters.util.AllianceFlip;
-import igknighters.util.Speeds;
-import igknighters.util.Speeds.FieldSpeeds;
 import java.util.function.Supplier;
+import wpilibExt.Speeds;
+import wpilibExt.Speeds.FieldSpeeds;
 
 public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
 
@@ -80,7 +80,8 @@ public class TeleopSwerveTargetCmd extends TeleopSwerveBaseCmd {
 
     if (movementComp) {
       targetAngle =
-          SwerveCommands.rotationRelativeToPose(lookaheadTranslation, targetTranslation).plus(offset);
+          SwerveCommands.rotationRelativeToPose(lookaheadTranslation, targetTranslation)
+              .plus(offset);
     } else {
       targetAngle =
           SwerveCommands.rotationRelativeToPose(currentTranslation, targetTranslation).plus(offset);

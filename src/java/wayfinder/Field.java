@@ -1,5 +1,3 @@
 package wayfinder;
 
-public class Field {
-  
-}
+public class Field {}

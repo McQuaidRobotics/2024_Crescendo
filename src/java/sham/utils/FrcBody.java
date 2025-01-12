@@ -13,8 +13,8 @@ import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
 import monologue.ProceduralStructGenerator;
 import org.dyn4j.dynamics.Body;
-import sham.utils.geometry.Velocity2d;
 import sham.utils.mathutils.GeometryConvertor;
+import wpilibExt.Velocity2d;
 
 public class FrcBody extends Body {
   public record FrcBodySnapshot(
