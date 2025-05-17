@@ -1,4 +1,5 @@
 {
+  "java.configuration.updateBuildConfiguration": "automatic",
   "java.server.launchMode": "Standard",
   "files.exclude": {
     "**/.git": true,
@@ -13,12 +14,47 @@
     "**/.factorypath": true,
     "**/*~": true
   },
-  "java.configuration.updateBuildConfiguration": "automatic",
-  "java.jdt.ls.java.home": "C:\\Users\\Public\\wpilib\\2024\\jdk",
-  "terminal.integrated.env.windows": {
-      "JAVA_HOME": "C:\\Users\\Public\\wpilib\\2024\\jdk",
-      "PATH": "C:\\Users\\Public\\wpilib\\2024\\jdk\\bin;${env:PATH}"
-  },
-  "java.import.gradle.java.home": "C:\\Users\\Public\\wpilib\\2024\\jdk",
-  "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m -Xlog:disable"
+  "java.test.config": [
+    {
+      "name": "WPIlibUnitTests",
+      "workingDirectory": "${workspaceFolder}/build/jni/release",
+      "vmargs": [ "-Djava.library.path=${workspaceFolder}/build/jni/release" ],
+      "env": {
+        "LD_LIBRARY_PATH": "${workspaceFolder}/build/jni/release" ,
+        "DYLD_LIBRARY_PATH": "${workspaceFolder}/build/jni/release"
+      }
+    },
+  ],
+  "java.test.defaultConfig": "WPIlibUnitTests",
+  "java.import.gradle.annotationProcessing.enabled": false,
+  "java.completion.favoriteStaticMembers": [
+    "org.junit.Assert.*",
+    "org.junit.Assume.*",
+    "org.junit.jupiter.api.Assertions.*",
+    "org.junit.jupiter.api.Assumptions.*",
+    "org.junit.jupiter.api.DynamicContainer.*",
+    "org.junit.jupiter.api.DynamicTest.*",
+    "org.mockito.Mockito.*",
+    "org.mockito.ArgumentMatchers.*",
+    "org.mockito.Answers.*",
+    "edu.wpi.first.units.Units.*"
+  ],
+  "java.completion.filteredTypes": [
+    "java.awt.*",
+    "com.sun.*",
+    "sun.*",
+    "jdk.*",
+    "org.graalvm.*",
+    "io.micrometer.shaded.*",
+    "java.beans.*",
+    "java.util.Base64.*",
+    "java.util.Timer",
+    "java.sql.*",
+    "javax.swing.*",
+    "javax.management.*",
+    "javax.smartcardio.*",
+    "edu.wpi.first.math.proto.*",
+    "edu.wpi.first.math.**.proto.*",
+    "edu.wpi.first.math.**.struct.*",
+  ]
 }
