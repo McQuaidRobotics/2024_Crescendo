@@ -247,6 +247,10 @@ public class SwerveSample implements TrajectorySample<SwerveSample> {
 
   private static final class SwerveSampleStruct implements Struct<SwerveSample> {
     @Override
+    public String getTypeName() {
+      return "I dont really know but its in the swerve sample class";
+    }
+    @Override
     public Class<SwerveSample> getTypeClass() {
       return SwerveSample.class;
     }

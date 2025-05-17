@@ -398,7 +398,7 @@ public class Monologue extends GlobalLogged {
         MonologueLog.runtimeWarn("Failed to join datalog thread");
         }
         datalogHandle.set(null);
-        oldDataLog.setFilename("DELETME");
+        // oldDataLog.setFilename("DELETME");
         oldDataLog.close();
         new File(dir + "/DELETME").delete();
         killedDatalog = true;

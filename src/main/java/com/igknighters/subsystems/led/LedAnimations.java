@@ -28,6 +28,10 @@ public enum LedAnimations implements StructSerializable {
 
     public static final Struct<LedAnimations> struct = new Struct<LedAnimations>() {
         @Override
+        public String getTypeName(){
+            return "LedAnimations";
+        }
+        @Override
         public String getSchema() {
             SchemaBuilder schema = new SchemaBuilder();
             EnumFieldBuilder enumField = new EnumFieldBuilder("pattern");
