@@ -7,7 +7,6 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -19,14 +18,19 @@ import com.igknighters.util.can.CANSignalManager;
 import com.igknighters.util.logging.BootupLogger;
 import com.igknighters.util.logging.FaultManager;
 
+import edu.wpi.first.units.measure.*;
 import edu.wpi.first.math.util.Units;
 
 public class WristRealFused extends Wrist {
     private final TalonFX motor;
     private final CANcoder cancoder;
 
-    private final StatusSignal<Double> motorRots, motorVelo, motorAmps, motorVolts;
-    private final StatusSignal<Double> cancoderRots, cancoderVelo;
+    private final StatusSignal<Angle> motorRots;
+    private final StatusSignal<AngularVelocity> motorVelo;
+    private final StatusSignal<Current> motorAmps;
+    private final StatusSignal<Voltage> motorVolts;
+    private final StatusSignal<Angle> cancoderRots;
+    private final StatusSignal<AngularVelocity> cancoderVelo;
 
     private final VoltageOut controlReqVolts = new VoltageOut(0.0).withUpdateFreqHz(0);
     private final MotionMagicVoltage controlReqMotionMagic = new MotionMagicVoltage(0.0).withUpdateFreqHz(0)
@@ -55,8 +59,8 @@ public class WristRealFused extends Wrist {
             cancoderRots, cancoderVelo
         );
 
-        cancoder.optimizeBusUtilization(1.0);
-        motor.optimizeBusUtilization(1.0);
+        cancoder.optimizeBusUtilization(0.0, 1.0);
+        motor.optimizeBusUtilization(0.0, 1.0);
 
         super.encoderRadians = Units.rotationsToRadians(cancoderRots.getValueAsDouble());
         super.radians = encoderRadians;
@@ -91,7 +95,7 @@ public class WristRealFused extends Wrist {
 
     private CANcoderConfiguration cancoderConfig() {
         CANcoderConfiguration cfg = new CANcoderConfiguration();
-        cfg.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
+        cfg.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1.0;
         cfg.MagnetSensor.MagnetOffset = kWrist.CANCODER_OFFSET;
 
         return cfg;
