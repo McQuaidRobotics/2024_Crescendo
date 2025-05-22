@@ -165,11 +165,6 @@ public class DifferentialSample implements TrajectorySample<DifferentialSample> 
 
   private static final class DifferentialSampleStruct implements Struct<DifferentialSample> {
     @Override
-    public String getTypeName(){
-      return "I Really Hope This Works";
-    }
-    
-    @Override
     public Class<DifferentialSample> getTypeClass() {
       return DifferentialSample.class;
     }

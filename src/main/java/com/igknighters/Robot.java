@@ -228,30 +228,30 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
             // used for tests and CI, does not actually log anything but asserts the logging is setup mostly correct
             Monologue.setupMonologueDisabled(this, "/Robot", true);
         }
-//WE NEED THE BUILD CONSTANTS FILE
+
         // filesystemLogger.addFile("/home/lvuser/FRC_UserProgram.log", "Console", 0.27);
         // filesystemLogger.addFile("/var/log/dmesg", "Dmesg", 2.2);
         // filesystemLogger.addFile("/var/log/messages", "Kernel", 1.4);
 
         // logs build data to the datalog
-        // final String meta = "/BuildData/";
-        // Monologue.log(meta + "RuntimeType", getRuntimeType().toString());
-        // Monologue.log(meta + "ProjectName", BuildConstants.MAVEN_NAME);
-        // Monologue.log(meta + "BuildDate", BuildConstants.BUILD_DATE);
-        // Monologue.log(meta + "GitSHA", BuildConstants.GIT_SHA);
-        // Monologue.log(meta + "GitDate", BuildConstants.GIT_DATE);
-        // Monologue.log(meta + "GitBranch", BuildConstants.GIT_BRANCH);
-        // switch (BuildConstants.DIRTY) {
-        //     case 0:
-        //         Monologue.log(meta + "GitDirty", "All changes committed");
-        //         break;
-        //     case 1:
-        //         Monologue.log(meta + "GitDirty", "Uncomitted changes");
-        //         break;
-        //     default:
-        //         Monologue.log(meta + "GitDirty", "Unknown");
-        //         break;
-        // }
+        final String meta = "/BuildData/";
+        Monologue.log(meta + "RuntimeType", getRuntimeType().toString());
+        Monologue.log(meta + "ProjectName", BuildConstants.MAVEN_NAME);
+        Monologue.log(meta + "BuildDate", BuildConstants.BUILD_DATE);
+        Monologue.log(meta + "GitSHA", BuildConstants.GIT_SHA);
+        Monologue.log(meta + "GitDate", BuildConstants.GIT_DATE);
+        Monologue.log(meta + "GitBranch", BuildConstants.GIT_BRANCH);
+        switch (BuildConstants.DIRTY) {
+            case 0:
+                Monologue.log(meta + "GitDirty", "All changes committed");
+                break;
+            case 1:
+                Monologue.log(meta + "GitDirty", "Uncomitted changes");
+                break;
+            default:
+                Monologue.log(meta + "GitDirty", "Unknown");
+                break;
+        }
 
         HashMap<String, Integer> commandCounts = new HashMap<>();
         BiConsumer<Command, Boolean> logCommandFunction = (Command command, Boolean active) -> {
