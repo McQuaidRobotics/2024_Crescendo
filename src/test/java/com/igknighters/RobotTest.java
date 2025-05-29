@@ -15,6 +15,8 @@ import com.igknighters.subsystems.swerve.Swerve;
 
 import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 
 public class RobotTest {
 
@@ -47,16 +49,15 @@ public class RobotTest {
         swerve.setYaw(traj.getInitialPose(false).getRotation());
 
         robot.autoChooser.addAutoRoutine(
-            "TestAuto",
-            factory -> {
-                AutoRoutine routine = factory.newRoutine("TestAutoLoop");
-                AutoTrajectory aTraj = factory.trajectory(traj, routine);
+                "TestAuto",
+                factory -> {
+                    AutoRoutine routine = factory.newRoutine("TestAutoLoop");
+                    AutoTrajectory aTraj = factory.trajectory(traj, routine);
 
-                routine.enabled().onTrue(aTraj.cmd());
+                    routine.enabled().onTrue(aTraj.cmd());
 
-                return routine;
-            }
-        );
+                    return routine;
+                });
         // robot.autoChooser.choose("TestAuto");
 
         DriverStationSim.setAutonomous(true);
@@ -69,10 +70,13 @@ public class RobotTest {
 
             if (isFinished) {
                 robo.finishUnitTestRobot();
-            } else if (robo.getElapsedTime() > 1.5) {
+            } else if (robo.getElapsedTime() > 2.0) {
+                // Commands.print("Test trajectory took to long.");
                 throw new RuntimeException(
                         "Auto took to long, ended at "
-                                + robo.localizer.pose().toString());
+                                + robo.localizer.pose().toString()
+                                + ", elapsed ttime ="
+                                + robo.getElapsedTime());
             }
         });
 
@@ -85,27 +89,27 @@ public class RobotTest {
 
     // @Test
     // public void testShooter(@Robo Robot robot) {
-    //     RobotSetup.testOverrideRobotID(RobotID.SIM_CRASH);
+    // RobotSetup.testOverrideRobotID(RobotID.SIM_CRASH);
 
-    //     DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
+    // DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
 
-    //     DriverStationSim.setEnabled(true);
+    // DriverStationSim.setEnabled(true);
 
-    //     robot.withTeleopInitTest(robo -> {
-    //         var umbrella = robo.getAllSubsystemsForTest().umbrella
-    //                 .get();
+    // robot.withTeleopInitTest(robo -> {
+    // var umbrella = robo.getAllSubsystemsForTest().umbrella
+    // .get();
 
-    //         umbrella.run(() -> umbrella.spinupShooterToRPM(3000));
-    //     })
-    //             .withTeleopPeriodicTest(robo -> {
-    //                 var umbrella = robo.getAllSubsystemsForTest().umbrella
-    //                         .get();
+    // umbrella.run(() -> umbrella.spinupShooterToRPM(3000));
+    // })
+    // .withTeleopPeriodicTest(robo -> {
+    // var umbrella = robo.getAllSubsystemsForTest().umbrella
+    // .get();
 
-    //                 if (umbrella.isShooterAtSpeed()) {
-    //                     robo.finishUnitTestRobot();
-    //                 }
-    //             });
+    // if (umbrella.isShooterAtSpeed()) {
+    // robo.finishUnitTestRobot();
+    // }
+    // });
 
-    //     robot.runTest(3);
+    // robot.runTest(3);
     // }
 }

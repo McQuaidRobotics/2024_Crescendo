@@ -41,12 +41,11 @@ import java.util.function.Supplier;
 
 /** Utilities to load and follow Choreo Trajectories */
 public final class Choreo {
-  private static final Gson GSON =
-      new GsonBuilder()
-          .registerTypeAdapter(EventMarker.class, new EventMarker.Deserializer())
-          .create();
+  private static final Gson GSON = new GsonBuilder()
+      .registerTypeAdapter(EventMarker.class, new EventMarker.Deserializer())
+      .create();
   private static final String TRAJECTORY_FILE_EXTENSION = ".traj";
-  private static final String SPEC_VERSION = "v2025.0.0";
+  private static final String SPEC_VERSION = "1";
 
   private static File CHOREO_DIR = new File(Filesystem.getDeployDirectory(), "choreo");
 
@@ -58,10 +57,12 @@ public final class Choreo {
   }
 
   /**
-   * Gets the project file from the deploy directory. Choreolib expects a .chor file to be placed in
+   * Gets the project file from the deploy directory. Choreolib expects a .chor
+   * file to be placed in
    * src/main/deploy/choreo.
    *
-   * <p>The result is cached after the first call.
+   * <p>
+   * The result is cached after the first call.
    *
    * @return the project file
    */
@@ -98,14 +99,17 @@ public final class Choreo {
   }
 
   /**
-   * This interface exists as a type alias. A TrajectoryLogger has a signature of ({@link
-   * Trajectory}, {@link Boolean})-&gt;void, where the function consumes a trajectory and a boolean
+   * This interface exists as a type alias. A TrajectoryLogger has a signature of
+   * ({@link
+   * Trajectory}, {@link Boolean})-&gt;void, where the function consumes a
+   * trajectory and a boolean
    * indicating whether the trajectory is starting or finishing.
    *
    * @param <SampleType> DifferentialSample or SwerveSample.
    */
   public interface TrajectoryLogger<SampleType extends TrajectorySample<SampleType>>
-      extends BiConsumer<Trajectory<SampleType>, Boolean> {}
+      extends BiConsumer<Trajectory<SampleType>, Boolean> {
+  }
 
   /** Default constructor. */
   private Choreo() {
@@ -113,30 +117,31 @@ public final class Choreo {
   }
 
   /**
-   * Load a trajectory from the deploy directory. Choreolib expects .traj files to be placed in
+   * Load a trajectory from the deploy directory. Choreolib expects .traj files to
+   * be placed in
    * src/main/deploy/choreo/[trajectoryName].traj.
    *
-   * @param <SampleType> The type of samples in the trajectory.
-   * @param trajectoryName The path name in Choreo, which matches the file name in the deploy
-   *     directory, file extension is optional.
-   * @return The loaded trajectory, or `Optional.empty()` if the trajectory could not be loaded.
+   * @param <SampleType>   The type of samples in the trajectory.
+   * @param trajectoryName The path name in Choreo, which matches the file name in
+   *                       the deploy
+   *                       directory, file extension is optional.
+   * @return The loaded trajectory, or `Optional.empty()` if the trajectory could
+   *         not be loaded.
    */
   @SuppressWarnings("unchecked")
-  public static <SampleType extends TrajectorySample<SampleType>>
-      Optional<Trajectory<SampleType>> loadTrajectory(String trajectoryName) {
+  public static <SampleType extends TrajectorySample<SampleType>> Optional<Trajectory<SampleType>> loadTrajectory(
+      String trajectoryName) {
     requireNonNullParam(trajectoryName, "trajectoryName", "Choreo.loadTrajectory");
 
     if (trajectoryName.endsWith(TRAJECTORY_FILE_EXTENSION)) {
-      trajectoryName =
-          trajectoryName.substring(0, trajectoryName.length() - TRAJECTORY_FILE_EXTENSION.length());
+      trajectoryName = trajectoryName.substring(0, trajectoryName.length() - TRAJECTORY_FILE_EXTENSION.length());
     }
     File trajectoryFile = new File(CHOREO_DIR, trajectoryName + TRAJECTORY_FILE_EXTENSION);
     try {
       var reader = new BufferedReader(new FileReader(trajectoryFile));
       String str = reader.lines().reduce("", (a, b) -> a + b);
       reader.close();
-      Trajectory<SampleType> trajectory =
-          (Trajectory<SampleType>) loadTrajectoryString(str, getProjectFile());
+      Trajectory<SampleType> trajectory = (Trajectory<SampleType>) loadTrajectoryString(str, getProjectFile());
       return Optional.of(trajectory);
     } catch (FileNotFoundException ex) {
       DriverStation.reportError("Could not find trajectory file: " + trajectoryFile, false);
@@ -152,8 +157,9 @@ public final class Choreo {
    * Load a trajectory from a string.
    *
    * @param trajectoryJsonString The JSON string.
-   * @param projectFile The project file.
-   * @return The loaded trajectory, or `empty std::optional` if the trajectory could not be loaded.
+   * @param projectFile          The project file.
+   * @return The loaded trajectory, or `empty std::optional` if the trajectory
+   *         could not be loaded.
    */
   static Trajectory<? extends TrajectorySample<?>> loadTrajectoryString(
       String trajectoryJsonString, ProjectFile projectFile) {
@@ -165,9 +171,8 @@ public final class Choreo {
           name + ".traj: Wrong version: " + version + ". Expected " + SPEC_VERSION);
     }
     // Filter out markers with negative timestamps or empty names
-    List<EventMarker> unfilteredEvents =
-        new ArrayList<EventMarker>(
-            Arrays.asList(GSON.fromJson(wholeTrajectory.get("events"), EventMarker[].class)));
+    List<EventMarker> unfilteredEvents = new ArrayList<EventMarker>(
+        Arrays.asList(GSON.fromJson(wholeTrajectory.get("events"), EventMarker[].class)));
     unfilteredEvents.removeIf(marker -> marker.timestamp < 0 || marker.event.length() == 0);
     EventMarker[] events = new EventMarker[unfilteredEvents.size()];
     unfilteredEvents.toArray(events);
@@ -184,8 +189,7 @@ public final class Choreo {
       SwerveSample[] samples = GSON.fromJson(trajectoryObj.get("samples"), SwerveSample[].class);
       return new Trajectory<SwerveSample>(name, List.of(samples), List.of(splits), List.of(events));
     } else if (projectFile.type.equals("Differential")) {
-      DifferentialSample[] sampleArray =
-          GSON.fromJson(trajectoryObj.get("samples"), DifferentialSample[].class);
+      DifferentialSample[] sampleArray = GSON.fromJson(trajectoryObj.get("samples"), DifferentialSample[].class);
       return new Trajectory<DifferentialSample>(
           name, List.of(sampleArray), List.of(splits), List.of(events));
     } else {
@@ -194,7 +198,8 @@ public final class Choreo {
   }
 
   /**
-   * A utility for caching loaded trajectories. This allows for loading trajectories only once, and
+   * A utility for caching loaded trajectories. This allows for loading
+   * trajectories only once, and
    * then reusing them.
    */
   public static class TrajectoryCache {
@@ -208,7 +213,9 @@ public final class Choreo {
     /**
      * Creates a new TrajectoryCache with a custom cache.
      *
-     * <p>this could be useful if you want to use a concurrent map or a map with a maximum size.
+     * <p>
+     * this could be useful if you want to use a concurrent map or a map with a
+     * maximum size.
      *
      * @param cache The cache to use.
      */
@@ -218,14 +225,19 @@ public final class Choreo {
     }
 
     /**
-     * Load a trajectory from the deploy directory. Choreolib expects .traj files to be placed in
+     * Load a trajectory from the deploy directory. Choreolib expects .traj files to
+     * be placed in
      * src/main/deploy/choreo/[trajectoryName].traj.
      *
-     * <p>This method will cache the loaded trajectory and reused it if it is requested again.
+     * <p>
+     * This method will cache the loaded trajectory and reused it if it is requested
+     * again.
      *
-     * @param trajectoryName the path name in Choreo, which matches the file name in the deploy
-     *     directory, file extension is optional.
-     * @return the loaded trajectory, or `Optional.empty()` if the trajectory could not be loaded.
+     * @param trajectoryName the path name in Choreo, which matches the file name in
+     *                       the deploy
+     *                       directory, file extension is optional.
+     * @return the loaded trajectory, or `Optional.empty()` if the trajectory could
+     *         not be loaded.
      * @see Choreo#loadTrajectory(String)
      */
     public Optional<? extends Trajectory<?>> loadTrajectory(String trajectoryName) {
@@ -243,16 +255,21 @@ public final class Choreo {
     }
 
     /**
-     * Load a section of a split trajectory from the deploy directory. Choreolib expects .traj files
+     * Load a section of a split trajectory from the deploy directory. Choreolib
+     * expects .traj files
      * to be placed in src/main/deploy/choreo/[trajectoryName].traj.
      *
-     * <p>This method will cache the loaded trajectory and reused it if it is requested again. The
+     * <p>
+     * This method will cache the loaded trajectory and reused it if it is requested
+     * again. The
      * trajectory that is split off of will also be cached.
      *
-     * @param trajectoryName the path name in Choreo, which matches the file name in the deploy
-     *     directory, file extension is optional.
-     * @param splitIndex the index of the split trajectory to load
-     * @return the loaded trajectory, or `Optional.empty()` if the trajectory could not be loaded.
+     * @param trajectoryName the path name in Choreo, which matches the file name in
+     *                       the deploy
+     *                       directory, file extension is optional.
+     * @param splitIndex     the index of the split trajectory to load
+     * @return the loaded trajectory, or `Optional.empty()` if the trajectory could
+     *         not be loaded.
      * @see Choreo#loadTrajectory(String)
      */
     public Optional<? extends Trajectory<?>> loadTrajectory(String trajectoryName, int splitIndex) {
@@ -293,22 +310,30 @@ public final class Choreo {
   }
 
   /**
-   * Create a factory that can be used to create {@link AutoRoutine} and {@link AutoTrajectory}.
+   * Create a factory that can be used to create {@link AutoRoutine} and
+   * {@link AutoTrajectory}.
    *
-   * @param <SampleType> The type of samples in the trajectory.
-   * @param driveSubsystem The drive {@link Subsystem} to require for {@link AutoTrajectory} {@link
-   *     Command}s.
-   * @param poseSupplier A function that returns the current field-relative {@link Pose2d} of the
-   *     robot.
-   * @param controller A {@link BiConsumer} to follow the current {@link Trajectory}&lt;{@link
-   *     SampleType}&gt;.
-   * @param mirrorTrajectory If this returns true, the path will be mirrored to the opposite side,
-   *     while keeping the same coordinate system origin. This will be called every loop during the
-   *     command.
-   * @param bindings Universal trajectory event bindings.
-   * @return An {@link AutoFactory} that can be used to create {@link AutoRoutine} and {@link
-   *     AutoTrajectory}.
-   * @see AutoChooser using this factory with AutoChooser to generate auto routines.
+   * @param <SampleType>     The type of samples in the trajectory.
+   * @param driveSubsystem   The drive {@link Subsystem} to require for
+   *                         {@link AutoTrajectory} {@link
+   *                         Command}s.
+   * @param poseSupplier     A function that returns the current field-relative
+   *                         {@link Pose2d} of the
+   *                         robot.
+   * @param controller       A {@link BiConsumer} to follow the current
+   *                         {@link Trajectory}&lt;{@link
+   *                         SampleType}&gt;.
+   * @param mirrorTrajectory If this returns true, the path will be mirrored to
+   *                         the opposite side,
+   *                         while keeping the same coordinate system origin. This
+   *                         will be called every loop during the
+   *                         command.
+   * @param bindings         Universal trajectory event bindings.
+   * @return An {@link AutoFactory} that can be used to create {@link AutoRoutine}
+   *         and {@link
+   *         AutoTrajectory}.
+   * @see AutoChooser using this factory with AutoChooser to generate auto
+   *      routines.
    */
   public static <SampleType extends TrajectorySample<SampleType>> AutoFactory createAutoFactory(
       Subsystem driveSubsystem,
@@ -326,24 +351,33 @@ public final class Choreo {
   }
 
   /**
-   * Create a factory that can be used to create {@link AutoRoutine} and {@link AutoTrajectory}.
+   * Create a factory that can be used to create {@link AutoRoutine} and
+   * {@link AutoTrajectory}.
    *
-   * @param <SampleType> The type of samples in the trajectory.
-   * @param driveSubsystem The drive {@link Subsystem} to require for {@link AutoTrajectory} {@link
-   *     Command}s.
-   * @param poseSupplier A function that returns the current field-relative {@link Pose2d} of the
-   *     robot.
-   * @param controller A {@link BiConsumer} to follow the current {@link Trajectory}&lt;{@link
-   *     SampleType}&gt;.
-   * @param mirrorTrajectory If this returns true, the path will be mirrored to the opposite side,
-   *     while keeping the same coordinate system origin. This will be called every loop during the
-   *     command.
-   * @param bindings Universal trajectory event bindings.
-   * @param trajectoryLogger A {@link TrajectoryLogger} to log {@link Trajectory} as they start and
-   *     finish.
-   * @return An {@link AutoFactory} that can be used to create {@link AutoRoutine} and {@link
-   *     AutoTrajectory}.
-   * @see AutoChooser using this factory with AutoChooser to generate auto routines.
+   * @param <SampleType>     The type of samples in the trajectory.
+   * @param driveSubsystem   The drive {@link Subsystem} to require for
+   *                         {@link AutoTrajectory} {@link
+   *                         Command}s.
+   * @param poseSupplier     A function that returns the current field-relative
+   *                         {@link Pose2d} of the
+   *                         robot.
+   * @param controller       A {@link BiConsumer} to follow the current
+   *                         {@link Trajectory}&lt;{@link
+   *                         SampleType}&gt;.
+   * @param mirrorTrajectory If this returns true, the path will be mirrored to
+   *                         the opposite side,
+   *                         while keeping the same coordinate system origin. This
+   *                         will be called every loop during the
+   *                         command.
+   * @param bindings         Universal trajectory event bindings.
+   * @param trajectoryLogger A {@link TrajectoryLogger} to log {@link Trajectory}
+   *                         as they start and
+   *                         finish.
+   * @return An {@link AutoFactory} that can be used to create {@link AutoRoutine}
+   *         and {@link
+   *         AutoTrajectory}.
+   * @see AutoChooser using this factory with AutoChooser to generate auto
+   *      routines.
    */
   public static <SampleType extends TrajectorySample<SampleType>> AutoFactory createAutoFactory(
       Subsystem driveSubsystem,
