@@ -13,6 +13,7 @@ import com.igknighters.util.plumbing.Channel.ThreadSafetyMarker;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import monologue.LogSink;
@@ -25,7 +26,7 @@ public class Localizer implements Logged {
     private final Channel<SwerveDriveSample> swerveDataChannel = new Channel<>();
 
     private final Receiver<VisionPoseEstimate> visionDataReceiver = visionDataChannel.openReceiver(8, ThreadSafetyMarker.CONCURRENT);
-    private final Receiver<SwerveDriveSample> swerveDataReveiver = swerveDataChannel.openReceiver(32, ThreadSafetyMarker.CONCURRENT);
+    private final Receiver<SwerveDriveSample> swerveDataReceiver = swerveDataChannel.openReceiver(32, ThreadSafetyMarker.CONCURRENT);
 
     private final TwistyPoseEst poseEstimator;
 
@@ -72,8 +73,8 @@ public class Localizer implements Logged {
     }
 
     public void update() {
-        while (swerveDataReveiver.hasData()) {
-            var sample = swerveDataReveiver.recv();
+        while (swerveDataReceiver.hasData()) {
+            var sample = swerveDataReceiver.recv();
             poseEstimator.addDriveSample(
                 kSwerve.KINEMATICS,
                 sample.modulePositions(),

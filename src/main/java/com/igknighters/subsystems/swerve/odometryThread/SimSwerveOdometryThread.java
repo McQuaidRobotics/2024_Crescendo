@@ -5,7 +5,6 @@ import java.util.function.Supplier;
 import com.igknighters.util.plumbing.Channel.Sender;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
@@ -44,7 +43,7 @@ public class SimSwerveOdometryThread extends SwerveOdometryThread{
         long startTime = RobotController.getFPGATime();
         swerveDataSender.send(
             new SwerveDriveSample(
-                new SwerveDriveWheelPositions(getModulePositions()),
+                getModulePositions(),
                 rotationSupplier.get(),
                 0.0,
                 Timer.getFPGATimestamp()

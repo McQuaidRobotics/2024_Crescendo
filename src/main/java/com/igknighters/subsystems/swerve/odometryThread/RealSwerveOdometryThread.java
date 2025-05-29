@@ -11,7 +11,6 @@ import com.igknighters.util.plumbing.Channel.Sender;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
@@ -173,7 +172,7 @@ public class RealSwerveOdometryThread extends SwerveOdometryThread {
 
                 swerveDataSender.send(
                     new SwerveDriveSample(
-                        new SwerveDriveWheelPositions(getModulePositions()),
+                        getModulePositions(),
                         getGyroRotation(),
                         getGForce(),
                         Timer.getFPGATimestamp()

@@ -1,5 +1,7 @@
 package com.igknighters.subsystems.vision;
 
+import com.igknighters.constants.ConstValues.kSwerve;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -8,7 +10,7 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.Kinematics;
 import edu.wpi.first.math.kinematics.Odometry;
-import edu.wpi.first.math.kinematics.WheelPositions;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -16,39 +18,51 @@ import edu.wpi.first.math.numbers.N3;
 /**
  * A fake pose estimator that only uses vision.
  */
-public class VisionOnlyPoseEstimator extends PoseEstimator<VisionOnlyPoseEstimator.FakeWheelPositions> {
-    public static class FakeWheelPositions implements WheelPositions<FakeWheelPositions> {
-        @Override
-        public FakeWheelPositions copy() {
-            return new FakeWheelPositions();
-        }
+public class VisionOnlyPoseEstimator extends PoseEstimator<VisionOnlyPoseEstimator.FakeModulePosition[]> {
+    protected final static int MODULE_COUNT = 4;
 
+    public static class FakeModulePosition extends SwerveModulePosition{
         @Override
-        public FakeWheelPositions interpolate(FakeWheelPositions endValue, double t) {
-            return new FakeWheelPositions();
+        public SwerveModulePosition copy(SwerveModulePosition position)
+        {
+            return new FakeModulePosition();
         }
     }
 
-    public static class FakeKinematics implements Kinematics<Double, FakeWheelPositions> {
-        @Override
-        public ChassisSpeeds toChassisSpeeds(Double wheelSpeeds) {
-            return new ChassisSpeeds();
-        }
+    public static class FakeKinematics implements Kinematics<Double, FakeModulePosition[]> {
+        // @Override
+        // public VisionOnlyPoseEstimator.FakeModulePosition[] copy(VisionOnlyPoseEstimator.FakeModulePosition[] positions)
+        // {
+        //     VisionOnlyPoseEstimator.FakeModulePosition[] copyPos = new VisionOnlyPoseEstimator.FakeModulePosition[MODULE_COUNT];
+        //     return copyPos;
+        // }
 
-        @Override
-        public Double toWheelSpeeds(ChassisSpeeds chassisSpeeds) {
-            return 0.0;
-        }
+        // @Override
+        // public void copyInto(FakeModulePosition[] positions, FakeModulePosition[] output)
+        // {
+        //     return;
+        // }
 
-        @Override
-        public Twist2d toTwist2d(FakeWheelPositions start, FakeWheelPositions end) {
-            return new Twist2d();
-        }
+
+        // @Override
+        // public ChassisSpeeds toChassisSpeeds(Double wheelSpeeds) {
+        //     return new ChassisSpeeds();
+        // }
+
+        // @Override
+        // public Double toWheelSpeeds(ChassisSpeeds chassisSpeeds) {
+        //     return 0.0;
+        // }
+
+        // @Override
+        // public Twist2d toTwist2d(FakeWheelPositions start, FakeWheelPositions end) {
+        //     return new Twist2d();
+        // }
     }
 
-    public static class FakeOdometry extends Odometry<FakeWheelPositions> {
+    public static class FakeOdometry extends Odometry<FakeModulePosition[]> {
         public FakeOdometry() {
-            super(new FakeKinematics(), new Rotation2d(), new FakeWheelPositions(), new Pose2d());
+            super(new FakeKinematics(), new Rotation2d(), new FakeModulePosition(), new Pose2d());
         }
     }
 
