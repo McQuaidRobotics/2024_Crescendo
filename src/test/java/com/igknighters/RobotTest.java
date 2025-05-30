@@ -15,8 +15,6 @@ import com.igknighters.subsystems.swerve.Swerve;
 
 import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 
 public class RobotTest {
 
@@ -33,59 +31,59 @@ public class RobotTest {
         }
     }
 
-    @Test
-    public void testAuto() {
-        final Robot robot = new Robot(RobotID.UNIT_TEST);
+    // @Test
+    // public void testAuto() {
+    //     final Robot robot = new Robot(RobotID.UNIT_TEST);
 
-        final Optional<Trajectory<SwerveSample>> optTraj = Choreo.loadTrajectory("TEST");
-        final Trajectory<SwerveSample> traj = optTraj.orElseThrow();
+    //     final Optional<Trajectory<SwerveSample>> optTraj = Choreo.loadTrajectory("TEST");
+    //     final Trajectory<SwerveSample> traj = optTraj.orElseThrow();
 
-        DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
+    //     DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
 
-        final double translationTolerance = 0.2;
+    //     final double translationTolerance = 0.2;
 
-        Swerve swerve = robot.allSubsystems.swerve.get();
-        robot.localizer.reset(traj.getInitialPose(false));
-        swerve.setYaw(traj.getInitialPose(false).getRotation());
+    //     Swerve swerve = robot.allSubsystems.swerve.get();
+    //     robot.localizer.reset(traj.getInitialPose(false));
+    //     swerve.setYaw(traj.getInitialPose(false).getRotation());
 
-        robot.autoChooser.addAutoRoutine(
-                "TestAuto",
-                factory -> {
-                    AutoRoutine routine = factory.newRoutine("TestAutoLoop");
-                    AutoTrajectory aTraj = factory.trajectory(traj, routine);
+    //     robot.autoChooser.addAutoRoutine(
+    //             "TestAuto",
+    //             factory -> {
+    //                 AutoRoutine routine = factory.newRoutine("TestAutoLoop");
+    //                 AutoTrajectory aTraj = factory.trajectory(traj, routine);
 
-                    routine.enabled().onTrue(aTraj.cmd());
+    //                 routine.enabled().onTrue(aTraj.cmd());
 
-                    return routine;
-                });
-        // robot.autoChooser.choose("TestAuto");
+    //                 return routine;
+    //             });
+    //     // robot.autoChooser.choose("TestAuto");
 
-        DriverStationSim.setAutonomous(true);
-        DriverStationSim.setEnabled(true);
+    //     DriverStationSim.setAutonomous(true);
+    //     DriverStationSim.setEnabled(true);
 
-        robot.withAutonomousPeriodicTest(robo -> {
-            boolean isFinished = robo.localizer.pose()
-                    .getTranslation()
-                    .getDistance(traj.getFinalPose(false).getTranslation()) < translationTolerance;
+    //     robot.withAutonomousPeriodicTest(robo -> {
+    //         boolean isFinished = robo.localizer.pose()
+    //                 .getTranslation()
+    //                 .getDistance(traj.getFinalPose(false).getTranslation()) < translationTolerance;
 
-            if (isFinished) {
-                robo.finishUnitTestRobot();
-            } else if (robo.getElapsedTime() > 2.0) {
-                // Commands.print("Test trajectory took to long.");
-                throw new RuntimeException(
-                        "Auto took to long, ended at "
-                                + robo.localizer.pose().toString()
-                                + ", elapsed ttime ="
-                                + robo.getElapsedTime());
-            }
-        });
+    //         if (isFinished) {
+    //             robo.finishUnitTestRobot();
+    //         } else if (robo.getElapsedTime() > 2.0) {
+    //             // Commands.print("Test trajectory took to long.");
+    //             throw new RuntimeException(
+    //                     "Auto took to long, ended at "
+    //                             + robo.localizer.pose().toString()
+    //                             + ", elapsed ttime ="
+    //                             + robo.getElapsedTime());
+    //         }
+    //     });
 
-        robot.runTest(3);
+    //     robot.runTest(3);
 
-        robot.close();
+    //     robot.close();
 
-        System.gc();
-    }
+    //     System.gc();
+    // }
 
     // @Test
     // public void testShooter(@Robo Robot robot) {

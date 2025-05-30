@@ -12,8 +12,8 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import monologue.Monologue.MonologueConfig;
 
 import com.ctre.phoenix6.SignalLogger;
-import com.igknighters.commands.autos.AutoController;
-import com.igknighters.commands.autos.AutoRoutines;
+// import com.igknighters.commands.autos.AutoController;
+// import com.igknighters.commands.autos.AutoRoutines;
 import com.igknighters.commands.swerve.teleop.TeleopSwerveTraditionalCmd;
 import com.igknighters.commands.tests.Characterizers;
 import com.igknighters.commands.tests.TestManager;
@@ -35,9 +35,7 @@ import com.igknighters.util.logging.WatchdogSilencer;
 import com.igknighters.util.logging.Tracer;
 import com.igknighters.util.robots.UnitTestableRobot;
 
-import choreo.Choreo;
-import choreo.auto.AutoChooser;
-import choreo.auto.AutoFactory.AutoBindings;
+
 
 public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
@@ -51,7 +49,6 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
     public final AllSubsystems allSubsystems;
 
-    public final AutoChooser autoChooser;
     public final TestManager testManager;
 
     public Robot() {
@@ -100,31 +97,31 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
             umbrella.setupSimNoteDetection(localizer);
         }
 
-        autoChooser = new AutoChooser(
-            Choreo.createAutoFactory(
-                allSubsystems.swerve.isPresent() ? allSubsystems.swerve.get() : new Subsystem() {},
-                localizer::pose,
-                new AutoController(allSubsystems.swerve),
-                AllianceFlip::isRed,
-                new AutoBindings(),
-                (traj, starting) -> {
-                    String msg = "[Auto] Trajectory " + traj.name() + " " + (starting ? "Started" : "Finished");
-                    System.out.println(msg);
-                    Monologue.log("AutoEvent", msg);
-                }
-            ),
-            "/Choosers"
-        );
+        // autoChooser = new AutoChooser(
+        //     Choreo.createAutoFactory(
+        //         allSubsystems.swerve.isPresent() ? allSubsystems.swerve.get() : new Subsystem() {},
+        //         localizer::pose,
+        //         new AutoController(allSubsystems.swerve),
+        //         AllianceFlip::isRed,
+        //         new AutoBindings(),
+        //         (traj, starting) -> {
+        //             String msg = "[Auto] Trajectory " + traj.name() + " " + (starting ? "Started" : "Finished");
+        //             System.out.println(msg);
+        //             Monologue.log("AutoEvent", msg);
+        //         }
+        //     ),
+        //     "/Choosers"
+        // );
 
-        if (allSubsystems.hasAllSubsystems()) {
-            final var routines = new AutoRoutines(allSubsystems, localizer);
-            autoChooser.addAutoRoutine("5 Piece Amp Side", routines::fivePieceAmpSide);
-            autoChooser.addAutoRoutine("6 Piece Amp Side Far", routines::sixPieceFarAmpSide);
-            autoChooser.addAutoRoutine("4 Piece Src Side", routines::fourPieceSourceSide);
-            autoChooser.addAutoRoutine("celtx", routines::celtxAuto);
-            // autoChooser.addAutoRoutine("3 Piece Sub Middle", routines::threePieceSubMiddle);
-            // autoChooser.addAutoRoutine("rahhh", routines::driveForward);
-        }
+        // if (allSubsystems.hasAllSubsystems()) {
+        //     final var routines = new AutoRoutines(allSubsystems, localizer);
+        //     autoChooser.addAutoRoutine("5 Piece Amp Side", routines::fivePieceAmpSide);
+        //     autoChooser.addAutoRoutine("6 Piece Amp Side Far", routines::sixPieceFarAmpSide);
+        //     autoChooser.addAutoRoutine("4 Piece Src Side", routines::fourPieceSourceSide);
+        //     autoChooser.addAutoRoutine("celtx", routines::celtxAuto);
+        //     // autoChooser.addAutoRoutine("3 Piece Sub Middle", routines::threePieceSubMiddle);
+        //     // autoChooser.addAutoRoutine("rahhh", routines::driveForward);
+        // }
 
         testManager = new TestManager();
 
@@ -157,7 +154,7 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
         Tracer.traceFunc("CommandScheduler", scheduler::run);
         Tracer.traceFunc("Monologue", Monologue::updateAll);
         Tracer.traceFunc("Choosers", () -> {
-            autoChooser.update();
+            // autoChooser.update();
             testManager.update();
         });
     }
@@ -173,11 +170,11 @@ public class Robot extends UnitTestableRobot<Robot> implements Logged {
 
     @Override
     public void autonomousInit() {
-        Command autoCmd = autoChooser.getSelectedAutoRoutine().cmd();
-        String msg = "---- Starting auto command: " + autoCmd.getName() + " ----";
-        if (isDebug()) System.out.println(msg);
-        Monologue.log("AutoEvent", msg);
-        scheduler.schedule(autoCmd);
+        // Command autoCmd = autoChooser.getSelectedAutoRoutine().cmd();
+        // String msg = "---- Starting auto command: " + autoCmd.getName() + " ----";
+        // if (isDebug()) System.out.println(msg);
+        // Monologue.log("AutoEvent", msg);
+        // scheduler.schedule(autoCmd);
     }
 
     @Override
