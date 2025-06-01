@@ -93,10 +93,11 @@ public class AllianceFlipUtil {
           put(2022, new YearInfo(Flipper.ROTATE_AROUND, 16.5811, 8.19912));
           put(2023, new YearInfo(Flipper.MIRRORED, 16.5811, 8.19912));
           put(2024, new YearInfo(Flipper.MIRRORED, 16.5811, 8.19912));
+          put(2025, new YearInfo(Flipper.MIRRORED, 17.55, 8.55));
         }
       };
 
-  private static YearInfo activeYear = flipperMap.get(2024);
+  private static YearInfo activeYear = flipperMap.get(2025);
 
   /** Default constructor. */
   private AllianceFlipUtil() {}
